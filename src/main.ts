@@ -1,0 +1,959 @@
+import './style.css';
+
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { HueSaturationShader } from 'three/addons/shaders/HueSaturationShader.js';
+import { BrightnessContrastShader } from 'three/addons/shaders/BrightnessContrastShader.js';
+import GUI from 'three/addons/libs/lil-gui.module.min.js';
+
+import { Avatar } from './Avatar';
+import { ColorGradingShader } from './ColorGradingShader';
+import {
+  DEFAULT_CONFIG,
+  GenshinAvatarConfig,
+  cloneConfig,
+  deepAssign,
+  exportConfigJSON,
+  downloadConfigJSON,
+  copyConfigToClipboard,
+} from './Config';
+
+// Active configuration state
+const currentConfig: GenshinAvatarConfig = cloneConfig(DEFAULT_CONFIG);
+
+// --------------------------------------------------
+// Renderer
+// --------------------------------------------------
+const canvas = document.querySelector<HTMLCanvasElement>('#app')!;
+
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: true,
+  alpha: true,
+  powerPreference: 'high-performance',
+});
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
+
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+function getToneMappingMode(mode: string): THREE.ToneMapping {
+  switch (mode) {
+    case 'ACESFilmic':
+      return THREE.ACESFilmicToneMapping;
+    case 'Reinhard':
+      return THREE.ReinhardToneMapping;
+    case 'AgX':
+      return THREE.AgXToneMapping;
+    case 'Linear':
+      return THREE.LinearToneMapping;
+    case 'None':
+      return THREE.NoToneMapping;
+    default:
+      return THREE.ACESFilmicToneMapping;
+  }
+}
+
+renderer.toneMapping = getToneMappingMode(currentConfig.postProcessing.toneMappingMode);
+renderer.toneMappingExposure = currentConfig.postProcessing.toneMappingExposure;
+renderer.shadowMap.enabled = currentConfig.lighting.castShadows;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// --------------------------------------------------
+// Scene & Camera
+// --------------------------------------------------
+const scene = new THREE.Scene();
+scene.background = null;
+
+function updateBackgroundDisplay(cfg: GenshinAvatarConfig): void {
+  const bgLayer = document.getElementById('bg-layer');
+  if (bgLayer) {
+    if (cfg.environment.useBackgroundImage && cfg.environment.backgroundImageUrl) {
+      bgLayer.style.backgroundImage = `url("${cfg.environment.backgroundImageUrl}")`;
+      bgLayer.style.display = 'block';
+      bgLayer.style.filter = cfg.environment.backgroundBlur > 0 ? `blur(${cfg.environment.backgroundBlur}px)` : 'none';
+      canvas.style.backgroundColor = 'transparent';
+      document.body.style.backgroundColor = cfg.environment.backgroundColor;
+    } else {
+      bgLayer.style.backgroundImage = 'none';
+      bgLayer.style.display = 'none';
+      canvas.style.backgroundColor = cfg.environment.backgroundColor;
+      document.body.style.backgroundColor = cfg.environment.backgroundColor;
+    }
+  }
+}
+
+updateBackgroundDisplay(currentConfig);
+
+const camera = new THREE.PerspectiveCamera(
+  30,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(0.0, 1.25, 2.6);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.15, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.minDistance = 0.8;
+controls.maxDistance = 6.0;
+controls.minPolarAngle = 0.2;
+controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+// --------------------------------------------------
+// Lights
+// --------------------------------------------------
+const ambientLight = new THREE.AmbientLight(
+  currentConfig.lighting.ambient.color,
+  currentConfig.lighting.ambient.intensity
+);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(
+  currentConfig.lighting.directional.color,
+  currentConfig.lighting.directional.intensity
+);
+dirLight.position.set(
+  currentConfig.lighting.directional.posX,
+  currentConfig.lighting.directional.posY,
+  currentConfig.lighting.directional.posZ
+);
+dirLight.castShadow = currentConfig.lighting.castShadows;
+dirLight.shadow.mapSize.set(2048, 2048);
+dirLight.shadow.camera.left = -2;
+dirLight.shadow.camera.right = 2;
+dirLight.shadow.camera.top = 2.5;
+dirLight.shadow.camera.bottom = -0.5;
+dirLight.shadow.camera.near = 0.1;
+dirLight.shadow.camera.far = 12;
+dirLight.shadow.bias = -0.0001;
+scene.add(dirLight);
+
+const rimLight = new THREE.DirectionalLight(
+  currentConfig.lighting.rim.color,
+  currentConfig.lighting.rim.intensity
+);
+rimLight.position.set(
+  currentConfig.lighting.rim.posX,
+  currentConfig.lighting.rim.posY,
+  currentConfig.lighting.rim.posZ
+);
+scene.add(rimLight);
+
+// --------------------------------------------------
+// Environment / Floor
+// --------------------------------------------------
+const floorGeo = new THREE.CircleGeometry(8, 64);
+const floorMat = new THREE.MeshStandardMaterial({
+  color: currentConfig.environment.floorColor,
+  roughness: 0.9,
+  metalness: 0.0,
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = 0;
+floor.receiveShadow = true;
+floor.visible = currentConfig.environment.showFloor;
+scene.add(floor);
+
+// --------------------------------------------------
+// Post Processing (with Multi-Sampled Render Target for Hardware MSAA)
+// --------------------------------------------------
+const pixelRatio = Math.min(window.devicePixelRatio, 2);
+const composerRenderTarget = new THREE.WebGLRenderTarget(
+  window.innerWidth * pixelRatio,
+  window.innerHeight * pixelRatio,
+  {
+    type: THREE.HalfFloatType,
+    format: THREE.RGBAFormat,
+    samples: currentConfig.postProcessing.antialiasing.msaaSamples,
+  }
+);
+const composer = new EffectComposer(renderer, composerRenderTarget);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  currentConfig.postProcessing.bloom.strength,
+  currentConfig.postProcessing.bloom.radius,
+  currentConfig.postProcessing.bloom.threshold
+);
+composer.addPass(bloomPass);
+
+const colorGradingPass = new ShaderPass(ColorGradingShader);
+colorGradingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
+(colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.shadowTint);
+(colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.highlightTint);
+colorGradingPass.uniforms['uStrength'].value = currentConfig.postProcessing.colorGrading.strength;
+colorGradingPass.uniforms['uGradingContrast'].value = currentConfig.postProcessing.colorGrading.contrast;
+colorGradingPass.uniforms['uGamma'].value = currentConfig.postProcessing.colorGrading.gamma;
+composer.addPass(colorGradingPass);
+
+const hueSaturationPass = new ShaderPass(HueSaturationShader);
+hueSaturationPass.uniforms['saturation'].value = currentConfig.postProcessing.saturation;
+composer.addPass(hueSaturationPass);
+
+const brightnessContrastPass = new ShaderPass(BrightnessContrastShader);
+brightnessContrastPass.uniforms['brightness'].value = currentConfig.postProcessing.brightness;
+brightnessContrastPass.uniforms['contrast'].value = currentConfig.postProcessing.contrast;
+composer.addPass(brightnessContrastPass);
+
+// SMAA (Subpixel Morphological Antialiasing) for smooth outline & texture edges
+const smaaPass = new SMAAPass();
+smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
+composer.addPass(smaaPass);
+
+composer.addPass(new OutputPass());
+
+// --------------------------------------------------
+// Avatar Initialization
+// --------------------------------------------------
+let avatarInstance: Avatar | null = null;
+
+avatarInstance = new Avatar(scene, camera, {
+  modelUrl: '/models/girl.vrm',
+  faceControlUrl: '/textures/hoshina-face-control.png',
+  defaultAnimationUrl: '/animations/Idle.fbx',
+  config: currentConfig,
+  autoBlink: true,
+  lookAtCamera: true,
+  enableBreathing: true,
+  onProgress: (progress) => {
+    const el = document.getElementById('progress-text');
+    if (el) el.textContent = `${progress.toFixed(0)}%`;
+  },
+  onLoaded: () => {
+    applyConfigToSceneAndRenderer(currentConfig);
+    const el = document.getElementById('loading-status');
+    if (el) {
+      el.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (右側GUIで全パラメータ調整・JSON出力可能)`;
+    }
+  },
+  onError: (error) => {
+    console.error('Failed to load VRM avatar:', error);
+    const el = document.getElementById('loading-status');
+    if (el) {
+      el.innerHTML = `<span style="color: #dc2626; font-weight: 600;">✗ ロード失敗</span>`;
+    }
+  },
+});
+
+// --------------------------------------------------
+// Apply Configuration updates to Scene & Shaders
+// --------------------------------------------------
+function applyConfigToSceneAndRenderer(cfg: GenshinAvatarConfig): void {
+  // Environment / Background
+  updateBackgroundDisplay(cfg);
+  floor.visible = cfg.environment.showFloor;
+  floorMat.color.set(cfg.environment.floorColor);
+
+  // Shadow mapping control (disable for pure single-step flat anime shading)
+  renderer.shadowMap.enabled = cfg.lighting.castShadows;
+  dirLight.castShadow = cfg.lighting.castShadows;
+  if (avatarInstance?.vrm) {
+    avatarInstance.vrm.scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        (obj as THREE.Mesh).castShadow = cfg.lighting.castShadows;
+      }
+    });
+  }
+
+  // Antialiasing
+  smaaPass.enabled = cfg.postProcessing.antialiasing.smaa;
+  if (composer.renderTarget1) {
+    composer.renderTarget1.samples = cfg.postProcessing.antialiasing.msaaSamples;
+  }
+  if (composer.renderTarget2) {
+    composer.renderTarget2.samples = cfg.postProcessing.antialiasing.msaaSamples;
+  }
+
+  // Post-processing
+  renderer.toneMapping = getToneMappingMode(cfg.postProcessing.toneMappingMode);
+  renderer.toneMappingExposure = cfg.postProcessing.toneMappingExposure;
+
+  bloomPass.strength = cfg.postProcessing.bloom.enabled ? cfg.postProcessing.bloom.strength : 0;
+  bloomPass.radius = cfg.postProcessing.bloom.radius;
+  bloomPass.threshold = cfg.postProcessing.bloom.threshold;
+
+  if (cfg.postProcessing.colorGrading) {
+    colorGradingPass.uniforms['uEnabled'].value = cfg.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
+    (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(cfg.postProcessing.colorGrading.shadowTint);
+    (colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(cfg.postProcessing.colorGrading.highlightTint);
+    colorGradingPass.uniforms['uStrength'].value = cfg.postProcessing.colorGrading.strength;
+    colorGradingPass.uniforms['uGradingContrast'].value = cfg.postProcessing.colorGrading.contrast;
+    colorGradingPass.uniforms['uGamma'].value = cfg.postProcessing.colorGrading.gamma;
+  }
+
+  hueSaturationPass.uniforms['saturation'].value = cfg.postProcessing.saturation;
+  brightnessContrastPass.uniforms['brightness'].value = cfg.postProcessing.brightness;
+  brightnessContrastPass.uniforms['contrast'].value = cfg.postProcessing.contrast;
+
+  // Lighting
+  ambientLight.color.set(cfg.lighting.ambient.color);
+  ambientLight.intensity = cfg.lighting.ambient.intensity;
+
+  dirLight.color.set(cfg.lighting.directional.color);
+  dirLight.intensity = cfg.lighting.directional.intensity;
+  dirLight.position.set(
+    cfg.lighting.directional.posX,
+    cfg.lighting.directional.posY,
+    cfg.lighting.directional.posZ
+  );
+
+  rimLight.color.set(cfg.lighting.rim.color);
+  rimLight.intensity = cfg.lighting.rim.intensity;
+  rimLight.position.set(
+    cfg.lighting.rim.posX,
+    cfg.lighting.rim.posY,
+    cfg.lighting.rim.posZ
+  );
+
+  // Avatar Shader & Materials
+  avatarInstance?.applyConfig(cfg);
+}
+
+// --------------------------------------------------
+// Lil-GUI Setup
+// --------------------------------------------------
+let gui: GUI;
+
+function setupGUI(): void {
+  gui = new GUI({ title: '✨ 原神調設定 & パラメータ' });
+  gui.domElement.style.position = 'fixed';
+  gui.domElement.style.top = '16px';
+  gui.domElement.style.right = '16px';
+  gui.domElement.style.zIndex = '1000';
+
+  // 1. JSON Export / Import folder at the top
+  const jsonFolder = gui.addFolder('💾 設定JSON エクスポート / 読込');
+  const jsonActions = {
+    copyJSON: async () => {
+      const ok = await copyConfigToClipboard(currentConfig);
+      showToast(ok ? '📋 設定JSONをクリップボードにコピーしました！' : 'コピーに失敗しました');
+    },
+    downloadJSON: () => {
+      downloadConfigJSON(currentConfig);
+      showToast('💾 genshin-avatar-config.json をダウンロードしました');
+    },
+    importJSON: () => {
+      openImportModal();
+    },
+    resetDefaults: () => {
+      deepAssign(currentConfig, DEFAULT_CONFIG);
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+      showToast('🔄 デフォルト設定にリセットしました');
+    },
+  };
+
+  jsonFolder.add(jsonActions, 'copyJSON').name('📋 設定JSONをコピー');
+  jsonFolder.add(jsonActions, 'downloadJSON').name('💾 JSONファイル保存');
+  jsonFolder.add(jsonActions, 'importJSON').name('📥 JSONを読み込み');
+  jsonFolder.add(jsonActions, 'resetDefaults').name('🔄 デフォルトにリセット');
+  jsonFolder.open();
+
+  // 2. Face Shader Folder
+  const faceFolder = gui.addFolder('顔SDFシェーダー (Face Shader)');
+  faceFolder
+    .addColor(currentConfig.faceShader, 'shadowColor')
+    .name('陰影色 (Shadow Color)')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .add(currentConfig.faceShader, 'shadowStrength', 0, 1, 0.01)
+    .name('影の強さ (Strength)')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .add(currentConfig.faceShader, 'softness', 0.001, 0.08, 0.001)
+    .name('SDF境界ソフトネス')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .add(currentConfig.faceShader, 'thresholdOffset', -0.5, 0.5, 0.01)
+    .name('影の閾値オフセット')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .addColor(currentConfig.faceShader, 'boundaryColor')
+    .name('影境界差し色 (Color Ramp)')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .add(currentConfig.faceShader, 'boundaryWidth', 0, 0.15, 0.005)
+    .name('境界差し色の太さ')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  faceFolder
+    .add(currentConfig.faceShader, 'boundaryStrength', 0, 1.5, 0.05)
+    .name('境界差し色の強さ')
+    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+
+  // Helper to add material folder
+  const addMaterialFolder = (title: string, kind: 'body' | 'hair' | 'cloth') => {
+    const folder = gui.addFolder(title);
+    const params = currentConfig.materials[kind];
+    const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
+
+    folder.addColor(params, 'shadeColor').name('影の色 (Shade Color)').onChange(update);
+    folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
+    folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name('明暗境界シフト (Shift)').onChange(update);
+    folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name('環境光均一化 (GI)').onChange(update);
+    folder.addColor(params, 'rimColor').name('リムライト色 (Rim Color)').onChange(update);
+    folder.add(params, 'parametricRimFresnelPowerFactor', 0, 10, 0.1).name('リム急峻度 (Fresnel Power)').onChange(update);
+    folder.add(params, 'parametricRimLiftFactor', 0, 5, 0.01).name('リム持ち上げ (Lift)').onChange(update);
+    folder.add(params, 'rimLightingMixFactor', 0, 2, 0.01).name('リム光合成比率 (Mix)').onChange(update);
+    folder.addColor(params, 'boundaryColor').name('影境界差し色 (Color Ramp)').onChange(update);
+    folder.add(params, 'boundaryWidth', 0, 0.15, 0.005).name('境界差し色の太さ').onChange(update);
+    folder.add(params, 'boundaryStrength', 0, 1.5, 0.05).name('境界差し色の強さ').onChange(update);
+    folder.addColor(params, 'outlineColor').name('輪郭線の色 (Outline Color)').onChange(update);
+    folder.add(params, 'outlineWidthFactor', 0, 0.01, 0.0002).name('輪郭線の太さ (Outline Width)').onChange(update);
+    folder.close();
+  };
+
+  // 3. Material Folders
+  addMaterialFolder('体・肌マテリアル (Body / Skin)', 'body');
+  addMaterialFolder('髪マテリアル (Hair)', 'hair');
+  addMaterialFolder('衣装マテリアル (Cloth / Shoes)', 'cloth');
+
+  // 4. Outline Folder
+  const outlineFolder = gui.addFolder('輪郭線 (Outline)');
+  outlineFolder
+    .add(currentConfig.outline, 'enabled')
+    .name('輪郭線表示 (Enabled)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'usePerMaterialColor')
+    .name('部位別カラー連動 (Per-Material)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .addColor(currentConfig.outline, 'color')
+    .name('共通線色 (Global Color)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'widthFactor', 0, 0.01, 0.0002)
+    .name('共通太さ (Global Width)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'lightingMixFactor', 0, 1, 0.01)
+    .name('光影響比率 (Lighting Mix)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder.close();
+
+  // 5. Environment & Background Folder
+  const envFolder = gui.addFolder('環境・背景 (Environment)');
+  envFolder
+    .add(currentConfig.environment, 'useBackgroundImage')
+    .name('画像背景を使用 (Image BG)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  envFolder
+    .add(currentConfig.environment, 'backgroundBlur', 0, 20, 1)
+    .name('背景ぼかし (Blur px)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  envFolder
+    .addColor(currentConfig.environment, 'backgroundColor')
+    .name('背景色 (単色時)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  envFolder
+    .add(currentConfig.environment, 'showFloor')
+    .name('床の表示 (Show Floor)')
+    .onChange((show: boolean) => {
+      floor.visible = show;
+    });
+  envFolder
+    .addColor(currentConfig.environment, 'floorColor')
+    .name('床の色 (Floor Color)')
+    .onChange((color: string) => {
+      floorMat.color.set(color);
+    });
+
+  const bgActions = {
+    chooseImage: () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUrl = event.target?.result as string;
+            currentConfig.environment.backgroundImageUrl = dataUrl;
+            currentConfig.environment.useBackgroundImage = true;
+            updateBackgroundDisplay(currentConfig);
+            gui.controllersRecursive().forEach((c) => c.updateDisplay());
+            showToast('🖼️ 背景画像を変更しました');
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+    },
+    resetDefaultBg: () => {
+      currentConfig.environment.backgroundImageUrl = '/textures/park-background.webp';
+      currentConfig.environment.useBackgroundImage = true;
+      updateBackgroundDisplay(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+      showToast('🌳 公園の背景画像に戻しました');
+    },
+  };
+  envFolder.add(bgActions, 'chooseImage').name('📁 背景画像を変更 (ファイル選択)');
+  envFolder.add(bgActions, 'resetDefaultBg').name('🌳 公園背景にリセット');
+  envFolder.close();
+
+  // 6. Lighting Folder
+  const lightFolder = gui.addFolder('ライティング (Lighting)');
+  lightFolder
+    .add(currentConfig.lighting, 'castShadows')
+    .name('落ち影 (Cast Shadows)')
+    .onChange((enabled: boolean) => {
+      renderer.shadowMap.enabled = enabled;
+      dirLight.castShadow = enabled;
+      if (avatarInstance?.vrm) {
+        avatarInstance.vrm.scene.traverse((obj) => {
+          if ((obj as THREE.Mesh).isMesh) {
+            (obj as THREE.Mesh).castShadow = enabled;
+          }
+        });
+      }
+    });
+
+  // Directional Light
+  lightFolder
+    .add(currentConfig.lighting.directional, 'intensity', 0, 8, 0.1)
+    .name('主光強度 (Key Intensity)')
+    .onChange((val: number) => (dirLight.intensity = val));
+  lightFolder
+    .addColor(currentConfig.lighting.directional, 'color')
+    .name('主光色 (Key Color)')
+    .onChange((val: string) => dirLight.color.set(val));
+  lightFolder
+    .add(currentConfig.lighting.directional, 'posX', -10, 10, 0.1)
+    .name('主光 位置 X')
+    .onChange((val: number) => (dirLight.position.x = val));
+  lightFolder
+    .add(currentConfig.lighting.directional, 'posY', -10, 10, 0.1)
+    .name('主光 位置 Y')
+    .onChange((val: number) => (dirLight.position.y = val));
+  lightFolder
+    .add(currentConfig.lighting.directional, 'posZ', -10, 10, 0.1)
+    .name('主光 位置 Z')
+    .onChange((val: number) => (dirLight.position.z = val));
+
+  // Ambient Light
+  lightFolder
+    .add(currentConfig.lighting.ambient, 'intensity', 0, 3, 0.05)
+    .name('環境光強度 (Ambient Int)')
+    .onChange((val: number) => (ambientLight.intensity = val));
+  lightFolder
+    .addColor(currentConfig.lighting.ambient, 'color')
+    .name('環境光色 (Ambient Color)')
+    .onChange((val: string) => ambientLight.color.set(val));
+
+  // Rim Light
+  lightFolder
+    .add(currentConfig.lighting.rim, 'intensity', 0, 3, 0.05)
+    .name('補助光強度 (Rim Int)')
+    .onChange((val: number) => (rimLight.intensity = val));
+  lightFolder
+    .addColor(currentConfig.lighting.rim, 'color')
+    .name('補助光色 (Rim Color)')
+    .onChange((val: string) => rimLight.color.set(val));
+  lightFolder.close();
+
+  // 7. Post Processing Folder
+  const postFolder = gui.addFolder('ポストプロセス (Post Processing)');
+  postFolder
+    .add(currentConfig.postProcessing, 'toneMappingMode', ['ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
+    .name('トーンマッピング方式')
+    .onChange((mode: string) => {
+      renderer.toneMapping = getToneMappingMode(mode);
+    });
+
+  postFolder
+    .add(currentConfig.postProcessing, 'toneMappingExposure', 0.2, 2.5, 0.05)
+    .name('露出 (Exposure)')
+    .onChange((val: number) => (renderer.toneMappingExposure = val));
+
+  // Antialiasing Folder
+  const aaFolder = postFolder.addFolder('✨ アンチエイリアス (Anti-Aliasing)');
+  aaFolder
+    .add(currentConfig.postProcessing.antialiasing, 'msaaSamples', [0, 2, 4, 8])
+    .name('MSAA サンプル数 (輪郭線/幾何)')
+    .onChange((samples: number) => {
+      if (composer.renderTarget1) composer.renderTarget1.samples = samples;
+      if (composer.renderTarget2) composer.renderTarget2.samples = samples;
+    });
+  aaFolder
+    .add(currentConfig.postProcessing.antialiasing, 'smaa')
+    .name('SMAA パス有効 (画面全体)')
+    .onChange((val: boolean) => {
+      smaaPass.enabled = val;
+    });
+  aaFolder.open();
+
+  // Bloom
+  postFolder
+    .add(currentConfig.postProcessing.bloom, 'enabled')
+    .name('ブルーム有効 (Bloom)')
+    .onChange((enabled: boolean) => {
+      bloomPass.strength = enabled ? currentConfig.postProcessing.bloom.strength : 0;
+    });
+  postFolder
+    .add(currentConfig.postProcessing.bloom, 'strength', 0, 0.8, 0.01)
+    .name('ブルーム強度 (Strength)')
+    .onChange((val: number) => {
+      if (currentConfig.postProcessing.bloom.enabled) bloomPass.strength = val;
+    });
+  postFolder
+    .add(currentConfig.postProcessing.bloom, 'threshold', 0.1, 1.0, 0.01)
+    .name('ブルーム閾値 (Threshold)')
+    .onChange((val: number) => (bloomPass.threshold = val));
+  postFolder
+    .add(currentConfig.postProcessing.bloom, 'radius', 0.0, 1.0, 0.02)
+    .name('ブルーム半径 (Radius)')
+    .onChange((val: number) => (bloomPass.radius = val));
+
+  // Color Grading (Split Toning / Film Look)
+  const cgFolder = postFolder.addFolder('🎬 アニメカラーグレーディング (Color Grading)');
+  cgFolder
+    .add(currentConfig.postProcessing.colorGrading, 'enabled')
+    .name('グレーディング有効')
+    .onChange((enabled: boolean) => {
+      colorGradingPass.uniforms['uEnabled'].value = enabled ? 1.0 : 0.0;
+    });
+  cgFolder
+    .addColor(currentConfig.postProcessing.colorGrading, 'shadowTint')
+    .name('影の色味 (Shadow Tint)')
+    .onChange((hex: string) => {
+      (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(hex);
+    });
+  cgFolder
+    .addColor(currentConfig.postProcessing.colorGrading, 'highlightTint')
+    .name('光の色味 (Highlight Tint)')
+    .onChange((hex: string) => {
+      (colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(hex);
+    });
+  cgFolder
+    .add(currentConfig.postProcessing.colorGrading, 'strength', 0, 1, 0.02)
+    .name('グレーディング強度')
+    .onChange((val: number) => {
+      colorGradingPass.uniforms['uStrength'].value = val;
+    });
+  cgFolder
+    .add(currentConfig.postProcessing.colorGrading, 'contrast', 0, 0.5, 0.01)
+    .name('フィルムS字コントラスト')
+    .onChange((val: number) => {
+      colorGradingPass.uniforms['uGradingContrast'].value = val;
+    });
+  cgFolder
+    .add(currentConfig.postProcessing.colorGrading, 'gamma', 0.7, 1.4, 0.02)
+    .name('ガンマ (Gamma)')
+    .onChange((val: number) => {
+      colorGradingPass.uniforms['uGamma'].value = val;
+    });
+  cgFolder.open();
+
+  // Basic Grading
+  postFolder
+    .add(currentConfig.postProcessing, 'saturation', -1.0, 1.0, 0.02)
+    .name('彩度 (Saturation)')
+    .onChange((val: number) => (hueSaturationPass.uniforms['saturation'].value = val));
+  postFolder
+    .add(currentConfig.postProcessing, 'brightness', -0.5, 0.5, 0.01)
+    .name('明度 (Brightness)')
+    .onChange((val: number) => (brightnessContrastPass.uniforms['brightness'].value = val));
+  postFolder
+    .add(currentConfig.postProcessing, 'contrast', -0.5, 0.5, 0.01)
+    .name('コントラスト (Contrast)')
+    .onChange((val: number) => (brightnessContrastPass.uniforms['contrast'].value = val));
+  postFolder.close();
+}
+
+setupGUI();
+
+// --------------------------------------------------
+// Toast Notification Helper
+// --------------------------------------------------
+function showToast(message: string): void {
+  let toast = document.getElementById('toast-msg');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast-msg';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
+    toast.style.color = '#ffffff';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '8px';
+    toast.style.fontSize = '14px';
+    toast.style.fontWeight = '500';
+    toast.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.2)';
+    toast.style.zIndex = '9999';
+    toast.style.transition = 'opacity 0.3s ease';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  setTimeout(() => {
+    if (toast) toast.style.opacity = '0';
+  }, 2500);
+}
+
+// --------------------------------------------------
+// Import Modal Setup
+// --------------------------------------------------
+function openImportModal(): void {
+  let modal = document.getElementById('import-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'import-modal';
+    modal.style.position = 'fixed';
+    modal.style.top = '0';
+    modal.style.left = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    modal.style.backdropFilter = 'blur(4px)';
+    modal.style.display = 'flex';
+    modal.style.justifyContent = 'center';
+    modal.style.alignItems = 'center';
+    modal.style.zIndex = '10000';
+
+    modal.innerHTML = `
+      <div style="background: white; border-radius: 12px; padding: 20px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 16px; color: #1e293b;">📥 設定JSONの読み込み</h3>
+        <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">設定JSONコードを貼り付けて「適用」を押してください。</p>
+        <textarea id="import-textarea" rows="12" style="width: 100%; box-sizing: border-box; font-family: monospace; font-size: 12px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+          <button id="modal-cancel-btn" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 13px;">キャンセル</button>
+          <button id="modal-apply-btn" style="padding: 6px 14px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">設定を適用</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('modal-cancel-btn')?.addEventListener('click', () => {
+      modal!.style.display = 'none';
+    });
+
+    document.getElementById('modal-apply-btn')?.addEventListener('click', () => {
+      const textarea = document.getElementById('import-textarea') as HTMLTextAreaElement;
+      if (textarea && textarea.value) {
+        try {
+          const parsed = JSON.parse(textarea.value);
+          deepAssign(currentConfig, parsed);
+          applyConfigToSceneAndRenderer(currentConfig);
+          gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+          modal!.style.display = 'none';
+          showToast('✓ 設定JSONを正常に適用しました！');
+        } catch (err) {
+          alert('JSONのパースに失敗しました。書式をご確認ください。');
+        }
+      }
+    });
+  }
+
+  const textarea = document.getElementById('import-textarea') as HTMLTextAreaElement;
+  if (textarea) textarea.value = exportConfigJSON(currentConfig);
+  modal.style.display = 'flex';
+}
+
+// --------------------------------------------------
+// UI Overlay (Left-side HUD for Expressions & Motions)
+// --------------------------------------------------
+function createUIOverlay() {
+  const container = document.createElement('div');
+  container.id = 'ui-container';
+  container.style.position = 'fixed';
+  container.style.top = '16px';
+  container.style.left = '16px';
+  container.style.zIndex = '100';
+  container.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  container.style.fontSize = '13px';
+  container.style.color = '#1e293b';
+  container.style.background = 'rgba(255, 255, 255, 0.92)';
+  container.style.backdropFilter = 'blur(10px)';
+  container.style.padding = '14px 18px';
+  container.style.borderRadius = '12px';
+  container.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
+  container.style.maxWidth = '340px';
+  container.style.maxHeight = '90vh';
+  container.style.overflowY = 'auto';
+  container.style.userSelect = 'none';
+
+  container.innerHTML = `
+    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+      <span style="color: #4f46e5;">✨</span> VRM 原神調ビュワー
+    </div>
+    <div id="loading-status" style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+      モデル読み込み中... <span id="progress-text">0%</span>
+    </div>
+    <div id="controls-panel" style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+        <button id="quick-copy-json" style="flex: 1; min-width: 90px; padding: 6px 8px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">📋 JSONコピー</button>
+        <button id="quick-download-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">💾 保存</button>
+        <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
+        <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
+      </div>
+      <div>
+        <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
+          <button data-motion="/animations/Idle.fbx" class="motion-btn active">待機</button>
+          <button data-motion="/animations/Standing Greeting.fbx" class="motion-btn">挨拶</button>
+          <button data-motion="/animations/Quick Formal Bow.fbx" class="motion-btn">お辞儀</button>
+          <button data-motion="/animations/Joyful Jump.fbx" class="motion-btn">ジャンプ</button>
+          <button data-motion="/animations/Clapping.fbx" class="motion-btn">拍手</button>
+          <button data-motion="/animations/Cheering.fbx" class="motion-btn">応援</button>
+          <button data-motion="/animations/Dismissing Gesture.fbx" class="motion-btn">手を振る</button>
+          <button data-motion="/animations/Surprised.fbx" class="motion-btn">驚き</button>
+          <button data-motion="/animations/Angry.fbx" class="motion-btn">怒り</button>
+          <button data-motion="/animations/Defeat.fbx" class="motion-btn">落ち込む</button>
+          <button data-motion="none" class="motion-btn">停止</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-weight: 600; display: block; margin-bottom: 4px;">表情 (Expression)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
+          <button data-expr="neutral" class="expr-btn active">通常</button>
+          <button data-expr="happy" class="expr-btn">笑顔</button>
+          <button data-expr="angry" class="expr-btn">怒り</button>
+          <button data-expr="sad" class="expr-btn">悲しみ</button>
+          <button data-expr="surprised" class="expr-btn">驚き</button>
+          <button data-expr="relaxed" class="expr-btn">リラックス</button>
+          <button data-expr="aa" class="expr-btn">あ</button>
+          <button data-expr="ee" class="expr-btn">え</button>
+          <button data-expr="oh" class="expr-btn">お</button>
+        </div>
+      </div>
+      <div style="font-size: 11px; color: #64748b; line-height: 1.4; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+        💡 右側GUIでシェーダー・アウトライン・光彩の全数値を微調整できます
+      </div>
+    </div>
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .expr-btn, .motion-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      color: #334155;
+    }
+    .expr-btn:hover, .motion-btn:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+    .expr-btn.active, .motion-btn.active {
+      background: #4f46e5;
+      color: #ffffff;
+      border-color: #4338ca;
+      font-weight: 600;
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(container);
+
+  // Quick action listeners
+  document.getElementById('quick-copy-json')?.addEventListener('click', async () => {
+    const ok = await copyConfigToClipboard(currentConfig);
+    showToast(ok ? '📋 設定JSONをクリップボードにコピーしました！' : 'コピーに失敗しました');
+  });
+
+  document.getElementById('quick-download-json')?.addEventListener('click', () => {
+    downloadConfigJSON(currentConfig);
+    showToast('💾 genshin-avatar-config.json をダウンロードしました');
+  });
+
+  document.getElementById('quick-import-json')?.addEventListener('click', () => {
+    openImportModal();
+  });
+
+  document.getElementById('quick-reset-json')?.addEventListener('click', () => {
+    deepAssign(currentConfig, DEFAULT_CONFIG);
+    applyConfigToSceneAndRenderer(currentConfig);
+    gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+    showToast('🔄 デフォルト設定にリセットしました');
+  });
+
+  return container;
+}
+
+createUIOverlay();
+
+// Setup expression buttons
+const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+exprButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    exprButtons.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const expr = btn.getAttribute('data-expr');
+    if (expr && avatarInstance) {
+      avatarInstance.setExpression(expr, 1.0);
+    }
+  });
+});
+
+// Setup motion buttons
+const motionButtons = document.querySelectorAll<HTMLButtonElement>('.motion-btn');
+motionButtons.forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    motionButtons.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const motionUrl = btn.getAttribute('data-motion');
+    if (!avatarInstance) return;
+
+    if (motionUrl === 'none') {
+      avatarInstance.stopAnimation();
+    } else if (motionUrl) {
+      const isLoop = motionUrl.includes('Idle');
+      await avatarInstance.playAnimation(motionUrl, isLoop);
+    }
+  });
+});
+
+// --------------------------------------------------
+// Resize & Render Loop
+// --------------------------------------------------
+const clock = new THREE.Clock();
+
+function onResize(): void {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+  composer.setSize(width, height);
+}
+window.addEventListener('resize', onResize);
+
+function tick(): void {
+  const delta = clock.getDelta();
+  const elapsed = clock.elapsedTime;
+
+  controls.update();
+
+  if (avatarInstance) {
+    avatarInstance.update(delta, elapsed);
+  }
+
+  composer.render();
+  requestAnimationFrame(tick);
+}
+
+tick();

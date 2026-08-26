@@ -1,0 +1,18 @@
+{
+  "name": "vrm-genshin-like",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.0.1"
+  },
+  "dependencies": {
+    "@pixiv/three-vrm": "^3.5.1",
+    "three": "^0.183.2"
+  }
+}
