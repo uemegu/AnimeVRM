@@ -190,6 +190,10 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
+// 1. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
+composer.addPass(new OutputPass());
+
+// 2. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
 const colorGradingPass = new ShaderPass(ColorGradingShader);
 colorGradingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
 (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.shadowTint);
@@ -208,45 +212,76 @@ brightnessContrastPass.uniforms['brightness'].value = currentConfig.postProcessi
 brightnessContrastPass.uniforms['contrast'].value = currentConfig.postProcessing.contrast;
 composer.addPass(brightnessContrastPass);
 
-// SMAA (Subpixel Morphological Antialiasing) for smooth outline & texture edges
+// SMAA (Subpixel Morphological Antialiasing) on sRGB edges
 const smaaPass = new SMAAPass();
 smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
 composer.addPass(smaaPass);
 
-composer.addPass(new OutputPass());
-
 // --------------------------------------------------
-// Avatar Initialization
+// Avatar Initialization & Model Loading
 // --------------------------------------------------
 let avatarInstance: Avatar | null = null;
+let currentModelUrl = '/models/girl.vrm';
+let currentMotionUrl = '/animations/Idle.fbx';
+let currentExprName = 'neutral';
 
-avatarInstance = new Avatar(scene, camera, {
-  modelUrl: '/models/girl.vrm',
-  faceControlUrl: '/textures/hoshina-face-control.png',
-  defaultAnimationUrl: '/animations/Idle.fbx',
-  config: currentConfig,
-  autoBlink: true,
-  lookAtCamera: true,
-  enableBreathing: true,
-  onProgress: (progress) => {
-    const el = document.getElementById('progress-text');
-    if (el) el.textContent = `${progress.toFixed(0)}%`;
-  },
-  onLoaded: () => {
-    applyConfigToSceneAndRenderer(currentConfig);
-    const el = document.getElementById('loading-status');
-    if (el) {
-      el.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (右側GUIで全パラメータ調整・JSON出力可能)`;
-    }
-  },
-  onError: (error) => {
-    console.error('Failed to load VRM avatar:', error);
-    const el = document.getElementById('loading-status');
-    if (el) {
-      el.innerHTML = `<span style="color: #dc2626; font-weight: 600;">✗ ロード失敗</span>`;
-    }
-  },
-});
+function loadAvatarModel(modelUrl: string): void {
+  currentModelUrl = modelUrl;
+
+  const loadingStatus = document.getElementById('loading-status');
+  if (loadingStatus) {
+    loadingStatus.innerHTML = `モデル読み込み中... <span id="progress-text">0%</span>`;
+  }
+
+  // Dispose previous avatar if existing
+  if (avatarInstance) {
+    avatarInstance.dispose();
+    avatarInstance = null;
+  }
+
+  avatarInstance = new Avatar(scene, camera, {
+    modelUrl: modelUrl,
+    defaultAnimationUrl: currentMotionUrl !== 'none' ? currentMotionUrl : undefined,
+    config: currentConfig,
+    autoBlink: true,
+    lookAtCamera: true,
+    enableBreathing: true,
+    onProgress: (progress) => {
+      const el = document.getElementById('progress-text');
+      if (el) el.textContent = `${progress.toFixed(0)}%`;
+    },
+    onLoaded: (avatar) => {
+      applyConfigToSceneAndRenderer(currentConfig);
+      if (currentExprName !== 'neutral') {
+        avatar.setExpression(currentExprName, 1.0);
+      }
+      const el = document.getElementById('loading-status');
+      if (el) {
+        const displayName = modelUrl.startsWith('blob:') ? 'ローカルVRM' : modelUrl.split('/').pop();
+        el.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (${displayName})`;
+      }
+      const displayName = modelUrl.startsWith('blob:') ? 'ローカルVRM' : modelUrl.split('/').pop();
+      showToast(`👤 モデルを読み込みました: ${displayName}`);
+
+      // Sync active state in UI buttons
+      document.querySelectorAll<HTMLButtonElement>('.model-btn').forEach((btn) => {
+        const btnModel = btn.getAttribute('data-model');
+        btn.classList.toggle('active', btnModel === modelUrl);
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to load VRM avatar:', error);
+      const el = document.getElementById('loading-status');
+      if (el) {
+        el.innerHTML = `<span style="color: #dc2626; font-weight: 600;">✗ ロード失敗</span>`;
+      }
+      showToast('❌ モデルの読み込みに失敗しました');
+    },
+  });
+}
+
+// Initial load
+loadAvatarModel(currentModelUrl);
 
 // --------------------------------------------------
 // Apply Configuration updates to Scene & Shaders
@@ -310,8 +345,9 @@ function applyConfigToSceneAndRenderer(cfg: GenshinAvatarConfig): void {
     cfg.lighting.directional.posZ
   );
 
+  rimLight.visible = cfg.lighting.rim.enabled !== false;
   rimLight.color.set(cfg.lighting.rim.color);
-  rimLight.intensity = cfg.lighting.rim.intensity;
+  rimLight.intensity = cfg.lighting.rim.enabled !== false ? cfg.lighting.rim.intensity : 0;
   rimLight.position.set(
     cfg.lighting.rim.posX,
     cfg.lighting.rim.posY,
@@ -362,36 +398,35 @@ function setupGUI(): void {
   jsonFolder.add(jsonActions, 'resetDefaults').name('🔄 デフォルトにリセット');
   jsonFolder.open();
 
-  // 2. Face Shader Folder
-  const faceFolder = gui.addFolder('顔SDFシェーダー (Face Shader)');
-  faceFolder
-    .addColor(currentConfig.faceShader, 'shadowColor')
-    .name('陰影色 (Shadow Color)')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .add(currentConfig.faceShader, 'shadowStrength', 0, 1, 0.01)
-    .name('影の強さ (Strength)')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .add(currentConfig.faceShader, 'softness', 0.001, 0.08, 0.001)
-    .name('SDF境界ソフトネス')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .add(currentConfig.faceShader, 'thresholdOffset', -0.5, 0.5, 0.01)
-    .name('影の閾値オフセット')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .addColor(currentConfig.faceShader, 'boundaryColor')
-    .name('影境界差し色 (Color Ramp)')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .add(currentConfig.faceShader, 'boundaryWidth', 0, 0.15, 0.005)
-    .name('境界差し色の太さ')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
-  faceFolder
-    .add(currentConfig.faceShader, 'boundaryStrength', 0, 1.5, 0.05)
-    .name('境界差し色の強さ')
-    .onChange(() => avatarInstance?.shaderController?.updateFaceShader(currentConfig.faceShader));
+  // 2. VRM Model Folder
+  const modelFolder = gui.addFolder('👤 VRMモデル切替 (Model Select)');
+  const modelState = {
+    model: currentModelUrl,
+    openLocalFile: () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.vrm';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          loadAvatarModel(blobUrl);
+        }
+      };
+      input.click();
+    },
+  };
+  modelFolder
+    .add(modelState, 'model', {
+      '👧 girl.vrm (デフォルト)': '/models/girl.vrm',
+      '👤 avatar.vrm': '/models/avatar.vrm',
+    })
+    .name('モデル選択')
+    .onChange((url: string) => {
+      loadAvatarModel(url);
+    });
+  modelFolder.add(modelState, 'openLocalFile').name('📁 VRMファイルを開く (PC内)');
+  modelFolder.open();
 
   // Helper to add material folder
   const addMaterialFolder = (title: string, kind: 'body' | 'hair' | 'cloth') => {
@@ -403,13 +438,11 @@ function setupGUI(): void {
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name('明暗境界シフト (Shift)').onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name('環境光均一化 (GI)').onChange(update);
+    folder.add(params, 'rimEnabled').name('リムライト有効 (Rim ON)').onChange(update);
     folder.addColor(params, 'rimColor').name('リムライト色 (Rim Color)').onChange(update);
     folder.add(params, 'parametricRimFresnelPowerFactor', 0, 10, 0.1).name('リム急峻度 (Fresnel Power)').onChange(update);
     folder.add(params, 'parametricRimLiftFactor', 0, 5, 0.01).name('リム持ち上げ (Lift)').onChange(update);
     folder.add(params, 'rimLightingMixFactor', 0, 2, 0.01).name('リム光合成比率 (Mix)').onChange(update);
-    folder.addColor(params, 'boundaryColor').name('影境界差し色 (Color Ramp)').onChange(update);
-    folder.add(params, 'boundaryWidth', 0, 0.15, 0.005).name('境界差し色の太さ').onChange(update);
-    folder.add(params, 'boundaryStrength', 0, 1.5, 0.05).name('境界差し色の強さ').onChange(update);
     folder.addColor(params, 'outlineColor').name('輪郭線の色 (Outline Color)').onChange(update);
     folder.add(params, 'outlineWidthFactor', 0, 0.01, 0.0002).name('輪郭線の太さ (Outline Width)').onChange(update);
     folder.close();
@@ -421,10 +454,18 @@ function setupGUI(): void {
   addMaterialFolder('衣装マテリアル (Cloth / Shoes)', 'cloth');
 
   // 4. Outline Folder
-  const outlineFolder = gui.addFolder('輪郭線 (Outline)');
+  const outlineFolder = gui.addFolder('輪郭線・アウトライン (Outline)');
   outlineFolder
     .add(currentConfig.outline, 'enabled')
     .name('輪郭線表示 (Enabled)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'autoColorFromMaterial')
+    .name('🎨 マテリアル色から自動設定 (Auto)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'darknessFactor', 0.1, 0.9, 0.05)
+    .name('線の暗さ (Darkness)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'usePerMaterialColor')
@@ -432,11 +473,11 @@ function setupGUI(): void {
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .addColor(currentConfig.outline, 'color')
-    .name('共通線色 (Global Color)')
+    .name('手動共通線色 (Manual Color)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'widthFactor', 0, 0.01, 0.0002)
-    .name('共通太さ (Global Width)')
+    .name('輪郭線の太さ (Width)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'lightingMixFactor', 0, 1, 0.01)
@@ -556,9 +597,18 @@ function setupGUI(): void {
 
   // Rim Light
   lightFolder
+    .add(currentConfig.lighting.rim, 'enabled')
+    .name('補助光有効 (Rim ON)')
+    .onChange((val: boolean) => {
+      rimLight.visible = val;
+      rimLight.intensity = val ? currentConfig.lighting.rim.intensity : 0;
+    });
+  lightFolder
     .add(currentConfig.lighting.rim, 'intensity', 0, 3, 0.05)
     .name('補助光強度 (Rim Int)')
-    .onChange((val: number) => (rimLight.intensity = val));
+    .onChange((val: number) => {
+      rimLight.intensity = currentConfig.lighting.rim.enabled !== false ? val : 0;
+    });
   lightFolder
     .addColor(currentConfig.lighting.rim, 'color')
     .name('補助光色 (Rim Color)')
@@ -804,6 +854,14 @@ function createUIOverlay() {
         <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
       </div>
       <div>
+        <label style="font-weight: 600; display: block; margin-bottom: 4px;">モデル切替 (VRM Model)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
+          <button data-model="/models/girl.vrm" class="model-btn active">👧 girl.vrm</button>
+          <button data-model="/models/avatar.vrm" class="model-btn">👤 avatar.vrm</button>
+          <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
+        </div>
+      </div>
+      <div>
         <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
           <button data-motion="/animations/Idle.fbx" class="motion-btn active">待機</button>
@@ -841,7 +899,7 @@ function createUIOverlay() {
 
   const style = document.createElement('style');
   style.textContent = `
-    .expr-btn, .motion-btn {
+    .expr-btn, .motion-btn, .model-btn {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
@@ -851,11 +909,11 @@ function createUIOverlay() {
       transition: all 0.15s ease;
       color: #334155;
     }
-    .expr-btn:hover, .motion-btn:hover {
+    .expr-btn:hover, .motion-btn:hover, .model-btn:hover {
       background: #e2e8f0;
       border-color: #94a3b8;
     }
-    .expr-btn.active, .motion-btn.active {
+    .expr-btn.active, .motion-btn.active, .model-btn.active {
       background: #4f46e5;
       color: #ffffff;
       border-color: #4338ca;
@@ -892,6 +950,35 @@ function createUIOverlay() {
 
 createUIOverlay();
 
+// Setup model selector buttons
+const modelButtons = document.querySelectorAll<HTMLButtonElement>('.model-btn');
+modelButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const modelUrl = btn.getAttribute('data-model');
+    if (modelUrl) {
+      modelButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadAvatarModel(modelUrl);
+    }
+  });
+});
+
+document.getElementById('open-local-vrm-btn')?.addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.vrm';
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const blobUrl = URL.createObjectURL(file);
+      modelButtons.forEach((b) => b.classList.remove('active'));
+      document.getElementById('open-local-vrm-btn')?.classList.add('active');
+      loadAvatarModel(blobUrl);
+    }
+  };
+  input.click();
+});
+
 // Setup expression buttons
 const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
 exprButtons.forEach((btn) => {
@@ -900,8 +987,11 @@ exprButtons.forEach((btn) => {
     btn.classList.add('active');
 
     const expr = btn.getAttribute('data-expr');
-    if (expr && avatarInstance) {
-      avatarInstance.setExpression(expr, 1.0);
+    if (expr) {
+      currentExprName = expr;
+      if (avatarInstance) {
+        avatarInstance.setExpression(expr, 1.0);
+      }
     }
   });
 });
@@ -952,7 +1042,18 @@ function tick(): void {
     avatarInstance.update(delta, elapsed);
   }
 
-  composer.render();
+  const usePost = currentConfig.postProcessing.bloom.enabled ||
+                  currentConfig.postProcessing.colorGrading.enabled ||
+                  currentConfig.postProcessing.saturation !== 0 ||
+                  currentConfig.postProcessing.brightness !== 0 ||
+                  currentConfig.postProcessing.contrast !== 0;
+
+  if (usePost) {
+    composer.render();
+  } else {
+    renderer.render(scene, camera);
+  }
+
   requestAnimationFrame(tick);
 }
 

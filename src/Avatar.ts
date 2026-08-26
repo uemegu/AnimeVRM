@@ -11,7 +11,6 @@ import type { GenshinAvatarConfig } from './Config';
 
 export interface AvatarOptions {
   modelUrl: string;
-  faceControlUrl?: string;
   defaultAnimationUrl?: string;
   config?: GenshinAvatarConfig;
   autoBlink?: boolean;
@@ -191,7 +190,6 @@ export class Avatar {
     this.camera = camera;
     this.options = {
       modelUrl: options.modelUrl,
-      faceControlUrl: options.faceControlUrl ?? '/textures/hoshina-face-control.png',
       defaultAnimationUrl: options.defaultAnimationUrl ?? '/animations/Idle.fbx',
       config: options.config,
       autoBlink: options.autoBlink ?? true,
@@ -250,11 +248,9 @@ export class Avatar {
 
         // Apply Genshin-like shading in-place
         const shaderOpts: GenshinLikeShaderOptions = {
-          faceControlUrl: this.options.faceControlUrl,
-          facePattern: /N00_000_00_Face_00_SKIN|(^|[_\s.\-])face([_\s.\-]|$)|顔|フェイス/i,
-          bodyPattern: /N00_000_00_Body_00_SKIN|N00_000_00_Face_00_SKIN|body|skin|肌|体/i,
-          hairPattern: /N00_000_00_HairBack_00_HAIR|hair|髪/i,
-          clothPattern: /N00_003_01_Shoes_01_CLOTH|cloth|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i,
+          bodyPattern: /Body.*SKIN|body|skin|肌|体/i,
+          hairPattern: /Hair|hair|髪/i,
+          clothPattern: /Cloth|Tops|Bottoms|Shoes|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i,
           config: this.options.config,
           debug: true,
         };
