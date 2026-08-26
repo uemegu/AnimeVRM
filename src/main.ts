@@ -16,7 +16,7 @@ import { Avatar } from './Avatar';
 import { ColorGradingShader } from './ColorGradingShader';
 import {
   DEFAULT_CONFIG,
-  GenshinAvatarConfig,
+  AvatarConfig,
   cloneConfig,
   deepAssign,
   exportConfigJSON,
@@ -25,7 +25,7 @@ import {
 } from './Config';
 
 // Active configuration state
-const currentConfig: GenshinAvatarConfig = cloneConfig(DEFAULT_CONFIG);
+const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
 
 // --------------------------------------------------
 // Renderer
@@ -71,23 +71,27 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 // Scene & Camera
 // --------------------------------------------------
 const scene = new THREE.Scene();
-scene.background = null;
 
-function updateBackgroundDisplay(cfg: GenshinAvatarConfig): void {
-  const bgLayer = document.getElementById('bg-layer');
-  if (bgLayer) {
-    if (cfg.environment.useBackgroundImage && cfg.environment.backgroundImageUrl) {
-      bgLayer.style.backgroundImage = `url("${cfg.environment.backgroundImageUrl}")`;
-      bgLayer.style.display = 'block';
-      bgLayer.style.filter = cfg.environment.backgroundBlur > 0 ? `blur(${cfg.environment.backgroundBlur}px)` : 'none';
-      canvas.style.backgroundColor = 'transparent';
-      document.body.style.backgroundColor = cfg.environment.backgroundColor;
-    } else {
-      bgLayer.style.backgroundImage = 'none';
-      bgLayer.style.display = 'none';
-      canvas.style.backgroundColor = cfg.environment.backgroundColor;
-      document.body.style.backgroundColor = cfg.environment.backgroundColor;
-    }
+const textureLoader = new THREE.TextureLoader();
+const backgroundTextureCache = new Map<string, THREE.Texture>();
+
+function getBackgroundTexture(url: string): THREE.Texture {
+  if (backgroundTextureCache.has(url)) {
+    return backgroundTextureCache.get(url)!;
+  }
+  const texture = textureLoader.load(url);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  backgroundTextureCache.set(url, texture);
+  return texture;
+}
+
+function updateBackgroundDisplay(cfg: AvatarConfig): void {
+  if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
+    scene.background = getBackgroundTexture(cfg.environment.backgroundImageUrl);
+    document.body.style.backgroundColor = '#000000';
+  } else {
+    scene.background = new THREE.Color(cfg.environment.backgroundColor);
+    document.body.style.backgroundColor = cfg.environment.backgroundColor;
   }
 }
 
@@ -286,7 +290,7 @@ loadAvatarModel(currentModelUrl);
 // --------------------------------------------------
 // Apply Configuration updates to Scene & Shaders
 // --------------------------------------------------
-function applyConfigToSceneAndRenderer(cfg: GenshinAvatarConfig): void {
+function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   // Environment / Background
   updateBackgroundDisplay(cfg);
   floor.visible = cfg.environment.showFloor;
@@ -364,7 +368,7 @@ function applyConfigToSceneAndRenderer(cfg: GenshinAvatarConfig): void {
 let gui: GUI;
 
 function setupGUI(): void {
-  gui = new GUI({ title: '✨ 原神調設定 & パラメータ' });
+  gui = new GUI({ title: '✨ パラメータ' });
   gui.domElement.style.position = 'fixed';
   gui.domElement.style.top = '16px';
   gui.domElement.style.right = '16px';
@@ -379,7 +383,7 @@ function setupGUI(): void {
     },
     downloadJSON: () => {
       downloadConfigJSON(currentConfig);
-      showToast('💾 genshin-avatar-config.json をダウンロードしました');
+      showToast('💾 avatar-config.json をダウンロードしました');
     },
     importJSON: () => {
       openImportModal();
@@ -485,19 +489,28 @@ function setupGUI(): void {
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder.close();
 
-  // 5. Environment & Background Folder
+  // 5. Environment Folder
   const envFolder = gui.addFolder('環境・背景 (Environment)');
   envFolder
-    .add(currentConfig.environment, 'useBackgroundImage')
-    .name('画像背景を使用 (Image BG)')
-    .onChange(() => updateBackgroundDisplay(currentConfig));
+    .add(currentConfig.environment, 'showBackgroundImage')
+    .name('背景画像 ON (Background Image)')
+    .onChange(() => {
+      updateBackgroundDisplay(currentConfig);
+      syncBgButtons();
+    });
   envFolder
-    .add(currentConfig.environment, 'backgroundBlur', 0, 20, 1)
-    .name('背景ぼかし (Blur px)')
-    .onChange(() => updateBackgroundDisplay(currentConfig));
+    .add(currentConfig.environment, 'backgroundImageUrl', {
+      '🌳 公園 (Park)': '/textures/park-background.jpg',
+      '🏠 部屋 (Room)': '/textures/room-background.jpg',
+    })
+    .name('背景画像選択')
+    .onChange(() => {
+      updateBackgroundDisplay(currentConfig);
+      syncBgButtons();
+    });
   envFolder
     .addColor(currentConfig.environment, 'backgroundColor')
-    .name('背景色 (単色時)')
+    .name('単色背景 (Background Color)')
     .onChange(() => updateBackgroundDisplay(currentConfig));
   envFolder
     .add(currentConfig.environment, 'showFloor')
@@ -511,39 +524,6 @@ function setupGUI(): void {
     .onChange((color: string) => {
       floorMat.color.set(color);
     });
-
-  const bgActions = {
-    chooseImage: () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const dataUrl = event.target?.result as string;
-            currentConfig.environment.backgroundImageUrl = dataUrl;
-            currentConfig.environment.useBackgroundImage = true;
-            updateBackgroundDisplay(currentConfig);
-            gui.controllersRecursive().forEach((c) => c.updateDisplay());
-            showToast('🖼️ 背景画像を変更しました');
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      input.click();
-    },
-    resetDefaultBg: () => {
-      currentConfig.environment.backgroundImageUrl = '/textures/park-background.webp';
-      currentConfig.environment.useBackgroundImage = true;
-      updateBackgroundDisplay(currentConfig);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-      showToast('🌳 公園の背景画像に戻しました');
-    },
-  };
-  envFolder.add(bgActions, 'chooseImage').name('📁 背景画像を変更 (ファイル選択)');
-  envFolder.add(bgActions, 'resetDefaultBg').name('🌳 公園背景にリセット');
   envFolder.close();
 
   // 6. Lighting Folder
@@ -802,6 +782,7 @@ function openImportModal(): void {
           deepAssign(currentConfig, parsed);
           applyConfigToSceneAndRenderer(currentConfig);
           gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+          syncBgButtons();
           modal!.style.display = 'none';
           showToast('✓ 設定JSONを正常に適用しました！');
         } catch (err) {
@@ -841,7 +822,7 @@ function createUIOverlay() {
 
   container.innerHTML = `
     <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-      <span style="color: #4f46e5;">✨</span> VRM 原神調ビュワー
+      <span style="color: #4f46e5;">✨</span> VRM ビュワー
     </div>
     <div id="loading-status" style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
       モデル読み込み中... <span id="progress-text">0%</span>
@@ -852,6 +833,14 @@ function createUIOverlay() {
         <button id="quick-download-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">💾 保存</button>
         <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
         <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
+      </div>
+      <div>
+        <label style="font-weight: 600; display: block; margin-bottom: 4px;">背景画像 (Background)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
+          <button data-bg="/textures/park-background.jpg" class="bg-btn active">🌳 公園 (ON)</button>
+          <button data-bg="/textures/room-background.jpg" class="bg-btn">🏠 部屋</button>
+          <button data-bg="none" class="bg-btn">OFF (単色)</button>
+        </div>
       </div>
       <div>
         <label style="font-weight: 600; display: block; margin-bottom: 4px;">モデル切替 (VRM Model)</label>
@@ -899,7 +888,7 @@ function createUIOverlay() {
 
   const style = document.createElement('style');
   style.textContent = `
-    .expr-btn, .motion-btn, .model-btn {
+    .expr-btn, .motion-btn, .model-btn, .bg-btn {
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
@@ -909,11 +898,11 @@ function createUIOverlay() {
       transition: all 0.15s ease;
       color: #334155;
     }
-    .expr-btn:hover, .motion-btn:hover, .model-btn:hover {
+    .expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover {
       background: #e2e8f0;
       border-color: #94a3b8;
     }
-    .expr-btn.active, .motion-btn.active, .model-btn.active {
+    .expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active {
       background: #4f46e5;
       color: #ffffff;
       border-color: #4338ca;
@@ -931,7 +920,7 @@ function createUIOverlay() {
 
   document.getElementById('quick-download-json')?.addEventListener('click', () => {
     downloadConfigJSON(currentConfig);
-    showToast('💾 genshin-avatar-config.json をダウンロードしました');
+    showToast('💾 avatar-config.json をダウンロードしました');
   });
 
   document.getElementById('quick-import-json')?.addEventListener('click', () => {
@@ -942,6 +931,7 @@ function createUIOverlay() {
     deepAssign(currentConfig, DEFAULT_CONFIG);
     applyConfigToSceneAndRenderer(currentConfig);
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+    syncBgButtons();
     showToast('🔄 デフォルト設定にリセットしました');
   });
 
@@ -949,6 +939,35 @@ function createUIOverlay() {
 }
 
 createUIOverlay();
+
+function syncBgButtons(): void {
+  const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
+  bgButtons.forEach((b) => {
+    const val = b.getAttribute('data-bg');
+    if (!currentConfig.environment.showBackgroundImage) {
+      b.classList.toggle('active', val === 'none');
+    } else {
+      b.classList.toggle('active', val === currentConfig.environment.backgroundImageUrl);
+    }
+  });
+}
+
+// Setup background selector buttons
+const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
+bgButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const bg = btn.getAttribute('data-bg');
+    if (bg === 'none') {
+      currentConfig.environment.showBackgroundImage = false;
+    } else if (bg) {
+      currentConfig.environment.showBackgroundImage = true;
+      currentConfig.environment.backgroundImageUrl = bg;
+    }
+    updateBackgroundDisplay(currentConfig);
+    syncBgButtons();
+    gui.controllersRecursive().forEach((c) => c.updateDisplay());
+  });
+});
 
 // Setup model selector buttons
 const modelButtons = document.querySelectorAll<HTMLButtonElement>('.model-btn');

@@ -3,16 +3,16 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import {
-  applyGenshinLikeShader,
-  GenshinLikeShaderController,
-  GenshinLikeShaderOptions,
-} from './GenshinLikeShader';
-import type { GenshinAvatarConfig } from './Config';
+  applyToonShader,
+  ToonShaderController,
+  ToonShaderOptions,
+} from './ToonShader';
+import type { AvatarConfig } from './Config';
 
 export interface AvatarOptions {
   modelUrl: string;
   defaultAnimationUrl?: string;
-  config?: GenshinAvatarConfig;
+  config?: AvatarConfig;
   autoBlink?: boolean;
   lookAtCamera?: boolean;
   enableBreathing?: boolean;
@@ -175,7 +175,7 @@ export class Avatar {
   public vrm: VRM | null = null;
   public scene: THREE.Scene;
   public camera: THREE.Camera;
-  public shaderController: GenshinLikeShaderController | null = null;
+  public shaderController: ToonShaderController | null = null;
   public mixer: THREE.AnimationMixer | null = null;
   public currentAction: THREE.AnimationAction | null = null;
   public currentAnimationUrl: string | null = null;
@@ -246,8 +246,8 @@ export class Avatar {
         // Initial VRM update to initialize bone matrices and texture uniforms
         vrm.update(0);
 
-        // Apply Genshin-like shading in-place
-        const shaderOpts: GenshinLikeShaderOptions = {
+        // Apply toon shading in-place
+        const shaderOpts: ToonShaderOptions = {
           bodyPattern: /Body.*SKIN|body|skin|肌|体/i,
           hairPattern: /Hair|hair|髪/i,
           clothPattern: /Cloth|Tops|Bottoms|Shoes|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i,
@@ -255,7 +255,7 @@ export class Avatar {
           debug: true,
         };
 
-        this.shaderController = applyGenshinLikeShader(vrm, this.scene, shaderOpts);
+        this.shaderController = applyToonShader(vrm, this.scene, shaderOpts);
         this.shaderController.update();
 
         // Initialize animation mixer and play default animation if available
@@ -341,7 +341,7 @@ export class Avatar {
     }
   }
 
-  public applyConfig(config: GenshinAvatarConfig): void {
+  public applyConfig(config: AvatarConfig): void {
     this.shaderController?.applyFullConfig(config);
   }
 
@@ -439,7 +439,7 @@ export class Avatar {
       this.updateBreathing(elapsed);
     }
 
-    // Update Genshin face shader & uniforms
+    // Update toon face shader & uniforms
     this.shaderController?.update();
   }
 

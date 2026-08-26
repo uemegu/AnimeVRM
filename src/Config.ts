@@ -12,7 +12,7 @@ export interface MaterialStyleParams {
   outlineWidthFactor: number;
 }
 
-export interface GenshinAvatarConfig {
+export interface AvatarConfig {
   materials: {
     body: MaterialStyleParams;
     hair: MaterialStyleParams;
@@ -28,12 +28,11 @@ export interface GenshinAvatarConfig {
     lightingMixFactor: number;
   };
   environment: {
+    showBackgroundImage: boolean;
+    backgroundImageUrl: string;
     backgroundColor: string;
     showFloor: boolean;
     floorColor: string;
-    useBackgroundImage: boolean;
-    backgroundImageUrl: string;
-    backgroundBlur: number;
   };
   lighting: {
     castShadows: boolean;
@@ -84,7 +83,7 @@ export interface GenshinAvatarConfig {
   };
 }
 
-export const DEFAULT_CONFIG: GenshinAvatarConfig = {
+export const DEFAULT_CONFIG: AvatarConfig = {
   materials: {
     body: {
       shadeColor: '#bf8d9b',
@@ -136,12 +135,11 @@ export const DEFAULT_CONFIG: GenshinAvatarConfig = {
     lightingMixFactor: 0,
   },
   environment: {
+    showBackgroundImage: true,
+    backgroundImageUrl: '/textures/park-background.jpg',
     backgroundColor: '#ffffff',
     showFloor: false,
     floorColor: '#ffffff',
-    useBackgroundImage: true,
-    backgroundImageUrl: '/textures/room-background.jpg',
-    backgroundBlur: 0,
   },
   lighting: {
     castShadows: false,
@@ -193,17 +191,17 @@ export const DEFAULT_CONFIG: GenshinAvatarConfig = {
 };
 
 /** Deep clone a configuration object */
-export function cloneConfig(cfg: GenshinAvatarConfig): GenshinAvatarConfig {
+export function cloneConfig(cfg: AvatarConfig): AvatarConfig {
   return JSON.parse(JSON.stringify(cfg));
 }
 
 /** Export config as a formatted JSON string */
-export function exportConfigJSON(config: GenshinAvatarConfig): string {
+export function exportConfigJSON(config: AvatarConfig): string {
   return JSON.stringify(config, null, 2);
 }
 
 /** Download config as a .json file */
-export function downloadConfigJSON(config: GenshinAvatarConfig, filename = 'genshin-avatar-config.json'): void {
+export function downloadConfigJSON(config: AvatarConfig, filename = 'avatar-config.json'): void {
   const jsonStr = exportConfigJSON(config);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -217,7 +215,7 @@ export function downloadConfigJSON(config: GenshinAvatarConfig, filename = 'gens
 }
 
 /** Copy JSON string to clipboard */
-export async function copyConfigToClipboard(config: GenshinAvatarConfig): Promise<boolean> {
+export async function copyConfigToClipboard(config: AvatarConfig): Promise<boolean> {
   const jsonStr = exportConfigJSON(config);
   try {
     await navigator.clipboard.writeText(jsonStr);
