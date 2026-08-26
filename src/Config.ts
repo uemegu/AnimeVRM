@@ -3,29 +3,16 @@ export interface MaterialStyleParams {
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
+  rimEnabled: boolean;
   rimColor: string;
   parametricRimFresnelPowerFactor: number;
   parametricRimLiftFactor: number;
   rimLightingMixFactor: number;
   outlineColor: string;
   outlineWidthFactor: number;
-  // Boundary Color Ramp (影の境界差し色)
-  boundaryColor: string;
-  boundaryWidth: number;
-  boundaryStrength: number;
 }
 
 export interface GenshinAvatarConfig {
-  faceShader: {
-    shadowColor: string;
-    shadowStrength: number;
-    softness: number;
-    thresholdOffset: number;
-    materialStyleStrength: number;
-    boundaryColor: string;
-    boundaryWidth: number;
-    boundaryStrength: number;
-  };
   materials: {
     body: MaterialStyleParams;
     hair: MaterialStyleParams;
@@ -33,6 +20,8 @@ export interface GenshinAvatarConfig {
   };
   outline: {
     enabled: boolean;
+    autoColorFromMaterial: boolean;
+    darknessFactor: number;
     usePerMaterialColor: boolean;
     color: string;
     widthFactor: number;
@@ -60,6 +49,7 @@ export interface GenshinAvatarConfig {
       posZ: number;
     };
     rim: {
+      enabled: boolean;
       color: string;
       intensity: number;
       posX: number;
@@ -95,68 +85,54 @@ export interface GenshinAvatarConfig {
 }
 
 export const DEFAULT_CONFIG: GenshinAvatarConfig = {
-  faceShader: {
-    shadowColor: '#c7abb5',
-    shadowStrength: 0.55,
-    softness: 0.018,
-    thresholdOffset: 0,
-    materialStyleStrength: 0.6,
-    boundaryColor: '#ff8877',
-    boundaryWidth: 0.04,
-    boundaryStrength: 0.55,
-  },
   materials: {
     body: {
-      shadeColor: '#c8c4c6',
+      shadeColor: '#bf8d9b',
       shadingToonyFactor: 1,
-      shadingShiftFactor: -0.16,
-      giEqualizationFactor: 0.78,
-      rimColor: '#1b1016',
+      shadingShiftFactor: -0.05,
+      giEqualizationFactor: 0.9,
+      rimEnabled: false,
+      rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 5,
-      parametricRimLiftFactor: 1.93,
-      rimLightingMixFactor: 0.15,
-      outlineColor: '#9e6b65',
+      parametricRimLiftFactor: 0.1,
+      rimLightingMixFactor: 0.1,
+      outlineColor: '#6a3b45',
       outlineWidthFactor: 0.001,
-      boundaryColor: '#ff7766',
-      boundaryWidth: 0.05,
-      boundaryStrength: 0.6,
     },
     hair: {
-      shadeColor: '#000000',
+      shadeColor: '#22222a',
       shadingToonyFactor: 1,
-      shadingShiftFactor: -0.64,
-      giEqualizationFactor: 0.55,
-      rimColor: '#000000',
-      parametricRimFresnelPowerFactor: 10,
-      parametricRimLiftFactor: 0.21,
-      rimLightingMixFactor: 0.24,
-      outlineColor: '#000000',
-      outlineWidthFactor: 0.001,
-      boundaryColor: '#a98e8e',
-      boundaryWidth: 0.04,
-      boundaryStrength: 0.65,
+      shadingShiftFactor: -0.05,
+      giEqualizationFactor: 0.9,
+      rimEnabled: false,
+      rimColor: '#545454',
+      parametricRimFresnelPowerFactor: 0,
+      parametricRimLiftFactor: 0.1,
+      rimLightingMixFactor: 0.2,
+      outlineColor: '#1a1c24',
+      outlineWidthFactor: 0.0008,
     },
     cloth: {
       shadeColor: '#aeb7d0',
       shadingToonyFactor: 1,
-      shadingShiftFactor: 0.24,
-      giEqualizationFactor: 0.75,
+      shadingShiftFactor: -0.05,
+      giEqualizationFactor: 0.9,
+      rimEnabled: true,
       rimColor: '#202942',
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
-      rimLightingMixFactor: 1.16,
+      rimLightingMixFactor: 1,
       outlineColor: '#1e2538',
-      outlineWidthFactor: 0.0008,
-      boundaryColor: '#556688',
-      boundaryWidth: 0.03,
-      boundaryStrength: 0.25,
+      outlineWidthFactor: 0.001,
     },
   },
   outline: {
     enabled: true,
-    usePerMaterialColor: true,
+    autoColorFromMaterial: true,
+    darknessFactor: 0.1,
+    usePerMaterialColor: false,
     color: '#1f2430',
-    widthFactor: 0.003,
+    widthFactor: 0.001,
     lightingMixFactor: 0,
   },
   environment: {
@@ -164,25 +140,26 @@ export const DEFAULT_CONFIG: GenshinAvatarConfig = {
     showFloor: false,
     floorColor: '#ffffff',
     useBackgroundImage: true,
-    backgroundImageUrl: '/textures/park-background.webp',
+    backgroundImageUrl: '/textures/room-background.jpg',
     backgroundBlur: 0,
   },
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#bb8888',
-      intensity: 1,
+      color: '#ffc7c7',
+      intensity: 0.3,
     },
     directional: {
       color: '#ffffff',
       intensity: 2.5,
-      posX: 1.4,
-      posY: -0.1,
+      posX: 4.1,
+      posY: 2.5,
       posZ: 2,
     },
     rim: {
+      enabled: false,
       color: '#dde8ff',
-      intensity: 0.6,
+      intensity: 0,
       posX: -2,
       posY: 2.5,
       posZ: -2,
@@ -190,27 +167,27 @@ export const DEFAULT_CONFIG: GenshinAvatarConfig = {
   },
   postProcessing: {
     toneMappingMode: 'None',
-    toneMappingExposure: 1.05,
+    toneMappingExposure: 1,
     antialiasing: {
       msaaSamples: 4,
       smaa: true,
     },
     bloom: {
       enabled: true,
-      strength: 0.1,
-      radius: 0.32,
-      threshold: 0.89,
+      strength: 0.05,
+      radius: 0.35,
+      threshold: 0.9,
     },
     colorGrading: {
       enabled: true,
       shadowTint: '#2d3559',
-      highlightTint: '#fffbf2',
-      strength: 0.4,
-      contrast: 0.16,
-      gamma: 0.96,
+      highlightTint: '#ffffff',
+      strength: 0.3,
+      contrast: 0.08,
+      gamma: 1,
     },
-    saturation: 0.5,
-    brightness: 0,
+    saturation: 0.2,
+    brightness: 0.05,
     contrast: 0,
   },
 };
