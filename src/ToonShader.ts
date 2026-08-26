@@ -1,22 +1,22 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
-import type { GenshinAvatarConfig, MaterialStyleParams } from './Config';
+import type { AvatarConfig, MaterialStyleParams } from './Config';
 
-export type GenshinLikeShaderOptions = {
+export type ToonShaderOptions = {
   bodyPattern?: RegExp;
   hairPattern?: RegExp;
   clothPattern?: RegExp;
-  config?: GenshinAvatarConfig;
+  config?: AvatarConfig;
   debug?: boolean;
 };
 
-export type GenshinLikeShaderController = {
+export type ToonShaderController = {
   update: () => void;
   dispose: () => void;
   patched: ReadonlyArray<string>;
   updateMaterialStyle: (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => void;
-  updateOutline: (params: Partial<GenshinAvatarConfig['outline']>) => void;
-  applyFullConfig: (config: GenshinAvatarConfig) => void;
+  updateOutline: (params: Partial<AvatarConfig['outline']>) => void;
+  applyFullConfig: (config: AvatarConfig) => void;
 };
 
 type MToonLikeMaterial = THREE.Material & {
@@ -136,11 +136,11 @@ function classifyStyleMaterial(
   return null;
 }
 
-export function applyGenshinLikeShader(
+export function applyToonShader(
   vrm: VRM,
   scene: THREE.Scene,
-  options: GenshinLikeShaderOptions
-): GenshinLikeShaderController {
+  options: ToonShaderOptions
+): ToonShaderController {
   const bodyPattern = options.bodyPattern ?? DEFAULT_BODY_PATTERN;
   const hairPattern = options.hairPattern ?? DEFAULT_HAIR_PATTERN;
   const clothPattern = options.clothPattern ?? DEFAULT_CLOTH_PATTERN;
@@ -237,7 +237,7 @@ export function applyGenshinLikeShader(
   };
 
   // Apply outline params directly to outline uniform values
-  const applyOutline = (outlineCfg: Partial<GenshinAvatarConfig['outline']>) => {
+  const applyOutline = (outlineCfg: Partial<AvatarConfig['outline']>) => {
     allMToonMaterials.forEach(({ material, kind }) => {
       // Visibility
       if (typeof outlineCfg.enabled === 'boolean') {

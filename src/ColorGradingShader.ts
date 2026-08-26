@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 /**
- * Anime/Genshin-style Color Grading Shader
+ * Anime-style Color Grading Shader
  * Provides split-toning (cool blue-purple shadows, warm ivory highlights)
  * and smooth S-curve contrast grading.
  */
