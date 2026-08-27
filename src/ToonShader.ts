@@ -51,9 +51,6 @@ type StyleKind = 'body' | 'hair' | 'cloth' | 'face';
 
 const textureColorCache = new WeakMap<THREE.Texture, THREE.Color>();
 
-/**
- * Fast average color extraction from texture image using a downsampled 16x16 canvas
- */
 function getTextureAverageColor(texture: THREE.Texture): THREE.Color {
   if (textureColorCache.has(texture)) return textureColorCache.get(texture)!;
   let col = new THREE.Color(0.8, 0.8, 0.8);
@@ -119,52 +116,49 @@ function getDarkenedOutlineColor(material: MToonLikeMaterial, darknessFactor = 0
 }
 
 /**
- * Automatically computes an anime shadow color from base color.
- * - For Skin/Face (Body): Shifts Hue towards warm pink/coral (~0.97 red-pink), boosts saturation (subsurface blood scattering), and maintains healthy luminosity.
- * - For Cloth/Hair: Shifts Hue towards cool ambient tone (~0.62 blue-purple) and deepens value.
+ * Computes an anime-style automatic shadow color (Auto HSV Shadow)
+ * - Skin/Face: Shifts towards warm pink/peach (subsurface blood scattering)
+ * - Cloth/Hair: Shifts towards cool blue/purple anime tone with boosted saturation
  */
-export function computeAutoShadowColor(baseCol: THREE.Color, kind: StyleKind | 'other' = 'cloth', hueShift = 0.08): THREE.Color {
-  const hsl = { h: 0, s: 0, l: 0 };
-  baseCol.getHSL(hsl);
+function computeAutoShadowColor(
+  material: MToonLikeMaterial,
+  kind: StyleKind | 'other',
+  hueShiftAmount = 0.03,
+  lightnessFactor = 0.2
+): THREE.Color {
+  const base = new THREE.Color();
+  if (material.map) {
+    base.copy(getTextureAverageColor(material.map));
+  } else if (material.color) {
+    base.copy(material.color);
+  } else if (material.userData.originalShadeColor) {
+    base.copy(material.userData.originalShadeColor);
+  } else {
+    base.set('#cccccc');
+  }
 
-  const isSkin = kind === 'body' || kind === 'face' || (hsl.h < 0.14 && hsl.l > 0.4);
+  const hsl = { h: 0, s: 0, l: 0 };
+  base.getHSL(hsl);
+
+  const isSkin = kind === 'body' || kind === 'face';
 
   if (isSkin) {
-    // Anime skin shadow: warm pinkish peach / coral tone (red-pink shift ~0.97)
-    const targetHue = 0.97;
-    let diff = targetHue - hsl.h;
-    if (diff > 0.5) diff -= 1.0;
-    if (diff < -0.5) diff += 1.0;
-
-    let newH = hsl.h + Math.sign(diff) * Math.min(Math.abs(diff), hueShift * 1.2);
-    if (newH < 0) newH += 1.0;
-    if (newH > 1) newH -= 1.0;
-
-    // Boost saturation to give healthy blush/blood scatter, prevent grey/ashy skin
-    const newS = Math.min(hsl.s * 1.35 + 0.12, 0.85);
-    // Keep lightness gentle and luminous
-    const newL = Math.max(hsl.l * 0.80, 0.25);
-
-    const shadow = new THREE.Color();
-    shadow.setHSL(newH, newS, newL);
-    return shadow;
+    // Warm blood scatter for anime skin with Hue Shift control
+    const targetHue = (0.97 + hueShiftAmount) % 1.0;
+    const h = (hsl.h * 0.25 + targetHue * 0.75 + 1.0) % 1.0;
+    const s = Math.min(Math.max(hsl.s * 1.5, 0.32), 0.85);
+    const l = Math.max(hsl.l * lightnessFactor, 0.05);
+    const res = new THREE.Color();
+    res.setHSL(h, s, l);
+    return res;
   } else {
-    // General cloth/hair shadow: cool ambient shift (~0.62 blue-purple)
-    const targetHue = 0.62;
-    let diff = targetHue - hsl.h;
-    if (diff > 0.5) diff -= 1.0;
-    if (diff < -0.5) diff += 1.0;
-
-    let newH = hsl.h + Math.sign(diff) * Math.min(Math.abs(diff), hueShift);
-    if (newH < 0) newH += 1.0;
-    if (newH > 1) newH -= 1.0;
-
-    const newS = Math.min(hsl.s * 1.15 + 0.05, 0.95);
-    const newL = Math.max(hsl.l * 0.72, 0.05);
-
-    const shadow = new THREE.Color();
-    shadow.setHSL(newH, newS, newL);
-    return shadow;
+    // Anime shadow hue shift (cool or warm based on slider)
+    const h = (hsl.h + hueShiftAmount + 1.0) % 1.0;
+    const s = Math.min(hsl.s * 1.25, 1.0);
+    const l = Math.max(hsl.l * lightnessFactor, 0.02);
+    const res = new THREE.Color();
+    res.setHSL(h, s, l);
+    return res;
   }
 }
 
@@ -185,12 +179,10 @@ function classifyStyleMaterial(
   const matName = material.name || '';
   const meshName = mesh.name || '';
 
-  // 1. Face priority
   if (regexTest(DEFAULT_FACE_PATTERN, matName) || regexTest(DEFAULT_FACE_PATTERN, meshName)) {
     return 'face';
   }
 
-  // 2. Strict hair check (must not contain non-hair keywords)
   const isStrictHair = (regexTest(hairPattern, matName) || regexTest(hairPattern, meshName)) &&
                        !regexTest(NON_HAIR_EXCLUSION_PATTERN, matName.replace(/hair/gi, '')) &&
                        !regexTest(NON_HAIR_EXCLUSION_PATTERN, meshName.replace(/hair/gi, ''));
@@ -199,12 +191,10 @@ function classifyStyleMaterial(
     return 'hair';
   }
 
-  // 3. Cloth check
   if (regexTest(clothPattern, matName) || regexTest(clothPattern, meshName)) {
     return 'cloth';
   }
 
-  // 4. Body / Skin check
   if (regexTest(bodyPattern, matName) || regexTest(bodyPattern, meshName)) {
     return 'body';
   }
@@ -292,22 +282,15 @@ export function applyToonShader(
     trackedMaterials
       .filter((entry) => entry.kind === kind || (kind === 'body' && entry.kind === 'face'))
       .forEach(({ material, kind: matKind }) => {
-        // Shadow color selection:
-        // 1. Auto HSV Shadow (if enabled, with skin-specific warm pink scatter)
-        // 2. Custom Manual Shade Color (if useCustomShadeColor enabled)
-        // 3. Original VRM Model Shade Color (default)
-        if (params.autoShadowColor) {
-          const baseCol = material.map ? getTextureAverageColor(material.map) : (material.color || new THREE.Color(0.8, 0.8, 0.8));
-          const autoShade = computeAutoShadowColor(baseCol, matKind, params.shadowHueShift ?? 0.08);
-          if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShade);
-          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShade);
-        } else if (params.useCustomShadeColor && params.shadeColor) {
-          if (material.shadeColorFactor) material.shadeColorFactor.set(params.shadeColor);
-          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.set(params.shadeColor);
-        } else if (material.userData.originalShadeColor) {
-          if (material.shadeColorFactor) material.shadeColorFactor.copy(material.userData.originalShadeColor);
-          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(material.userData.originalShadeColor);
-        }
+        // Shade Color (Always auto-computed with hue shift and lightness factor)
+        const autoShadeColor = computeAutoShadowColor(
+          material,
+          matKind,
+          params.shadowHueShift ?? 0.03,
+          params.shadowLightnessFactor ?? 0.2
+        );
+        if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShadeColor);
+        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShadeColor);
 
         // Rim Color & Depth-based Rim suppression on face
         if (params.rimEnabled !== undefined || params.rimColor !== undefined) {
@@ -390,28 +373,11 @@ export function applyToonShader(
         if (material.uniforms?.outlineLightingMixFactor) material.uniforms.outlineLightingMixFactor.value = outlineCfg.lightingMixFactor;
       }
 
-      // Color & Width (Auto vs Per-Material vs Global)
-      if (outlineCfg.autoColorFromMaterial) {
-        const autoColor = getDarkenedOutlineColor(material, outlineCfg.darknessFactor ?? 0.45);
-        if (material.outlineColorFactor) material.outlineColorFactor.copy(autoColor);
-        if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.copy(autoColor);
-      } else if (outlineCfg.usePerMaterialColor && activeConfig?.materials) {
-        const matParams = kind === 'hair'
-          ? activeConfig.materials.hair
-          : kind === 'cloth'
-          ? activeConfig.materials.cloth
-          : activeConfig.materials.body;
-
-        if (matParams.outlineColor) {
-          if (material.outlineColorFactor) material.outlineColorFactor.set(matParams.outlineColor);
-          if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.set(matParams.outlineColor);
-        }
-      } else {
-        if (outlineCfg.color) {
-          if (material.outlineColorFactor) material.outlineColorFactor.set(outlineCfg.color);
-          if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.set(outlineCfg.color);
-        }
-      }
+      // Outline Color: Automatically derived from material color / texture
+      const darkness = outlineCfg.darknessFactor ?? 0.1;
+      const autoColor = getDarkenedOutlineColor(material, darkness);
+      if (material.outlineColorFactor) material.outlineColorFactor.copy(autoColor);
+      if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.copy(autoColor);
 
       // Width
       if (typeof outlineCfg.widthFactor === 'number') {

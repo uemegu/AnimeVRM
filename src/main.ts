@@ -15,8 +15,6 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
 import { ColorGradingShader } from './ColorGradingShader';
-import { GTToneMappingShader } from './shader/GTToneMappingShader';
-import { ScreenSpaceOutlinePass } from './postprocessing/ScreenSpaceOutlinePass';
 import {
   DEFAULT_CONFIG,
   AvatarConfig,
@@ -61,36 +59,27 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
 });
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x000000, 0);
-
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = getToneMappingMode(currentConfig.postProcessing.toneMappingMode);
+renderer.toneMappingExposure = currentConfig.postProcessing.toneMappingExposure;
 
 function getToneMappingMode(mode: string): THREE.ToneMapping {
   switch (mode) {
-    case 'GranTurismo':
-      // Gran Turismo Tone Mapping is handled by custom shader pass before OutputPass
-      return THREE.NoToneMapping;
     case 'ACESFilmic':
       return THREE.ACESFilmicToneMapping;
     case 'Reinhard':
       return THREE.ReinhardToneMapping;
     case 'AgX':
-      return THREE.AgXToneMapping;
+      return (THREE as any).AgXToneMapping ?? THREE.ACESFilmicToneMapping;
     case 'Linear':
       return THREE.LinearToneMapping;
     case 'None':
-      return THREE.NoToneMapping;
     default:
       return THREE.NoToneMapping;
   }
 }
-
-renderer.toneMapping = getToneMappingMode(currentConfig.postProcessing.toneMappingMode);
-renderer.toneMappingExposure = currentConfig.postProcessing.toneMappingExposure;
-renderer.shadowMap.enabled = currentConfig.lighting.castShadows;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 // --------------------------------------------------
 // Scene & Camera
@@ -123,24 +112,34 @@ function updateBackgroundDisplay(cfg: AvatarConfig): void {
 updateBackgroundDisplay(currentConfig);
 
 const camera = new THREE.PerspectiveCamera(
-  30,
+  currentConfig.camera.fov,
   window.innerWidth / window.innerHeight,
   0.1,
-  100
+  20
 );
-camera.position.set(0.0, 1.25, 2.6);
+camera.position.set(
+  currentConfig.camera.position.x,
+  currentConfig.camera.position.y,
+  currentConfig.camera.position.z
+);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 1.15, 0);
+// --------------------------------------------------
+// OrbitControls
+// --------------------------------------------------
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(
+  currentConfig.camera.target.x,
+  currentConfig.camera.target.y,
+  currentConfig.camera.target.z
+);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.minDistance = 0.8;
-controls.maxDistance = 6.0;
-controls.minPolarAngle = 0.2;
+controls.minDistance = currentConfig.camera.minDistance;
+controls.maxDistance = currentConfig.camera.maxDistance;
 controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
 // --------------------------------------------------
-// Lights
+// Environment & Lights
 // --------------------------------------------------
 const ambientLight = new THREE.AmbientLight(
   currentConfig.lighting.ambient.color,
@@ -157,15 +156,6 @@ dirLight.position.set(
   currentConfig.lighting.directional.posY,
   currentConfig.lighting.directional.posZ
 );
-dirLight.castShadow = currentConfig.lighting.castShadows;
-dirLight.shadow.mapSize.set(2048, 2048);
-dirLight.shadow.camera.left = -2;
-dirLight.shadow.camera.right = 2;
-dirLight.shadow.camera.top = 2.5;
-dirLight.shadow.camera.bottom = -0.5;
-dirLight.shadow.camera.near = 0.1;
-dirLight.shadow.camera.far = 12;
-dirLight.shadow.bias = -0.0001;
 scene.add(dirLight);
 
 const rimLight = new THREE.DirectionalLight(
@@ -179,14 +169,11 @@ rimLight.position.set(
 );
 scene.add(rimLight);
 
-// --------------------------------------------------
-// Environment / Floor
-// --------------------------------------------------
-const floorGeo = new THREE.CircleGeometry(8, 64);
+// Floor
+const floorGeo = new THREE.PlaneGeometry(10, 10);
 const floorMat = new THREE.MeshStandardMaterial({
   color: currentConfig.environment.floorColor,
-  roughness: 0.9,
-  metalness: 0.0,
+  roughness: 0.8,
 });
 const floor = new THREE.Mesh(floorGeo, floorMat);
 floor.rotation.x = -Math.PI / 2;
@@ -196,7 +183,7 @@ floor.visible = currentConfig.environment.showFloor;
 scene.add(floor);
 
 // --------------------------------------------------
-// Post Processing Pipeline
+// Post-Processing Pipeline (EffectComposer)
 // --------------------------------------------------
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
 const composerRenderTarget = new THREE.WebGLRenderTarget(
@@ -213,17 +200,7 @@ const composer = new EffectComposer(renderer, composerRenderTarget);
 // 1. Render base scene
 composer.addPass(new RenderPass(scene, camera));
 
-// 2. Screen-Space Depth & Normal Edge Outline Pass (for interior intersection edges)
-const screenSpaceOutlinePass = new ScreenSpaceOutlinePass(
-  scene,
-  camera,
-  window.innerWidth * pixelRatio,
-  window.innerHeight * pixelRatio,
-  currentConfig.outline.screenSpaceOutline
-);
-composer.addPass(screenSpaceOutlinePass);
-
-// 3. Bloom Pass (HDR high brightness glow)
+// 2. Bloom Pass (HDR high brightness glow)
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   currentConfig.postProcessing.bloom.strength,
@@ -232,18 +209,7 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
-// 4. Gran Turismo (GT) Tone Mapping Shader Pass
-const gtToneMappingPass = new ShaderPass(GTToneMappingShader);
-gtToneMappingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.toneMappingMode === 'GranTurismo' ? 1.0 : 0.0;
-gtToneMappingPass.uniforms['uMaxLuminance'].value = currentConfig.postProcessing.granTurismo.maxLuminance;
-gtToneMappingPass.uniforms['uContrast'].value = currentConfig.postProcessing.granTurismo.contrast;
-gtToneMappingPass.uniforms['uLinearSection'].value = currentConfig.postProcessing.granTurismo.linearSection;
-gtToneMappingPass.uniforms['uLinearLength'].value = currentConfig.postProcessing.granTurismo.linearLength;
-gtToneMappingPass.uniforms['uBlackTightness'].value = currentConfig.postProcessing.granTurismo.blackTightness;
-gtToneMappingPass.uniforms['uPedestal'].value = currentConfig.postProcessing.granTurismo.pedestal;
-composer.addPass(gtToneMappingPass);
-
-// 5. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping if standard mode
+// 3. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
 composer.addPass(new OutputPass());
 
 // 6. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
@@ -365,25 +331,9 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
     composer.renderTarget2.samples = cfg.postProcessing.antialiasing.msaaSamples;
   }
 
-  // Screen Space Outline
-  if (cfg.outline.screenSpaceOutline) {
-    screenSpaceOutlinePass.updateParams(cfg.outline.screenSpaceOutline);
-  }
-
-  // Tone Mapping (Standard vs Gran Turismo)
+  // Tone Mapping
   renderer.toneMapping = getToneMappingMode(cfg.postProcessing.toneMappingMode);
   renderer.toneMappingExposure = cfg.postProcessing.toneMappingExposure;
-
-  const isGT = cfg.postProcessing.toneMappingMode === 'GranTurismo';
-  gtToneMappingPass.uniforms['uEnabled'].value = isGT ? 1.0 : 0.0;
-  if (cfg.postProcessing.granTurismo) {
-    gtToneMappingPass.uniforms['uMaxLuminance'].value = cfg.postProcessing.granTurismo.maxLuminance;
-    gtToneMappingPass.uniforms['uContrast'].value = cfg.postProcessing.granTurismo.contrast;
-    gtToneMappingPass.uniforms['uLinearSection'].value = cfg.postProcessing.granTurismo.linearSection;
-    gtToneMappingPass.uniforms['uLinearLength'].value = cfg.postProcessing.granTurismo.linearLength;
-    gtToneMappingPass.uniforms['uBlackTightness'].value = cfg.postProcessing.granTurismo.blackTightness;
-    gtToneMappingPass.uniforms['uPedestal'].value = cfg.postProcessing.granTurismo.pedestal;
-  }
 
   bloomPass.strength = cfg.postProcessing.bloom.enabled ? cfg.postProcessing.bloom.strength : 0;
   bloomPass.radius = cfg.postProcessing.bloom.radius;
@@ -475,31 +425,14 @@ function setupGUI(): void {
   // 2. Quick Feature Toggles (1クリックで各機能のON/OFFを切り替え)
   const toggleFolder = gui.addFolder('⚡ 各機能 個別 ON/OFF トグル (Feature Toggles)');
   const toggleState = {
-    gtToneMapping: currentConfig.postProcessing.toneMappingMode === 'GranTurismo',
     colorGrading: currentConfig.postProcessing.colorGrading.enabled,
     bloom: currentConfig.postProcessing.bloom.enabled,
-    customShadowBody: currentConfig.materials.body.useCustomShadeColor,
-    customShadowHair: currentConfig.materials.hair.useCustomShadeColor,
-    customShadowCloth: currentConfig.materials.cloth.useCustomShadeColor,
-    autoShadowBody: currentConfig.materials.body.autoShadowColor,
-    autoShadowHair: currentConfig.materials.hair.autoShadowColor,
-    autoShadowCloth: currentConfig.materials.cloth.autoShadowColor,
     smoothNormal: currentConfig.outline.useSmoothNormal,
     screenSpaceWidth: currentConfig.outline.screenSpaceWidth,
-    screenSpaceOutline: currentConfig.outline.screenSpaceOutline.enabled,
     rimBody: currentConfig.materials.body.rimEnabled,
     rimCloth: currentConfig.materials.cloth.rimEnabled,
     rimLight: currentConfig.lighting.rim.enabled,
   };
-
-  toggleFolder
-    .add(toggleState, 'gtToneMapping')
-    .name('🏎️ GTトーンマッピング')
-    .onChange((val: boolean) => {
-      currentConfig.postProcessing.toneMappingMode = val ? 'GranTurismo' : 'None';
-      applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
 
   toggleFolder
     .add(toggleState, 'colorGrading')
@@ -520,60 +453,6 @@ function setupGUI(): void {
     });
 
   toggleFolder
-    .add(toggleState, 'customShadowBody')
-    .name('🎨 手動影色有効 (肌/体)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.body.useCustomShadeColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'customShadowHair')
-    .name('🎨 手動影色有効 (髪)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.hair.useCustomShadeColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('hair', currentConfig.materials.hair);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'customShadowCloth')
-    .name('🎨 手動影色有効 (衣装)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.cloth.useCustomShadeColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'autoShadowBody')
-    .name('🤖 自動影色HSV (肌/体)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.body.autoShadowColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'autoShadowHair')
-    .name('🤖 自動影色HSV (髪)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.hair.autoShadowColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('hair', currentConfig.materials.hair);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'autoShadowCloth')
-    .name('🤖 自動影色HSV (衣装)')
-    .onChange((val: boolean) => {
-      currentConfig.materials.cloth.autoShadowColor = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
     .add(toggleState, 'smoothNormal')
     .name('✨ スムーズ法線アウトライン')
     .onChange((val: boolean) => {
@@ -588,15 +467,6 @@ function setupGUI(): void {
     .onChange((val: boolean) => {
       currentConfig.outline.screenSpaceWidth = val;
       avatarInstance?.shaderController?.updateOutline(currentConfig.outline);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'screenSpaceOutline')
-    .name('🖼️ 内側交差線 (Edge Pass)')
-    .onChange((val: boolean) => {
-      currentConfig.outline.screenSpaceOutline.enabled = val;
-      applyConfigToSceneAndRenderer(currentConfig);
       gui.controllersRecursive().forEach((c) => c.updateDisplay());
     });
 
@@ -665,10 +535,8 @@ function setupGUI(): void {
     const params = currentConfig.materials[kind];
     const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
 
-    folder.add(params, 'useCustomShadeColor').name('🎨 手動影色有効 (Custom Shade)').onChange(update);
-    folder.addColor(params, 'shadeColor').name('手動影色 (Shade Color)').onChange(update);
-    folder.add(params, 'autoShadowColor').name('🤖 自動影色 (Auto HSV)').onChange(update);
-    folder.add(params, 'shadowHueShift', 0.0, 0.25, 0.01).name('影の寒色シフト (Hue Shift)').onChange(update);
+    folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name('影の色相シフト (Hue Shift)').onChange(update);
+    folder.add(params, 'shadowLightnessFactor', 0.1, 1.0, 0.01).name('影の明度比率 (Lightness)').onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name('明暗境界シフト (Shift)').onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name('環境光均一化 (GI)').onChange(update);
@@ -678,7 +546,6 @@ function setupGUI(): void {
     folder.add(params, 'parametricRimFresnelPowerFactor', 0, 10, 0.1).name('リム急峻度 (Fresnel Power)').onChange(update);
     folder.add(params, 'parametricRimLiftFactor', 0, 5, 0.01).name('リム持ち上げ (Lift)').onChange(update);
     folder.add(params, 'rimLightingMixFactor', 0, 2, 0.01).name('リム光合成比率 (Mix)').onChange(update);
-    folder.addColor(params, 'outlineColor').name('輪郭線の色 (Outline Color)').onChange(update);
     folder.add(params, 'outlineWidthFactor', 0, 0.01, 0.0002).name('輪郭線の太さ (Outline Width)').onChange(update);
     folder.close();
   };
@@ -707,20 +574,8 @@ function setupGUI(): void {
     .name('✒️ 線の抑揚自動調整 (Auto Weight)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
-    .add(currentConfig.outline, 'autoColorFromMaterial')
-    .name('🎨 マテリアル色から自動設定')
-    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
-  outlineFolder
-    .add(currentConfig.outline, 'darknessFactor', 0.1, 0.9, 0.05)
+    .add(currentConfig.outline, 'darknessFactor', 0.01, 0.5, 0.02)
     .name('線の暗さ (Darkness)')
-    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
-  outlineFolder
-    .add(currentConfig.outline, 'usePerMaterialColor')
-    .name('部位別カラー連動 (Per-Material)')
-    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
-  outlineFolder
-    .addColor(currentConfig.outline, 'color')
-    .name('手動共通線色 (Manual Color)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'widthFactor', 0, 0.01, 0.0002)
@@ -730,17 +585,6 @@ function setupGUI(): void {
     .add(currentConfig.outline, 'lightingMixFactor', 0, 1, 0.01)
     .name('光影響比率 (Lighting Mix)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
-
-  // Screen Space Outline Sub-folder (Interior intersection lines)
-  const ssoFolder = outlineFolder.addFolder('🖼️ 内側交差線 (Screen-space Outline)');
-  const updateSSO = () => screenSpaceOutlinePass.updateParams(currentConfig.outline.screenSpaceOutline);
-  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'enabled').name('内側交差線有効').onChange(updateSSO);
-  ssoFolder.addColor(currentConfig.outline.screenSpaceOutline, 'color').name('線の色').onChange(updateSSO);
-  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'edgeStrength', 0, 2.0, 0.05).name('線の濃さ (Strength)').onChange(updateSSO);
-  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'depthThreshold', 0.0005, 0.02, 0.0005).name('深度感度 (Depth Sens)').onChange(updateSSO);
-  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'normalThreshold', 0.1, 1.0, 0.02).name('法線感度 (Normal Sens)').onChange(updateSSO);
-  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'thickness', 0.5, 3.0, 0.25).name('線幅 (Thickness)').onChange(updateSSO);
-  ssoFolder.open();
   outlineFolder.close();
 
   // 5. Environment Folder
@@ -852,9 +696,9 @@ function setupGUI(): void {
   // 7. Post Processing Folder
   const postFolder = gui.addFolder('ポストプロセス (Post Processing)');
   postFolder
-    .add(currentConfig.postProcessing, 'toneMappingMode', ['GranTurismo', 'ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
+    .add(currentConfig.postProcessing, 'toneMappingMode', ['ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
     .name('トーンマッピング方式')
-    .onChange((mode: string) => {
+    .onChange(() => {
       applyConfigToSceneAndRenderer(currentConfig);
     });
 
@@ -862,24 +706,6 @@ function setupGUI(): void {
     .add(currentConfig.postProcessing, 'toneMappingExposure', 0.2, 2.5, 0.05)
     .name('露出 (Exposure)')
     .onChange((val: number) => (renderer.toneMappingExposure = val));
-
-  // GT Tone Mapping Sub-folder
-  const gtFolder = postFolder.addFolder('🏎️ Gran Turismo (GT) トーン設定');
-  const updateGT = () => {
-    if (currentConfig.postProcessing.granTurismo) {
-      gtToneMappingPass.uniforms['uMaxLuminance'].value = currentConfig.postProcessing.granTurismo.maxLuminance;
-      gtToneMappingPass.uniforms['uContrast'].value = currentConfig.postProcessing.granTurismo.contrast;
-      gtToneMappingPass.uniforms['uLinearSection'].value = currentConfig.postProcessing.granTurismo.linearSection;
-      gtToneMappingPass.uniforms['uLinearLength'].value = currentConfig.postProcessing.granTurismo.linearLength;
-      gtToneMappingPass.uniforms['uBlackTightness'].value = currentConfig.postProcessing.granTurismo.blackTightness;
-      gtToneMappingPass.uniforms['uPedestal'].value = currentConfig.postProcessing.granTurismo.pedestal;
-    }
-  };
-  gtFolder.add(currentConfig.postProcessing.granTurismo, 'contrast', 0.5, 2.0, 0.05).name('コントラスト (a)').onChange(updateGT);
-  gtFolder.add(currentConfig.postProcessing.granTurismo, 'linearSection', 0.05, 0.6, 0.02).name('リニア開始 (m)').onChange(updateGT);
-  gtFolder.add(currentConfig.postProcessing.granTurismo, 'linearLength', 0.1, 0.8, 0.02).name('リニア長 (l)').onChange(updateGT);
-  gtFolder.add(currentConfig.postProcessing.granTurismo, 'blackTightness', 0.5, 3.0, 0.1).name('黒の締まり (c)').onChange(updateGT);
-  gtFolder.open();
 
   // Antialiasing Folder
   const aaFolder = postFolder.addFolder('✨ アンチエイリアス (Anti-Aliasing)');
@@ -1154,28 +980,31 @@ function createUIOverlay() {
   container.style.userSelect = 'none';
 
   container.innerHTML = `
-    <div style="font-weight: 700; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-      <span style="color: #4f46e5;">✨</span> VRM ビュワー
-    </div>
-    <div id="loading-status" style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
-      モデル読み込み中... <span id="progress-text">0%</span>
-    </div>
-    <div id="controls-panel" style="display: flex; flex-direction: column; gap: 10px;">
-      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-        <button id="quick-copy-json" style="flex: 1; min-width: 90px; padding: 6px 8px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">📋 JSONコピー</button>
-        <button id="quick-download-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">💾 保存</button>
-        <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
-        <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
+    <div id="ui-header" style="font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; padding-bottom: 2px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="color: #4f46e5;">✨</span> VRM ビュワー
       </div>
+      <button id="ui-toggle-btn" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11px; color: #475569; cursor: pointer; padding: 2px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;">
+        <span id="ui-toggle-icon">▼</span> <span id="ui-toggle-text">閉じる</span>
+      </button>
+    </div>
+    <div id="ui-body" style="margin-top: 8px;">
+      <div id="loading-status" style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+        モデル読み込み中... <span id="progress-text">0%</span>
+      </div>
+      <div id="controls-panel" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+          <button id="quick-copy-json" style="flex: 1; min-width: 90px; padding: 6px 8px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">📋 JSONコピー</button>
+          <button id="quick-download-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">💾 保存</button>
+          <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
+          <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
+        </div>
 
         <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
         <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
           <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
           <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
-            <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav (デフォルト)</button>
-            <button id="sample-voice-1" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample1.mp3')}">🎙️ サンプル1 (女声)</button>
-            <button id="sample-voice-2" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample2.mp3')}">🎙️ サンプル2 (女声)</button>
-            <button id="sample-voice-3" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample3.mp3')}">🎙️ サンプル3 (男声)</button>
+            <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
             <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
           </div>
 
@@ -1293,12 +1122,10 @@ function createUIOverlay() {
       font-weight: 600;
     }
     .phoneme-tag {
-      flex: 1;
-      text-align: center;
-      padding: 2px 0;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 600;
-      border-radius: 3px;
+      padding: 1px 4px;
+      border-radius: 4px;
       background: #e2e8f0;
       color: #64748b;
       transition: all 0.1s ease;
@@ -1306,12 +1133,36 @@ function createUIOverlay() {
     .phoneme-tag.active {
       background: #4f46e5;
       color: #ffffff;
-      transform: scale(1.05);
-      box-shadow: 0 0 6px rgba(79, 70, 229, 0.6);
+      transform: scale(1.08);
     }
   `;
   document.head.appendChild(style);
   document.body.appendChild(container);
+
+  // Toggle Collapse / Expand
+  const uiHeader = container.querySelector('#ui-header');
+  const uiBody = container.querySelector('#ui-body') as HTMLElement | null;
+  const uiToggleIcon = container.querySelector('#ui-toggle-icon');
+  const uiToggleText = container.querySelector('#ui-toggle-text');
+
+  let isUICollapsed = false;
+  const toggleUI = () => {
+    isUICollapsed = !isUICollapsed;
+    if (uiBody) {
+      uiBody.style.display = isUICollapsed ? 'none' : 'block';
+    }
+    if (uiToggleIcon) {
+      uiToggleIcon.textContent = isUICollapsed ? '▲' : '▼';
+    }
+    if (uiToggleText) {
+      uiToggleText.textContent = isUICollapsed ? '開く' : '閉じる';
+    }
+    container.style.padding = isUICollapsed ? '10px 16px' : '14px 18px';
+  };
+
+  uiHeader?.addEventListener('click', (e) => {
+    toggleUI();
+  });
 
   // Quick action listeners
   document.getElementById('quick-copy-json')?.addEventListener('click', async () => {
@@ -1347,12 +1198,13 @@ function createUIOverlay() {
   const volumeSlider = document.getElementById('audio-volume') as HTMLInputElement | null;
 
   // File picker for audio
-  document.getElementById('open-audio-file-btn')?.addEventListener('click', () => {
+  document.getElementById('open-audio-file-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'audio/*';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
+    input.onchange = (ev) => {
+      const file = (ev.target as HTMLInputElement).files?.[0];
       if (file) {
         audioLipSync.loadAudioFile(file);
         if (audioTitleEl) audioTitleEl.textContent = file.name;
@@ -1366,7 +1218,8 @@ function createUIOverlay() {
 
   // Preset sample voice buttons
   document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const voiceUrl = btn.getAttribute('data-voice');
       if (voiceUrl) {
         document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((b) => b.classList.remove('active'));
@@ -1381,10 +1234,11 @@ function createUIOverlay() {
   });
 
   // Play / Pause toggle
-  playPauseBtn?.addEventListener('click', () => {
+  playPauseBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
     if (!audioLipSync.audioElement.src) {
-      // Default to sample 1 if no audio loaded
-      const sampleBtn = document.getElementById('sample-voice-1') as HTMLButtonElement | null;
+      // Default to 001.wav if no audio loaded
+      const sampleBtn = document.getElementById('sample-voice-default') as HTMLButtonElement | null;
       sampleBtn?.click();
       return;
     }
@@ -1552,7 +1406,6 @@ function onResize(): void {
 
   renderer.setSize(width, height);
   composer.setSize(width, height);
-  screenSpaceOutlinePass.setSize(width * pixelRatio, height * pixelRatio);
 }
 window.addEventListener('resize', onResize);
 
