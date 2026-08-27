@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
 import type { AvatarConfig, MaterialStyleParams } from './Config';
+import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
@@ -37,12 +38,14 @@ type MToonLikeMaterial = THREE.Material & {
   outlineWidthFactor?: number;
   outlineLightingMixFactor?: number;
   outlineWidthMode?: string;
+  userData: Record<string, any>;
 };
 
 const DEFAULT_FACE_PATTERN = /Face|Mouth|Eye|Brow|Eyelash|Eyeline|顔|目|眉|口/i;
 const DEFAULT_BODY_PATTERN = /Body.*SKIN|body|skin|肌|体/i;
 const DEFAULT_HAIR_PATTERN = /Hair|hair|髪/i;
-const DEFAULT_CLOTH_PATTERN = /Shoes|Cloth|Tops|Bottoms|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i;
+const DEFAULT_CLOTH_PATTERN = /Shoes|Cloth|Tops|Bottoms|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|suit|pant|服|靴|衣/i;
+const NON_HAIR_EXCLUSION_PATTERN = /Face|Mouth|Eye|Brow|Eyelash|Skin|Body|Cloth|Tops|Bottoms|Shoes|Dress|Skirt|Suit|Shirt|Pant|Onepiece|肌|体|顔|目|服|靴|衣/i;
 
 type StyleKind = 'body' | 'hair' | 'cloth' | 'face';
 
@@ -115,6 +118,56 @@ function getDarkenedOutlineColor(material: MToonLikeMaterial, darknessFactor = 0
   return result;
 }
 
+/**
+ * Automatically computes an anime shadow color from base color.
+ * - For Skin/Face (Body): Shifts Hue towards warm pink/coral (~0.97 red-pink), boosts saturation (subsurface blood scattering), and maintains healthy luminosity.
+ * - For Cloth/Hair: Shifts Hue towards cool ambient tone (~0.62 blue-purple) and deepens value.
+ */
+export function computeAutoShadowColor(baseCol: THREE.Color, kind: StyleKind | 'other' = 'cloth', hueShift = 0.08): THREE.Color {
+  const hsl = { h: 0, s: 0, l: 0 };
+  baseCol.getHSL(hsl);
+
+  const isSkin = kind === 'body' || kind === 'face' || (hsl.h < 0.14 && hsl.l > 0.4);
+
+  if (isSkin) {
+    // Anime skin shadow: warm pinkish peach / coral tone (red-pink shift ~0.97)
+    const targetHue = 0.97;
+    let diff = targetHue - hsl.h;
+    if (diff > 0.5) diff -= 1.0;
+    if (diff < -0.5) diff += 1.0;
+
+    let newH = hsl.h + Math.sign(diff) * Math.min(Math.abs(diff), hueShift * 1.2);
+    if (newH < 0) newH += 1.0;
+    if (newH > 1) newH -= 1.0;
+
+    // Boost saturation to give healthy blush/blood scatter, prevent grey/ashy skin
+    const newS = Math.min(hsl.s * 1.35 + 0.12, 0.85);
+    // Keep lightness gentle and luminous
+    const newL = Math.max(hsl.l * 0.80, 0.25);
+
+    const shadow = new THREE.Color();
+    shadow.setHSL(newH, newS, newL);
+    return shadow;
+  } else {
+    // General cloth/hair shadow: cool ambient shift (~0.62 blue-purple)
+    const targetHue = 0.62;
+    let diff = targetHue - hsl.h;
+    if (diff > 0.5) diff -= 1.0;
+    if (diff < -0.5) diff += 1.0;
+
+    let newH = hsl.h + Math.sign(diff) * Math.min(Math.abs(diff), hueShift);
+    if (newH < 0) newH += 1.0;
+    if (newH > 1) newH -= 1.0;
+
+    const newS = Math.min(hsl.s * 1.15 + 0.05, 0.95);
+    const newL = Math.max(hsl.l * 0.72, 0.05);
+
+    const shadow = new THREE.Color();
+    shadow.setHSL(newH, newS, newL);
+    return shadow;
+  }
+}
+
 function regexTest(regex: RegExp, value: string): boolean {
   regex.lastIndex = 0;
   return regex.test(value);
@@ -122,17 +175,40 @@ function regexTest(regex: RegExp, value: string): boolean {
 
 function classifyStyleMaterial(
   material: MToonLikeMaterial,
+  mesh: THREE.Mesh,
   bodyPattern: RegExp,
   hairPattern: RegExp,
   clothPattern: RegExp
 ): StyleKind | null {
   if (!material.isMToonMaterial) return null;
 
-  const name = material.name || '';
-  if (regexTest(DEFAULT_FACE_PATTERN, name)) return 'face';
-  if (regexTest(hairPattern, name)) return 'hair';
-  if (regexTest(clothPattern, name)) return 'cloth';
-  if (regexTest(bodyPattern, name)) return 'body';
+  const matName = material.name || '';
+  const meshName = mesh.name || '';
+
+  // 1. Face priority
+  if (regexTest(DEFAULT_FACE_PATTERN, matName) || regexTest(DEFAULT_FACE_PATTERN, meshName)) {
+    return 'face';
+  }
+
+  // 2. Strict hair check (must not contain non-hair keywords)
+  const isStrictHair = (regexTest(hairPattern, matName) || regexTest(hairPattern, meshName)) &&
+                       !regexTest(NON_HAIR_EXCLUSION_PATTERN, matName.replace(/hair/gi, '')) &&
+                       !regexTest(NON_HAIR_EXCLUSION_PATTERN, meshName.replace(/hair/gi, ''));
+
+  if (isStrictHair) {
+    return 'hair';
+  }
+
+  // 3. Cloth check
+  if (regexTest(clothPattern, matName) || regexTest(clothPattern, meshName)) {
+    return 'cloth';
+  }
+
+  // 4. Body / Skin check
+  if (regexTest(bodyPattern, matName) || regexTest(bodyPattern, meshName)) {
+    return 'body';
+  }
+
   return null;
 }
 
@@ -169,8 +245,34 @@ export function applyToonShader(
       const material = sourceMaterial as MToonLikeMaterial;
       if (!material.isMToonMaterial) return;
 
-      const styleKind = classifyStyleMaterial(material, bodyPattern, hairPattern, clothPattern);
+      const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
+
+      // Preserve original VRM shade color
+      if (material.shadeColorFactor) {
+        material.userData.originalShadeColor = material.shadeColorFactor.clone();
+      }
+
+      // Safely inject Auto Line Weight into outline vertex shader while preserving MToon defines
+      if (material.isOutline) {
+        const prevOnBeforeCompile = material.onBeforeCompile;
+        material.onBeforeCompile = (shader, renderer) => {
+          if (prevOnBeforeCompile) {
+            prevOnBeforeCompile(shader, renderer);
+          }
+          shader.vertexShader = shader.vertexShader.replace(
+            'vec3 outlineOffset = outlineWidthFactor * worldNormalLength * objectNormal;',
+            /* glsl */ `
+            vec3 outlineOffset = outlineWidthFactor * worldNormalLength * objectNormal;
+            // Auto Line Weight: View Angle silhouette modulation
+            float dotNV = abs(dot(normalize(transformedNormal), vec3(0.0, 0.0, 1.0)));
+            float lineWeight = 1.0 + (1.0 - dotNV) * 0.45;
+            outlineOffset *= lineWeight;
+            `
+          );
+        };
+        material.needsUpdate = true;
+      }
 
       allMToonMaterials.push({ material, kind });
 
@@ -190,47 +292,72 @@ export function applyToonShader(
     trackedMaterials
       .filter((entry) => entry.kind === kind || (kind === 'body' && entry.kind === 'face'))
       .forEach(({ material, kind: matKind }) => {
-        // Shade Color
-        if (params.shadeColor) {
+        // Shadow color selection:
+        // 1. Auto HSV Shadow (if enabled, with skin-specific warm pink scatter)
+        // 2. Custom Manual Shade Color (if useCustomShadeColor enabled)
+        // 3. Original VRM Model Shade Color (default)
+        if (params.autoShadowColor) {
+          const baseCol = material.map ? getTextureAverageColor(material.map) : (material.color || new THREE.Color(0.8, 0.8, 0.8));
+          const autoShade = computeAutoShadowColor(baseCol, matKind, params.shadowHueShift ?? 0.08);
+          if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShade);
+          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShade);
+        } else if (params.useCustomShadeColor && params.shadeColor) {
           if (material.shadeColorFactor) material.shadeColorFactor.set(params.shadeColor);
           if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.set(params.shadeColor);
+        } else if (material.userData.originalShadeColor) {
+          if (material.shadeColorFactor) material.shadeColorFactor.copy(material.userData.originalShadeColor);
+          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(material.userData.originalShadeColor);
         }
-        // Rim Color
+
+        // Rim Color & Depth-based Rim suppression on face
         if (params.rimEnabled !== undefined || params.rimColor !== undefined) {
           const isEnabled = params.rimEnabled !== false;
-          const effectiveColor = isEnabled ? (params.rimColor ?? '#000000') : '#000000';
+          // For face, always disable rim to prevent whole face glow
+          const effectiveColor = (isEnabled && matKind !== 'face') ? (params.rimColor ?? '#000000') : '#000000';
           if (material.parametricRimColorFactor) material.parametricRimColorFactor.set(effectiveColor);
           if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.set(effectiveColor);
         }
+
+        // Shading Toony Factor
         if (typeof params.shadingToonyFactor === 'number') {
           material.shadingToonyFactor = params.shadingToonyFactor;
           if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = params.shadingToonyFactor;
         }
-        // For face, ensure it maintains an anime-safe positive shift so cheeks aren't cut by 3D normal shadows
+
+        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts)
         if (typeof params.shadingShiftFactor === 'number') {
           const shift = matKind === 'face' ? Math.max(params.shadingShiftFactor, 0.45) : params.shadingShiftFactor;
           material.shadingShiftFactor = shift;
           if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
         }
+
+        // GI Equalization
         if (typeof params.giEqualizationFactor === 'number') {
           material.giEqualizationFactor = params.giEqualizationFactor;
           if (material.uniforms?.giEqualizationFactor) material.uniforms.giEqualizationFactor.value = params.giEqualizationFactor;
         }
+
+        // Parametric Rim Fresnel Power (High power keeps rim tight on silhouettes only)
         if (typeof params.parametricRimFresnelPowerFactor === 'number') {
-          material.parametricRimFresnelPowerFactor = params.parametricRimFresnelPowerFactor;
-          if (material.uniforms?.parametricRimFresnelPowerFactor) material.uniforms.parametricRimFresnelPowerFactor.value = params.parametricRimFresnelPowerFactor;
+          const power = matKind === 'body' ? Math.max(params.parametricRimFresnelPowerFactor, 4.0) : params.parametricRimFresnelPowerFactor;
+          material.parametricRimFresnelPowerFactor = power;
+          if (material.uniforms?.parametricRimFresnelPowerFactor) material.uniforms.parametricRimFresnelPowerFactor.value = power;
         }
+
+        // Parametric Rim Lift
         if (typeof params.parametricRimLiftFactor === 'number') {
           material.parametricRimLiftFactor = params.parametricRimLiftFactor;
           if (material.uniforms?.parametricRimLiftFactor) material.uniforms.parametricRimLiftFactor.value = params.parametricRimLiftFactor;
         }
+
+        // Rim Lighting Mix
         if (typeof params.rimLightingMixFactor === 'number') {
           material.rimLightingMixFactor = params.rimLightingMixFactor;
           if (material.uniforms?.rimLightingMixFactor) material.uniforms.rimLightingMixFactor.value = params.rimLightingMixFactor;
         }
       });
 
-    // If auto outline is enabled or per-material color is active, update outlines
+    // If outline config exists, update outlines
     if (activeConfig?.outline) {
       applyOutline(activeConfig.outline);
     }
@@ -238,12 +365,23 @@ export function applyToonShader(
 
   // Apply outline params directly to outline uniform values
   const applyOutline = (outlineCfg: Partial<AvatarConfig['outline']>) => {
+    // Dynamic smooth normal toggle on VRM scene hierarchy
+    if (typeof outlineCfg.useSmoothNormal === 'boolean') {
+      toggleSmoothNormalsInHierarchy(vrm.scene, outlineCfg.useSmoothNormal);
+    }
+
     allMToonMaterials.forEach(({ material, kind }) => {
       // Visibility
       if (typeof outlineCfg.enabled === 'boolean') {
         if (material.isOutline) {
           material.visible = outlineCfg.enabled;
         }
+      }
+
+      // Screen-space stable outline width mode
+      if (outlineCfg.screenSpaceWidth !== undefined) {
+        const mode = outlineCfg.screenSpaceWidth ? 'screenCoordinates' : 'worldCoordinates';
+        material.outlineWidthMode = mode;
       }
 
       // Lighting mix
