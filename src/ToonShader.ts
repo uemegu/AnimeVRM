@@ -129,6 +129,9 @@ function computeAutoShadowColor(
   const base = new THREE.Color();
   if (material.map) {
     base.copy(getTextureAverageColor(material.map));
+    if (material.color) {
+      base.multiply(material.color);
+    }
   } else if (material.color) {
     base.copy(material.color);
   } else if (material.userData.originalShadeColor) {
@@ -143,11 +146,11 @@ function computeAutoShadowColor(
   const isSkin = kind === 'body' || kind === 'face';
 
   if (isSkin) {
-    // Warm blood scatter for anime skin with Hue Shift control
-    const targetHue = (0.97 + hueShiftAmount) % 1.0;
-    const h = (hsl.h * 0.25 + targetHue * 0.75 + 1.0) % 1.0;
-    const s = Math.min(Math.max(hsl.s * 1.5, 0.32), 0.85);
-    const l = Math.max(hsl.l * lightnessFactor, 0.05);
+    // Warm blood scatter for anime skin with Hue Shift control (shifts towards peach-red 0.98)
+    const targetHue = (0.98 + hueShiftAmount + 1.0) % 1.0;
+    const h = (hsl.h * 0.2 + targetHue * 0.8 + 1.0) % 1.0;
+    const s = Math.min(Math.max(hsl.s * 1.6, 0.38), 0.9);
+    const l = Math.max(hsl.l * lightnessFactor, 0.02);
     const res = new THREE.Color();
     res.setHSL(h, s, l);
     return res;
@@ -282,6 +285,12 @@ export function applyToonShader(
     trackedMaterials
       .filter((entry) => entry.kind === kind || (kind === 'body' && entry.kind === 'face'))
       .forEach(({ material, kind: matKind }) => {
+        // Base Color / Tint (litFactor)
+        if (params.color) {
+          if (material.color) material.color.set(params.color);
+          if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.set(params.color);
+        }
+
         // Shade Color (Always auto-computed with hue shift and lightness factor)
         const autoShadeColor = computeAutoShadowColor(
           material,
