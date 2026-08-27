@@ -1,4 +1,5 @@
 import Meyda from 'meyda';
+import { resolveAssetUrl } from './utils/path';
 
 export const PHONEMES = ['aa', 'ee', 'ih', 'oh', 'ou'] as const;
 export type Phoneme = (typeof PHONEMES)[number];
@@ -185,8 +186,9 @@ export class AudioLipSync {
    */
   public loadAudioUrl(url: string, title?: string): void {
     this.initAudioContext();
+    const resolvedUrl = resolveAssetUrl(url);
     this.audioTitle = title || url.split('/').pop() || 'Audio Track';
-    this.audioElement.src = url;
+    this.audioElement.src = resolvedUrl;
     this.audioElement.load();
     this.currentPhoneme = 'nn';
     if (this.events.onPhonemeChange) {

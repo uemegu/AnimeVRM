@@ -24,6 +24,7 @@ import {
   downloadConfigJSON,
   copyConfigToClipboard,
 } from './Config';
+import { resolveAssetUrl } from './utils/path';
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
@@ -244,8 +245,8 @@ composer.addPass(smaaPass);
 // Avatar Initialization & Model Loading
 // --------------------------------------------------
 let avatarInstance: Avatar | null = null;
-let currentModelUrl = '/models/girl.vrm';
-let currentMotionUrl = '/animations/Idle.fbx';
+let currentModelUrl = resolveAssetUrl('/models/girl.vrm');
+let currentMotionUrl = resolveAssetUrl('/animations/Idle.fbx');
 let currentExprName = 'neutral';
 
 function loadAvatarModel(modelUrl: string): void {
@@ -446,8 +447,8 @@ function setupGUI(): void {
   };
   modelFolder
     .add(modelState, 'model', {
-      '👧 girl.vrm (デフォルト)': '/models/girl.vrm',
-      '👤 avatar.vrm': '/models/avatar.vrm',
+      '👧 girl.vrm (デフォルト)': resolveAssetUrl('/models/girl.vrm'),
+      '👤 avatar.vrm': resolveAssetUrl('/models/avatar.vrm'),
     })
     .name('モデル選択')
     .onChange((url: string) => {
@@ -524,8 +525,8 @@ function setupGUI(): void {
     });
   envFolder
     .add(currentConfig.environment, 'backgroundImageUrl', {
-      '🌳 公園 (Park)': '/textures/park-background.jpg',
-      '🏠 部屋 (Room)': '/textures/room-background.jpg',
+      '🌳 公園 (Park)': resolveAssetUrl('/textures/park-background.jpg'),
+      '🏠 部屋 (Room)': resolveAssetUrl('/textures/room-background.jpg'),
     })
     .name('背景画像選択')
     .onChange(() => {
@@ -920,88 +921,88 @@ function createUIOverlay() {
         <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
       </div>
 
-      <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
-      <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
-        <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
-          <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="/voices/001.wav">🎙️ 001.wav (デフォルト)</button>
-          <button id="sample-voice-1" class="model-btn voice-btn" data-voice="/voice/sample1.mp3">🎙️ サンプル1 (女声)</button>
-          <button id="sample-voice-2" class="model-btn voice-btn" data-voice="/voice/sample2.mp3">🎙️ サンプル2 (女声)</button>
-          <button id="sample-voice-3" class="model-btn voice-btn" data-voice="/voice/sample3.mp3">🎙️ サンプル3 (男声)</button>
-          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
-        </div>
-
-        <!-- プレイヤーUI -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">001.wav</span>
-            <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
+        <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
+            <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav (デフォルト)</button>
+            <button id="sample-voice-1" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample1.mp3')}">🎙️ サンプル1 (女声)</button>
+            <button id="sample-voice-2" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample2.mp3')}">🎙️ サンプル2 (女声)</button>
+            <button id="sample-voice-3" class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voice/sample3.mp3')}">🎙️ サンプル3 (男声)</button>
+            <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
           </div>
 
-          <!-- シークバー -->
-          <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
-
-          <!-- コントロールボタン群 -->
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
-            <div style="display: flex; gap: 4px;">
-              <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
-              <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
-              <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
+          <!-- プレイヤーUI -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">001.wav</span>
+              <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
             </div>
-            <!-- 音量 -->
-            <div style="display: flex; align-items: center; gap: 2px;">
-              <span style="font-size: 10px;">🔊</span>
-              <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+
+            <!-- シークバー -->
+            <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
+
+            <!-- コントロールボタン群 -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+              <div style="display: flex; gap: 4px;">
+                <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
+                <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
+                <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
+              </div>
+              <!-- 音量 -->
+              <div style="display: flex; align-items: center; gap: 2px;">
+                <span style="font-size: 10px;">🔊</span>
+                <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+              </div>
+            </div>
+
+            <!-- 音素モニター (LipSync Phoneme Monitor) -->
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
+              <div style="display: flex; gap: 3px; flex: 1;">
+                <span class="phoneme-tag" data-phoneme="aa">あ (aa)</span>
+                <span class="phoneme-tag" data-phoneme="ih">い (ih)</span>
+                <span class="phoneme-tag" data-phoneme="ou">う (ou)</span>
+                <span class="phoneme-tag" data-phoneme="ee">え (ee)</span>
+                <span class="phoneme-tag" data-phoneme="oh">お (oh)</span>
+                <span class="phoneme-tag active" data-phoneme="nn">閉 (nn)</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- 音素モニター (LipSync Phoneme Monitor) -->
-          <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-            <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
-            <div style="display: flex; gap: 3px; flex: 1;">
-              <span class="phoneme-tag" data-phoneme="aa">あ (aa)</span>
-              <span class="phoneme-tag" data-phoneme="ih">い (ih)</span>
-              <span class="phoneme-tag" data-phoneme="ou">う (ou)</span>
-              <span class="phoneme-tag" data-phoneme="ee">え (ee)</span>
-              <span class="phoneme-tag" data-phoneme="oh">お (oh)</span>
-              <span class="phoneme-tag active" data-phoneme="nn">閉 (nn)</span>
-            </div>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">背景画像 (Background)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
+            <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn active">🌳 公園 (ON)</button>
+            <button data-bg="${resolveAssetUrl('/textures/room-background.jpg')}" class="bg-btn">🏠 部屋</button>
+            <button data-bg="none" class="bg-btn">OFF (単色)</button>
           </div>
         </div>
-      </div>
-
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 4px;">背景画像 (Background)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-          <button data-bg="/textures/park-background.jpg" class="bg-btn active">🌳 公園 (ON)</button>
-          <button data-bg="/textures/room-background.jpg" class="bg-btn">🏠 部屋</button>
-          <button data-bg="none" class="bg-btn">OFF (単色)</button>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モデル切替 (VRM Model)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
+            <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
+            <button data-model="${resolveAssetUrl('/models/avatar.vrm')}" class="model-btn">👤 avatar.vrm</button>
+            <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
+          </div>
         </div>
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 4px;">モデル切替 (VRM Model)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
-          <button data-model="/models/girl.vrm" class="model-btn active">👧 girl.vrm</button>
-          <button data-model="/models/avatar.vrm" class="model-btn">👤 avatar.vrm</button>
-          <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
+        <div>
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
+            <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
+            <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
+            <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
+            <button data-motion="${resolveAssetUrl('/animations/Joyful Jump.fbx')}" class="motion-btn">ジャンプ</button>
+            <button data-motion="${resolveAssetUrl('/animations/Clapping.fbx')}" class="motion-btn">拍手</button>
+            <button data-motion="${resolveAssetUrl('/animations/Cheering.fbx')}" class="motion-btn">応援</button>
+            <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
+            <button data-motion="${resolveAssetUrl('/animations/Surprised.fbx')}" class="motion-btn">驚き</button>
+            <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
+            <button data-motion="${resolveAssetUrl('/animations/Defeat.fbx')}" class="motion-btn">落ち込む</button>
+            <button data-motion="none" class="motion-btn">停止</button>
+          </div>
         </div>
-      </div>
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
-          <button data-motion="/animations/Idle.fbx" class="motion-btn active">待機</button>
-          <button data-motion="/animations/Standing Greeting.fbx" class="motion-btn">挨拶</button>
-          <button data-motion="/animations/Quick Formal Bow.fbx" class="motion-btn">お辞儀</button>
-          <button data-motion="/animations/Joyful Jump.fbx" class="motion-btn">ジャンプ</button>
-          <button data-motion="/animations/Clapping.fbx" class="motion-btn">拍手</button>
-          <button data-motion="/animations/Cheering.fbx" class="motion-btn">応援</button>
-          <button data-motion="/animations/Dismissing Gesture.fbx" class="motion-btn">手を振る</button>
-          <button data-motion="/animations/Surprised.fbx" class="motion-btn">驚き</button>
-          <button data-motion="/animations/Angry.fbx" class="motion-btn">怒り</button>
-          <button data-motion="/animations/Defeat.fbx" class="motion-btn">落ち込む</button>
-          <button data-motion="none" class="motion-btn">停止</button>
-        </div>
-      </div>
       <div>
         <label style="font-weight: 600; display: block; margin-bottom: 4px;">表情 (Expression)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
@@ -1185,7 +1186,7 @@ function createUIOverlay() {
 createUIOverlay();
 
 // Initial load of default voice (001.wav)
-audioLipSync.loadAudioUrl('/voices/001.wav', '001.wav');
+audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
 
 function syncBgButtons(): void {
   const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');

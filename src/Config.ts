@@ -1,3 +1,5 @@
+import { resolveAssetUrl } from './utils/path';
+
 export interface MaterialStyleParams {
   shadeColor: string;
   shadingToonyFactor: number;
@@ -142,7 +144,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   environment: {
     showBackgroundImage: true,
-    backgroundImageUrl: '/textures/park-background.jpg',
+    backgroundImageUrl: resolveAssetUrl('/textures/park-background.jpg'),
     backgroundColor: '#ffffff',
     showFloor: false,
     floorColor: '#ffffff',
