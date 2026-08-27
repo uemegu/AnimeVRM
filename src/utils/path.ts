@@ -1,5 +1,6 @@
 /**
  * Resolves a public asset path considering Vite's base path (e.g. GitHub Pages repository subpath).
+ * Idempotent: will not duplicate the base path if already present.
  */
 export function resolveAssetUrl(path: string): string {
   if (!path) return path;
@@ -11,8 +12,20 @@ export function resolveAssetUrl(path: string): string {
   ) {
     return path;
   }
+
   const base = import.meta.env.BASE_URL || '/';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
+  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+
+  // If path already starts with normalizedBase, return it as is
+  if (path.startsWith(normalizedBase)) {
+    return path;
+  }
+
+  // If path starts with base without leading slash
+  if (normalizedBase.startsWith('/') && path.startsWith(normalizedBase.slice(1))) {
+    return `/${path}`;
+  }
+
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  return `${cleanBase}${cleanPath}`;
+  return `${normalizedBase}${cleanPath}`;
 }
