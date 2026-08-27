@@ -13,6 +13,7 @@ import { BrightnessContrastShader } from 'three/addons/shaders/BrightnessContras
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 
 import { Avatar } from './Avatar';
+import { AudioLipSync, Phoneme } from './AudioLipSync';
 import { ColorGradingShader } from './ColorGradingShader';
 import {
   DEFAULT_CONFIG,
@@ -26,6 +27,24 @@ import {
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
+
+// --------------------------------------------------
+// Audio Lip-Sync Controller
+// --------------------------------------------------
+const audioLipSync = new AudioLipSync({
+  onPhonemeChange: (phoneme) => {
+    updateLipSyncPhonemeDisplay(phoneme);
+  },
+  onPlayStateChange: (isPlaying) => {
+    updatePlayStateUI(isPlaying);
+  },
+  onTimeUpdate: (currentTime, duration) => {
+    updateAudioTimeUI(currentTime, duration);
+  },
+  onEnded: () => {
+    updatePlayStateUI(false);
+  },
+});
 
 // --------------------------------------------------
 // Renderer
@@ -360,6 +379,11 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
 
   // Avatar Shader & Materials
   avatarInstance?.applyConfig(cfg);
+
+  // Audio Lip-Sync Settings
+  if (cfg.lipSync) {
+    audioLipSync.rmsThreshold = cfg.lipSync.rmsThreshold;
+  }
 }
 
 // --------------------------------------------------
@@ -702,6 +726,25 @@ function setupGUI(): void {
     .name('コントラスト (Contrast)')
     .onChange((val: number) => (brightnessContrastPass.uniforms['contrast'].value = val));
   postFolder.close();
+
+  // 8. Lip Sync Folder
+  const lipFolder = gui.addFolder('🎵 リップシンク設定 (Lip Sync)');
+  lipFolder
+    .add(currentConfig.lipSync, 'enabled')
+    .name('リップシンク有効 (Enabled)');
+  lipFolder
+    .add(currentConfig.lipSync, 'gain', 0.0, 1.5, 0.05)
+    .name('口の開き倍率 (Gain)');
+  lipFolder
+    .add(currentConfig.lipSync, 'smoothing', 0.05, 0.6, 0.01)
+    .name('スムージング速度 (Smoothing)');
+  lipFolder
+    .add(currentConfig.lipSync, 'rmsThreshold', 0.001, 0.05, 0.001)
+    .name('無音判定閾値 (RMS Threshold)')
+    .onChange((val: number) => {
+      audioLipSync.rmsThreshold = val;
+    });
+  lipFolder.open();
 }
 
 setupGUI();
@@ -798,7 +841,49 @@ function openImportModal(): void {
 }
 
 // --------------------------------------------------
-// UI Overlay (Left-side HUD for Expressions & Motions)
+// Audio UI Helper Functions
+// --------------------------------------------------
+function formatTime(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function updateLipSyncPhonemeDisplay(phoneme: Phoneme | 'nn' | undefined): void {
+  const pTags = document.querySelectorAll<HTMLElement>('.phoneme-tag');
+  pTags.forEach((el) => {
+    const p = el.getAttribute('data-phoneme');
+    if (phoneme === p || (!phoneme && p === 'nn')) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+}
+
+function updatePlayStateUI(isPlaying: boolean): void {
+  const playBtn = document.getElementById('audio-play-pause-btn');
+  if (playBtn) {
+    playBtn.textContent = isPlaying ? '⏸ 一時停止' : '▶ 再生';
+    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+  }
+}
+
+function updateAudioTimeUI(currentTime: number, duration: number): void {
+  const timeLabel = document.getElementById('audio-time');
+  const seekbar = document.getElementById('audio-seekbar') as HTMLInputElement | null;
+
+  if (timeLabel) {
+    timeLabel.textContent = `${formatTime(currentTime)} / ${formatTime(duration)}`;
+  }
+  if (seekbar && duration > 0 && !seekbar.matches(':active')) {
+    seekbar.value = ((currentTime / duration) * 100).toString();
+  }
+}
+
+// --------------------------------------------------
+// UI Overlay (Left-side HUD for Expressions, Motions & Lip-Sync)
 // --------------------------------------------------
 function createUIOverlay() {
   const container = document.createElement('div');
@@ -834,6 +919,57 @@ function createUIOverlay() {
         <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
         <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
       </div>
+
+      <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
+        <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
+          <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="/voices/001.wav">🎙️ 001.wav (デフォルト)</button>
+          <button id="sample-voice-1" class="model-btn voice-btn" data-voice="/voice/sample1.mp3">🎙️ サンプル1 (女声)</button>
+          <button id="sample-voice-2" class="model-btn voice-btn" data-voice="/voice/sample2.mp3">🎙️ サンプル2 (女声)</button>
+          <button id="sample-voice-3" class="model-btn voice-btn" data-voice="/voice/sample3.mp3">🎙️ サンプル3 (男声)</button>
+          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
+        </div>
+
+        <!-- プレイヤーUI -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">001.wav</span>
+            <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
+          </div>
+
+          <!-- シークバー -->
+          <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
+
+          <!-- コントロールボタン群 -->
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+            <div style="display: flex; gap: 4px;">
+              <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
+              <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
+              <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
+            </div>
+            <!-- 音量 -->
+            <div style="display: flex; align-items: center; gap: 2px;">
+              <span style="font-size: 10px;">🔊</span>
+              <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+            </div>
+          </div>
+
+          <!-- 音素モニター (LipSync Phoneme Monitor) -->
+          <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+            <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
+            <div style="display: flex; gap: 3px; flex: 1;">
+              <span class="phoneme-tag" data-phoneme="aa">あ (aa)</span>
+              <span class="phoneme-tag" data-phoneme="ih">い (ih)</span>
+              <span class="phoneme-tag" data-phoneme="ou">う (ou)</span>
+              <span class="phoneme-tag" data-phoneme="ee">え (ee)</span>
+              <span class="phoneme-tag" data-phoneme="oh">お (oh)</span>
+              <span class="phoneme-tag active" data-phoneme="nn">閉 (nn)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div>
         <label style="font-weight: 600; display: block; margin-bottom: 4px;">背景画像 (Background)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
@@ -908,6 +1044,23 @@ function createUIOverlay() {
       border-color: #4338ca;
       font-weight: 600;
     }
+    .phoneme-tag {
+      flex: 1;
+      text-align: center;
+      padding: 2px 0;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 3px;
+      background: #e2e8f0;
+      color: #64748b;
+      transition: all 0.1s ease;
+    }
+    .phoneme-tag.active {
+      background: #4f46e5;
+      color: #ffffff;
+      transform: scale(1.05);
+      box-shadow: 0 0 6px rgba(79, 70, 229, 0.6);
+    }
   `;
   document.head.appendChild(style);
   document.body.appendChild(container);
@@ -935,10 +1088,104 @@ function createUIOverlay() {
     showToast('🔄 デフォルト設定にリセットしました');
   });
 
+  // --------------------------------------------------
+  // Audio Lip-Sync Event Listeners
+  // --------------------------------------------------
+  const audioTitleEl = document.getElementById('audio-title');
+  const playPauseBtn = document.getElementById('audio-play-pause-btn');
+  const stopBtn = document.getElementById('audio-stop-btn');
+  const loopBtn = document.getElementById('audio-loop-btn');
+  const seekbar = document.getElementById('audio-seekbar') as HTMLInputElement | null;
+  const volumeSlider = document.getElementById('audio-volume') as HTMLInputElement | null;
+
+  // File picker for audio
+  document.getElementById('open-audio-file-btn')?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'audio/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        audioLipSync.loadAudioFile(file);
+        if (audioTitleEl) audioTitleEl.textContent = file.name;
+        document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((b) => b.classList.remove('active'));
+        audioLipSync.play();
+        showToast(`🎵 音声ファイルを読み込みました: ${file.name}`);
+      }
+    };
+    input.click();
+  });
+
+  // Preset sample voice buttons
+  document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const voiceUrl = btn.getAttribute('data-voice');
+      if (voiceUrl) {
+        document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const title = btn.textContent || 'サンプル音声';
+        audioLipSync.loadAudioUrl(voiceUrl, title);
+        if (audioTitleEl) audioTitleEl.textContent = title;
+        audioLipSync.play();
+        showToast(`🎙️ ${title} を再生します`);
+      }
+    });
+  });
+
+  // Play / Pause toggle
+  playPauseBtn?.addEventListener('click', () => {
+    if (!audioLipSync.audioElement.src) {
+      // Default to sample 1 if no audio loaded
+      const sampleBtn = document.getElementById('sample-voice-1') as HTMLButtonElement | null;
+      sampleBtn?.click();
+      return;
+    }
+    if (audioLipSync.isPlaying) {
+      audioLipSync.pause();
+    } else {
+      audioLipSync.play();
+    }
+  });
+
+  // Stop button
+  stopBtn?.addEventListener('click', () => {
+    audioLipSync.stop();
+  });
+
+  // Loop button
+  let isLooping = false;
+  loopBtn?.addEventListener('click', () => {
+    isLooping = !isLooping;
+    audioLipSync.setLoop(isLooping);
+    loopBtn.classList.toggle('active', isLooping);
+    loopBtn.style.background = isLooping ? '#4f46e5' : '#f1f5f9';
+    loopBtn.style.color = isLooping ? '#ffffff' : '#334155';
+    showToast(isLooping ? '🔁 ループ再生 ON' : '🔁 ループ再生 OFF');
+  });
+
+  // Seekbar
+  seekbar?.addEventListener('input', () => {
+    const percent = parseFloat(seekbar.value);
+    const duration = audioLipSync.audioElement.duration || 0;
+    if (duration > 0) {
+      const targetTime = (percent / 100) * duration;
+      audioLipSync.seek(targetTime);
+    }
+  });
+
+  // Volume slider
+  volumeSlider?.addEventListener('input', () => {
+    const vol = parseFloat(volumeSlider.value);
+    audioLipSync.setVolume(vol);
+  });
+
   return container;
 }
 
 createUIOverlay();
+
+// Initial load of default voice (001.wav)
+audioLipSync.loadAudioUrl('/voices/001.wav', '001.wav');
 
 function syncBgButtons(): void {
   const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
@@ -972,10 +1219,15 @@ bgButtons.forEach((btn) => {
 // Setup model selector buttons
 const modelButtons = document.querySelectorAll<HTMLButtonElement>('.model-btn');
 modelButtons.forEach((btn) => {
+  if (btn.classList.contains('voice-btn') || btn.id === 'open-audio-file-btn') return;
   btn.addEventListener('click', () => {
     const modelUrl = btn.getAttribute('data-model');
     if (modelUrl) {
-      modelButtons.forEach((b) => b.classList.remove('active'));
+      modelButtons.forEach((b) => {
+        if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
+          b.classList.remove('active');
+        }
+      });
       btn.classList.add('active');
       loadAvatarModel(modelUrl);
     }
@@ -990,7 +1242,11 @@ document.getElementById('open-local-vrm-btn')?.addEventListener('click', () => {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (file) {
       const blobUrl = URL.createObjectURL(file);
-      modelButtons.forEach((b) => b.classList.remove('active'));
+      modelButtons.forEach((b) => {
+        if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
+          b.classList.remove('active');
+        }
+      });
       document.getElementById('open-local-vrm-btn')?.classList.add('active');
       loadAvatarModel(blobUrl);
     }
@@ -1058,6 +1314,15 @@ function tick(): void {
   controls.update();
 
   if (avatarInstance) {
+    // Apply real-time lip sync if enabled
+    if (currentConfig.lipSync.enabled) {
+      avatarInstance.updateLipSync(
+        audioLipSync.currentPhoneme,
+        currentConfig.lipSync.gain,
+        currentConfig.lipSync.smoothing
+      );
+    }
+
     avatarInstance.update(delta, elapsed);
   }
 
@@ -1077,3 +1342,4 @@ function tick(): void {
 }
 
 tick();
+
