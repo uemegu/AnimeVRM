@@ -1,10 +1,8 @@
 import { resolveAssetUrl } from './utils/path';
 
 export interface MaterialStyleParams {
-  useCustomShadeColor: boolean;
-  shadeColor: string;
-  autoShadowColor: boolean;
   shadowHueShift: number;
+  shadowLightnessFactor: number;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
@@ -13,26 +11,7 @@ export interface MaterialStyleParams {
   parametricRimFresnelPowerFactor: number;
   parametricRimLiftFactor: number;
   rimLightingMixFactor: number;
-  outlineColor: string;
   outlineWidthFactor: number;
-}
-
-export interface ScreenSpaceOutlineConfig {
-  enabled: boolean;
-  color: string;
-  depthThreshold: number;
-  normalThreshold: number;
-  edgeStrength: number;
-  thickness: number;
-}
-
-export interface GranTurismoToneMappingConfig {
-  maxLuminance: number;
-  contrast: number;
-  linearSection: number;
-  linearLength: number;
-  blackTightness: number;
-  pedestal: number;
 }
 
 export interface DepthRimConfig {
@@ -53,13 +32,9 @@ export interface AvatarConfig {
     useSmoothNormal: boolean;
     screenSpaceWidth: boolean;
     autoLineWeight: boolean;
-    autoColorFromMaterial: boolean;
     darknessFactor: number;
-    usePerMaterialColor: boolean;
-    color: string;
     widthFactor: number;
     lightingMixFactor: number;
-    screenSpaceOutline: ScreenSpaceOutlineConfig;
   };
   environment: {
     showBackgroundImage: boolean;
@@ -92,9 +67,8 @@ export interface AvatarConfig {
     depthRim: DepthRimConfig;
   };
   postProcessing: {
-    toneMappingMode: 'GranTurismo' | 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
+    toneMappingMode: 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
     toneMappingExposure: number;
-    granTurismo: GranTurismoToneMappingConfig;
     antialiasing: {
       msaaSamples: number;
       smaa: boolean;
@@ -117,6 +91,21 @@ export interface AvatarConfig {
     brightness: number;
     contrast: number;
   };
+  camera: {
+    fov: number;
+    position: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    target: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    minDistance: number;
+    maxDistance: number;
+  };
   lipSync: {
     enabled: boolean;
     gain: number;
@@ -128,10 +117,8 @@ export interface AvatarConfig {
 export const DEFAULT_CONFIG: AvatarConfig = {
   materials: {
     body: {
-      useCustomShadeColor: false,
-      shadeColor: '#bf8d9b',
-      autoShadowColor: true,
-      shadowHueShift: 0.08,
+      shadowHueShift: 0.03,
+      shadowLightnessFactor: 0.2,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -140,14 +127,11 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 5,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.1,
-      outlineColor: '#6a3b45',
       outlineWidthFactor: 0.001,
     },
     hair: {
-      useCustomShadeColor: false,
-      shadeColor: '#22222a',
-      autoShadowColor: true,
-      shadowHueShift: 0.1,
+      shadowHueShift: 0.03,
+      shadowLightnessFactor: 0.2,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -156,14 +140,11 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 0,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.2,
-      outlineColor: '#1a1c24',
       outlineWidthFactor: 0.0008,
     },
     cloth: {
-      useCustomShadeColor: false,
-      shadeColor: '#aeb7d0',
-      autoShadowColor: true,
-      shadowHueShift: 0.06,
+      shadowHueShift: 0.03,
+      shadowLightnessFactor: 0.2,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -172,7 +153,6 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
       rimLightingMixFactor: 1.0,
-      outlineColor: '#1e2538',
       outlineWidthFactor: 0.001,
     },
   },
@@ -181,20 +161,9 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     useSmoothNormal: true,
     screenSpaceWidth: true,
     autoLineWeight: true,
-    autoColorFromMaterial: true,
     darknessFactor: 0.1,
-    usePerMaterialColor: false,
-    color: '#1f2430',
     widthFactor: 0.001,
     lightingMixFactor: 0.0,
-    screenSpaceOutline: {
-      enabled: false,
-      color: '#1f2430',
-      depthThreshold: 0.15,
-      normalThreshold: 0.38,
-      edgeStrength: 0.6,
-      thickness: 1.0,
-    },
   },
   environment: {
     showBackgroundImage: true,
@@ -206,8 +175,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#fff0f0',
-      intensity: 0.15,
+      color: '#ffb8b8',
+      intensity: 0.35,
     },
     directional: {
       color: '#ffffff',
@@ -234,14 +203,6 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   postProcessing: {
     toneMappingMode: 'None',
     toneMappingExposure: 1.0,
-    granTurismo: {
-      maxLuminance: 1.0,
-      contrast: 1.0,
-      linearSection: 0.22,
-      linearLength: 0.4,
-      blackTightness: 1.33,
-      pedestal: 0.0,
-    },
     antialiasing: {
       msaaSamples: 4,
       smaa: true,
@@ -255,36 +216,64 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     colorGrading: {
       enabled: true,
       shadowTint: '#5471f2',
-      highlightTint: '#fffafa',
-      strength: 0.56,
+      highlightTint: '#ffffff',
+      strength: 0.5,
       contrast: 0.13,
-      gamma: 0.7,
+      gamma: 1.0,
     },
     saturation: 0.26,
-    brightness: 0.05,
-    contrast: 0,
+    brightness: 0.0,
+    contrast: 0.0,
+  },
+  camera: {
+    fov: 30,
+    position: {
+      x: 0,
+      y: 1.4,
+      z: 1.8,
+    },
+    target: {
+      x: 0,
+      y: 1.3,
+      z: 0,
+    },
+    minDistance: 0.5,
+    maxDistance: 10,
   },
   lipSync: {
     enabled: true,
-    gain: 1.1,
-    smoothing: 0.2,
-    rmsThreshold: 0.01,
+    gain: 1.5,
+    smoothing: 0.45,
+    rmsThreshold: 0.008,
   },
 };
 
-/** Deep clone a configuration object */
 export function cloneConfig(cfg: AvatarConfig): AvatarConfig {
   return JSON.parse(JSON.stringify(cfg));
 }
 
-/** Export config as a formatted JSON string */
-export function exportConfigJSON(config: AvatarConfig): string {
-  return JSON.stringify(config, null, 2);
+export function deepAssign(target: any, source: any): any {
+  for (const key of Object.keys(source)) {
+    if (
+      source[key] !== null &&
+      typeof source[key] === 'object' &&
+      !Array.isArray(source[key])
+    ) {
+      if (!target[key]) target[key] = {};
+      deepAssign(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
 }
 
-/** Download config as a .json file */
-export function downloadConfigJSON(config: AvatarConfig, filename = 'avatar-config.json'): void {
-  const jsonStr = exportConfigJSON(config);
+export function exportConfigJSON(cfg: AvatarConfig): string {
+  return JSON.stringify(cfg, null, 2);
+}
+
+export function downloadConfigJSON(cfg: AvatarConfig, filename = 'avatar-config.json'): void {
+  const jsonStr = exportConfigJSON(cfg);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -296,36 +285,13 @@ export function downloadConfigJSON(config: AvatarConfig, filename = 'avatar-conf
   URL.revokeObjectURL(url);
 }
 
-/** Copy JSON string to clipboard */
-export async function copyConfigToClipboard(config: AvatarConfig): Promise<boolean> {
-  const jsonStr = exportConfigJSON(config);
+export async function copyConfigToClipboard(cfg: AvatarConfig): Promise<boolean> {
   try {
+    const jsonStr = exportConfigJSON(cfg);
     await navigator.clipboard.writeText(jsonStr);
     return true;
-  } catch (err) {
-    console.error('Clipboard copy failed:', err);
+  } catch {
     return false;
   }
 }
 
-/**
- * Recursively copy properties from source to target in-place,
- * preserving existing object references so lil-gui controller bindings stay connected.
- */
-export function deepAssign<T extends Record<string, any>>(target: T, source: any): T {
-  if (!source || typeof source !== 'object') return target;
-  for (const key of Object.keys(source)) {
-    const val = source[key];
-    if (val !== undefined) {
-      if (val && typeof val === 'object' && !Array.isArray(val)) {
-        if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
-          target[key] = {} as any;
-        }
-        deepAssign(target[key], val);
-      } else {
-        target[key] = val;
-      }
-    }
-  }
-  return target;
-}
