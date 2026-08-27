@@ -8,6 +8,7 @@ import {
   ToonShaderOptions,
 } from './ToonShader';
 import type { AvatarConfig } from './Config';
+import { PHONEMES, Phoneme } from './AudioLipSync';
 
 export interface AvatarOptions {
   modelUrl: string;
@@ -185,6 +186,15 @@ export class Avatar {
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
   private currentExpression: string = 'neutral';
 
+  public phonemeWeights: Record<Phoneme, number> = {
+    aa: 0,
+    ee: 0,
+    ih: 0,
+    oh: 0,
+    ou: 0,
+  };
+  public isLipSyncActive: boolean = false;
+
   constructor(scene: THREE.Scene, camera: THREE.Camera, options: AvatarOptions) {
     this.scene = scene;
     this.camera = camera;
@@ -338,6 +348,46 @@ export class Avatar {
 
     if (expressionName !== 'neutral') {
       manager.setValue(expressionName, weight);
+    }
+  }
+
+  public updateLipSync(
+    phoneme: Phoneme | 'nn' | undefined,
+    gain: number = 0.8,
+    smoothing: number = 0.2
+  ): void {
+    if (!this.vrm?.expressionManager) return;
+    const manager = this.vrm.expressionManager;
+
+    const target: Record<Phoneme, number> = {
+      aa: 0,
+      ee: 0,
+      ih: 0,
+      oh: 0,
+      ou: 0,
+    };
+
+    if (phoneme && phoneme !== 'nn') {
+      target[phoneme] = 1.0;
+      this.isLipSyncActive = true;
+    }
+
+    let hasNonZero = false;
+    PHONEMES.forEach((p) => {
+      const cw = this.phonemeWeights[p];
+      const tw = target[p];
+      const nw = cw + smoothing * (tw - cw);
+      const finalWeight = nw < 0.005 ? 0 : nw;
+      this.phonemeWeights[p] = finalWeight;
+      if (finalWeight > 0.001) {
+        hasNonZero = true;
+      }
+
+      manager.setValue(p, finalWeight * gain);
+    });
+
+    if (!hasNonZero && (!phoneme || phoneme === 'nn')) {
+      this.isLipSyncActive = false;
     }
   }
 

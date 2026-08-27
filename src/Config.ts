@@ -81,6 +81,12 @@ export interface AvatarConfig {
     brightness: number;
     contrast: number;
   };
+  lipSync: {
+    enabled: boolean;
+    gain: number;
+    smoothing: number;
+    rmsThreshold: number;
+  };
 }
 
 export const DEFAULT_CONFIG: AvatarConfig = {
@@ -104,7 +110,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       rimEnabled: false,
-      rimColor: '#545454',
+      rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 0,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.2,
@@ -144,20 +150,20 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#ffc7c7',
-      intensity: 0.3,
+      color: '#fff0f0',
+      intensity: 0.15,
     },
     directional: {
       color: '#ffffff',
-      intensity: 2.5,
+      intensity: 2.6,
       posX: 4.1,
       posY: 2.5,
       posZ: 2,
     },
     rim: {
-      enabled: false,
+      enabled: true,
       color: '#dde8ff',
-      intensity: 0,
+      intensity: 0.05,
       posX: -2,
       posY: 2.5,
       posZ: -2,
@@ -172,21 +178,27 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.05,
-      radius: 0.35,
-      threshold: 0.9,
+      strength: 0.09,
+      radius: 0.16,
+      threshold: 0.85,
     },
     colorGrading: {
       enabled: true,
-      shadowTint: '#2d3559',
-      highlightTint: '#ffffff',
-      strength: 0.3,
-      contrast: 0.08,
-      gamma: 1,
+      shadowTint: '#5471f2',
+      highlightTint: '#fffafa',
+      strength: 0.56,
+      contrast: 0.13,
+      gamma: 0.7,
     },
-    saturation: 0.2,
+    saturation: 0.26,
     brightness: 0.05,
     contrast: 0,
+  },
+  lipSync: {
+    enabled: true,
+    gain: 1.1,
+    smoothing: 0.2,
+    rmsThreshold: 0.01,
   },
 };
 
