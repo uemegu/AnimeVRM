@@ -9,6 +9,7 @@ import {
 } from './ToonShader';
 import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
+import { resolveAssetUrl } from './utils/path';
 
 export interface AvatarOptions {
   modelUrl: string;
@@ -30,16 +31,17 @@ const animationClipCache = new Map<string, THREE.AnimationClip>();
  * (Adapted from pixiv/three-vrm loadMixamoAnimation example)
  */
 export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.AnimationClip> {
-  const cacheKey = `${url}:${vrm.scene.uuid}`;
+  const resolvedUrl = resolveAssetUrl(url);
+  const cacheKey = `${resolvedUrl}:${vrm.scene.uuid}`;
   if (animationClipCache.has(cacheKey)) {
     return animationClipCache.get(cacheKey)!;
   }
 
-  let asset = animationAssetCache.get(url);
+  let asset = animationAssetCache.get(resolvedUrl);
   if (!asset) {
     const loader = new FBXLoader();
-    asset = await loader.loadAsync(url);
-    animationAssetCache.set(url, asset);
+    asset = await loader.loadAsync(resolvedUrl);
+    animationAssetCache.set(resolvedUrl, asset);
   }
 
   const clip = THREE.AnimationClip.findByName(asset.animations, 'mixamo.com') || asset.animations[0];
@@ -219,7 +221,7 @@ export class Avatar {
     loader.register((parser) => new VRMLoaderPlugin(parser));
 
     loader.load(
-      this.options.modelUrl,
+      resolveAssetUrl(this.options.modelUrl),
       async (gltf) => {
         const vrm = gltf.userData.vrm as VRM;
         if (!vrm) {
