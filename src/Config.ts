@@ -1,4 +1,5 @@
 import { resolveAssetUrl } from './utils/path';
+import type { ShortAnimationConfig } from './animation/types';
 
 export interface MaterialStyleParams {
   color: string;
@@ -113,6 +114,7 @@ export interface AvatarConfig {
     smoothing: number;
     rmsThreshold: number;
   };
+  shortAnimation: ShortAnimationConfig;
 }
 
 export const DEFAULT_CONFIG: AvatarConfig = {
@@ -250,6 +252,120 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     smoothing: 0.45,
     rmsThreshold: 0.008,
   },
+  shortAnimation: {
+    cuts: [
+      {
+        enabled: true,
+        duration: 1.5,
+        startAngle: 'farFront',
+        cameraDistance: 1.8,
+        cameraPreset: 'pushIn',
+        cameraStrength: 1.2,
+        motion: resolveAssetUrl('/animations/Walking.fbx'),
+        backText: {
+          text: 'AnimeVRM',
+          animationPreset: 'slideLeft',
+          x: 50,
+          y: 35,
+          fontSize: 14,
+          color: '#ffffff',
+          fontWeight: 800,
+        },
+        frontText: {
+          text: 'MOTION',
+          animationPreset: 'scaleIn',
+          x: 50,
+          y: 72,
+          fontSize: 8,
+          color: '#818cf8',
+          fontWeight: 800,
+        },
+      },
+      {
+        enabled: true,
+        duration: 2.0,
+        startAngle: 'right',
+        cameraDistance: 1.2,
+        cameraPreset: 'orbitLeftHalf',
+        cameraStrength: 1.0,
+        motion: resolveAssetUrl('/animations/Flair.fbx'),
+        backText: {
+          text: 'THREE.JS',
+          animationPreset: 'fade',
+          x: 50,
+          y: 30,
+          fontSize: 13,
+          color: '#f43f5e',
+          fontWeight: 800,
+        },
+        frontText: {
+          text: 'GROOVE',
+          animationPreset: 'slideRight',
+          x: 50,
+          y: 75,
+          fontSize: 9,
+          color: '#ffffff',
+          fontWeight: 700,
+        },
+      },
+      {
+        enabled: true,
+        duration: 1.5,
+        startAngle: 'lowAngle',
+        cameraDistance: 1.0,
+        cameraPreset: 'lowAngleUp',
+        cameraStrength: 1.0,
+        motion: resolveAssetUrl('/animations/Punching.fbx'),
+        backText: {
+          text: 'POWER',
+          animationPreset: 'slideUp',
+          x: 50,
+          y: 38,
+          fontSize: 12,
+          color: '#ffffff',
+          fontWeight: 800,
+        },
+        frontText: {
+          text: 'FEATURING',
+          animationPreset: 'static',
+          x: 50,
+          y: 68,
+          fontSize: 7,
+          color: '#38bdf8',
+          fontWeight: 700,
+        },
+      },
+      {
+        enabled: true,
+        duration: 1.5,
+        startAngle: 'front',
+        cameraDistance: 1.0,
+        cameraPreset: 'punchIn',
+        cameraStrength: 1.0,
+        motion: resolveAssetUrl('/animations/Joyful Jump.fbx'),
+        backText: {
+          text: 'CLIMAX',
+          animationPreset: 'punch',
+          x: 50,
+          y: 35,
+          fontSize: 16,
+          color: '#fbbf24',
+          fontWeight: 900,
+        },
+        frontText: {
+          text: 'VRM TOON',
+          animationPreset: 'punch',
+          x: 50,
+          y: 75,
+          fontSize: 9,
+          color: '#ffffff',
+          fontWeight: 800,
+        },
+      },
+    ],
+  },
+
+
 };
 
 export function cloneConfig(cfg: AvatarConfig): AvatarConfig {
@@ -263,8 +379,12 @@ export function deepAssign(target: any, source: any): any {
       typeof source[key] === 'object' &&
       !Array.isArray(source[key])
     ) {
-      if (!target[key]) target[key] = {};
+      if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
+        target[key] = {};
+      }
       deepAssign(target[key], source[key]);
+    } else if (Array.isArray(source[key])) {
+      target[key] = JSON.parse(JSON.stringify(source[key]));
     } else {
       target[key] = source[key];
     }

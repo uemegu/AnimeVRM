@@ -4,12 +4,59 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #ffffff;
 }
 
+#animation-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  display: none;
+}
+
+#animation-text-back {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
 #app {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100vw;
   height: 100vh;
+}
+
+#animation-text-front {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.typography-item {
+  position: absolute;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  font-family: 'Impact', 'Arial Black', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  will-change: transform, opacity;
+}
+
+.back-item {
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
+}
+
+.front-item {
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 0, 0, 0.2);
 }

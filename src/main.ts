@@ -15,6 +15,8 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
 import { ColorGradingShader } from './ColorGradingShader';
+import { TypographyOverlay } from './animation/TypographyOverlay';
+import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
 import {
   DEFAULT_CONFIG,
   AvatarConfig,
@@ -28,6 +30,7 @@ import { resolveAssetUrl } from './utils/path';
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
+
 
 // --------------------------------------------------
 // Audio Lip-Sync Controller
@@ -137,6 +140,53 @@ controls.dampingFactor = 0.05;
 controls.minDistance = currentConfig.camera.minDistance;
 controls.maxDistance = currentConfig.camera.maxDistance;
 controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+// --------------------------------------------------
+// Typography Overlay & Short Animation Player
+// --------------------------------------------------
+let originalMotionUrlBeforeAnim = resolveAssetUrl('/animations/Idle.fbx');
+
+const typographyOverlay = new TypographyOverlay();
+const animationPlayer = new ShortAnimationPlayer({
+  camera,
+  controls,
+  overlay: typographyOverlay,
+  getConfig: () => currentConfig,
+  onEnterTransparent: () => {
+    scene.background = null;
+    renderer.setClearColor(0x000000, 0);
+    originalMotionUrlBeforeAnim = currentMotionUrl;
+  },
+  onExitTransparent: () => {
+    updateBackgroundDisplay(currentConfig);
+  },
+  onPlayStateChange: (isPlaying) => {
+    updateAnimationPlayStateUI(isPlaying);
+  },
+  onPlayMotion: (motionUrl) => {
+    if (!avatarInstance) return;
+    if (motionUrl === 'stop') {
+      avatarInstance.stopAnimation();
+      return;
+    }
+    if (motionUrl && motionUrl !== 'none') {
+      const resolved = resolveAssetUrl(motionUrl);
+      const isLoop = resolved.includes('Idle') || resolved.includes('Walking');
+      avatarInstance.playAnimation(resolved, isLoop);
+    }
+  },
+  onRestoreMotion: () => {
+    if (!avatarInstance) return;
+    if (originalMotionUrlBeforeAnim === 'none') {
+      avatarInstance.stopAnimation();
+    } else if (originalMotionUrlBeforeAnim) {
+      const isLoop = originalMotionUrlBeforeAnim.includes('Idle') || originalMotionUrlBeforeAnim.includes('Walking');
+      avatarInstance.playAnimation(originalMotionUrlBeforeAnim, isLoop);
+    }
+  },
+});
+
+
 
 // --------------------------------------------------
 // Environment & Lights
@@ -422,8 +472,121 @@ function setupGUI(): void {
   jsonFolder.add(jsonActions, 'resetDefaults').name('🔄 デフォルトにリセット');
   jsonFolder.close();
 
+  // 1.5. Short Animation Folder (🎬 ショートアニメーション)
+  const animFolder = gui.addFolder('🎬 ショートアニメーション');
+  const animActions = {
+    play: () => animationPlayer.play(),
+    stop: () => animationPlayer.stop(),
+  };
+  animFolder.add(animActions, 'play').name('▶ アニメーション再生');
+  animFolder.add(animActions, 'stop').name('■ 停止');
+
+  const cameraAngleOptions = {
+    'Continue (前Cutを引き継ぐ)': 'continue',
+    'Front (正面)': 'front',
+    'Far Front (遠景・正面)': 'farFront',
+    'Right (右サイド 90°)': 'right',
+    'Left (左サイド -90°)': 'left',
+    'Back (背面 180°)': 'back',
+    'Low Angle (足元見上げ)': 'lowAngle',
+    'High Angle (見下ろし)': 'highAngle',
+    'Close Up (顔寄り)': 'closeUp',
+  };
+
+  const cameraPresetOptions = {
+    'Hold (固定)': 'hold',
+    'Push In (寄り)': 'pushIn',
+    'Pull Out (引き)': 'pullOut',
+    'Pan Left (左流し)': 'panLeft',
+    'Pan Right (右流し)': 'panRight',
+    'Orbit Left (左旋回)': 'orbitLeft',
+    'Orbit Right (右旋回)': 'orbitRight',
+    'Orbit Left Half (左半周 180°)': 'orbitLeftHalf',
+    'Orbit Right Half (右半周 180°)': 'orbitRightHalf',
+    'Low Angle Up (足元から見上げ)': 'lowAngleUp',
+    'Rise Up (上昇)': 'riseUp',
+    'Dive Down (下降)': 'diveDown',
+    'Punch In (パンチ)': 'punchIn',
+  };
+
+  const motionPresetOptions = {
+    'None (維持 / 変更なし)': 'none',
+    '待機 (Idle)': resolveAssetUrl('/animations/Idle.fbx'),
+    '歩行 (Walking)': resolveAssetUrl('/animations/Walking.fbx'),
+    'ダンス (Flair)': resolveAssetUrl('/animations/Flair.fbx'),
+    '挨拶 (Standing Greeting)': resolveAssetUrl('/animations/Standing Greeting.fbx'),
+    'お辞儀 (Quick Formal Bow)': resolveAssetUrl('/animations/Quick Formal Bow.fbx'),
+    'うなずく (Acknowledging)': resolveAssetUrl('/animations/Acknowledging.fbx'),
+    '手を振る (Dismissing Gesture)': resolveAssetUrl('/animations/Dismissing Gesture.fbx'),
+    'キッス (Kiss)': resolveAssetUrl('/animations/Kiss.fbx'),
+    'ジャンプ (Joyful Jump)': resolveAssetUrl('/animations/Joyful Jump.fbx'),
+    '拍手 (Clapping)': resolveAssetUrl('/animations/Clapping.fbx'),
+    '応援 (Cheering)': resolveAssetUrl('/animations/Cheering.fbx'),
+    'パンチ (Punching)': resolveAssetUrl('/animations/Punching.fbx'),
+    '驚き (Surprised)': resolveAssetUrl('/animations/Surprised.fbx'),
+    '怒り (Angry)': resolveAssetUrl('/animations/Angry.fbx'),
+    '落ち込む (Defeat)': resolveAssetUrl('/animations/Defeat.fbx'),
+    '負傷待機 (Injured Idle)': resolveAssetUrl('/animations/Injured Idle.fbx'),
+    '横たわる (Laying Idle)': resolveAssetUrl('/animations/Laying Idle.fbx'),
+    '撃沈 (Standing Death)': resolveAssetUrl('/animations/Standing Death Left 01.fbx'),
+    '停止 (Stop)': 'stop',
+  };
+
+  const textPresetOptions = {
+    'Static (静止)': 'static',
+    'Fade (フェード)': 'fade',
+    'Slide Left (左スライド)': 'slideLeft',
+    'Slide Right (右スライド)': 'slideRight',
+    'Slide Up (上スライド)': 'slideUp',
+    'Scale In (拡大)': 'scaleIn',
+    'Punch (パンチ)': 'punch',
+  };
+
+  currentConfig.shortAnimation.cuts.forEach((cut, index) => {
+    const cutFolder = animFolder.addFolder(`Cut ${index + 1}`);
+    cutFolder.add(cut, 'enabled').name('有効');
+    cutFolder.add(cut, 'duration', [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0]).name('再生時間 (秒)');
+    cutFolder.add(cut, 'startAngle', cameraAngleOptions).name('開始アングル (Jump)');
+    cutFolder.add(cut, 'cameraDistance', 0.5, 3.0, 0.1).name('カメラ距離倍率 (Distance)');
+    cutFolder.add(cut, 'cameraPreset', cameraPresetOptions).name('カメラ');
+    cutFolder.add(cut, 'cameraStrength', 0.1, 5.0, 0.1).name('カメラ強度');
+    cutFolder.add(cut, 'motion', motionPresetOptions).name('モーション (Motion)');
+
+
+    // Back Text
+    const backFolder = cutFolder.addFolder('Back Text (背景側)');
+    backFolder.add(cut.backText, 'text').name('テキスト');
+    backFolder.add(cut.backText, 'animationPreset', textPresetOptions).name('アニメーション');
+    backFolder.add(cut.backText, 'x', 0, 100, 1).name('X (%)');
+    backFolder.add(cut.backText, 'y', 0, 100, 1).name('Y (%)');
+    backFolder.add(cut.backText, 'fontSize', 5, 40, 1).name('サイズ (vw)');
+    backFolder.addColor(cut.backText, 'color').name('文字色');
+    backFolder.add(cut.backText, 'fontWeight', [100, 200, 300, 400, 500, 600, 700, 800, 900]).name('太さ');
+    backFolder.close();
+
+    // Front Text
+    const frontFolder = cutFolder.addFolder('Front Text (前面側)');
+    frontFolder.add(cut.frontText, 'text').name('テキスト');
+    frontFolder.add(cut.frontText, 'animationPreset', textPresetOptions).name('アニメーション');
+    frontFolder.add(cut.frontText, 'x', 0, 100, 1).name('X (%)');
+    frontFolder.add(cut.frontText, 'y', 0, 100, 1).name('Y (%)');
+    frontFolder.add(cut.frontText, 'fontSize', 5, 40, 1).name('サイズ (vw)');
+    frontFolder.addColor(cut.frontText, 'color').name('文字色');
+    frontFolder.add(cut.frontText, 'fontWeight', [100, 200, 300, 400, 500, 600, 700, 800, 900]).name('太さ');
+    frontFolder.close();
+
+    if (index === 0) {
+      cutFolder.open();
+    } else {
+      cutFolder.close();
+    }
+  });
+  animFolder.open();
+
+
   // 2. Quick Feature Toggles (1クリックで各機能のON/OFFを切り替え)
   const toggleFolder = gui.addFolder('⚡ 各機能 個別 ON/OFF トグル (Feature Toggles)');
+
   const toggleState = {
     colorGrading: currentConfig.postProcessing.colorGrading.enabled,
     bloom: currentConfig.postProcessing.bloom.enabled,
@@ -897,6 +1060,9 @@ function openImportModal(): void {
       if (textarea && textarea.value) {
         try {
           const parsed = JSON.parse(textarea.value);
+          if (!parsed.shortAnimation || !Array.isArray(parsed.shortAnimation.cuts)) {
+            parsed.shortAnimation = cloneConfig(DEFAULT_CONFIG).shortAnimation;
+          }
           deepAssign(currentConfig, parsed);
           applyConfigToSceneAndRenderer(currentConfig);
           gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
@@ -914,6 +1080,18 @@ function openImportModal(): void {
   if (textarea) textarea.value = exportConfigJSON(currentConfig);
   modal.style.display = 'flex';
 }
+
+// --------------------------------------------------
+// Animation UI Helper Functions
+// --------------------------------------------------
+function updateAnimationPlayStateUI(isPlaying: boolean): void {
+  const playBtn = document.getElementById('anim-play-btn');
+  if (playBtn) {
+    playBtn.textContent = isPlaying ? '⏹ 再生中 (停止/再開)' : '▶ アニメーション再生';
+    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+  }
+}
+
 
 // --------------------------------------------------
 // Audio UI Helper Functions
@@ -1001,9 +1179,19 @@ function createUIOverlay() {
           <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
         </div>
 
+        <!-- ショートアニメーション (Short Animation) セクション -->
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎬 ショートアニメーション (Motion Graphics)</label>
+          <div style="display: flex; gap: 4px;">
+            <button id="anim-play-btn" style="flex: 1; padding: 6px 10px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: background 0.15s ease;">▶ アニメーション再生</button>
+            <button id="anim-stop-btn" style="padding: 6px 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 12px;">■ 停止</button>
+          </div>
+        </div>
+
         <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
         <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
           <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
+
           <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
             <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
             <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
@@ -1065,21 +1253,30 @@ function createUIOverlay() {
           </div>
         </div>
         <div>
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion)</label>
+          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion: 全18種)</label>
           <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
             <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
+            <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
+            <button data-motion="${resolveAssetUrl('/animations/Flair.fbx')}" class="motion-btn">ダンス</button>
             <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
             <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
+            <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
+            <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
+            <button data-motion="${resolveAssetUrl('/animations/Kiss.fbx')}" class="motion-btn">キッス</button>
             <button data-motion="${resolveAssetUrl('/animations/Joyful Jump.fbx')}" class="motion-btn">ジャンプ</button>
             <button data-motion="${resolveAssetUrl('/animations/Clapping.fbx')}" class="motion-btn">拍手</button>
             <button data-motion="${resolveAssetUrl('/animations/Cheering.fbx')}" class="motion-btn">応援</button>
-            <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
+            <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
             <button data-motion="${resolveAssetUrl('/animations/Surprised.fbx')}" class="motion-btn">驚き</button>
             <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
             <button data-motion="${resolveAssetUrl('/animations/Defeat.fbx')}" class="motion-btn">落ち込む</button>
+            <button data-motion="${resolveAssetUrl('/animations/Injured Idle.fbx')}" class="motion-btn">負傷待機</button>
+            <button data-motion="${resolveAssetUrl('/animations/Laying Idle.fbx')}" class="motion-btn">横たわる</button>
+            <button data-motion="${resolveAssetUrl('/animations/Standing Death Left 01.fbx')}" class="motion-btn">撃沈</button>
             <button data-motion="none" class="motion-btn">停止</button>
           </div>
         </div>
+
       <div>
         <label style="font-weight: 600; display: block; margin-bottom: 4px;">表情 (Expression)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
@@ -1188,9 +1385,23 @@ function createUIOverlay() {
     showToast('🔄 デフォルト設定にリセットしました');
   });
 
+  // Short Animation Listeners
+  document.getElementById('anim-play-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    animationPlayer.play();
+    showToast('🎬 ショートアニメーションを再生します');
+  });
+
+  document.getElementById('anim-stop-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    animationPlayer.stop();
+    showToast('⏹ アニメーションを停止しました');
+  });
+
   // --------------------------------------------------
   // Audio Lip-Sync Event Listeners
   // --------------------------------------------------
+
   const audioTitleEl = document.getElementById('audio-title');
   const playPauseBtn = document.getElementById('audio-play-pause-btn');
   const stopBtn = document.getElementById('audio-stop-btn');
@@ -1387,9 +1598,10 @@ motionButtons.forEach((btn) => {
     if (motionUrl === 'none') {
       avatarInstance.stopAnimation();
     } else if (motionUrl) {
-      const isLoop = motionUrl.includes('Idle');
+      const isLoop = motionUrl.includes('Idle') || motionUrl.includes('Walking');
       await avatarInstance.playAnimation(motionUrl, isLoop);
     }
+
   });
 });
 
@@ -1414,7 +1626,11 @@ function tick(): void {
   const delta = clock.getDelta();
   const elapsed = clock.elapsedTime;
 
-  controls.update();
+  if (animationPlayer.isPlaying) {
+    animationPlayer.update(delta);
+  } else {
+    controls.update();
+  }
 
   if (avatarInstance) {
     // Apply real-time lip sync if enabled
@@ -1443,6 +1659,7 @@ function tick(): void {
 
   requestAnimationFrame(tick);
 }
+
 
 tick();
 
