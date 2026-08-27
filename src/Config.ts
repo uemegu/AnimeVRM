@@ -1,7 +1,10 @@
 import { resolveAssetUrl } from './utils/path';
 
 export interface MaterialStyleParams {
+  useCustomShadeColor: boolean;
   shadeColor: string;
+  autoShadowColor: boolean;
+  shadowHueShift: number;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
@@ -14,6 +17,31 @@ export interface MaterialStyleParams {
   outlineWidthFactor: number;
 }
 
+export interface ScreenSpaceOutlineConfig {
+  enabled: boolean;
+  color: string;
+  depthThreshold: number;
+  normalThreshold: number;
+  edgeStrength: number;
+  thickness: number;
+}
+
+export interface GranTurismoToneMappingConfig {
+  maxLuminance: number;
+  contrast: number;
+  linearSection: number;
+  linearLength: number;
+  blackTightness: number;
+  pedestal: number;
+}
+
+export interface DepthRimConfig {
+  enabled: boolean;
+  power: number;
+  threshold: number;
+  intensity: number;
+}
+
 export interface AvatarConfig {
   materials: {
     body: MaterialStyleParams;
@@ -22,12 +50,16 @@ export interface AvatarConfig {
   };
   outline: {
     enabled: boolean;
+    useSmoothNormal: boolean;
+    screenSpaceWidth: boolean;
+    autoLineWeight: boolean;
     autoColorFromMaterial: boolean;
     darknessFactor: number;
     usePerMaterialColor: boolean;
     color: string;
     widthFactor: number;
     lightingMixFactor: number;
+    screenSpaceOutline: ScreenSpaceOutlineConfig;
   };
   environment: {
     showBackgroundImage: boolean;
@@ -57,10 +89,12 @@ export interface AvatarConfig {
       posY: number;
       posZ: number;
     };
+    depthRim: DepthRimConfig;
   };
   postProcessing: {
-    toneMappingMode: 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
+    toneMappingMode: 'GranTurismo' | 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
     toneMappingExposure: number;
+    granTurismo: GranTurismoToneMappingConfig;
     antialiasing: {
       msaaSamples: number;
       smaa: boolean;
@@ -94,8 +128,11 @@ export interface AvatarConfig {
 export const DEFAULT_CONFIG: AvatarConfig = {
   materials: {
     body: {
+      useCustomShadeColor: false,
       shadeColor: '#bf8d9b',
-      shadingToonyFactor: 1,
+      autoShadowColor: true,
+      shadowHueShift: 0.08,
+      shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       rimEnabled: false,
@@ -107,8 +144,11 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       outlineWidthFactor: 0.001,
     },
     hair: {
+      useCustomShadeColor: false,
       shadeColor: '#22222a',
-      shadingToonyFactor: 1,
+      autoShadowColor: true,
+      shadowHueShift: 0.1,
+      shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       rimEnabled: false,
@@ -120,27 +160,41 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       outlineWidthFactor: 0.0008,
     },
     cloth: {
+      useCustomShadeColor: false,
       shadeColor: '#aeb7d0',
-      shadingToonyFactor: 1,
+      autoShadowColor: true,
+      shadowHueShift: 0.06,
+      shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
-      rimEnabled: true,
+      rimEnabled: false,
       rimColor: '#202942',
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
-      rimLightingMixFactor: 1,
+      rimLightingMixFactor: 1.0,
       outlineColor: '#1e2538',
       outlineWidthFactor: 0.001,
     },
   },
   outline: {
     enabled: true,
+    useSmoothNormal: true,
+    screenSpaceWidth: true,
+    autoLineWeight: true,
     autoColorFromMaterial: true,
     darknessFactor: 0.1,
     usePerMaterialColor: false,
     color: '#1f2430',
     widthFactor: 0.001,
-    lightingMixFactor: 0,
+    lightingMixFactor: 0.0,
+    screenSpaceOutline: {
+      enabled: false,
+      color: '#1f2430',
+      depthThreshold: 0.15,
+      normalThreshold: 0.38,
+      edgeStrength: 0.6,
+      thickness: 1.0,
+    },
   },
   environment: {
     showBackgroundImage: true,
@@ -170,10 +224,24 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       posY: 2.5,
       posZ: -2,
     },
+    depthRim: {
+      enabled: true,
+      power: 4.0,
+      threshold: 0.15,
+      intensity: 0.8,
+    },
   },
   postProcessing: {
     toneMappingMode: 'None',
-    toneMappingExposure: 1,
+    toneMappingExposure: 1.0,
+    granTurismo: {
+      maxLuminance: 1.0,
+      contrast: 1.0,
+      linearSection: 0.22,
+      linearLength: 0.4,
+      blackTightness: 1.33,
+      pedestal: 0.0,
+    },
     antialiasing: {
       msaaSamples: 4,
       smaa: true,

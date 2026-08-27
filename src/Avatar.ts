@@ -7,6 +7,7 @@ import {
   ToonShaderController,
   ToonShaderOptions,
 } from './ToonShader';
+import { applySmoothNormalsToHierarchy } from './shader/SmoothNormalHelper';
 import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
@@ -234,6 +235,9 @@ export class Avatar {
         // Optimize geometry & joints
         VRMUtils.removeUnnecessaryVertices(gltf.scene);
         VRMUtils.removeUnnecessaryJoints(gltf.scene);
+
+        // Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
+        applySmoothNormalsToHierarchy(vrm.scene);
 
         // Adjust model orientation (faces camera by default in VRM 1.0)
         vrm.scene.rotation.y = 0;

@@ -15,6 +15,8 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
 import { ColorGradingShader } from './ColorGradingShader';
+import { GTToneMappingShader } from './shader/GTToneMappingShader';
+import { ScreenSpaceOutlinePass } from './postprocessing/ScreenSpaceOutlinePass';
 import {
   DEFAULT_CONFIG,
   AvatarConfig,
@@ -67,6 +69,9 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 function getToneMappingMode(mode: string): THREE.ToneMapping {
   switch (mode) {
+    case 'GranTurismo':
+      // Gran Turismo Tone Mapping is handled by custom shader pass before OutputPass
+      return THREE.NoToneMapping;
     case 'ACESFilmic':
       return THREE.ACESFilmicToneMapping;
     case 'Reinhard':
@@ -78,7 +83,7 @@ function getToneMappingMode(mode: string): THREE.ToneMapping {
     case 'None':
       return THREE.NoToneMapping;
     default:
-      return THREE.ACESFilmicToneMapping;
+      return THREE.NoToneMapping;
   }
 }
 
@@ -191,7 +196,7 @@ floor.visible = currentConfig.environment.showFloor;
 scene.add(floor);
 
 // --------------------------------------------------
-// Post Processing (with Multi-Sampled Render Target for Hardware MSAA)
+// Post Processing Pipeline
 // --------------------------------------------------
 const pixelRatio = Math.min(window.devicePixelRatio, 2);
 const composerRenderTarget = new THREE.WebGLRenderTarget(
@@ -204,8 +209,21 @@ const composerRenderTarget = new THREE.WebGLRenderTarget(
   }
 );
 const composer = new EffectComposer(renderer, composerRenderTarget);
+
+// 1. Render base scene
 composer.addPass(new RenderPass(scene, camera));
 
+// 2. Screen-Space Depth & Normal Edge Outline Pass (for interior intersection edges)
+const screenSpaceOutlinePass = new ScreenSpaceOutlinePass(
+  scene,
+  camera,
+  window.innerWidth * pixelRatio,
+  window.innerHeight * pixelRatio,
+  currentConfig.outline.screenSpaceOutline
+);
+composer.addPass(screenSpaceOutlinePass);
+
+// 3. Bloom Pass (HDR high brightness glow)
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   currentConfig.postProcessing.bloom.strength,
@@ -214,10 +232,21 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
-// 1. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
+// 4. Gran Turismo (GT) Tone Mapping Shader Pass
+const gtToneMappingPass = new ShaderPass(GTToneMappingShader);
+gtToneMappingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.toneMappingMode === 'GranTurismo' ? 1.0 : 0.0;
+gtToneMappingPass.uniforms['uMaxLuminance'].value = currentConfig.postProcessing.granTurismo.maxLuminance;
+gtToneMappingPass.uniforms['uContrast'].value = currentConfig.postProcessing.granTurismo.contrast;
+gtToneMappingPass.uniforms['uLinearSection'].value = currentConfig.postProcessing.granTurismo.linearSection;
+gtToneMappingPass.uniforms['uLinearLength'].value = currentConfig.postProcessing.granTurismo.linearLength;
+gtToneMappingPass.uniforms['uBlackTightness'].value = currentConfig.postProcessing.granTurismo.blackTightness;
+gtToneMappingPass.uniforms['uPedestal'].value = currentConfig.postProcessing.granTurismo.pedestal;
+composer.addPass(gtToneMappingPass);
+
+// 5. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping if standard mode
 composer.addPass(new OutputPass());
 
-// 2. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
+// 6. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
 const colorGradingPass = new ShaderPass(ColorGradingShader);
 colorGradingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
 (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.shadowTint);
@@ -236,7 +265,7 @@ brightnessContrastPass.uniforms['brightness'].value = currentConfig.postProcessi
 brightnessContrastPass.uniforms['contrast'].value = currentConfig.postProcessing.contrast;
 composer.addPass(brightnessContrastPass);
 
-// SMAA (Subpixel Morphological Antialiasing) on sRGB edges
+// 7. SMAA (Subpixel Morphological Antialiasing) on sRGB edges
 const smaaPass = new SMAAPass();
 smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
 composer.addPass(smaaPass);
@@ -336,9 +365,25 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
     composer.renderTarget2.samples = cfg.postProcessing.antialiasing.msaaSamples;
   }
 
-  // Post-processing
+  // Screen Space Outline
+  if (cfg.outline.screenSpaceOutline) {
+    screenSpaceOutlinePass.updateParams(cfg.outline.screenSpaceOutline);
+  }
+
+  // Tone Mapping (Standard vs Gran Turismo)
   renderer.toneMapping = getToneMappingMode(cfg.postProcessing.toneMappingMode);
   renderer.toneMappingExposure = cfg.postProcessing.toneMappingExposure;
+
+  const isGT = cfg.postProcessing.toneMappingMode === 'GranTurismo';
+  gtToneMappingPass.uniforms['uEnabled'].value = isGT ? 1.0 : 0.0;
+  if (cfg.postProcessing.granTurismo) {
+    gtToneMappingPass.uniforms['uMaxLuminance'].value = cfg.postProcessing.granTurismo.maxLuminance;
+    gtToneMappingPass.uniforms['uContrast'].value = cfg.postProcessing.granTurismo.contrast;
+    gtToneMappingPass.uniforms['uLinearSection'].value = cfg.postProcessing.granTurismo.linearSection;
+    gtToneMappingPass.uniforms['uLinearLength'].value = cfg.postProcessing.granTurismo.linearLength;
+    gtToneMappingPass.uniforms['uBlackTightness'].value = cfg.postProcessing.granTurismo.blackTightness;
+    gtToneMappingPass.uniforms['uPedestal'].value = cfg.postProcessing.granTurismo.pedestal;
+  }
 
   bloomPass.strength = cfg.postProcessing.bloom.enabled ? cfg.postProcessing.bloom.strength : 0;
   bloomPass.radius = cfg.postProcessing.bloom.radius;
@@ -425,9 +470,166 @@ function setupGUI(): void {
   jsonFolder.add(jsonActions, 'downloadJSON').name('💾 JSONファイル保存');
   jsonFolder.add(jsonActions, 'importJSON').name('📥 JSONを読み込み');
   jsonFolder.add(jsonActions, 'resetDefaults').name('🔄 デフォルトにリセット');
-  jsonFolder.open();
+  jsonFolder.close();
 
-  // 2. VRM Model Folder
+  // 2. Quick Feature Toggles (1クリックで各機能のON/OFFを切り替え)
+  const toggleFolder = gui.addFolder('⚡ 各機能 個別 ON/OFF トグル (Feature Toggles)');
+  const toggleState = {
+    gtToneMapping: currentConfig.postProcessing.toneMappingMode === 'GranTurismo',
+    colorGrading: currentConfig.postProcessing.colorGrading.enabled,
+    bloom: currentConfig.postProcessing.bloom.enabled,
+    customShadowBody: currentConfig.materials.body.useCustomShadeColor,
+    customShadowHair: currentConfig.materials.hair.useCustomShadeColor,
+    customShadowCloth: currentConfig.materials.cloth.useCustomShadeColor,
+    autoShadowBody: currentConfig.materials.body.autoShadowColor,
+    autoShadowHair: currentConfig.materials.hair.autoShadowColor,
+    autoShadowCloth: currentConfig.materials.cloth.autoShadowColor,
+    smoothNormal: currentConfig.outline.useSmoothNormal,
+    screenSpaceWidth: currentConfig.outline.screenSpaceWidth,
+    screenSpaceOutline: currentConfig.outline.screenSpaceOutline.enabled,
+    rimBody: currentConfig.materials.body.rimEnabled,
+    rimCloth: currentConfig.materials.cloth.rimEnabled,
+    rimLight: currentConfig.lighting.rim.enabled,
+  };
+
+  toggleFolder
+    .add(toggleState, 'gtToneMapping')
+    .name('🏎️ GTトーンマッピング')
+    .onChange((val: boolean) => {
+      currentConfig.postProcessing.toneMappingMode = val ? 'GranTurismo' : 'None';
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'colorGrading')
+    .name('🎬 アニメカラーグレーディング')
+    .onChange((val: boolean) => {
+      currentConfig.postProcessing.colorGrading.enabled = val;
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'bloom')
+    .name('🌟 ブルーム (Bloom)')
+    .onChange((val: boolean) => {
+      currentConfig.postProcessing.bloom.enabled = val;
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'customShadowBody')
+    .name('🎨 手動影色有効 (肌/体)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.body.useCustomShadeColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'customShadowHair')
+    .name('🎨 手動影色有効 (髪)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.hair.useCustomShadeColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('hair', currentConfig.materials.hair);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'customShadowCloth')
+    .name('🎨 手動影色有効 (衣装)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.cloth.useCustomShadeColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'autoShadowBody')
+    .name('🤖 自動影色HSV (肌/体)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.body.autoShadowColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'autoShadowHair')
+    .name('🤖 自動影色HSV (髪)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.hair.autoShadowColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('hair', currentConfig.materials.hair);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'autoShadowCloth')
+    .name('🤖 自動影色HSV (衣装)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.cloth.autoShadowColor = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'smoothNormal')
+    .name('✨ スムーズ法線アウトライン')
+    .onChange((val: boolean) => {
+      currentConfig.outline.useSmoothNormal = val;
+      avatarInstance?.shaderController?.updateOutline(currentConfig.outline);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'screenSpaceWidth')
+    .name('📐 画面固定線幅 (NDC)')
+    .onChange((val: boolean) => {
+      currentConfig.outline.screenSpaceWidth = val;
+      avatarInstance?.shaderController?.updateOutline(currentConfig.outline);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'screenSpaceOutline')
+    .name('🖼️ 内側交差線 (Edge Pass)')
+    .onChange((val: boolean) => {
+      currentConfig.outline.screenSpaceOutline.enabled = val;
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'rimBody')
+    .name('💡 リムライト (肌/体)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.body.rimEnabled = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'rimCloth')
+    .name('💡 リムライト (衣装)')
+    .onChange((val: boolean) => {
+      currentConfig.materials.cloth.rimEnabled = val;
+      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'rimLight')
+    .name('💡 補助環境リム光')
+    .onChange((val: boolean) => {
+      currentConfig.lighting.rim.enabled = val;
+      applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder.open();
+
+  // 3. VRM Model Folder
   const modelFolder = gui.addFolder('👤 VRMモデル切替 (Model Select)');
   const modelState = {
     model: currentModelUrl,
@@ -463,10 +665,14 @@ function setupGUI(): void {
     const params = currentConfig.materials[kind];
     const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
 
-    folder.addColor(params, 'shadeColor').name('影の色 (Shade Color)').onChange(update);
+    folder.add(params, 'useCustomShadeColor').name('🎨 手動影色有効 (Custom Shade)').onChange(update);
+    folder.addColor(params, 'shadeColor').name('手動影色 (Shade Color)').onChange(update);
+    folder.add(params, 'autoShadowColor').name('🤖 自動影色 (Auto HSV)').onChange(update);
+    folder.add(params, 'shadowHueShift', 0.0, 0.25, 0.01).name('影の寒色シフト (Hue Shift)').onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name('明暗境界シフト (Shift)').onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name('環境光均一化 (GI)').onChange(update);
+
     folder.add(params, 'rimEnabled').name('リムライト有効 (Rim ON)').onChange(update);
     folder.addColor(params, 'rimColor').name('リムライト色 (Rim Color)').onChange(update);
     folder.add(params, 'parametricRimFresnelPowerFactor', 0, 10, 0.1).name('リム急峻度 (Fresnel Power)').onChange(update);
@@ -486,11 +692,23 @@ function setupGUI(): void {
   const outlineFolder = gui.addFolder('輪郭線・アウトライン (Outline)');
   outlineFolder
     .add(currentConfig.outline, 'enabled')
-    .name('輪郭線表示 (Enabled)')
+    .name('外周線表示 (Inverted Hull)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'useSmoothNormal')
+    .name('✨ スムーズ法線 (Smooth Normal)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'screenSpaceWidth')
+    .name('📐 画面固定線幅 (Screen-Space)')
+    .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+  outlineFolder
+    .add(currentConfig.outline, 'autoLineWeight')
+    .name('✒️ 線の抑揚自動調整 (Auto Weight)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'autoColorFromMaterial')
-    .name('🎨 マテリアル色から自動設定 (Auto)')
+    .name('🎨 マテリアル色から自動設定')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder
     .add(currentConfig.outline, 'darknessFactor', 0.1, 0.9, 0.05)
@@ -512,6 +730,17 @@ function setupGUI(): void {
     .add(currentConfig.outline, 'lightingMixFactor', 0, 1, 0.01)
     .name('光影響比率 (Lighting Mix)')
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
+
+  // Screen Space Outline Sub-folder (Interior intersection lines)
+  const ssoFolder = outlineFolder.addFolder('🖼️ 内側交差線 (Screen-space Outline)');
+  const updateSSO = () => screenSpaceOutlinePass.updateParams(currentConfig.outline.screenSpaceOutline);
+  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'enabled').name('内側交差線有効').onChange(updateSSO);
+  ssoFolder.addColor(currentConfig.outline.screenSpaceOutline, 'color').name('線の色').onChange(updateSSO);
+  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'edgeStrength', 0, 2.0, 0.05).name('線の濃さ (Strength)').onChange(updateSSO);
+  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'depthThreshold', 0.0005, 0.02, 0.0005).name('深度感度 (Depth Sens)').onChange(updateSSO);
+  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'normalThreshold', 0.1, 1.0, 0.02).name('法線感度 (Normal Sens)').onChange(updateSSO);
+  ssoFolder.add(currentConfig.outline.screenSpaceOutline, 'thickness', 0.5, 3.0, 0.25).name('線幅 (Thickness)').onChange(updateSSO);
+  ssoFolder.open();
   outlineFolder.close();
 
   // 5. Environment Folder
@@ -623,16 +852,34 @@ function setupGUI(): void {
   // 7. Post Processing Folder
   const postFolder = gui.addFolder('ポストプロセス (Post Processing)');
   postFolder
-    .add(currentConfig.postProcessing, 'toneMappingMode', ['ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
+    .add(currentConfig.postProcessing, 'toneMappingMode', ['GranTurismo', 'ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
     .name('トーンマッピング方式')
     .onChange((mode: string) => {
-      renderer.toneMapping = getToneMappingMode(mode);
+      applyConfigToSceneAndRenderer(currentConfig);
     });
 
   postFolder
     .add(currentConfig.postProcessing, 'toneMappingExposure', 0.2, 2.5, 0.05)
     .name('露出 (Exposure)')
     .onChange((val: number) => (renderer.toneMappingExposure = val));
+
+  // GT Tone Mapping Sub-folder
+  const gtFolder = postFolder.addFolder('🏎️ Gran Turismo (GT) トーン設定');
+  const updateGT = () => {
+    if (currentConfig.postProcessing.granTurismo) {
+      gtToneMappingPass.uniforms['uMaxLuminance'].value = currentConfig.postProcessing.granTurismo.maxLuminance;
+      gtToneMappingPass.uniforms['uContrast'].value = currentConfig.postProcessing.granTurismo.contrast;
+      gtToneMappingPass.uniforms['uLinearSection'].value = currentConfig.postProcessing.granTurismo.linearSection;
+      gtToneMappingPass.uniforms['uLinearLength'].value = currentConfig.postProcessing.granTurismo.linearLength;
+      gtToneMappingPass.uniforms['uBlackTightness'].value = currentConfig.postProcessing.granTurismo.blackTightness;
+      gtToneMappingPass.uniforms['uPedestal'].value = currentConfig.postProcessing.granTurismo.pedestal;
+    }
+  };
+  gtFolder.add(currentConfig.postProcessing.granTurismo, 'contrast', 0.5, 2.0, 0.05).name('コントラスト (a)').onChange(updateGT);
+  gtFolder.add(currentConfig.postProcessing.granTurismo, 'linearSection', 0.05, 0.6, 0.02).name('リニア開始 (m)').onChange(updateGT);
+  gtFolder.add(currentConfig.postProcessing.granTurismo, 'linearLength', 0.1, 0.8, 0.02).name('リニア長 (l)').onChange(updateGT);
+  gtFolder.add(currentConfig.postProcessing.granTurismo, 'blackTightness', 0.5, 3.0, 0.1).name('黒の締まり (c)').onChange(updateGT);
+  gtFolder.open();
 
   // Antialiasing Folder
   const aaFolder = postFolder.addFolder('✨ アンチエイリアス (Anti-Aliasing)');
@@ -1305,6 +1552,7 @@ function onResize(): void {
 
   renderer.setSize(width, height);
   composer.setSize(width, height);
+  screenSpaceOutlinePass.setSize(width * pixelRatio, height * pixelRatio);
 }
 window.addEventListener('resize', onResize);
 
