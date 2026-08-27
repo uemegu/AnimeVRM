@@ -535,8 +535,9 @@ function setupGUI(): void {
     const params = currentConfig.materials[kind];
     const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
 
+    folder.addColor(params, 'color').name('基本色・血色感 (Base Color / Tint)').onChange(update);
     folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name('影の色相シフト (Hue Shift)').onChange(update);
-    folder.add(params, 'shadowLightnessFactor', 0.1, 1.0, 0.01).name('影の明度比率 (Lightness)').onChange(update);
+    folder.add(params, 'shadowLightnessFactor', 0.02, 1.0, 0.01).name('影の明度比率 (Lightness)').onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name('明暗境界シフト (Shift)').onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name('環境光均一化 (GI)').onChange(update);

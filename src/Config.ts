@@ -1,6 +1,7 @@
 import { resolveAssetUrl } from './utils/path';
 
 export interface MaterialStyleParams {
+  color: string;
   shadowHueShift: number;
   shadowLightnessFactor: number;
   shadingToonyFactor: number;
@@ -117,8 +118,9 @@ export interface AvatarConfig {
 export const DEFAULT_CONFIG: AvatarConfig = {
   materials: {
     body: {
-      shadowHueShift: 0.03,
-      shadowLightnessFactor: 0.2,
+      color: '#fffafa',
+      shadowHueShift: 0.02,
+      shadowLightnessFactor: 0.16,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -130,6 +132,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       outlineWidthFactor: 0.001,
     },
     hair: {
+      color: '#ffffff',
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadingToonyFactor: 1.0,
@@ -143,6 +146,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       outlineWidthFactor: 0.0008,
     },
     cloth: {
+      color: '#ffffff',
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadingToonyFactor: 1.0,
