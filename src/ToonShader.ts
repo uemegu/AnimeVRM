@@ -282,6 +282,8 @@ export function applyToonShader(
 
   // Apply material params directly to MToon parameters
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
+    const bodyEntry = trackedMaterials.find((entry) => entry.kind === 'body');
+
     trackedMaterials
       .filter((entry) => entry.kind === kind || (kind === 'body' && entry.kind === 'face'))
       .forEach(({ material, kind: matKind }) => {
@@ -291,9 +293,10 @@ export function applyToonShader(
           if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.set(params.color);
         }
 
-        // Shade Color (Always auto-computed with hue shift and lightness factor)
+        // Shade Color (Face uses body material as reference so skin shadow matches body perfectly)
+        const referenceMaterial = (matKind === 'face' && bodyEntry) ? bodyEntry.material : material;
         const autoShadeColor = computeAutoShadowColor(
-          material,
+          referenceMaterial,
           matKind,
           params.shadowHueShift ?? 0.03,
           params.shadowLightnessFactor ?? 0.2
@@ -384,7 +387,9 @@ export function applyToonShader(
 
       // Outline Color: Automatically derived from material color / texture
       const darkness = outlineCfg.darknessFactor ?? 0.1;
-      const autoColor = getDarkenedOutlineColor(material, darkness);
+      const bodyEntry = allMToonMaterials.find((e) => e.kind === 'body' && !e.material.isOutline);
+      const referenceMaterial = (kind === 'face' && bodyEntry) ? bodyEntry.material : material;
+      const autoColor = getDarkenedOutlineColor(referenceMaterial, darkness);
       if (material.outlineColorFactor) material.outlineColorFactor.copy(autoColor);
       if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.copy(autoColor);
 
