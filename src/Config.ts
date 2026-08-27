@@ -288,7 +288,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
         cameraDistance: 1.2,
         cameraPreset: 'orbitLeftHalf',
         cameraStrength: 1.0,
-        motion: resolveAssetUrl('/animations/Flair.fbx'),
+        motion: resolveAssetUrl('/animations/Idle.fbx'),
         backText: {
           text: 'THREE.JS',
           animationPreset: 'fade',
@@ -315,7 +315,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
         cameraDistance: 1.0,
         cameraPreset: 'lowAngleUp',
         cameraStrength: 1.0,
-        motion: resolveAssetUrl('/animations/Punching.fbx'),
+        motion: resolveAssetUrl('/animations/Idle.fbx'),
         backText: {
           text: 'POWER',
           animationPreset: 'slideUp',
@@ -337,12 +337,12 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       },
       {
         enabled: true,
-        duration: 1.5,
+        duration: 3.0,
         startAngle: 'front',
         cameraDistance: 1.0,
         cameraPreset: 'punchIn',
         cameraStrength: 1.0,
-        motion: resolveAssetUrl('/animations/Joyful Jump.fbx'),
+        motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
         backText: {
           text: 'CLIMAX',
           animationPreset: 'punch',
@@ -364,6 +364,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       },
     ],
   },
+
 
 
 };

@@ -1084,13 +1084,30 @@ function openImportModal(): void {
 // --------------------------------------------------
 // Animation UI Helper Functions
 // --------------------------------------------------
+let setUICollapsed: (collapsed: boolean) => void = () => {};
+
 function updateAnimationPlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('anim-play-btn');
   if (playBtn) {
     playBtn.textContent = isPlaying ? '⏹ 再生中 (停止/再開)' : '▶ アニメーション再生';
     playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
   }
+
+  if (isPlaying) {
+    // 再生開始時: VRMビュワーと設定パネルを両方とも閉じる
+    setUICollapsed(true);
+    if (gui) {
+      gui.close();
+    }
+  } else {
+    // 停止/終了時: パネルを開いて元の状態に戻す
+    setUICollapsed(false);
+    if (gui) {
+      gui.open();
+    }
+  }
 }
+
 
 
 // --------------------------------------------------
@@ -1344,8 +1361,8 @@ function createUIOverlay() {
   const uiToggleText = container.querySelector('#ui-toggle-text');
 
   let isUICollapsed = false;
-  const toggleUI = () => {
-    isUICollapsed = !isUICollapsed;
+  setUICollapsed = (collapsed: boolean) => {
+    isUICollapsed = collapsed;
     if (uiBody) {
       uiBody.style.display = isUICollapsed ? 'none' : 'block';
     }
@@ -1358,9 +1375,14 @@ function createUIOverlay() {
     container.style.padding = isUICollapsed ? '10px 16px' : '14px 18px';
   };
 
+  const toggleUI = () => {
+    setUICollapsed(!isUICollapsed);
+  };
+
   uiHeader?.addEventListener('click', (e) => {
     toggleUI();
   });
+
 
   // Quick action listeners
   document.getElementById('quick-copy-json')?.addEventListener('click', async () => {
