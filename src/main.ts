@@ -19,6 +19,7 @@ import { GodRaysShader } from './postprocessing/GodRaysShader';
 import { SunEffect } from './postprocessing/SunEffect';
 import { TypographyOverlay } from './animation/TypographyOverlay';
 import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
+import { ScenarioPlayer } from './animation/ScenarioPlayer';
 import { WindController, WIND_PRESETS } from './wind/WindController';
 import { WindParticles } from './wind/WindParticles';
 import {
@@ -382,6 +383,20 @@ const animationPlayer = new ShortAnimationPlayer({
       const isLoop = originalMotionUrlBeforeAnim.includes('Idle') || originalMotionUrlBeforeAnim.includes('Walking');
       avatarInstance.playAnimation(originalMotionUrlBeforeAnim, isLoop);
     }
+  },
+});
+
+const scenarioPlayer = new ScenarioPlayer({
+  getAvatar: () => avatarInstance,
+  getAudioLipSync: () => audioLipSync,
+  onStepChange: (index, step) => {
+    updateScenarioStepUI(index, step);
+  },
+  onPlayStateChange: (isPlaying) => {
+    updateScenarioPlayStateUI(isPlaying);
+  },
+  onFinished: () => {
+    // Finished naturally
   },
 });
 
@@ -1480,6 +1495,42 @@ function updateAnimationPlayStateUI(isPlaying: boolean): void {
   }
 }
 
+function updateScenarioPlayStateUI(isPlaying: boolean): void {
+  const playBtn = document.getElementById('scenario-play-btn');
+  const statusBox = document.getElementById('scenario-status-box');
+  const panel = document.getElementById('panel-container');
+  const gearBtn = document.getElementById('settings-open-btn');
+
+  if (playBtn) {
+    playBtn.textContent = isPlaying ? '⏹ シーケンス停止' : '▶ 会話シーケンス再生';
+    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+  }
+  if (statusBox) {
+    statusBox.style.display = isPlaying ? 'block' : 'none';
+  }
+
+  if (isPlaying) {
+    // アドベンチャー再生中: パネル・ギアボタンを両方非表示にして画面に没入
+    if (panel) panel.style.display = 'none';
+    if (gearBtn) gearBtn.style.display = 'none';
+  } else {
+    // 停止/終了時: パネルを開いて元の状態に戻す
+    setPanelOpen(true);
+  }
+}
+
+function updateScenarioStepUI(index: number, step: { text: string; motionUrl?: string; expression?: string }): void {
+  const stepLabel = document.getElementById('scenario-current-step');
+  const stepText = document.getElementById('scenario-current-text');
+  if (stepLabel) {
+    const stepNames = ['Step 1: 手を振る', 'Step 2: 笑顔', 'Step 3: うなずく (通常表情)'];
+    stepLabel.textContent = stepNames[index] || `Step ${index + 1}`;
+  }
+  if (stepText) {
+    stepText.textContent = `「${step.text}」`;
+  }
+}
+
 // --------------------------------------------------
 // Audio UI Helper Functions
 // --------------------------------------------------
@@ -1632,12 +1683,31 @@ function setupUnifiedUI(): void {
         </div>
       </div>
 
+      <!-- Conversation Scenario Sequence Controls -->
+      <div class="section-box" style="border-left: 3px solid #8b5cf6;">
+        <label class="section-label" style="color: #6d28d9; font-weight: 700;">🎭 会話連動アニメーション (セリフ1〜3連続)</label>
+        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+          <button id="scenario-play-btn" class="action-btn primary" style="flex: 1; background: #6d28d9;">▶ 会話シーケンス再生</button>
+          <button id="scenario-stop-btn" class="action-btn">■ 停止</button>
+        </div>
+        <div id="scenario-status-box" style="display: none; padding: 6px 8px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 11px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #6d28d9;">
+            <span id="scenario-current-step">Step 1: 手を振る</span>
+            <span style="font-size: 10px; color: #7c3aed;">再生中...</span>
+          </div>
+          <div id="scenario-current-text" style="color: #4b5563; margin-top: 2px; font-size: 10.5px; font-style: italic;"></div>
+        </div>
+      </div>
+
       <!-- Audio Lip-Sync & Player -->
       <div class="section-box">
         <label class="section-label">🎵 音声リップシンク ＆ プレイヤー</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
           <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
-          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 110px;">📁 音声を開く</button>
+          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.wav')}">🎙️ 1. ストーカー？</button>
+          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.wav')}">🎙️ 2. 冗談だ</button>
+          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.wav')}">🎙️ 3. 何してるの？</button>
+          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 90px;">📁 音声を開く</button>
         </div>
         <div class="player-box">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1746,6 +1816,21 @@ function setupUnifiedUI(): void {
     e.stopPropagation();
     animationPlayer.stop();
     showToast('⏹ アニメーションを停止しました');
+  });
+
+  // Scenario Sequence Play/Stop
+  document.getElementById('scenario-play-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (scenarioPlayer.isPlaying) {
+      scenarioPlayer.stop();
+    } else {
+      scenarioPlayer.play();
+    }
+  });
+
+  document.getElementById('scenario-stop-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scenarioPlayer.stop();
   });
 
   // Background Buttons
