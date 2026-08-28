@@ -359,8 +359,9 @@ export class Avatar {
 
   public updateLipSync(
     phoneme: Phoneme | 'nn' | undefined,
-    gain: number = 0.8,
-    smoothing: number = 0.2
+    gain: number = 0.65,
+    smoothing: number = 0.17,
+    _delta: number = 0.016
   ): void {
     if (!this.vrm?.expressionManager) return;
     const manager = this.vrm.expressionManager;
@@ -382,7 +383,13 @@ export class Avatar {
     PHONEMES.forEach((p) => {
       const cw = this.phonemeWeights[p];
       const tw = target[p];
-      const nw = cw + smoothing * (tw - cw);
+
+      // Fast attack for immediate opening, smooth decay for natural mouth closing
+      const effectiveSmoothing = tw > cw 
+        ? Math.min(1.0, smoothing * 2.0 + 0.25)
+        : smoothing;
+
+      const nw = cw + effectiveSmoothing * (tw - cw);
       const finalWeight = nw < 0.005 ? 0 : nw;
       this.phonemeWeights[p] = finalWeight;
       if (finalWeight > 0.001) {

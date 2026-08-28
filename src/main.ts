@@ -429,6 +429,7 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   // Audio Lip-Sync Settings
   if (cfg.lipSync) {
     audioLipSync.rmsThreshold = cfg.lipSync.rmsThreshold;
+    audioLipSync.setAudioDelay(cfg.lipSync.audioDelay ?? 0.05);
   }
 }
 
@@ -976,6 +977,12 @@ function setupGUI(): void {
   lipFolder
     .add(currentConfig.lipSync, 'smoothing', 0.05, 0.6, 0.01)
     .name('スムージング速度 (Smoothing)');
+  lipFolder
+    .add(currentConfig.lipSync, 'audioDelay', 0.0, 0.2, 0.005)
+    .name('音声遅延補正秒 (Audio Delay)')
+    .onChange((val: number) => {
+      audioLipSync.setAudioDelay(val);
+    });
   lipFolder
     .add(currentConfig.lipSync, 'rmsThreshold', 0.001, 0.05, 0.001)
     .name('無音判定閾値 (RMS Threshold)')
@@ -1660,7 +1667,8 @@ function tick(): void {
       avatarInstance.updateLipSync(
         audioLipSync.currentPhoneme,
         currentConfig.lipSync.gain,
-        currentConfig.lipSync.smoothing
+        currentConfig.lipSync.smoothing,
+        delta
       );
     }
 
