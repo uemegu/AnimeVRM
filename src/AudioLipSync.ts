@@ -19,10 +19,12 @@ export class AudioLipSync {
   public currentRms: number = 0;
   public isPlaying: boolean = false;
   public rmsThreshold: number = 0.01;
+  public audioDelay: number = 0.05; // Default delay compensation (50ms)
   public audioTitle: string = '';
 
   private analyzer: any = null;
   private sourceNode: MediaElementAudioSourceNode | null = null;
+  private delayNode: DelayNode | null = null;
   private gainNode: GainNode | null = null;
   private events: AudioLipSyncEvents = {};
   private objectUrlToRevoke: string | null = null;
@@ -80,6 +82,17 @@ export class AudioLipSync {
   }
 
   /**
+   * Set delay compensation (in seconds) for audio output.
+   * Delays speaker playback so visual lip-sync processing and morphing aligns accurately with speech.
+   */
+  public setAudioDelay(delaySeconds: number): void {
+    this.audioDelay = Math.max(0, Math.min(1.0, delaySeconds));
+    if (this.delayNode && this.audioContext) {
+      this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
+    }
+  }
+
+  /**
    * AudioContext and Meyda Analyzer lazy initialization
    */
   private initAudioContext(): void {
@@ -89,22 +102,19 @@ export class AudioLipSync {
     this.audioContext = new AudioContextClass();
 
     this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
+    this.delayNode = this.audioContext.createDelay(1.0);
+    this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
     this.gainNode = this.audioContext.createGain();
 
-    // Route: source -> gain -> speakers
-    this.sourceNode.connect(this.gainNode);
+    // Playback Route: source -> delay -> gain -> speakers
+    this.sourceNode.connect(this.delayNode);
+    this.delayNode.connect(this.gainNode);
     this.gainNode.connect(this.audioContext.destination);
 
-    // Route: source -> MediaStreamDestination for Meyda
-    const dest = this.audioContext.createMediaStreamDestination();
-    this.sourceNode.connect(dest);
-
-    const streamSource = this.audioContext.createMediaStreamSource(dest.stream);
-
-    // Initialize Meyda Analyzer for MFCC and RMS feature extraction
+    // Initialize Meyda Analyzer directly from sourceNode with zero-latency extraction
     this.analyzer = Meyda.createMeydaAnalyzer({
       audioContext: this.audioContext,
-      source: streamSource,
+      source: this.sourceNode,
       bufferSize: 512,
       featureExtractors: ['mfcc', 'rms'],
       callback: (features: { mfcc?: number[]; rms?: number }) => {

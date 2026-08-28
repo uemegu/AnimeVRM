@@ -113,6 +113,7 @@ export interface AvatarConfig {
     gain: number;
     smoothing: number;
     rmsThreshold: number;
+    audioDelay?: number;
   };
   shortAnimation: ShortAnimationConfig;
 }
@@ -248,9 +249,10 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   lipSync: {
     enabled: true,
-    gain: 1.5,
-    smoothing: 0.45,
+    gain: 0.65,
+    smoothing: 0.17,
     rmsThreshold: 0.008,
+    audioDelay: 0.05,
   },
   shortAnimation: {
     cuts: [
