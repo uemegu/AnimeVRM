@@ -44,6 +44,18 @@ export interface AvatarConfig {
     backgroundColor: string;
     showFloor: boolean;
     floorColor: string;
+    showMidground?: boolean;
+    midgroundImageUrl?: string;
+    midgroundPosition?: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    midgroundScale?: number;
+    midgroundOpacity?: number;
+    farFogEnabled?: boolean;
+    farFogColor?: string;
+    farFogIntensity?: number;
   };
   lighting: {
     castShadows: boolean;
@@ -175,10 +187,22 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   environment: {
     showBackgroundImage: true,
-    backgroundImageUrl: resolveAssetUrl('/textures/park-background.jpg'),
+    backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
     backgroundColor: '#ffffff',
     showFloor: false,
     floorColor: '#ffffff',
+    showMidground: true,
+    midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.jpg'),
+    midgroundPosition: {
+      x: 0,
+      y: 1.35,
+      z: -0.25,
+    },
+    midgroundScale: 1.15,
+    midgroundOpacity: 1.0,
+    farFogEnabled: true,
+    farFogColor: '#ffffff',
+    farFogIntensity: 0.24,
   },
   lighting: {
     castShadows: false,
