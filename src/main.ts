@@ -92,27 +92,210 @@ const scene = new THREE.Scene();
 const textureLoader = new THREE.TextureLoader();
 const backgroundTextureCache = new Map<string, THREE.Texture>();
 
-function getBackgroundTexture(url: string): THREE.Texture {
-  if (backgroundTextureCache.has(url)) {
-    return backgroundTextureCache.get(url)!;
+function loadAtmosphericBackground(
+  url: string,
+  fogEnabled: boolean,
+  fogColor: string,
+  fogIntensity: number
+): Promise<THREE.Texture> {
+  const cacheKey = `${url}_fog_${fogEnabled}_${fogColor}_${fogIntensity.toFixed(2)}`;
+  if (backgroundTextureCache.has(cacheKey)) {
+    return Promise.resolve(backgroundTextureCache.get(cacheKey)!);
   }
-  const texture = textureLoader.load(url);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  backgroundTextureCache.set(url, texture);
-  return texture;
+
+  if (!fogEnabled || fogIntensity <= 0) {
+    const tex = textureLoader.load(url);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    backgroundTextureCache.set(cacheKey, tex);
+    return Promise.resolve(tex);
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        const tex = textureLoader.load(url);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        backgroundTextureCache.set(cacheKey, tex);
+        resolve(tex);
+        return;
+      }
+
+      // 1. 元の遠景画像を描画
+      ctx.drawImage(img, 0, 0);
+
+      // 2. 空気の層（大気霞み）のグラデーションを作成
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      const c = new THREE.Color(fogColor);
+      const r = Math.round(c.r * 255);
+      const g = Math.round(c.g * 255);
+      const b = Math.round(c.b * 255);
+
+      grad.addColorStop(0.0, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 0.25).toFixed(3)})`); // 上空
+      grad.addColorStop(0.35, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 0.55).toFixed(3)})`); // 中空
+      grad.addColorStop(0.65, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 1.0).toFixed(3)})`); // 地平線・高層ビル群
+      grad.addColorStop(1.0, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 0.8).toFixed(3)})`); // 地表
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.needsUpdate = true;
+      backgroundTextureCache.set(cacheKey, tex);
+      resolve(tex);
+    };
+    img.onerror = () => {
+      const tex = textureLoader.load(url);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      backgroundTextureCache.set(cacheKey, tex);
+      resolve(tex);
+    };
+    img.src = url;
+  });
 }
 
 function updateBackgroundDisplay(cfg: AvatarConfig): void {
   if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
-    scene.background = getBackgroundTexture(cfg.environment.backgroundImageUrl);
     document.body.style.backgroundColor = '#000000';
+    loadAtmosphericBackground(
+      cfg.environment.backgroundImageUrl,
+      cfg.environment.farFogEnabled !== false,
+      cfg.environment.farFogColor || '#ffffff',
+      cfg.environment.farFogIntensity ?? 0.24
+    ).then((tex) => {
+      scene.background = tex;
+    });
   } else {
     scene.background = new THREE.Color(cfg.environment.backgroundColor);
     document.body.style.backgroundColor = cfg.environment.backgroundColor;
   }
 }
 
-updateBackgroundDisplay(currentConfig);
+// --------------------------------------------------
+// Midground (Layered Background) Setup with Keying
+// --------------------------------------------------
+const midgroundTextureCache = new Map<string, THREE.Texture>();
+
+function loadTransparentKeyedTexture(url: string, threshold = 238, feather = 18): Promise<THREE.Texture> {
+  if (midgroundTextureCache.has(url)) {
+    return Promise.resolve(midgroundTextureCache.get(url)!);
+  }
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const cvs = document.createElement('canvas');
+      cvs.width = img.width;
+      cvs.height = img.height;
+      const ctx = cvs.getContext('2d');
+      if (!ctx) {
+        const tex = new THREE.Texture(img);
+        resolve(tex);
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const minVal = Math.min(r, g, b);
+        if (minVal >= threshold) {
+          data[i + 3] = 0;
+        } else if (minVal > threshold - feather) {
+          const factor = (threshold - minVal) / feather;
+          data[i + 3] = Math.round(data[i + 3] * factor);
+        }
+      }
+      ctx.putImageData(imgData, 0, 0);
+      const texture = new THREE.CanvasTexture(cvs);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.needsUpdate = true;
+      midgroundTextureCache.set(url, texture);
+      resolve(texture);
+    };
+    img.onerror = (err) => reject(err);
+    img.src = url;
+  });
+}
+
+const midgroundMat = new THREE.MeshBasicMaterial({
+  transparent: true,
+  opacity: 1.0,
+  depthWrite: false,
+  depthTest: true,
+  side: THREE.DoubleSide,
+});
+// 16:9 plane geometry (aspect 16/9 = 1.7778)
+const midgroundGeo = new THREE.PlaneGeometry(16 / 9, 1);
+const midgroundMesh = new THREE.Mesh(midgroundGeo, midgroundMat);
+midgroundMesh.renderOrder = -1;
+scene.add(midgroundMesh);
+
+const initialControlsTarget = new THREE.Vector3(
+  DEFAULT_CONFIG.camera.target.x,
+  DEFAULT_CONFIG.camera.target.y,
+  DEFAULT_CONFIG.camera.target.z
+);
+
+function updateMidgroundTransform(): void {
+  if (!midgroundMesh.visible || typeof controls === 'undefined' || typeof camera === 'undefined') return;
+
+  const cfg = currentConfig.environment;
+  const offsetX = cfg.midgroundPosition?.x ?? 0;
+  const offsetY = (cfg.midgroundPosition?.y ?? 1.35) - 1.35;
+  const scaleMul = cfg.midgroundScale ?? 1.15;
+
+  // パン（平行移動）による移動量のみを算出（回転時は 0 のまま）
+  const panDeltaX = controls.target.x - initialControlsTarget.x;
+  const panDeltaY = controls.target.y - initialControlsTarget.y;
+
+  // カメラの視線ベクトル（正規化）
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+
+  // カメラの上方向・右方向ベクトル
+  const right = new THREE.Vector3().crossVectors(forward, camera.up).normalize();
+  const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+
+  // カメラ正面の一定距離（2.0m）に配置し、パン（平行移動）のオフセットのみを適用
+  const baseDist = 2.05;
+  const planePos = camera.position.clone()
+    .addScaledVector(forward, baseDist)
+    .addScaledVector(right, offsetX - panDeltaX)
+    .addScaledVector(up, offsetY - panDeltaY);
+
+  midgroundMesh.position.copy(planePos);
+  midgroundMesh.quaternion.copy(camera.quaternion);
+
+  // カメラからプレーンまでの距離に応じた視野角スケーリング
+  const vFovRad = THREE.MathUtils.degToRad(camera.fov);
+  const frustumHeight = 2 * baseDist * Math.tan(vFovRad / 2);
+  const finalScale = frustumHeight * scaleMul;
+  midgroundMesh.scale.set(finalScale, finalScale, 1);
+}
+
+function updateMidgroundDisplay(cfg: AvatarConfig): void {
+  const show = cfg.environment.showBackgroundImage && cfg.environment.showMidground !== false && !!cfg.environment.midgroundImageUrl;
+  midgroundMesh.visible = show;
+  if (!show || !cfg.environment.midgroundImageUrl) return;
+
+  midgroundMat.opacity = cfg.environment.midgroundOpacity ?? 1.0;
+
+  loadTransparentKeyedTexture(cfg.environment.midgroundImageUrl).then((texture) => {
+    midgroundMat.map = texture;
+    midgroundMat.needsUpdate = true;
+  });
+
+  updateMidgroundTransform();
+}
 
 const camera = new THREE.PerspectiveCamera(
   currentConfig.camera.fov,
@@ -141,6 +324,9 @@ controls.minDistance = currentConfig.camera.minDistance;
 controls.maxDistance = currentConfig.camera.maxDistance;
 controls.maxPolarAngle = Math.PI / 2 + 0.1;
 
+updateBackgroundDisplay(currentConfig);
+updateMidgroundDisplay(currentConfig);
+
 // --------------------------------------------------
 // Typography Overlay & Short Animation Player
 // --------------------------------------------------
@@ -154,11 +340,13 @@ const animationPlayer = new ShortAnimationPlayer({
   getConfig: () => currentConfig,
   onEnterTransparent: () => {
     scene.background = null;
+    midgroundMesh.visible = false;
     renderer.setClearColor(0x000000, 0);
     originalMotionUrlBeforeAnim = currentMotionUrl;
   },
   onExitTransparent: () => {
     updateBackgroundDisplay(currentConfig);
+    updateMidgroundDisplay(currentConfig);
   },
   onPlayStateChange: (isPlaying) => {
     updateAnimationPlayStateUI(isPlaying);
@@ -358,6 +546,7 @@ loadAvatarModel(currentModelUrl);
 function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   // Environment / Background
   updateBackgroundDisplay(cfg);
+  updateMidgroundDisplay(cfg);
   floor.visible = cfg.environment.showFloor;
   floorMat.color.set(cfg.environment.floorColor);
 
@@ -685,11 +874,64 @@ function setupGUI(mountPoint?: HTMLElement): void {
   outlineFolder.close();
 
   // 5. Environment Folder
-  const envFolder = gui.addFolder('環境・床設定 (Environment / Floor)');
+  const envFolder = gui.addFolder('環境・多層背景・床 (Environment / Layers)');
+  envFolder
+    .add(currentConfig.environment, 'showBackgroundImage')
+    .name('遠景背景表示 (Show Background)')
+    .onChange(() => {
+      updateBackgroundDisplay(currentConfig);
+      updateMidgroundDisplay(currentConfig);
+    });
   envFolder
     .addColor(currentConfig.environment, 'backgroundColor')
     .name('単色背景 (Background Color)')
     .onChange(() => updateBackgroundDisplay(currentConfig));
+
+  // Far Fog (Atmospheric Perspective) folder
+  const fogFolder = envFolder.addFolder('🌫️ 遠景大気フォグ (Far Fog / Haze)');
+  fogFolder
+    .add(currentConfig.environment, 'farFogEnabled')
+    .name('フォグ有効化 (Enable Fog)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  fogFolder
+    .addColor(currentConfig.environment, 'farFogColor')
+    .name('空気色 (Fog Color)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  fogFolder
+    .add(currentConfig.environment, 'farFogIntensity', 0, 1, 0.02)
+    .name('霞み強度 (Intensity)')
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  
+  // Midground layer folder
+  const midFolder = envFolder.addFolder('🌳 中景レイヤー (Midground Layer)');
+  if (!currentConfig.environment.midgroundPosition) {
+    currentConfig.environment.midgroundPosition = { x: 0, y: 1.05, z: -0.6 };
+  }
+  midFolder
+    .add(currentConfig.environment, 'showMidground')
+    .name('中景の表示 (Show Midground)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'x', -5, 5, 0.05)
+    .name('X位置 (Pos X)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'y', -2, 5, 0.05)
+    .name('Y高さ (Pos Y)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'z', -5, 2, 0.05)
+    .name('Z深度 (Pos Z / Depth)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment, 'midgroundScale', 0.5, 10, 0.1)
+    .name('サイズ (Scale)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment, 'midgroundOpacity', 0, 1, 0.05)
+    .name('不透明度 (Opacity)')
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+
   envFolder
     .add(currentConfig.environment, 'showFloor')
     .name('床の表示 (Show Floor)')
@@ -1229,7 +1471,8 @@ function setupUnifiedUI(): void {
       <div class="section-box">
         <label class="section-label">🌄 背景 (Background)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-          <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn active">🌳 公園</button>
+          <button data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">🌳 近代公園 (多層)</button>
+          <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">🌲 旧公園</button>
           <button data-bg="${resolveAssetUrl('/textures/room-background.jpg')}" class="bg-btn">🏠 部屋</button>
           <button data-bg="none" class="bg-btn">OFF (単色)</button>
         </div>
@@ -1307,13 +1550,22 @@ function setupUnifiedUI(): void {
   bgButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const bg = btn.getAttribute('data-bg');
+      const mid = btn.getAttribute('data-mid');
       if (bg === 'none') {
         currentConfig.environment.showBackgroundImage = false;
+        currentConfig.environment.showMidground = false;
       } else if (bg) {
         currentConfig.environment.showBackgroundImage = true;
         currentConfig.environment.backgroundImageUrl = bg;
+        if (mid) {
+          currentConfig.environment.showMidground = true;
+          currentConfig.environment.midgroundImageUrl = mid;
+        } else {
+          currentConfig.environment.showMidground = false;
+        }
       }
       updateBackgroundDisplay(currentConfig);
+      updateMidgroundDisplay(currentConfig);
       syncBgButtons();
       gui.controllersRecursive().forEach((c) => c.updateDisplay());
     });
@@ -1510,6 +1762,9 @@ function tick(): void {
   } else {
     controls.update();
   }
+
+  // Keep midground properly aligned to camera perspective
+  updateMidgroundTransform();
 
   if (avatarInstance) {
     // Apply real-time lip sync if enabled
