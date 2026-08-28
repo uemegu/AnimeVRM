@@ -15,8 +15,12 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
 import { ColorGradingShader } from './ColorGradingShader';
+import { GodRaysShader } from './postprocessing/GodRaysShader';
+import { SunEffect } from './postprocessing/SunEffect';
 import { TypographyOverlay } from './animation/TypographyOverlay';
 import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
+import { WindController, WIND_PRESETS } from './wind/WindController';
+import { WindParticles } from './wind/WindParticles';
 import {
   DEFAULT_CONFIG,
   AvatarConfig,
@@ -30,6 +34,8 @@ import { resolveAssetUrl } from './utils/path';
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
+
+const windController = new WindController();
 
 
 // --------------------------------------------------
@@ -88,6 +94,7 @@ function getToneMappingMode(mode: string): THREE.ToneMapping {
 // Scene & Camera
 // --------------------------------------------------
 const scene = new THREE.Scene();
+const windParticles = new WindParticles(scene);
 
 const textureLoader = new THREE.TextureLoader();
 const backgroundTextureCache = new Map<string, THREE.Texture>();
@@ -301,7 +308,7 @@ const camera = new THREE.PerspectiveCamera(
   currentConfig.camera.fov,
   window.innerWidth / window.innerHeight,
   0.1,
-  20
+  100
 );
 camera.position.set(
   currentConfig.camera.position.x,
@@ -341,12 +348,16 @@ const animationPlayer = new ShortAnimationPlayer({
   onEnterTransparent: () => {
     scene.background = null;
     midgroundMesh.visible = false;
+    sunEffect.sunGroup.visible = false;
+    sunEffect.flareGroup.visible = false;
     renderer.setClearColor(0x000000, 0);
     originalMotionUrlBeforeAnim = currentMotionUrl;
   },
   onExitTransparent: () => {
     updateBackgroundDisplay(currentConfig);
     updateMidgroundDisplay(currentConfig);
+    sunEffect.sunGroup.visible = (currentConfig.lighting.sunShafts?.enabled || currentConfig.lighting.lensFlare?.enabled) ?? false;
+    sunEffect.flareGroup.visible = currentConfig.lighting.lensFlare?.enabled ?? false;
   },
   onPlayStateChange: (isPlaying) => {
     updateAnimationPlayStateUI(isPlaying);
@@ -407,6 +418,9 @@ rimLight.position.set(
 );
 scene.add(rimLight);
 
+// Sun & Lens Flare effect
+const sunEffect = new SunEffect(scene);
+
 // Floor
 const floorGeo = new THREE.PlaneGeometry(10, 10);
 const floorMat = new THREE.MeshStandardMaterial({
@@ -447,7 +461,17 @@ const bloomPass = new UnrealBloomPass(
 );
 composer.addPass(bloomPass);
 
-// 3. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
+// 3. God Rays Pass (Volumetric sun shafts & komorebi)
+const godRaysPass = new ShaderPass(GodRaysShader);
+godRaysPass.uniforms['uExposure'].value = currentConfig.lighting.sunShafts?.enabled ? currentConfig.lighting.sunShafts.exposure : 0;
+godRaysPass.uniforms['uDecay'].value = currentConfig.lighting.sunShafts?.decay ?? 0.94;
+godRaysPass.uniforms['uDensity'].value = currentConfig.lighting.sunShafts?.density ?? 0.85;
+godRaysPass.uniforms['uWeight'].value = currentConfig.lighting.sunShafts?.weight ?? 0.4;
+(godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(currentConfig.lighting.sunShafts?.color ?? '#fff2db');
+godRaysPass.uniforms['uShimmer'].value = currentConfig.lighting.sunShafts?.shimmer ?? 0.4;
+composer.addPass(godRaysPass);
+
+// 4. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
 composer.addPass(new OutputPass());
 
 // 6. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
@@ -494,6 +518,7 @@ function loadAvatarModel(modelUrl: string): void {
   if (avatarInstance) {
     avatarInstance.dispose();
     avatarInstance = null;
+    windController.resetModel();
   }
 
   avatarInstance = new Avatar(scene, camera, {
@@ -585,6 +610,15 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
     colorGradingPass.uniforms['uStrength'].value = cfg.postProcessing.colorGrading.strength;
     colorGradingPass.uniforms['uGradingContrast'].value = cfg.postProcessing.colorGrading.contrast;
     colorGradingPass.uniforms['uGamma'].value = cfg.postProcessing.colorGrading.gamma;
+  }
+
+  if (cfg.lighting.sunShafts) {
+    godRaysPass.uniforms['uExposure'].value = cfg.lighting.sunShafts.enabled ? cfg.lighting.sunShafts.exposure : 0;
+    godRaysPass.uniforms['uDecay'].value = cfg.lighting.sunShafts.decay;
+    godRaysPass.uniforms['uDensity'].value = cfg.lighting.sunShafts.density;
+    godRaysPass.uniforms['uWeight'].value = cfg.lighting.sunShafts.weight;
+    (godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(cfg.lighting.sunShafts.color);
+    godRaysPass.uniforms['uShimmer'].value = cfg.lighting.sunShafts.shimmer;
   }
 
   hueSaturationPass.uniforms['saturation'].value = cfg.postProcessing.saturation;
@@ -747,6 +781,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
     rimBody: currentConfig.materials.body.rimEnabled,
     rimCloth: currentConfig.materials.cloth.rimEnabled,
     rimLight: currentConfig.lighting.rim.enabled,
+    wind: currentConfig.wind.enabled,
   };
 
   toggleFolder
@@ -764,6 +799,14 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: boolean) => {
       currentConfig.postProcessing.bloom.enabled = val;
       applyConfigToSceneAndRenderer(currentConfig);
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  toggleFolder
+    .add(toggleState, 'wind')
+    .name('🍃 風・揺れもの物理 (Wind Effect)')
+    .onChange((val: boolean) => {
+      currentConfig.wind.enabled = val;
       gui.controllersRecursive().forEach((c) => c.updateDisplay());
     });
 
@@ -1015,6 +1058,118 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: string) => rimLight.color.set(val));
   lightFolder.close();
 
+  // 6.5 Sun & God Rays & Lens Flare Folder
+  const sunFolder = gui.addFolder('☀️ 太陽・サンシャフト・フレア (Sun & God Rays)');
+
+  // Sun Transform / Light Tracking
+  const sunPosFolder = sunFolder.addFolder('📍 太陽位置 (Sun Position)');
+  sunPosFolder
+    .add(currentConfig.lighting.sunShafts, 'followDirectionalLight')
+    .name('主光の向きに自動追従')
+    .onChange((val: boolean) => {
+      currentConfig.lighting.sunShafts.followDirectionalLight = val;
+    });
+  sunPosFolder
+    .add(currentConfig.lighting.sunShafts.sunPosition, 'x', -20, 20, 0.1)
+    .name('太陽 位置 X')
+    .onChange((val: number) => {
+      currentConfig.lighting.sunShafts.sunPosition.x = val;
+    });
+  sunPosFolder
+    .add(currentConfig.lighting.sunShafts.sunPosition, 'y', -5, 25, 0.1)
+    .name('太陽 位置 Y')
+    .onChange((val: number) => {
+      currentConfig.lighting.sunShafts.sunPosition.y = val;
+    });
+  sunPosFolder
+    .add(currentConfig.lighting.sunShafts.sunPosition, 'z', -20, 20, 0.1)
+    .name('太陽 位置 Z')
+    .onChange((val: number) => {
+      currentConfig.lighting.sunShafts.sunPosition.z = val;
+    });
+  sunPosFolder.open();
+
+  // God Rays (Sun Shafts / Komorebi)
+  const godRaysFolder = sunFolder.addFolder('✨ サンシャフト / 木漏れ日 (God Rays)');
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'enabled')
+    .name('サンシャフト有効')
+    .onChange((enabled: boolean) => {
+      godRaysPass.uniforms['uExposure'].value = enabled ? currentConfig.lighting.sunShafts.exposure : 0;
+    });
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'exposure', 0.0, 1.5, 0.02)
+    .name('光条強度 (Exposure)')
+    .onChange((val: number) => {
+      if (currentConfig.lighting.sunShafts.enabled) {
+        godRaysPass.uniforms['uExposure'].value = val;
+      }
+    });
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'decay', 0.8, 0.99, 0.005)
+    .name('光条長さ・減衰 (Decay)')
+    .onChange((val: number) => {
+      godRaysPass.uniforms['uDecay'].value = val;
+    });
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'density', 0.2, 1.8, 0.05)
+    .name('光線密度 (Density)')
+    .onChange((val: number) => {
+      godRaysPass.uniforms['uDensity'].value = val;
+    });
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'weight', 0.05, 1.0, 0.02)
+    .name('光線寄与率 (Weight)')
+    .onChange((val: number) => {
+      godRaysPass.uniforms['uWeight'].value = val;
+    });
+  godRaysFolder
+    .addColor(currentConfig.lighting.sunShafts, 'color')
+    .name('光条カラー (Ray Color)')
+    .onChange((hex: string) => {
+      (godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(hex);
+    });
+  godRaysFolder
+    .add(currentConfig.lighting.sunShafts, 'shimmer', 0.0, 1.0, 0.05)
+    .name('木漏れ日揺らめき (Shimmer)')
+    .onChange((val: number) => {
+      godRaysPass.uniforms['uShimmer'].value = val;
+    });
+  godRaysFolder.open();
+
+  // Lens Flare
+  const flareFolder = sunFolder.addFolder('🌟 太陽レンズフレア (Lens Flare)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'enabled')
+    .name('レンズフレア有効')
+    .onChange((enabled: boolean) => {
+      sunEffect.flareGroup.visible = enabled;
+    });
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'sunSize', 0.2, 3.0, 0.05)
+    .name('太陽サイズ (Sun Size)');
+  flareFolder
+    .addColor(currentConfig.lighting.lensFlare, 'sunColor')
+    .name('フレア光色 (Sun Color)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'glowIntensity', 0.0, 2.0, 0.05)
+    .name('コロナグロー (Corona Glow)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'starburstIntensity', 0.0, 2.0, 0.05)
+    .name('星型光芒 (Starburst)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'anamorphicIntensity', 0.0, 2.0, 0.05)
+    .name('横光条 (Anamorphic Streak)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'ghostIntensity', 0.0, 2.0, 0.05)
+    .name('ゴースト (Ghosts)');
+  flareFolder
+    .add(currentConfig.lighting.lensFlare, 'haloIntensity', 0.0, 2.0, 0.05)
+    .name('光輪 (Ring Halo)');
+  flareFolder.open();
+
+  sunFolder.close();
+
   // 7. Post Processing Folder
   const postFolder = gui.addFolder('ポストプロセス (Post Processing)');
   postFolder
@@ -1123,7 +1278,55 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: number) => (brightnessContrastPass.uniforms['contrast'].value = val));
   postFolder.close();
 
-  // 8. Lip Sync Folder
+  // 8. Wind & SpringBone Physics Folder
+  const windFolder = gui.addFolder('🍃 風・揺れもの物理設定 (Wind & Physics)');
+
+  const windPresetKeys: Record<string, string> = {
+    '🌸 そよ風 (Gentle Breeze)': 'breeze',
+    '💨 強風 (Strong Wind)': 'strong',
+    '🌪️ 突風・嵐 (Gusty Storm)': 'gusty',
+    '✨ 原神風・疾風 (Anemo Gale)': 'anemo',
+    '🍃 無風 (Calm)': 'calm',
+  };
+
+  const windPresetObj = { preset: 'breeze' };
+  windFolder
+    .add(windPresetObj, 'preset', windPresetKeys)
+    .name('風プリセット')
+    .onChange((key: string) => {
+      WindController.applyPreset(currentConfig.wind, key);
+      toggleState.wind = currentConfig.wind.enabled;
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+      showToast(`🍃 風プリセット適用: ${WIND_PRESETS[key]?.label || key}`);
+    });
+
+  windFolder
+    .add(currentConfig.wind, 'enabled')
+    .name('風物理有効 (Enabled)')
+    .onChange((val: boolean) => {
+      toggleState.wind = val;
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+
+  windFolder.add(currentConfig.wind, 'speed', 0.0, 5.0, 0.1).name('風速 (Speed)');
+  windFolder.add(currentConfig.wind, 'direction', 0, 360, 1).name('風向角度 (Direction °)');
+  windFolder.add(currentConfig.wind, 'elevation', -45, 45, 1).name('仰角 (Elevation °)');
+  windFolder.add(currentConfig.wind, 'turbulence', 0.0, 2.0, 0.05).name('乱流・揺らぎ (Turbulence)');
+  windFolder.add(currentConfig.wind, 'gustFrequency', 0.0, 1.0, 0.05).name('突風頻度 (Gust Freq)');
+  windFolder.add(currentConfig.wind, 'gustStrength', 0.0, 3.0, 0.1).name('突風強度 (Gust Strength)');
+
+  const particleFolder = windFolder.addFolder('✨ 風パーティクル (Particles)');
+  particleFolder.add(currentConfig.wind.particles, 'enabled').name('粒子表示 (Enabled)');
+  particleFolder.add(currentConfig.wind.particles, 'count', 20, 500, 10).name('粒子数 (Count)');
+  particleFolder.add(currentConfig.wind.particles, 'size', 0.01, 0.1, 0.005).name('サイズ (Size)');
+  particleFolder.addColor(currentConfig.wind.particles, 'color').name('カラー (Color)');
+  particleFolder.add(currentConfig.wind.particles, 'opacity', 0.1, 1.0, 0.05).name('不透明度 (Opacity)');
+  particleFolder.add(currentConfig.wind.particles, 'speedFactor', 0.2, 3.0, 0.1).name('速度倍率 (Speed Factor)');
+  particleFolder.close();
+
+  windFolder.close();
+
+  // 9. Lip Sync Folder
   const lipFolder = gui.addFolder('🎵 リップシンク設定 (Lip Sync)');
   lipFolder
     .add(currentConfig.lipSync, 'enabled')
@@ -1777,10 +1980,45 @@ function tick(): void {
       );
     }
 
-    avatarInstance.update(delta, elapsed);
+    avatarInstance.update(delta, elapsed, () => {
+      windController.update(avatarInstance?.vrm ?? null, currentConfig.wind, elapsed);
+    });
+  }
+
+  // Update Wind Particles
+  windParticles.update(delta, elapsed, currentConfig.wind, windController.currentWindVector);
+
+  // Update Sun & Lens Flare effect
+  const vrmMeshes: THREE.Object3D[] = [];
+  if (avatarInstance?.vrm?.scene) {
+    vrmMeshes.push(avatarInstance.vrm.scene);
+  }
+  const sunInfo = sunEffect.update(
+    camera,
+    delta,
+    elapsed,
+    currentConfig,
+    dirLight,
+    vrmMeshes
+  );
+
+  // Update God Rays Pass uniforms & enabled state
+  const sunShaftsEnabled = currentConfig.lighting.sunShafts?.enabled ?? false;
+  godRaysPass.enabled = sunShaftsEnabled;
+  if (sunShaftsEnabled) {
+    godRaysPass.uniforms['uSunPosition'].value.copy(sunInfo.sunScreenPosition);
+    godRaysPass.uniforms['uSunVisibility'].value = sunInfo.sunVisibility;
+    godRaysPass.uniforms['uExposure'].value = currentConfig.lighting.sunShafts.exposure;
+    godRaysPass.uniforms['uDecay'].value = currentConfig.lighting.sunShafts.decay;
+    godRaysPass.uniforms['uDensity'].value = currentConfig.lighting.sunShafts.density;
+    godRaysPass.uniforms['uWeight'].value = currentConfig.lighting.sunShafts.weight;
+    (godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(currentConfig.lighting.sunShafts.color);
+    godRaysPass.uniforms['uShimmer'].value = currentConfig.lighting.sunShafts.shimmer;
+    godRaysPass.uniforms['uTime'].value = elapsed;
   }
 
   const usePost = currentConfig.postProcessing.bloom.enabled ||
+                  currentConfig.lighting.sunShafts?.enabled ||
                   currentConfig.postProcessing.colorGrading.enabled ||
                   currentConfig.postProcessing.saturation !== 0 ||
                   currentConfig.postProcessing.brightness !== 0 ||
