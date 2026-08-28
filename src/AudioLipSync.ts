@@ -4,42 +4,57 @@ import { resolveAssetUrl } from './utils/path';
 export const PHONEMES = ['aa', 'ee', 'ih', 'oh', 'ou'] as const;
 export type Phoneme = (typeof PHONEMES)[number];
 
-// Standard MFCC prototype vectors (c1 to c8) for Japanese vowels
-// Reflecting acoustic spectral tilt, curvature, and formant peaks
-const MFCC_PROFILES: Record<Phoneme, number[]> = {
-  // 'aa': Low F1/F2 ratio, strong mid-band energy (700-1400Hz), wide mouth opening
+// Female / Anime voice prototype vectors (higher F1/F2, sharper high end)
+const MFCC_PROFILES_FEMALE: Record<Phoneme, number[]> = {
   aa: [-32.0, -16.0, 10.0, -12.0, -8.0, 4.0, -2.0, 1.0],
-  // 'ih': Low F1 (<350Hz), Very high F2 (>2200Hz), mid-frequency dip
   ih: [18.0, 24.0, -20.0, 16.0, -10.0, -14.0, 8.0, -4.0],
-  // 'ou': Low F1, Low F2, rounded lips, strong high-frequency attenuation
   ou: [-38.0, 10.0, 18.0, 6.0, -4.0, -10.0, -2.0, 0.0],
-  // 'ee': Mid F1 (~500Hz), High F2 (~2000Hz), balanced distribution
   ee: [-4.0, 16.0, -8.0, 12.0, -16.0, 4.0, 4.0, -2.0],
-  // 'oh': Mid-Low F1 (~500Hz), Low F2 (~900Hz), concentrated in 400-1100Hz
   oh: [-24.0, 6.0, 16.0, -6.0, -12.0, 2.0, -4.0, 0.0],
 };
 
+// Male voice prototype vectors (lower F1/F2, richer low-mid resonance)
+const MFCC_PROFILES_MALE: Record<Phoneme, number[]> = {
+  aa: [-38.0, -12.0, 14.0, -16.0, -6.0, 6.0, -4.0, 0.0],
+  ih: [12.0, 18.0, -14.0, 12.0, -6.0, -10.0, 6.0, -2.0],
+  ou: [-44.0, 14.0, 22.0, 4.0, -2.0, -6.0, 0.0, 2.0],
+  ee: [-10.0, 12.0, -4.0, 8.0, -12.0, 2.0, 2.0, -1.0],
+  oh: [-30.0, 8.0, 20.0, -8.0, -8.0, 4.0, -2.0, 1.0],
+};
+
 interface FormantBands {
-  low: number;     // 150 - 500 Hz (F1 low: 'ih', 'ou')
-  midLow: number;  // 500 - 1400 Hz (F1 high / F2 low: 'aa', 'oh')
-  midHigh: number; // 1400 - 2500 Hz (F2 high: 'ee', 'ih')
-  high: number;    // 2500 - 5500 Hz (F3 / high consonants)
+  low: number;     // F1 low: 'ih', 'ou'
+  midLow: number;  // F1 high / F2 low: 'aa', 'oh'
+  midHigh: number; // F2 high: 'ee', 'ih'
+  high: number;    // F3 / high consonants
 }
 
-function calculateFormantBands(spectrum: number[], sampleRate: number, bufferSize: number): FormantBands {
+function calculateFormantBands(
+  spectrum: number[],
+  sampleRate: number,
+  bufferSize: number,
+  gender: 'female' | 'male' = 'female'
+): FormantBands {
   const binWidth = sampleRate / bufferSize;
   let low = 0, midLow = 0, midHigh = 0, high = 0;
+
+  // Gender-specific formant boundaries (Hz)
+  const isFemale = gender === 'female';
+  const fLowMax = isFemale ? 550 : 450;
+  const fMidLowMax = isFemale ? 1600 : 1300;
+  const fMidHighMax = isFemale ? 2800 : 2200;
+  const fHighMax = isFemale ? 6000 : 4800;
 
   for (let i = 0; i < spectrum.length; i++) {
     const freq = i * binWidth;
     const val = spectrum[i];
-    if (freq >= 150 && freq < 500) {
+    if (freq >= 120 && freq < fLowMax) {
       low += val;
-    } else if (freq >= 500 && freq < 1400) {
+    } else if (freq >= fLowMax && freq < fMidLowMax) {
       midLow += val;
-    } else if (freq >= 1400 && freq < 2500) {
+    } else if (freq >= fMidLowMax && freq < fMidHighMax) {
       midHigh += val;
-    } else if (freq >= 2500 && freq < 5500) {
+    } else if (freq >= fMidHighMax && freq < fHighMax) {
       high += val;
     }
   }
@@ -101,6 +116,7 @@ export class AudioLipSync {
   public isPlaying: boolean = false;
   public rmsThreshold: number = 0.01;
   public audioDelay: number = 0.05; // Default delay compensation (50ms)
+  public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
 
   private analyzer: any = null;
@@ -160,6 +176,13 @@ export class AudioLipSync {
         this.events.onError(new Error('Audio playback failed'));
       }
     });
+  }
+
+  /**
+   * Set voice gender profile ('female' or 'male') for optimized vowel classification
+   */
+  public setVoiceGender(gender: 'female' | 'male'): void {
+    this.voiceGender = gender;
   }
 
   /**
@@ -243,11 +266,12 @@ export class AudioLipSync {
 
     // c1 to c8 (skip c0 which is overall energy)
     const vec = mfcc.slice(1, 9);
+    const profiles = this.voiceGender === 'male' ? MFCC_PROFILES_MALE : MFCC_PROFILES_FEMALE;
 
     // Calculate spectral formant band ratios if power spectrum is available
     let bands: FormantBands | null = null;
     if (powerSpectrum && powerSpectrum.length > 0 && this.audioContext) {
-      bands = calculateFormantBands(powerSpectrum, this.audioContext.sampleRate, 512);
+      bands = calculateFormantBands(powerSpectrum, this.audioContext.sampleRate, 512, this.voiceGender);
     }
 
     let bestPhoneme: Phoneme | 'nn' = 'nn';
@@ -255,7 +279,7 @@ export class AudioLipSync {
 
     for (const p of PHONEMES) {
       // 1. MFCC Cosine Similarity normalized to [0, 1]
-      const mfccSim = (cosineSimilarity(vec, MFCC_PROFILES[p]) + 1.0) * 0.5;
+      const mfccSim = (cosineSimilarity(vec, profiles[p]) + 1.0) * 0.5;
 
       // 2. Formant Energy Ratio Score [0, 1]
       let formantScore = 0.5;

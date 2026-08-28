@@ -430,57 +430,25 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   if (cfg.lipSync) {
     audioLipSync.rmsThreshold = cfg.lipSync.rmsThreshold;
     audioLipSync.setAudioDelay(cfg.lipSync.audioDelay ?? 0.05);
+    audioLipSync.setVoiceGender(cfg.lipSync.voiceGender ?? 'female');
   }
 }
 
 // --------------------------------------------------
-// Lil-GUI Setup
+// --------------------------------------------------
+// Lil-GUI Setup (Mounted inside Unified Panel)
 // --------------------------------------------------
 let gui: GUI;
 
-function setupGUI(): void {
-  gui = new GUI({ title: '✨ パラメータ' });
-  gui.domElement.style.position = 'fixed';
-  gui.domElement.style.top = '16px';
-  gui.domElement.style.right = '16px';
-  gui.domElement.style.zIndex = '1000';
+function setupGUI(mountPoint?: HTMLElement): void {
+  gui = new GUI({
+    title: '詳細パラメータ',
+    container: mountPoint,
+    autoPlace: !mountPoint,
+  });
 
-  // 1. JSON Export / Import folder at the top
-  const jsonFolder = gui.addFolder('💾 設定JSON エクスポート / 読込');
-  const jsonActions = {
-    copyJSON: async () => {
-      const ok = await copyConfigToClipboard(currentConfig);
-      showToast(ok ? '📋 設定JSONをクリップボードにコピーしました！' : 'コピーに失敗しました');
-    },
-    downloadJSON: () => {
-      downloadConfigJSON(currentConfig);
-      showToast('💾 avatar-config.json をダウンロードしました');
-    },
-    importJSON: () => {
-      openImportModal();
-    },
-    resetDefaults: () => {
-      deepAssign(currentConfig, DEFAULT_CONFIG);
-      applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
-      showToast('🔄 デフォルト設定にリセットしました');
-    },
-  };
-
-  jsonFolder.add(jsonActions, 'copyJSON').name('📋 設定JSONをコピー');
-  jsonFolder.add(jsonActions, 'downloadJSON').name('💾 JSONファイル保存');
-  jsonFolder.add(jsonActions, 'importJSON').name('📥 JSONを読み込み');
-  jsonFolder.add(jsonActions, 'resetDefaults').name('🔄 デフォルトにリセット');
-  jsonFolder.close();
-
-  // 1.5. Short Animation Folder (🎬 ショートアニメーション)
-  const animFolder = gui.addFolder('🎬 ショートアニメーション');
-  const animActions = {
-    play: () => animationPlayer.play(),
-    stop: () => animationPlayer.stop(),
-  };
-  animFolder.add(animActions, 'play').name('▶ アニメーション再生');
-  animFolder.add(animActions, 'stop').name('■ 停止');
+  // 1. Short Animation Cuts Folder
+  const animFolder = gui.addFolder('🎬 ショートアニメーション各Cut設定');
 
   const cameraAngleOptions = {
     'Continue (前Cutを引き継ぐ)': 'continue',
@@ -553,7 +521,6 @@ function setupGUI(): void {
     cutFolder.add(cut, 'cameraStrength', 0.1, 5.0, 0.1).name('カメラ強度');
     cutFolder.add(cut, 'motion', motionPresetOptions).name('モーション (Motion)');
 
-
     // Back Text
     const backFolder = cutFolder.addFolder('Back Text (背景側)');
     backFolder.add(cut.backText, 'text').name('テキスト');
@@ -576,16 +543,11 @@ function setupGUI(): void {
     frontFolder.add(cut.frontText, 'fontWeight', [100, 200, 300, 400, 500, 600, 700, 800, 900]).name('太さ');
     frontFolder.close();
 
-    if (index === 0) {
-      cutFolder.open();
-    } else {
-      cutFolder.close();
-    }
+    cutFolder.close();
   });
-  animFolder.open();
+  animFolder.close();
 
-
-  // 2. Quick Feature Toggles (1クリックで各機能のON/OFFを切り替え)
+  // 2. Quick Feature Toggles
   const toggleFolder = gui.addFolder('⚡ 各機能 個別 ON/OFF トグル (Feature Toggles)');
 
   const toggleState = {
@@ -661,37 +623,7 @@ function setupGUI(): void {
       gui.controllersRecursive().forEach((c) => c.updateDisplay());
     });
 
-  toggleFolder.open();
-
-  // 3. VRM Model Folder
-  const modelFolder = gui.addFolder('👤 VRMモデル切替 (Model Select)');
-  const modelState = {
-    model: currentModelUrl,
-    openLocalFile: () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.vrm';
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0];
-        if (file) {
-          const blobUrl = URL.createObjectURL(file);
-          loadAvatarModel(blobUrl);
-        }
-      };
-      input.click();
-    },
-  };
-  modelFolder
-    .add(modelState, 'model', {
-      '👧 girl.vrm (デフォルト)': resolveAssetUrl('/models/girl.vrm'),
-      '👤 avatar.vrm': resolveAssetUrl('/models/avatar.vrm'),
-    })
-    .name('モデル選択')
-    .onChange((url: string) => {
-      loadAvatarModel(url);
-    });
-  modelFolder.add(modelState, 'openLocalFile').name('📁 VRMファイルを開く (PC内)');
-  modelFolder.open();
+  toggleFolder.close();
 
   // Helper to add material folder
   const addMaterialFolder = (title: string, kind: 'body' | 'hair' | 'cloth') => {
@@ -753,24 +685,7 @@ function setupGUI(): void {
   outlineFolder.close();
 
   // 5. Environment Folder
-  const envFolder = gui.addFolder('環境・背景 (Environment)');
-  envFolder
-    .add(currentConfig.environment, 'showBackgroundImage')
-    .name('背景画像 ON (Background Image)')
-    .onChange(() => {
-      updateBackgroundDisplay(currentConfig);
-      syncBgButtons();
-    });
-  envFolder
-    .add(currentConfig.environment, 'backgroundImageUrl', {
-      '🌳 公園 (Park)': resolveAssetUrl('/textures/park-background.jpg'),
-      '🏠 部屋 (Room)': resolveAssetUrl('/textures/room-background.jpg'),
-    })
-    .name('背景画像選択')
-    .onChange(() => {
-      updateBackgroundDisplay(currentConfig);
-      syncBgButtons();
-    });
+  const envFolder = gui.addFolder('環境・床設定 (Environment / Floor)');
   envFolder
     .addColor(currentConfig.environment, 'backgroundColor')
     .name('単色背景 (Background Color)')
@@ -972,6 +887,15 @@ function setupGUI(): void {
     .add(currentConfig.lipSync, 'enabled')
     .name('リップシンク有効 (Enabled)');
   lipFolder
+    .add(currentConfig.lipSync, 'voiceGender', {
+      '女性 / 高音 (Female)': 'female',
+      '男性 / 低音 (Male)': 'male',
+    })
+    .name('声質プロファイル (Voice Gender)')
+    .onChange((val: 'female' | 'male') => {
+      audioLipSync.setVoiceGender(val);
+    });
+  lipFolder
     .add(currentConfig.lipSync, 'gain', 0.0, 1.5, 0.05)
     .name('口の開き倍率 (Gain)');
   lipFolder
@@ -991,8 +915,6 @@ function setupGUI(): void {
     });
   lipFolder.open();
 }
-
-setupGUI();
 
 // --------------------------------------------------
 // Toast Notification Helper
@@ -1091,7 +1013,7 @@ function openImportModal(): void {
 // --------------------------------------------------
 // Animation UI Helper Functions
 // --------------------------------------------------
-let setUICollapsed: (collapsed: boolean) => void = () => {};
+let setPanelOpen: (open: boolean) => void = () => {};
 
 function updateAnimationPlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('anim-play-btn');
@@ -1100,22 +1022,18 @@ function updateAnimationPlayStateUI(isPlaying: boolean): void {
     playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
   }
 
+  const panel = document.getElementById('panel-container');
+  const gearBtn = document.getElementById('settings-open-btn');
+
   if (isPlaying) {
-    // 再生開始時: VRMビュワーと設定パネルを両方とも閉じる
-    setUICollapsed(true);
-    if (gui) {
-      gui.close();
-    }
+    // 再生開始時: パネル・ギアボタンを両方非表示にして画面をクリアにする
+    if (panel) panel.style.display = 'none';
+    if (gearBtn) gearBtn.style.display = 'none';
   } else {
     // 停止/終了時: パネルを開いて元の状態に戻す
-    setUICollapsed(false);
-    if (gui) {
-      gui.open();
-    }
+    setPanelOpen(true);
   }
 }
-
-
 
 // --------------------------------------------------
 // Audio UI Helper Functions
@@ -1159,150 +1077,94 @@ function updateAudioTimeUI(currentTime: number, duration: number): void {
   }
 }
 
-// --------------------------------------------------
-// UI Overlay (Left-side HUD for Expressions, Motions & Lip-Sync)
-// --------------------------------------------------
-function createUIOverlay() {
-  const container = document.createElement('div');
-  container.id = 'ui-container';
-  container.style.position = 'fixed';
-  container.style.top = '16px';
-  container.style.left = '16px';
-  container.style.zIndex = '100';
-  container.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  container.style.fontSize = '13px';
-  container.style.color = '#1e293b';
-  container.style.background = 'rgba(255, 255, 255, 0.92)';
-  container.style.backdropFilter = 'blur(10px)';
-  container.style.padding = '14px 18px';
-  container.style.borderRadius = '12px';
-  container.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)';
-  container.style.maxWidth = '340px';
-  container.style.maxHeight = '90vh';
-  container.style.overflowY = 'auto';
-  container.style.userSelect = 'none';
+function syncBgButtons(): void {
+  const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
+  bgButtons.forEach((b) => {
+    const val = b.getAttribute('data-bg');
+    if (!currentConfig.environment.showBackgroundImage) {
+      b.classList.toggle('active', val === 'none');
+    } else {
+      b.classList.toggle('active', val === currentConfig.environment.backgroundImageUrl);
+    }
+  });
+}
 
-  container.innerHTML = `
-    <div id="ui-header" style="font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; padding-bottom: 2px;">
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="color: #4f46e5;">✨</span> VRM ビュワー
+// --------------------------------------------------
+// Unified Control Panel (Right Side HUD & Settings)
+// --------------------------------------------------
+function setupUnifiedUI(): void {
+  // 1. Floating Settings Gear Button (shown when minimized)
+  const gearBtn = document.createElement('button');
+  gearBtn.id = 'settings-open-btn';
+  gearBtn.title = '設定パネルを開く';
+  gearBtn.innerHTML = '⚙️';
+  document.body.appendChild(gearBtn);
+
+  // 2. Main Right-Side Unified Panel
+  const panel = document.createElement('div');
+  panel.id = 'panel-container';
+  panel.innerHTML = `
+    <div id="panel-header">
+      <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px;">
+        <span style="color: #4f46e5; font-size: 16px;">✨</span> VRM Controller
       </div>
-      <button id="ui-toggle-btn" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 11px; color: #475569; cursor: pointer; padding: 2px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px; font-weight: 600;">
-        <span id="ui-toggle-icon">▼</span> <span id="ui-toggle-text">閉じる</span>
-      </button>
+      <button id="panel-close-btn" class="panel-close-btn" title="最小化">✕</button>
     </div>
-    <div id="ui-body" style="margin-top: 8px;">
-      <div id="loading-status" style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+    <div id="panel-body">
+      <!-- Loading Status -->
+      <div id="loading-status" class="status-box">
         モデル読み込み中... <span id="progress-text">0%</span>
       </div>
-      <div id="controls-panel" style="display: flex; flex-direction: column; gap: 10px;">
+
+      <!-- Quick JSON Actions -->
+      <div class="section-box">
         <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-          <button id="quick-copy-json" style="flex: 1; min-width: 90px; padding: 6px 8px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">📋 JSONコピー</button>
-          <button id="quick-download-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">💾 保存</button>
-          <button id="quick-import-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">📥 読込</button>
-          <button id="quick-reset-json" style="padding: 6px 8px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 11px;">🔄 リセット</button>
+          <button id="quick-copy-json" class="action-btn primary" style="flex: 1; min-width: 80px;">📋 コピー</button>
+          <button id="quick-download-json" class="action-btn">💾 保存</button>
+          <button id="quick-import-json" class="action-btn">📥 読込</button>
+          <button id="quick-reset-json" class="action-btn">🔄 リセット</button>
         </div>
+      </div>
 
-        <!-- ショートアニメーション (Short Animation) セクション -->
-        <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎬 ショートアニメーション (Motion Graphics)</label>
-          <div style="display: flex; gap: 4px;">
-            <button id="anim-play-btn" style="flex: 1; padding: 6px 10px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: background 0.15s ease;">▶ アニメーション再生</button>
-            <button id="anim-stop-btn" style="padding: 6px 10px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 12px;">■ 停止</button>
-          </div>
+      <!-- VRM Model Selector -->
+      <div class="section-box">
+        <label class="section-label">👤 モデル切替 (VRM Model)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
+          <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
+          <button data-model="${resolveAssetUrl('/models/avatar.vrm')}" class="model-btn">👤 avatar.vrm</button>
+          <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
         </div>
+      </div>
 
-        <!-- 音声リップシンク (Audio Lip-Sync) セクション -->
-        <div style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">🎵 音声リップシンク (Audio Lip-Sync)</label>
-
-          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px;">
-            <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
-            <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 120px;">📁 音声ファイルを開く</button>
-          </div>
-
-          <!-- プレイヤーUI -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">001.wav</span>
-              <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
-            </div>
-
-            <!-- シークバー -->
-            <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
-
-            <!-- コントロールボタン群 -->
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
-              <div style="display: flex; gap: 4px;">
-                <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
-                <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
-                <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
-              </div>
-              <!-- 音量 -->
-              <div style="display: flex; align-items: center; gap: 2px;">
-                <span style="font-size: 10px;">🔊</span>
-                <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
-              </div>
-            </div>
-
-            <!-- 音素モニター (LipSync Phoneme Monitor) -->
-            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-              <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
-              <div style="display: flex; gap: 3px; flex: 1;">
-                <span class="phoneme-tag" data-phoneme="aa">あ (aa)</span>
-                <span class="phoneme-tag" data-phoneme="ih">い (ih)</span>
-                <span class="phoneme-tag" data-phoneme="ou">う (ou)</span>
-                <span class="phoneme-tag" data-phoneme="ee">え (ee)</span>
-                <span class="phoneme-tag" data-phoneme="oh">お (oh)</span>
-                <span class="phoneme-tag active" data-phoneme="nn">閉 (nn)</span>
-              </div>
-            </div>
-          </div>
+      <!-- Motions -->
+      <div class="section-box">
+        <label class="section-label">💃 モーション (Motion: 全18種)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
+          <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
+          <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
+          <button data-motion="${resolveAssetUrl('/animations/Flair.fbx')}" class="motion-btn">ダンス</button>
+          <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
+          <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
+          <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
+          <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
+          <button data-motion="${resolveAssetUrl('/animations/Kiss.fbx')}" class="motion-btn">キッス</button>
+          <button data-motion="${resolveAssetUrl('/animations/Joyful Jump.fbx')}" class="motion-btn">ジャンプ</button>
+          <button data-motion="${resolveAssetUrl('/animations/Clapping.fbx')}" class="motion-btn">拍手</button>
+          <button data-motion="${resolveAssetUrl('/animations/Cheering.fbx')}" class="motion-btn">応援</button>
+          <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
+          <button data-motion="${resolveAssetUrl('/animations/Surprised.fbx')}" class="motion-btn">驚き</button>
+          <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
+          <button data-motion="${resolveAssetUrl('/animations/Defeat.fbx')}" class="motion-btn">落ち込む</button>
+          <button data-motion="${resolveAssetUrl('/animations/Injured Idle.fbx')}" class="motion-btn">負傷待機</button>
+          <button data-motion="${resolveAssetUrl('/animations/Laying Idle.fbx')}" class="motion-btn">横たわる</button>
+          <button data-motion="${resolveAssetUrl('/animations/Standing Death Left 01.fbx')}" class="motion-btn">撃沈</button>
+          <button data-motion="none" class="motion-btn">停止</button>
         </div>
+      </div>
 
-        <div>
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">背景画像 (Background)</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-            <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn active">🌳 公園 (ON)</button>
-            <button data-bg="${resolveAssetUrl('/textures/room-background.jpg')}" class="bg-btn">🏠 部屋</button>
-            <button data-bg="none" class="bg-btn">OFF (単色)</button>
-          </div>
-        </div>
-        <div>
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モデル切替 (VRM Model)</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
-            <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
-            <button data-model="${resolveAssetUrl('/models/avatar.vrm')}" class="model-btn">👤 avatar.vrm</button>
-            <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
-          </div>
-        </div>
-        <div>
-          <label style="font-weight: 600; display: block; margin-bottom: 4px;">モーション (Motion: 全18種)</label>
-          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
-            <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
-            <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
-            <button data-motion="${resolveAssetUrl('/animations/Flair.fbx')}" class="motion-btn">ダンス</button>
-            <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
-            <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
-            <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
-            <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
-            <button data-motion="${resolveAssetUrl('/animations/Kiss.fbx')}" class="motion-btn">キッス</button>
-            <button data-motion="${resolveAssetUrl('/animations/Joyful Jump.fbx')}" class="motion-btn">ジャンプ</button>
-            <button data-motion="${resolveAssetUrl('/animations/Clapping.fbx')}" class="motion-btn">拍手</button>
-            <button data-motion="${resolveAssetUrl('/animations/Cheering.fbx')}" class="motion-btn">応援</button>
-            <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
-            <button data-motion="${resolveAssetUrl('/animations/Surprised.fbx')}" class="motion-btn">驚き</button>
-            <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
-            <button data-motion="${resolveAssetUrl('/animations/Defeat.fbx')}" class="motion-btn">落ち込む</button>
-            <button data-motion="${resolveAssetUrl('/animations/Injured Idle.fbx')}" class="motion-btn">負傷待機</button>
-            <button data-motion="${resolveAssetUrl('/animations/Laying Idle.fbx')}" class="motion-btn">横たわる</button>
-            <button data-motion="${resolveAssetUrl('/animations/Standing Death Left 01.fbx')}" class="motion-btn">撃沈</button>
-            <button data-motion="none" class="motion-btn">停止</button>
-          </div>
-        </div>
-
-      <div>
-        <label style="font-weight: 600; display: block; margin-bottom: 4px;">表情 (Expression)</label>
+      <!-- Expressions -->
+      <div class="section-box">
+        <label class="section-label">😄 表情 (Expression)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
           <button data-expr="neutral" class="expr-btn active">通常</button>
           <button data-expr="happy" class="expr-btn">笑顔</button>
@@ -1315,83 +1177,96 @@ function createUIOverlay() {
           <button data-expr="oh" class="expr-btn">お</button>
         </div>
       </div>
-      <div style="font-size: 11px; color: #64748b; line-height: 1.4; border-top: 1px solid #e2e8f0; padding-top: 8px;">
-        💡 右側GUIでシェーダー・アウトライン・光彩の全数値を微調整できます
+
+      <!-- Short Animation Controls -->
+      <div class="section-box">
+        <label class="section-label">🎬 ショートアニメーション</label>
+        <div style="display: flex; gap: 4px;">
+          <button id="anim-play-btn" class="action-btn primary" style="flex: 1;">▶ アニメーション再生</button>
+          <button id="anim-stop-btn" class="action-btn">■ 停止</button>
+        </div>
+      </div>
+
+      <!-- Audio Lip-Sync & Player -->
+      <div class="section-box">
+        <label class="section-label">🎵 音声リップシンク ＆ プレイヤー</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+          <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
+          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 110px;">📁 音声を開く</button>
+        </div>
+        <div class="player-box">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
+            <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
+          </div>
+          <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+            <div style="display: flex; gap: 4px;">
+              <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
+              <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
+              <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 2px;">
+              <span style="font-size: 10px;">🔊</span>
+              <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+            <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
+            <div style="display: flex; gap: 3px; flex: 1;">
+              <span class="phoneme-tag" data-phoneme="aa">あ</span>
+              <span class="phoneme-tag" data-phoneme="ih">い</span>
+              <span class="phoneme-tag" data-phoneme="ou">う</span>
+              <span class="phoneme-tag" data-phoneme="ee">え</span>
+              <span class="phoneme-tag" data-phoneme="oh">お</span>
+              <span class="phoneme-tag active" data-phoneme="nn">閉</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Background selector -->
+      <div class="section-box">
+        <label class="section-label">🌄 背景 (Background)</label>
+        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
+          <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn active">🌳 公園</button>
+          <button data-bg="${resolveAssetUrl('/textures/room-background.jpg')}" class="bg-btn">🏠 部屋</button>
+          <button data-bg="none" class="bg-btn">OFF (単色)</button>
+        </div>
+      </div>
+
+      <!-- lil-gui mount container -->
+      <div class="section-box" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
+        <label class="section-label" style="color: #6366f1; font-size: 12px; margin-bottom: 2px;">⚙️ 詳細パラメータ調整</label>
+        <div id="gui-mount-point"></div>
       </div>
     </div>
   `;
+  document.body.appendChild(panel);
 
-  const style = document.createElement('style');
-  style.textContent = `
-    .expr-btn, .motion-btn, .model-btn, .bg-btn {
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      color: #334155;
-    }
-    .expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover {
-      background: #e2e8f0;
-      border-color: #94a3b8;
-    }
-    .expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active {
-      background: #4f46e5;
-      color: #ffffff;
-      border-color: #4338ca;
-      font-weight: 600;
-    }
-    .phoneme-tag {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 1px 4px;
-      border-radius: 4px;
-      background: #e2e8f0;
-      color: #64748b;
-      transition: all 0.1s ease;
-    }
-    .phoneme-tag.active {
-      background: #4f46e5;
-      color: #ffffff;
-      transform: scale(1.08);
-    }
-  `;
-  document.head.appendChild(style);
-  document.body.appendChild(container);
-
-  // Toggle Collapse / Expand
-  const uiHeader = container.querySelector('#ui-header');
-  const uiBody = container.querySelector('#ui-body') as HTMLElement | null;
-  const uiToggleIcon = container.querySelector('#ui-toggle-icon');
-  const uiToggleText = container.querySelector('#ui-toggle-text');
-
-  let isUICollapsed = false;
-  setUICollapsed = (collapsed: boolean) => {
-    isUICollapsed = collapsed;
-    if (uiBody) {
-      uiBody.style.display = isUICollapsed ? 'none' : 'block';
-    }
-    if (uiToggleIcon) {
-      uiToggleIcon.textContent = isUICollapsed ? '▲' : '▼';
-    }
-    if (uiToggleText) {
-      uiToggleText.textContent = isUICollapsed ? '開く' : '閉じる';
-    }
-    container.style.padding = isUICollapsed ? '10px 16px' : '14px 18px';
+  // Setup Minimize / Open toggle
+  let isPanelOpen = true;
+  setPanelOpen = (open: boolean) => {
+    isPanelOpen = open;
+    panel.style.display = isPanelOpen ? 'flex' : 'none';
+    gearBtn.style.display = isPanelOpen ? 'none' : 'flex';
   };
 
-  const toggleUI = () => {
-    setUICollapsed(!isUICollapsed);
-  };
-
-  uiHeader?.addEventListener('click', (e) => {
-    toggleUI();
+  document.getElementById('panel-close-btn')?.addEventListener('click', () => {
+    setPanelOpen(false);
   });
 
+  gearBtn.addEventListener('click', () => {
+    setPanelOpen(true);
+  });
 
-  // Quick action listeners
+  // Setup lil-gui inside gui-mount-point
+  const mountPoint = document.getElementById('gui-mount-point');
+  if (mountPoint) {
+    setupGUI(mountPoint);
+  }
+
+  // Setup Quick JSON Actions
   document.getElementById('quick-copy-json')?.addEventListener('click', async () => {
     const ok = await copyConfigToClipboard(currentConfig);
     showToast(ok ? '📋 設定JSONをクリップボードにコピーしました！' : 'コピーに失敗しました');
@@ -1414,7 +1289,7 @@ function createUIOverlay() {
     showToast('🔄 デフォルト設定にリセットしました');
   });
 
-  // Short Animation Listeners
+  // Animation Play/Stop
   document.getElementById('anim-play-btn')?.addEventListener('click', (e) => {
     e.stopPropagation();
     animationPlayer.play();
@@ -1427,10 +1302,98 @@ function createUIOverlay() {
     showToast('⏹ アニメーションを停止しました');
   });
 
-  // --------------------------------------------------
-  // Audio Lip-Sync Event Listeners
-  // --------------------------------------------------
+  // Background Buttons
+  const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
+  bgButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const bg = btn.getAttribute('data-bg');
+      if (bg === 'none') {
+        currentConfig.environment.showBackgroundImage = false;
+      } else if (bg) {
+        currentConfig.environment.showBackgroundImage = true;
+        currentConfig.environment.backgroundImageUrl = bg;
+      }
+      updateBackgroundDisplay(currentConfig);
+      syncBgButtons();
+      gui.controllersRecursive().forEach((c) => c.updateDisplay());
+    });
+  });
 
+  // Model Buttons
+  const modelButtons = document.querySelectorAll<HTMLButtonElement>('.model-btn');
+  modelButtons.forEach((btn) => {
+    if (btn.classList.contains('voice-btn') || btn.id === 'open-audio-file-btn') return;
+    btn.addEventListener('click', () => {
+      const modelUrl = btn.getAttribute('data-model');
+      if (modelUrl) {
+        modelButtons.forEach((b) => {
+          if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
+            b.classList.remove('active');
+          }
+        });
+        btn.classList.add('active');
+        loadAvatarModel(modelUrl);
+      }
+    });
+  });
+
+  document.getElementById('open-local-vrm-btn')?.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.vrm';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const blobUrl = URL.createObjectURL(file);
+        modelButtons.forEach((b) => {
+          if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
+            b.classList.remove('active');
+          }
+        });
+        document.getElementById('open-local-vrm-btn')?.classList.add('active');
+        loadAvatarModel(blobUrl);
+      }
+    };
+    input.click();
+  });
+
+  // Motion Buttons
+  const motionButtons = document.querySelectorAll<HTMLButtonElement>('.motion-btn');
+  motionButtons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      motionButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const motionUrl = btn.getAttribute('data-motion');
+      if (!avatarInstance) return;
+
+      if (motionUrl === 'none') {
+        avatarInstance.stopAnimation();
+      } else if (motionUrl) {
+        const isLoop = motionUrl.includes('Idle') || motionUrl.includes('Walking');
+        await avatarInstance.playAnimation(motionUrl, isLoop);
+      }
+    });
+  });
+
+  // Expression Buttons
+  const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+  exprButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      exprButtons.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const expr = btn.getAttribute('data-expr');
+      if (expr) {
+        currentExprName = expr;
+        if (avatarInstance) {
+          avatarInstance.setExpression(expr, 1.0);
+        }
+      }
+    });
+  });
+
+  // Audio LipSync Controls
   const audioTitleEl = document.getElementById('audio-title');
   const playPauseBtn = document.getElementById('audio-play-pause-btn');
   const stopBtn = document.getElementById('audio-stop-btn');
@@ -1438,7 +1401,6 @@ function createUIOverlay() {
   const seekbar = document.getElementById('audio-seekbar') as HTMLInputElement | null;
   const volumeSlider = document.getElementById('audio-volume') as HTMLInputElement | null;
 
-  // File picker for audio
   document.getElementById('open-audio-file-btn')?.addEventListener('click', (e) => {
     e.stopPropagation();
     const input = document.createElement('input');
@@ -1457,7 +1419,6 @@ function createUIOverlay() {
     input.click();
   });
 
-  // Preset sample voice buttons
   document.querySelectorAll<HTMLButtonElement>('.voice-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -1474,11 +1435,9 @@ function createUIOverlay() {
     });
   });
 
-  // Play / Pause toggle
   playPauseBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     if (!audioLipSync.audioElement.src) {
-      // Default to 001.wav if no audio loaded
       const sampleBtn = document.getElementById('sample-voice-default') as HTMLButtonElement | null;
       sampleBtn?.click();
       return;
@@ -1490,12 +1449,10 @@ function createUIOverlay() {
     }
   });
 
-  // Stop button
   stopBtn?.addEventListener('click', () => {
     audioLipSync.stop();
   });
 
-  // Loop button
   let isLooping = false;
   loopBtn?.addEventListener('click', () => {
     isLooping = !isLooping;
@@ -1506,7 +1463,6 @@ function createUIOverlay() {
     showToast(isLooping ? '🔁 ループ再生 ON' : '🔁 ループ再生 OFF');
   });
 
-  // Seekbar
   seekbar?.addEventListener('input', () => {
     const percent = parseFloat(seekbar.value);
     const duration = audioLipSync.audioElement.duration || 0;
@@ -1516,123 +1472,17 @@ function createUIOverlay() {
     }
   });
 
-  // Volume slider
   volumeSlider?.addEventListener('input', () => {
     const vol = parseFloat(volumeSlider.value);
     audioLipSync.setVolume(vol);
   });
-
-  return container;
 }
 
-createUIOverlay();
+setupUnifiedUI();
 
 // Initial load of default voice (001.wav)
 audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
 
-function syncBgButtons(): void {
-  const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
-  bgButtons.forEach((b) => {
-    const val = b.getAttribute('data-bg');
-    if (!currentConfig.environment.showBackgroundImage) {
-      b.classList.toggle('active', val === 'none');
-    } else {
-      b.classList.toggle('active', val === currentConfig.environment.backgroundImageUrl);
-    }
-  });
-}
-
-// Setup background selector buttons
-const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
-bgButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const bg = btn.getAttribute('data-bg');
-    if (bg === 'none') {
-      currentConfig.environment.showBackgroundImage = false;
-    } else if (bg) {
-      currentConfig.environment.showBackgroundImage = true;
-      currentConfig.environment.backgroundImageUrl = bg;
-    }
-    updateBackgroundDisplay(currentConfig);
-    syncBgButtons();
-    gui.controllersRecursive().forEach((c) => c.updateDisplay());
-  });
-});
-
-// Setup model selector buttons
-const modelButtons = document.querySelectorAll<HTMLButtonElement>('.model-btn');
-modelButtons.forEach((btn) => {
-  if (btn.classList.contains('voice-btn') || btn.id === 'open-audio-file-btn') return;
-  btn.addEventListener('click', () => {
-    const modelUrl = btn.getAttribute('data-model');
-    if (modelUrl) {
-      modelButtons.forEach((b) => {
-        if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
-          b.classList.remove('active');
-        }
-      });
-      btn.classList.add('active');
-      loadAvatarModel(modelUrl);
-    }
-  });
-});
-
-document.getElementById('open-local-vrm-btn')?.addEventListener('click', () => {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.vrm';
-  input.onchange = (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0];
-    if (file) {
-      const blobUrl = URL.createObjectURL(file);
-      modelButtons.forEach((b) => {
-        if (!b.classList.contains('voice-btn') && b.id !== 'open-audio-file-btn') {
-          b.classList.remove('active');
-        }
-      });
-      document.getElementById('open-local-vrm-btn')?.classList.add('active');
-      loadAvatarModel(blobUrl);
-    }
-  };
-  input.click();
-});
-
-// Setup expression buttons
-const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
-exprButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    exprButtons.forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const expr = btn.getAttribute('data-expr');
-    if (expr) {
-      currentExprName = expr;
-      if (avatarInstance) {
-        avatarInstance.setExpression(expr, 1.0);
-      }
-    }
-  });
-});
-
-// Setup motion buttons
-const motionButtons = document.querySelectorAll<HTMLButtonElement>('.motion-btn');
-motionButtons.forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    motionButtons.forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const motionUrl = btn.getAttribute('data-motion');
-    if (!avatarInstance) return;
-
-    if (motionUrl === 'none') {
-      avatarInstance.stopAnimation();
-    } else if (motionUrl) {
-      const isLoop = motionUrl.includes('Idle') || motionUrl.includes('Walking');
-      await avatarInstance.playAnimation(motionUrl, isLoop);
-    }
-
-  });
-});
 
 // --------------------------------------------------
 // Resize & Render Loop
