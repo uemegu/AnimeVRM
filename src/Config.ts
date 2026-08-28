@@ -114,6 +114,7 @@ export interface AvatarConfig {
     smoothing: number;
     rmsThreshold: number;
     audioDelay?: number;
+    voiceGender?: 'female' | 'male';
   };
   shortAnimation: ShortAnimationConfig;
 }
@@ -253,6 +254,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     smoothing: 0.17,
     rmsThreshold: 0.008,
     audioDelay: 0.05,
+    voiceGender: 'female',
   },
   shortAnimation: {
     cuts: [
