@@ -475,20 +475,12 @@ export class Avatar {
     }
   }
 
-  public update(delta: number, elapsed: number): void {
+  public update(delta: number, elapsed: number, windCallback?: () => void): void {
     if (!this.vrm) return;
 
-    // Update VRM internal state
-    this.vrm.update(delta);
-
-    // Update animation mixer
+    // Update animation mixer first to update bone transformations
     if (this.mixer) {
       this.mixer.update(delta);
-    }
-
-    // Update spring bones
-    if (this.vrm.springBoneManager?.update) {
-      this.vrm.springBoneManager.update(delta);
     }
 
     // Update eye blinking
@@ -501,6 +493,14 @@ export class Avatar {
     if (!this.currentAction) {
       this.updateBreathing(elapsed);
     }
+
+    // Apply wind forces before VRM spring bone physics step
+    if (windCallback) {
+      windCallback();
+    }
+
+    // Update VRM internal state (expressions, humanoid, spring bones)
+    this.vrm.update(delta);
 
     // Update toon face shader & uniforms
     this.shaderController?.update();

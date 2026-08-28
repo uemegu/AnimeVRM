@@ -65,13 +65,8 @@ export class TypographyOverlay {
 
   public enterTransparentMode(cfg: AvatarConfig): void {
     this.bgLayer.style.display = 'block';
-    if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
-      this.bgLayer.style.backgroundImage = `url("${cfg.environment.backgroundImageUrl}")`;
-      this.bgLayer.style.backgroundColor = '#000000';
-    } else {
-      this.bgLayer.style.backgroundImage = 'none';
-      this.bgLayer.style.backgroundColor = cfg.environment.backgroundColor || '#ffffff';
-    }
+    this.bgLayer.style.backgroundImage = 'none';
+    this.bgLayer.style.backgroundColor = cfg.environment.backgroundColor || '#ffffff';
   }
 
   public exitTransparentMode(): void {

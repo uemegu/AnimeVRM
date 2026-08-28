@@ -23,6 +23,53 @@ export interface DepthRimConfig {
   intensity: number;
 }
 
+export interface SunShaftsConfig {
+  enabled: boolean;
+  followDirectionalLight: boolean;
+  sunPosition: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  exposure: number;
+  decay: number;
+  density: number;
+  weight: number;
+  color: string;
+  shimmer: number;
+}
+
+export interface LensFlareConfig {
+  enabled: boolean;
+  sunSize: number;
+  sunColor: string;
+  glowIntensity: number;
+  starburstIntensity: number;
+  anamorphicIntensity: number;
+  ghostIntensity: number;
+  haloIntensity: number;
+}
+
+export interface WindParticlesConfig {
+  enabled: boolean;
+  count: number;
+  size: number;
+  color: string;
+  opacity: number;
+  speedFactor: number;
+}
+
+export interface WindConfig {
+  enabled: boolean;
+  speed: number;
+  direction: number; // degrees 0-360
+  elevation: number; // degrees -45 to 45
+  turbulence: number;
+  gustFrequency: number;
+  gustStrength: number;
+  particles: WindParticlesConfig;
+}
+
 export interface AvatarConfig {
   materials: {
     body: MaterialStyleParams;
@@ -79,6 +126,8 @@ export interface AvatarConfig {
       posZ: number;
     };
     depthRim: DepthRimConfig;
+    sunShafts: SunShaftsConfig;
+    lensFlare: LensFlareConfig;
   };
   postProcessing: {
     toneMappingMode: 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
@@ -128,6 +177,7 @@ export interface AvatarConfig {
     audioDelay?: number;
     voiceGender?: 'female' | 'male';
   };
+  wind: WindConfig;
   shortAnimation: ShortAnimationConfig;
 }
 
@@ -230,6 +280,31 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       power: 4.0,
       threshold: 0.15,
       intensity: 0.8,
+    },
+    sunShafts: {
+      enabled: true,
+      followDirectionalLight: false,
+      sunPosition: {
+        x: 3.2,
+        y: 4.3,
+        z: -3.8,
+      },
+      exposure: 0.24,
+      decay: 0.91,
+      density: 0.8,
+      weight: 0.24,
+      color: '#fff2db',
+      shimmer: 0.4,
+    },
+    lensFlare: {
+      enabled: true,
+      sunSize: 1.25,
+      sunColor: '#fff8ee',
+      glowIntensity: 1.15,
+      starburstIntensity: 1.05,
+      anamorphicIntensity: 1.2,
+      ghostIntensity: 0.85,
+      haloIntensity: 0.9,
     },
   },
   postProcessing: {
@@ -392,9 +467,23 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       },
     ],
   },
-
-
-
+  wind: {
+    enabled: true,
+    speed: 0.1,
+    direction: 45, // degrees
+    elevation: 5, // degrees
+    turbulence: 0.15,
+    gustFrequency: 0.2,
+    gustStrength: 0.15,
+    particles: {
+      enabled: false,
+      count: 160,
+      size: 0.035,
+      color: '#e2f8ff',
+      opacity: 0.8,
+      speedFactor: 1.0,
+    },
+  },
 };
 
 export function cloneConfig(cfg: AvatarConfig): AvatarConfig {
