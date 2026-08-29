@@ -238,7 +238,7 @@ export class ScenarioPlayer {
     // 2. Play Motion
     if (avatar && step.motionUrl) {
       const resolvedMotion = resolveAssetUrl(step.motionUrl);
-      const isLoop = resolvedMotion.includes('Idle') || resolvedMotion.includes('Walking');
+      const isLoop = resolvedMotion.includes('Idle') || resolvedMotion.includes('Walking') || resolvedMotion.includes('Jogging') || resolvedMotion.includes('Pose');
       avatar.playAnimation(resolvedMotion, isLoop);
     }
 

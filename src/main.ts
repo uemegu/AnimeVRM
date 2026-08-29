@@ -52,7 +52,6 @@ function getActivePresetId(): ScenePresetId {
   }
   const tod = currentConfig.activeScene?.timeOfDay;
   if (tod === 'morning') return 'morning_park';
-  if (tod === 'noon') return 'noon_park';
   return 'evening_park';
 }
 
@@ -74,8 +73,6 @@ function switchScene(presetId: ScenePresetId, notify = true): void {
     location: preset.category,
     timeOfDay: presetId.startsWith('morning')
       ? 'morning'
-      : presetId.startsWith('noon')
-      ? 'noon'
       : presetId.startsWith('evening')
       ? 'evening'
       : undefined,
@@ -398,6 +395,10 @@ controls.maxPolarAngle = Math.PI / 2 + 0.1;
 updateBackgroundDisplay(currentConfig);
 updateMidgroundDisplay(currentConfig);
 
+function isMotionLoop(url: string): boolean {
+  return url.includes('Idle') || url.includes('Walking') || url.includes('Jogging') || url.includes('Pose');
+}
+
 // --------------------------------------------------
 // Typography Overlay & Short Animation Player
 // --------------------------------------------------
@@ -434,7 +435,7 @@ const animationPlayer = new ShortAnimationPlayer({
     }
     if (motionUrl && motionUrl !== 'none') {
       const resolved = resolveAssetUrl(motionUrl);
-      const isLoop = resolved.includes('Idle') || resolved.includes('Walking');
+      const isLoop = isMotionLoop(resolved);
       avatarInstance.playAnimation(resolved, isLoop);
     }
   },
@@ -443,7 +444,7 @@ const animationPlayer = new ShortAnimationPlayer({
     if (originalMotionUrlBeforeAnim === 'none') {
       avatarInstance.stopAnimation();
     } else if (originalMotionUrlBeforeAnim) {
-      const isLoop = originalMotionUrlBeforeAnim.includes('Idle') || originalMotionUrlBeforeAnim.includes('Walking');
+      const isLoop = isMotionLoop(originalMotionUrlBeforeAnim);
       avatarInstance.playAnimation(originalMotionUrlBeforeAnim, isLoop);
     }
   },
@@ -756,10 +757,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
   const sceneOptions: Record<string, ScenePresetId> = {
     '🌳 朝・公園 (Morning Park)': 'morning_park',
-    '🌳 昼・公園 (Noon Park)': 'noon_park',
     '🌳 夕方・公園 (Evening Park)': 'evening_park',
     '🏫 朝・校門 (Morning School Gate)': 'morning_school',
-    '🏫 昼・校門 (Noon School Gate)': 'noon_school',
     '🏫 夕方・校門 (Evening School Gate)': 'evening_school',
     '💡 明るい・室内 (Bright Indoor)': 'bright_indoor',
     '🌙 暗い・室内 (Dark Indoor)': 'dark_indoor',
@@ -774,10 +773,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
   const sceneActions = {
     morningPark: () => switchScene('morning_park'),
-    noonPark: () => switchScene('noon_park'),
     eveningPark: () => switchScene('evening_park'),
     morningSchool: () => switchScene('morning_school'),
-    noonSchool: () => switchScene('noon_school'),
     eveningSchool: () => switchScene('evening_school'),
     brightIndoor: () => switchScene('bright_indoor'),
     darkIndoor: () => switchScene('dark_indoor'),
@@ -785,10 +782,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
   const subFolder = sceneFolder.addFolder('クイック切り替えボタン');
   subFolder.add(sceneActions, 'morningPark').name('🌳 朝・公園');
-  subFolder.add(sceneActions, 'noonPark').name('🌳 昼・公園');
   subFolder.add(sceneActions, 'eveningPark').name('🌳 夕方・公園');
   subFolder.add(sceneActions, 'morningSchool').name('🏫 朝・校門');
-  subFolder.add(sceneActions, 'noonSchool').name('🏫 昼・校門');
   subFolder.add(sceneActions, 'eveningSchool').name('🏫 夕方・校門');
   subFolder.add(sceneActions, 'brightIndoor').name('💡 明るい・室内');
   subFolder.add(sceneActions, 'darkIndoor').name('🌙 暗い・室内');
@@ -829,23 +824,18 @@ function setupGUI(mountPoint?: HTMLElement): void {
   const motionPresetOptions = {
     'None (維持 / 変更なし)': 'none',
     '待機 (Idle)': resolveAssetUrl('/animations/Idle.fbx'),
+    '立ち待機 (Standing Idle)': resolveAssetUrl('/animations/Standing Idle.fbx'),
+    '立ちポーズ (Female Standing Pose)': resolveAssetUrl('/animations/Female Standing Pose.fbx'),
     '歩行 (Walking)': resolveAssetUrl('/animations/Walking.fbx'),
-    'ダンス (Flair)': resolveAssetUrl('/animations/Flair.fbx'),
+    'ジョギング (Jogging)': resolveAssetUrl('/animations/Jogging.fbx'),
     '挨拶 (Standing Greeting)': resolveAssetUrl('/animations/Standing Greeting.fbx'),
     'お辞儀 (Quick Formal Bow)': resolveAssetUrl('/animations/Quick Formal Bow.fbx'),
     'うなずく (Acknowledging)': resolveAssetUrl('/animations/Acknowledging.fbx'),
     '手を振る (Dismissing Gesture)': resolveAssetUrl('/animations/Dismissing Gesture.fbx'),
-    'キッス (Kiss)': resolveAssetUrl('/animations/Kiss.fbx'),
-    'ジャンプ (Joyful Jump)': resolveAssetUrl('/animations/Joyful Jump.fbx'),
-    '拍手 (Clapping)': resolveAssetUrl('/animations/Clapping.fbx'),
-    '応援 (Cheering)': resolveAssetUrl('/animations/Cheering.fbx'),
-    'パンチ (Punching)': resolveAssetUrl('/animations/Punching.fbx'),
-    '驚き (Surprised)': resolveAssetUrl('/animations/Surprised.fbx'),
+    '敬礼 (Salute)': resolveAssetUrl('/animations/Salute.fbx'),
+    '喜ぶ (Excited)': resolveAssetUrl('/animations/Excited.fbx'),
     '怒り (Angry)': resolveAssetUrl('/animations/Angry.fbx'),
-    '落ち込む (Defeat)': resolveAssetUrl('/animations/Defeat.fbx'),
-    '負傷待機 (Injured Idle)': resolveAssetUrl('/animations/Injured Idle.fbx'),
-    '横たわる (Laying Idle)': resolveAssetUrl('/animations/Laying Idle.fbx'),
-    '撃沈 (Standing Death)': resolveAssetUrl('/animations/Standing Death Left 01.fbx'),
+    'パンチ (Punching)': resolveAssetUrl('/animations/Punching.fbx'),
     '停止 (Stop)': 'stop',
   };
 
@@ -1758,26 +1748,21 @@ function setupUnifiedUI(): void {
 
       <!-- Motions -->
       <div class="section-box">
-        <label class="section-label">💃 モーション (Motion: 全18種)</label>
+        <label class="section-label">💃 モーション (Motion: 全13種)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
           <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
+          <button data-motion="${resolveAssetUrl('/animations/Standing Idle.fbx')}" class="motion-btn">立ち待機</button>
+          <button data-motion="${resolveAssetUrl('/animations/Female Standing Pose.fbx')}" class="motion-btn">立ちポーズ</button>
           <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
-          <button data-motion="${resolveAssetUrl('/animations/Flair.fbx')}" class="motion-btn">ダンス</button>
+          <button data-motion="${resolveAssetUrl('/animations/Jogging.fbx')}" class="motion-btn">ジョギング</button>
           <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
           <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
           <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
           <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
-          <button data-motion="${resolveAssetUrl('/animations/Kiss.fbx')}" class="motion-btn">キッス</button>
-          <button data-motion="${resolveAssetUrl('/animations/Joyful Jump.fbx')}" class="motion-btn">ジャンプ</button>
-          <button data-motion="${resolveAssetUrl('/animations/Clapping.fbx')}" class="motion-btn">拍手</button>
-          <button data-motion="${resolveAssetUrl('/animations/Cheering.fbx')}" class="motion-btn">応援</button>
-          <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
-          <button data-motion="${resolveAssetUrl('/animations/Surprised.fbx')}" class="motion-btn">驚き</button>
+          <button data-motion="${resolveAssetUrl('/animations/Salute.fbx')}" class="motion-btn">敬礼</button>
+          <button data-motion="${resolveAssetUrl('/animations/Excited.fbx')}" class="motion-btn">喜ぶ</button>
           <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
-          <button data-motion="${resolveAssetUrl('/animations/Defeat.fbx')}" class="motion-btn">落ち込む</button>
-          <button data-motion="${resolveAssetUrl('/animations/Injured Idle.fbx')}" class="motion-btn">負傷待機</button>
-          <button data-motion="${resolveAssetUrl('/animations/Laying Idle.fbx')}" class="motion-btn">横たわる</button>
-          <button data-motion="${resolveAssetUrl('/animations/Standing Death Left 01.fbx')}" class="motion-btn">撃沈</button>
+          <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
           <button data-motion="none" class="motion-btn">停止</button>
         </div>
       </div>
@@ -1871,21 +1856,19 @@ function setupUnifiedUI(): void {
           <!-- Park -->
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🌳 公園</span>
-            <span style="font-size: 10px; color: #94a3b8;">朝 / 昼 / 夕</span>
+            <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
             <button data-scene="morning_park" class="scene-preset-btn" title="青空・強い太陽光・昼光フレア（多層）">🌅 朝</button>
-            <button data-scene="noon_park" class="scene-preset-btn" title="朝の斜光・大気フォグ・朝焼け光条（多層）">☀️ 昼</button>
             <button data-scene="evening_park" class="scene-preset-btn active" title="茜色夕日・西日光条・夕焼けフレア（多層）">🌇 夕方</button>
           </div>
           <!-- School Gate -->
           <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
             <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏫 校門</span>
-            <span style="font-size: 10px; color: #94a3b8;">朝 / 昼 / 夕</span>
+            <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
             <button data-scene="morning_school" class="scene-preset-btn" title="青空・澄んだ朝陽・校門">🌅 朝</button>
-            <button data-scene="noon_school" class="scene-preset-btn" title="晴天の昼・高彩度・校門">☀️ 昼</button>
             <button data-scene="evening_school" class="scene-preset-btn" title="茜色夕焼け・西日・校門">🌇 夕方</button>
           </div>
           <!-- Indoor Classroom -->
@@ -2084,7 +2067,7 @@ function setupUnifiedUI(): void {
       if (motionUrl === 'none') {
         avatarInstance.stopAnimation();
       } else if (motionUrl) {
-        const isLoop = motionUrl.includes('Idle') || motionUrl.includes('Walking');
+        const isLoop = isMotionLoop(motionUrl);
         await avatarInstance.playAnimation(motionUrl, isLoop);
       }
     });

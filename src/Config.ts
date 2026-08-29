@@ -181,18 +181,15 @@ export interface AvatarConfig {
   activeScene?: {
     presetId?:
       | 'morning_park'
-      | 'noon_park'
       | 'evening_park'
       | 'morning_school'
-      | 'noon_school'
       | 'evening_school'
       | 'bright_indoor'
       | 'dark_indoor'
       | 'morning_outdoor'
-      | 'noon_outdoor'
       | 'evening_outdoor'
       | string;
-    timeOfDay?: 'morning' | 'noon' | 'evening';
+    timeOfDay?: 'morning' | 'evening';
     location?: 'outdoor' | 'indoor';
   };
   wind: WindConfig;
