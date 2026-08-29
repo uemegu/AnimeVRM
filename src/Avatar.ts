@@ -11,6 +11,7 @@ import { applySmoothNormalsToHierarchy } from './shader/SmoothNormalHelper';
 import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
+import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './effects/text';
 
 export interface AvatarOptions {
   modelUrl: string;
@@ -19,6 +20,7 @@ export interface AvatarOptions {
   autoBlink?: boolean;
   lookAtCamera?: boolean;
   enableBreathing?: boolean;
+  effectTextManager?: EffectTextManager;
   onProgress?: (progress: number) => void;
   onLoaded?: (avatar: Avatar) => void;
   onError?: (error: unknown) => void;
@@ -183,8 +185,9 @@ export class Avatar {
   public mixer: THREE.AnimationMixer | null = null;
   public currentAction: THREE.AnimationAction | null = null;
   public currentAnimationUrl: string | null = null;
+  public effectTextManager: EffectTextManager | null = null;
 
-  private options: Required<AvatarOptions>;
+  private options: AvatarOptions;
   private blinkTimer = 0;
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
   private currentExpression: string = 'neutral';
@@ -208,11 +211,13 @@ export class Avatar {
       autoBlink: options.autoBlink ?? true,
       lookAtCamera: options.lookAtCamera ?? true,
       enableBreathing: options.enableBreathing ?? true,
+      effectTextManager: options.effectTextManager,
       onProgress: options.onProgress ?? (() => {}),
       onLoaded: options.onLoaded ?? (() => {}),
       onError: options.onError ?? ((err) => console.error(err)),
     };
 
+    this.effectTextManager = options.effectTextManager ?? new EffectTextManager(scene);
     this.blinkTimer = this.getRandomBlinkInterval(3, 7);
     this.loadModel();
   }
@@ -504,9 +509,26 @@ export class Avatar {
 
     // Update toon face shader & uniforms
     this.shaderController?.update();
+
+    // Update active emotion effect texts
+    this.effectTextManager?.update(delta, this.camera);
+  }
+
+  /**
+   * Display manga-style emotion effect text attached to this VRM
+   */
+  public showEffectText(options: Omit<ShowEffectTextOptions, 'target'> & { target?: VRM | THREE.Object3D }): EffectTextInstance | null {
+    if (!this.effectTextManager) return null;
+    return this.effectTextManager.show({
+      target: options.target ?? (this.vrm ?? undefined),
+      ...options,
+    });
   }
 
   public dispose(): void {
+    this.effectTextManager?.dispose();
+    this.effectTextManager = null;
+
     this.shaderController?.dispose();
     this.shaderController = null;
 

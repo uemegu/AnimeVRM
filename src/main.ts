@@ -1486,7 +1486,111 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: number) => {
       audioLipSync.rmsThreshold = val;
     });
-  lipFolder.open();
+  lipFolder.close();
+
+  // 10. Manga Emotion Effect Text Folder
+  const effectTextFolder = gui.addFolder('💬 感情エフェクト文字 (Emotion Effect Text)');
+  const effectTextState = {
+    text: 'ワナワナ',
+    preset: 'wanawana',
+    mode: 'auto',
+    anchor: 'head',
+    duration: 1.8,
+    scale: 1.0,
+    offsetX: 0.0,
+    offsetY: 0.22,
+    offsetZ: 0.04,
+    show: () => {
+      if (!avatarInstance) return;
+      const modeParam = effectTextState.mode === 'auto' ? undefined : (effectTextState.mode as any);
+      avatarInstance.showEffectText({
+        text: effectTextState.text || 'ワナワナ',
+        stylePreset: effectTextState.preset,
+        mode: modeParam,
+        anchor: effectTextState.anchor as any,
+        offset: {
+          x: effectTextState.offsetX,
+          y: effectTextState.offsetY,
+          z: effectTextState.offsetZ,
+        },
+        duration: effectTextState.duration,
+        scale: effectTextState.scale,
+      });
+      showToast(`💬 「${effectTextState.text}」を表示しました`);
+    },
+    showMulti: () => {
+      if (!avatarInstance?.effectTextManager || !avatarInstance.vrm) return;
+      avatarInstance.effectTextManager.showMultiple([
+        {
+          text: 'ガーン',
+          target: avatarInstance.vrm,
+          anchor: 'head',
+          stylePreset: 'gaan',
+          offset: { x: 0, y: 0.22, z: 0.04 },
+        },
+        {
+          text: '・・・・',
+          target: avatarInstance.vrm,
+          anchor: 'head',
+          stylePreset: 'shiin',
+          offset: { x: 0.22, y: 0.12, z: 0 },
+        },
+        {
+          text: 'イライラ',
+          target: avatarInstance.vrm,
+          anchor: 'rightHand',
+          stylePreset: 'iraira',
+          offset: { x: 0.14, y: 0.08, z: 0 },
+        },
+      ]);
+      showToast('💥 複数エフェクト文字を同時表示しました');
+    },
+    clearAll: () => {
+      avatarInstance?.effectTextManager?.clear();
+      showToast('🧹 全てのエフェクト文字をクリアしました');
+    },
+  };
+
+  effectTextFolder.add(effectTextState, 'text').name('表示テキスト (Text)');
+  effectTextFolder
+    .add(effectTextState, 'preset', {
+      '🟣 ワナワナ (wanawana: 湧き上がり)': 'wanawana',
+      '🔴 イライラ (iraira: 湧き上がり)': 'iraira',
+      '💖 ドキドキ (doki: 湧き上がり)': 'doki',
+      '🔵 ガーン (gaan: 中央落下)': 'gaan',
+      '⚪ しーん (shiin: 中央浮遊)': 'shiin',
+      '✨ キラキラ (kirakira: 中央ポップ)': 'kirakira',
+      '⚡ ビクッ (biku: 中央衝撃)': 'biku',
+    })
+    .name('プリセット (Preset)');
+  effectTextFolder
+    .add(effectTextState, 'mode', {
+      '自動 (Auto - プリセット設定に従う)': 'auto',
+      '連続湧き上がり (Rising Stream)': 'stream',
+      '単一・中央表示 (Single Banner)': 'single',
+    })
+    .name('表示モード (Mode)');
+  effectTextFolder
+    .add(effectTextState, 'anchor', {
+      '頭 (Head)': 'head',
+      '首 (Neck)': 'neck',
+      '胸 (Chest)': 'chest',
+      '腰 (Hips)': 'hips',
+      '左肩 (Left Shoulder)': 'leftShoulder',
+      '右肩 (Right Shoulder)': 'rightShoulder',
+      '左手 (Left Hand)': 'leftHand',
+      '右手 (Right Hand)': 'rightHand',
+    })
+    .name('追従ボーン (Anchor)');
+  effectTextFolder.add(effectTextState, 'duration', 0.5, 5.0, 0.1).name('表示時間秒 (Duration)');
+  effectTextFolder.add(effectTextState, 'scale', 0.3, 2.5, 0.05).name('サイズ倍率 (Scale)');
+  effectTextFolder.add(effectTextState, 'offsetX', -1.5, 1.5, 0.02).name('オフセット X (0で中央)');
+  effectTextFolder.add(effectTextState, 'offsetY', -1.5, 1.5, 0.02).name('オフセット Y');
+  effectTextFolder.add(effectTextState, 'offsetZ', -1.5, 1.5, 0.02).name('オフセット Z');
+  effectTextFolder.add(effectTextState, 'show').name('▶ エフェクト表示 (Show)');
+  effectTextFolder.add(effectTextState, 'showMulti').name('💥 複数同時表示テスト');
+  effectTextFolder.add(effectTextState, 'clearAll').name('✕ 全消去 (Clear All)');
+  effectTextFolder.open();
 }
 
 // --------------------------------------------------
@@ -1780,6 +1884,38 @@ function setupUnifiedUI(): void {
           <button data-expr="aa" class="expr-btn">あ</button>
           <button data-expr="ee" class="expr-btn">え</button>
           <button data-expr="oh" class="expr-btn">お</button>
+        </div>
+      </div>
+
+      <!-- Manga Emotion Effect Texts -->
+      <div class="section-box" style="border-left: 3px solid #ec4899; padding-left: 2px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label class="section-label" style="color: #db2777; font-weight: 700;">💬 感情エフェクト文字 (Emotion Text)</label>
+          <button id="quick-clear-effect-text-btn" style="font-size: 10px; padding: 2px 6px; background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; border-radius: 4px; cursor: pointer; font-weight: 600;">全消去</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;" id="effect-text-buttons">
+          <button class="effect-text-btn" data-preset="wanawana" data-text="ワナワナ" data-expr="angry" style="background: #fdf4ff; border-color: #f0abfc; color: #a21caf;">🟣 ワナワナ</button>
+          <button class="effect-text-btn" data-preset="iraira" data-text="イライラ" data-expr="angry" style="background: #fef2f2; border-color: #fca5a5; color: #dc2626;">🔴 イライラ</button>
+          <button class="effect-text-btn" data-preset="gaan" data-text="ガーン" data-expr="sad" style="background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;">🔵 ガーン</button>
+          <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="background: #fefce8; border-color: #fde047; color: #ca8a04;">✨ キラキラ</button>
+          <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">⚪ しーん</button>
+          <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="background: #fff1f2; border-color: #fda4af; color: #e11d48;">💖 ドキドキ</button>
+          <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="background: #fef9c3; border-color: #facc15; color: #854d0e;">⚡ ビクッ！</button>
+          <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="background: #f0fdf4; border-color: #86efac; color: #15803d;">🎉 やったー！</button>
+          <button class="effect-text-btn" data-preset="wanawana" data-text="ゾクッ…" data-expr="surprised" style="background: #faf5ff; border-color: #d8b4fe; color: #7e22ce;">🥶 ゾクッ…</button>
+        </div>
+        <div style="display: flex; gap: 4px; margin-top: 3px;">
+          <input type="text" id="quick-custom-effect-text" placeholder="自由な文字 (例: ぷんぷん)" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+          <select id="quick-custom-effect-preset" style="font-size: 10.5px; padding: 4px 2px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;">
+            <option value="kirakira">✨ キラキラ</option>
+            <option value="wanawana">🟣 ワナワナ</option>
+            <option value="iraira">🔴 イライラ</option>
+            <option value="gaan">🔵 ガーン</option>
+            <option value="shiin">⚪ しーん</option>
+            <option value="doki">💖 ドキドキ</option>
+            <option value="biku">⚡ ビクッ</option>
+          </select>
+          <button id="quick-custom-effect-btn" class="action-btn primary" style="padding: 4px 8px; font-size: 11px; background: #db2777; border-color: #be185d;">表示</button>
         </div>
       </div>
 
@@ -2088,6 +2224,61 @@ function setupUnifiedUI(): void {
         }
       }
     });
+  });
+
+  // Manga Emotion Effect Text Buttons
+  document.querySelectorAll<HTMLButtonElement>('.effect-text-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const preset = btn.getAttribute('data-preset') || 'wanawana';
+      const text = btn.getAttribute('data-text') || 'ワナワナ';
+      const expr = btn.getAttribute('data-expr');
+
+      if (avatarInstance) {
+        if (expr) {
+          avatarInstance.setExpression(expr, 1.0);
+          exprButtons.forEach((b) => {
+            b.classList.toggle('active', b.getAttribute('data-expr') === expr);
+          });
+        }
+        avatarInstance.showEffectText({
+          text,
+          stylePreset: preset,
+          anchor: 'head',
+        });
+        showToast(`💬 「${text}」を表示しました`);
+      }
+    });
+  });
+
+  // Custom Effect Text Trigger
+  const customEffectInput = document.getElementById('quick-custom-effect-text') as HTMLInputElement | null;
+  const customEffectPreset = document.getElementById('quick-custom-effect-preset') as HTMLSelectElement | null;
+  const customEffectBtn = document.getElementById('quick-custom-effect-btn');
+
+  const triggerCustomEffect = () => {
+    const text = customEffectInput?.value.trim() || 'キラキラ';
+    const preset = customEffectPreset?.value || 'kirakira';
+    if (avatarInstance) {
+      avatarInstance.showEffectText({
+        text,
+        stylePreset: preset,
+        anchor: 'head',
+      });
+      showToast(`💬 「${text}」を表示しました`);
+    }
+  };
+
+  customEffectBtn?.addEventListener('click', triggerCustomEffect);
+  customEffectInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      triggerCustomEffect();
+    }
+  });
+
+  // Quick Clear Button
+  document.getElementById('quick-clear-effect-text-btn')?.addEventListener('click', () => {
+    avatarInstance?.effectTextManager?.clear();
+    showToast('🧹 全てのエフェクト文字をクリアしました');
   });
 
   // Audio LipSync Controls
