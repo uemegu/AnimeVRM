@@ -264,4 +264,38 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       frequency: 38,
     },
   },
+
+  yatta: {
+    name: 'yatta',
+    spawnMode: 'single',
+    style: {
+      fontFamily: '"Mochiy Pop One", "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Meiryo", "Arial Black", sans-serif',
+      fontWeight: '900',
+      textColor: ['#fff176', '#ff5722'],
+      gradientDirection: 'vertical',
+      strokeColor: '#ffffff',
+      strokeWidth: 16,
+      outerStrokeColor: '#bf360c',
+      outerStrokeWidth: 8,
+      shadowColor: 'rgba(191, 54, 12, 0.85)',
+      shadowOffset: { x: 5, y: 7 },
+      shadowBlur: 0,
+      decorations: ['sparkle', 'exclamation'],
+      decorationColor: '#ffd600',
+      charJitter: {
+        rotationRange: 0.14,
+        offsetYRange: 8,
+        scaleRange: 0.1,
+      },
+      slant: -6,
+    },
+    animations: ['pop', 'pulse', 'float', 'fadeOut'],
+    defaultDuration: 2.4,
+    defaultScale: 0.75,
+    defaultOffset: { x: 0, y: 0.24, z: 0.04 },
+    floatParams: {
+      speed: 3.5,
+      height: 0.04,
+    },
+  },
 };

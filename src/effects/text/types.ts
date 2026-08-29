@@ -42,7 +42,8 @@ export type EffectPresetName =
   | 'shiin'     // 静寂・沈黙・点々（頭上中央・浮遊）
   | 'kirakira'  // 輝き・星・ポップ（頭上中央・星装飾）
   | 'doki'      // ドキドキ・鼓動（左右から「ドキ」が拍動上昇）
-  | 'biku';     // ビクッ・驚き（頭上中央・衝撃）
+  | 'biku'      // ビクッ・驚き（頭上中央・衝撃）
+  | 'yatta';    // やったー！・歓喜・喜び（頭上中央・ポップジャンプ）
 
 /**
  * Decoration types drawn onto the 2D canvas
