@@ -32,11 +32,74 @@ import {
   copyConfigToClipboard,
 } from './Config';
 import { resolveAssetUrl } from './utils/path';
+import {
+  ScenePresetId,
+  getScenePreset,
+  SCENE_PRESETS,
+} from './presets/ScenePresets';
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
 
 const windController = new WindController();
+
+function getActivePresetId(): ScenePresetId {
+  if (currentConfig.activeScene?.presetId && currentConfig.activeScene.presetId in SCENE_PRESETS) {
+    return currentConfig.activeScene.presetId as ScenePresetId;
+  }
+  if (currentConfig.activeScene?.location === 'indoor') {
+    return 'bright_indoor';
+  }
+  const tod = currentConfig.activeScene?.timeOfDay;
+  if (tod === 'morning') return 'morning_park';
+  if (tod === 'noon') return 'noon_park';
+  return 'evening_park';
+}
+
+function syncSceneButtons(): void {
+  const activeId = getActivePresetId();
+
+  const sceneButtons = document.querySelectorAll<HTMLButtonElement>('.scene-preset-btn');
+  sceneButtons.forEach((btn) => {
+    const sceneId = btn.getAttribute('data-scene');
+    const isActive = sceneId === activeId;
+    btn.classList.toggle('active', isActive);
+  });
+}
+
+function switchScene(presetId: ScenePresetId, notify = true): void {
+  const preset = getScenePreset(presetId);
+  currentConfig.activeScene = {
+    presetId,
+    location: preset.category,
+    timeOfDay: presetId.startsWith('morning')
+      ? 'morning'
+      : presetId.startsWith('noon')
+      ? 'noon'
+      : presetId.startsWith('evening')
+      ? 'evening'
+      : undefined,
+  };
+  deepAssign(currentConfig.environment, preset.environment);
+  deepAssign(currentConfig.lighting, preset.lighting);
+  deepAssign(currentConfig.postProcessing, preset.postProcessing);
+  if (preset.materials) {
+    deepAssign(currentConfig.materials, preset.materials);
+  }
+  if (preset.wind) {
+    deepAssign(currentConfig.wind, preset.wind);
+  }
+
+  applyConfigToSceneAndRenderer(currentConfig);
+  if (gui) {
+    gui.controllersRecursive().forEach((c) => c.updateDisplay());
+  }
+  syncSceneButtons();
+  syncBgButtons();
+  if (notify) {
+    showToast(`🌅 シーンを変更しました: ${preset.name}`);
+  }
+}
 
 
 // --------------------------------------------------
@@ -685,6 +748,53 @@ function setupGUI(mountPoint?: HTMLElement): void {
     autoPlace: !mountPoint,
   });
 
+  // 0. Scene Presets Folder
+  const sceneFolder = gui.addFolder('🌅 シーン・ライティング一括プリセット (Scene Presets)');
+  const sceneState = {
+    preset: getActivePresetId(),
+  };
+
+  const sceneOptions: Record<string, ScenePresetId> = {
+    '🌳 朝・公園 (Morning Park)': 'morning_park',
+    '🌳 昼・公園 (Noon Park)': 'noon_park',
+    '🌳 夕方・公園 (Evening Park)': 'evening_park',
+    '🏫 朝・校門 (Morning School Gate)': 'morning_school',
+    '🏫 昼・校門 (Noon School Gate)': 'noon_school',
+    '🏫 夕方・校門 (Evening School Gate)': 'evening_school',
+    '💡 明るい・室内 (Bright Indoor)': 'bright_indoor',
+    '🌙 暗い・室内 (Dark Indoor)': 'dark_indoor',
+  };
+
+  sceneFolder
+    .add(sceneState, 'preset', sceneOptions)
+    .name('シーン選択')
+    .onChange((val: ScenePresetId) => {
+      switchScene(val);
+    });
+
+  const sceneActions = {
+    morningPark: () => switchScene('morning_park'),
+    noonPark: () => switchScene('noon_park'),
+    eveningPark: () => switchScene('evening_park'),
+    morningSchool: () => switchScene('morning_school'),
+    noonSchool: () => switchScene('noon_school'),
+    eveningSchool: () => switchScene('evening_school'),
+    brightIndoor: () => switchScene('bright_indoor'),
+    darkIndoor: () => switchScene('dark_indoor'),
+  };
+
+  const subFolder = sceneFolder.addFolder('クイック切り替えボタン');
+  subFolder.add(sceneActions, 'morningPark').name('🌳 朝・公園');
+  subFolder.add(sceneActions, 'noonPark').name('🌳 昼・公園');
+  subFolder.add(sceneActions, 'eveningPark').name('🌳 夕方・公園');
+  subFolder.add(sceneActions, 'morningSchool').name('🏫 朝・校門');
+  subFolder.add(sceneActions, 'noonSchool').name('🏫 昼・校門');
+  subFolder.add(sceneActions, 'eveningSchool').name('🏫 夕方・校門');
+  subFolder.add(sceneActions, 'brightIndoor').name('💡 明るい・室内');
+  subFolder.add(sceneActions, 'darkIndoor').name('🌙 暗い・室内');
+  subFolder.close();
+  sceneFolder.open();
+
   // 1. Short Animation Cuts Folder
   const animFolder = gui.addFolder('🎬 ショートアニメーション各Cut設定');
 
@@ -1071,6 +1181,18 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .addColor(currentConfig.lighting.rim, 'color')
     .name('補助光色 (Rim Color)')
     .onChange((val: string) => rimLight.color.set(val));
+  lightFolder
+    .add(currentConfig.lighting.rim, 'posX', -10, 10, 0.1)
+    .name('補助光 位置 X')
+    .onChange((val: number) => (rimLight.position.x = val));
+  lightFolder
+    .add(currentConfig.lighting.rim, 'posY', -10, 10, 0.1)
+    .name('補助光 位置 Y')
+    .onChange((val: number) => (rimLight.position.y = val));
+  lightFolder
+    .add(currentConfig.lighting.rim, 'posZ', -10, 10, 0.1)
+    .name('補助光 位置 Z')
+    .onChange((val: number) => (rimLight.position.z = val));
   lightFolder.close();
 
   // 6.5 Sun & God Rays & Lens Flare Folder
@@ -1455,6 +1577,7 @@ function openImportModal(): void {
           deepAssign(currentConfig, parsed);
           applyConfigToSceneAndRenderer(currentConfig);
           gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+          syncSceneButtons();
           syncBgButtons();
           modal!.style.display = 'none';
           showToast('✓ 設定JSONを正常に適用しました！');
@@ -1740,13 +1863,50 @@ function setupUnifiedUI(): void {
         </div>
       </div>
 
+      <!-- Scene & Lighting Presets (Park 3, School Gate 3, Indoor 2) -->
+      <div class="section-box" style="border-left: 3px solid #f59e0b;">
+        <label class="section-label" style="color: #d97706; font-weight: 700;">🌅 シーン・ライティング (Scene & Lighting)</label>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <!-- Park -->
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🌳 公園</span>
+            <span style="font-size: 10px; color: #94a3b8;">朝 / 昼 / 夕</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+            <button data-scene="morning_park" class="scene-preset-btn" title="青空・強い太陽光・昼光フレア（多層）">🌅 朝</button>
+            <button data-scene="noon_park" class="scene-preset-btn" title="朝の斜光・大気フォグ・朝焼け光条（多層）">☀️ 昼</button>
+            <button data-scene="evening_park" class="scene-preset-btn active" title="茜色夕日・西日光条・夕焼けフレア（多層）">🌇 夕方</button>
+          </div>
+          <!-- School Gate -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏫 校門</span>
+            <span style="font-size: 10px; color: #94a3b8;">朝 / 昼 / 夕</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
+            <button data-scene="morning_school" class="scene-preset-btn" title="青空・澄んだ朝陽・校門">🌅 朝</button>
+            <button data-scene="noon_school" class="scene-preset-btn" title="晴天の昼・高彩度・校門">☀️ 昼</button>
+            <button data-scene="evening_school" class="scene-preset-btn" title="茜色夕焼け・西日・校門">🌇 夕方</button>
+          </div>
+          <!-- Indoor Classroom -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏠 室内 (教室)</span>
+            <span style="font-size: 10px; color: #94a3b8;">明るい / 暗い</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+            <button data-scene="bright_indoor" class="scene-preset-btn" title="教室背景・均一で明るい室内照明">💡 明るい</button>
+            <button data-scene="dark_indoor" class="scene-preset-btn" title="教室背景・薄暗い間接照明・夜光">🌙 暗い</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Background selector -->
       <div class="section-box">
         <label class="section-label">🌄 背景 (Background)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
           <button data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">🌳 近代公園 (多層)</button>
+          <button data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">🏫 校門</button>
+          <button data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">🏫 教室</button>
           <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">🌲 旧公園</button>
-          <button data-bg="${resolveAssetUrl('/textures/room-background.jpg')}" class="bg-btn">🏠 部屋</button>
           <button data-bg="none" class="bg-btn">OFF (単色)</button>
         </div>
       </div>
@@ -1801,9 +1961,22 @@ function setupUnifiedUI(): void {
     deepAssign(currentConfig, DEFAULT_CONFIG);
     applyConfigToSceneAndRenderer(currentConfig);
     gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+    syncSceneButtons();
     syncBgButtons();
     showToast('🔄 デフォルト設定にリセットしました');
   });
+
+  // Scene Preset Buttons
+  const sceneButtons = document.querySelectorAll<HTMLButtonElement>('.scene-preset-btn');
+  sceneButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sceneId = btn.getAttribute('data-scene') as ScenePresetId;
+      if (sceneId) {
+        switchScene(sceneId);
+      }
+    });
+  });
+  syncSceneButtons();
 
   // Animation Play/Stop
   document.getElementById('anim-play-btn')?.addEventListener('click', (e) => {

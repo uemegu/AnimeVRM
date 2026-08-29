@@ -36,11 +36,11 @@ export class AdventureMessageWindow {
         left: 0;
         right: 0;
         height: clamp(220px, 32vh, 320px);
-        background: linear-gradient(to bottom, rgba(3, 7, 18, 0) 0%, rgba(3, 7, 18, 0.72) 35%, rgba(3, 7, 18, 0.96) 100%);
+        background: linear-gradient(to bottom, rgba(3, 7, 18, 0) 0%, rgba(3, 7, 18, 0.8) 28%, rgba(3, 7, 18, 0.96) 100%);
         display: flex;
         justify-content: center;
-        align-items: flex-end;
-        padding: 24px 20px 36px;
+        align-items: flex-start;
+        padding: 44px 24px 28px;
         box-sizing: border-box;
         z-index: 9990;
         pointer-events: auto;
