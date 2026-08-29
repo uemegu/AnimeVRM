@@ -3,15 +3,12 @@ import type { AvatarConfig } from '../Config';
 
 export type ScenePresetId =
   | 'morning_park'
-  | 'noon_park'
   | 'evening_park'
   | 'morning_school'
-  | 'noon_school'
   | 'evening_school'
   | 'bright_indoor'
   | 'dark_indoor'
   | 'morning_outdoor'
-  | 'noon_outdoor'
   | 'evening_outdoor';
 
 export interface ScenePresetData {
@@ -179,155 +176,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
     },
   },
 
-  // 2. 昼 × 公園 (Noon Park)
-  noon_park: {
-    id: 'noon_park',
-    name: '昼・公園',
-    category: 'outdoor',
-    description: '爽やかな朝の斜光、澄んだ大気フォグ、淡い朝焼けサンシャフトとシャープなフレア（多層背景）',
-    materials: {
-      body: {
-        color: '#fffafa',
-        shadowHueShift: 0.02,
-        shadowLightnessFactor: 0.16,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: true,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 5,
-        parametricRimLiftFactor: 0.1,
-        rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
-      },
-      hair: {
-        color: '#ffffff',
-        shadowHueShift: 0.03,
-        shadowLightnessFactor: 0.2,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: false,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 0,
-        parametricRimLiftFactor: 0.1,
-        rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
-      },
-      cloth: {
-        color: '#ffffff',
-        shadowHueShift: 0.03,
-        shadowLightnessFactor: 0.2,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: false,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 4,
-        parametricRimLiftFactor: 0.02,
-        rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
-      },
-    },
-    environment: {
-      showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
-      backgroundColor: '#ffffff',
-      showFloor: false,
-      floorColor: '#ffffff',
-      showMidground: true,
-      midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.jpg'),
-      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
-      midgroundScale: 1.15,
-      midgroundOpacity: 1.0,
-      farFogEnabled: true,
-      farFogColor: '#e0ebff',
-      farFogIntensity: 0.32,
-    },
-    lighting: {
-      castShadows: false,
-      ambient: {
-        color: '#ffebeb',
-        intensity: 0.45,
-      },
-      directional: {
-        color: '#ffffff',
-        intensity: 2,
-        posX: -2.2,
-        posY: 3.2,
-        posZ: 3,
-      },
-      rim: {
-        enabled: true,
-        color: '#ffe8d6',
-        intensity: 0.25,
-        posX: 0,
-        posY: 1.5,
-        posZ: 2.5,
-      },
-      depthRim: {
-        enabled: true,
-        power: 4.2,
-        threshold: 0.15,
-        intensity: 0.85,
-      },
-      sunShafts: {
-        enabled: true,
-        followDirectionalLight: false,
-        sunPosition: {
-          x: -1.3,
-          y: 6.4,
-          z: -7.6,
-        },
-        exposure: 0.16,
-        decay: 0.86,
-        density: 0.5,
-        weight: 0.44,
-        color: '#ffe8c2',
-        shimmer: 0.4,
-      },
-      lensFlare: {
-        enabled: true,
-        sunSize: 1.1,
-        sunColor: '#fff5e4',
-        glowIntensity: 0.35,
-        starburstIntensity: 0.85,
-        anamorphicIntensity: 0.35,
-        ghostIntensity: 0.5,
-        haloIntensity: 0.45,
-      },
-    },
-    postProcessing: {
-      toneMappingMode: 'None',
-      toneMappingExposure: 1.0,
-      antialiasing: {
-        msaaSamples: 4,
-        smaa: true,
-      },
-      bloom: {
-        enabled: true,
-        strength: 0.04,
-        radius: 0.14,
-        threshold: 0.84,
-      },
-      colorGrading: {
-        enabled: true,
-        shadowTint: '#4a5596',
-        highlightTint: '#fff7ec',
-        strength: 0.45,
-        contrast: 0.12,
-        gamma: 1.0,
-      },
-      saturation: 0.4,
-      brightness: 0.04,
-      contrast: 0.02,
-    },
-    wind: {
-      enabled: true,
-    },
-  },
-
-  // 3. 夕方 × 公園 (Evening Park - デフォルト)
+  // 2. 夕方 × 公園 (Evening Park - デフォルト)
   evening_park: {
     id: 'evening_park',
     name: '夕方・公園',
@@ -628,152 +477,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
     },
   },
 
-  // 5. 昼 × 校門 (Noon School Gate)
-  noon_school: {
-    id: 'noon_school',
-    name: '昼・校門',
-    category: 'outdoor',
-    description: '鮮やかな晴天の昼光、抜けの良い大気とシャープなフレア',
-    materials: {
-      body: {
-        color: '#fffafa',
-        shadowHueShift: 0.02,
-        shadowLightnessFactor: 0.16,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: true,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 5,
-        parametricRimLiftFactor: 0.1,
-        rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
-      },
-      hair: {
-        color: '#ffffff',
-        shadowHueShift: 0.03,
-        shadowLightnessFactor: 0.2,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: false,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 0,
-        parametricRimLiftFactor: 0.1,
-        rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
-      },
-      cloth: {
-        color: '#ffffff',
-        shadowHueShift: 0.03,
-        shadowLightnessFactor: 0.2,
-        shadingToonyFactor: 1,
-        shadingShiftFactor: -0.05,
-        giEqualizationFactor: 0.9,
-        rimEnabled: false,
-        rimColor: '#ffffff',
-        parametricRimFresnelPowerFactor: 4,
-        parametricRimLiftFactor: 0.02,
-        rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
-      },
-    },
-    environment: {
-      showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/school-gate-far.jpeg'),
-      backgroundColor: '#ffffff',
-      showFloor: false,
-      floorColor: '#ffffff',
-      showMidground: false,
-      midgroundImageUrl: undefined,
-      farFogEnabled: true,
-      farFogColor: '#e0ebff',
-      farFogIntensity: 0.2,
-    },
-    lighting: {
-      castShadows: false,
-      ambient: {
-        color: '#ffebeb',
-        intensity: 0.45,
-      },
-      directional: {
-        color: '#ffffff',
-        intensity: 2,
-        posX: -2.2,
-        posY: 3.2,
-        posZ: 3,
-      },
-      rim: {
-        enabled: true,
-        color: '#ffe8d6',
-        intensity: 0.25,
-        posX: 0,
-        posY: 1.5,
-        posZ: 2.5,
-      },
-      depthRim: {
-        enabled: true,
-        power: 4.2,
-        threshold: 0.15,
-        intensity: 0.85,
-      },
-      sunShafts: {
-        enabled: true,
-        followDirectionalLight: false,
-        sunPosition: {
-          x: -1.3,
-          y: 6.4,
-          z: -7.6,
-        },
-        exposure: 0.16,
-        decay: 0.86,
-        density: 0.5,
-        weight: 0.44,
-        color: '#ffe8c2',
-        shimmer: 0.4,
-      },
-      lensFlare: {
-        enabled: true,
-        sunSize: 1.1,
-        sunColor: '#fff5e4',
-        glowIntensity: 0.35,
-        starburstIntensity: 0.85,
-        anamorphicIntensity: 0.35,
-        ghostIntensity: 0.5,
-        haloIntensity: 0.45,
-      },
-    },
-    postProcessing: {
-      toneMappingMode: 'None',
-      toneMappingExposure: 1.0,
-      antialiasing: {
-        msaaSamples: 4,
-        smaa: true,
-      },
-      bloom: {
-        enabled: true,
-        strength: 0.04,
-        radius: 0.14,
-        threshold: 0.84,
-      },
-      colorGrading: {
-        enabled: true,
-        shadowTint: '#4a5596',
-        highlightTint: '#fff7ec',
-        strength: 0.45,
-        contrast: 0.12,
-        gamma: 1.0,
-      },
-      saturation: 0.4,
-      brightness: 0.04,
-      contrast: 0.02,
-    },
-    wind: {
-      enabled: true,
-    },
-  },
-
-  // 6. 夕方 × 校門 (Evening School Gate)
+  // 4. 夕方 × 校門 (Evening School Gate)
   evening_school: {
     id: 'evening_school',
     name: '夕方・校門',
@@ -1094,6 +798,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
+        matcapEnabled: false,
         rimEnabled: false,
         rimColor: '#ffffff',
         parametricRimFresnelPowerFactor: 0,
@@ -1221,7 +926,6 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
 
 // Aliases for outdoor presets
 SCENE_PRESETS.morning_outdoor = SCENE_PRESETS.morning_park;
-SCENE_PRESETS.noon_outdoor = SCENE_PRESETS.noon_park;
 SCENE_PRESETS.evening_outdoor = SCENE_PRESETS.evening_park;
 
 /**
