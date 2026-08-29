@@ -224,7 +224,7 @@ body {
   background: #4338ca;
 }
 
-.expr-btn, .motion-btn, .model-btn, .bg-btn {
+.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn {
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -233,14 +233,15 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   color: #334155;
+  text-align: center;
 }
 
-.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover {
+.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover {
   background: #e2e8f0;
   border-color: #94a3b8;
 }
 
-.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active {
+.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active {
   background: #4f46e5;
   color: #ffffff;
   border-color: #4338ca;

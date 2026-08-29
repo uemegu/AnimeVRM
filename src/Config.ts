@@ -177,11 +177,33 @@ export interface AvatarConfig {
     audioDelay?: number;
     voiceGender?: 'female' | 'male';
   };
+  activeScene?: {
+    presetId?:
+      | 'morning_park'
+      | 'noon_park'
+      | 'evening_park'
+      | 'morning_school'
+      | 'noon_school'
+      | 'evening_school'
+      | 'bright_indoor'
+      | 'dark_indoor'
+      | 'morning_outdoor'
+      | 'noon_outdoor'
+      | 'evening_outdoor'
+      | string;
+    timeOfDay?: 'morning' | 'noon' | 'evening';
+    location?: 'outdoor' | 'indoor';
+  };
   wind: WindConfig;
   shortAnimation: ShortAnimationConfig;
 }
 
 export const DEFAULT_CONFIG: AvatarConfig = {
+  activeScene: {
+    presetId: 'evening_park',
+    timeOfDay: 'evening',
+    location: 'outdoor',
+  },
   materials: {
     body: {
       color: '#fffafa',
@@ -190,7 +212,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
-      rimEnabled: false,
+      rimEnabled: true,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 5,
       parametricRimLiftFactor: 0.1,
@@ -218,7 +240,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
-      rimEnabled: false,
+      rimEnabled: true,
       rimColor: '#202942',
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
@@ -238,7 +260,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   environment: {
     showBackgroundImage: true,
     backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
-    backgroundColor: '#ffffff',
+    backgroundColor: '#2b101d',
     showFloor: false,
     floorColor: '#ffffff',
     showMidground: true,
@@ -251,60 +273,60 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     midgroundScale: 1.15,
     midgroundOpacity: 1.0,
     farFogEnabled: true,
-    farFogColor: '#ffffff',
-    farFogIntensity: 0.24,
+    farFogColor: '#ff7e4d',
+    farFogIntensity: 0.08,
   },
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#ffb8b8',
-      intensity: 0.35,
+      color: '#3e407a',
+      intensity: 0.5,
     },
     directional: {
-      color: '#ffffff',
-      intensity: 2.6,
-      posX: 4.1,
-      posY: 2.5,
-      posZ: 2,
+      color: '#fffbf0',
+      intensity: 1.8,
+      posX: -3.7,
+      posY: 0.8,
+      posZ: 0.7,
     },
     rim: {
       enabled: true,
-      color: '#dde8ff',
-      intensity: 0.05,
-      posX: -2,
-      posY: 2.5,
-      posZ: -2,
+      color: '#ffaa60',
+      intensity: 0.3,
+      posX: 0,
+      posY: 1.5,
+      posZ: 2.5,
     },
     depthRim: {
       enabled: true,
-      power: 4.0,
-      threshold: 0.15,
-      intensity: 0.8,
+      power: 3.5,
+      threshold: 0.12,
+      intensity: 1.0,
     },
     sunShafts: {
       enabled: true,
       followDirectionalLight: false,
       sunPosition: {
-        x: 3.2,
-        y: 4.3,
-        z: -3.8,
+        x: -5.5,
+        y: 1.6,
+        z: -3.5,
       },
-      exposure: 0.24,
-      decay: 0.91,
-      density: 0.8,
-      weight: 0.24,
-      color: '#fff2db',
-      shimmer: 0.4,
+      exposure: 0.36,
+      decay: 0.83,
+      density: 0.5,
+      weight: 0.48,
+      color: '#ff7826',
+      shimmer: 0.25,
     },
     lensFlare: {
       enabled: true,
-      sunSize: 1.25,
-      sunColor: '#fff8ee',
+      sunSize: 1.05,
+      sunColor: '#ff6222',
       glowIntensity: 1.15,
       starburstIntensity: 1.05,
-      anamorphicIntensity: 1.2,
-      ghostIntensity: 0.85,
-      haloIntensity: 0.9,
+      anamorphicIntensity: 0.95,
+      ghostIntensity: 0.95,
+      haloIntensity: 0.3,
     },
   },
   postProcessing: {
@@ -316,21 +338,21 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.09,
-      radius: 0.16,
-      threshold: 0.85,
+      strength: 0.15,
+      radius: 0.22,
+      threshold: 0.78,
     },
     colorGrading: {
       enabled: true,
-      shadowTint: '#5471f2',
-      highlightTint: '#ffffff',
-      strength: 0.5,
-      contrast: 0.13,
-      gamma: 1.0,
+      shadowTint: '#391752',
+      highlightTint: '#ffad70',
+      strength: 0.65,
+      contrast: 0.18,
+      gamma: 0.95,
     },
     saturation: 0.26,
-    brightness: 0.0,
-    contrast: 0.0,
+    brightness: -0.04,
+    contrast: 0.08,
   },
   camera: {
     fov: 30,
