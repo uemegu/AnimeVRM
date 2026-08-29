@@ -8,6 +8,7 @@ export interface MaterialStyleParams {
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
+  matcapEnabled?: boolean;
   rimEnabled: boolean;
   rimColor: string;
   parametricRimFresnelPowerFactor: number;
@@ -212,6 +213,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
+      matcapEnabled: true,
       rimEnabled: true,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 5,
@@ -226,6 +228,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
+      matcapEnabled: true,
       rimEnabled: false,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 0,
@@ -240,7 +243,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
-      rimEnabled: true,
+      matcapEnabled: true,
+      rimEnabled: false,
       rimColor: '#202942',
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
@@ -501,8 +505,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       enabled: false,
       count: 160,
       size: 0.035,
-      color: '#e2f8ff',
-      opacity: 0.8,
+      color: '#ffd5e5',
+      opacity: 0.85,
       speedFactor: 1.0,
     },
   },

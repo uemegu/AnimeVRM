@@ -989,6 +989,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
     const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
 
     folder.addColor(params, 'color').name('基本色・血色感 (Base Color / Tint)').onChange(update);
+    folder.add(params, 'matcapEnabled').name('✨ ハイライト表示 (Highlight / MatCap)').onChange(update);
     folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name('影の色相シフト (Hue Shift)').onChange(update);
     folder.add(params, 'shadowLightnessFactor', 0.02, 1.0, 0.01).name('影の明度比率 (Lightness)').onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name('トゥーン度 (Toony)').onChange(update);
@@ -1452,10 +1453,10 @@ function setupGUI(mountPoint?: HTMLElement): void {
   windFolder.add(currentConfig.wind, 'gustFrequency', 0.0, 1.0, 0.05).name('突風頻度 (Gust Freq)');
   windFolder.add(currentConfig.wind, 'gustStrength', 0.0, 3.0, 0.1).name('突風強度 (Gust Strength)');
 
-  const particleFolder = windFolder.addFolder('✨ 風パーティクル (Particles)');
-  particleFolder.add(currentConfig.wind.particles, 'enabled').name('粒子表示 (Enabled)');
-  particleFolder.add(currentConfig.wind.particles, 'count', 20, 500, 10).name('粒子数 (Count)');
-  particleFolder.add(currentConfig.wind.particles, 'size', 0.01, 0.1, 0.005).name('サイズ (Size)');
+  const particleFolder = windFolder.addFolder('🌸 風・花びらパーティクル (Petals)');
+  particleFolder.add(currentConfig.wind.particles, 'enabled').name('花びら表示 (Enabled)');
+  particleFolder.add(currentConfig.wind.particles, 'count', 20, 500, 10).name('花びら数 (Count)');
+  particleFolder.add(currentConfig.wind.particles, 'size', 0.005, 0.08, 0.002).name('サイズ (Size)');
   particleFolder.addColor(currentConfig.wind.particles, 'color').name('カラー (Color)');
   particleFolder.add(currentConfig.wind.particles, 'opacity', 0.1, 1.0, 0.05).name('不透明度 (Opacity)');
   particleFolder.add(currentConfig.wind.particles, 'speedFactor', 0.2, 3.0, 0.1).name('速度倍率 (Speed Factor)');
@@ -1750,7 +1751,7 @@ function setupUnifiedUI(): void {
         <label class="section-label">👤 モデル切替 (VRM Model)</label>
         <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
           <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
-          <button data-model="${resolveAssetUrl('/models/avatar.vrm')}" class="model-btn">👤 avatar.vrm</button>
+          <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
           <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
         </div>
       </div>

@@ -34,6 +34,11 @@ type MToonLikeMaterial = THREE.Material & {
   parametricRimFresnelPowerFactor?: number;
   parametricRimLiftFactor?: number;
   rimLightingMixFactor?: number;
+  matcapFactor?: THREE.Color;
+  matcapTexture?: THREE.Texture | null;
+  emissive?: THREE.Color;
+  emissiveIntensity?: number;
+  emissiveMap?: THREE.Texture | null;
   outlineColorFactor?: THREE.Color;
   outlineWidthFactor?: number;
   outlineLightingMixFactor?: number;
@@ -182,23 +187,31 @@ function classifyStyleMaterial(
   const matName = material.name || '';
   const meshName = mesh.name || '';
 
-  if (regexTest(DEFAULT_FACE_PATTERN, matName) || regexTest(DEFAULT_FACE_PATTERN, meshName)) {
+  // 1. First check material name (handles merged meshes correctly)
+  if (regexTest(DEFAULT_FACE_PATTERN, matName)) {
     return 'face';
   }
-
-  const isStrictHair = (regexTest(hairPattern, matName) || regexTest(hairPattern, meshName)) &&
-                       !regexTest(NON_HAIR_EXCLUSION_PATTERN, matName.replace(/hair/gi, '')) &&
-                       !regexTest(NON_HAIR_EXCLUSION_PATTERN, meshName.replace(/hair/gi, ''));
-
-  if (isStrictHair) {
+  if (regexTest(hairPattern, matName)) {
     return 'hair';
   }
-
-  if (regexTest(clothPattern, matName) || regexTest(clothPattern, meshName)) {
+  if (regexTest(clothPattern, matName)) {
     return 'cloth';
   }
+  if (regexTest(bodyPattern, matName)) {
+    return 'body';
+  }
 
-  if (regexTest(bodyPattern, matName) || regexTest(bodyPattern, meshName)) {
+  // 2. Fallback to mesh name
+  if (regexTest(DEFAULT_FACE_PATTERN, meshName)) {
+    return 'face';
+  }
+  if (regexTest(hairPattern, meshName)) {
+    return 'hair';
+  }
+  if (regexTest(clothPattern, meshName)) {
+    return 'cloth';
+  }
+  if (regexTest(bodyPattern, meshName)) {
     return 'body';
   }
 
@@ -241,9 +254,32 @@ export function applyToonShader(
       const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
 
-      // Preserve original VRM shade color
+      // Preserve original VRM shade color, matcap factor & emissive properties
       if (material.shadeColorFactor) {
         material.userData.originalShadeColor = material.shadeColorFactor.clone();
+      }
+      if (material.matcapFactor) {
+        material.userData.originalMatcapFactor = material.matcapFactor.clone();
+      } else if (material.uniforms?.matcapFactor?.value) {
+        material.userData.originalMatcapFactor = material.uniforms.matcapFactor.value.clone();
+      } else {
+        material.userData.originalMatcapFactor = new THREE.Color(1, 1, 1);
+      }
+
+      if (material.emissive) {
+        material.userData.originalEmissive = material.emissive.clone();
+      } else if (material.uniforms?.emissive?.value) {
+        material.userData.originalEmissive = material.uniforms.emissive.value.clone();
+      } else {
+        material.userData.originalEmissive = new THREE.Color(1, 1, 1);
+      }
+
+      if (typeof material.emissiveIntensity === 'number') {
+        material.userData.originalEmissiveIntensity = material.emissiveIntensity;
+      } else if (typeof material.uniforms?.emissiveIntensity?.value === 'number') {
+        material.userData.originalEmissiveIntensity = material.uniforms.emissiveIntensity.value;
+      } else {
+        material.userData.originalEmissiveIntensity = 1.0;
       }
 
       // Safely inject Auto Line Weight into outline vertex shader while preserving MToon defines
@@ -349,6 +385,30 @@ export function applyToonShader(
         if (typeof params.rimLightingMixFactor === 'number') {
           material.rimLightingMixFactor = params.rimLightingMixFactor;
           if (material.uniforms?.rimLightingMixFactor) material.uniforms.rimLightingMixFactor.value = params.rimLightingMixFactor;
+        }
+
+        // Highlight (MatCap & Emissive Texture) ON/OFF
+        if (params.matcapEnabled !== undefined) {
+          const isEnabled = params.matcapEnabled !== false;
+
+          // 1. MatCap Factor
+          const origMatcap = (material.userData.originalMatcapFactor as THREE.Color | undefined) ?? new THREE.Color(1, 1, 1);
+          const targetMatcap = isEnabled ? origMatcap : new THREE.Color(0, 0, 0);
+          if (material.matcapFactor) material.matcapFactor.copy(targetMatcap);
+          if (material.uniforms?.matcapFactor?.value) material.uniforms.matcapFactor.value.copy(targetMatcap);
+
+          // 2. Emissive (VRM hair highlight textures use emissiveMap / emissive)
+          const origEmissive = (material.userData.originalEmissive as THREE.Color | undefined) ?? new THREE.Color(1, 1, 1);
+          const origIntensity = (material.userData.originalEmissiveIntensity as number | undefined) ?? 1.0;
+
+          const targetEmissive = isEnabled ? origEmissive : new THREE.Color(0, 0, 0);
+          const targetIntensity = isEnabled ? origIntensity : 0.0;
+
+          if (material.emissive) material.emissive.copy(targetEmissive);
+          if (typeof material.emissiveIntensity === 'number') material.emissiveIntensity = targetIntensity;
+
+          if (material.uniforms?.emissive?.value) material.uniforms.emissive.value.copy(targetEmissive);
+          if (material.uniforms?.emissiveIntensity) material.uniforms.emissiveIntensity.value = targetIntensity;
         }
       });
 
