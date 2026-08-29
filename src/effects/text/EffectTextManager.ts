@@ -4,11 +4,25 @@ import { EffectTextInstance } from './EffectTextInstance';
 import { EFFECT_TEXT_PRESETS } from './presets';
 import { clearEffectTextTextureCache } from './textureGenerator';
 
+const DEFAULT_PRESET_TEXTS: Record<string, string> = {
+  wanawana: 'ワナワナ',
+  iraira: 'イライラ',
+  doki: 'ドキドキ',
+  gaan: 'ガーン',
+  shiin: 'シーン',
+  kirakira: 'キラキラ',
+  biku: 'ビクッ',
+  yatta: 'やったー！',
+};
+
 /**
  * Helper to extract repeated subphrase for stream mode
  * e.g. "ワナワナ" -> "ワナ", "イライラ" -> "イラ", "ドキドキ" -> "ドキ", "モヤモヤ" -> "モヤ"
  */
-function extractSubphrase(text: string, defaultPhrase?: string): string {
+function extractSubphrase(text?: string, defaultPhrase?: string): string {
+  if (!text) {
+    return defaultPhrase || 'ドキ';
+  }
   if (defaultPhrase && (text === defaultPhrase + defaultPhrase || text === defaultPhrase)) {
     return defaultPhrase;
   }
@@ -161,19 +175,26 @@ export class EffectTextManager {
    * If mode is 'single', spawns centered banner.
    */
   public show(options: ShowEffectTextOptions): EffectTextInstance | null {
-    const presetName = options.stylePreset || 'wanawana';
-    const preset = EFFECT_TEXT_PRESETS[presetName as keyof typeof EFFECT_TEXT_PRESETS] || EFFECT_TEXT_PRESETS.wanawana;
+    const presetName = options.stylePreset || (options as any).preset || 'doki';
+    const preset = EFFECT_TEXT_PRESETS[presetName as keyof typeof EFFECT_TEXT_PRESETS] || EFFECT_TEXT_PRESETS.doki;
 
-    const mode = options.mode ?? preset.spawnMode ?? 'single';
+    const text = options.text || DEFAULT_PRESET_TEXTS[presetName] || 'ドキドキ';
+    const normalizedOptions: ShowEffectTextOptions = {
+      ...options,
+      stylePreset: presetName,
+      text,
+    };
+
+    const mode = normalizedOptions.mode ?? preset.spawnMode ?? 'single';
 
     if (mode === 'stream') {
       const emitterId = `effect_stream_${this.nextId++}`;
-      const emitter = new StreamEmitter(options, emitterId, this);
+      const emitter = new StreamEmitter(normalizedOptions, emitterId, this);
       this.emitters.set(emitterId, emitter);
       return null;
     }
 
-    return this.spawnSingleInstance(options);
+    return this.spawnSingleInstance(normalizedOptions);
   }
 
   /**

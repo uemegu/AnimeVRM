@@ -299,11 +299,27 @@ export class Avatar {
     );
   }
 
-  public async playAnimation(url: string, loop: boolean = true, crossFadeDuration: number = 0.5): Promise<THREE.AnimationAction | null> {
+  private returnToIdleUrl: string | null = null;
+  private boundMixerFinishedListener: ((e: any) => void) | null = null;
+
+  public async playAnimation(
+    url: string,
+    loop: boolean = true,
+    crossFadeDuration: number = 0.5,
+    returnToIdleUrl?: string
+  ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm) return null;
 
     if (!this.mixer) {
       this.mixer = new THREE.AnimationMixer(this.vrm.scene);
+      this.boundMixerFinishedListener = (e: { action: THREE.AnimationAction }) => {
+        if (this.returnToIdleUrl && this.currentAction === e.action) {
+          const idle = this.returnToIdleUrl;
+          this.returnToIdleUrl = null;
+          this.playAnimation(idle, true, 0.6);
+        }
+      };
+      this.mixer.addEventListener('finished', this.boundMixerFinishedListener);
     }
 
     try {
@@ -313,9 +329,11 @@ export class Avatar {
       if (loop) {
         action.setLoop(THREE.LoopRepeat, Infinity);
         action.clampWhenFinished = false;
+        this.returnToIdleUrl = null;
       } else {
         action.setLoop(THREE.LoopOnce, 1);
         action.clampWhenFinished = true;
+        this.returnToIdleUrl = returnToIdleUrl ?? (this.options.defaultAnimationUrl || '/animations/Idle.fbx');
       }
 
       action.reset();
@@ -335,6 +353,7 @@ export class Avatar {
   }
 
   public stopAnimation(): void {
+    this.returnToIdleUrl = null;
     if (this.currentAction) {
       this.currentAction.fadeOut(0.3);
       this.currentAction = null;

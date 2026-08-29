@@ -20,6 +20,8 @@ import { SunEffect } from './postprocessing/SunEffect';
 import { TypographyOverlay } from './animation/TypographyOverlay';
 import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
 import { ScenarioPlayer } from './animation/ScenarioPlayer';
+import { ScenarioEngine } from './scenario/ScenarioEngine';
+import { PARK_CONFESSION_SCENARIO } from './scenario/parkConfessionScenario';
 import { WindController, WIND_PRESETS } from './wind/WindController';
 import { WindParticles } from './wind/WindParticles';
 import {
@@ -461,6 +463,20 @@ const scenarioPlayer = new ScenarioPlayer({
   },
   onFinished: () => {
     // Finished naturally
+  },
+});
+
+const scenarioEngine = new ScenarioEngine({
+  getAvatar: () => avatarInstance,
+  getAudioLipSync: () => audioLipSync,
+  onPlayStateChange: (isPlaying) => {
+    updateScenarioPlayStateUI(isPlaying);
+  },
+  onSwitchScenePreset: (presetId) => {
+    switchScene(presetId, false);
+  },
+  onFinished: () => {
+    showToast('✨ シナリオが終了しました');
   },
 });
 
@@ -1715,16 +1731,23 @@ function updateAnimationPlayStateUI(isPlaying: boolean): void {
 
 function updateScenarioPlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('scenario-play-btn');
+  const confessionBtn = document.getElementById('scenario-confession-btn');
   const statusBox = document.getElementById('scenario-status-box');
   const panel = document.getElementById('panel-container');
   const gearBtn = document.getElementById('settings-open-btn');
 
   if (playBtn) {
-    playBtn.textContent = isPlaying ? '⏹ シーケンス停止' : '▶ 会話シーケンス再生';
-    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+    playBtn.textContent = scenarioPlayer.isPlaying ? '⏹ シーケンス停止' : '▶ 会話シーケンス再生';
+    playBtn.style.background = scenarioPlayer.isPlaying ? '#ea580c' : '#4f46e5';
+  }
+  if (confessionBtn) {
+    confessionBtn.textContent = scenarioEngine.isPlaying ? '⏹ シナリオ停止' : '🌸 告白イベントシナリオ再生';
+    confessionBtn.style.background = scenarioEngine.isPlaying
+      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+      : 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)';
   }
   if (statusBox) {
-    statusBox.style.display = isPlaying ? 'block' : 'none';
+    statusBox.style.display = scenarioPlayer.isPlaying ? 'block' : 'none';
   }
 
   if (isPlaying) {
@@ -1944,6 +1967,18 @@ function setupUnifiedUI(): void {
         </div>
       </div>
 
+      <!-- Interactive Branching Scenario Controls -->
+      <div class="section-box" style="border-left: 3px solid #ec4899; background: #fdf2f8;">
+        <label class="section-label" style="color: #db2777; font-weight: 700;">🌸 インタラクティブ・シナリオ (選択肢・感情エフェクト)</label>
+        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
+          <button id="scenario-confession-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12.5px; padding: 10px 8px;">🌸 告白イベントシナリオ再生</button>
+          <button id="scenario-confession-stop-btn" class="action-btn">■ 停止</button>
+        </div>
+        <div style="font-size: 10px; color: #9d174d; line-height: 1.4; margin-top: 3px;">
+          ※クリックで会話送り・タイピングスキップ。選択肢（告白/500円/沈黙）で分岐し、ドキドキ・ガーン・シーン等の感情エフェクトが発動します。
+        </div>
+      </div>
+
       <!-- Audio Lip-Sync & Player -->
       <div class="section-box">
         <label class="section-label">🎵 音声リップシンク ＆ プレイヤー</label>
@@ -2117,6 +2152,8 @@ function setupUnifiedUI(): void {
     if (scenarioPlayer.isPlaying) {
       scenarioPlayer.stop();
     } else {
+      if (scenarioEngine.isPlaying) scenarioEngine.stop();
+      if (animationPlayer.isPlaying) animationPlayer.stop();
       scenarioPlayer.play();
     }
   });
@@ -2124,6 +2161,25 @@ function setupUnifiedUI(): void {
   document.getElementById('scenario-stop-btn')?.addEventListener('click', (e) => {
     e.stopPropagation();
     scenarioPlayer.stop();
+  });
+
+  // Interactive Confession Scenario Play/Stop
+  document.getElementById('scenario-confession-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (scenarioEngine.isPlaying) {
+      scenarioEngine.stop();
+    } else {
+      if (scenarioPlayer.isPlaying) scenarioPlayer.stop();
+      if (animationPlayer.isPlaying) animationPlayer.stop();
+      scenarioEngine.play(PARK_CONFESSION_SCENARIO);
+      showToast('🌸 告白イベントシナリオを開始しました');
+    }
+  });
+
+  document.getElementById('scenario-confession-stop-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    scenarioEngine.stop();
+    showToast('⏹ シナリオを停止しました');
   });
 
   // Background Buttons
