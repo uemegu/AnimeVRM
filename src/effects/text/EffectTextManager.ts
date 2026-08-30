@@ -194,6 +194,42 @@ export class EffectTextManager {
       return null;
     }
 
+    if (mode === 'surround') {
+      const defaultPhrase = preset.streamConfig?.phrase || (presetName === 'wanawana' ? 'ワナ' : (presetName === 'iraira' ? 'イラ' : 'ドキ'));
+      const phrase = extractSubphrase(text, defaultPhrase);
+      const duration = normalizedOptions.duration ?? preset.defaultDuration ?? Infinity;
+      const baseScale = (normalizedOptions.scale ?? 1.0) * (preset.defaultScale ?? 0.38);
+
+      // 4 surround positions tightly wrapped around avatar head/chest (1 o'clock, 3〜4 o'clock, 8〜9 o'clock, 11 o'clock)
+      const positions = [
+        { x: 0.18, y: 0.10, z: 0.04, rot: -0.12 },  // 1時（右上）
+        { x: 0.21, y: -0.06, z: 0.04, rot: 0.10 },  // 3〜4時（右下）
+        { x: -0.21, y: -0.06, z: 0.04, rot: -0.10 }, // 8〜9時（左下）
+        { x: -0.18, y: 0.10, z: 0.04, rot: 0.12 },  // 11時（左上）
+      ];
+
+      const baseOffset = normalizedOptions.offset ?? preset.defaultOffset ?? { x: 0, y: 0, z: 0 };
+
+      positions.forEach((pos) => {
+        const itemOptions: ShowEffectTextOptions = {
+          ...normalizedOptions,
+          text: phrase,
+          offset: {
+            x: baseOffset.x + pos.x,
+            y: baseOffset.y + pos.y,
+            z: baseOffset.z + pos.z,
+          },
+          scale: baseScale,
+          duration: duration,
+          animations: normalizedOptions.animations ?? preset.animations,
+        };
+        const inst = this.spawnSingleInstance(itemOptions);
+        (inst as any).initialRotation = pos.rot;
+      });
+
+      return null;
+    }
+
     return this.spawnSingleInstance(normalizedOptions);
   }
 
@@ -266,10 +302,10 @@ export class EffectTextManager {
   }
 
   /**
-   * Get count of currently active effect instances
+   * Get count of currently active effect instances and stream emitters
    */
   public get activeCount(): number {
-    return this.instances.size;
+    return this.instances.size + this.emitters.size;
   }
 
   /**

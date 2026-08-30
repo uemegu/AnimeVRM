@@ -3,7 +3,7 @@ import { EffectPresetName, EffectTextPreset } from './types';
 export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
   wanawana: {
     name: 'wanawana',
-    spawnMode: 'stream',
+    spawnMode: 'surround',
     style: {
       fontFamily: '"Mochiy Pop One", "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Meiryo", "Arial Black", sans-serif',
       fontWeight: '900',
@@ -25,30 +25,23 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       },
       slant: -4,
     },
-    animations: ['pop', 'shake', 'rise', 'fadeOut'],
-    defaultDuration: 1.8,
+    animations: ['pop', 'shake'],
+    defaultDuration: Infinity,
     defaultScale: 0.38,
-    defaultOffset: { x: 0, y: -0.02, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
-      position: 0.012,
-      rotation: 0.08,
-      frequency: 12, // Gentle, readable comic shudder
+      position: 0.016,
+      rotation: 0.12,
+      frequency: 16, // Fast nervous comic shudder
     },
-    riseSpeed: 0.20,
     streamConfig: {
       phrase: 'ワナ',
-      count: 7,
-      interval: 0.20,
-      spreadX: 0.20,
-      riseSpeed: 0.20,
-      particleDuration: 1.4,
-      particleScale: 0.38,
     },
   },
 
   iraira: {
     name: 'iraira',
-    spawnMode: 'stream',
+    spawnMode: 'surround',
     style: {
       fontFamily: '"Mochiy Pop One", "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Meiryo", "Arial Black", sans-serif',
       fontWeight: '900',
@@ -70,24 +63,17 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       },
       slant: -6,
     },
-    animations: ['pop', 'shake', 'rise', 'fadeOut'],
-    defaultDuration: 2.0,
+    animations: ['pop', 'shake'],
+    defaultDuration: Infinity,
     defaultScale: 0.40,
-    defaultOffset: { x: 0, y: -0.02, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
-      position: 0.014,
-      rotation: 0.10,
-      frequency: 15, // Rhythmic irritated vibration
+      position: 0.016,
+      rotation: 0.12,
+      frequency: 16, // Rhythmic irritated vibration
     },
-    riseSpeed: 0.22,
     streamConfig: {
       phrase: 'イラ',
-      count: 7,
-      interval: 0.20,
-      spreadX: 0.22,
-      riseSpeed: 0.22,
-      particleDuration: 1.4,
-      particleScale: 0.40,
     },
   },
 
@@ -119,14 +105,14 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     defaultDuration: 2.0,
     defaultScale: 0.38,
     defaultOffset: { x: 0, y: -0.02, z: 0.04 },
-    riseSpeed: 0.20,
+    riseSpeed: 0.16,
     streamConfig: {
       phrase: 'ドキ',
-      count: 7,
-      interval: 0.22,
+      count: Infinity,
+      interval: 0.52,
       spreadX: 0.18, // Tightly hugged near chest/neck
-      riseSpeed: 0.20,
-      particleDuration: 1.35,
+      riseSpeed: 0.16,
+      particleDuration: 1.9,
       particleScale: 0.38,
     },
   },
