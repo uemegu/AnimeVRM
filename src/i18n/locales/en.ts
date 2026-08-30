@@ -76,6 +76,7 @@ export const en: Translations = {
       yatta: '🎉 Yay!',
       zoku: '🥶 Shiver...',
       sweat: '💦 Sweat (Nervous)',
+      jito: '😑 Cold Sweat (Stare)',
     },
     lipSyncTitle: '🎵 Audio Lip-Sync & Player',
     openAudioFile: '📁 Open Audio',

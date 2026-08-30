@@ -698,13 +698,28 @@ export class Avatar {
     this.sweatEffect?.updateConfig(config);
   }
 
-  public restartSweat(duration?: number): void {
-    this.sweatEffect?.restart(duration);
+  public restartSweat(mode?: 'fly4' | 'jito', duration?: number): void {
+    this.sweatEffect?.restart(mode, duration);
   }
 
-  public showSweat(options?: { duration?: number }): void {
+  public showSweat(options?: { mode?: 'fly4' | 'jito'; duration?: number }): void {
     if (this.sweatEffect) {
-      this.sweatEffect.restart(options?.duration ?? 3.0);
+      this.sweatEffect.restart(options?.mode ?? 'fly4', options?.duration ?? 3.0);
+    }
+  }
+
+  public showJitoSweat(options?: { side?: 'right' | 'left' | 'both'; duration?: number }): void {
+    if (this.sweatEffect) {
+      if (options?.side) {
+        this.sweatEffect.updateConfig({ side: options.side });
+      }
+      this.sweatEffect.restart('jito', options?.duration ?? 3.0);
+    }
+  }
+
+  public showFlySweat(options?: { duration?: number }): void {
+    if (this.sweatEffect) {
+      this.sweatEffect.restart('fly4', options?.duration ?? 3.0);
     }
   }
 

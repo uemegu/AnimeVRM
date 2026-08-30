@@ -76,6 +76,7 @@ export interface Translations {
       yatta: string;
       zoku: string;
       sweat: string;
+      jito: string;
     };
     lipSyncTitle: string;
     openAudioFile: string;
