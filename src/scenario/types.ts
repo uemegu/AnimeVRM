@@ -10,7 +10,8 @@ export interface ScenarioChoice {
 }
 
 export interface ScenarioSceneAvatarConfig {
-  motion?: string;
+  character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
+  motion?: string;    // Motion Master ID (e.g. 'greeting') or FBX URL
   expression?: string;
   expressionWeight?: number;
   faceTexture?: string;
@@ -25,7 +26,9 @@ export interface ScenarioScene {
   id: string;
   speaker?: string;
   text: string;
-  voiceUrl?: string;
+  character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
+  voice?: string;     // Sound Master ID (e.g. 'confess_intro_1')
+  voiceUrl?: string;  // Direct voice audio URL (Backward compatibility)
   avatar?: ScenarioSceneAvatarConfig;
   location?: string;
   background?: string;
@@ -50,9 +53,11 @@ export interface ScenarioChapter {
 export interface ScenarioPackage {
   id: string;
   title: string;
-  bgmUrl?: string;
+  bgm?: string;       // Sound Master ID (e.g. 'bgm_main')
+  bgmUrl?: string;    // Direct BGM URL (Backward compatibility)
   bgmVolume?: number;
-  seUrl?: string;
+  se?: string;        // Sound Master ID (e.g. 'se_cicada')
+  seUrl?: string;     // Direct SE URL (Backward compatibility)
   seVolume?: number;
   chapters: ScenarioChapter[];
 }
