@@ -12,6 +12,7 @@ import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
 import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './effects/text';
+import { TearEffect, TearConfig } from './effects/tears';
 
 export interface AvatarOptions {
   modelUrl: string;
@@ -186,6 +187,7 @@ export class Avatar {
   public currentAction: THREE.AnimationAction | null = null;
   public currentAnimationUrl: string | null = null;
   public effectTextManager: EffectTextManager | null = null;
+  public tearEffect: TearEffect | null = null;
 
   private options: AvatarOptions;
   private blinkTimer = 0;
@@ -284,6 +286,9 @@ export class Avatar {
         if (this.options.defaultAnimationUrl) {
           await this.playAnimation(this.options.defaultAnimationUrl, true);
         }
+
+        // Initialize tear effect
+        this.tearEffect = new TearEffect(vrm, { enabled: false });
 
         this.options.onLoaded(this);
       },
@@ -540,6 +545,9 @@ export class Avatar {
 
     // Update active emotion effect texts
     this.effectTextManager?.update(delta, this.camera);
+
+    // Update tear flow & glow effect
+    this.tearEffect?.update(delta);
   }
 
   private originalFaceTextures: Map<THREE.Material, THREE.Texture | null> = new Map();
@@ -646,7 +654,30 @@ export class Avatar {
     this.effectTextManager?.clear();
   }
 
+  /**
+   * Enable/disable or restart tear effect
+   */
+  public setTearsEnabled(enabled: boolean): void {
+    if (this.tearEffect) {
+      this.tearEffect.updateConfig({ enabled });
+      if (enabled) {
+        this.tearEffect.restart();
+      }
+    }
+  }
+
+  public setTearConfig(config: Partial<TearConfig>): void {
+    this.tearEffect?.updateConfig(config);
+  }
+
+  public restartTears(): void {
+    this.tearEffect?.restart();
+  }
+
   public dispose(): void {
+    this.tearEffect?.dispose();
+    this.tearEffect = null;
+
     this.effectTextManager?.dispose();
     this.effectTextManager = null;
 
