@@ -19,20 +19,20 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       decorations: ['sweat', 'spikes'],
       decorationColor: '#ba68c8',
       charJitter: {
-        rotationRange: 0.14,
-        offsetYRange: 6,
-        scaleRange: 0.08,
+        rotationRange: 0.08,
+        offsetYRange: 3,
+        scaleRange: 0.05,
       },
-      slant: -4,
+      slant: -3,
     },
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.38,
     defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
-      position: 0.016,
-      rotation: 0.12,
-      frequency: 16, // Fast nervous comic shudder
+      position: 0.006,
+      rotation: 0.035,
+      frequency: 9, // Subtle nervous comic shudder
     },
     streamConfig: {
       phrase: 'ワナ',
@@ -57,20 +57,20 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       decorations: ['anger', 'spikes'],
       decorationColor: '#ff1744',
       charJitter: {
-        rotationRange: 0.18,
-        offsetYRange: 8,
-        scaleRange: 0.1,
+        rotationRange: 0.09,
+        offsetYRange: 4,
+        scaleRange: 0.06,
       },
-      slant: -6,
+      slant: -4,
     },
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.40,
     defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
-      position: 0.016,
-      rotation: 0.12,
-      frequency: 16, // Rhythmic irritated vibration
+      position: 0.007,
+      rotation: 0.04,
+      frequency: 8, // Calm simmering vibration
     },
     streamConfig: {
       phrase: 'イラ',
