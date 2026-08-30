@@ -10,6 +10,7 @@ export interface CharacterMasterItem {
   initialScale?: number;
   description?: string;
   thumbnail?: string;
+  faceBlushTexture?: string;
 }
 
 export interface MotionMasterItem {
