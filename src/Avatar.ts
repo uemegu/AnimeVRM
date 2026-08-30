@@ -13,6 +13,7 @@ import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
 import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './effects/text';
 import { TearEffect, TearConfig } from './effects/tears';
+import { SweatEffect, SweatConfig } from './effects/sweat';
 
 export interface AvatarOptions {
   modelUrl: string;
@@ -188,6 +189,7 @@ export class Avatar {
   public currentAnimationUrl: string | null = null;
   public effectTextManager: EffectTextManager | null = null;
   public tearEffect: TearEffect | null = null;
+  public sweatEffect: SweatEffect | null = null;
 
   private options: AvatarOptions;
   private blinkTimer = 0;
@@ -289,6 +291,9 @@ export class Avatar {
 
         // Initialize tear effect
         this.tearEffect = new TearEffect(vrm, { enabled: false });
+
+        // Initialize sweat effect
+        this.sweatEffect = new SweatEffect(vrm, { enabled: false });
 
         this.options.onLoaded(this);
       },
@@ -548,6 +553,9 @@ export class Avatar {
 
     // Update tear flow & glow effect
     this.tearEffect?.update(delta);
+
+    // Update sweat mark effect
+    this.sweatEffect?.update(delta);
   }
 
   private originalFaceTextures: Map<THREE.Material, THREE.Texture | null> = new Map();
@@ -674,7 +682,36 @@ export class Avatar {
     this.tearEffect?.restart();
   }
 
+  /**
+   * Enable/disable or restart sweat effect
+   */
+  public setSweatEnabled(enabled: boolean): void {
+    if (this.sweatEffect) {
+      this.sweatEffect.updateConfig({ enabled });
+      if (enabled) {
+        this.sweatEffect.restart();
+      }
+    }
+  }
+
+  public setSweatConfig(config: Partial<SweatConfig>): void {
+    this.sweatEffect?.updateConfig(config);
+  }
+
+  public restartSweat(duration?: number): void {
+    this.sweatEffect?.restart(duration);
+  }
+
+  public showSweat(options?: { duration?: number }): void {
+    if (this.sweatEffect) {
+      this.sweatEffect.restart(options?.duration ?? 3.0);
+    }
+  }
+
   public dispose(): void {
+    this.sweatEffect?.dispose();
+    this.sweatEffect = null;
+
     this.tearEffect?.dispose();
     this.tearEffect = null;
 

@@ -397,10 +397,21 @@ export class SunEffect {
       const camPos = camera.position.clone();
       const rayDir = this.sunWorldPosition.clone().sub(camPos).normalize();
       const distToSun = this.sunWorldPosition.distanceTo(camPos);
+      this.raycaster.camera = camera;
       this.raycaster.set(camPos, rayDir);
       this.raycaster.far = distToSun;
 
-      const intersects = this.raycaster.intersectObjects(vrmMeshes, true);
+      // Only check solid 3D meshes (exclude 2D sprites like sweat marks or effect texts)
+      const solidMeshes: THREE.Object3D[] = [];
+      for (const root of vrmMeshes) {
+        root.traverse((child) => {
+          if ((child as THREE.Mesh).isMesh && !(child as any).isSprite) {
+            solidMeshes.push(child);
+          }
+        });
+      }
+
+      const intersects = this.raycaster.intersectObjects(solidMeshes, false);
       if (intersects.length > 0) {
         // Occluded by character
         targetOcclusion = 0.7; // Keep 30% backlight rim
