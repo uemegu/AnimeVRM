@@ -1729,6 +1729,89 @@ function setupGUI(mountPoint?: HTMLElement): void {
   posFolder.close();
 
   tearFolder.open();
+
+  // --------------------------------------------------
+  // 💦 Sweat (Manga Mark) Effect Folder
+  // --------------------------------------------------
+  const sweatFolder = gui.addFolder('💦 漫符汗エフェクト (4方向放物線)');
+  const sweatState = {
+    enabled: false,
+    scale: 0.045,
+    flySpeed: 1.0,
+    gravity: 1.8,
+    spawnInterval: 0.38,
+    duration: 3.0,
+    loop: false,
+    color: '#38bdf8',
+    accentColor: '#0284c7',
+    originX: 0.0,
+    originY: 0.18,
+    originZ: -0.03,
+    toggleNervousExpression: () => {
+      if (!avatarInstance) return;
+      avatarInstance.setExpression('surprised', 1.0);
+      sweatState.enabled = true;
+      avatarInstance.setSweatEnabled(true);
+      avatarInstance.restartSweat(sweatState.duration);
+      sweatFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+      showToast('💦 焦り表情 ＋ 4方向放物線汗マークを発動しました');
+    },
+    restart: () => {
+      if (avatarInstance?.sweatEffect) {
+        avatarInstance.sweatEffect.restart(sweatState.duration);
+        showToast('💦 4方向に汗マークを吹き出しました');
+      }
+    },
+  };
+
+  const updateSweatConfig = () => {
+    if (!avatarInstance?.sweatEffect) return;
+    avatarInstance.setSweatConfig({
+      enabled: sweatState.enabled,
+      scale: sweatState.scale,
+      flySpeed: sweatState.flySpeed,
+      gravity: sweatState.gravity,
+      spawnInterval: sweatState.spawnInterval,
+      duration: sweatState.duration,
+      loop: sweatState.loop,
+      color: sweatState.color,
+      accentColor: sweatState.accentColor,
+      originOffset: { x: sweatState.originX, y: sweatState.originY, z: sweatState.originZ },
+    });
+  };
+
+  sweatFolder
+    .add(sweatState, 'enabled')
+    .name('汗エフェクト ON/OFF')
+    .onChange((val: boolean) => {
+      if (avatarInstance?.sweatEffect) {
+        sweatState.originX = avatarInstance.sweatEffect.config.originOffset.x;
+        sweatState.originY = avatarInstance.sweatEffect.config.originOffset.y;
+        sweatState.originZ = avatarInstance.sweatEffect.config.originOffset.z;
+        sweatFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+      }
+      avatarInstance?.setSweatEnabled(val);
+    });
+
+  sweatFolder.add(sweatState, 'toggleNervousExpression').name('💦 焦り顔プリセット');
+  sweatFolder.add(sweatState, 'restart').name('🔄 汗を噴出');
+
+  sweatFolder.add(sweatState, 'scale', 0.01, 0.15, 0.005).name('汗の大きさ').onChange(updateSweatConfig);
+  sweatFolder.add(sweatState, 'flySpeed', 0.4, 2.5, 0.1).name('飛び散る勢い (速度)').onChange(updateSweatConfig);
+  sweatFolder.add(sweatState, 'gravity', 0.5, 4.0, 0.1).name('重力 (落下の強さ)').onChange(updateSweatConfig);
+  sweatFolder.add(sweatState, 'spawnInterval', 0.15, 1.0, 0.02).name('噴出間隔 (秒)').onChange(updateSweatConfig);
+  sweatFolder.add(sweatState, 'duration', 0.5, 10.0, 0.5).name('表示秒数 (Duration)').onChange(updateSweatConfig);
+  sweatFolder.add(sweatState, 'loop').name(tr.common.loop).onChange(updateSweatConfig);
+  sweatFolder.addColor(sweatState, 'color').name('汗のメイン色').onChange(updateSweatConfig);
+  sweatFolder.addColor(sweatState, 'accentColor').name('汗の濃い色').onChange(updateSweatConfig);
+
+  const sweatPosFolder = sweatFolder.addFolder('📍 発生位置微調整 (Origin)');
+  sweatPosFolder.add(sweatState, 'originX', -0.15, 0.15, 0.005).name('左右位置 (X)').onChange(updateSweatConfig);
+  sweatPosFolder.add(sweatState, 'originY', 0.0, 0.35, 0.005).name('上下高さ (Y: 頭上)').onChange(updateSweatConfig);
+  sweatPosFolder.add(sweatState, 'originZ', -0.2, 0.2, 0.005).name('前後位置 (Z: ＋手前/ー奥)').onChange(updateSweatConfig);
+  sweatPosFolder.close();
+
+  sweatFolder.open();
 }
 
 function rebuildGUI(): void {
@@ -2114,6 +2197,7 @@ function setupUnifiedUI(): void {
               <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="background: #fef9c3; border-color: #facc15; color: #854d0e;">${tr.character.presets.biku}</button>
               <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="background: #f0fdf4; border-color: #86efac; color: #15803d;">${tr.character.presets.yatta}</button>
               <button class="effect-text-btn" data-preset="wanawana" data-text="ゾクッ…" data-expr="surprised" style="background: #faf5ff; border-color: #d8b4fe; color: #7e22ce;">${tr.character.presets.zoku}</button>
+              <button id="quick-sweat-btn" class="effect-sweat-btn" data-expr="surprised" style="background: #f0f9ff; border-color: #7dd3fc; color: #0284c7; grid-column: span 3; font-weight: 700;">${tr.character.presets.sweat}</button>
             </div>
             <div style="display: flex; gap: 4px; margin-top: 3px;">
               <input type="text" id="quick-custom-effect-text" placeholder="${tr.character.customTextPlaceholder}" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
@@ -2656,6 +2740,18 @@ function setupUnifiedUI(): void {
           showToast(`💬 「${text}」`);
         }
       });
+    });
+
+    // Quick Sweat Mark Button
+    document.getElementById('quick-sweat-btn')?.addEventListener('click', () => {
+      if (avatarInstance) {
+        avatarInstance.setExpression('surprised', 1.0);
+        exprButtons.forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-expr') === 'surprised');
+        });
+        avatarInstance.showSweat({ duration: 3.0 });
+        showToast('💦 焦り表情 ＋ 4方向放物線の汗マークを発動しました');
+      }
     });
 
     // Custom Effect Text Trigger

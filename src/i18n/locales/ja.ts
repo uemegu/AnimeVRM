@@ -75,6 +75,7 @@ export const ja: Translations = {
       biku: '⚡ ビクッ！',
       yatta: '🎉 やったー！',
       zoku: '🥶 ゾクッ…',
+      sweat: '💦 汗 (焦り)',
     },
     lipSyncTitle: '🎵 音声リップシンク ＆ プレイヤー',
     openAudioFile: '📁 音声を開く',
