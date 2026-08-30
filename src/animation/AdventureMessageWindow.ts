@@ -189,16 +189,16 @@ export class AdventureMessageWindow {
         filter: drop-shadow(0 2px 6px rgba(56, 189, 248, 0.6));
       }
 
-      /* --- Choice Dialog & Backdrop --- */
+      /* --- Persona-Style Choice Dialog & Backdrop --- */
       .adv-choices-backdrop {
         position: fixed;
         inset: 0;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(4px);
+        background: radial-gradient(circle at center, rgba(15, 23, 42, 0.45) 0%, rgba(3, 7, 18, 0.8) 100%);
+        backdrop-filter: blur(6px);
         z-index: 9996;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.25s ease;
       }
 
       .adv-choices-backdrop.visible {
@@ -208,54 +208,167 @@ export class AdventureMessageWindow {
 
       .adv-choices-container {
         position: fixed;
-        top: 48%;
+        top: 38%;
         left: 50%;
         transform: translate(-50%, -50%);
         z-index: 9998;
         display: flex;
         flex-direction: column;
-        gap: 16px;
-        width: 90%;
-        max-width: 580px;
+        gap: 22px; /* 1と2が被らないよう十分な間隔を確保 */
+        width: 92%;
+        max-width: 660px;
         pointer-events: none;
         opacity: 0;
-        transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.2s ease;
       }
 
       .adv-choices-container.visible {
         pointer-events: auto;
         opacity: 1;
-        transform: translate(-50%, -50%);
       }
 
-      .adv-choice-btn {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(240, 249, 255, 0.88) 100%);
-        color: #0f172a;
-        font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', serif;
-        font-size: clamp(16px, 1.8vw, 19px);
-        font-weight: 600;
-        padding: 16px 24px;
-        border-radius: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.8);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(56, 189, 248, 0.25);
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        backdrop-filter: blur(10px);
+      /* Persona Style Header: Thinking Time */
+      .adv-thinking-header {
+        align-self: center;
+        margin-bottom: 6px;
         position: relative;
-        overflow: hidden;
+        background: #e11d48;
+        color: #ffffff;
+        font-family: 'Arial Black', 'Impact', sans-serif;
+        font-size: clamp(20px, 2.6vw, 26px);
+        font-weight: 900;
+        font-style: italic;
+        letter-spacing: 0.14em;
+        padding: 6px 36px;
+        transform: skewX(-14deg) rotate(-2.5deg);
+        box-shadow: -8px 8px 0px #000000, -14px 14px 0px rgba(0, 0, 0, 0.35);
+        border: 3px solid #000000;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        text-shadow: 2px 2px 0px #000000;
+        animation: persona-header-drop 0.4s cubic-bezier(0.12, 1.25, 0.28, 1.15) both;
+        user-select: none;
+      }
+
+      .adv-thinking-header::before {
+        content: '★';
+        color: #facc15;
+        font-size: 0.85em;
+        text-shadow: 2px 2px 0px #000000;
+      }
+      .adv-thinking-header::after {
+        content: '★';
+        color: #facc15;
+        font-size: 0.85em;
+        text-shadow: 2px 2px 0px #000000;
+      }
+
+      /* Persona Style Slam-In Choice Card with Solid Hard-Edge Shadows */
+      .adv-choice-btn {
+        --rot: -3deg;
+        position: relative;
+        background: #ffffff;
+        color: #000000;
+        font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Arial Black', sans-serif;
+        font-size: clamp(16px, 1.8vw, 20px);
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        padding: 15px 24px 15px 18px;
+        border: 3px solid #000000;
+        border-radius: 2px;
+        clip-path: polygon(16px 0%, 100% 0%, calc(100% - 16px) 100%, 0% 100%);
+        /* はっきりとしたソリッド陰影（グラデーションなし） */
+        box-shadow: -10px 10px 0px #000000, -18px 18px 0px rgba(0, 0, 0, 0.45);
+        cursor: pointer;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        user-select: none;
+        transform-origin: center center;
+        opacity: 0;
+        transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, color 0.15s ease, box-shadow 0.18s ease, border-color 0.15s ease;
+      }
+
+      .adv-choice-btn.slam-in {
+        animation: persona-slam 0.44s cubic-bezier(0.12, 1.25, 0.28, 1.15) both;
+      }
+
+      .adv-choice-badge {
+        background: #e11d48;
+        color: #ffffff;
+        font-family: 'Arial Black', sans-serif;
+        font-size: 15px;
+        font-weight: 900;
+        padding: 4px 12px;
+        transform: skewX(-14deg);
+        border: 2px solid #000000;
+        box-shadow: -3px 3px 0px #000000;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      }
+
+      .adv-choice-text {
+        flex: 1;
+        line-height: 1.4;
       }
 
       .adv-choice-btn:hover {
-        background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
-        border-color: #38bdf8;
-        color: #0284c7;
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4), 0 0 25px rgba(56, 189, 248, 0.5);
+        background: #000000;
+        color: #ffffff;
+        border-color: #e11d48;
+        transform: scale(1.04) rotate(calc(var(--rot) * 0.5)) translate(6px, -6px) !important;
+        box-shadow: -14px 14px 0px #e11d48, -22px 22px 0px #000000;
+      }
+
+      .adv-choice-btn:hover .adv-choice-badge {
+        background: #facc15;
+        color: #000000;
+        transform: skewX(-14deg) scale(1.12);
       }
 
       .adv-choice-btn:active {
-        transform: translateY(0) scale(0.99);
+        transform: scale(0.98) rotate(var(--rot)) !important;
+      }
+
+      @keyframes persona-header-drop {
+        0% {
+          opacity: 0;
+          transform: scale(2.8) translateY(-80px) skewX(-14deg) rotate(-10deg);
+        }
+        70% {
+          opacity: 1;
+          transform: scale(0.92) translateY(4px) skewX(-14deg) rotate(-2.5deg);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0) skewX(-14deg) rotate(-2.5deg);
+        }
+      }
+
+      @keyframes persona-slam {
+        0% {
+          opacity: 0;
+          transform: scale(2.5) translate(90px, -70px) rotate(-20deg);
+          filter: blur(8px);
+        }
+        60% {
+          opacity: 1;
+          transform: scale(0.92) translate(-4px, 3px) rotate(calc(var(--rot) + 2deg));
+          filter: blur(0);
+        }
+        82% {
+          transform: scale(1.04) rotate(calc(var(--rot) - 1deg));
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) rotate(var(--rot));
+        }
       }
 
       @keyframes adv-bounce {
@@ -386,10 +499,32 @@ export class AdventureMessageWindow {
 
     if (this.choicesContainerEl) {
       this.choicesContainerEl.innerHTML = '';
-      choices.forEach((choice) => {
+
+      // Title Logo Header: Thinking Time
+      const header = document.createElement('div');
+      header.className = 'adv-thinking-header';
+      header.textContent = 'Thinking Time';
+      this.choicesContainerEl.appendChild(header);
+
+      const rotations = ['-3.2deg', '2.6deg', '-2.0deg', '3.0deg'];
+
+      choices.forEach((choice, index) => {
         const btn = document.createElement('button');
-        btn.className = 'adv-choice-btn';
-        btn.innerHTML = this.escapeHTML(choice.text);
+        btn.className = 'adv-choice-btn slam-in';
+        btn.style.setProperty('--rot', rotations[index % rotations.length]);
+        btn.style.animationDelay = `${0.12 + index * 0.16}s`;
+
+        const badge = document.createElement('span');
+        badge.className = 'adv-choice-badge';
+        badge.textContent = `0${index + 1}`;
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'adv-choice-text';
+        textSpan.innerHTML = this.escapeHTML(choice.text);
+
+        btn.appendChild(badge);
+        btn.appendChild(textSpan);
+
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.hideChoices();

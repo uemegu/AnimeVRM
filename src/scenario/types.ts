@@ -13,6 +13,7 @@ export interface ScenarioSceneAvatarConfig {
   motion?: string;
   expression?: string;
   expressionWeight?: number;
+  faceTexture?: string;
   effectText?: EffectPresetName | {
     preset: EffectPresetName;
     text?: string;

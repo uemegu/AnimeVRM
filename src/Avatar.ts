@@ -310,6 +310,15 @@ export class Avatar {
   ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm) return null;
 
+    // If identical animation is already running, just continue playing seamlessly!
+    if (this.currentAnimationUrl === url && this.currentAction && this.currentAction.isRunning()) {
+      if (loop) {
+        this.returnToIdleUrl = null;
+        this.currentAction.setLoop(THREE.LoopRepeat, Infinity);
+      }
+      return this.currentAction;
+    }
+
     if (!this.mixer) {
       this.mixer = new THREE.AnimationMixer(this.vrm.scene);
       this.boundMixerFinishedListener = (e: { action: THREE.AnimationAction }) => {
@@ -533,15 +542,108 @@ export class Avatar {
     this.effectTextManager?.update(delta, this.camera);
   }
 
+  private originalFaceTextures: Map<THREE.Material, THREE.Texture | null> = new Map();
+  private loadedTextureCache: Map<string, THREE.Texture> = new Map();
+  private textureLoader = new THREE.TextureLoader();
+
   /**
-   * Display manga-style emotion effect text attached to this VRM
+   * Dynamically change the face skin texture (e.g. blush / red cheeks face texture).
+   * Passing null resets to the original face texture.
+   */
+  public setFaceTexture(textureUrl: string | null): void {
+    if (!this.vrm) return;
+
+    const faceSkinMaterials: any[] = [];
+    this.vrm.scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const mesh = obj as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const mat of materials) {
+          if (mat && mat.name && /Face.*SKIN|Face_00|Face/i.test(mat.name) && !/Mouth|Eye|Brow|Eyelash|Eyeline/i.test(mat.name)) {
+            faceSkinMaterials.push(mat);
+            if (!this.originalFaceTextures.has(mat)) {
+              this.originalFaceTextures.set(mat, (mat as any).map ?? null);
+            }
+          }
+        }
+      }
+    });
+
+    if (!textureUrl) {
+      // Reset to original texture
+      faceSkinMaterials.forEach((mat) => {
+        const orig = this.originalFaceTextures.get(mat) ?? null;
+        mat.map = orig;
+        if (mat.uniforms && mat.uniforms.map) {
+          mat.uniforms.map.value = orig;
+        }
+        mat.needsUpdate = true;
+      });
+      return;
+    }
+
+    const applyTexture = (tex: THREE.Texture) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.flipY = false;
+      faceSkinMaterials.forEach((mat) => {
+        mat.map = tex;
+        if (mat.uniforms && mat.uniforms.map) {
+          mat.uniforms.map.value = tex;
+        }
+        mat.needsUpdate = true;
+      });
+    };
+
+    if (this.loadedTextureCache.has(textureUrl)) {
+      applyTexture(this.loadedTextureCache.get(textureUrl)!);
+    } else {
+      this.textureLoader.load(
+        resolveAssetUrl(textureUrl),
+        (tex) => {
+          this.loadedTextureCache.set(textureUrl, tex);
+          applyTexture(tex);
+        },
+        undefined,
+        (err) => console.error(`Failed to load face texture: ${textureUrl}`, err)
+      );
+    }
+  }
+
+  public resetFaceTexture(): void {
+    this.setFaceTexture(null);
+  }
+
+  private currentEffectKey: string | null = null;
+
+  /**
+   * Display manga-style emotion effect text attached to this VRM.
+   * If the effect matches current active effect, it continues smoothly without restarting!
    */
   public showEffectText(options: Omit<ShowEffectTextOptions, 'target'> & { target?: VRM | THREE.Object3D }): EffectTextInstance | null {
     if (!this.effectTextManager) return null;
+
+    const presetName = options.stylePreset || (options as any).preset || 'doki';
+    const text = options.text || '';
+    const effectKey = `${presetName}:${text}`;
+
+    // If identical effect is already active, seamlessly continue it!
+    if (this.currentEffectKey === effectKey && this.effectTextManager.activeCount > 0) {
+      return null;
+    }
+
+    // Clear previous different effects and start new one
+    this.effectTextManager.clear();
+    this.currentEffectKey = effectKey;
+
     return this.effectTextManager.show({
       target: options.target ?? (this.vrm ?? undefined),
       ...options,
     });
+  }
+
+  public clearEffectText(): void {
+    this.currentEffectKey = null;
+    this.effectTextManager?.clear();
   }
 
   public dispose(): void {

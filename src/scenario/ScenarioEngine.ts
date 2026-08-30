@@ -121,6 +121,8 @@ export class ScenarioEngine {
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
+    this.getAvatar()?.resetFaceTexture();
+    this.getAvatar()?.clearEffectText();
 
     this.messageWindow.hide();
     this.onPlayStateChange?.(false);
@@ -307,6 +309,13 @@ export class ScenarioEngine {
         avatar.setExpression(expression, expressionWeight ?? 1.0);
       }
 
+      // Dynamic Face Texture (e.g. Blush / Red cheeks)
+      if (scene.avatar.faceTexture) {
+        avatar.setFaceTexture(scene.avatar.faceTexture);
+      } else {
+        avatar.resetFaceTexture();
+      }
+
       // 3D Manga Emotion Effect Text
       if (effectText) {
         if (typeof effectText === 'string') {
@@ -321,7 +330,11 @@ export class ScenarioEngine {
             duration: effectText.duration,
           });
         }
+      } else {
+        avatar.clearEffectText();
       }
+    } else if (avatar) {
+      avatar.clearEffectText();
     }
 
     // 4. Voice Lip-Sync

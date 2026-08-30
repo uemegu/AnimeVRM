@@ -127,7 +127,7 @@ export interface StreamConfig {
 /**
  * Spawn mode
  */
-export type EffectSpawnMode = 'single' | 'stream';
+export type EffectSpawnMode = 'single' | 'stream' | 'surround';
 
 /**
  * Preset definition
