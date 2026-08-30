@@ -750,15 +750,36 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
     audioLipSync.setAudioDelay(cfg.lipSync.audioDelay ?? 0.05);
     audioLipSync.setVoiceGender(cfg.lipSync.voiceGender ?? 'female');
   }
+
+  syncToggleState();
 }
 
-// --------------------------------------------------
-// --------------------------------------------------
-// Lil-GUI Setup (Mounted inside Unified Panel)
-// --------------------------------------------------
+const toggleState = {
+  colorGrading: true,
+  bloom: true,
+  smoothNormal: true,
+  screenSpaceWidth: true,
+  rimBody: true,
+  rimCloth: true,
+  rimLight: true,
+  wind: true,
+};
+
+function syncToggleState(): void {
+  toggleState.colorGrading = currentConfig.postProcessing.colorGrading?.enabled ?? false;
+  toggleState.bloom = currentConfig.postProcessing.bloom?.enabled ?? false;
+  toggleState.smoothNormal = currentConfig.outline.useSmoothNormal;
+  toggleState.screenSpaceWidth = currentConfig.outline.screenSpaceWidth;
+  toggleState.rimBody = currentConfig.materials.body.rimEnabled ?? false;
+  toggleState.rimCloth = currentConfig.materials.cloth.rimEnabled ?? false;
+  toggleState.rimLight = currentConfig.lighting.rim.enabled !== false;
+  toggleState.wind = currentConfig.wind.enabled;
+}
+
 let gui: GUI;
 
 function setupGUI(mountPoint?: HTMLElement): void {
+  syncToggleState();
   gui = new GUI({
     title: '詳細パラメータ',
     container: mountPoint,
@@ -903,17 +924,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
   // 2. Quick Feature Toggles
   const toggleFolder = gui.addFolder('⚡ 各機能 個別 ON/OFF トグル (Feature Toggles)');
-
-  const toggleState = {
-    colorGrading: currentConfig.postProcessing.colorGrading.enabled,
-    bloom: currentConfig.postProcessing.bloom.enabled,
-    smoothNormal: currentConfig.outline.useSmoothNormal,
-    screenSpaceWidth: currentConfig.outline.screenSpaceWidth,
-    rimBody: currentConfig.materials.body.rimEnabled,
-    rimCloth: currentConfig.materials.cloth.rimEnabled,
-    rimLight: currentConfig.lighting.rim.enabled,
-    wind: currentConfig.wind.enabled,
-  };
+  syncToggleState();
 
   toggleFolder
     .add(toggleState, 'colorGrading')
