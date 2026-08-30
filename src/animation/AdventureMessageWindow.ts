@@ -1,4 +1,5 @@
 import { ScenarioChoice } from '../scenario/types';
+import { t } from '../i18n';
 
 export interface AdventureMessageWindowOptions {
   onNextClick?: () => void;
@@ -659,8 +660,8 @@ export class AdventureMessageWindow {
     topControls.id = 'adv-top-controls';
     topControls.className = 'adv-top-controls';
     topControls.innerHTML = `
-      <button class="adv-stop-btn" title="シナリオを終了 (ESC)">
-        <span>⏹</span> シナリオ終了
+      <button class="adv-stop-btn" title="${t().scenario.endScenario} (ESC)">
+        <span>⏹</span> ${t().scenario.endScenario}
       </button>
     `;
     topControls.querySelector('.adv-stop-btn')?.addEventListener('click', (e) => {

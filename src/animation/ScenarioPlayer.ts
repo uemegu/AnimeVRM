@@ -2,6 +2,7 @@ import { Avatar } from '../Avatar';
 import { AudioLipSync } from '../AudioLipSync';
 import { resolveAssetUrl } from '../utils/path';
 import { AdventureMessageWindow } from './AdventureMessageWindow';
+import { Language, getLanguage } from '../i18n';
 
 export interface ScenarioStep {
   text: string;
@@ -26,7 +27,7 @@ export interface ScenarioPlayerOptions {
   seVolume?: number;
 }
 
-export const DEFAULT_CONVERSATION_STEPS: ScenarioStep[] = [
+export const DEFAULT_CONVERSATION_STEPS_JA: ScenarioStep[] = [
   {
     text: '君とはよく会うな。もしかして私のストーカーなのか？',
     displayText: '「君とはよく会うな。もしかして私のストーカーなのか？」',
@@ -57,6 +58,44 @@ export const DEFAULT_CONVERSATION_STEPS: ScenarioStep[] = [
     pauseAfterSec: 0.8,
   },
 ];
+
+export const DEFAULT_CONVERSATION_STEPS_EN: ScenarioStep[] = [
+  {
+    text: 'We run into each other quite often. Are you perhaps stalking me?',
+    displayText: '"We run into each other quite often. Are you perhaps stalking me?"',
+    durationSec: 5.92,
+    voiceUrl: '/voices/scenario_01.wav',
+    motionUrl: '/animations/Dismissing Gesture.fbx',
+    expression: 'neutral',
+    pauseAfterSec: 0.3,
+  },
+  {
+    text: 'Hehe, just kidding.',
+    displayText: '"Hehe, just kidding."',
+    durationSec: 2.44,
+    voiceUrl: '/voices/scenario_02.wav',
+    motionUrl: '/animations/Idle.fbx',
+    expression: 'happy',
+    expressionWeight: 1.0,
+    pauseAfterSec: 0.3,
+  },
+  {
+    text: 'So, what are you doing here anyway?',
+    displayText: '"So, what are you doing here anyway?"',
+    durationSec: 4.04,
+    voiceUrl: '/voices/scenario_03.wav',
+    motionUrl: '/animations/Acknowledging.fbx',
+    expression: 'neutral',
+    expressionWeight: 1.0,
+    pauseAfterSec: 0.8,
+  },
+];
+
+export function getConversationSteps(lang: Language = getLanguage()): ScenarioStep[] {
+  return lang === 'en' ? DEFAULT_CONVERSATION_STEPS_EN : DEFAULT_CONVERSATION_STEPS_JA;
+}
+
+export const DEFAULT_CONVERSATION_STEPS: ScenarioStep[] = DEFAULT_CONVERSATION_STEPS_JA;
 
 export class ScenarioPlayer {
   private getAvatar: () => Avatar | null;
@@ -116,7 +155,7 @@ export class ScenarioPlayer {
       this.stop();
     }
 
-    this.steps = customSteps && customSteps.length > 0 ? customSteps : DEFAULT_CONVERSATION_STEPS;
+    this.steps = customSteps && customSteps.length > 0 ? customSteps : getConversationSteps();
     this._isPlaying = true;
     this.currentStepIndex = 0;
 
