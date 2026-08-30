@@ -10,13 +10,16 @@ import {
 import { ScenePresetId } from '../presets/ScenePresets';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { resolveAssetUrl } from '../utils/path';
+import { MasterDataManager } from '../master/MasterDataManager';
 
 export interface ScenarioEngineOptions {
   getAvatar: () => Avatar | null;
   getAudioLipSync: () => AudioLipSync;
+  masterManager?: MasterDataManager;
   onPlayStateChange?: (isPlaying: boolean) => void;
   onSceneChange?: (scene: ScenarioScene, state: ScenarioState) => void;
   onFinished?: () => void;
+  onSwitchAvatar?: (modelUrl: string) => Promise<void>;
   onSwitchScenePreset?: (presetId: ScenePresetId) => void;
   onApplyCamera?: (
     startAngle?: CameraStartAngle,
@@ -28,9 +31,11 @@ export interface ScenarioEngineOptions {
 export class ScenarioEngine {
   private getAvatar: () => Avatar | null;
   private getAudioLipSync: () => AudioLipSync;
+  private masterManager: MasterDataManager;
   private onPlayStateChange?: (isPlaying: boolean) => void;
   private onSceneChange?: (scene: ScenarioScene, state: ScenarioState) => void;
   private onFinished?: () => void;
+  private onSwitchAvatar?: (modelUrl: string) => Promise<void>;
   private onSwitchScenePreset?: (presetId: ScenePresetId) => void;
   private onApplyCamera?: (
     startAngle?: CameraStartAngle,
@@ -53,9 +58,11 @@ export class ScenarioEngine {
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
     this.getAudioLipSync = options.getAudioLipSync;
+    this.masterManager = options.masterManager || new MasterDataManager();
     this.onPlayStateChange = options.onPlayStateChange;
     this.onSceneChange = options.onSceneChange;
     this.onFinished = options.onFinished;
+    this.onSwitchAvatar = options.onSwitchAvatar;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
 
@@ -105,9 +112,11 @@ export class ScenarioEngine {
 
     this.onPlayStateChange?.(true);
 
-    // Start BGM & SE if configured
-    this.startBgm(scenarioPackage.bgmUrl, scenarioPackage.bgmVolume);
-    this.startSe(scenarioPackage.seUrl, scenarioPackage.seVolume);
+    // Start BGM & SE if configured (resolve IDs via MasterDataManager)
+    const bgmPath = this.masterManager.resolveSoundUrl(scenarioPackage.bgm || scenarioPackage.bgmUrl);
+    const sePath = this.masterManager.resolveSoundUrl(scenarioPackage.se || scenarioPackage.seUrl);
+    this.startBgm(bgmPath || undefined, scenarioPackage.bgmVolume);
+    this.startSe(sePath || undefined, scenarioPackage.seVolume);
 
     this.messageWindow.show();
     this.executeCurrentScene();
@@ -270,6 +279,17 @@ export class ScenarioEngine {
     this.clearAutoNextTimer();
     this.stopVoice();
 
+    // 0. Character Model Switch (if specified)
+    const charId = scene.character || scene.avatar?.character;
+    if (charId && this.onSwitchAvatar) {
+      const modelUrl = this.masterManager.resolveCharacterModelUrl(charId);
+      if (modelUrl) {
+        this.onSwitchAvatar(modelUrl).catch((err) => {
+          console.error('Failed to switch avatar during scenario:', err);
+        });
+      }
+    }
+
     // 1. Switch Scene Preset (Lighting, Environment, PostProcessing)
     if (scene.scenePreset && this.onSwitchScenePreset) {
       this.onSwitchScenePreset(scene.scenePreset);
@@ -289,13 +309,14 @@ export class ScenarioEngine {
     if (avatar && scene.avatar) {
       const { motion, expression, expressionWeight, effectText } = scene.avatar;
 
-      // Motion
+      // Motion (resolve Master ID or FBX path)
       if (motion) {
-        const resolvedMotion = resolveAssetUrl(motion);
+        const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
+        const motionLower = resolvedMotion.toLowerCase();
         const isLoop =
-          resolvedMotion.toLowerCase().includes('idle') ||
-          resolvedMotion.toLowerCase().includes('walking') ||
-          resolvedMotion.toLowerCase().includes('jogging');
+          motionLower.includes('idle') ||
+          motionLower.includes('walking') ||
+          motionLower.includes('jogging');
         avatar.playAnimation(
           resolvedMotion,
           isLoop,
@@ -337,10 +358,11 @@ export class ScenarioEngine {
       avatar.clearEffectText();
     }
 
-    // 4. Voice Lip-Sync
-    if (scene.voiceUrl) {
+    // 4. Voice Lip-Sync (resolve Voice Master ID or WAV path)
+    const voiceKey = scene.voice || scene.voiceUrl;
+    if (voiceKey) {
       const audioLipSync = this.getAudioLipSync();
-      const voicePath = resolveAssetUrl(scene.voiceUrl);
+      const voicePath = this.masterManager.resolveSoundUrl(voiceKey) || resolveAssetUrl(voiceKey);
       audioLipSync.loadAudioUrl(voicePath, scene.text);
       audioLipSync.play().catch(() => {});
 
@@ -367,7 +389,7 @@ export class ScenarioEngine {
 
     // 6. Reset choices (shown after user reads text and clicks)
     this.messageWindow.hideChoices();
-    if (scene.autoNextSec && !scene.voiceUrl && (!scene.choices || scene.choices.length === 0)) {
+    if (scene.autoNextSec && !voiceKey && (!scene.choices || scene.choices.length === 0)) {
       this.autoNextTimer = window.setTimeout(() => {
         this.next();
       }, scene.autoNextSec * 1000);

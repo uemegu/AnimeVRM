@@ -22,6 +22,7 @@ import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
 import { ScenarioPlayer } from './animation/ScenarioPlayer';
 import { ScenarioEngine } from './scenario/ScenarioEngine';
 import { PARK_CONFESSION_SCENARIO } from './scenario/parkConfessionScenario';
+import { MasterDataManager } from './master/MasterDataManager';
 import { WindController, WIND_PRESETS } from './wind/WindController';
 import { WindParticles } from './wind/WindParticles';
 import {
@@ -466,11 +467,20 @@ const scenarioPlayer = new ScenarioPlayer({
   },
 });
 
+const masterManager = new MasterDataManager();
+
 const scenarioEngine = new ScenarioEngine({
   getAvatar: () => avatarInstance,
   getAudioLipSync: () => audioLipSync,
+  masterManager,
   onPlayStateChange: (isPlaying) => {
     updateScenarioPlayStateUI(isPlaying);
+  },
+  onSceneChange: (scene, state) => {
+    updateScenarioDebugUI(scene, state);
+  },
+  onSwitchAvatar: async (modelUrl) => {
+    loadAvatarModel(modelUrl);
   },
   onSwitchScenePreset: (presetId) => {
     switchScene(presetId, false);
@@ -1783,6 +1793,20 @@ function updateScenarioStepUI(index: number, step: { text: string; motionUrl?: s
   }
 }
 
+function updateScenarioDebugUI(scene: any, state: any): void {
+  const sceneLabel = document.getElementById('scenario-engine-scene-id');
+  const speakerLabel = document.getElementById('scenario-engine-speaker');
+  const flagsLabel = document.getElementById('scenario-engine-flags');
+  const textLabel = document.getElementById('scenario-engine-text');
+  if (sceneLabel) sceneLabel.textContent = scene.id || '-';
+  if (speakerLabel) speakerLabel.textContent = scene.speaker || '(地の文/ナレーション)';
+  if (flagsLabel) {
+    const flagArray = Array.from(state.flags as Set<string>);
+    flagsLabel.textContent = flagArray.length > 0 ? flagArray.join(', ') : 'なし';
+  }
+  if (textLabel) textLabel.textContent = scene.text || '';
+}
+
 // --------------------------------------------------
 // Audio UI Helper Functions
 // --------------------------------------------------
@@ -1848,239 +1872,342 @@ function setupUnifiedUI(): void {
   gearBtn.innerHTML = '⚙️';
   document.body.appendChild(gearBtn);
 
-  // 2. Main Right-Side Unified Panel
+  // 2. Main Right-Side Unified Panel (Studio Layout)
   const panel = document.createElement('div');
   panel.id = 'panel-container';
   panel.innerHTML = `
     <div id="panel-header">
-      <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px;">
-        <span style="color: #4f46e5; font-size: 16px;">✨</span> VRM Controller
+      <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px;">
+        <span style="color: #4f46e5; font-size: 16px;">🎮</span> AnimeVRM Studio
       </div>
       <button id="panel-close-btn" class="panel-close-btn" title="最小化">✕</button>
     </div>
+
+    <!-- Studio Tab Navigation Bar -->
+    <div id="panel-tabs">
+      <button class="studio-tab-btn active" data-tab="character">
+        <span class="studio-tab-icon">👤</span>
+        <span>キャラ・演出</span>
+      </button>
+      <button class="studio-tab-btn" data-tab="scenario">
+        <span class="studio-tab-icon">📜</span>
+        <span>シナリオ</span>
+      </button>
+      <button class="studio-tab-btn" data-tab="scenes">
+        <span class="studio-tab-icon">🏞️</span>
+        <span>シーン</span>
+      </button>
+      <button class="studio-tab-btn" data-tab="render">
+        <span class="studio-tab-icon">🎨</span>
+        <span>描画・設定</span>
+      </button>
+      <button class="studio-tab-btn" data-tab="masters">
+        <span class="studio-tab-icon">🗄️</span>
+        <span>マスター</span>
+      </button>
+    </div>
+
     <div id="panel-body">
-      <!-- Loading Status -->
+      <!-- Loading Status (Shared) -->
       <div id="loading-status" class="status-box">
         モデル読み込み中... <span id="progress-text">0%</span>
       </div>
 
-      <!-- Quick JSON Actions -->
-      <div class="section-box">
-        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-          <button id="quick-copy-json" class="action-btn primary" style="flex: 1; min-width: 80px;">📋 コピー</button>
-          <button id="quick-download-json" class="action-btn">💾 保存</button>
-          <button id="quick-import-json" class="action-btn">📥 読込</button>
-          <button id="quick-reset-json" class="action-btn">🔄 リセット</button>
-        </div>
-      </div>
-
-      <!-- VRM Model Selector -->
-      <div class="section-box">
-        <label class="section-label">👤 モデル切替 (VRM Model)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
-          <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
-          <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
-          <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
-        </div>
-      </div>
-
-      <!-- Motions -->
-      <div class="section-box">
-        <label class="section-label">💃 モーション (Motion: 全13種)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
-          <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
-          <button data-motion="${resolveAssetUrl('/animations/Standing Idle.fbx')}" class="motion-btn">立ち待機</button>
-          <button data-motion="${resolveAssetUrl('/animations/Female Standing Pose.fbx')}" class="motion-btn">立ちポーズ</button>
-          <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
-          <button data-motion="${resolveAssetUrl('/animations/Jogging.fbx')}" class="motion-btn">ジョギング</button>
-          <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
-          <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
-          <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
-          <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
-          <button data-motion="${resolveAssetUrl('/animations/Salute.fbx')}" class="motion-btn">敬礼</button>
-          <button data-motion="${resolveAssetUrl('/animations/Excited.fbx')}" class="motion-btn">喜ぶ</button>
-          <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
-          <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
-          <button data-motion="none" class="motion-btn">停止</button>
-        </div>
-      </div>
-
-      <!-- Expressions -->
-      <div class="section-box">
-        <label class="section-label">😄 表情 (Expression)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
-          <button data-expr="neutral" class="expr-btn active">通常</button>
-          <button data-expr="happy" class="expr-btn">笑顔</button>
-          <button data-expr="angry" class="expr-btn">怒り</button>
-          <button data-expr="sad" class="expr-btn">悲しみ</button>
-          <button data-expr="surprised" class="expr-btn">驚き</button>
-          <button data-expr="relaxed" class="expr-btn">リラックス</button>
-          <button data-expr="aa" class="expr-btn">あ</button>
-          <button data-expr="ee" class="expr-btn">え</button>
-          <button data-expr="oh" class="expr-btn">お</button>
-        </div>
-      </div>
-
-      <!-- Manga Emotion Effect Texts -->
-      <div class="section-box" style="border-left: 3px solid #ec4899; padding-left: 2px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <label class="section-label" style="color: #db2777; font-weight: 700;">💬 感情エフェクト文字 (Emotion Text)</label>
-          <button id="quick-clear-effect-text-btn" style="font-size: 10px; padding: 2px 6px; background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; border-radius: 4px; cursor: pointer; font-weight: 600;">全消去</button>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;" id="effect-text-buttons">
-          <button class="effect-text-btn" data-preset="wanawana" data-text="ワナワナ" data-expr="angry" style="background: #fdf4ff; border-color: #f0abfc; color: #a21caf;">🟣 ワナワナ</button>
-          <button class="effect-text-btn" data-preset="iraira" data-text="イライラ" data-expr="angry" style="background: #fef2f2; border-color: #fca5a5; color: #dc2626;">🔴 イライラ</button>
-          <button class="effect-text-btn" data-preset="gaan" data-text="ガーン" data-expr="sad" style="background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;">🔵 ガーン</button>
-          <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="background: #fefce8; border-color: #fde047; color: #ca8a04;">✨ キラキラ</button>
-          <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">⚪ しーん</button>
-          <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="background: #fff1f2; border-color: #fda4af; color: #e11d48;">💖 ドキドキ</button>
-          <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="background: #fef9c3; border-color: #facc15; color: #854d0e;">⚡ ビクッ！</button>
-          <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="background: #f0fdf4; border-color: #86efac; color: #15803d;">🎉 やったー！</button>
-          <button class="effect-text-btn" data-preset="wanawana" data-text="ゾクッ…" data-expr="surprised" style="background: #faf5ff; border-color: #d8b4fe; color: #7e22ce;">🥶 ゾクッ…</button>
-        </div>
-        <div style="display: flex; gap: 4px; margin-top: 3px;">
-          <input type="text" id="quick-custom-effect-text" placeholder="自由な文字 (例: ぷんぷん)" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
-          <select id="quick-custom-effect-preset" style="font-size: 10.5px; padding: 4px 2px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;">
-            <option value="kirakira">✨ キラキラ</option>
-            <option value="wanawana">🟣 ワナワナ</option>
-            <option value="iraira">🔴 イライラ</option>
-            <option value="gaan">🔵 ガーン</option>
-            <option value="shiin">⚪ しーん</option>
-            <option value="doki">💖 ドキドキ</option>
-            <option value="biku">⚡ ビクッ</option>
-          </select>
-          <button id="quick-custom-effect-btn" class="action-btn primary" style="padding: 4px 8px; font-size: 11px; background: #db2777; border-color: #be185d;">表示</button>
-        </div>
-      </div>
-
-      <!-- Short Animation Controls -->
-      <div class="section-box">
-        <label class="section-label">🎬 ショートアニメーション</label>
-        <div style="display: flex; gap: 4px;">
-          <button id="anim-play-btn" class="action-btn primary" style="flex: 1;">▶ アニメーション再生</button>
-          <button id="anim-stop-btn" class="action-btn">■ 停止</button>
-        </div>
-      </div>
-
-      <!-- Conversation Scenario Sequence Controls -->
-      <div class="section-box" style="border-left: 3px solid #8b5cf6;">
-        <label class="section-label" style="color: #6d28d9; font-weight: 700;">🎭 会話連動アニメーション (セリフ1〜3連続)</label>
-        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
-          <button id="scenario-play-btn" class="action-btn primary" style="flex: 1; background: #6d28d9;">▶ 会話シーケンス再生</button>
-          <button id="scenario-stop-btn" class="action-btn">■ 停止</button>
-        </div>
-        <div id="scenario-status-box" style="display: none; padding: 6px 8px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 11px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #6d28d9;">
-            <span id="scenario-current-step">Step 1: 手を振る</span>
-            <span style="font-size: 10px; color: #7c3aed;">再生中...</span>
-          </div>
-          <div id="scenario-current-text" style="color: #4b5563; margin-top: 2px; font-size: 10.5px; font-style: italic;"></div>
-        </div>
-      </div>
-
-      <!-- Interactive Branching Scenario Controls -->
-      <div class="section-box" style="border-left: 3px solid #ec4899; background: #fdf2f8;">
-        <label class="section-label" style="color: #db2777; font-weight: 700;">🌸 インタラクティブ・シナリオ (選択肢・感情エフェクト)</label>
-        <div style="display: flex; gap: 4px; margin-bottom: 4px;">
-          <button id="scenario-confession-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12.5px; padding: 10px 8px;">🌸 告白イベントシナリオ再生</button>
-          <button id="scenario-confession-stop-btn" class="action-btn">■ 停止</button>
-        </div>
-        <div style="font-size: 10px; color: #9d174d; line-height: 1.4; margin-top: 3px;">
-          ※クリックで会話送り・タイピングスキップ。選択肢（告白/500円/沈黙）で分岐し、ドキドキ・ガーン・シーン等の感情エフェクトが発動します。
-        </div>
-      </div>
-
-      <!-- Audio Lip-Sync & Player -->
-      <div class="section-box">
-        <label class="section-label">🎵 音声リップシンク ＆ プレイヤー</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
-          <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
-          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.wav')}">🎙️ 1. ストーカー？</button>
-          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.wav')}">🎙️ 2. 冗談だ</button>
-          <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.wav')}">🎙️ 3. 何してるの？</button>
-          <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 90px;">📁 音声を開く</button>
-        </div>
-        <div class="player-box">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
-            <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
-          </div>
-          <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
-            <div style="display: flex; gap: 4px;">
-              <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
-              <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
-              <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
-            </div>
-            <div style="display: flex; align-items: center; gap: 2px;">
-              <span style="font-size: 10px;">🔊</span>
-              <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-            <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
-            <div style="display: flex; gap: 3px; flex: 1;">
-              <span class="phoneme-tag" data-phoneme="aa">あ</span>
-              <span class="phoneme-tag" data-phoneme="ih">い</span>
-              <span class="phoneme-tag" data-phoneme="ou">う</span>
-              <span class="phoneme-tag" data-phoneme="ee">え</span>
-              <span class="phoneme-tag" data-phoneme="oh">お</span>
-              <span class="phoneme-tag active" data-phoneme="nn">閉</span>
-            </div>
+      <!-- ==================================================== -->
+      <!-- TAB 1: キャラクター・モーション・演出 (Character & FX) -->
+      <!-- ==================================================== -->
+      <div id="tab-pane-character" class="tab-pane active">
+        <!-- VRM Model Selector -->
+        <div class="section-box">
+          <label class="section-label">👤 モデル切替 (VRM Model)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
+            <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
+            <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
+            <button id="open-local-vrm-btn" class="model-btn">📁 ファイル選択</button>
           </div>
         </div>
-      </div>
 
-      <!-- Scene & Lighting Presets (Park 3, School Gate 3, Indoor 2) -->
-      <div class="section-box" style="border-left: 3px solid #f59e0b;">
-        <label class="section-label" style="color: #d97706; font-weight: 700;">🌅 シーン・ライティング (Scene & Lighting)</label>
-        <div style="display: flex; flex-direction: column; gap: 4px;">
-          <!-- Park -->
+        <!-- Motions -->
+        <div class="section-box">
+          <label class="section-label">💃 モーション (Motion: 全13種)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
+            <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">待機</button>
+            <button data-motion="${resolveAssetUrl('/animations/Standing Idle.fbx')}" class="motion-btn">立ち待機</button>
+            <button data-motion="${resolveAssetUrl('/animations/Female Standing Pose.fbx')}" class="motion-btn">立ちポーズ</button>
+            <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">歩行</button>
+            <button data-motion="${resolveAssetUrl('/animations/Jogging.fbx')}" class="motion-btn">ジョギング</button>
+            <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">挨拶</button>
+            <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">お辞儀</button>
+            <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">うなずく</button>
+            <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">手を振る</button>
+            <button data-motion="${resolveAssetUrl('/animations/Salute.fbx')}" class="motion-btn">敬礼</button>
+            <button data-motion="${resolveAssetUrl('/animations/Excited.fbx')}" class="motion-btn">喜ぶ</button>
+            <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">怒り</button>
+            <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">パンチ</button>
+            <button data-motion="none" class="motion-btn">停止</button>
+          </div>
+        </div>
+
+        <!-- Expressions -->
+        <div class="section-box">
+          <label class="section-label">😄 表情 (Expression)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
+            <button data-expr="neutral" class="expr-btn active">通常</button>
+            <button data-expr="happy" class="expr-btn">笑顔</button>
+            <button data-expr="angry" class="expr-btn">怒り</button>
+            <button data-expr="sad" class="expr-btn">悲しみ</button>
+            <button data-expr="surprised" class="expr-btn">驚き</button>
+            <button data-expr="relaxed" class="expr-btn">リラックス</button>
+            <button data-expr="aa" class="expr-btn">あ</button>
+            <button data-expr="ee" class="expr-btn">え</button>
+            <button data-expr="oh" class="expr-btn">お</button>
+          </div>
+        </div>
+
+        <!-- Manga Emotion Effect Texts -->
+        <div class="section-box" style="border-left: 3px solid #ec4899; padding-left: 6px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🌳 公園</span>
-            <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
+            <label class="section-label" style="color: #db2777; font-weight: 700;">💬 感情エフェクト文字 (3D漫符)</label>
+            <button id="quick-clear-effect-text-btn" style="font-size: 10px; padding: 2px 6px; background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; border-radius: 4px; cursor: pointer; font-weight: 600;">全消去</button>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
-            <button data-scene="morning_park" class="scene-preset-btn" title="青空・強い太陽光・昼光フレア（多層）">🌅 朝</button>
-            <button data-scene="evening_park" class="scene-preset-btn active" title="茜色夕日・西日光条・夕焼けフレア（多層）">🌇 夕方</button>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;" id="effect-text-buttons">
+            <button class="effect-text-btn" data-preset="wanawana" data-text="ワナワナ" data-expr="angry" style="background: #fdf4ff; border-color: #f0abfc; color: #a21caf;">🟣 ワナワナ</button>
+            <button class="effect-text-btn" data-preset="iraira" data-text="イライラ" data-expr="angry" style="background: #fef2f2; border-color: #fca5a5; color: #dc2626;">🔴 イライラ</button>
+            <button class="effect-text-btn" data-preset="gaan" data-text="ガーン" data-expr="sad" style="background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;">🔵 ガーン</button>
+            <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="background: #fefce8; border-color: #fde047; color: #ca8a04;">✨ キラキラ</button>
+            <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">⚪ しーん</button>
+            <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="background: #fff1f2; border-color: #fda4af; color: #e11d48;">💖 ドキドキ</button>
+            <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="background: #fef9c3; border-color: #facc15; color: #854d0e;">⚡ ビクッ！</button>
+            <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="background: #f0fdf4; border-color: #86efac; color: #15803d;">🎉 やったー！</button>
+            <button class="effect-text-btn" data-preset="wanawana" data-text="ゾクッ…" data-expr="surprised" style="background: #faf5ff; border-color: #d8b4fe; color: #7e22ce;">🥶 ゾクッ…</button>
           </div>
-          <!-- School Gate -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏫 校門</span>
-            <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
+          <div style="display: flex; gap: 4px; margin-top: 3px;">
+            <input type="text" id="quick-custom-effect-text" placeholder="自由な文字 (例: ぷんぷん)" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            <select id="quick-custom-effect-preset" style="font-size: 10.5px; padding: 4px 2px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;">
+              <option value="kirakira">✨ キラキラ</option>
+              <option value="wanawana">🟣 ワナワナ</option>
+              <option value="iraira">🔴 イライラ</option>
+              <option value="gaan">🔵 ガーン</option>
+              <option value="shiin">⚪ しーん</option>
+              <option value="doki">💖 ドキドキ</option>
+              <option value="biku">⚡ ビクッ</option>
+            </select>
+            <button id="quick-custom-effect-btn" class="action-btn primary" style="padding: 4px 8px; font-size: 11px; background: #db2777; border-color: #be185d;">表示</button>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
-            <button data-scene="morning_school" class="scene-preset-btn" title="青空・澄んだ朝陽・校門">🌅 朝</button>
-            <button data-scene="evening_school" class="scene-preset-btn" title="茜色夕焼け・西日・校門">🌇 夕方</button>
+        </div>
+
+        <!-- Audio Lip-Sync & Player -->
+        <div class="section-box">
+          <label class="section-label">🎵 音声リップシンク ＆ プレイヤー</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
+            <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
+            <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.wav')}">🎙️ 1. ストーカー？</button>
+            <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.wav')}">🎙️ 2. 冗談だ</button>
+            <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.wav')}">🎙️ 3. 何してるの？</button>
+            <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 90px;">📁 音声を開く</button>
           </div>
-          <!-- Indoor Classroom -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-            <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏠 室内 (教室)</span>
-            <span style="font-size: 10px; color: #94a3b8;">明るい / 暗い</span>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
-            <button data-scene="bright_indoor" class="scene-preset-btn" title="教室背景・均一で明るい室内照明">💡 明るい</button>
-            <button data-scene="dark_indoor" class="scene-preset-btn" title="教室背景・薄暗い間接照明・夜光">🌙 暗い</button>
+          <div class="player-box">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
+              <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
+            </div>
+            <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
+              <div style="display: flex; gap: 4px;">
+                <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ 再生</button>
+                <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ 停止</button>
+                <button id="audio-loop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ループ</button>
+              </div>
+              <div style="display: flex; align-items: center; gap: 2px;">
+                <span style="font-size: 10px;">🔊</span>
+                <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <span style="font-size: 10px; color: #64748b; min-width: 45px;">判定音素:</span>
+              <div style="display: flex; gap: 3px; flex: 1;">
+                <span class="phoneme-tag" data-phoneme="aa">あ</span>
+                <span class="phoneme-tag" data-phoneme="ih">い</span>
+                <span class="phoneme-tag" data-phoneme="ou">う</span>
+                <span class="phoneme-tag" data-phoneme="ee">え</span>
+                <span class="phoneme-tag" data-phoneme="oh">お</span>
+                <span class="phoneme-tag active" data-phoneme="nn">閉</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Background selector -->
-      <div class="section-box">
-        <label class="section-label">🌄 背景 (Background)</label>
-        <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-          <button data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">🌳 近代公園 (多層)</button>
-          <button data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">🏫 校門</button>
-          <button data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">🏫 教室</button>
-          <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">🌲 旧公園</button>
-          <button data-bg="none" class="bg-btn">OFF (単色)</button>
+      <!-- ==================================================== -->
+      <!-- TAB 2: シナリオ・分岐ロジック (Scenario & Logic) -->
+      <!-- ==================================================== -->
+      <div id="tab-pane-scenario" class="tab-pane">
+        <!-- Interactive Branching Scenario Controls -->
+        <div class="section-box" style="border-left: 3px solid #ec4899; background: #fdf2f8; padding: 8px; border-radius: 6px;">
+          <label class="section-label" style="color: #db2777; font-weight: 700;">🌸 告白イベントシナリオ (分岐・漫符・音声)</label>
+          <div style="display: flex; gap: 4px; margin-top: 4px;">
+            <button id="scenario-confession-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12.5px; padding: 8px;">🌸 告白シナリオ再生</button>
+            <button id="scenario-confession-stop-btn" class="action-btn">■ 停止</button>
+          </div>
+          <div style="font-size: 10.5px; color: #9d174d; line-height: 1.4; margin-top: 5px;">
+            ※クリックで会話送り。選択肢（告白/500円/沈黙）で分岐し、モデル表情・感情漫符が連動します。
+          </div>
+        </div>
+
+        <!-- Scenario Engine Live Debugger -->
+        <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+            <span style="font-weight: 700; font-size: 11.5px; color: #475569;">📊 実行中シナリオステータス</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
+            <div><span style="color: #64748b;">シーンID:</span> <strong id="scenario-engine-scene-id" style="color: #4f46e5;">-</strong></div>
+            <div><span style="color: #64748b;">話者:</span> <span id="scenario-engine-speaker" style="font-weight: 600;">-</span></div>
+            <div><span style="color: #64748b;">獲得フラグ:</span> <span id="scenario-engine-flags" style="color: #059669; font-weight: 600;">なし</span></div>
+            <div style="margin-top: 2px; padding: 4px 6px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; min-height: 28px; font-style: italic; color: #334155;" id="scenario-engine-text">
+              （待機中）
+            </div>
+          </div>
+        </div>
+
+        <!-- External Scenario JSON Runner -->
+        <div class="section-box">
+          <label class="section-label">📥 外部シナリオJSON読み込み・実行</label>
+          <input type="file" id="scenario-json-file-input" accept=".json" style="display: none;">
+          <button id="scenario-json-file-btn" class="action-btn" style="width: 100%; padding: 6px;">📂 シナリオJSONファイルを選択して再生</button>
+        </div>
+
+        <!-- Conversation Scenario Sequence Controls -->
+        <div class="section-box" style="border-left: 3px solid #8b5cf6; padding-left: 6px;">
+          <label class="section-label" style="color: #6d28d9; font-weight: 700;">🎭 会話連動シーケンス (セリフ1〜3)</label>
+          <div style="display: flex; gap: 4px;">
+            <button id="scenario-play-btn" class="action-btn primary" style="flex: 1; background: #6d28d9;">▶ シーケンス再生</button>
+            <button id="scenario-stop-btn" class="action-btn">■ 停止</button>
+          </div>
+          <div id="scenario-status-box" style="display: none; padding: 6px 8px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 11px; margin-top: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #6d28d9;">
+              <span id="scenario-current-step">Step 1: 手を振る</span>
+              <span style="font-size: 10px; color: #7c3aed;">再生中...</span>
+            </div>
+            <div id="scenario-current-text" style="color: #4b5563; margin-top: 2px; font-size: 10.5px; font-style: italic;"></div>
+          </div>
+        </div>
+
+        <!-- Short Animation Controls -->
+        <div class="section-box">
+          <label class="section-label">🎬 ショートアニメーション演出</label>
+          <div style="display: flex; gap: 4px;">
+            <button id="anim-play-btn" class="action-btn primary" style="flex: 1;">▶ アニメーション再生</button>
+            <button id="anim-stop-btn" class="action-btn">■ 停止</button>
+          </div>
         </div>
       </div>
 
-      <!-- lil-gui mount container -->
-      <div class="section-box" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
-        <label class="section-label" style="color: #6366f1; font-size: 12px; margin-bottom: 2px;">⚙️ 詳細パラメータ調整</label>
-        <div id="gui-mount-point"></div>
+      <!-- ==================================================== -->
+      <!-- TAB 3: シーン・環境 (Scenes & Env) -->
+      <!-- ==================================================== -->
+      <div id="tab-pane-scenes" class="tab-pane">
+        <!-- Scene & Lighting Presets (Park 3, School Gate 3, Indoor 2) -->
+        <div class="section-box" style="border-left: 3px solid #f59e0b; padding-left: 6px;">
+          <label class="section-label" style="color: #d97706; font-weight: 700;">🌅 シーン・ライティング プリセット</label>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+            <!-- Park -->
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🌳 公園</span>
+              <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+              <button data-scene="morning_park" class="scene-preset-btn" title="青空・強い太陽光・昼光フレア（多層）">🌅 朝</button>
+              <button data-scene="evening_park" class="scene-preset-btn active" title="茜色夕日・西日光条・夕焼けフレア（多層）">🌇 夕方</button>
+            </div>
+            <!-- School Gate -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+              <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏫 校門</span>
+              <span style="font-size: 10px; color: #94a3b8;">朝 / 夕</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+              <button data-scene="morning_school" class="scene-preset-btn" title="青空・澄んだ朝陽・校門">🌅 朝</button>
+              <button data-scene="evening_school" class="scene-preset-btn" title="茜色夕焼け・西日・校門">🌇 夕方</button>
+            </div>
+            <!-- Indoor Classroom -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+              <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">🏠 室内 (教室)</span>
+              <span style="font-size: 10px; color: #94a3b8;">明るい / 暗い</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+              <button data-scene="bright_indoor" class="scene-preset-btn" title="教室背景・均一で明るい室内照明">💡 明るい</button>
+              <button data-scene="dark_indoor" class="scene-preset-btn" title="教室背景・薄暗い間接照明・夜光">🌙 暗い</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Background selector -->
+        <div class="section-box">
+          <label class="section-label">🌄 背景 (Background)</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
+            <button data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">🌳 近代公園 (多層)</button>
+            <button data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">🏫 校門</button>
+            <button data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">🏫 教室</button>
+            <button data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">🌲 旧公園</button>
+            <button data-bg="none" class="bg-btn">OFF (単色)</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================== -->
+      <!-- TAB 4: 描画・シェーダー・詳細設定 (Rendering) -->
+      <!-- ==================================================== -->
+      <div id="tab-pane-render" class="tab-pane">
+        <!-- Quick JSON Actions -->
+        <div class="section-box">
+          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+            <button id="quick-copy-json" class="action-btn primary" style="flex: 1; min-width: 80px;">📋 コピー</button>
+            <button id="quick-download-json" class="action-btn">💾 保存</button>
+            <button id="quick-import-json" class="action-btn">📥 読込</button>
+            <button id="quick-reset-json" class="action-btn">🔄 リセット</button>
+          </div>
+        </div>
+
+        <!-- lil-gui mount container -->
+        <div class="section-box" style="margin-top: 4px;">
+          <label class="section-label" style="color: #6366f1; font-size: 12px; margin-bottom: 2px;">⚙️ 詳細パラメータ調整 (トゥーン・マテリアル・光・風)</label>
+          <div id="gui-mount-point"></div>
+        </div>
+      </div>
+
+      <!-- ==================================================== -->
+      <!-- TAB 5: マスターデータ管理 (Master Data Manager) -->
+      <!-- ==================================================== -->
+      <div id="tab-pane-masters" class="tab-pane">
+        <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+          <label class="section-label" style="color: #334155; font-size: 12px; margin-bottom: 6px;">🗄️ 登録マスターデータ概要</label>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+            <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+              <span style="color: #64748b;">👤 キャラクター:</span> <strong id="master-count-characters">2</strong> 体
+            </div>
+            <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+              <span style="color: #64748b;">💃 モーション:</span> <strong id="master-count-motions">13</strong> 種
+            </div>
+            <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+              <span style="color: #64748b;">🎙️ 音声・サウンド:</span> <strong id="master-count-sounds">14</strong> 種
+            </div>
+            <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+              <span style="color: #64748b;">🌅 シーン環境:</span> <strong id="master-count-scenes">6</strong> 種
+            </div>
+          </div>
+        </div>
+
+        <div class="section-box">
+          <label class="section-label">💾 マスターJSONの一括保存 / 読込</label>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 4px;">
+              <button id="master-export-json-btn" class="action-btn primary" style="flex: 1;">💾 masters.json 保存</button>
+              <button id="master-copy-json-btn" class="action-btn">📋 コピー</button>
+            </div>
+            <input type="file" id="master-import-file-input" accept=".json" style="display: none;">
+            <button id="master-import-json-btn" class="action-btn">📥 masters.json 読み込み・適用</button>
+            <button id="master-reset-btn" class="action-btn" style="color: #dc2626; border-color: #fecaca; background: #fef2f2;">🔄 デフォルトマスターにリセット</button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -2100,6 +2227,86 @@ function setupUnifiedUI(): void {
 
   gearBtn.addEventListener('click', () => {
     setPanelOpen(true);
+  });
+
+  // Setup Tab Navigation
+  const tabBtns = panel.querySelectorAll<HTMLButtonElement>('.studio-tab-btn');
+  const tabPanes = panel.querySelectorAll<HTMLElement>('.tab-pane');
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.getAttribute('data-tab');
+      tabBtns.forEach((b) => b.classList.toggle('active', b === btn));
+      tabPanes.forEach((pane) => {
+        pane.classList.toggle('active', pane.id === `tab-pane-${target}`);
+      });
+    });
+  });
+
+  // Master Data Manager UI Integration
+  const updateMasterCountLabels = () => {
+    const charEl = document.getElementById('master-count-characters');
+    const motEl = document.getElementById('master-count-motions');
+    const sndEl = document.getElementById('master-count-sounds');
+    const scnEl = document.getElementById('master-count-scenes');
+    if (charEl) charEl.textContent = masterManager.getCharacters().length.toString();
+    if (motEl) motEl.textContent = masterManager.getMotions().length.toString();
+    if (sndEl) sndEl.textContent = masterManager.getSounds().length.toString();
+    if (scnEl) scnEl.textContent = masterManager.getScenes().length.toString();
+  };
+  masterManager.subscribe(updateMasterCountLabels);
+  updateMasterCountLabels();
+
+  document.getElementById('master-export-json-btn')?.addEventListener('click', () => {
+    masterManager.downloadJSON('masters.json');
+    showToast('💾 masters.json をダウンロードしました');
+  });
+
+  document.getElementById('master-copy-json-btn')?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(masterManager.exportJSON());
+      showToast('📋 masters.json をコピーしました');
+    } catch {
+      showToast('コピーに失敗しました');
+    }
+  });
+
+  const masterImportInput = document.getElementById('master-import-file-input') as HTMLInputElement | null;
+  document.getElementById('master-import-json-btn')?.addEventListener('click', () => {
+    masterImportInput?.click();
+  });
+  masterImportInput?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      const text = await file.text();
+      const ok = masterManager.importJSON(text);
+      showToast(ok ? '📥 マスターデータをインポートしました！' : '❌ JSONの解析に失敗しました');
+    }
+  });
+
+  document.getElementById('master-reset-btn')?.addEventListener('click', () => {
+    masterManager.resetToDefault();
+    showToast('🔄 マスターデータを初期状態にリセットしました');
+  });
+
+  // External Scenario JSON Runner
+  const scenarioJsonInput = document.getElementById('scenario-json-file-input') as HTMLInputElement | null;
+  document.getElementById('scenario-json-file-btn')?.addEventListener('click', () => {
+    scenarioJsonInput?.click();
+  });
+  scenarioJsonInput?.addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (file) {
+      try {
+        const text = await file.text();
+        const customScenario = JSON.parse(text);
+        if (scenarioPlayer.isPlaying) scenarioPlayer.stop();
+        if (animationPlayer.isPlaying) animationPlayer.stop();
+        scenarioEngine.play(customScenario);
+        showToast(`🌸 シナリオ「${customScenario.title || file.name}」を開始しました`);
+      } catch (err) {
+        showToast('❌ シナリオJSONの読み込みに失敗しました');
+      }
+    }
   });
 
   // Setup lil-gui inside gui-mount-point
