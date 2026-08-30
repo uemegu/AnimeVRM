@@ -1627,7 +1627,104 @@ function setupGUI(mountPoint?: HTMLElement): void {
   effectTextFolder.add(effectTextState, 'show').name('▶ エフェクト表示 (Show)');
   effectTextFolder.add(effectTextState, 'showMulti').name('💥 複数同時表示テスト');
   effectTextFolder.add(effectTextState, 'clearAll').name('✕ 全消去 (Clear All)');
-  effectTextFolder.open();
+  effectTextFolder.close();
+
+  // 11. Glowing Tears Effect Folder
+  const tearFolder = gui.addFolder('💧 涙・発光筋エフェクト (Glowing Tears)');
+  const tearState = {
+    enabled: false,
+    side: 'left',
+    speed: 0.45,
+    glowIntensity: 1.8,
+    trailLength: 1.0,
+    tearColor: '#c8f0ff',
+    glowColor: '#ffffff',
+    width: 0.0032,
+    loop: false,
+    leftOffsetX: 0.054,
+    leftOffsetY: 0.047,
+    leftOffsetZ: 0.085,
+    restart: () => {
+      if (avatarInstance?.tearEffect) {
+        avatarInstance.tearEffect.restart();
+        showToast('💧 涙がスーッと流れます');
+      }
+    },
+    toggleSadExpression: () => {
+      if (!avatarInstance) return;
+      avatarInstance.setExpression('sad', 1.0);
+      tearState.enabled = true;
+      avatarInstance.setTearsEnabled(true);
+      avatarInstance.restartTears();
+      tearFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+      showToast('😢 悲しい表情 + 涙を一筋流しました');
+    },
+  };
+
+  const updateTearConfig = () => {
+    if (!avatarInstance?.tearEffect) return;
+    avatarInstance.setTearConfig({
+      enabled: tearState.enabled,
+      side: tearState.side as any,
+      speed: tearState.speed,
+      glowIntensity: tearState.glowIntensity,
+      trailLength: tearState.trailLength,
+      tearColor: tearState.tearColor,
+      glowColor: tearState.glowColor,
+      width: tearState.width,
+      loop: tearState.loop,
+      leftEyeOffset: { x: tearState.leftOffsetX, y: tearState.leftOffsetY, z: tearState.leftOffsetZ },
+      rightEyeOffset: { x: -tearState.leftOffsetX, y: tearState.leftOffsetY, z: tearState.leftOffsetZ },
+    });
+  };
+
+  tearFolder
+    .add(tearState, 'enabled')
+    .name('涙エフェクト ON/OFF')
+    .onChange((val: boolean) => {
+      if (avatarInstance?.tearEffect) {
+        tearState.leftOffsetX = avatarInstance.tearEffect.config.leftEyeOffset.x;
+        tearState.leftOffsetY = avatarInstance.tearEffect.config.leftEyeOffset.y;
+        tearState.leftOffsetZ = avatarInstance.tearEffect.config.leftEyeOffset.z;
+        tearFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+      }
+      avatarInstance?.setTearsEnabled(val);
+      if (val) {
+        if (!currentConfig.postProcessing.bloom.enabled) {
+          currentConfig.postProcessing.bloom.enabled = true;
+          bloomPass.strength = currentConfig.postProcessing.bloom.strength;
+          showToast('💧 涙を光らせるため Bloom を有効化しました');
+        }
+      }
+    });
+
+  tearFolder
+    .add(tearState, 'side', {
+      '左目から一筋 (Left)': 'left',
+      '右目から一筋 (Right)': 'right',
+      '両目 (Both)': 'both',
+    })
+    .name('流す位置 (Side)')
+    .onChange(updateTearConfig);
+
+  tearFolder.add(tearState, 'toggleSadExpression').name('😢 泣き顔プリセット (悲しみ + 一筋の涙)');
+  tearFolder.add(tearState, 'restart').name('🔄 最初から流す (Play Stream)');
+
+  tearFolder.add(tearState, 'speed', 0.1, 1.5, 0.05).name('流れる速度 (Speed)').onChange(updateTearConfig);
+  tearFolder.add(tearState, 'glowIntensity', 0.5, 5.0, 0.1).name('発光強度 (Glow / Bloom)').onChange(updateTearConfig);
+  tearFolder.add(tearState, 'trailLength', 0.2, 1.0, 0.05).name('残る筋の長さ (Trail)').onChange(updateTearConfig);
+  tearFolder.add(tearState, 'width', 0.001, 0.015, 0.0005).name('涙の筋の太さ (Width)').onChange(updateTearConfig);
+  tearFolder.addColor(tearState, 'tearColor').name('涙の基本色 (Base Color)').onChange(updateTearConfig);
+  tearFolder.addColor(tearState, 'glowColor').name('発光色 (Glow Color)').onChange(updateTearConfig);
+  tearFolder.add(tearState, 'loop').name('何度も流す (Loop)').onChange(updateTearConfig);
+
+  const posFolder = tearFolder.addFolder('📍 位置微調整 (Eye Offset)');
+  posFolder.add(tearState, 'leftOffsetX', 0.01, 0.1, 0.001).name('目の左右間隔 (X)').onChange(updateTearConfig);
+  posFolder.add(tearState, 'leftOffsetY', 0.0, 0.15, 0.001).name('目の上下高さ (Y)').onChange(updateTearConfig);
+  posFolder.add(tearState, 'leftOffsetZ', 0.02, 0.2, 0.001).name('顔の表面奥行き (Z)').onChange(updateTearConfig);
+  posFolder.close();
+
+  tearFolder.open();
 }
 
 // --------------------------------------------------
