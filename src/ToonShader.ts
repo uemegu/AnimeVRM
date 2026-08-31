@@ -387,22 +387,24 @@ export function applyToonShader(
           if (material.uniforms?.rimLightingMixFactor) material.uniforms.rimLightingMixFactor.value = params.rimLightingMixFactor;
         }
 
-        // Highlight (MatCap & Emissive Texture) ON/OFF
-        if (params.matcapEnabled !== undefined) {
+        // Highlight (MatCap & Emissive Texture) ON/OFF & Intensity
+        if (params.matcapEnabled !== undefined || params.emissiveIntensity !== undefined) {
           const isEnabled = params.matcapEnabled !== false;
+          const intensity = typeof params.emissiveIntensity === 'number' ? params.emissiveIntensity : (isEnabled ? (material.userData.originalEmissiveIntensity ?? 1.0) : 0.0);
 
-          // 1. MatCap Factor
+          // 1. MatCap Factor (Boost by intensity if > 1.0 to trigger Bloom)
           const origMatcap = (material.userData.originalMatcapFactor as THREE.Color | undefined) ?? new THREE.Color(1, 1, 1);
-          const targetMatcap = isEnabled ? origMatcap : new THREE.Color(0, 0, 0);
+          const matcapMultiplier = isEnabled ? Math.max(1.0, intensity) : 0.0;
+          const targetMatcap = origMatcap.clone().multiplyScalar(matcapMultiplier);
           if (material.matcapFactor) material.matcapFactor.copy(targetMatcap);
           if (material.uniforms?.matcapFactor?.value) material.uniforms.matcapFactor.value.copy(targetMatcap);
 
           // 2. Emissive (VRM hair highlight textures use emissiveMap / emissive)
           const origEmissive = (material.userData.originalEmissive as THREE.Color | undefined) ?? new THREE.Color(1, 1, 1);
-          const origIntensity = (material.userData.originalEmissiveIntensity as number | undefined) ?? 1.0;
+          const baseEmissive = (origEmissive.r === 0 && origEmissive.g === 0 && origEmissive.b === 0) ? new THREE.Color(1, 1, 1) : origEmissive;
 
-          const targetEmissive = isEnabled ? origEmissive : new THREE.Color(0, 0, 0);
-          const targetIntensity = isEnabled ? origIntensity : 0.0;
+          const targetEmissive = isEnabled ? baseEmissive : new THREE.Color(0, 0, 0);
+          const targetIntensity = isEnabled ? intensity : 0.0;
 
           if (material.emissive) material.emissive.copy(targetEmissive);
           if (typeof material.emissiveIntensity === 'number') material.emissiveIntensity = targetIntensity;

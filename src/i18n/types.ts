@@ -208,6 +208,7 @@ export interface Translations {
     matCloth: string;
     baseColor: string;
     highlightMatcap: string;
+    emissiveIntensity: string;
     shadowHueShift: string;
     shadowLightness: string;
     toonyFactor: string;
