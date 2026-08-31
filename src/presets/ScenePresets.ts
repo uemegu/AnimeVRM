@@ -175,7 +175,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
       contrast: 0.0,
     },
     wind: {
-      enabled: true,
+      enabled: false,
     },
   },
 
@@ -330,7 +330,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
       contrast: 0.08,
     },
     wind: {
-      enabled: true,
+      enabled: false,
     },
   },
 
@@ -482,7 +482,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
       contrast: 0.0,
     },
     wind: {
-      enabled: true,
+      enabled: false,
     },
   },
 
@@ -630,7 +630,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
       contrast: 0.08,
     },
     wind: {
-      enabled: true,
+      enabled: false,
     },
   },
 
@@ -716,7 +716,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
         color: '#ffffff',
         intensity: 2.2,
         posX: -3.5,
-        posY: 2.8,
+        posY: 0,
         posZ: 1.8,
       },
       rim: {
@@ -867,7 +867,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
         color: '#b7cdf0',
         intensity: 2.5,
         posX: -3.5,
-        posY: 2.2,
+        posY: 0,
         posZ: 1.5,
       },
       rim: {

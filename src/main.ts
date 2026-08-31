@@ -1022,6 +1022,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
     folder.addColor(params, 'color').name(tr.gui.baseColor).onChange(update);
     folder.add(params, 'matcapEnabled').name(tr.gui.highlightMatcap).onChange(update);
+    folder.add(params, 'emissiveIntensity', 0.0, 5.0, 0.1).name(tr.gui.emissiveIntensity).onChange(update);
     folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name(tr.gui.shadowHueShift).onChange(update);
     folder.add(params, 'shadowLightnessFactor', 0.02, 1.0, 0.01).name(tr.gui.shadowLightness).onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);

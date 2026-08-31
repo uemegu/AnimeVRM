@@ -208,6 +208,7 @@ export const ja: Translations = {
     matCloth: '衣装マテリアル (Cloth / Shoes)',
     baseColor: '基本色・血色感 (Base Color / Tint)',
     highlightMatcap: '✨ ハイライト表示 (Highlight / MatCap)',
+    emissiveIntensity: '🌟 発光強度 (Emissive / Bloom)',
     shadowHueShift: '影の色相シフト (Hue Shift)',
     shadowLightness: '影の明度比率 (Lightness)',
     toonyFactor: 'トゥーン度 (Toony)',

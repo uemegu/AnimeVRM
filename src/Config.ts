@@ -9,6 +9,7 @@ export interface MaterialStyleParams {
   shadingShiftFactor: number;
   giEqualizationFactor: number;
   matcapEnabled?: boolean;
+  emissiveIntensity?: number;
   rimEnabled: boolean;
   rimColor: string;
   parametricRimFresnelPowerFactor: number;
@@ -211,6 +212,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
+      emissiveIntensity: 0.0,
       rimEnabled: true,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 5,
@@ -226,6 +228,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
+      emissiveIntensity: 1.5,
       rimEnabled: false,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 0,
@@ -241,6 +244,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
+      emissiveIntensity: 0.0,
       rimEnabled: false,
       rimColor: '#202942',
       parametricRimFresnelPowerFactor: 4,
@@ -491,7 +495,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     ],
   },
   wind: {
-    enabled: true,
+    enabled: false,
     speed: 0.1,
     direction: 45, // degrees
     elevation: 5, // degrees

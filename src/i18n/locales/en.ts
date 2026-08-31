@@ -208,6 +208,7 @@ export const en: Translations = {
     matCloth: 'Cloth & Shoes Material',
     baseColor: 'Base Color / Tint',
     highlightMatcap: '✨ Highlight (MatCap)',
+    emissiveIntensity: '🌟 Emissive Intensity (Bloom)',
     shadowHueShift: 'Shadow Hue Shift',
     shadowLightness: 'Shadow Lightness',
     toonyFactor: 'Toon Shading Factor',
