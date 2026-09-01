@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { VRM, VRMHumanoidBoneName } from '@pixiv/three-vrm';
+import type { VRM, VRMHumanBoneName } from '@pixiv/three-vrm';
 import { EffectAnimationType, EffectAnchor, EffectTextPreset, ShowEffectTextOptions } from './types';
 import { createEffectTextTexture } from './textureGenerator';
 import { EFFECT_TEXT_PRESETS } from './presets';
@@ -106,7 +106,7 @@ export class EffectTextInstance {
       const vrm = this.target as VRM;
       const boneName =
         typeof this.anchor === 'string' && this.anchor !== 'custom'
-          ? (this.anchor as VRMHumanoidBoneName)
+          ? (this.anchor as VRMHumanBoneName)
           : 'head';
 
       const boneNode = vrm.humanoid.getNormalizedBoneNode(boneName) || vrm.humanoid.getRawBoneNode(boneName);
