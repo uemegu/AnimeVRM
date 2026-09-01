@@ -155,8 +155,8 @@ body {
 
 .studio-tab-btn {
   flex: 1;
-  min-width: 60px;
-  padding: 7px 4px;
+  min-width: 50px;
+  padding: 9px 4px;
   font-size: 11px;
   font-weight: 500;
   color: #888888;
@@ -165,9 +165,8 @@ body {
   border-bottom: 2px solid transparent;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
+  justify-content: center;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
@@ -182,10 +181,6 @@ body {
   border-bottom-color: #4772b3;
   background: #282828;
   font-weight: 600;
-}
-
-.studio-tab-icon {
-  font-size: 14px;
 }
 
 .panel-close-btn {
@@ -299,7 +294,7 @@ body {
   border-color: #4772b3;
 }
 
-.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn {
+.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn, .timeofday-btn {
   background: #363636;
   border: 1px solid #444444;
   border-radius: 4px;
@@ -311,13 +306,13 @@ body {
   text-align: center;
 }
 
-.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover {
+.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover, .timeofday-btn:hover {
   background: #464646;
   border-color: #555555;
   color: #ffffff;
 }
 
-.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active {
+.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active, .timeofday-btn.active {
   background: #4772b3;
   color: #ffffff;
   border-color: #385d94;
@@ -402,4 +397,119 @@ body {
 
 #gui-mount-point .lil-gui .lil-gui {
   border-top: 1px solid #2a2a2a !important;
+}
+
+/* ==================================================== */
+/* Histogram Tab Styles                                 */
+/* ==================================================== */
+.histogram-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hist-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.hist-control-btn {
+  flex: 1;
+  min-width: 44px;
+  padding: 3px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  background: #202020;
+  border: 1px solid #383838;
+  border-radius: 4px;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.hist-control-btn:hover {
+  background: #2e2e2e;
+  color: #ffffff;
+  border-color: #4a4a4a;
+}
+
+.hist-control-btn.active {
+  background: #36435c;
+  color: #ffffff;
+  border-color: #5684c8;
+  font-weight: 600;
+}
+
+.hist-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  background: #181818;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+#hist-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+.hist-tooltip {
+  position: absolute;
+  display: none;
+  background: rgba(20, 20, 20, 0.92);
+  border: 1px solid #484848;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  line-height: 1.35;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hist-gradient-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #000000, #404040 25%, #808080 50%, #c0c0c0 75%, #ffffff);
+  border: 1px solid #333333;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+
+.hist-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  font-size: 11px;
+}
+
+.hist-stat-item {
+  background: #242424;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #333333;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hist-stat-label {
+  font-size: 10px;
+  color: #888888;
+}
+
+.hist-stat-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  font-family: monospace, sans-serif;
 }

@@ -27,7 +27,33 @@ export interface Translations {
     scenario: string;
     scenes: string;
     render: string;
+    histogram: string;
     masters: string;
+  };
+  histogram: {
+    title: string;
+    description: string;
+    refresh: string;
+    channelMode: string;
+    channelAll: string;
+    channelRgb: string;
+    channelR: string;
+    channelG: string;
+    channelB: string;
+    channelLuminance: string;
+    scaleMode: string;
+    linearScale: string;
+    logScale: string;
+    statistics: string;
+    meanR: string;
+    meanG: string;
+    meanB: string;
+    meanLuminance: string;
+    shadowClip: string;
+    highlightClip: string;
+    resolution: string;
+    samplePixels: string;
+    peakCount: string;
   };
   character: {
     modelSwitch: string;
@@ -114,13 +140,17 @@ export interface Translations {
   };
   scenes: {
     lightingPresetsTitle: string;
+    timeOfDayTitle: string;
+    locationTitle: string;
     park: string;
     schoolGate: string;
     indoor: string;
     morningEvening: string;
     brightDark: string;
     morning: string;
+    day: string;
     evening: string;
+    rainy: string;
     bright: string;
     dark: string;
     backgroundTitle: string;
@@ -132,9 +162,13 @@ export interface Translations {
       offSingleColor: string;
     };
     presetMorningParkTip: string;
+    presetDayParkTip: string;
     presetEveningParkTip: string;
+    presetRainyParkTip: string;
     presetMorningSchoolTip: string;
+    presetDaySchoolTip: string;
     presetEveningSchoolTip: string;
+    presetRainySchoolTip: string;
     presetBrightIndoorTip: string;
     presetDarkIndoorTip: string;
   };
