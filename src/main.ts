@@ -818,7 +818,7 @@ brightnessContrastPass.uniforms['contrast'].value = currentConfig.postProcessing
 composer.addPass(brightnessContrastPass);
 
 // 7. SMAA (Subpixel Morphological Antialiasing) on sRGB edges
-const smaaPass = new SMAAPass(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio);
+const smaaPass = new SMAAPass();
 smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
 composer.addPass(smaaPass);
 
@@ -1157,18 +1157,20 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
   currentConfig.shortAnimation.cuts.forEach((cut, index) => {
     const cutFolder = animFolder.addFolder(`Cut ${index + 1}`);
+    const cutAny = cut as any;
     cutFolder.add(cut, 'enabled').name(tr.gui.cutEnabled);
     cutFolder.add(cut, 'duration', [0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0]).name(tr.gui.cutDuration);
-    cutFolder.add(cut, 'startAngle', cameraAngleOptions).name(tr.gui.startAngle);
-    cutFolder.add(cut, 'cameraDistance', 0.5, 3.0, 0.1).name(tr.gui.cameraDistance);
-    cutFolder.add(cut, 'cameraPreset', cameraPresetOptions).name(tr.gui.camera);
-    cutFolder.add(cut, 'cameraStrength', 0.1, 5.0, 0.1).name(tr.gui.cameraStrength);
-    cutFolder.add(cut, 'motion', motionPresetOptions).name(tr.gui.motion);
+    cutFolder.add(cutAny, 'startAngle', cameraAngleOptions).name(tr.gui.startAngle);
+    cutFolder.add(cutAny, 'cameraDistance', 0.5, 3.0, 0.1).name(tr.gui.cameraDistance);
+    cutFolder.add(cutAny, 'cameraPreset', cameraPresetOptions).name(tr.gui.camera);
+    cutFolder.add(cutAny, 'cameraStrength', 0.1, 5.0, 0.1).name(tr.gui.cameraStrength);
+    cutFolder.add(cutAny, 'motion', motionPresetOptions).name(tr.gui.motion);
 
     // Back Text
     const backFolder = cutFolder.addFolder(tr.gui.backTextFolder);
+    const backTextAny = cut.backText as any;
     backFolder.add(cut.backText, 'text').name(tr.gui.text);
-    backFolder.add(cut.backText, 'animationPreset', textPresetOptions).name(tr.gui.animation);
+    backFolder.add(backTextAny, 'animationPreset', textPresetOptions).name(tr.gui.animation);
     backFolder.add(cut.backText, 'x', 0, 100, 1).name('X (%)');
     backFolder.add(cut.backText, 'y', 0, 100, 1).name('Y (%)');
     backFolder.add(cut.backText, 'fontSize', 5, 40, 1).name(tr.gui.size);
@@ -1178,8 +1180,9 @@ function setupGUI(mountPoint?: HTMLElement): void {
 
     // Front Text
     const frontFolder = cutFolder.addFolder(tr.gui.frontTextFolder);
+    const frontTextAny = cut.frontText as any;
     frontFolder.add(cut.frontText, 'text').name(tr.gui.text);
-    frontFolder.add(cut.frontText, 'animationPreset', textPresetOptions).name(tr.gui.animation);
+    frontFolder.add(frontTextAny, 'animationPreset', textPresetOptions).name(tr.gui.animation);
     frontFolder.add(cut.frontText, 'x', 0, 100, 1).name('X (%)');
     frontFolder.add(cut.frontText, 'y', 0, 100, 1).name('Y (%)');
     frontFolder.add(cut.frontText, 'fontSize', 5, 40, 1).name(tr.gui.size);
@@ -2268,7 +2271,7 @@ function openImportModal(): void {
           deepAssign(currentConfig, parsed);
           applyConfigToSceneAndRenderer(currentConfig);
           gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
-          syncSceneButtons();
+          syncTimeOfDayButtons();
           syncBgButtons();
           modal!.style.display = 'none';
           showToast(t().toasts.configImported);

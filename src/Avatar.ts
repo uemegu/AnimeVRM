@@ -267,7 +267,7 @@ export class Avatar {
       async (gltf) => {
         const vrm = gltf.userData.vrm as VRM;
         if (!vrm) {
-          this.options.onError(new Error('No VRM found in GLTF user data'));
+          this.options.onError?.(new Error('No VRM found in GLTF user data'));
           return;
         }
 
@@ -327,16 +327,16 @@ export class Avatar {
         // Initialize sweat effect
         this.sweatEffect = new SweatEffect(vrm, { enabled: false });
 
-        this.options.onLoaded(this);
+        this.options.onLoaded?.(this);
       },
       (progress) => {
         if (progress.total > 0) {
           const ratio = (progress.loaded / progress.total) * 100;
-          this.options.onProgress(ratio);
+          this.options.onProgress?.(ratio);
         }
       },
       (error) => {
-        this.options.onError(error);
+        this.options.onError?.(error);
       }
     );
   }

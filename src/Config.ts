@@ -11,8 +11,8 @@ export interface MaterialStyleParams {
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
-  matcapEnabled?: boolean;
-  emissiveIntensity?: number;
+  matcapEnabled: boolean;
+  emissiveIntensity: number;
   rimEnabled: boolean;
   rimColor: string;
   parametricRimFresnelPowerFactor: number;
@@ -75,6 +75,35 @@ export interface WindConfig {
   particles: WindParticlesConfig;
 }
 
+export interface EnvironmentConfig {
+  showBackgroundImage: boolean;
+  backgroundImageUrl: string;
+  backgroundColor: string;
+  showFloor: boolean;
+  floorColor: string;
+  showMidground: boolean;
+  midgroundImageUrl?: string;
+  midgroundPosition: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  midgroundScale: number;
+  midgroundOpacity: number;
+  farFogEnabled: boolean;
+  farFogColor: string;
+  farFogIntensity: number;
+}
+
+export interface LipSyncConfig {
+  enabled: boolean;
+  gain: number;
+  smoothing: number;
+  rmsThreshold: number;
+  audioDelay: number;
+  voiceGender: 'female' | 'male';
+}
+
 export interface AvatarConfig {
   materials: {
     body: MaterialStyleParams;
@@ -90,25 +119,7 @@ export interface AvatarConfig {
     widthFactor: number;
     lightingMixFactor: number;
   };
-  environment: {
-    showBackgroundImage: boolean;
-    backgroundImageUrl: string;
-    backgroundColor: string;
-    showFloor: boolean;
-    floorColor: string;
-    showMidground?: boolean;
-    midgroundImageUrl?: string;
-    midgroundPosition?: {
-      x: number;
-      y: number;
-      z: number;
-    };
-    midgroundScale?: number;
-    midgroundOpacity?: number;
-    farFogEnabled?: boolean;
-    farFogColor?: string;
-    farFogIntensity?: number;
-  };
+  environment: EnvironmentConfig;
   lighting: {
     castShadows: boolean;
     ambient: {
@@ -174,21 +185,14 @@ export interface AvatarConfig {
     minDistance: number;
     maxDistance: number;
   };
-  lipSync: {
-    enabled: boolean;
-    gain: number;
-    smoothing: number;
-    rmsThreshold: number;
-    audioDelay?: number;
-    voiceGender?: 'female' | 'male';
-  };
+  lipSync: LipSyncConfig;
   activeScene?: {
     presetId?: string;
     timeOfDay?: 'morning' | 'day' | 'evening' | 'bright_indoor' | 'dark_indoor' | string;
     location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'none' | 'outdoor' | 'indoor' | string;
   };
   wind: WindConfig;
-  rain?: RainConfig;
+  rain: RainConfig;
   shortAnimation: ShortAnimationConfig;
 }
 

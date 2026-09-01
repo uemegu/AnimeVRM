@@ -59,14 +59,15 @@ const textureColorCache = new WeakMap<THREE.Texture, THREE.Color>();
 function getTextureAverageColor(texture: THREE.Texture): THREE.Color {
   if (textureColorCache.has(texture)) return textureColorCache.get(texture)!;
   let col = new THREE.Color(0.8, 0.8, 0.8);
-  if (texture.image && texture.image.width && texture.image.height) {
+  const img = texture.image as (HTMLImageElement | HTMLCanvasElement | ImageBitmap) | undefined;
+  if (img && img.width && img.height) {
     try {
       const cvs = document.createElement('canvas');
       cvs.width = 16;
       cvs.height = 16;
       const ctx = cvs.getContext('2d');
       if (ctx) {
-        ctx.drawImage(texture.image, 0, 0, 16, 16);
+        ctx.drawImage(img, 0, 0, 16, 16);
         const data = ctx.getImageData(0, 0, 16, 16).data;
         let r = 0, g = 0, b = 0, count = 0;
         for (let i = 0; i < data.length; i += 4) {
