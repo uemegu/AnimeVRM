@@ -66,9 +66,9 @@ export const GodRaysShader = {
       const int NUM_SAMPLES = 45;
       vec2 step = deltaTexCoord * (1.0 / float(NUM_SAMPLES)) * uDensity;
 
-      // High frequency dither offset to break banding artifacts
-      float dither = hash(vUv * 120.0 + fract(uTime * 0.05));
-      vec2 coord = vUv - step * dither * 0.6;
+      // Subtle sub-pixel dither offset to break banding artifacts without grain noise
+      float dither = hash(gl_FragCoord.xy);
+      vec2 coord = vUv - step * (dither * 0.25);
 
       float illuminationDecay = 1.0;
       vec3 accumulatedRays = vec3(0.0);

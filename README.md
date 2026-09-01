@@ -1,6 +1,6 @@
 # AnimeVRM (VRM Toon Viewer)
 
-アニメ・セル調（原神ライクなセルルック）表現を追求した WebGL / Three.js ベースの VRM アバタービューア＆アニメーション演出エンジンです。
+アニメ・セル調表現を追求した WebGL / Three.js ベースの VRM アバタービューア＆アニメーション演出エンジンです。
 
 🌐 **Live Demo:** [https://uemegu.github.io/AnimeVRM/](https://uemegu.github.io/AnimeVRM/)
 

@@ -1,5 +1,8 @@
 import { resolveAssetUrl } from './utils/path';
 import type { ShortAnimationConfig } from './animation/types';
+import { type RainConfig, DEFAULT_RAIN_CONFIG } from './effects/rain';
+
+export type { RainConfig };
 
 export interface MaterialStyleParams {
   color: string;
@@ -180,32 +183,24 @@ export interface AvatarConfig {
     voiceGender?: 'female' | 'male';
   };
   activeScene?: {
-    presetId?:
-      | 'morning_park'
-      | 'evening_park'
-      | 'morning_school'
-      | 'evening_school'
-      | 'bright_indoor'
-      | 'dark_indoor'
-      | 'morning_outdoor'
-      | 'evening_outdoor'
-      | string;
-    timeOfDay?: 'morning' | 'evening';
-    location?: 'outdoor' | 'indoor';
+    presetId?: string;
+    timeOfDay?: 'morning' | 'day' | 'evening' | 'bright_indoor' | 'dark_indoor' | string;
+    location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'none' | 'outdoor' | 'indoor' | string;
   };
   wind: WindConfig;
+  rain?: RainConfig;
   shortAnimation: ShortAnimationConfig;
 }
 
 export const DEFAULT_CONFIG: AvatarConfig = {
   activeScene: {
-    presetId: 'evening_park',
-    timeOfDay: 'evening',
-    location: 'outdoor',
+    presetId: 'morning_park',
+    timeOfDay: 'morning',
+    location: 'modern_park',
   },
   materials: {
     body: {
-      color: '#fffafa',
+      color: '#fffffa',
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
       shadingToonyFactor: 1.0,
@@ -213,7 +208,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
       emissiveIntensity: 0.0,
-      rimEnabled: true,
+      rimEnabled: false,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 5,
       parametricRimLiftFactor: 0.1,
@@ -265,7 +260,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   environment: {
     showBackgroundImage: true,
     backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
-    backgroundColor: '#2b101d',
+    backgroundColor: '#ffffff',
     showFloor: false,
     floorColor: '#ffffff',
     showMidground: true,
@@ -278,60 +273,60 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     midgroundScale: 1.15,
     midgroundOpacity: 1.0,
     farFogEnabled: true,
-    farFogColor: '#ff7e4d',
-    farFogIntensity: 0.08,
+    farFogColor: '#ffffff',
+    farFogIntensity: 0.24,
   },
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#3e407a',
-      intensity: 0.5,
+      color: '#f6ccff',
+      intensity: 0.35,
     },
     directional: {
-      color: '#fffbf0',
-      intensity: 1.8,
-      posX: -3.7,
-      posY: 0.8,
-      posZ: 0.7,
+      color: '#ffffff',
+      intensity: 2.6,
+      posX: 4.1,
+      posY: 0.1,
+      posZ: 2.0,
     },
     rim: {
-      enabled: true,
-      color: '#ffaa60',
-      intensity: 0.3,
+      enabled: false,
+      color: '#dde8ff',
+      intensity: 0.05,
       posX: 0,
       posY: 1.5,
       posZ: 2.5,
     },
     depthRim: {
       enabled: true,
-      power: 3.5,
-      threshold: 0.12,
-      intensity: 1.0,
+      power: 4.0,
+      threshold: 0.15,
+      intensity: 0.8,
     },
     sunShafts: {
       enabled: true,
       followDirectionalLight: false,
       sunPosition: {
-        x: -5.5,
-        y: 1.6,
-        z: -3.5,
+        x: 3.2,
+        y: 4.3,
+        z: -3.8,
       },
-      exposure: 0.36,
-      decay: 0.83,
-      density: 0.5,
-      weight: 0.48,
-      color: '#ff7826',
-      shimmer: 0.25,
+      exposure: 0.24,
+      decay: 0.88,
+      density: 0.8,
+      weight: 0.24,
+      color: '#dcdbff',
+      shimmer: 0.4,
     },
     lensFlare: {
       enabled: true,
-      sunSize: 1.05,
-      sunColor: '#ff6222',
+      sunSize: 1.25,
+      sunColor: '#fff8ee',
       glowIntensity: 1.15,
-      starburstIntensity: 1.05,
-      anamorphicIntensity: 0.95,
-      ghostIntensity: 0.95,
-      haloIntensity: 0.3,
+      starburstIntensity: 0.95,
+      anamorphicIntensity: 1.1,
+      ghostIntensity: 0.3,
+      haloIntensity: 0.5,
     },
   },
   postProcessing: {
@@ -343,21 +338,21 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.15,
-      radius: 0.22,
-      threshold: 0.78,
+      strength: 0.09,
+      radius: 0.06,
+      threshold: 0.9,
     },
     colorGrading: {
       enabled: true,
-      shadowTint: '#391752',
-      highlightTint: '#ffad70',
-      strength: 0.65,
-      contrast: 0.18,
-      gamma: 0.95,
+      shadowTint: '#3d61ff',
+      highlightTint: '#99c0ff',
+      strength: 0.28,
+      contrast: 0.31,
+      gamma: 0.84,
     },
     saturation: 0.26,
-    brightness: -0.04,
-    contrast: 0.08,
+    brightness: 0.0,
+    contrast: 0.0,
   },
   camera: {
     fov: 30,
@@ -511,6 +506,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       speedFactor: 1.0,
     },
   },
+  rain: { ...DEFAULT_RAIN_CONFIG },
 };
 
 export function cloneConfig(cfg: AvatarConfig): AvatarConfig {
