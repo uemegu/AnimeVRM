@@ -34,6 +34,7 @@ export interface ScenarioEngineOptions {
     preset?: CameraPreset,
     strength?: number
   ) => void;
+  onApplySceneCamera?: (scene: ScenarioScene) => void;
 }
 
 export class ScenarioEngine {
@@ -53,6 +54,7 @@ export class ScenarioEngine {
     preset?: CameraPreset,
     strength?: number
   ) => void;
+  private onApplySceneCamera?: (scene: ScenarioScene) => void;
 
   private messageWindow: AdventureMessageWindow;
   private currentPackage: ScenarioPackage | null = null;
@@ -79,6 +81,7 @@ export class ScenarioEngine {
     this.onRestoreAvatar = options.onRestoreAvatar;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
+    this.onApplySceneCamera = options.onApplySceneCamera;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -396,8 +399,10 @@ export class ScenarioEngine {
       this.onSwitchScenePreset(scene.scenePreset);
     }
 
-    // 2. Camera Angle & Preset
-    if (this.onApplyCamera && (scene.cameraStartAngle || scene.cameraPreset)) {
+    // 2. Camera Angle, Zoom & Preset
+    if (this.onApplySceneCamera) {
+      this.onApplySceneCamera(scene);
+    } else if (this.onApplyCamera && (scene.cameraStartAngle || scene.cameraPreset)) {
       this.onApplyCamera(
         scene.cameraStartAngle,
         scene.cameraPreset,
