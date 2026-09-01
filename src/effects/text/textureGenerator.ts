@@ -206,6 +206,16 @@ export function createEffectTextTexture(
     return textureCache.get(cacheKey)!;
   }
 
+  const chars = Array.from(text);
+  const len = chars.length;
+
+  // Detect 4-character repeated word (e.g. "ワナワナ" -> "ワナ" + "ワナ", "イライラ" -> "イラ" + "イラ")
+  const is4CharRepeat =
+    (len === 4 && text.slice(0, 2) === text.slice(2, 4)) ||
+    (len === 4 && style.splitRepeatTilt);
+
+  const is2CharWord = len === 2;
+
   const fontSize = 110;
   const fontWeight = style.fontWeight ?? '900';
   const fontFamily =
@@ -218,13 +228,81 @@ export function createEffectTextTexture(
   const tempCtx = tempCanvas.getContext('2d')!;
   tempCtx.font = font;
 
-  const chars = Array.from(text);
-  const charWidths = chars.map((c) => tempCtx.measureText(c).width);
-  const totalTextWidth = charWidths.reduce((a, b) => a + b, 0);
+  // Scale computation: "一文字目を少し大きくし" (Kawaii bounce rhythm)
+  const firstScale = style.firstCharScale ?? 1.22;
+  const secondScale = 0.94;
+
+  const charBaseScales: number[] = [];
+  if (is4CharRepeat) {
+    charBaseScales.push(firstScale);         // Char 0: 'ワ' or 'イ'
+    charBaseScales.push(secondScale);        // Char 1: 'ナ' or 'ラ'
+    charBaseScales.push(firstScale * 0.98);  // Char 2: 'ワ' or 'イ'
+    charBaseScales.push(secondScale);        // Char 3: 'ナ' or 'ラ'
+  } else if (is2CharWord) {
+    charBaseScales.push(firstScale);         // Char 0: 'ワ' or 'イ'
+    charBaseScales.push(secondScale);        // Char 1: 'ナ' or 'ラ'
+  } else if (style.firstCharScale && len > 0) {
+    charBaseScales.push(firstScale);
+    for (let i = 1; i < len; i++) {
+      charBaseScales.push(1.0);
+    }
+  } else {
+    for (let i = 0; i < len; i++) {
+      charBaseScales.push(1.0);
+    }
+  }
+
+  // Measure character widths with scale
+  const rawCharWidths = chars.map((c) => tempCtx.measureText(c).width);
+  const scaledCharWidths = rawCharWidths.map((w, i) => w * charBaseScales[i]);
+
+  // Seed for deterministic organic tilt
+  const seed = (style.seed ?? 0) + (chars[0]?.charCodeAt(0) || 0) * 31 + (chars[1]?.charCodeAt(0) || 0) * 17;
+  const prng = (offset: number) => {
+    const x = Math.sin(seed + offset) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const halfTiltRange = style.halfTiltRange ?? 0.14; // ~8 degrees
+
+  let groupRot0 = 0;
+  let groupRot1 = 0;
+  let groupOffsetY0 = 0;
+  let groupOffsetY1 = 0;
+  const groupGap = is4CharRepeat ? 16 : 0;
+
+  if (is4CharRepeat) {
+    // Halves random tilt: Contrasting tilts for 前半 and 後半 for maximum Kawaii charm
+    const r1 = prng(1.23) * 2 - 1;
+    const r2 = prng(4.56) * 2 - 1;
+    groupRot0 = r1 * halfTiltRange;
+    const sign2 = groupRot0 >= 0 ? -1 : 1;
+    groupRot1 = sign2 * (0.45 + Math.abs(r2) * 0.55) * halfTiltRange;
+    groupOffsetY0 = (prng(7.89) - 0.5) * 6;
+    groupOffsetY1 = (prng(10.11) - 0.5) * 6;
+  } else if (is2CharWord) {
+    const r = prng(1.23) * 2 - 1;
+    groupRot0 = r * (halfTiltRange * 0.8);
+    groupOffsetY0 = (prng(7.89) - 0.5) * 4;
+  }
+
+  // Calculate layout widths
+  let totalTextWidth = 0;
+  let group0Width = 0;
+  let group1Width = 0;
+
+  if (is4CharRepeat) {
+    group0Width = scaledCharWidths[0] + scaledCharWidths[1];
+    group1Width = scaledCharWidths[2] + scaledCharWidths[3];
+    totalTextWidth = group0Width + groupGap + group1Width;
+  } else {
+    totalTextWidth = scaledCharWidths.reduce((a, b) => a + b, 0);
+    group0Width = totalTextWidth;
+  }
 
   // Margins for outlines, shadows, and decorations
-  const paddingX = 140;
-  const paddingY = 130;
+  const paddingX = 150;
+  const paddingY = 140;
 
   const canvasWidth = Math.ceil(totalTextWidth + paddingX * 2);
   const canvasHeight = Math.ceil(fontSize + paddingY * 2);
@@ -247,12 +325,11 @@ export function createEffectTextTexture(
   }
 
   // Pre-calculate per-character transforms for hand-drawn feel
-  const charJitter = style.charJitter ?? { rotationRange: 0.1, offsetYRange: 5, scaleRange: 0.06 };
+  const charJitter = style.charJitter ?? { rotationRange: 0.08, offsetYRange: 4, scaleRange: 0.05 };
   const slant = (style.slant ?? 0) * (Math.PI / 180);
 
-  // Deterministic seed based on char code
   const getJitter = (index: number) => {
-    const code = (chars[index]?.charCodeAt(0) || 0) + index * 17;
+    const code = (chars[index]?.charCodeAt(0) || 0) + index * 19 + seed;
     const sin1 = Math.sin(code * 1.33);
     const cos1 = Math.cos(code * 2.11);
     const sin2 = Math.sin(code * 3.77);
@@ -264,44 +341,127 @@ export function createEffectTextTexture(
     };
   };
 
-  // Helper to render all characters with full pipeline
+  interface CharRenderInfo {
+    char: string;
+    groupCenterX: number;
+    groupCenterY: number;
+    groupRot: number;
+    localX: number;
+    localY: number;
+    baseScale: number;
+    jitter: { rot: number; offsetY: number; scale: number };
+  }
+
+  const charRenderInfos: CharRenderInfo[] = [];
+
+  if (is4CharRepeat) {
+    const group0CenterX = centerX - totalTextWidth / 2 + group0Width / 2;
+    const group1CenterX = centerX + totalTextWidth / 2 - group1Width / 2;
+
+    // Group 0 (前半: chars 0, 1)
+    let localX0 = -group0Width / 2;
+    for (let i = 0; i < 2; i++) {
+      const cWidth = scaledCharWidths[i];
+      const charLocalCenter = localX0 + cWidth / 2;
+      localX0 += cWidth;
+
+      charRenderInfos.push({
+        char: chars[i],
+        groupCenterX: group0CenterX,
+        groupCenterY: centerY + groupOffsetY0,
+        groupRot: groupRot0,
+        localX: charLocalCenter,
+        localY: 0,
+        baseScale: charBaseScales[i],
+        jitter: getJitter(i),
+      });
+    }
+
+    // Group 1 (後半: chars 2, 3)
+    let localX1 = -group1Width / 2;
+    for (let i = 2; i < 4; i++) {
+      const cWidth = scaledCharWidths[i];
+      const charLocalCenter = localX1 + cWidth / 2;
+      localX1 += cWidth;
+
+      charRenderInfos.push({
+        char: chars[i],
+        groupCenterX: group1CenterX,
+        groupCenterY: centerY + groupOffsetY1,
+        groupRot: groupRot1,
+        localX: charLocalCenter,
+        localY: 0,
+        baseScale: charBaseScales[i],
+        jitter: getJitter(i),
+      });
+    }
+  } else {
+    // Single group
+    let currentX = -totalTextWidth / 2;
+    for (let i = 0; i < len; i++) {
+      const cWidth = scaledCharWidths[i];
+      const charLocalCenter = currentX + cWidth / 2;
+      currentX += cWidth;
+
+      charRenderInfos.push({
+        char: chars[i],
+        groupCenterX: centerX,
+        groupCenterY: centerY + groupOffsetY0,
+        groupRot: groupRot0,
+        localX: charLocalCenter,
+        localY: 0,
+        baseScale: charBaseScales[i],
+        jitter: getJitter(i),
+      });
+    }
+  }
+
+  // Helper to render all characters with group tilting and hierarchy transforms
   const renderCharacters = (
     drawFn: (
       char: string,
-      x: number,
-      y: number,
-      jitter: { rot: number; offsetY: number; scale: number },
       charIndex: number
-    ) => void
+    ) => void,
+    shadowOffset?: { x: number; y: number }
   ) => {
-    let currentX = centerX - totalTextWidth / 2;
-    for (let i = 0; i < chars.length; i++) {
-      const char = chars[i];
-      const charWidth = charWidths[i];
-      const charCenterX = currentX + charWidth / 2;
-      const jitter = getJitter(i);
+    const sx = shadowOffset?.x ?? 0;
+    const sy = shadowOffset?.y ?? 0;
 
-      drawFn(char, charCenterX, centerY, jitter, i);
-      currentX += charWidth;
+    for (let i = 0; i < charRenderInfos.length; i++) {
+      const info = charRenderInfos[i];
+      ctx.save();
+      // 1. Move to group center (with shadow offset if any)
+      ctx.translate(info.groupCenterX + sx, info.groupCenterY + sy);
+      // 2. Rotate group (前半 or 後半 tilt)
+      if (info.groupRot !== 0) {
+        ctx.rotate(info.groupRot);
+      }
+      // 3. Move to character position relative to group
+      ctx.translate(info.localX, info.localY + info.jitter.offsetY);
+      // 4. Overall text slant
+      if (slant !== 0) {
+        ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
+      }
+      // 5. Individual character jitter rotation
+      ctx.rotate(info.jitter.rot);
+      // 6. Scale (base scale for 1st char * jitter scale)
+      const finalScale = info.baseScale * info.jitter.scale;
+      ctx.scale(finalScale, finalScale);
+
+      drawFn(info.char, i);
+
+      ctx.restore();
     }
   };
 
   // Layer 1: Drop Shadow
   if (style.shadowColor && style.shadowOffset) {
-    const sx = style.shadowOffset.x;
-    const sy = style.shadowOffset.y;
     ctx.save();
     ctx.fillStyle = style.shadowColor;
     ctx.strokeStyle = style.shadowColor;
     const shadowStrokeWidth = (style.outerStrokeWidth || 0) + (style.strokeWidth || 0);
 
-    renderCharacters((char, cx, cy, jitter) => {
-      ctx.save();
-      ctx.translate(cx + sx, cy + sy + jitter.offsetY);
-      if (slant !== 0) ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
-      ctx.rotate(jitter.rot);
-      ctx.scale(jitter.scale, jitter.scale);
-
+    renderCharacters((char) => {
       if (shadowStrokeWidth > 0) {
         ctx.lineWidth = shadowStrokeWidth;
         ctx.lineJoin = 'miter';
@@ -309,8 +469,7 @@ export function createEffectTextTexture(
         ctx.strokeText(char, 0, 0);
       }
       ctx.fillText(char, 0, 0);
-      ctx.restore();
-    });
+    }, style.shadowOffset);
     ctx.restore();
   }
 
@@ -322,14 +481,8 @@ export function createEffectTextTexture(
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    renderCharacters((char, cx, cy, jitter) => {
-      ctx.save();
-      ctx.translate(cx, cy + jitter.offsetY);
-      if (slant !== 0) ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
-      ctx.rotate(jitter.rot);
-      ctx.scale(jitter.scale, jitter.scale);
+    renderCharacters((char) => {
       ctx.strokeText(char, 0, 0);
-      ctx.restore();
     });
     ctx.restore();
   }
@@ -342,14 +495,8 @@ export function createEffectTextTexture(
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    renderCharacters((char, cx, cy, jitter) => {
-      ctx.save();
-      ctx.translate(cx, cy + jitter.offsetY);
-      if (slant !== 0) ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
-      ctx.rotate(jitter.rot);
-      ctx.scale(jitter.scale, jitter.scale);
+    renderCharacters((char) => {
       ctx.strokeText(char, 0, 0);
-      ctx.restore();
     });
     ctx.restore();
   }
@@ -371,26 +518,18 @@ export function createEffectTextTexture(
     ctx.fillStyle = style.textColor;
   }
 
-  renderCharacters((char, cx, cy, jitter) => {
-    ctx.save();
-    ctx.translate(cx, cy + jitter.offsetY);
-    if (slant !== 0) ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
-    ctx.rotate(jitter.rot);
-    ctx.scale(jitter.scale, jitter.scale);
+  renderCharacters((char) => {
     ctx.fillText(char, 0, 0);
-    ctx.restore();
   });
   ctx.restore();
 
   // Layer 5: Highlights / Top-gloss sheen on text
   ctx.save();
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  renderCharacters((char, cx, cy, jitter) => {
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  renderCharacters((char) => {
     ctx.save();
-    ctx.translate(cx, cy - fontSize * 0.12 + jitter.offsetY);
-    if (slant !== 0) ctx.transform(1, 0, Math.tan(slant), 1, 0, 0);
-    ctx.rotate(jitter.rot);
-    ctx.scale(jitter.scale * 0.95, jitter.scale * 0.35);
+    ctx.translate(0, -fontSize * 0.12);
+    ctx.scale(0.95, 0.35);
     ctx.fillText(char, 0, 0);
     ctx.restore();
   });

@@ -2022,6 +2022,9 @@ function showToast(message: string): void {
 // --------------------------------------------------
 // Import Modal Setup
 // --------------------------------------------------
+// --------------------------------------------------
+// Import Modal Setup
+// --------------------------------------------------
 function openImportModal(): void {
   let modal = document.getElementById('import-modal');
   if (!modal) {
@@ -2032,7 +2035,7 @@ function openImportModal(): void {
     modal.style.left = '0';
     modal.style.width = '100vw';
     modal.style.height = '100vh';
-    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.65)';
     modal.style.backdropFilter = 'blur(4px)';
     modal.style.display = 'flex';
     modal.style.justifyContent = 'center';
@@ -2041,13 +2044,13 @@ function openImportModal(): void {
 
     const tr = t();
     modal.innerHTML = `
-      <div style="background: white; border-radius: 12px; padding: 20px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 16px; color: #1e293b;">${tr.render.importModalTitle}</h3>
-        <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">${tr.render.importModalDesc}</p>
-        <textarea id="import-textarea" rows="12" style="width: 100%; box-sizing: border-box; font-family: monospace; font-size: 12px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+      <div style="background: #242424; border: 1px solid #383838; border-radius: 6px; padding: 20px; width: 90%; max-width: 500px; box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.6); color: #cccccc;">
+        <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 15px; color: #ffffff;">${tr.render.importModalTitle}</h3>
+        <p style="font-size: 11.5px; color: #aaaaaa; margin-bottom: 12px;">${tr.render.importModalDesc}</p>
+        <textarea id="import-textarea" rows="12" style="width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11.5px; padding: 8px; background: #181818; color: #e0e0e0; border: 1px solid #383838; border-radius: 4px; resize: vertical; outline: none;"></textarea>
         <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
-          <button id="modal-cancel-btn" style="padding: 6px 14px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 13px;">${tr.common.cancel}</button>
-          <button id="modal-apply-btn" style="padding: 6px 14px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;">${tr.render.applyConfig}</button>
+          <button id="modal-cancel-btn" style="padding: 6px 14px; background: #383838; border: 1px solid #484848; color: #cccccc; border-radius: 4px; cursor: pointer; font-size: 12px;">${tr.common.cancel}</button>
+          <button id="modal-apply-btn" style="padding: 6px 14px; background: #4772b3; color: white; border: 1px solid #385e94; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 12px;">${tr.render.applyConfig}</button>
         </div>
       </div>
     `;
@@ -2094,7 +2097,7 @@ function updateAnimationPlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('anim-play-btn');
   if (playBtn) {
     playBtn.textContent = isPlaying ? '⏹ 再生中 (停止/再開)' : '▶ アニメーション再生';
-    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+    playBtn.style.background = isPlaying ? '#ea580c' : '#4772b3';
   }
 
   const panel = document.getElementById('panel-container');
@@ -2121,21 +2124,21 @@ function updateScenarioPlayStateUI(isPlaying: boolean): void {
 
   if (playBtn) {
     playBtn.textContent = scenarioPlayer.isPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playSequence;
-    playBtn.style.background = scenarioPlayer.isPlaying ? '#ea580c' : '#4f46e5';
+    playBtn.style.background = scenarioPlayer.isPlaying ? '#ea580c' : '#4772b3';
   }
   if (confessionBtn) {
     const isConfessionPlaying = scenarioEngine.isPlaying && !isMultiAvatarScenarioActive;
     confessionBtn.textContent = isConfessionPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playConfession;
     confessionBtn.style.background = isConfessionPlaying
-      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-      : 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)';
+      ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
+      : 'linear-gradient(135deg, #db2777 0%, #be185d 100%)';
   }
   if (twogirlsBtn) {
     const isTwoGirlsPlaying = scenarioEngine.isPlaying && isMultiAvatarScenarioActive;
     twogirlsBtn.textContent = isTwoGirlsPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playTwoGirls;
     twogirlsBtn.style.background = isTwoGirlsPlaying
-      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
-      : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+      ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
+      : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
   }
   if (statusBox) {
     statusBox.style.display = scenarioPlayer.isPlaying ? 'block' : 'none';
@@ -2205,7 +2208,7 @@ function updatePlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('audio-play-pause-btn');
   if (playBtn) {
     playBtn.textContent = isPlaying ? '⏸ 一時停止' : '▶ 再生';
-    playBtn.style.background = isPlaying ? '#ea580c' : '#4f46e5';
+    playBtn.style.background = isPlaying ? '#ea580c' : '#4772b3';
   }
 }
 
@@ -2265,11 +2268,11 @@ function setupUnifiedUI(): void {
 
     panel!.innerHTML = `
       <div id="panel-header">
-        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13.5px;">
-          <span style="color: #4f46e5; font-size: 16px;">🎮</span> ${tr.common.title}
+        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #ffffff;">
+          <span style="color: #5684c8; font-size: 15px;">🎮</span> ${tr.common.title}
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <select id="language-select" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; color: #334155; font-weight: 600;">
+          <select id="language-select" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; cursor: pointer; color: #dcdcdc; font-weight: 500;">
             <option value="ja" ${lang === 'ja' ? 'selected' : ''}>🇯🇵 日本語</option>
             <option value="en" ${lang === 'en' ? 'selected' : ''}>🇺🇸 English</option>
           </select>
@@ -2304,7 +2307,7 @@ function setupUnifiedUI(): void {
       <div id="panel-body">
         <!-- Loading Status (Shared) -->
         <div id="loading-status" class="status-box">
-          ${tr.common.loadingModel} <span id="progress-text">0%</span>
+          ${tr.common.loadingModel} <span id="progress-text" style="color: #ffffff; font-weight: 600;">0%</span>
         </div>
 
         <!-- ==================================================== -->
@@ -2360,26 +2363,26 @@ function setupUnifiedUI(): void {
           </div>
 
           <!-- Manga Emotion Effect Texts -->
-          <div class="section-box" style="border-left: 3px solid #ec4899; padding-left: 6px;">
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-              <label class="section-label" style="color: #db2777; font-weight: 700;">${tr.character.emotionEffectText}</label>
-              <button id="quick-clear-effect-text-btn" style="font-size: 10px; padding: 2px 6px; background: #fdf2f8; border: 1px solid #fbcfe8; color: #db2777; border-radius: 4px; cursor: pointer; font-weight: 600;">${tr.character.clearAll}</button>
+              <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.character.emotionEffectText}</label>
+              <button id="quick-clear-effect-text-btn" style="font-size: 10px; padding: 2px 6px; background: #2a2a2a; border: 1px solid #444444; color: #f472b6; border-radius: 4px; cursor: pointer; font-weight: 600;">${tr.character.clearAll}</button>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;" id="effect-text-buttons">
-              <button class="effect-text-btn" data-preset="wanawana" data-text="ワナワナ" data-expr="angry" style="background: #fdf4ff; border-color: #f0abfc; color: #a21caf;">${tr.character.presets.wanawana}</button>
-              <button class="effect-text-btn" data-preset="iraira" data-text="イライラ" data-expr="angry" style="background: #fef2f2; border-color: #fca5a5; color: #dc2626;">${tr.character.presets.iraira}</button>
-              <button class="effect-text-btn" data-preset="gaan" data-text="ガーン" data-expr="sad" style="background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;">${tr.character.presets.gaan}</button>
-              <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="background: #fefce8; border-color: #fde047; color: #ca8a04;">${tr.character.presets.kirakira}</button>
-              <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">${tr.character.presets.shiin}</button>
-              <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="background: #fff1f2; border-color: #fda4af; color: #e11d48;">${tr.character.presets.doki}</button>
-              <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="background: #fef9c3; border-color: #facc15; color: #854d0e;">${tr.character.presets.biku}</button>
-              <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="background: #f0fdf4; border-color: #86efac; color: #15803d;">${tr.character.presets.yatta}</button>
-              <button id="quick-sweat-btn" class="effect-sweat-btn" data-expr="surprised" style="background: #f0f9ff; border-color: #7dd3fc; color: #0284c7; font-weight: 700;">${tr.character.presets.sweat}</button>
-              <button id="quick-jito-btn" class="effect-sweat-btn" data-expr="relaxed" style="background: #f0fdfa; border-color: #99f6e4; color: #0f766e; font-weight: 700; grid-column: span 2;">${tr.character.presets.jito}</button>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px;" id="effect-text-buttons">
+              <button class="effect-text-btn" data-preset="wanawana" data-text="ワナワナ" data-expr="angry" style="border-color: #7c3aed; color: #c4b5fd;">${tr.character.presets.wanawana}</button>
+              <button class="effect-text-btn" data-preset="iraira" data-text="イライラ" data-expr="angry" style="border-color: #dc2626; color: #fca5a5;">${tr.character.presets.iraira}</button>
+              <button class="effect-text-btn" data-preset="gaan" data-text="ガーン" data-expr="sad" style="border-color: #2563eb; color: #93c5fd;">${tr.character.presets.gaan}</button>
+              <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="border-color: #ca8a04; color: #fde047;">${tr.character.presets.kirakira}</button>
+              <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="border-color: #475569; color: #cbd5e1;">${tr.character.presets.shiin}</button>
+              <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="border-color: #e11d48; color: #fda4af;">${tr.character.presets.doki}</button>
+              <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="border-color: #ca8a04; color: #fde047;">${tr.character.presets.biku}</button>
+              <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="border-color: #16a34a; color: #86efac;">${tr.character.presets.yatta}</button>
+              <button id="quick-sweat-btn" class="effect-text-btn" data-expr="surprised" style="border-color: #0284c7; color: #7dd3fc; font-weight: 700;">${tr.character.presets.sweat}</button>
+              <button id="quick-jito-btn" class="effect-text-btn" data-expr="relaxed" style="border-color: #0f766e; color: #99f6e4; font-weight: 700; grid-column: span 2;">${tr.character.presets.jito}</button>
             </div>
-            <div style="display: flex; gap: 4px; margin-top: 3px;">
-              <input type="text" id="quick-custom-effect-text" placeholder="${tr.character.customTextPlaceholder}" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
-              <select id="quick-custom-effect-preset" style="font-size: 10.5px; padding: 4px 2px; border: 1px solid #cbd5e1; border-radius: 4px; background: white;">
+            <div style="display: flex; gap: 4px; margin-top: 6px;">
+              <input type="text" id="quick-custom-effect-text" placeholder="${tr.character.customTextPlaceholder}" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #3d3d3d; background: #1c1c1c; color: #e0e0e0; border-radius: 4px; outline: none;">
+              <select id="quick-custom-effect-preset" style="font-size: 10.5px; padding: 4px 2px; border: 1px solid #3d3d3d; background: #1c1c1c; color: #e0e0e0; border-radius: 4px;">
                 <option value="kirakira">${tr.character.presets.kirakira}</option>
                 <option value="wanawana">${tr.character.presets.wanawana}</option>
                 <option value="iraira">${tr.character.presets.iraira}</option>
@@ -2404,23 +2407,23 @@ function setupUnifiedUI(): void {
             </div>
             <div class="player-box">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
-                <span id="audio-time" style="font-size: 10px; color: #64748b; font-family: monospace;">0:00 / 0:00</span>
+                <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
+                <span id="audio-time" style="font-size: 10px; color: #888888; font-family: monospace;">0:00 / 0:00</span>
               </div>
-              <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4f46e5; height: 4px;">
+              <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4772b3; height: 4px;">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px;">
                 <div style="display: flex; gap: 4px;">
-                  <button id="audio-play-pause-btn" style="padding: 3px 8px; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600;">▶ ${tr.common.play}</button>
-                  <button id="audio-stop-btn" style="padding: 3px 6px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">⏹ ${tr.common.stop}</button>
-                  <button id="audio-loop-btn" style="padding: 3px 6px; background: ${isLooping ? '#4f46e5' : '#f1f5f9'}; color: ${isLooping ? '#ffffff' : '#334155'}; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 11px;">🔁 ${tr.common.loop}</button>
+                  <button id="audio-play-pause-btn" class="action-btn primary" style="padding: 3px 8px; font-size: 11px; font-weight: 600;">▶ ${tr.common.play}</button>
+                  <button id="audio-stop-btn" class="action-btn" style="padding: 3px 6px; font-size: 11px;">⏹ ${tr.common.stop}</button>
+                  <button id="audio-loop-btn" class="action-btn" style="padding: 3px 6px; font-size: 11px; background: ${isLooping ? '#4772b3' : '#363636'}; color: ${isLooping ? '#ffffff' : '#cccccc'};">🔁 ${tr.common.loop}</button>
                 </div>
                 <div style="display: flex; align-items: center; gap: 2px;">
                   <span style="font-size: 10px;">🔊</span>
-                  <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4f46e5; height: 4px; cursor: pointer;">
+                  <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="1" style="width: 50px; accent-color: #4772b3; height: 4px; cursor: pointer;">
                 </div>
               </div>
               <div style="display: flex; align-items: center; gap: 4px; margin-top: 2px;">
-                <span style="font-size: 10px; color: #64748b; min-width: 45px;">${tr.character.detectedPhoneme}</span>
+                <span style="font-size: 10px; color: #888888; min-width: 45px;">${tr.character.detectedPhoneme}</span>
                 <div style="display: flex; gap: 3px; flex: 1;">
                   <span class="phoneme-tag" data-phoneme="aa">あ</span>
                   <span class="phoneme-tag" data-phoneme="ih">い</span>
@@ -2439,39 +2442,39 @@ function setupUnifiedUI(): void {
         <!-- ==================================================== -->
         <div id="tab-pane-scenario" class="tab-pane ${currentActiveTab === 'scenario' ? 'active' : ''}">
           <!-- Interactive Branching Scenario Controls (Confession) -->
-          <div class="section-box" style="border-left: 3px solid #ec4899; background: #fdf2f8; padding: 8px; border-radius: 6px;">
-            <label class="section-label" style="color: #db2777; font-weight: 700;">${tr.scenario.confessionTitle}</label>
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.scenario.confessionTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
-              <button id="scenario-confession-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12.5px; padding: 8px;">${tr.scenario.playConfession}</button>
+              <button id="scenario-confession-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #db2777 0%, #be185d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playConfession}</button>
               <button id="scenario-confession-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
             </div>
-            <div style="font-size: 10.5px; color: #9d174d; line-height: 1.4; margin-top: 5px;">
+            <div style="font-size: 10.5px; color: #fbcfe8; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.confessionDesc}
             </div>
           </div>
 
           <!-- Interactive 2-Girl Dialogue Scenario Controls (girl & girl2) -->
-          <div class="section-box" style="border-left: 3px solid #3b82f6; background: #eff6ff; padding: 8px; border-radius: 6px;">
-            <label class="section-label" style="color: #2563eb; font-weight: 700;">${tr.scenario.twoGirlsTitle}</label>
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #3b82f6; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #60a5fa; font-weight: 700;">${tr.scenario.twoGirlsTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
-              <button id="scenario-twogirls-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); font-size: 12.5px; padding: 8px;">${tr.scenario.playTwoGirls}</button>
+              <button id="scenario-twogirls-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playTwoGirls}</button>
               <button id="scenario-twogirls-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
             </div>
-            <div style="font-size: 10.5px; color: #1e40af; line-height: 1.4; margin-top: 5px;">
+            <div style="font-size: 10.5px; color: #bfdbfe; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.twoGirlsDesc}
             </div>
           </div>
 
           <!-- Scenario Engine Live Debugger -->
-          <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px;">
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 8px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-              <span style="font-weight: 700; font-size: 11.5px; color: #475569;">${tr.scenario.liveStatus}</span>
+              <span style="font-weight: 600; font-size: 11px; color: #aaaaaa;">${tr.scenario.liveStatus}</span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 3px; font-size: 11px;">
-              <div><span style="color: #64748b;">${tr.scenario.sceneId}</span> <strong id="scenario-engine-scene-id" style="color: #4f46e5;">-</strong></div>
-              <div><span style="color: #64748b;">${tr.scenario.speaker}</span> <span id="scenario-engine-speaker" style="font-weight: 600;">-</span></div>
-              <div><span style="color: #64748b;">${tr.scenario.acquiredFlags}</span> <span id="scenario-engine-flags" style="color: #059669; font-weight: 600;">${tr.scenario.noneFlags}</span></div>
-              <div style="margin-top: 2px; padding: 4px 6px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; min-height: 28px; font-style: italic; color: #334155;" id="scenario-engine-text">
+              <div><span style="color: #888888;">${tr.scenario.sceneId}</span> <strong id="scenario-engine-scene-id" style="color: #5684c8;">-</strong></div>
+              <div><span style="color: #888888;">${tr.scenario.speaker}</span> <span id="scenario-engine-speaker" style="font-weight: 600; color: #e0e0e0;">-</span></div>
+              <div><span style="color: #888888;">${tr.scenario.acquiredFlags}</span> <span id="scenario-engine-flags" style="color: #72b27b; font-weight: 600;">${tr.scenario.noneFlags}</span></div>
+              <div style="margin-top: 2px; padding: 4px 6px; background: #181818; border: 1px solid #333333; border-radius: 4px; min-height: 28px; font-style: italic; color: #cccccc;" id="scenario-engine-text">
                 ${tr.scenario.waiting}
               </div>
             </div>
@@ -2486,17 +2489,17 @@ function setupUnifiedUI(): void {
 
           <!-- Conversation Scenario Sequence Controls -->
           <div class="section-box" style="border-left: 3px solid #8b5cf6; padding-left: 6px;">
-            <label class="section-label" style="color: #6d28d9; font-weight: 700;">${tr.scenario.conversationTitle}</label>
+            <label class="section-label" style="color: #a78bfa; font-weight: 700;">${tr.scenario.conversationTitle}</label>
             <div style="display: flex; gap: 4px;">
-              <button id="scenario-play-btn" class="action-btn primary" style="flex: 1; background: #6d28d9;">${tr.scenario.playSequence}</button>
+              <button id="scenario-play-btn" class="action-btn primary" style="flex: 1; background: #7c3aed; border-color: #6d28d9;">${tr.scenario.playSequence}</button>
               <button id="scenario-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
             </div>
-            <div id="scenario-status-box" style="display: none; padding: 6px 8px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 11px; margin-top: 4px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #6d28d9;">
+            <div id="scenario-status-box" style="display: none; padding: 6px 8px; background: #202020; border: 1px solid #5b21b6; border-radius: 4px; font-size: 11px; margin-top: 4px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; font-weight: 700; color: #c4b5fd;">
                 <span id="scenario-current-step">${tr.scenario.steps.step1Title}</span>
-                <span style="font-size: 10px; color: #7c3aed;">${tr.scenario.playing}</span>
+                <span style="font-size: 10px; color: #a78bfa;">${tr.scenario.playing}</span>
               </div>
-              <div id="scenario-current-text" style="color: #4b5563; margin-top: 2px; font-size: 10.5px; font-style: italic;"></div>
+              <div id="scenario-current-text" style="color: #d1d5db; margin-top: 2px; font-size: 10.5px; font-style: italic;"></div>
             </div>
           </div>
 
@@ -2516,12 +2519,12 @@ function setupUnifiedUI(): void {
         <div id="tab-pane-scenes" class="tab-pane ${currentActiveTab === 'scenes' ? 'active' : ''}">
           <!-- Scene & Lighting Presets (Park, School Gate, Indoor) -->
           <div class="section-box" style="border-left: 3px solid #f59e0b; padding-left: 6px;">
-            <label class="section-label" style="color: #d97706; font-weight: 700;">${tr.scenes.lightingPresetsTitle}</label>
+            <label class="section-label" style="color: #fbbf24; font-weight: 700;">${tr.scenes.lightingPresetsTitle}</label>
             <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
               <!-- Park -->
               <div style="display: flex; align-items: center; justify-content: space-between;">
-                <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">${tr.scenes.park}</span>
-                <span style="font-size: 10px; color: #94a3b8;">${tr.scenes.morningEvening}</span>
+                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600;">${tr.scenes.park}</span>
+                <span style="font-size: 10px; color: #777777;">${tr.scenes.morningEvening}</span>
               </div>
               <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
                 <button data-scene="morning_park" class="scene-preset-btn" title="${tr.scenes.presetMorningParkTip}">${tr.scenes.morning}</button>
@@ -2529,8 +2532,8 @@ function setupUnifiedUI(): void {
               </div>
               <!-- School Gate -->
               <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">${tr.scenes.schoolGate}</span>
-                <span style="font-size: 10px; color: #94a3b8;">${tr.scenes.morningEvening}</span>
+                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600;">${tr.scenes.schoolGate}</span>
+                <span style="font-size: 10px; color: #777777;">${tr.scenes.morningEvening}</span>
               </div>
               <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
                 <button data-scene="morning_school" class="scene-preset-btn" title="${tr.scenes.presetMorningSchoolTip}">${tr.scenes.morning}</button>
@@ -2538,8 +2541,8 @@ function setupUnifiedUI(): void {
               </div>
               <!-- Indoor Classroom -->
               <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                <span style="font-size: 10.5px; color: #64748b; font-weight: 600;">${tr.scenes.indoor}</span>
-                <span style="font-size: 10px; color: #94a3b8;">${tr.scenes.brightDark}</span>
+                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600;">${tr.scenes.indoor}</span>
+                <span style="font-size: 10px; color: #777777;">${tr.scenes.brightDark}</span>
               </div>
               <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
                 <button data-scene="bright_indoor" class="scene-preset-btn" title="${tr.scenes.presetBrightIndoorTip}">${tr.scenes.bright}</button>
@@ -2577,7 +2580,7 @@ function setupUnifiedUI(): void {
 
           <!-- lil-gui mount container -->
           <div class="section-box" style="margin-top: 4px;">
-            <label class="section-label" style="color: #6366f1; font-size: 12px; margin-bottom: 2px;">${tr.render.detailedParamsTitle}</label>
+            <label class="section-label" style="color: #5684c8; font-size: 11.5px; margin-bottom: 2px;">${tr.render.detailedParamsTitle}</label>
             <div id="gui-mount-point"></div>
           </div>
         </div>
@@ -2586,20 +2589,20 @@ function setupUnifiedUI(): void {
         <!-- TAB 5: マスターデータ管理 (Master Data Manager) -->
         <!-- ==================================================== -->
         <div id="tab-pane-masters" class="tab-pane ${currentActiveTab === 'masters' ? 'active' : ''}">
-          <div class="section-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
-            <label class="section-label" style="color: #334155; font-size: 12px; margin-bottom: 6px;">${tr.masters.overviewTitle}</label>
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 10px;">
+            <label class="section-label" style="color: #cccccc; font-size: 11px; margin-bottom: 6px;">${tr.masters.overviewTitle}</label>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
-              <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                <span style="color: #64748b;">${tr.masters.characterCount}</span> <strong id="master-count-characters">2</strong> ${tr.masters.unitCount}
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.characterCount}</span> <strong id="master-count-characters" style="color: #ffffff;">2</strong> ${tr.masters.unitCount}
               </div>
-              <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                <span style="color: #64748b;">${tr.masters.motionCount}</span> <strong id="master-count-motions">13</strong> ${tr.masters.unitType}
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.motionCount}</span> <strong id="master-count-motions" style="color: #ffffff;">13</strong> ${tr.masters.unitType}
               </div>
-              <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                <span style="color: #64748b;">${tr.masters.soundCount}</span> <strong id="master-count-sounds">14</strong> ${tr.masters.unitType}
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.soundCount}</span> <strong id="master-count-sounds" style="color: #ffffff;">14</strong> ${tr.masters.unitType}
               </div>
-              <div style="background: white; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                <span style="color: #64748b;">${tr.masters.sceneCount}</span> <strong id="master-count-scenes">6</strong> ${tr.masters.unitType}
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.sceneCount}</span> <strong id="master-count-scenes" style="color: #ffffff;">6</strong> ${tr.masters.unitType}
               </div>
             </div>
           </div>
@@ -2613,7 +2616,7 @@ function setupUnifiedUI(): void {
               </div>
               <input type="file" id="master-import-file-input" accept=".json" style="display: none;">
               <button id="master-import-json-btn" class="action-btn">${tr.masters.loadMasters}</button>
-              <button id="master-reset-btn" class="action-btn" style="color: #dc2626; border-color: #fecaca; background: #fef2f2;">${tr.masters.resetMasters}</button>
+              <button id="master-reset-btn" class="action-btn" style="color: #f87171; border-color: #7f1d1d; background: #2d1e1e;">${tr.masters.resetMasters}</button>
             </div>
           </div>
         </div>
@@ -3070,8 +3073,8 @@ function setupUnifiedUI(): void {
       isLooping = !isLooping;
       audioLipSync.setLoop(isLooping);
       loopBtn.classList.toggle('active', isLooping);
-      loopBtn.style.background = isLooping ? '#4f46e5' : '#f1f5f9';
-      loopBtn.style.color = isLooping ? '#ffffff' : '#334155';
+      loopBtn.style.background = isLooping ? '#4772b3' : '#363636';
+      loopBtn.style.color = isLooping ? '#ffffff' : '#cccccc';
       showToast(isLooping ? '🔁 ループ再生 ON' : '🔁 ループ再生 OFF');
     });
 

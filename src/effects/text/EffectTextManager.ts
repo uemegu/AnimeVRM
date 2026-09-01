@@ -109,6 +109,10 @@ class StreamEmitter {
       scale: this.particleScale,
       duration: this.particleDuration,
       animations: this.options.animations ?? this.preset.animations,
+      customStyle: {
+        ...(this.options.customStyle || {}),
+        seed: (this.options.customStyle?.seed ?? 0) + this.spawnedCount * 43 + 19,
+      },
     };
 
     this.manager.spawnSingleInstance(childOptions);
@@ -195,36 +199,43 @@ export class EffectTextManager {
     }
 
     if (mode === 'surround') {
-      const defaultPhrase = preset.streamConfig?.phrase || (presetName === 'wanawana' ? 'ワナ' : (presetName === 'iraira' ? 'イラ' : 'ドキ'));
-      const phrase = extractSubphrase(text, defaultPhrase);
       const duration = normalizedOptions.duration ?? preset.defaultDuration ?? Infinity;
-      const baseScale = (normalizedOptions.scale ?? 1.0) * (preset.defaultScale ?? 0.38);
+      const baseScale = (normalizedOptions.scale ?? 1.0) * (preset.defaultScale ?? 0.35);
 
-      // 4 surround positions tightly wrapped around avatar head/chest (1 o'clock, 3〜4 o'clock, 8〜9 o'clock, 11 o'clock)
+      // Organic, asymmetric positions around avatar with varying heights, depths, and angles
       const positions = [
-        { x: 0.18, y: 0.10, z: 0.04, rot: -0.12 },  // 1時（右上）
-        { x: 0.21, y: -0.06, z: 0.04, rot: 0.10 },  // 3〜4時（右下）
-        { x: -0.21, y: -0.06, z: 0.04, rot: -0.10 }, // 8〜9時（左下）
-        { x: -0.18, y: 0.10, z: 0.04, rot: 0.12 },  // 11時（左上）
+        { x: 0.22, y: 0.13, z: 0.04, rot: -0.12, scaleMul: 1.05 },  // 右上（やや高め・外寄り）
+        { x: 0.25, y: -0.05, z: 0.05, rot: 0.09, scaleMul: 0.92 },   // 右下（肩付近・手前）
+        { x: -0.24, y: -0.09, z: 0.03, rot: -0.07, scaleMul: 0.98 }, // 左下（胸横・少し低め）
+        { x: -0.18, y: 0.08, z: 0.04, rot: 0.13, scaleMul: 1.02 },   // 左上（頭横・内寄り）
       ];
 
       const baseOffset = normalizedOptions.offset ?? preset.defaultOffset ?? { x: 0, y: 0, z: 0 };
 
-      positions.forEach((pos) => {
+      positions.forEach((pos, idx) => {
+        // Natural micro-jitter for organic placement
+        const jitterX = (Math.random() - 0.5) * 0.03;
+        const jitterY = (Math.random() - 0.5) * 0.03;
+        const jitterRot = (Math.random() - 0.5) * 0.04;
+
         const itemOptions: ShowEffectTextOptions = {
           ...normalizedOptions,
-          text: phrase,
+          text: text,
           offset: {
-            x: baseOffset.x + pos.x,
-            y: baseOffset.y + pos.y,
+            x: baseOffset.x + pos.x + jitterX,
+            y: baseOffset.y + pos.y + jitterY,
             z: baseOffset.z + pos.z,
           },
-          scale: baseScale,
+          customStyle: {
+            ...(normalizedOptions.customStyle || {}),
+            seed: (normalizedOptions.customStyle?.seed ?? 0) + idx * 73 + 17,
+          },
+          scale: baseScale * pos.scaleMul,
           duration: duration,
           animations: normalizedOptions.animations ?? preset.animations,
         };
         const inst = this.spawnSingleInstance(itemOptions);
-        (inst as any).initialRotation = pos.rot;
+        (inst as any).initialRotation = pos.rot + jitterRot;
       });
 
       return null;
