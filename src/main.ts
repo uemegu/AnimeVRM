@@ -22,6 +22,8 @@ import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
 import { ScenarioPlayer } from './animation/ScenarioPlayer';
 import { ScenarioEngine } from './scenario/ScenarioEngine';
 import { PARK_CONFESSION_SCENARIO, getParkConfessionScenario } from './scenario/parkConfessionScenario';
+import { getTwoGirlsConversationScenario } from './scenario/twoGirlsConversationScenario';
+import { ScenarioCharacterPlacement, AvatarSlotPosition, AVATAR_POSITION_PRESETS, AVATAR_ROTATION_PRESETS } from './scenario/types';
 import { MasterDataManager } from './master/MasterDataManager';
 import { WindController, WIND_PRESETS } from './wind/WindController';
 import { WindParticles } from './wind/WindParticles';
@@ -456,7 +458,7 @@ const animationPlayer = new ShortAnimationPlayer({
 });
 
 const scenarioPlayer = new ScenarioPlayer({
-  getAvatar: () => avatarInstance,
+  getAvatar: () => (isMultiAvatarScenarioActive ? scenarioAvatars.values().next().value ?? null : avatarInstance),
   getAudioLipSync: () => audioLipSync,
   onStepChange: (index, step) => {
     updateScenarioStepUI(index, step);
@@ -469,10 +471,121 @@ const scenarioPlayer = new ScenarioPlayer({
   },
 });
 
+let avatarInstance: Avatar | null = null;
+let currentModelUrl = resolveAssetUrl('/models/girl.vrm');
+let currentMotionUrl = resolveAssetUrl('/animations/Idle.fbx');
+let currentExprName = 'neutral';
+const scenarioAvatars = new Map<string, Avatar>();
+let isMultiAvatarScenarioActive = false;
+
 const masterManager = new MasterDataManager();
 
+let savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
+let savedCameraTargetBeforeMultiAvatar: THREE.Vector3 | null = null;
+
+async function setupScenarioCharacters(characters: ScenarioCharacterPlacement[]): Promise<void> {
+  if (avatarInstance) {
+    avatarInstance.dispose();
+    avatarInstance = null;
+  }
+  scenarioAvatars.forEach((av) => av.dispose());
+  scenarioAvatars.clear();
+  windController.resetModel();
+
+  isMultiAvatarScenarioActive = true;
+
+  // Save current camera state before adjusting for multi-avatar scene
+  if (!savedCameraPosBeforeMultiAvatar) {
+    savedCameraPosBeforeMultiAvatar = camera.position.clone();
+    savedCameraTargetBeforeMultiAvatar = controls.target.clone();
+  }
+
+  // Adjust camera distance to comfortably view multiple characters
+  if (characters.length > 1) {
+    camera.position.set(0, 1.15, 3.45);
+    controls.target.set(0, 0.95, 0);
+    controls.update();
+  }
+
+  const loadPromises = characters.map((placement) => {
+    return new Promise<void>((resolve, reject) => {
+      const modelUrl = masterManager.resolveCharacterModelUrl(placement.character) || resolveAssetUrl(placement.character);
+      let posX = 0, posY = 0, posZ = 0;
+      let rotY = placement.rotationY ?? 0;
+
+      if (typeof placement.position === 'string' && placement.position in AVATAR_POSITION_PRESETS) {
+        const p = AVATAR_POSITION_PRESETS[placement.position as AvatarSlotPosition];
+        posX = p[0];
+        posY = p[1];
+        posZ = p[2];
+        if (placement.rotationY === undefined && placement.position in AVATAR_ROTATION_PRESETS) {
+          rotY = AVATAR_ROTATION_PRESETS[placement.position as AvatarSlotPosition];
+        }
+      } else if (Array.isArray(placement.position)) {
+        posX = placement.position[0];
+        posY = placement.position[1];
+        posZ = placement.position[2];
+      }
+
+      const avatar = new Avatar(scene, camera, {
+        modelUrl: modelUrl,
+        defaultAnimationUrl: resolveAssetUrl('/animations/Idle.fbx'),
+        position: [posX, posY, posZ],
+        rotationY: rotY,
+        config: currentConfig,
+        autoBlink: true,
+        lookAtCamera: false,
+        enableBreathing: true,
+        onLoaded: (loadedAvatar) => {
+          scenarioAvatars.set(placement.id, loadedAvatar);
+          resolve();
+        },
+        onError: (err) => {
+          console.error(`Failed to load scenario character ${placement.id}:`, err);
+          reject(err);
+        },
+      });
+    });
+  });
+
+  await Promise.all(loadPromises);
+  applyConfigToSceneAndRenderer(currentConfig);
+}
+
+async function restoreSingleAvatar(): Promise<void> {
+  if (!isMultiAvatarScenarioActive) return;
+  scenarioAvatars.forEach((av) => av.dispose());
+  scenarioAvatars.clear();
+  isMultiAvatarScenarioActive = false;
+
+  // Restore previous camera position
+  if (savedCameraPosBeforeMultiAvatar && savedCameraTargetBeforeMultiAvatar) {
+    camera.position.copy(savedCameraPosBeforeMultiAvatar);
+    controls.target.copy(savedCameraTargetBeforeMultiAvatar);
+    controls.update();
+    savedCameraPosBeforeMultiAvatar = null;
+    savedCameraTargetBeforeMultiAvatar = null;
+  }
+
+  loadAvatarModel(currentModelUrl);
+}
+
 const scenarioEngine = new ScenarioEngine({
-  getAvatar: () => avatarInstance,
+  getAvatar: (charId?: string) => {
+    if (isMultiAvatarScenarioActive) {
+      if (charId && scenarioAvatars.has(charId)) {
+        return scenarioAvatars.get(charId)!;
+      }
+      return scenarioAvatars.values().next().value ?? null;
+    }
+    return avatarInstance;
+  },
+  getAvatars: () => {
+    if (isMultiAvatarScenarioActive) {
+      return Array.from(scenarioAvatars.values());
+    }
+    return avatarInstance ? [avatarInstance] : [];
+  },
   getAudioLipSync: () => audioLipSync,
   masterManager,
   onPlayStateChange: (isPlaying) => {
@@ -483,6 +596,12 @@ const scenarioEngine = new ScenarioEngine({
   },
   onSwitchAvatar: async (modelUrl) => {
     loadAvatarModel(modelUrl);
+  },
+  onSetupScenarioCharacters: async (characters) => {
+    await setupScenarioCharacters(characters);
+  },
+  onRestoreAvatar: async () => {
+    await restoreSingleAvatar();
   },
   onSwitchScenePreset: (presetId) => {
     switchScene(presetId, false);
@@ -608,11 +727,6 @@ composer.addPass(smaaPass);
 // --------------------------------------------------
 // Avatar Initialization & Model Loading
 // --------------------------------------------------
-let avatarInstance: Avatar | null = null;
-let currentModelUrl = resolveAssetUrl('/models/girl.vrm');
-let currentMotionUrl = resolveAssetUrl('/animations/Idle.fbx');
-let currentExprName = 'neutral';
-
 function loadAvatarModel(modelUrl: string): void {
   currentModelUrl = modelUrl;
 
@@ -754,7 +868,11 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   );
 
   // Avatar Shader & Materials
-  avatarInstance?.applyConfig(cfg);
+  if (isMultiAvatarScenarioActive) {
+    scenarioAvatars.forEach((av) => av.applyConfig(cfg));
+  } else {
+    avatarInstance?.applyConfig(cfg);
+  }
 
   // Audio Lip-Sync Settings
   if (cfg.lipSync) {
@@ -1995,6 +2113,7 @@ function updateAnimationPlayStateUI(isPlaying: boolean): void {
 function updateScenarioPlayStateUI(isPlaying: boolean): void {
   const playBtn = document.getElementById('scenario-play-btn');
   const confessionBtn = document.getElementById('scenario-confession-btn');
+  const twogirlsBtn = document.getElementById('scenario-twogirls-btn');
   const statusBox = document.getElementById('scenario-status-box');
   const panel = document.getElementById('panel-container');
   const gearBtn = document.getElementById('settings-open-btn');
@@ -2005,10 +2124,18 @@ function updateScenarioPlayStateUI(isPlaying: boolean): void {
     playBtn.style.background = scenarioPlayer.isPlaying ? '#ea580c' : '#4f46e5';
   }
   if (confessionBtn) {
-    confessionBtn.textContent = scenarioEngine.isPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playConfession;
-    confessionBtn.style.background = scenarioEngine.isPlaying
+    const isConfessionPlaying = scenarioEngine.isPlaying && !isMultiAvatarScenarioActive;
+    confessionBtn.textContent = isConfessionPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playConfession;
+    confessionBtn.style.background = isConfessionPlaying
       ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
       : 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)';
+  }
+  if (twogirlsBtn) {
+    const isTwoGirlsPlaying = scenarioEngine.isPlaying && isMultiAvatarScenarioActive;
+    twogirlsBtn.textContent = isTwoGirlsPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playTwoGirls;
+    twogirlsBtn.style.background = isTwoGirlsPlaying
+      ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+      : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
   }
   if (statusBox) {
     statusBox.style.display = scenarioPlayer.isPlaying ? 'block' : 'none';
@@ -2190,6 +2317,7 @@ function setupUnifiedUI(): void {
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
               <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
               <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
+              <button data-model="${resolveAssetUrl('/models/girl3.vrm')}" class="model-btn">👩 girl3.vrm</button>
               <button id="open-local-vrm-btn" class="model-btn">${tr.character.selectFile}</button>
             </div>
           </div>
@@ -2310,7 +2438,7 @@ function setupUnifiedUI(): void {
         <!-- TAB 2: シナリオ・分岐ロジック (Scenario & Logic) -->
         <!-- ==================================================== -->
         <div id="tab-pane-scenario" class="tab-pane ${currentActiveTab === 'scenario' ? 'active' : ''}">
-          <!-- Interactive Branching Scenario Controls -->
+          <!-- Interactive Branching Scenario Controls (Confession) -->
           <div class="section-box" style="border-left: 3px solid #ec4899; background: #fdf2f8; padding: 8px; border-radius: 6px;">
             <label class="section-label" style="color: #db2777; font-weight: 700;">${tr.scenario.confessionTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -2319,6 +2447,18 @@ function setupUnifiedUI(): void {
             </div>
             <div style="font-size: 10.5px; color: #9d174d; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.confessionDesc}
+            </div>
+          </div>
+
+          <!-- Interactive 2-Girl Dialogue Scenario Controls (girl & girl2) -->
+          <div class="section-box" style="border-left: 3px solid #3b82f6; background: #eff6ff; padding: 8px; border-radius: 6px;">
+            <label class="section-label" style="color: #2563eb; font-weight: 700;">${tr.scenario.twoGirlsTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-twogirls-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); font-size: 12.5px; padding: 8px;">${tr.scenario.playTwoGirls}</button>
+              <button id="scenario-twogirls-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #1e40af; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.twoGirlsDesc}
             </div>
           </div>
 
@@ -2668,6 +2808,25 @@ function setupUnifiedUI(): void {
       showToast(t().toasts.scenarioStopped);
     });
 
+    // Interactive 2-Girl Dialogue Scenario Play/Stop
+    document.getElementById('scenario-twogirls-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (scenarioEngine.isPlaying) {
+        scenarioEngine.stop();
+      } else {
+        if (scenarioPlayer.isPlaying) scenarioPlayer.stop();
+        if (animationPlayer.isPlaying) animationPlayer.stop();
+        scenarioEngine.play(getTwoGirlsConversationScenario(getLanguage()));
+        showToast(t().toasts.twoGirlsStarted);
+      }
+    });
+
+    document.getElementById('scenario-twogirls-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
     // Background Buttons
     const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
     bgButtons.forEach((btn) => {
@@ -2990,7 +3149,25 @@ function tick(): void {
   // Keep midground properly aligned to camera perspective
   updateMidgroundTransform();
 
-  if (avatarInstance) {
+  if (isMultiAvatarScenarioActive) {
+    const activeSpeakerId = scenarioEngine.currentScene?.speakerCharacterId;
+    for (const [charId, av] of scenarioAvatars.entries()) {
+      const isSpeaking = activeSpeakerId ? (activeSpeakerId === charId) : true;
+      if (currentConfig.lipSync.enabled && isSpeaking) {
+        av.updateLipSync(
+          audioLipSync.currentPhoneme,
+          currentConfig.lipSync.gain,
+          currentConfig.lipSync.smoothing,
+          delta
+        );
+      } else {
+        av.updateLipSync(undefined, currentConfig.lipSync.gain, currentConfig.lipSync.smoothing, delta);
+      }
+      av.update(delta, elapsed, () => {
+        windController.update(av.vrm ?? null, currentConfig.wind, elapsed);
+      });
+    }
+  } else if (avatarInstance) {
     // Apply real-time lip sync if enabled
     if (currentConfig.lipSync.enabled) {
       avatarInstance.updateLipSync(
@@ -3011,7 +3188,11 @@ function tick(): void {
 
   // Update Sun & Lens Flare effect
   const vrmMeshes: THREE.Object3D[] = [];
-  if (avatarInstance?.vrm?.scene) {
+  if (isMultiAvatarScenarioActive) {
+    for (const av of scenarioAvatars.values()) {
+      if (av.vrm?.scene) vrmMeshes.push(av.vrm.scene);
+    }
+  } else if (avatarInstance?.vrm?.scene) {
     vrmMeshes.push(avatarInstance.vrm.scene);
   }
   const sunInfo = sunEffect.update(

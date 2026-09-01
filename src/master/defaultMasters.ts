@@ -19,6 +19,13 @@ export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
     defaultVoiceGender: 'female',
     description: 'ブロンドヘアのVRMキャラクター',
   },
+  girl_03: {
+    id: 'girl_03',
+    name: '👩 サブキャラクター2 (girl3.vrm)',
+    modelUrl: '/models/girl3.vrm',
+    defaultVoiceGender: 'female',
+    description: 'VRMキャラクター (girl3)',
+  },
 };
 
 export const DEFAULT_MOTIONS: MasterDatabase['motions'] = {

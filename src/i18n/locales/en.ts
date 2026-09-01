@@ -88,6 +88,9 @@ export const en: Translations = {
     playConfession: '🌸 Play Confession Scenario',
     stopScenario: '■ Stop',
     confessionDesc: '※ Click to advance dialogue. Choices (Love / 500 Yen / Silence) trigger branching story with synchronized avatar expressions and manga FX.',
+    twoGirlsTitle: '👥 2-Girl Dialogue Scenario (Aoi & Emiri Chat)',
+    playTwoGirls: '👥 Play 2-Girl Scenario',
+    twoGirlsDesc: '※ girl and girl2 appear side-by-side having an interactive conversation after school.',
     liveStatus: '📊 Live Scenario Status',
     sceneId: 'Scene ID:',
     speaker: 'Speaker:',
@@ -172,6 +175,7 @@ export const en: Translations = {
     animStarted: '🎬 Playing short animation',
     animStopped: '⏹ Animation stopped',
     confessionStarted: '🌸 Started confession event scenario',
+    twoGirlsStarted: '👥 Started 2-girl dialogue scenario',
     scenarioStopped: '⏹ Scenario stopped',
   },
   gui: {
