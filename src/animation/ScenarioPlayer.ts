@@ -2,6 +2,8 @@ import { Avatar } from '../Avatar';
 import { AudioLipSync } from '../AudioLipSync';
 import { resolveAssetUrl } from '../utils/path';
 import { AdventureMessageWindow } from './AdventureMessageWindow';
+import { CameraZoomType, CameraTransitionEasing } from '../scenario/types';
+import { CameraPreset, CameraStartAngle } from './types';
 import { Language, getLanguage } from '../i18n';
 
 export interface ScenarioStep {
@@ -13,6 +15,13 @@ export interface ScenarioStep {
   expression?: string;
   expressionWeight?: number;
   pauseAfterSec?: number;
+  cameraZoom?: CameraZoomType;
+  cameraDistance?: number;
+  cameraPreset?: CameraPreset;
+  cameraStrength?: number;
+  cameraStartAngle?: CameraStartAngle;
+  cameraTransitionDuration?: number;
+  cameraTransitionEasing?: CameraTransitionEasing;
 }
 
 export interface ScenarioPlayerOptions {
@@ -21,6 +30,7 @@ export interface ScenarioPlayerOptions {
   onStepChange?: (stepIndex: number, step: ScenarioStep) => void;
   onPlayStateChange?: (isPlaying: boolean) => void;
   onFinished?: () => void;
+  onApplyStepCamera?: (step: ScenarioStep) => void;
   bgmUrl?: string;
   bgmVolume?: number;
   seUrl?: string;
@@ -36,6 +46,9 @@ export const DEFAULT_CONVERSATION_STEPS_JA: ScenarioStep[] = [
     motionUrl: '/animations/Dismissing Gesture.fbx',
     expression: 'neutral',
     pauseAfterSec: 0.3,
+    cameraZoom: 'speaker',
+    cameraPreset: 'pushIn',
+    cameraStrength: 0.8,
   },
   {
     text: 'ふふっ、冗談だ',
@@ -46,6 +59,11 @@ export const DEFAULT_CONVERSATION_STEPS_JA: ScenarioStep[] = [
     expression: 'happy',
     expressionWeight: 1.0,
     pauseAfterSec: 0.3,
+    cameraZoom: 'speaker_close',
+    cameraTransitionEasing: 'gyuin',
+    cameraTransitionDuration: 0.5,
+    cameraPreset: 'punchIn',
+    cameraStrength: 1.0,
   },
   {
     text: 'それで、君はここで何をしてるのかな？',
@@ -56,6 +74,9 @@ export const DEFAULT_CONVERSATION_STEPS_JA: ScenarioStep[] = [
     expression: 'neutral',
     expressionWeight: 1.0,
     pauseAfterSec: 0.8,
+    cameraZoom: 'medium',
+    cameraPreset: 'orbitLeftHalf',
+    cameraStrength: 0.6,
   },
 ];
 
@@ -68,6 +89,9 @@ export const DEFAULT_CONVERSATION_STEPS_EN: ScenarioStep[] = [
     motionUrl: '/animations/Dismissing Gesture.fbx',
     expression: 'neutral',
     pauseAfterSec: 0.3,
+    cameraZoom: 'speaker',
+    cameraPreset: 'pushIn',
+    cameraStrength: 0.8,
   },
   {
     text: 'Hehe, just kidding.',
@@ -78,6 +102,11 @@ export const DEFAULT_CONVERSATION_STEPS_EN: ScenarioStep[] = [
     expression: 'happy',
     expressionWeight: 1.0,
     pauseAfterSec: 0.3,
+    cameraZoom: 'speaker_close',
+    cameraTransitionEasing: 'gyuin',
+    cameraTransitionDuration: 0.5,
+    cameraPreset: 'punchIn',
+    cameraStrength: 1.0,
   },
   {
     text: 'So, what are you doing here anyway?',
@@ -88,6 +117,9 @@ export const DEFAULT_CONVERSATION_STEPS_EN: ScenarioStep[] = [
     expression: 'neutral',
     expressionWeight: 1.0,
     pauseAfterSec: 0.8,
+    cameraZoom: 'medium',
+    cameraPreset: 'orbitLeftHalf',
+    cameraStrength: 0.6,
   },
 ];
 
@@ -103,6 +135,7 @@ export class ScenarioPlayer {
   private onStepChange?: (stepIndex: number, step: ScenarioStep) => void;
   private onPlayStateChange?: (isPlaying: boolean) => void;
   private onFinished?: () => void;
+  private onApplyStepCamera?: (step: ScenarioStep) => void;
 
   private bgmUrl: string;
   private bgmVolume: number;
@@ -125,6 +158,7 @@ export class ScenarioPlayer {
     this.onStepChange = options.onStepChange;
     this.onPlayStateChange = options.onPlayStateChange;
     this.onFinished = options.onFinished;
+    this.onApplyStepCamera = options.onApplyStepCamera;
 
     this.bgmUrl = options.bgmUrl ?? '/bgm/bgm.mp3';
     this.bgmVolume = options.bgmVolume ?? 0.4;
@@ -269,19 +303,22 @@ export class ScenarioPlayer {
     const avatar = this.getAvatar();
     const audioLipSync = this.getAudioLipSync();
 
-    // 1. Set Expression
+    // 1. Apply Camera zoom & motion
+    this.onApplyStepCamera?.(step);
+
+    // 2. Set Expression
     if (avatar && step.expression) {
       avatar.setExpression(step.expression, step.expressionWeight ?? 1.0);
     }
 
-    // 2. Play Motion
+    // 3. Play Motion
     if (avatar && step.motionUrl) {
       const resolvedMotion = resolveAssetUrl(step.motionUrl);
       const isLoop = resolvedMotion.includes('Idle') || resolvedMotion.includes('Walking') || resolvedMotion.includes('Jogging') || resolvedMotion.includes('Pose');
       avatar.playAnimation(resolvedMotion, isLoop);
     }
 
-    // 3. Update Message Window with fast typing effect (show only current line)
+    // 4. Update Message Window with fast typing effect (show only current line)
     const textToShow = step.displayText || `「${step.text}」`;
     this.messageWindow.setText(textToShow);
 

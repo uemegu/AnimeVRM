@@ -22,6 +22,7 @@ import { TypographyOverlay } from './animation/TypographyOverlay';
 import { ShortAnimationPlayer } from './animation/ShortAnimationPlayer';
 import { ScenarioPlayer } from './animation/ScenarioPlayer';
 import { ScenarioEngine } from './scenario/ScenarioEngine';
+import { DialogueCameraController } from './scenario/DialogueCameraController';
 import { PARK_CONFESSION_SCENARIO, getParkConfessionScenario } from './scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from './scenario/twoGirlsConversationScenario';
 import { ScenarioCharacterPlacement, AvatarSlotPosition, AVATAR_POSITION_PRESETS, AVATAR_ROTATION_PRESETS } from './scenario/types';
@@ -416,13 +417,50 @@ const initialControlsTarget = new THREE.Vector3(
   DEFAULT_CONFIG.camera.target.z
 );
 
+let dialogueCameraController: DialogueCameraController | null = null;
+
+function updateBackgroundZoom(): void {
+  if (!scene.background || !(scene.background instanceof THREE.Texture)) return;
+  const bgTex = scene.background;
+
+  if (dialogueCameraController?.isActive) {
+    const bgTrans = dialogueCameraController.getBackgroundTransform();
+    const zoom = Math.max(1.0, bgTrans.zoomScale);
+    const invZoom = 1.0 / zoom;
+    bgTex.center.set(0.5, 0.5);
+    bgTex.repeat.set(invZoom, invZoom);
+    bgTex.offset.set(
+      (1 - invZoom) * 0.5 - bgTrans.panOffsetX,
+      (1 - invZoom) * 0.5 - bgTrans.panOffsetY
+    );
+  } else {
+    if (bgTex.repeat.x !== 1 || bgTex.repeat.y !== 1 || bgTex.offset.x !== 0 || bgTex.offset.y !== 0) {
+      bgTex.center.set(0, 0);
+      bgTex.repeat.set(1, 1);
+      bgTex.offset.set(0, 0);
+    }
+  }
+}
+
 function updateMidgroundTransform(): void {
   if (!midgroundMesh.visible || typeof controls === 'undefined' || typeof camera === 'undefined') return;
 
   const cfg = currentConfig.environment;
   const offsetX = cfg.midgroundPosition?.x ?? 0;
   const offsetY = (cfg.midgroundPosition?.y ?? 1.35) - 1.35;
-  const scaleMul = cfg.midgroundScale ?? 1.15;
+  const baseScaleMul = cfg.midgroundScale ?? 1.15;
+
+  // 会話カメラズーム連動 (Dialogue Camera Zoom)
+  let zoomMultiplier = 1.0;
+  let panZoomOffsetX = 0;
+  let panZoomOffsetY = 0;
+  if (dialogueCameraController?.isActive) {
+    const bgTrans = dialogueCameraController.getBackgroundTransform();
+    zoomMultiplier = bgTrans.zoomScale;
+    panZoomOffsetX = bgTrans.panOffsetX;
+    panZoomOffsetY = bgTrans.panOffsetY;
+  }
+  const scaleMul = baseScaleMul * zoomMultiplier;
 
   // パン（平行移動）による移動量のみを算出（回転時は 0 のまま）
   const panDeltaX = controls.target.x - initialControlsTarget.x;
@@ -441,8 +479,8 @@ function updateMidgroundTransform(): void {
   const baseDist = Math.max(targetDist + 0.3, 2.1);
   const planePos = camera.position.clone()
     .addScaledVector(forward, baseDist)
-    .addScaledVector(right, offsetX - panDeltaX)
-    .addScaledVector(up, offsetY - panDeltaY);
+    .addScaledVector(right, offsetX - panDeltaX + panZoomOffsetX * 0.8)
+    .addScaledVector(up, offsetY - panDeltaY + panZoomOffsetY * 0.8);
 
   midgroundMesh.position.copy(planePos);
   midgroundMesh.quaternion.copy(camera.quaternion);
@@ -472,7 +510,7 @@ function updateMidgroundDisplay(cfg: AvatarConfig): void {
 const camera = new THREE.PerspectiveCamera(
   currentConfig.camera.fov,
   window.innerWidth / window.innerHeight,
-  0.1,
+  0.05,
   100
 );
 camera.position.set(
@@ -554,20 +592,6 @@ const animationPlayer = new ShortAnimationPlayer({
   },
 });
 
-const scenarioPlayer = new ScenarioPlayer({
-  getAvatar: () => (isMultiAvatarScenarioActive ? scenarioAvatars.values().next().value ?? null : avatarInstance),
-  getAudioLipSync: () => audioLipSync,
-  onStepChange: (index, step) => {
-    updateScenarioStepUI(index, step);
-  },
-  onPlayStateChange: (isPlaying) => {
-    updateScenarioPlayStateUI(isPlaying);
-  },
-  onFinished: () => {
-    // Finished naturally
-  },
-});
-
 let avatarInstance: Avatar | null = null;
 let currentModelUrl = resolveAssetUrl('/models/girl.vrm');
 let currentMotionUrl = resolveAssetUrl('/animations/Idle.fbx');
@@ -576,6 +600,59 @@ const scenarioAvatars = new Map<string, Avatar>();
 let isMultiAvatarScenarioActive = false;
 
 const masterManager = new MasterDataManager();
+
+// --------------------------------------------------
+// Dialogue Camera Controller (話者ズーム＆背景ズーム連動)
+// --------------------------------------------------
+dialogueCameraController = new DialogueCameraController({
+  camera,
+  controls,
+  getAvatar: (charId?: string) => {
+    if (isMultiAvatarScenarioActive) {
+      if (charId && scenarioAvatars.has(charId)) {
+        return scenarioAvatars.get(charId)!;
+      }
+      return scenarioAvatars.values().next().value ?? null;
+    }
+    return avatarInstance;
+  },
+  getAvatars: () => {
+    if (isMultiAvatarScenarioActive) {
+      return Array.from(scenarioAvatars.values());
+    }
+    return avatarInstance ? [avatarInstance] : [];
+  },
+});
+
+const scenarioPlayer = new ScenarioPlayer({
+  getAvatar: () => (isMultiAvatarScenarioActive ? scenarioAvatars.values().next().value ?? null : avatarInstance),
+  getAudioLipSync: () => audioLipSync,
+  onStepChange: (index, step) => {
+    updateScenarioStepUI(index, step);
+  },
+  onApplyStepCamera: (step) => {
+    dialogueCameraController?.applyScene({
+      id: `step_${step.displayText || step.text}`,
+      text: step.text,
+      cameraZoom: step.cameraZoom,
+      cameraDistance: step.cameraDistance,
+      cameraPreset: step.cameraPreset,
+      cameraStrength: step.cameraStrength,
+      cameraStartAngle: step.cameraStartAngle,
+      cameraTransitionDuration: step.cameraTransitionDuration,
+      cameraTransitionEasing: step.cameraTransitionEasing,
+    });
+  },
+  onPlayStateChange: (isPlaying) => {
+    if (!isPlaying) {
+      dialogueCameraController?.stop();
+    }
+    updateScenarioPlayStateUI(isPlaying);
+  },
+  onFinished: () => {
+    dialogueCameraController?.stop();
+  },
+});
 
 let savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
 let savedCameraTargetBeforeMultiAvatar: THREE.Vector3 | null = null;
@@ -686,10 +763,16 @@ const scenarioEngine = new ScenarioEngine({
   getAudioLipSync: () => audioLipSync,
   masterManager,
   onPlayStateChange: (isPlaying) => {
+    if (!isPlaying) {
+      dialogueCameraController?.stop();
+    }
     updateScenarioPlayStateUI(isPlaying);
   },
   onSceneChange: (scene, state) => {
     updateScenarioDebugUI(scene, state);
+  },
+  onApplySceneCamera: (scene) => {
+    dialogueCameraController?.applyScene(scene);
   },
   onSwitchAvatar: async (modelUrl) => {
     loadAvatarModel(modelUrl);
@@ -704,6 +787,7 @@ const scenarioEngine = new ScenarioEngine({
     switchScene(presetId, false);
   },
   onFinished: () => {
+    dialogueCameraController?.stop();
     showToast('✨ シナリオが終了しました');
   },
 });
@@ -3395,11 +3479,16 @@ function tick(): void {
 
   if (animationPlayer.isPlaying) {
     animationPlayer.update(delta);
+  } else if (dialogueCameraController?.isActive) {
+    dialogueCameraController.update(delta);
   } else {
     controls.update();
   }
 
-  // Keep midground properly aligned to camera perspective
+  // Update dynamic background zoom
+  updateBackgroundZoom();
+
+  // Keep midground properly aligned to camera perspective & zoom
   updateMidgroundTransform();
 
   if (isMultiAvatarScenarioActive) {

@@ -45,6 +45,19 @@ export interface ScenarioSceneAvatarConfig {
   };
 }
 
+export type CameraZoomType =
+  | 'speaker'       // 自動で発話者キャラへズーム (バストアップ)
+  | 'speaker_close' // 発話者キャラへ超クローズアップ (感情・告白・強調)
+  | 'wide'          // 全体・引きのショット (2人全体・背景を広く写す)
+  | 'medium'        // 標準的な会話ショット
+  | 'none'          // カメラ移動なし (現在の構図を維持)
+  | 'hold';         // 前の構図をキープ
+
+export type CameraTransitionEasing =
+  | 'gyuin'         // 勢いよく寄ってピタッと止まるアニメ的なダイナミックズーム (easeOutExpo)
+  | 'smooth'        // なめらかな補間 (easeInOutCubic)
+  | 'cut';          // 即座に切り替えるカット
+
 export interface ScenarioScene {
   id: string;
   speaker?: string;
@@ -61,6 +74,11 @@ export interface ScenarioScene {
   cameraStartAngle?: CameraStartAngle;
   cameraPreset?: CameraPreset;
   cameraStrength?: number;
+  cameraZoom?: CameraZoomType;
+  cameraDistance?: number; // Distance multiplier (e.g. 0.6 for close, 1.5 for far)
+  cameraTransitionDuration?: number; // Transition duration in seconds (default 0.7s)
+  cameraTransitionEasing?: CameraTransitionEasing;
+  cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
   choices?: ScenarioChoice[];
   conditions?: string[];
   goto?: string;
