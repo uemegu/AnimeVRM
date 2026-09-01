@@ -363,12 +363,12 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     fov: 30,
     position: {
       x: 0,
-      y: 1.05,
-      z: 2.25,
+      y: 1.1,
+      z: 2.65,
     },
     target: {
       x: 0,
-      y: 1.2,
+      y: 1.15,
       z: 0,
     },
     minDistance: 0.5,

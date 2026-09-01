@@ -88,6 +88,9 @@ export const ja: Translations = {
     playConfession: '🌸 告白シナリオ再生',
     stopScenario: '■ 停止',
     confessionDesc: '※クリックで会話送り。選択肢（告白/500円/沈黙）で分岐し、モデル表情・感情漫符が連動します。',
+    twoGirlsTitle: '👥 2人会話シナリオ (girl & girl2 掛け合い)',
+    playTwoGirls: '👥 2人会話シナリオ再生',
+    twoGirlsDesc: '※girlとgirl2が同時に登場し、放課後の約束について掛け合い会話を行います。',
     liveStatus: '📊 実行中シナリオステータス',
     sceneId: 'シーンID:',
     speaker: '話者:',
@@ -172,6 +175,7 @@ export const ja: Translations = {
     animStarted: '🎬 ショートアニメーションを再生します',
     animStopped: '⏹ アニメーションを停止しました',
     confessionStarted: '🌸 告白イベントシナリオを開始しました',
+    twoGirlsStarted: '👥 2人会話シナリオを開始しました',
     scenarioStopped: '⏹ シナリオを停止しました',
   },
   gui: {

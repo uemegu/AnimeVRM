@@ -88,6 +88,9 @@ export interface Translations {
     playConfession: string;
     stopScenario: string;
     confessionDesc: string;
+    twoGirlsTitle: string;
+    playTwoGirls: string;
+    twoGirlsDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -172,6 +175,7 @@ export interface Translations {
     animStarted: string;
     animStopped: string;
     confessionStarted: string;
+    twoGirlsStarted: string;
     scenarioStopped: string;
   };
   gui: {

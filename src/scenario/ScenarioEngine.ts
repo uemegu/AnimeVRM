@@ -6,6 +6,11 @@ import {
   ScenarioScene,
   ScenarioChoice,
   ScenarioState,
+  ScenarioCharacterPlacement,
+  ScenarioSceneAvatarConfig,
+  AvatarSlotPosition,
+  AVATAR_POSITION_PRESETS,
+  AVATAR_ROTATION_PRESETS,
 } from './types';
 import { ScenePresetId } from '../presets/ScenePresets';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
@@ -13,13 +18,16 @@ import { resolveAssetUrl } from '../utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
 
 export interface ScenarioEngineOptions {
-  getAvatar: () => Avatar | null;
+  getAvatar: (characterId?: string) => Avatar | null;
+  getAvatars?: () => Avatar[];
   getAudioLipSync: () => AudioLipSync;
   masterManager?: MasterDataManager;
   onPlayStateChange?: (isPlaying: boolean) => void;
   onSceneChange?: (scene: ScenarioScene, state: ScenarioState) => void;
   onFinished?: () => void;
   onSwitchAvatar?: (modelUrl: string) => Promise<void>;
+  onSetupScenarioCharacters?: (characters: ScenarioCharacterPlacement[]) => Promise<void>;
+  onRestoreAvatar?: () => Promise<void>;
   onSwitchScenePreset?: (presetId: ScenePresetId) => void;
   onApplyCamera?: (
     startAngle?: CameraStartAngle,
@@ -29,13 +37,16 @@ export interface ScenarioEngineOptions {
 }
 
 export class ScenarioEngine {
-  private getAvatar: () => Avatar | null;
+  private getAvatar: (characterId?: string) => Avatar | null;
+  private getAvatars?: () => Avatar[];
   private getAudioLipSync: () => AudioLipSync;
   private masterManager: MasterDataManager;
   private onPlayStateChange?: (isPlaying: boolean) => void;
   private onSceneChange?: (scene: ScenarioScene, state: ScenarioState) => void;
   private onFinished?: () => void;
   private onSwitchAvatar?: (modelUrl: string) => Promise<void>;
+  private onSetupScenarioCharacters?: (characters: ScenarioCharacterPlacement[]) => Promise<void>;
+  private onRestoreAvatar?: () => Promise<void>;
   private onSwitchScenePreset?: (presetId: ScenePresetId) => void;
   private onApplyCamera?: (
     startAngle?: CameraStartAngle,
@@ -57,12 +68,15 @@ export class ScenarioEngine {
 
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
+    this.getAvatars = options.getAvatars;
     this.getAudioLipSync = options.getAudioLipSync;
     this.masterManager = options.masterManager || new MasterDataManager();
     this.onPlayStateChange = options.onPlayStateChange;
     this.onSceneChange = options.onSceneChange;
     this.onFinished = options.onFinished;
     this.onSwitchAvatar = options.onSwitchAvatar;
+    this.onSetupScenarioCharacters = options.onSetupScenarioCharacters;
+    this.onRestoreAvatar = options.onRestoreAvatar;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
 
@@ -99,7 +113,7 @@ export class ScenarioEngine {
     };
   }
 
-  public play(scenarioPackage: ScenarioPackage): void {
+  public async play(scenarioPackage: ScenarioPackage): Promise<void> {
     if (this.isPlayingState) {
       this.stop();
     }
@@ -111,6 +125,15 @@ export class ScenarioEngine {
     this.isPlayingState = true;
 
     this.onPlayStateChange?.(true);
+
+    // Setup multi-character placements if defined
+    if (scenarioPackage.characters && scenarioPackage.characters.length > 0 && this.onSetupScenarioCharacters) {
+      try {
+        await this.onSetupScenarioCharacters(scenarioPackage.characters);
+      } catch (err) {
+        console.error('Failed to setup scenario characters:', err);
+      }
+    }
 
     // Start BGM & SE if configured (resolve IDs via MasterDataManager)
     const bgmPath = this.masterManager.resolveSoundUrl(scenarioPackage.bgm || scenarioPackage.bgmUrl);
@@ -130,12 +153,22 @@ export class ScenarioEngine {
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
-    this.getAvatar()?.resetFaceTexture();
-    this.getAvatar()?.clearEffectText();
+
+    const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
+    allAvatars.forEach((avatar) => {
+      avatar.resetFaceTexture();
+      avatar.clearEffectText();
+    });
 
     this.messageWindow.hide();
     this.onPlayStateChange?.(false);
     this.onFinished?.();
+
+    if (this.onRestoreAvatar) {
+      this.onRestoreAvatar().catch((err) => {
+        console.error('Failed to restore avatar after scenario:', err);
+      });
+    }
   }
 
   private handleUserNext(): void {
@@ -269,6 +302,73 @@ export class ScenarioEngine {
     return conditions.every((cond) => this.flags.has(cond));
   }
 
+  private applyAvatarAction(avatar: Avatar, config: ScenarioSceneAvatarConfig): void {
+    const { motion, expression, expressionWeight, faceTexture, effectText, position, rotationY } = config;
+
+    // Slot position / custom transform
+    if (position !== undefined) {
+      if (typeof position === 'string' && position in AVATAR_POSITION_PRESETS) {
+        const [px, py, pz] = AVATAR_POSITION_PRESETS[position as AvatarSlotPosition];
+        avatar.setPosition(px, py, pz);
+        if (rotationY === undefined && position in AVATAR_ROTATION_PRESETS) {
+          avatar.setRotationY(AVATAR_ROTATION_PRESETS[position as AvatarSlotPosition]);
+        }
+      } else if (Array.isArray(position)) {
+        avatar.setPosition(position[0], position[1], position[2]);
+      }
+    }
+    if (rotationY !== undefined) {
+      avatar.setRotationY(rotationY);
+    }
+
+    // Motion (resolve Master ID or FBX path)
+    if (motion) {
+      const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
+      const motionLower = resolvedMotion.toLowerCase();
+      const isLoop =
+        motionLower.includes('idle') ||
+        motionLower.includes('walking') ||
+        motionLower.includes('jogging') ||
+        motionLower.includes('standing pose');
+      avatar.playAnimation(
+        resolvedMotion,
+        isLoop,
+        0.5,
+        resolveAssetUrl('/animations/Idle.fbx')
+      );
+    }
+
+    // Expression
+    if (expression) {
+      avatar.setExpression(expression, expressionWeight ?? 1.0);
+    }
+
+    // Dynamic Face Texture (e.g. Blush / Red cheeks)
+    if (faceTexture) {
+      avatar.setFaceTexture(faceTexture);
+    } else if (faceTexture === null) {
+      avatar.resetFaceTexture();
+    }
+
+    // 3D Manga Emotion Effect Text
+    if (effectText) {
+      if (typeof effectText === 'string') {
+        avatar.showEffectText({
+          stylePreset: effectText,
+          text: '',
+        });
+      } else {
+        avatar.showEffectText({
+          stylePreset: effectText.preset,
+          text: effectText.text ?? '',
+          duration: effectText.duration,
+        });
+      }
+    } else {
+      avatar.clearEffectText();
+    }
+  }
+
   private executeCurrentScene(): void {
     const scene = this.currentScene;
     if (!scene) {
@@ -279,9 +379,10 @@ export class ScenarioEngine {
     this.clearAutoNextTimer();
     this.stopVoice();
 
-    // 0. Character Model Switch (if specified)
+    // 0. Single Character Model Switch (if specified & not in multi-character package)
+    const isMultiCharacter = Boolean(this.currentPackage?.characters && this.currentPackage.characters.length > 0);
     const charId = scene.character || scene.avatar?.character;
-    if (charId && this.onSwitchAvatar) {
+    if (!isMultiCharacter && charId && this.onSwitchAvatar) {
       const modelUrl = this.masterManager.resolveCharacterModelUrl(charId);
       if (modelUrl) {
         this.onSwitchAvatar(modelUrl).catch((err) => {
@@ -305,57 +406,19 @@ export class ScenarioEngine {
     }
 
     // 3. Avatar Control (Motion, Expression, 3D Manga Effect)
-    const avatar = this.getAvatar();
-    if (avatar && scene.avatar) {
-      const { motion, expression, expressionWeight, effectText } = scene.avatar;
-
-      // Motion (resolve Master ID or FBX path)
-      if (motion) {
-        const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
-        const motionLower = resolvedMotion.toLowerCase();
-        const isLoop =
-          motionLower.includes('idle') ||
-          motionLower.includes('walking') ||
-          motionLower.includes('jogging');
-        avatar.playAnimation(
-          resolvedMotion,
-          isLoop,
-          0.5,
-          resolveAssetUrl('/animations/Idle.fbx')
-        );
-      }
-
-      // Expression
-      if (expression) {
-        avatar.setExpression(expression, expressionWeight ?? 1.0);
-      }
-
-      // Dynamic Face Texture (e.g. Blush / Red cheeks)
-      if (scene.avatar.faceTexture) {
-        avatar.setFaceTexture(scene.avatar.faceTexture);
-      } else {
-        avatar.resetFaceTexture();
-      }
-
-      // 3D Manga Emotion Effect Text
-      if (effectText) {
-        if (typeof effectText === 'string') {
-          avatar.showEffectText({
-            stylePreset: effectText,
-            text: '',
-          });
-        } else {
-          avatar.showEffectText({
-            stylePreset: effectText.preset,
-            text: effectText.text ?? '',
-            duration: effectText.duration,
-          });
+    if (scene.avatars) {
+      for (const [charKey, config] of Object.entries(scene.avatars)) {
+        const avatar = this.getAvatar(charKey);
+        if (avatar) {
+          this.applyAvatarAction(avatar, config);
         }
-      } else {
-        avatar.clearEffectText();
       }
-    } else if (avatar) {
-      avatar.clearEffectText();
+    } else if (scene.avatar) {
+      const charKey = scene.avatar.character || scene.character || scene.speakerCharacterId;
+      const avatar = this.getAvatar(charKey);
+      if (avatar) {
+        this.applyAvatarAction(avatar, scene.avatar);
+      }
     }
 
     // 4. Voice Lip-Sync (resolve Voice Master ID or WAV path)

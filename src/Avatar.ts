@@ -19,6 +19,8 @@ export interface AvatarOptions {
   modelUrl: string;
   defaultAnimationUrl?: string;
   config?: AvatarConfig;
+  position?: THREE.Vector3 | [number, number, number];
+  rotationY?: number;
   autoBlink?: boolean;
   lookAtCamera?: boolean;
   enableBreathing?: boolean;
@@ -191,6 +193,9 @@ export class Avatar {
   public tearEffect: TearEffect | null = null;
   public sweatEffect: SweatEffect | null = null;
 
+  public initialPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+  public initialRotationY: number = 0;
+
   private options: AvatarOptions;
   private blinkTimer = 0;
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
@@ -212,6 +217,8 @@ export class Avatar {
       modelUrl: options.modelUrl,
       defaultAnimationUrl: options.defaultAnimationUrl ?? '/animations/Idle.fbx',
       config: options.config,
+      position: options.position,
+      rotationY: options.rotationY,
       autoBlink: options.autoBlink ?? true,
       lookAtCamera: options.lookAtCamera ?? true,
       enableBreathing: options.enableBreathing ?? true,
@@ -221,9 +228,34 @@ export class Avatar {
       onError: options.onError ?? ((err) => console.error(err)),
     };
 
+    if (options.position) {
+      if (options.position instanceof THREE.Vector3) {
+        this.initialPosition.copy(options.position);
+      } else if (Array.isArray(options.position)) {
+        this.initialPosition.set(options.position[0], options.position[1], options.position[2]);
+      }
+    }
+    if (typeof options.rotationY === 'number') {
+      this.initialRotationY = options.rotationY;
+    }
+
     this.effectTextManager = options.effectTextManager ?? new EffectTextManager(scene);
     this.blinkTimer = this.getRandomBlinkInterval(3, 7);
     this.loadModel();
+  }
+
+  public setPosition(x: number, y: number, z: number): void {
+    this.initialPosition.set(x, y, z);
+    if (this.vrm) {
+      this.vrm.scene.position.set(x, y, z);
+    }
+  }
+
+  public setRotationY(rad: number): void {
+    this.initialRotationY = rad;
+    if (this.vrm) {
+      this.vrm.scene.rotation.y = rad;
+    }
   }
 
   private loadModel(): void {
@@ -248,9 +280,9 @@ export class Avatar {
         // Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
         applySmoothNormalsToHierarchy(vrm.scene);
 
-        // Adjust model orientation (faces camera by default in VRM 1.0)
-        vrm.scene.rotation.y = 0;
-        vrm.scene.position.set(0, 0, 0);
+        // Adjust model orientation & initial position
+        vrm.scene.rotation.y = this.initialRotationY;
+        vrm.scene.position.copy(this.initialPosition);
 
         // Setup shadows and depth write
         vrm.scene.traverse((obj) => {
@@ -506,7 +538,7 @@ export class Avatar {
     if (!this.options.enableBreathing || !this.vrm) return;
 
     const root = this.vrm.scene;
-    root.position.y = Math.sin(elapsed * 1.5) * 0.005;
+    root.position.y = this.initialPosition.y + Math.sin(elapsed * 1.5) * 0.005;
 
     const head =
       this.vrm.humanoid?.getNormalizedBoneNode?.('head') ||
