@@ -373,10 +373,7 @@ export class SunEffect {
     camera.getWorldDirection(camForward);
     const toSun = this.sunWorldPosition.clone().sub(camera.position).normalize();
     const forwardDot = camForward.dot(toSun);
-    const inFront = forwardDot > 0.02; // Sun is in front of camera
-
-    this.sunGroup.visible = (sunCfg.enabled || flareCfg.enabled) && inFront;
-    this.flareGroup.visible = flareCfg.enabled && inFront;
+    const inFront = forwardDot > 0.0; // Sun is in front of camera
 
     // Project Sun to Normalized Device Coordinates (NDC)
     const ndc = this.sunWorldPosition.clone().project(camera);
@@ -384,12 +381,15 @@ export class SunEffect {
     const screenY = (ndc.y + 1) * 0.5;
     this.sunScreenPosition.set(screenX, screenY);
 
-    // Viewport edge falloff
+    // Viewport edge falloff (広角フォールオフ: 画面端・斜め外からもしっかり光条が差し込む)
     let edgeFactor = 0.0;
     if (inFront) {
       const distFromCenter = Math.sqrt(ndc.x * ndc.x + ndc.y * ndc.y);
-      edgeFactor = Math.max(0.0, Math.min(1.0, (2.8 - distFromCenter) / 1.8));
+      edgeFactor = Math.max(0.25, Math.min(1.0, (3.6 - distFromCenter) / 2.2));
     }
+
+    this.sunGroup.visible = (sunCfg.enabled || flareCfg.enabled) && inFront && edgeFactor > 0.1;
+    this.flareGroup.visible = flareCfg.enabled && inFront && edgeFactor > 0.1;
 
     // 3. Occlusion Raycast check (smooth transition)
     let targetOcclusion = 0.0;
