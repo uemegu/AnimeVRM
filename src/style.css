@@ -64,33 +64,37 @@ body {
 /* -------------------------------------------------- */
 /* Floating Settings Button (Minimized State)         */
 /* -------------------------------------------------- */
+/* -------------------------------------------------- */
+/* Floating Settings Button (Minimized State)         */
+/* -------------------------------------------------- */
 #settings-open-btn {
   position: fixed;
   top: 16px;
   right: 16px;
   z-index: 1000;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(203, 213, 225, 0.8);
-  background: rgba(255, 255, 255, 0.92);
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid #3d3d3d;
+  background: rgba(36, 36, 36, 0.95);
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
   cursor: pointer;
   display: none;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  color: #334155;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 18px;
+  color: #e0e0e0;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
 }
 
 #settings-open-btn:hover {
-  transform: scale(1.08);
-  background: #ffffff;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
-  border-color: #94a3b8;
+  transform: scale(1.05);
+  background: #444444;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  border-color: #555555;
+  color: #ffffff;
 }
 
 #settings-open-btn:active {
@@ -98,25 +102,29 @@ body {
 }
 
 /* -------------------------------------------------- */
-/* Unified Control Panel (Right Side)                 */
+/* Unified Control Panel (Blender-like Dark Panel)    */
 /* -------------------------------------------------- */
 #panel-container {
   position: fixed;
-  top: 16px;
-  right: 16px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100vh;
+  max-height: 100vh;
   z-index: 1000;
   width: 380px;
-  max-height: calc(100vh - 32px);
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 14px;
-  box-shadow: 0 12px 35px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  background: #282828;
+  border-left: 1px solid #1a1a1a;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 0;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12.5px;
-  color: #1e293b;
+  font-size: 12px;
+  color: #cccccc;
   user-select: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
   overflow: hidden;
@@ -127,15 +135,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e2e8f0;
-  background: rgba(248, 250, 252, 0.9);
+  border-bottom: 1px solid #181818;
+  background: #202020;
+  color: #f0f0f0;
 }
 
 /* Studio Tab Bar Navigation */
 #panel-tabs {
   display: flex;
-  background: #f1f5f9;
-  border-bottom: 1px solid #e2e8f0;
+  background: #181818;
+  border-bottom: 1px solid #181818;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -146,11 +155,11 @@ body {
 
 .studio-tab-btn {
   flex: 1;
-  min-width: 65px;
-  padding: 8px 4px;
+  min-width: 60px;
+  padding: 7px 4px;
   font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 500;
+  color: #888888;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -164,15 +173,15 @@ body {
 }
 
 .studio-tab-btn:hover {
-  color: #1e293b;
-  background: rgba(255, 255, 255, 0.5);
+  color: #dcdcdc;
+  background: #232323;
 }
 
 .studio-tab-btn.active {
-  color: #4f46e5;
-  border-bottom-color: #4f46e5;
-  background: #ffffff;
-  font-weight: 700;
+  color: #ffffff;
+  border-bottom-color: #4772b3;
+  background: #282828;
+  font-weight: 600;
 }
 
 .studio-tab-icon {
@@ -180,13 +189,13 @@ body {
 }
 
 .panel-close-btn {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  color: #64748b;
+  background: #2e2e2e;
+  border: 1px solid #3d3d3d;
+  border-radius: 4px;
+  color: #aaaaaa;
   cursor: pointer;
-  padding: 3px 8px;
-  font-size: 12px;
+  padding: 2px 7px;
+  font-size: 11px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -195,9 +204,9 @@ body {
 }
 
 .panel-close-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  border-color: #94a3b8;
+  background: #3e3e3e;
+  color: #ffffff;
+  border-color: #555555;
 }
 
 #panel-body {
@@ -205,8 +214,11 @@ body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  max-height: calc(100vh - 130px);
+  gap: 12px;
+  flex: 1;
+  height: calc(100vh - 84px);
+  box-sizing: border-box;
+  background: #282828;
 }
 
 .tab-pane {
@@ -219,28 +231,28 @@ body {
   display: flex;
 }
 
-/* Custom Scrollbar for Panel */
+/* Custom Scrollbar for Panel (Blender style) */
 #panel-body::-webkit-scrollbar {
   width: 6px;
 }
 #panel-body::-webkit-scrollbar-track {
-  background: transparent;
+  background: #1e1e1e;
 }
 #panel-body::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #3d3d3d;
   border-radius: 3px;
 }
 #panel-body::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #555555;
 }
 
 .status-box {
-  font-size: 12px;
-  color: #64748b;
-  padding: 4px 6px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  font-size: 11.5px;
+  color: #aaaaaa;
+  padding: 5px 8px;
+  background: #202020;
+  border-radius: 4px;
+  border: 1px solid #333333;
 }
 
 .section-box {
@@ -250,92 +262,99 @@ body {
 }
 
 .section-label {
-  font-weight: 700;
-  font-size: 12px;
-  color: #334155;
+  font-weight: 600;
+  font-size: 11px;
+  color: #aaaaaa;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .action-btn {
   padding: 6px 10px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  background: #383838;
+  border: 1px solid #484848;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 11px;
-  color: #334155;
+  color: #dcdcdc;
   transition: all 0.15s ease;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .action-btn:hover {
-  background: #e2e8f0;
-  border-color: #94a3b8;
+  background: #484848;
+  border-color: #5a5a5a;
+  color: #ffffff;
 }
 
 .action-btn.primary {
-  background: #4f46e5;
+  background: #4772b3;
   color: #ffffff;
-  border-color: #4338ca;
+  border-color: #385d94;
+  font-weight: 600;
 }
 
 .action-btn.primary:hover {
-  background: #4338ca;
+  background: #5684c8;
+  border-color: #4772b3;
 }
 
 .expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 4px 8px;
+  background: #363636;
+  border: 1px solid #444444;
+  border-radius: 4px;
+  padding: 5px 8px;
   font-size: 11px;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #334155;
+  color: #cccccc;
   text-align: center;
 }
 
 .expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover {
-  background: #e2e8f0;
-  border-color: #94a3b8;
+  background: #464646;
+  border-color: #555555;
+  color: #ffffff;
 }
 
 .expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active {
-  background: #4f46e5;
+  background: #4772b3;
   color: #ffffff;
-  border-color: #4338ca;
+  border-color: #385d94;
   font-weight: 600;
 }
 
 .effect-text-btn {
   padding: 5px 6px;
   font-size: 11px;
-  font-weight: 700;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  font-weight: 600;
+  background: #343434;
+  border: 1px solid #484848;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  color: #dedede;
 }
 
 .effect-text-btn:hover {
+  background: #444444;
+  border-color: #606060;
+  color: #ffffff;
   transform: translateY(-1px);
-  filter: brightness(0.95);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
 .effect-text-btn:active {
   transform: translateY(1px);
-  filter: brightness(0.9);
 }
 
 .player-box {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  background: #202020;
+  border: 1px solid #333333;
+  border-radius: 6px;
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
@@ -346,35 +365,41 @@ body {
   font-size: 10px;
   font-weight: 600;
   padding: 2px 5px;
-  border-radius: 4px;
-  background: #e2e8f0;
-  color: #64748b;
+  border-radius: 3px;
+  background: #2c2c2c;
+  border: 1px solid #3a3a3a;
+  color: #888888;
   transition: all 0.1s ease;
 }
 
 .phoneme-tag.active {
-  background: #4f46e5;
+  background: #4772b3;
   color: #ffffff;
+  border-color: #385d94;
   transform: scale(1.08);
 }
 
-/* lil-gui integration inside unified panel */
+/* Blender-style lil-gui integration inside unified panel */
 #gui-mount-point .lil-gui {
-  --background-color: transparent !important;
-  --text-color: #334155 !important;
-  --title-background-color: #f1f5f9 !important;
-  --widget-color: #f8fafc !important;
-  --hover-color: #e2e8f0 !important;
-  --focus-color: #cbd5e1 !important;
-  --number-color: #4f46e5 !important;
-  --string-color: #059669 !important;
+  --background-color: #242424 !important;
+  --text-color: #cccccc !important;
+  --title-background-color: #1e1e1e !important;
+  --widget-color: #383838 !important;
+  --hover-color: #484848 !important;
+  --focus-color: #4772b3 !important;
+  --number-color: #5684c8 !important;
+  --string-color: #72b27b !important;
   font-family: inherit !important;
   font-size: 11px !important;
   width: 100% !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
 }
 
 #gui-mount-point .lil-gui.root {
-  border: 1px solid #e2e8f0 !important;
-  background: #fdfdfd !important;
+  border: 1px solid #333333 !important;
+  background: #202020 !important;
+}
+
+#gui-mount-point .lil-gui .lil-gui {
+  border-top: 1px solid #2a2a2a !important;
 }

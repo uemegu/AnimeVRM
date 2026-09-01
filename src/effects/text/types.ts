@@ -102,6 +102,14 @@ export interface EffectTextStyle {
   };
   /** Base text slant (skewX in degrees) */
   slant?: number;
+  /** Scale factor for the first character of words/repeated units (e.g. 1.22 for Kawaii bounce) */
+  firstCharScale?: number;
+  /** Whether to split repeated words (like ワナワナ -> ワナ + ワナ) and tilt each half independently */
+  splitRepeatTilt?: boolean;
+  /** Range of random rotation angle in radians for halves when splitRepeatTilt is enabled (e.g. 0.14) */
+  halfTiltRange?: number;
+  /** Random variation seed for deterministic yet distinct tilts per instance */
+  seed?: number;
 }
 
 /**
