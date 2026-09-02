@@ -741,6 +741,47 @@ export class AdventureMessageWindow {
           transform: translateY(6px);
         }
       }
+
+      /* --- Eyelid Closing / Opening Transition Curtains --- */
+      .adv-eyelid-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 45;
+        overflow: hidden;
+      }
+
+      .adv-eyelid {
+        position: absolute;
+        left: -8%;
+        width: 116%;
+        height: 56%;
+        background: #000000;
+        transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 0 50px 30px rgba(0, 0, 0, 0.95);
+      }
+
+      .adv-eyelid-top {
+        top: 0;
+        transform: translateY(-102%);
+        border-bottom-left-radius: 50% 60px;
+        border-bottom-right-radius: 50% 60px;
+      }
+
+      .adv-eyelid-bottom {
+        bottom: 0;
+        transform: translateY(102%);
+        border-top-left-radius: 50% 60px;
+        border-top-right-radius: 50% 60px;
+      }
+
+      .adv-eyelid-overlay.closed .adv-eyelid-top {
+        transform: translateY(0%);
+      }
+
+      .adv-eyelid-overlay.closed .adv-eyelid-bottom {
+        transform: translateY(0%);
+      }
     `;
     document.head.appendChild(style);
   }
@@ -790,6 +831,8 @@ export class AdventureMessageWindow {
       this.locationBadgeEl.classList.remove('visible');
     }
 
+    this.resetEyelids();
+
     if (this.container) {
       this.container.classList.remove('visible');
       setTimeout(() => {
@@ -804,9 +847,41 @@ export class AdventureMessageWindow {
           this.choicesContainerEl?.remove();
           this.choicesContainerEl = null;
           document.getElementById('adv-choices-backdrop')?.remove();
+          this.eyelidOverlayEl?.remove();
+          this.eyelidOverlayEl = null;
           topControls?.remove();
         }
       }, 400);
+    }
+  }
+
+  private eyelidOverlayEl: HTMLDivElement | null = null;
+
+  private createEyelidOverlay(): void {
+    if (this.eyelidOverlayEl) return;
+    const parent = this.getParentContainer();
+    const overlay = document.createElement('div');
+    overlay.className = 'adv-eyelid-overlay';
+    overlay.innerHTML = `
+      <div class="adv-eyelid adv-eyelid-top"></div>
+      <div class="adv-eyelid adv-eyelid-bottom"></div>
+    `;
+    parent.appendChild(overlay);
+    this.eyelidOverlayEl = overlay;
+  }
+
+  public setEyelidClosed(closed: boolean): void {
+    this.createEyelidOverlay();
+    if (closed) {
+      this.eyelidOverlayEl?.classList.add('closed');
+    } else {
+      this.eyelidOverlayEl?.classList.remove('closed');
+    }
+  }
+
+  public resetEyelids(): void {
+    if (this.eyelidOverlayEl) {
+      this.eyelidOverlayEl.classList.remove('closed');
     }
   }
 

@@ -46,17 +46,24 @@ export interface ScenarioSceneAvatarConfig {
 }
 
 export type CameraZoomType =
-  | 'speaker'       // 自動で発話者キャラへズーム (バストアップ)
-  | 'speaker_close' // 発話者キャラへ超クローズアップ (感情・告白・強調)
-  | 'wide'          // 全体・引きのショット (2人全体・背景を広く写す)
-  | 'medium'        // 標準的な会話ショット
-  | 'none'          // カメラ移動なし (現在の構図を維持)
-  | 'hold';         // 前の構図をキープ
+  | 'speaker'               // 自動で発話者キャラへズーム (バストアップ)
+  | 'speaker_close'         // 発話者キャラへクローズアップ (感情・告白・強調)
+  | 'speaker_extreme_close' // 発話者キャラへ超至近距離ズーム (耳元ささやき・目線アップ)
+  | 'wide'                  // 全体・引きのショット (2人全体・背景を広く写す)
+  | 'medium'                // 標準的な会話ショット
+  | 'none'                  // カメラ移動なし (現在の構図を維持)
+  | 'hold';                 // 前の構図をキープ
 
 export type CameraTransitionEasing =
   | 'gyuin'         // 勢いよく寄ってピタッと止まるアニメ的なダイナミックズーム (easeOutExpo)
   | 'smooth'        // なめらかな補間 (easeInOutCubic)
   | 'cut';          // 即座に切り替えるカット
+
+export type ScreenTransitionType =
+  | 'eyelid_close'  // 瞼を閉じるように上下から中央へ暗幕が閉じる
+  | 'eyelid_blink'  // 瞬き（パチパチ）
+  | 'fade_black'    // フェード黒
+  | 'none';
 
 export interface ScenarioScene {
   id: string;
@@ -66,6 +73,8 @@ export interface ScenarioScene {
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   voice?: string;     // Sound Master ID (e.g. 'confess_intro_1')
   voiceUrl?: string;  // Direct voice audio URL (Backward compatibility)
+  voicePan?: number;  // Stereo Panning (-1.0 = Left, 0 = Center, 1.0 = Right only)
+  screenTransition?: ScreenTransitionType; // 画面トランジション演出 (瞼閉じなど)
   avatar?: ScenarioSceneAvatarConfig;
   avatars?: Record<string, ScenarioSceneAvatarConfig>; // Multi-character per-avatar action configs
   location?: string;

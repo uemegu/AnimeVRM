@@ -433,12 +433,19 @@ export class ScenarioEngine {
       }
     }
 
-    // 4. Voice Lip-Sync (resolve Voice Master ID or WAV path)
+    // 3.5 Screen Transition (Eyelid close / blink)
+    if (scene.screenTransition === 'eyelid_close') {
+      this.messageWindow.setEyelidClosed(true);
+    } else {
+      this.messageWindow.setEyelidClosed(false);
+    }
+
+    // 4. Voice Lip-Sync (resolve Voice Master ID or WAV path & Stereo Pan)
     const voiceKey = scene.voice || scene.voiceUrl;
     if (voiceKey) {
       const audioLipSync = this.getAudioLipSync();
       const voicePath = this.masterManager.resolveSoundUrl(voiceKey) || resolveAssetUrl(voiceKey);
-      audioLipSync.loadAudioUrl(voicePath, scene.text);
+      audioLipSync.loadAudioUrl(voicePath, scene.text, scene.voicePan ?? 0);
       audioLipSync.play().catch(() => {});
 
       if (this.boundVoiceEndHandler) {
