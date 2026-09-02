@@ -30,6 +30,7 @@ import { MasterDataManager } from './master/MasterDataManager';
 import { WindController, WIND_PRESETS } from './wind/WindController';
 import { WindParticles } from './wind/WindParticles';
 import { RainEffect, DEFAULT_RAIN_CONFIG } from './effects/rain';
+import { EffectTextManager } from './effects/text';
 import { getLanguage, setLanguage, t, onLanguageChange, Language } from './i18n';
 import {
   DEFAULT_CONFIG,
@@ -202,6 +203,8 @@ function switchScene(presetId: ScenePresetId, notify = true): void {
 }
 
 
+import { AvatarChatController } from './ai/AvatarChatController';
+
 // --------------------------------------------------
 // Audio Lip-Sync Controller
 // --------------------------------------------------
@@ -219,6 +222,12 @@ const audioLipSync = new AudioLipSync({
     updatePlayStateUI(false);
   },
 });
+
+// --------------------------------------------------
+// AI Avatar Chat Controller
+// --------------------------------------------------
+const avatarChatController = new AvatarChatController();
+avatarChatController.setAudioLipSync(audioLipSync);
 
 // --------------------------------------------------
 // Renderer
@@ -258,6 +267,9 @@ function getToneMappingMode(mode: string): THREE.ToneMapping {
 // Scene & Camera
 // --------------------------------------------------
 const scene = new THREE.Scene();
+const effectTextScene = new THREE.Scene();
+const sharedEffectTextManager = new EffectTextManager(effectTextScene);
+
 const windParticles = new WindParticles(scene);
 const rainEffect = new RainEffect(scene, currentConfig.rain);
 
@@ -710,6 +722,7 @@ async function setupScenarioCharacters(characters: ScenarioCharacterPlacement[])
         autoBlink: true,
         lookAtCamera: false,
         enableBreathing: true,
+        effectTextManager: sharedEffectTextManager,
         onLoaded: (loadedAvatar) => {
           scenarioAvatars.set(placement.id, loadedAvatar);
           resolve();
@@ -931,11 +944,13 @@ function loadAvatarModel(modelUrl: string): void {
     autoBlink: true,
     lookAtCamera: true,
     enableBreathing: true,
+    effectTextManager: sharedEffectTextManager,
     onProgress: (progress) => {
       const el = document.getElementById('progress-text');
       if (el) el.textContent = `${progress.toFixed(0)}%`;
     },
     onLoaded: (avatar) => {
+      avatarChatController.setAvatar(avatar);
       applyConfigToSceneAndRenderer(currentConfig);
       if (currentExprName !== 'neutral') {
         avatar.setExpression(currentExprName, 1.0);
@@ -2604,6 +2619,9 @@ function setupUnifiedUI(): void {
         <button class="studio-tab-btn ${currentActiveTab === 'masters' ? 'active' : ''}" data-tab="masters">
           <span>${tr.tabs.masters}</span>
         </button>
+        <button class="studio-tab-btn ${currentActiveTab === 'aichat' ? 'active' : ''}" data-tab="aichat">
+          <span>🤖 ${tr.tabs.aichat}</span>
+        </button>
       </div>
 
       <div id="panel-body">
@@ -2920,6 +2938,39 @@ function setupUnifiedUI(): void {
             </div>
           </div>
         </div>
+
+        <!-- ==================================================== -->
+        <!-- TAB 7: AIアバター会話 (AI Avatar Chat) -->
+        <!-- ==================================================== -->
+        <div id="tab-pane-aichat" class="tab-pane ${currentActiveTab === 'aichat' ? 'active' : ''}">
+          <div class="aichat-container">
+            <div class="aichat-status-card">
+              <div class="aichat-status-header">
+                <span class="aichat-status-title">${tr.aichat.title}</span>
+                <span id="ai-chat-badge" class="aichat-badge">${tr.aichat.statusUnloaded}</span>
+              </div>
+              <div id="ai-chat-status-msg" class="aichat-status-detail">${tr.aichat.description}</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px;">
+                <label style="color: #aaaaaa; white-space: nowrap;">${tr.aichat.llmModel}:</label>
+                <select id="ai-chat-llm-select" style="flex: 1; font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
+                  <option value="gemini-nano" ${avatarChatController.getLlmProvider() === 'gemini-nano' ? 'selected' : ''}>⚡ ${tr.aichat.llmGeminiNano}</option>
+                  <option value="lfm" ${avatarChatController.getLlmProvider() === 'lfm' ? 'selected' : ''}>🌐 ${tr.aichat.llmLfm}</option>
+                </select>
+              </div>
+              <button id="ai-chat-init-btn" class="aichat-init-btn">${tr.aichat.prepareAi}</button>
+              <div id="ai-chat-webgpu-warn" class="aichat-warning" style="display: none;">${tr.aichat.webgpuWarning}</div>
+            </div>
+
+            <div id="ai-chat-messages" class="aichat-messages-box">
+              <div id="ai-chat-empty-hint" class="aichat-empty-hint">${tr.aichat.emptyHistory}</div>
+            </div>
+
+            <div class="aichat-input-row">
+              <input type="text" id="ai-chat-input" class="aichat-input" placeholder="${tr.aichat.inputPlaceholder}" disabled />
+              <button id="ai-chat-send-btn" class="aichat-send-btn" disabled>${tr.aichat.send}</button>
+            </div>
+          </div>
+        </div>
       </div>
     `;
 
@@ -2984,6 +3035,144 @@ function setupUnifiedUI(): void {
     };
     masterManager.subscribe(updateMasterCountLabels);
     updateMasterCountLabels();
+
+    // --------------------------------------------------
+    // Setup AI Avatar Chat UI
+    // --------------------------------------------------
+    const aiInitBtn = document.getElementById('ai-chat-init-btn') as HTMLButtonElement | null;
+    const aiSendBtn = document.getElementById('ai-chat-send-btn') as HTMLButtonElement | null;
+    const aiInput = document.getElementById('ai-chat-input') as HTMLInputElement | null;
+    const aiBadge = document.getElementById('ai-chat-badge');
+    const aiStatusMsg = document.getElementById('ai-chat-status-msg');
+    const aiMessages = document.getElementById('ai-chat-messages');
+    const aiEmptyHint = document.getElementById('ai-chat-empty-hint');
+    const aiWebgpuWarn = document.getElementById('ai-chat-webgpu-warn');
+
+    if (!navigator.gpu && aiWebgpuWarn) {
+      aiWebgpuWarn.style.display = 'block';
+    }
+
+    const renderChatState = (state: string, statusText?: string) => {
+      if (!aiBadge) return;
+      aiBadge.className = `aichat-badge ${state}`;
+
+      const curTr = t();
+      const stateLabels: Record<string, string> = {
+        unloaded: curTr.aichat.statusUnloaded,
+        loading: curTr.aichat.statusLoading,
+        ready: curTr.aichat.statusReady,
+        generating: curTr.aichat.statusGenerating,
+        synthesizing: curTr.aichat.statusSynthesizing,
+        speaking: curTr.aichat.statusSpeaking,
+        error: curTr.aichat.statusError,
+      };
+
+      aiBadge.textContent = stateLabels[state] || state;
+      if (statusText && aiStatusMsg) {
+        aiStatusMsg.textContent = statusText;
+      }
+
+      if (aiInitBtn) {
+        const isReadyOrActive = state === 'ready' || state === 'speaking' || state === 'generating' || state === 'synthesizing';
+        aiInitBtn.style.display = isReadyOrActive ? 'none' : 'block';
+        aiInitBtn.disabled = state === 'loading';
+      }
+
+      if (aiInput && aiSendBtn) {
+        const canSend = state === 'ready';
+        aiInput.disabled = !canSend;
+        aiSendBtn.disabled = !canSend;
+        if (canSend) {
+          aiInput.focus();
+        }
+      }
+    };
+
+    avatarChatController.setEvents({
+      onStateChange: (state, statusText) => {
+        renderChatState(state, statusText);
+      },
+      onMessageAdded: (msg, replyMeta) => {
+        if (aiEmptyHint) aiEmptyHint.style.display = 'none';
+        if (aiMessages) {
+          const msgEl = document.createElement('div');
+          msgEl.className = `aichat-msg ${msg.role}`;
+
+          const textEl = document.createElement('div');
+          textEl.textContent = msg.content;
+          msgEl.appendChild(textEl);
+
+          if (replyMeta) {
+            const metaEl = document.createElement('div');
+            metaEl.className = 'aichat-msg-meta';
+            metaEl.innerHTML = `<span class="aichat-tag">😊 ${replyMeta.expression}</span><span class="aichat-tag">🎬 ${replyMeta.motion}</span>`;
+            msgEl.appendChild(metaEl);
+          }
+
+          aiMessages.appendChild(msgEl);
+          aiMessages.scrollTop = aiMessages.scrollHeight;
+        }
+      },
+      onError: (err) => {
+        const msg = typeof err === 'string' ? err : err.message;
+        if (aiStatusMsg) aiStatusMsg.textContent = msg;
+        renderChatState('error', msg);
+      },
+    });
+
+    // Initial state reflection
+    renderChatState(avatarChatController.getState());
+
+    // Restore existing chat messages
+    const existingHistory = avatarChatController.getHistory();
+    if (existingHistory.length > 0) {
+      if (aiEmptyHint) aiEmptyHint.style.display = 'none';
+      if (aiMessages) {
+        aiMessages.innerHTML = '';
+        existingHistory.forEach((msg) => {
+          const msgEl = document.createElement('div');
+          msgEl.className = `aichat-msg ${msg.role}`;
+          const textEl = document.createElement('div');
+          textEl.textContent = msg.content;
+          msgEl.appendChild(textEl);
+          aiMessages.appendChild(msgEl);
+        });
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+      }
+    }
+
+    const aiLlmSelect = document.getElementById('ai-chat-llm-select') as HTMLSelectElement | null;
+    aiLlmSelect?.addEventListener('change', () => {
+      const selected = aiLlmSelect.value as 'gemini-nano' | 'lfm';
+      avatarChatController.setLlmProvider(selected);
+      renderChatState(avatarChatController.getState());
+    });
+
+    aiInitBtn?.addEventListener('click', async () => {
+      // AudioContext unblocking
+      if ((audioLipSync as any).audioContext?.state === 'suspended') {
+        await (audioLipSync as any).audioContext.resume();
+      }
+      await avatarChatController.initialize();
+    });
+
+    const handleSendMessage = async () => {
+      if (!aiInput || !aiInput.value.trim()) return;
+      const text = aiInput.value.trim();
+      aiInput.value = '';
+      if ((audioLipSync as any).audioContext?.state === 'suspended') {
+        await (audioLipSync as any).audioContext.resume();
+      }
+      await avatarChatController.sendMessage(text);
+    };
+
+    aiSendBtn?.addEventListener('click', handleSendMessage);
+    aiInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    });
 
     document.getElementById('master-export-json-btn')?.addEventListener('click', () => {
       masterManager.downloadJSON('masters.json');
@@ -3576,6 +3765,14 @@ function tick(): void {
     composer.render();
   } else {
     renderer.render(scene, camera);
+  }
+
+  // Render Effect Texts (漫符・文字エフェクト) on top of post-processing & sun effects
+  if (effectTextScene.children.length > 0) {
+    renderer.autoClear = false;
+    renderer.clearDepth();
+    renderer.render(effectTextScene, camera);
+    renderer.autoClear = true;
   }
 
   requestAnimationFrame(tick);

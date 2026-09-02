@@ -79,14 +79,14 @@ export class EffectTextInstance {
     this.material = new THREE.SpriteMaterial({
       map: texture,
       transparent: true,
-      depthTest: true,
+      depthTest: false,
       depthWrite: false,
       rotation: this.initialRotation,
     });
 
     // Create Sprite (Anchor point is center (0.5, 0.5) by default)
     this.sprite = new THREE.Sprite(this.material);
-    this.sprite.renderOrder = 999;
+    this.sprite.renderOrder = 10000;
 
     // Set initial transform
     this.updateSpriteTransform(0);

@@ -31,7 +31,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.34,
-    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.32, z: 0.04 },
     shakeIntensity: {
       position: 0.006,
       rotation: 0.035,
@@ -72,7 +72,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.35,
-    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.32, z: 0.04 },
     shakeIntensity: {
       position: 0.007,
       rotation: 0.04,
@@ -110,13 +110,13 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'pulse', 'rise', 'fadeOut'],
     defaultDuration: 2.0,
     defaultScale: 0.38,
-    defaultOffset: { x: 0, y: -0.02, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.20, z: 0.04 },
     riseSpeed: 0.16,
     streamConfig: {
       phrase: 'ドキ',
       count: Infinity,
       interval: 0.52,
-      spreadX: 0.18, // Tightly hugged near chest/neck
+      spreadX: 0.26, // Spread wider away from center face
       riseSpeed: 0.16,
       particleDuration: 1.9,
       particleScale: 0.38,
@@ -150,7 +150,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'drop', 'fadeOut'],
     defaultDuration: 2.3,
     defaultScale: 0.70,
-    defaultOffset: { x: 0, y: 0.22, z: 0.04 }, // Closely right above the forehead
+    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned well above the forehead
     dropSpeed: 0.08,
   },
 
@@ -181,7 +181,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['float', 'fadeOut'],
     defaultDuration: 2.5,
     defaultScale: 0.62,
-    defaultOffset: { x: 0, y: 0.20, z: 0 }, // Closely right above the head
+    defaultOffset: { x: 0, y: 0.38, z: 0 }, // Positioned above the head
     floatParams: {
       speed: 1.6,
       height: 0.03,
@@ -215,7 +215,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'float', 'spinSmall', 'fadeOut'],
     defaultDuration: 2.2,
     defaultScale: 0.70,
-    defaultOffset: { x: 0, y: 0.22, z: 0.04 }, // Closely right above the head
+    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned above the head
     floatParams: {
       speed: 3.2,
       height: 0.04,
@@ -249,7 +249,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'shake', 'fadeOut'],
     defaultDuration: 1.6,
     defaultScale: 0.72,
-    defaultOffset: { x: 0, y: 0.22, z: 0.04 }, // Closely right above the head
+    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned above the head
     shakeIntensity: {
       position: 0.03,
       rotation: 0.2,
@@ -284,7 +284,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'pulse', 'float', 'fadeOut'],
     defaultDuration: 2.4,
     defaultScale: 0.75,
-    defaultOffset: { x: 0, y: 0.24, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.42, z: 0.04 }, // Positioned above the head
     floatParams: {
       speed: 3.5,
       height: 0.04,
