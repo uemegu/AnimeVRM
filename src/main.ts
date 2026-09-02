@@ -232,22 +232,32 @@ let isTtsGpuExclusive = false;
 // Viewport & 16:9 Aspect Ratio Calculation
 // --------------------------------------------------
 function getViewportSize(): { width: number; height: number } {
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
+  const wrapper = document.getElementById('viewport-wrapper');
+  let availableWidth = window.innerWidth;
+  let availableHeight = window.innerHeight;
+
+  if (wrapper) {
+    const rect = wrapper.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      availableWidth = rect.width;
+      availableHeight = rect.height;
+    }
+  }
+
   const targetAspect = 16 / 9;
-  const windowAspect = windowWidth / windowHeight;
+  const areaAspect = availableWidth / availableHeight;
 
   let width: number;
   let height: number;
 
-  if (windowAspect > targetAspect) {
-    // Window is wider than 16:9 -> Fit to height (pillarboxing)
-    height = windowHeight;
-    width = Math.round(height * targetAspect);
+  if (areaAspect > targetAspect) {
+    // Window/Wrapper is wider than 16:9 -> Fit to height (pillarboxing)
+    height = Math.floor(availableHeight);
+    width = Math.floor(height * targetAspect);
   } else {
-    // Window is taller than 16:9 -> Fit to width (letterboxing)
-    width = windowWidth;
-    height = Math.round(width / targetAspect);
+    // Window/Wrapper is taller than 16:9 -> Fit to width (letterboxing)
+    width = Math.floor(availableWidth);
+    height = Math.floor(width / targetAspect);
   }
 
   return { width, height };
@@ -258,6 +268,11 @@ function getViewportSize(): { width: number; height: number } {
 // --------------------------------------------------
 const canvas = document.querySelector<HTMLCanvasElement>('#app')!;
 const initialViewport = getViewportSize();
+const initialContainer = document.getElementById('viewport-container');
+if (initialContainer) {
+  initialContainer.style.width = `${initialViewport.width}px`;
+  initialContainer.style.height = `${initialViewport.height}px`;
+}
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -266,7 +281,7 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
 });
 
-renderer.setSize(initialViewport.width, initialViewport.height, false);
+renderer.setSize(initialViewport.width, initialViewport.height, true);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = getToneMappingMode(currentConfig.postProcessing.toneMappingMode);
@@ -2466,7 +2481,12 @@ function setupUnifiedUI(): void {
   if (!panel) {
     panel = document.createElement('div');
     panel.id = 'panel-container';
-    document.body.appendChild(panel);
+    const appLayout = document.getElementById('app-layout');
+    if (appLayout) {
+      appLayout.appendChild(panel);
+    } else {
+      document.body.appendChild(panel);
+    }
   }
 
   let currentActiveTab = 'character';
@@ -3494,8 +3514,17 @@ function setupUnifiedUI(): void {
   let isPanelOpen = true;
   setPanelOpen = (open: boolean) => {
     isPanelOpen = open;
-    panel!.style.display = isPanelOpen ? 'flex' : 'none';
-    gearBtn!.style.display = isPanelOpen ? 'none' : 'flex';
+    if (panel) {
+      panel.style.display = isPanelOpen ? 'flex' : 'none';
+      panel.classList.toggle('hidden', !isPanelOpen);
+    }
+    if (gearBtn) {
+      gearBtn.style.display = isPanelOpen ? 'none' : 'flex';
+    }
+    // Resize 16:9 canvas to adapt to new available width
+    requestAnimationFrame(() => {
+      onResize();
+    });
   };
 
   gearBtn.addEventListener('click', () => {
@@ -3529,10 +3558,17 @@ function onResize(): void {
   const { width, height } = getViewportSize();
   const pr = Math.min(window.devicePixelRatio, 2);
 
+  // Set strict 16:9 container dimensions
+  const container = document.getElementById('viewport-container');
+  if (container) {
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+  }
+
   camera.aspect = 16 / 9;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(width, height, false);
+  renderer.setSize(width, height, true);
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
   composer.setSize(width, height);
@@ -3541,6 +3577,15 @@ function onResize(): void {
   }
 }
 window.addEventListener('resize', onResize);
+
+// Auto-sync when viewport-wrapper layout changes (e.g. sidebar toggle)
+const viewportWrapperEl = document.getElementById('viewport-wrapper');
+if (viewportWrapperEl && typeof ResizeObserver !== 'undefined') {
+  const ro = new ResizeObserver(() => {
+    onResize();
+  });
+  ro.observe(viewportWrapperEl);
+}
 
 function tick(timestamp?: number): void {
   timer.update(timestamp);
