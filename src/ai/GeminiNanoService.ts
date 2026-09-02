@@ -27,6 +27,42 @@ export class GeminiNanoService {
   private isLoaded = false;
   private isLoading = false;
 
+  private async createSessionWithoutDownload(): Promise<void> {
+    const lm = this.getLmInterface();
+    if (!lm) throw new Error('Chrome Built-in AIを検出できませんでした。');
+
+    const sessionOptions = this.getSessionOptions();
+    let availabilityStatus: string | null = null;
+    if (typeof lm.availability === 'function') {
+      availabilityStatus = this.getAvailabilityStatus(await lm.availability(sessionOptions));
+    } else if (typeof lm.capabilities === 'function') {
+      availabilityStatus = this.getAvailabilityStatus(await lm.capabilities());
+    }
+    if (!this.isReadyWithoutDownload(availabilityStatus)) {
+      throw new Error(
+        `Gemini Nanoをダウンロードなしで利用できません (availability: ${availabilityStatus ?? 'unknown'})。`
+      );
+    }
+
+    this.session = await lm.create(sessionOptions);
+  }
+
+  private async destroySession(): Promise<void> {
+    const session = this.session;
+    this.session = null;
+    if (!session) return;
+
+    try {
+      const destroy = session.destroy || session.close;
+      if (typeof destroy === 'function') {
+        await Promise.resolve(destroy.call(session));
+      }
+      console.log('[Gemini Nano] Session destroyed before TTS to release resources.');
+    } catch (error) {
+      console.warn('[Gemini Nano] Session cleanup failed:', error);
+    }
+  }
+
   /**
    * Find LanguageModel interface across W3C standard and Chrome variants:
    * 1. window.LanguageModel / globalThis.LanguageModel (Latest W3C / Chrome Stable)
@@ -147,29 +183,38 @@ export class GeminiNanoService {
         );
       }
 
-      // No monitor is attached: availability is already "available", and this
-      // app must never opt into the Prompt API download flow.
-      this.session = await lm.create(sessionOptions);
-
+      // Do not create and retain a Gemini session during Irodori model loading
+      // and warmup. generate() creates it just-in-time after repeating this
+      // same no-download availability check, then destroys it before TTS.
       this.isLoaded = true;
       const loadTime = performance.now() - t0;
-      console.log(`[Gemini Nano] Session created successfully in ${loadTime.toFixed(1)} ms`);
+      console.log(
+        `[Gemini Nano] Availability confirmed without creating a session (${loadTime.toFixed(1)} ms)`
+      );
     } finally {
       this.isLoading = false;
     }
   }
 
   public get ready(): boolean {
-    return this.isLoaded && this.session !== null;
+    // The Prompt API session is intentionally destroyed between LLM and TTS to
+    // release accelerator resources. It is recreated on the next prompt only
+    // after availability confirms that no download is required.
+    return this.isLoaded;
   }
 
   public async generate(
     history: ChatMessage[],
     _systemPrompt: string = DEFAULT_SYSTEM_PROMPT
   ): Promise<{ reply: AvatarReply; rawText: string; ttftMs: number; totalMs: number }> {
-    if (!this.ready) {
+    if (!this.isLoaded) {
       throw new Error('Gemini Nano is not ready');
     }
+
+    if (!this.session) {
+      await this.createSessionWithoutDownload();
+    }
+    const activeSession = this.session;
 
     const t0 = performance.now();
     let ttftMs = 0;
@@ -188,35 +233,39 @@ export class GeminiNanoService {
 
     let responseStr = '';
 
-    // Prompt execution
-    if (typeof this.session.promptStreaming === 'function') {
-      try {
-        const stream = this.session.promptStreaming(promptText);
-        let isFirst = true;
-        let accumulated = '';
-        for await (const chunk of stream) {
-          if (isFirst) {
-            ttftMs = performance.now() - t0;
-            isFirst = false;
-            console.log(`[Chat] Gemini Nano TTFT: ${ttftMs.toFixed(1)} ms`);
+    try {
+      // Prompt execution
+      if (typeof activeSession.promptStreaming === 'function') {
+        try {
+          const stream = activeSession.promptStreaming(promptText);
+          let isFirst = true;
+          let accumulated = '';
+          for await (const chunk of stream) {
+            if (isFirst) {
+              ttftMs = performance.now() - t0;
+              isFirst = false;
+              console.log(`[Chat] Gemini Nano TTFT: ${ttftMs.toFixed(1)} ms`);
+            }
+            if (chunk.startsWith(accumulated)) {
+              // chunk is full accumulated string
+              accumulated = chunk;
+            } else {
+              // chunk is incremental delta
+              accumulated += chunk;
+            }
           }
-          if (chunk.startsWith(accumulated)) {
-            // chunk is full accumulated string
-            accumulated = chunk;
-          } else {
-            // chunk is incremental delta
-            accumulated += chunk;
-          }
+          responseStr = accumulated;
+        } catch (streamErr) {
+          console.warn('[Gemini Nano] promptStreaming fallback to prompt:', streamErr);
+          responseStr = await activeSession.prompt(promptText);
+          ttftMs = performance.now() - t0;
         }
-        responseStr = accumulated;
-      } catch (streamErr) {
-        console.warn('[Gemini Nano] promptStreaming fallback to prompt:', streamErr);
-        responseStr = await this.session.prompt(promptText);
+      } else {
+        responseStr = await activeSession.prompt(promptText);
         ttftMs = performance.now() - t0;
       }
-    } else {
-      responseStr = await this.session.prompt(promptText);
-      ttftMs = performance.now() - t0;
+    } finally {
+      await this.destroySession();
     }
 
     const totalMs = performance.now() - t0;

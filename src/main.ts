@@ -228,6 +228,7 @@ const audioLipSync = new AudioLipSync({
 // --------------------------------------------------
 const avatarChatController = new AvatarChatController();
 avatarChatController.setAudioLipSync(audioLipSync);
+let isTtsGpuExclusive = false;
 
 // --------------------------------------------------
 // Renderer
@@ -2957,6 +2958,17 @@ function setupUnifiedUI(): void {
                   <option value="lfm" ${avatarChatController.getLlmProvider() === 'lfm' ? 'selected' : ''}>🌐 ${tr.aichat.llmLfm}</option>
                 </select>
               </div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px;">
+                <label style="color: #aaaaaa; white-space: nowrap;">${tr.aichat.ttsSteps}:</label>
+                <select id="ai-chat-tts-steps-select" style="flex: 1; font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
+                  ${[4, 6, 8, 12, 16]
+                    .map(
+                      (steps) =>
+                        `<option value="${steps}" ${avatarChatController.getTtsNumSteps() === steps ? 'selected' : ''}>${steps}</option>`
+                    )
+                    .join('')}
+                </select>
+              </div>
               <button id="ai-chat-init-btn" class="aichat-init-btn">${tr.aichat.prepareAi}</button>
               <div id="ai-chat-webgpu-warn" class="aichat-warning" style="display: none;">${tr.aichat.webgpuWarning}</div>
             </div>
@@ -3092,6 +3104,13 @@ function setupUnifiedUI(): void {
       onStateChange: (state, statusText) => {
         renderChatState(state, statusText);
       },
+      onTtsGpuActivityChange: (active) => {
+        if (isTtsGpuExclusive === active) return;
+        isTtsGpuExclusive = active;
+        console.log(
+          `[TTS] GPU exclusive mode ${active ? 'enabled (Three.js rendering paused)' : 'disabled'}`
+        );
+      },
       onMessageAdded: (msg, replyMeta) => {
         if (aiEmptyHint) aiEmptyHint.style.display = 'none';
         if (aiMessages) {
@@ -3146,6 +3165,13 @@ function setupUnifiedUI(): void {
       const selected = aiLlmSelect.value as 'gemini-nano' | 'lfm';
       avatarChatController.setLlmProvider(selected);
       renderChatState(avatarChatController.getState());
+    });
+
+    const aiTtsStepsSelect = document.getElementById(
+      'ai-chat-tts-steps-select'
+    ) as HTMLSelectElement | null;
+    aiTtsStepsSelect?.addEventListener('change', () => {
+      avatarChatController.setTtsNumSteps(Number(aiTtsStepsSelect.value));
     });
 
     aiInitBtn?.addEventListener('click', async () => {
@@ -3666,6 +3692,14 @@ function tick(): void {
   const delta = clock.getDelta();
   const elapsed = clock.elapsedTime;
 
+  // Three.js/WebGL and ORT/WebGPU otherwise compete for the same Metal GPU.
+  // Keep rAF alive for a clean clock, but submit no rendering work while an
+  // Irodori inference run is active. Rendering resumes between TTS chunks.
+  if (isTtsGpuExclusive) {
+    requestAnimationFrame(tick);
+    return;
+  }
+
   if (animationPlayer.isPlaying) {
     animationPlayer.update(delta);
   } else if (dialogueCameraController?.isActive) {
@@ -3780,4 +3814,3 @@ function tick(): void {
 
 
 tick();
-

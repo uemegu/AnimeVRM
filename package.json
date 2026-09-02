@@ -17,7 +17,7 @@
     "@huggingface/transformers": "^4.2.0",
     "@pixiv/three-vrm": "^3.5.1",
     "meyda": "^5.6.3",
-    "onnxruntime-web": "^1.29.0",
+    "onnxruntime-web": "1.23.0",
     "three": "^0.183.2"
   }
 }

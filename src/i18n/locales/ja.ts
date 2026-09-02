@@ -37,6 +37,7 @@ export const ja: Translations = {
     llmModel: 'LLMモデル',
     llmGeminiNano: 'Gemini Nano (Chrome組み込み・高速)',
     llmLfm: 'LFM2.5-2.6B (WebGPU ONNX)',
+    ttsSteps: 'TTSステップ数',
     statusUnloaded: 'AI未ロード',
     statusLoading: '読み込み中...',
     statusReady: '準備完了',

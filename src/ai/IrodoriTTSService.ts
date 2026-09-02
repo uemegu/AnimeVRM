@@ -10,50 +10,30 @@ const CACHE_NAME = 'irodori-tts-models-v2';
 const HF_BASE = 'https://huggingface.co/noguchis/irodori-tts-onnx/resolve/main/onnx_fp16';
 
 let cachedOrt: any = null;
-let cachedGpuAdapter: GPUAdapter | null = null;
+let loggedGpuDevice = false;
 
-async function getGpuAdapter(ort: any): Promise<GPUAdapter> {
-  if (cachedGpuAdapter) return cachedGpuAdapter;
+async function logOrtGpuDevice(ort: any): Promise<void> {
+  if (loggedGpuDevice) return;
 
-  // Select the adapter, but deliberately let ORT create and own the GPUDevice.
-  // Passing a user-created device to ORT Web 1.29 breaks synchronous GPU output
-  // downloads (microsoft/onnxruntime#32257: "Failed to wait ...:3").
-  const adapter =
-    (ort.env.webgpu.adapter as GPUAdapter | null | undefined) ||
-    (await navigator.gpu.requestAdapter({
-      powerPreference: 'high-performance',
-      forceFallbackAdapter: false,
-    })) ||
-    (await navigator.gpu.requestAdapter({ forceFallbackAdapter: false }));
-
-  if (!adapter) {
-    throw new Error(
-      'WebGPU アダプタを取得できませんでした。chrome://gpu で WebGPU が Hardware accelerated か確認してください。'
-    );
-  }
-  if (!adapter.features.has('shader-f16')) {
-    throw new Error(
-      '選択されたWebGPUアダプタは shader-f16 をサポートしていません。Irodori-TTSのFP16モデルを実行できません。'
-    );
+  // Let ORT create the adapter/device exactly as the upstream Irodori browser
+  // demo does. GPUAdapter injection is deprecated in current WebGPU typings;
+  // GPUDevice.adapterInfo is the current way to inspect the selected adapter.
+  const device = (await ort.env.webgpu.device) as GPUDevice;
+  if (!device.features.has('shader-f16')) {
+    throw new Error('ORTのWebGPUデバイスがshader-f16をサポートしていません。');
   }
 
-  // ORT will request its own device from this adapter with shader-f16,
-  // subgroups, appropriate limits, and its required timed-wait instance.
-  ort.env.webgpu.adapter = adapter;
-
-  const info = adapter.info;
+  const info = (device as GPUDevice & { adapterInfo?: GPUAdapterInfo }).adapterInfo;
   console.log('[IrodoriTTSService] WebGPU adapter:', {
     vendor: info?.vendor || 'unknown',
     architecture: info?.architecture || 'unknown',
     device: info?.device || 'unknown',
     description: info?.description || 'unknown',
-    shaderF16: adapter.features.has('shader-f16'),
-    subgroups: adapter.features.has('subgroups'),
+    shaderF16: device.features.has('shader-f16'),
+    subgroups: device.features.has('subgroups'),
     deviceOwner: 'onnxruntime',
   });
-
-  cachedGpuAdapter = adapter;
-  return adapter;
+  loggedGpuDevice = true;
 }
 
 async function getOrtWebgpu(): Promise<any> {
@@ -63,10 +43,8 @@ async function getOrtWebgpu(): Promise<any> {
     cachedOrt.env.webgpu.powerPreference = 'high-performance';
     cachedOrt.env.webgpu.forceFallbackAdapter = false;
     cachedOrt.env.webgpu.validateInputContent = false;
-    console.log('[IrodoriTTSService] Loaded bundled ONNX Runtime WebGPU 1.29.x');
+    console.log('[IrodoriTTSService] Loaded bundled ONNX Runtime WebGPU 1.23.0 (Irodori verified)');
   }
-
-  await getGpuAdapter(cachedOrt);
   return cachedOrt;
 }
 
@@ -172,6 +150,7 @@ export class IrodoriTTSService {
         };
 
         sessions[m.key] = await ort.InferenceSession.create(modelBytes, sessionOptions);
+        await logOrtGpuDevice(ort);
       }
 
       // 3. Instantiate IrodoriTTS pipeline

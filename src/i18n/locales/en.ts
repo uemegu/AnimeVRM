@@ -37,6 +37,7 @@ export const en: Translations = {
     llmModel: 'LLM Model',
     llmGeminiNano: 'Gemini Nano (Chrome Built-in / Fast)',
     llmLfm: 'LFM2.5-2.6B (WebGPU ONNX)',
+    ttsSteps: 'TTS Steps',
     statusUnloaded: 'AI Unloaded',
     statusLoading: 'Loading...',
     statusReady: 'Ready',

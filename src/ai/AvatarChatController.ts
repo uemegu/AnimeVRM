@@ -24,6 +24,74 @@ export interface AvatarChatControllerEvents {
     replyMeta?: { expression: string; motion: string }
   ) => void;
   onError?: (error: Error | string) => void;
+  /** Pause competing GPU rendering while an Irodori WebGPU run is active. */
+  onTtsGpuActivityChange?: (active: boolean) => void;
+}
+
+const MIN_SPEECH_CHUNK_CHARS = 8;
+const MAX_SPEECH_CHUNK_CHARS = 32;
+
+/**
+ * Split Japanese speech at natural punctuation boundaries for chunked TTS.
+ * Very short fragments are joined to a neighbour because tiny TTS requests
+ * add latency and tend to sound less natural.
+ */
+export function splitSpeechIntoChunks(text: string): string[] {
+  const normalized = text.trim().replace(/\s+/g, ' ');
+  if (!normalized) return [];
+
+  const fragments =
+    normalized.match(/[^、，,。．.!！?？…]+(?:[、，,。．.!！?？…]+|$)/gu) || [normalized];
+  const rawChunks: string[] = [];
+  let current = '';
+
+  for (const fragmentValue of fragments) {
+    const fragment = fragmentValue.trim();
+    if (!fragment) continue;
+
+    if (current && current.length + fragment.length > MAX_SPEECH_CHUNK_CHARS) {
+      rawChunks.push(current);
+      current = fragment;
+    } else {
+      current += fragment;
+    }
+
+    const isSentenceEnd = /[。．.!！?？]+$/u.test(fragment);
+    const isClauseEnd = /[、，,…]+$/u.test(fragment);
+    if (
+      isSentenceEnd ||
+      current.length >= MAX_SPEECH_CHUNK_CHARS ||
+      (isClauseEnd && current.length >= MIN_SPEECH_CHUNK_CHARS)
+    ) {
+      rawChunks.push(current);
+      current = '';
+    }
+  }
+  if (current) rawChunks.push(current);
+
+  const chunks: string[] = [];
+  let leadingShortChunk = '';
+  for (const chunk of rawChunks) {
+    // A short but complete sentence such as "こんにちは。" is an excellent
+    // first streaming chunk. Only merge tiny/incomplete fragments.
+    const isCompleteShortSentence = chunk.length >= 4 && /[。．.!！?？]+$/u.test(chunk);
+    if (chunk.length < MIN_SPEECH_CHUNK_CHARS && !isCompleteShortSentence) {
+      if (chunks.length > 0) {
+        chunks[chunks.length - 1] += chunk;
+      } else {
+        leadingShortChunk += chunk;
+      }
+      continue;
+    }
+    chunks.push(leadingShortChunk + chunk);
+    leadingShortChunk = '';
+  }
+  if (leadingShortChunk) {
+    if (chunks.length > 0) chunks[chunks.length - 1] += leadingShortChunk;
+    else chunks.push(leadingShortChunk);
+  }
+
+  return chunks;
 }
 
 export class AvatarChatController {
@@ -37,6 +105,7 @@ export class AvatarChatController {
   private history: ChatMessage[] = [];
   private events: AvatarChatControllerEvents;
   private isProcessing = false;
+  private ttsNumSteps = 8;
 
   constructor(events: AvatarChatControllerEvents = {}) {
     this.events = events;
@@ -71,6 +140,16 @@ export class AvatarChatController {
 
   public getLlmProvider(): LlmProvider {
     return this.llmProvider;
+  }
+
+  public setTtsNumSteps(numSteps: number): void {
+    if (!Number.isFinite(numSteps)) return;
+    this.ttsNumSteps = Math.max(1, Math.min(32, Math.round(numSteps)));
+    console.log(`[AvatarChatController] TTS sampling steps: ${this.ttsNumSteps}`);
+  }
+
+  public getTtsNumSteps(): number {
+    return this.ttsNumSteps;
   }
 
   public getState(): ChatState {
@@ -163,21 +242,11 @@ export class AvatarChatController {
         motion: reply.motion,
       });
 
-      // 3. Synthesize Voice
-      this.setState('synthesizing', '音声生成中 (0%)...');
-      console.log(`[AvatarChatController] Synthesizing speech: "${reply.speech}"...`);
-      const { wavBlob } = await this.ttsService.synthesize(reply.speech, {
-        numSteps: 8,
-        onProgress: (pct) => {
-          this.setState('synthesizing', `音声生成中 (${pct}%)...`);
-        },
-      });
-
-      console.log('[AvatarChatController] TTS synthesized successfully.');
-
-      // 4. Play Animation, Expression & Audio
-      this.setState('speaking', '再生中');
-      await this.playAvatarReaction(reply, wavBlob, responseStartTime);
+      // 3. Generate speech in punctuation-delimited chunks. Once the first
+      // chunk is ready, play it while WebGPU generates the next one.
+      await this.streamAvatarReaction(reply, responseStartTime);
+      this.isProcessing = false;
+      this.setState('ready', '準備完了');
     } catch (err: any) {
       console.error('[AvatarChatController] Error during chat turnaround:', err);
       const errMsg = err?.message || '処理中にエラーが発生しました';
@@ -187,68 +256,148 @@ export class AvatarChatController {
     }
   }
 
-  private async playAvatarReaction(
+  private async streamAvatarReaction(
     reply: AvatarReply,
-    wavBlob: Blob,
     responseStartTime: number
   ): Promise<void> {
-    // Apply expression
+    const chunks = splitSpeechIntoChunks(reply.speech);
+    if (chunks.length === 0) return;
+
+    const numSteps = this.ttsNumSteps;
+    let hasStartedPlayback = false;
+    let hasLoggedSpeechStart = false;
+    console.log(
+      `[AvatarChatController] Streaming TTS: ${chunks.length} chunk(s), ${numSteps} steps`,
+      chunks
+    );
+
+    type Synthesis = Awaited<ReturnType<IrodoriTTSService['synthesize']>>;
+    type SettledSynthesis = { value: Synthesis } | { error: unknown };
+    const queueSynthesis = (index: number): Promise<SettledSynthesis> => {
+      const displayIndex = index + 1;
+      this.events.onTtsGpuActivityChange?.(true);
+      return this.ttsService
+        .synthesize(chunks[index], {
+          numSteps,
+          onProgress: (pct) => {
+            if (hasStartedPlayback) {
+              this.setState(
+                'speaking',
+                `再生中 · 次の音声生成中 (${displayIndex}/${chunks.length}, ${pct}%)`
+              );
+            } else {
+              this.setState(
+                'synthesizing',
+                `音声生成中 (${displayIndex}/${chunks.length}, ${pct}%)...`
+              );
+            }
+          },
+        })
+        .then(
+          (value) => ({ value }),
+          (error) => ({ error })
+        )
+        .finally(() => {
+          this.events.onTtsGpuActivityChange?.(false);
+        });
+    };
+
+    this.setState('synthesizing', `音声生成中 (1/${chunks.length}, 0%)...`);
+    let pendingSynthesis = queueSynthesis(0);
+
+    // Apply one expression and motion across all audio chunks.
     if (this.avatar) {
       this.avatar.setExpression(reply.expression, 1.0);
-    }
-
-    // Apply motion
-    const motionUrl = MOTIONS[reply.motion] || MOTIONS.idle;
-    const isLoop = reply.motion === 'idle' || reply.motion === 'standing';
-    if (this.avatar) {
+      const motionUrl = MOTIONS[reply.motion] || MOTIONS.idle;
+      const isLoop = reply.motion === 'idle' || reply.motion === 'standing';
       this.avatar.playAnimation(motionUrl, isLoop, 0.4);
     }
 
-    // Play Audio with AudioLipSync
-    if (this.audioLipSync) {
-      const file = new File([wavBlob], 'ai-response.wav', { type: 'audio/wav' });
-      console.log(`[AvatarChatController] Loading wav to AudioLipSync (${wavBlob.size} bytes)...`);
+    for (let index = 0; index < chunks.length; index += 1) {
+      const synthesized = await pendingSynthesis;
+      if ('error' in synthesized) throw synthesized.error;
 
-      let finished = false;
+      hasStartedPlayback = true;
+      pendingSynthesis =
+        index + 1 < chunks.length
+          ? queueSynthesis(index + 1)
+          : Promise.resolve({ value: synthesized.value });
+
+      this.setState('speaking', `再生中 (${index + 1}/${chunks.length})`);
+      await this.playAudioChunk(synthesized.value.wavBlob, index, chunks.length, () => {
+        if (hasLoggedSpeechStart) return;
+        hasLoggedSpeechStart = true;
+        const speechStartMs = performance.now() - responseStartTime;
+        console.log(`[Chat] response -> speech start: ${speechStartMs.toFixed(1)} ms`);
+      });
+    }
+
+    console.log('[AvatarChatController] Streaming speech playback completed.');
+  }
+
+  private playAudioChunk(
+    wavBlob: Blob,
+    index: number,
+    total: number,
+    onStarted: () => void
+  ): Promise<void> {
+    if (!this.audioLipSync) return Promise.resolve();
+
+    const lipSync = this.audioLipSync;
+    const audioElement = lipSync.audioElement;
+    const file = new File([wavBlob], `ai-response-${index + 1}.wav`, { type: 'audio/wav' });
+    console.log(
+      `[AvatarChatController] Playing audio chunk ${index + 1}/${total} (${wavBlob.size} bytes)`
+    );
+
+    return new Promise<void>((resolve, reject) => {
+      let settled = false;
+      const timeoutId = window.setTimeout(() => {
+        finish(new Error(`音声チャンク ${index + 1}/${total} の再生がタイムアウトしました`));
+      }, 60000);
+
       const cleanup = () => {
-        if (finished) return;
-        finished = true;
-        this.isProcessing = false;
-        this.setState('ready', '準備完了');
-        console.log('[AvatarChatController] Speech playback completed.');
+        window.clearTimeout(timeoutId);
+        audioElement.removeEventListener('ended', handleEnded);
+        audioElement.removeEventListener('error', handleError);
+      };
+      const finish = (error?: Error) => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        if (error) reject(error);
+        else resolve();
+      };
+      const handleEnded = () => finish();
+      const handleError = () => {
+        const mediaError = audioElement.error;
+        finish(
+          new Error(
+            `音声チャンクの再生に失敗しました${mediaError ? ` (code: ${mediaError.code})` : ''}`
+          )
+        );
       };
 
-      const originalAudioElem = (this.audioLipSync as any).audioElement as HTMLAudioElement;
-      if (originalAudioElem) {
-        originalAudioElem.addEventListener('ended', cleanup, { once: true });
-        originalAudioElem.addEventListener('error', (e) => {
-          console.error('[AvatarChatController] Audio element error:', e);
-          cleanup();
-        }, { once: true });
-      }
+      audioElement.addEventListener('ended', handleEnded);
+      audioElement.addEventListener('error', handleError);
 
-      // Fallback timer (30s)
-      setTimeout(() => {
-        if (!finished && this.state === 'speaking') {
-          console.warn('[AvatarChatController] Playback timeout fallback triggered.');
-          cleanup();
-        }
-      }, 30000);
-
-      this.audioLipSync.loadAudioFile(file);
       try {
-        await this.audioLipSync.play();
-        console.log('[AvatarChatController] AudioLipSync play started.');
-      } catch (playErr) {
-        console.error('[AvatarChatController] Error calling audioLipSync.play():', playErr);
-        cleanup();
+        lipSync.loadAudioFile(file);
+        void lipSync.play().then(
+          () => {
+            if (audioElement.paused) {
+              finish(new Error('ブラウザが音声再生を開始できませんでした'));
+              return;
+            }
+            onStarted();
+          },
+          (error) => {
+            finish(error instanceof Error ? error : new Error(String(error)));
+          }
+        );
+      } catch (error) {
+        finish(error instanceof Error ? error : new Error(String(error)));
       }
-
-      const speechStartMs = performance.now() - responseStartTime;
-      console.log(`[Chat] response -> speech start: ${speechStartMs.toFixed(1)} ms`);
-    } else {
-      this.isProcessing = false;
-      this.setState('ready', '準備完了');
-    }
+    });
   }
 }
