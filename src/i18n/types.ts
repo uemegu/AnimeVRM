@@ -34,9 +34,6 @@ export interface Translations {
   aichat: {
     title: string;
     description: string;
-    llmModel: string;
-    llmGeminiNano: string;
-    llmLfm: string;
     ttsSteps: string;
     statusUnloaded: string;
     statusLoading: string;

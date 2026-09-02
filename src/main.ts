@@ -2621,7 +2621,7 @@ function setupUnifiedUI(): void {
           <span>${tr.tabs.masters}</span>
         </button>
         <button class="studio-tab-btn ${currentActiveTab === 'aichat' ? 'active' : ''}" data-tab="aichat">
-          <span>🤖 ${tr.tabs.aichat}</span>
+          <span>${tr.tabs.aichat}</span>
         </button>
       </div>
 
@@ -2952,13 +2952,6 @@ function setupUnifiedUI(): void {
               </div>
               <div id="ai-chat-status-msg" class="aichat-status-detail">${tr.aichat.description}</div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px;">
-                <label style="color: #aaaaaa; white-space: nowrap;">${tr.aichat.llmModel}:</label>
-                <select id="ai-chat-llm-select" style="flex: 1; font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
-                  <option value="gemini-nano" ${avatarChatController.getLlmProvider() === 'gemini-nano' ? 'selected' : ''}>⚡ ${tr.aichat.llmGeminiNano}</option>
-                  <option value="lfm" ${avatarChatController.getLlmProvider() === 'lfm' ? 'selected' : ''}>🌐 ${tr.aichat.llmLfm}</option>
-                </select>
-              </div>
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px;">
                 <label style="color: #aaaaaa; white-space: nowrap;">${tr.aichat.ttsSteps}:</label>
                 <select id="ai-chat-tts-steps-select" style="flex: 1; font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
                   ${[4, 6, 8, 12, 16]
@@ -3124,7 +3117,7 @@ function setupUnifiedUI(): void {
           if (replyMeta) {
             const metaEl = document.createElement('div');
             metaEl.className = 'aichat-msg-meta';
-            metaEl.innerHTML = `<span class="aichat-tag">😊 ${replyMeta.expression}</span><span class="aichat-tag">🎬 ${replyMeta.motion}</span>`;
+            metaEl.innerHTML = `<span class="aichat-tag">${replyMeta.expression}</span><span class="aichat-tag">${replyMeta.motion}</span>`;
             msgEl.appendChild(metaEl);
           }
 
@@ -3159,13 +3152,6 @@ function setupUnifiedUI(): void {
         aiMessages.scrollTop = aiMessages.scrollHeight;
       }
     }
-
-    const aiLlmSelect = document.getElementById('ai-chat-llm-select') as HTMLSelectElement | null;
-    aiLlmSelect?.addEventListener('change', () => {
-      const selected = aiLlmSelect.value as 'gemini-nano' | 'lfm';
-      avatarChatController.setLlmProvider(selected);
-      renderChatState(avatarChatController.getState());
-    });
 
     const aiTtsStepsSelect = document.getElementById(
       'ai-chat-tts-steps-select'
@@ -3668,7 +3654,8 @@ audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
 // --------------------------------------------------
 // Resize & Render Loop
 // --------------------------------------------------
-const clock = new THREE.Clock();
+const timer = new THREE.Timer();
+timer.connect(document);
 
 function onResize(): void {
   const width = window.innerWidth;
@@ -3688,9 +3675,10 @@ function onResize(): void {
 }
 window.addEventListener('resize', onResize);
 
-function tick(): void {
-  const delta = clock.getDelta();
-  const elapsed = clock.elapsedTime;
+function tick(timestamp?: number): void {
+  timer.update(timestamp);
+  const delta = timer.getDelta();
+  const elapsed = timer.getElapsed();
 
   // Three.js/WebGL and ORT/WebGPU otherwise compete for the same Metal GPU.
   // Keep rAF alive for a clean clock, but submit no rendering work while an

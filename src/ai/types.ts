@@ -23,8 +23,6 @@ export interface AvatarReply {
   motion: AvatarMotion;
 }
 
-export type LlmProvider = 'gemini-nano' | 'lfm';
-
 export type ChatState =
   | 'unloaded'
   | 'loading'
