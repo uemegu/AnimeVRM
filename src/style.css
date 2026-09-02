@@ -6,18 +6,35 @@ body {
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #0d0d0d;
+}
+
+#app-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+#viewport-wrapper {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background-color: #0d0d0d;
 }
 
 #viewport-container {
   position: relative;
-  width: 100vw;
-  height: 100vh;
-  max-width: calc(100vh * (16 / 9));
-  max-height: calc(100vw * (9 / 16));
   aspect-ratio: 16 / 9;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,9 +99,6 @@ body {
 /* -------------------------------------------------- */
 /* Floating Settings Button (Minimized State)         */
 /* -------------------------------------------------- */
-/* -------------------------------------------------- */
-/* Floating Settings Button (Minimized State)         */
-/* -------------------------------------------------- */
 #settings-open-btn {
   position: fixed;
   top: 16px;
@@ -120,32 +134,29 @@ body {
 }
 
 /* -------------------------------------------------- */
-/* Unified Control Panel (Blender-like Dark Panel)    */
+/* Unified Control Panel (Side Docked Dark Panel)     */
 /* -------------------------------------------------- */
 #panel-container {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
+  position: relative;
   height: 100vh;
   max-height: 100vh;
-  z-index: 1000;
+  z-index: 100;
   width: 380px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   background: #282828;
   border-left: 1px solid #1a1a1a;
-  border-top: none;
-  border-right: none;
-  border-bottom: none;
-  border-radius: 0;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.45);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   color: #cccccc;
   user-select: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
   overflow: hidden;
+}
+
+#panel-container.hidden {
+  display: none !important;
 }
 
 #panel-header {
