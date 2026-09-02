@@ -123,9 +123,7 @@ function applySceneConfig(combined: {
   currentConfig.rain = JSON.parse(JSON.stringify(combined.rain));
 
   applyConfigToSceneAndRenderer(currentConfig);
-  if (gui) {
-    gui.controllersRecursive().forEach((c) => c.updateDisplay());
-  }
+  updateAllGuisDisplay();
   syncTimeOfDayButtons();
   syncBgButtons();
 }
@@ -1113,91 +1111,134 @@ function syncToggleState(): void {
   toggleState.rain = currentConfig.rain?.enabled ?? false;
 }
 
-let gui: GUI;
-let cachedGuiMountPoint: HTMLElement | undefined;
+let guis: GUI[] = [];
 
-function setupGUI(mountPoint?: HTMLElement): void {
-  cachedGuiMountPoint = mountPoint;
-  syncToggleState();
-  const tr = t();
-  gui = new GUI({
-    title: tr.gui.detailedTitle,
-    container: mountPoint,
-    autoPlace: !mountPoint,
+function updateAllGuisDisplay(): void {
+  guis.forEach((g) => {
+    try {
+      g.controllersRecursive().forEach((c) => c.updateDisplay());
+    } catch {
+      // ignore
+    }
   });
+}
 
-  // 0. Scene Presets Folder
-  const sceneFolder = gui.addFolder(tr.gui.sceneFolder);
-  const sceneState = {
-    preset: getActivePresetId(),
-    timeOfDay: getActiveTimeOfDay(),
+function destroyAllGuis(): void {
+  guis.forEach((g) => {
+    try {
+      g.destroy();
+    } catch {
+      // ignore
+    }
+  });
+  guis = [];
+}
+
+
+
+function setupStageGUI(container: HTMLElement): void {
+  const tr = t();
+  const stageGui = new GUI({
+    title: tr.render.detailedParamsTitle,
+    container,
+    autoPlace: false,
+  });
+  guis.push(stageGui);
+
+  // 1. Wind & SpringBone Physics Folder
+  const windFolder = stageGui.addFolder(tr.gui.windFolder);
+
+  const windPresetKeys: Record<string, string> = {
+    '🌸 そよ風 (Gentle Breeze)': 'breeze',
+    '💨 強風 (Strong Wind)': 'strong',
+    '🌪️ 突風・嵐 (Gusty Storm)': 'gusty',
+    '✨ 原神風・疾風 (Anemo Gale)': 'anemo',
+    '🍃 無風 (Calm)': 'calm',
   };
 
-  const timeOfDayOptions: Record<string, TimeOfDayId> = {
-    '🌅 朝 (Morning)': 'morning',
-    '☀️ 昼 (Day)': 'day',
-    '🌇 夕方 (Evening)': 'evening',
-    '🌧️ 雨 (Rainy)': 'rainy',
-    '💡 室内・明 (Bright Indoor)': 'bright_indoor',
-    '🌙 室内・暗 (Dark Indoor)': 'dark_indoor',
-  };
-
-  sceneFolder
-    .add(sceneState, 'timeOfDay', timeOfDayOptions)
-    .name('時間帯 (Time of Day)')
-    .onChange((val: TimeOfDayId) => {
-      switchTimeOfDay(val);
+  const windPresetObj = { preset: 'breeze' };
+  windFolder
+    .add(windPresetObj, 'preset', windPresetKeys)
+    .name(tr.gui.windSpeed)
+    .onChange((key: string) => {
+      WindController.applyPreset(currentConfig.wind, key);
+      toggleState.wind = currentConfig.wind.enabled;
+      updateAllGuisDisplay();
+      showToast(`🍃 風プリセット適用: ${WIND_PRESETS[key]?.label || key}`);
     });
 
-  const sceneOptions: Record<string, ScenePresetId> = {
-    '🌳 朝・公園 (Morning Park)': 'morning_park',
-    '🌳 昼・公園 (Day Park)': 'day_park',
-    '🌳 夕方・公園 (Evening Park)': 'evening_park',
-    '🌳 雨・公園 (Rainy Park)': 'rainy_park',
-    '🏫 朝・校門 (Morning School Gate)': 'morning_school',
-    '🏫 昼・校門 (Day School Gate)': 'day_school',
-    '🏫 夕方・校門 (Evening School Gate)': 'evening_school',
-    '🏫 雨・校門 (Rainy School Gate)': 'rainy_school',
-    '💡 明るい・室内 (Bright Indoor)': 'bright_indoor',
-    '🌙 暗い・室内 (Dark Indoor)': 'dark_indoor',
-  };
-
-  sceneFolder
-    .add(sceneState, 'preset', sceneOptions)
-    .name(tr.gui.sceneSelect)
-    .onChange((val: ScenePresetId) => {
-      switchScene(val);
+  windFolder
+    .add(currentConfig.wind, 'enabled')
+    .name(tr.gui.windEnabled)
+    .onChange((val: boolean) => {
+      toggleState.wind = val;
+      updateAllGuisDisplay();
     });
 
-  const sceneActions = {
-    morningPark: () => switchScene('morning_park'),
-    dayPark: () => switchScene('day_park'),
-    eveningPark: () => switchScene('evening_park'),
-    rainyPark: () => switchScene('rainy_park'),
-    morningSchool: () => switchScene('morning_school'),
-    daySchool: () => switchScene('day_school'),
-    eveningSchool: () => switchScene('evening_school'),
-    rainySchool: () => switchScene('rainy_school'),
-    brightIndoor: () => switchScene('bright_indoor'),
-    darkIndoor: () => switchScene('dark_indoor'),
-  };
+  windFolder.add(currentConfig.wind, 'speed', 0.0, 5.0, 0.1).name(tr.gui.windSpeed);
+  windFolder.add(currentConfig.wind, 'direction', 0, 360, 1).name(tr.gui.windDirection);
+  windFolder.add(currentConfig.wind, 'elevation', -45, 45, 1).name(tr.gui.windElevation);
+  windFolder.add(currentConfig.wind, 'turbulence', 0.0, 2.0, 0.05).name(tr.gui.windTurbulence);
+  windFolder.add(currentConfig.wind, 'gustFrequency', 0.0, 1.0, 0.05).name(tr.gui.windGustFreq);
+  windFolder.add(currentConfig.wind, 'gustStrength', 0.0, 3.0, 0.1).name(tr.gui.windGustStrength);
 
-  const subFolder = sceneFolder.addFolder(tr.gui.quickSwitchFolder);
-  subFolder.add(sceneActions, 'morningPark').name('🌳 朝・公園');
-  subFolder.add(sceneActions, 'dayPark').name('🌳 昼・公園');
-  subFolder.add(sceneActions, 'eveningPark').name('🌳 夕方・公園');
-  subFolder.add(sceneActions, 'rainyPark').name('🌧️ 雨・公園');
-  subFolder.add(sceneActions, 'morningSchool').name('🏫 朝・校門');
-  subFolder.add(sceneActions, 'daySchool').name('🏫 昼・校門');
-  subFolder.add(sceneActions, 'eveningSchool').name('🏫 夕方・校門');
-  subFolder.add(sceneActions, 'rainySchool').name('🌧️ 雨・校門');
-  subFolder.add(sceneActions, 'brightIndoor').name('💡 明るい・室内');
-  subFolder.add(sceneActions, 'darkIndoor').name('🌙 暗い・室内');
-  subFolder.close();
-  sceneFolder.close();
+  const particleFolder = windFolder.addFolder(tr.gui.particlesFolder);
+  particleFolder.add(currentConfig.wind.particles, 'enabled').name(tr.gui.particlesEnabled);
+  particleFolder.add(currentConfig.wind.particles, 'count', 20, 500, 10).name(tr.gui.particlesCount);
+  particleFolder.add(currentConfig.wind.particles, 'size', 0.005, 0.08, 0.002).name(tr.gui.particlesSize);
+  particleFolder.addColor(currentConfig.wind.particles, 'color').name(tr.gui.particlesColor);
+  particleFolder.add(currentConfig.wind.particles, 'opacity', 0.1, 1.0, 0.05).name(tr.gui.particlesOpacity);
+  particleFolder.add(currentConfig.wind.particles, 'speedFactor', 0.2, 3.0, 0.1).name(tr.gui.particlesSpeed);
+  particleFolder.close();
+  windFolder.close();
 
-  // 1. Short Animation Cuts Folder
-  const animFolder = gui.addFolder(tr.gui.animCutFolder);
+  // 2. Rain Particles Folder
+  if (!currentConfig.rain) currentConfig.rain = { ...DEFAULT_RAIN_CONFIG };
+  const rainFolder = stageGui.addFolder('🌧️ 雨エフェクト (Rain Particles)');
+  rainFolder
+    .add(currentConfig.rain, 'enabled')
+    .name('雨有効 (Enable)')
+    .onChange((val: boolean) => {
+      toggleState.rain = val;
+      rainEffect.updateConfig(currentConfig.rain!);
+      updateAllGuisDisplay();
+    });
+  rainFolder
+    .add(currentConfig.rain, 'count', 100, 4000, 100)
+    .name('雨量・粒子数 (Count)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'speed', 2.0, 30.0, 0.5)
+    .name('落下速度 (Speed)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'length', 0.05, 1.0, 0.01)
+    .name('雨筋の長さ (Streak Length)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'angle', -30, 30, 1)
+    .name('傾き角度 (Slant Angle)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .addColor(currentConfig.rain, 'color')
+    .name('雨の色 (Rain Color)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'opacity', 0.05, 1.0, 0.05)
+    .name('不透明度 (Opacity)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'splashEnabled')
+    .name('地面の水しぶき (Splashes)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder
+    .add(currentConfig.rain, 'splashCount', 20, 500, 10)
+    .name('水しぶき数 (Splash Count)')
+    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
+  rainFolder.close();
+
+  // 3. Short Animation Cuts Folder
+  const animFolder = stageGui.addFolder(tr.gui.animCutFolder);
 
   const cameraAngleOptions = {
     'Continue (前Cutを引き継ぐ)': 'continue',
@@ -1294,96 +1335,21 @@ function setupGUI(mountPoint?: HTMLElement): void {
   });
   animFolder.close();
 
-  // 2. Quick Feature Toggles
-  const toggleFolder = gui.addFolder(tr.gui.togglesFolder);
-  syncToggleState();
+  stageGui.folders.forEach((folder) => folder.close());
+}
 
-  toggleFolder
-    .add(toggleState, 'colorGrading')
-    .name(tr.gui.toggleColorGrading)
-    .onChange((val: boolean) => {
-      currentConfig.postProcessing.colorGrading.enabled = val;
-      applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'bloom')
-    .name(tr.gui.toggleBloom)
-    .onChange((val: boolean) => {
-      currentConfig.postProcessing.bloom.enabled = val;
-      applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'wind')
-    .name(tr.gui.toggleWind)
-    .onChange((val: boolean) => {
-      currentConfig.wind.enabled = val;
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'rain')
-    .name('🌧️ 雨パーティクル (Rain Effect)')
-    .onChange((val: boolean) => {
-      if (!currentConfig.rain) currentConfig.rain = { ...DEFAULT_RAIN_CONFIG };
-      currentConfig.rain.enabled = val;
-      rainEffect.updateConfig(currentConfig.rain);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'smoothNormal')
-    .name(tr.gui.toggleSmoothNormal)
-    .onChange((val: boolean) => {
-      currentConfig.outline.useSmoothNormal = val;
-      avatarInstance?.shaderController?.updateOutline(currentConfig.outline);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'screenSpaceWidth')
-    .name(tr.gui.toggleScreenSpaceWidth)
-    .onChange((val: boolean) => {
-      currentConfig.outline.screenSpaceWidth = val;
-      avatarInstance?.shaderController?.updateOutline(currentConfig.outline);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'rimBody')
-    .name(tr.gui.toggleRimBody)
-    .onChange((val: boolean) => {
-      currentConfig.materials.body.rimEnabled = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('body', currentConfig.materials.body);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'rimCloth')
-    .name(tr.gui.toggleRimCloth)
-    .onChange((val: boolean) => {
-      currentConfig.materials.cloth.rimEnabled = val;
-      avatarInstance?.shaderController?.updateMaterialStyle('cloth', currentConfig.materials.cloth);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder
-    .add(toggleState, 'rimLight')
-    .name(tr.gui.toggleRimLight)
-    .onChange((val: boolean) => {
-      currentConfig.lighting.rim.enabled = val;
-      applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  toggleFolder.close();
+function setupVisualGUI(container: HTMLElement): void {
+  const tr = t();
+  const visualGui = new GUI({
+    title: tr.render.detailedParamsTitle,
+    container,
+    autoPlace: false,
+  });
+  guis.push(visualGui);
 
   // Helper to add material folder
   const addMaterialFolder = (title: string, kind: 'body' | 'hair' | 'cloth') => {
-    const folder = gui.addFolder(title);
+    const folder = visualGui.addFolder(title);
     const params = currentConfig.materials[kind];
     const update = () => avatarInstance?.shaderController?.updateMaterialStyle(kind, params);
 
@@ -1405,13 +1371,13 @@ function setupGUI(mountPoint?: HTMLElement): void {
     folder.close();
   };
 
-  // 3. Material Folders
+  // 1. Material Folders
   addMaterialFolder(tr.gui.matBody, 'body');
   addMaterialFolder(tr.gui.matHair, 'hair');
   addMaterialFolder(tr.gui.matCloth, 'cloth');
 
-  // 4. Outline Folder
-  const outlineFolder = gui.addFolder(tr.gui.outlineFolder);
+  // 2. Outline Folder
+  const outlineFolder = visualGui.addFolder(tr.gui.outlineFolder);
   outlineFolder
     .add(currentConfig.outline, 'enabled')
     .name(tr.gui.outlineInvertedHull)
@@ -1442,81 +1408,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange(() => avatarInstance?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder.close();
 
-  // 5. Environment Folder
-  const envFolder = gui.addFolder(tr.gui.envFolder);
-  envFolder
-    .add(currentConfig.environment, 'showBackgroundImage')
-    .name(tr.gui.showBgImage)
-    .onChange(() => {
-      updateBackgroundDisplay(currentConfig);
-      updateMidgroundDisplay(currentConfig);
-    });
-  envFolder
-    .addColor(currentConfig.environment, 'backgroundColor')
-    .name(tr.gui.bgColor)
-    .onChange(() => updateBackgroundDisplay(currentConfig));
-
-  // Far Fog (Atmospheric Perspective) folder
-  const fogFolder = envFolder.addFolder(tr.gui.fogFolder);
-  fogFolder
-    .add(currentConfig.environment, 'farFogEnabled')
-    .name(tr.gui.fogEnabled)
-    .onChange(() => updateBackgroundDisplay(currentConfig));
-  fogFolder
-    .addColor(currentConfig.environment, 'farFogColor')
-    .name(tr.gui.fogColor)
-    .onChange(() => updateBackgroundDisplay(currentConfig));
-  fogFolder
-    .add(currentConfig.environment, 'farFogIntensity', 0, 1, 0.02)
-    .name(tr.gui.fogIntensity)
-    .onChange(() => updateBackgroundDisplay(currentConfig));
-  
-  // Midground layer folder
-  const midFolder = envFolder.addFolder(tr.gui.midFolder);
-  if (!currentConfig.environment.midgroundPosition) {
-    currentConfig.environment.midgroundPosition = { x: 0, y: 1.05, z: -0.6 };
-  }
-  midFolder
-    .add(currentConfig.environment, 'showMidground')
-    .name(tr.gui.showMidground)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-  midFolder
-    .add(currentConfig.environment.midgroundPosition, 'x', -5, 5, 0.05)
-    .name(tr.gui.midX)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-  midFolder
-    .add(currentConfig.environment.midgroundPosition, 'y', -2, 5, 0.05)
-    .name(tr.gui.midY)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-  midFolder
-    .add(currentConfig.environment.midgroundPosition, 'z', -5, 2, 0.05)
-    .name(tr.gui.midZ)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-  midFolder
-    .add(currentConfig.environment, 'midgroundScale', 0.5, 10, 0.1)
-    .name(tr.gui.midScale)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-  midFolder
-    .add(currentConfig.environment, 'midgroundOpacity', 0, 1, 0.05)
-    .name(tr.gui.midOpacity)
-    .onChange(() => updateMidgroundDisplay(currentConfig));
-
-  envFolder
-    .add(currentConfig.environment, 'showFloor')
-    .name(tr.gui.showFloor)
-    .onChange((show: boolean) => {
-      floor.visible = show;
-    });
-  envFolder
-    .addColor(currentConfig.environment, 'floorColor')
-    .name(tr.gui.floorColor)
-    .onChange((color: string) => {
-      floorMat.color.set(color);
-    });
-  envFolder.close();
-
-  // 6. Lighting Folder
-  const lightFolder = gui.addFolder(tr.gui.lightFolder);
+  // 3. Lighting Folder
+  const lightFolder = visualGui.addFolder(tr.gui.lightFolder);
   lightFolder
     .add(currentConfig.lighting, 'castShadows')
     .name(tr.gui.castShadows)
@@ -1596,8 +1489,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: number) => (rimLight.position.z = val));
   lightFolder.close();
 
-  // 6.5 Sun & God Rays & Lens Flare Folder
-  const sunFolder = gui.addFolder(tr.gui.sunFolder);
+  // 4. Sun & Atmosphere Folder
+  const sunFolder = visualGui.addFolder(tr.gui.sunFolder);
 
   // Sun Transform / Light Tracking
   const sunPosFolder = sunFolder.addFolder(tr.gui.sunPosFolder);
@@ -1706,10 +1599,73 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .name(tr.gui.flareHalo);
   flareFolder.close();
 
+  // Atmosphere / Far Fog
+  const fogFolder = sunFolder.addFolder(tr.gui.fogFolder);
+  fogFolder
+    .add(currentConfig.environment, 'farFogEnabled')
+    .name(tr.gui.fogEnabled)
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  fogFolder
+    .addColor(currentConfig.environment, 'farFogColor')
+    .name(tr.gui.fogColor)
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  fogFolder
+    .add(currentConfig.environment, 'farFogIntensity', 0, 1, 0.02)
+    .name(tr.gui.fogIntensity)
+    .onChange(() => updateBackgroundDisplay(currentConfig));
+  fogFolder.close();
+
+  // Midground layer folder
+  const midFolder = sunFolder.addFolder(tr.gui.midFolder);
+  if (!currentConfig.environment.midgroundPosition) {
+    currentConfig.environment.midgroundPosition = { x: 0, y: 1.05, z: -0.6 };
+  }
+  midFolder
+    .add(currentConfig.environment, 'showMidground')
+    .name(tr.gui.showMidground)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'x', -5, 5, 0.05)
+    .name(tr.gui.midX)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'y', -2, 5, 0.05)
+    .name(tr.gui.midY)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment.midgroundPosition, 'z', -5, 2, 0.05)
+    .name(tr.gui.midZ)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment, 'midgroundScale', 0.5, 10, 0.1)
+    .name(tr.gui.midScale)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder
+    .add(currentConfig.environment, 'midgroundOpacity', 0, 1, 0.05)
+    .name(tr.gui.midOpacity)
+    .onChange(() => updateMidgroundDisplay(currentConfig));
+  midFolder.close();
+
+  // Floor
+  const floorFolder = sunFolder.addFolder(tr.gui.envFolder);
+  floorFolder
+    .add(currentConfig.environment, 'showFloor')
+    .name(tr.gui.showFloor)
+    .onChange((show: boolean) => {
+      floor.visible = show;
+    });
+  floorFolder
+    .addColor(currentConfig.environment, 'floorColor')
+    .name(tr.gui.floorColor)
+    .onChange((color: string) => {
+      floorMat.color.set(color);
+    });
+  floorFolder.close();
+
   sunFolder.close();
 
-  // 7. Post Processing Folder
-  const postFolder = gui.addFolder(tr.gui.postFolder);
+  // 5. Post Processing Folder
+  const postFolder = visualGui.addFolder(tr.gui.postFolder);
   postFolder
     .add(currentConfig.postProcessing, 'toneMappingMode', ['ACESFilmic', 'Reinhard', 'AgX', 'Linear', 'None'])
     .name(tr.gui.toneMapping)
@@ -1761,7 +1717,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .name(tr.gui.bloomRadius)
     .onChange((val: number) => (bloomPass.radius = val));
 
-  // Color Grading (Split Toning / Film Look)
+  // Color Grading
   const cgFolder = postFolder.addFolder(tr.gui.cgFolder);
   cgFolder
     .add(currentConfig.postProcessing.colorGrading, 'enabled')
@@ -1800,7 +1756,6 @@ function setupGUI(mountPoint?: HTMLElement): void {
       colorGradingPass.uniforms['uGamma'].value = val;
     });
   cgFolder.close();
-  postFolder.close();
 
   // Basic Grading
   postFolder
@@ -1817,135 +1772,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
     .onChange((val: number) => (brightnessContrastPass.uniforms['contrast'].value = val));
   postFolder.close();
 
-  // 8. Wind & SpringBone Physics Folder
-  const windFolder = gui.addFolder(tr.gui.windFolder);
-
-  const windPresetKeys: Record<string, string> = {
-    '🌸 そよ風 (Gentle Breeze)': 'breeze',
-    '💨 強風 (Strong Wind)': 'strong',
-    '🌪️ 突風・嵐 (Gusty Storm)': 'gusty',
-    '✨ 原神風・疾風 (Anemo Gale)': 'anemo',
-    '🍃 無風 (Calm)': 'calm',
-  };
-
-  const windPresetObj = { preset: 'breeze' };
-  windFolder
-    .add(windPresetObj, 'preset', windPresetKeys)
-    .name(tr.gui.windSpeed)
-    .onChange((key: string) => {
-      WindController.applyPreset(currentConfig.wind, key);
-      toggleState.wind = currentConfig.wind.enabled;
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-      showToast(`🍃 風プリセット適用: ${WIND_PRESETS[key]?.label || key}`);
-    });
-
-  windFolder
-    .add(currentConfig.wind, 'enabled')
-    .name(tr.gui.windEnabled)
-    .onChange((val: boolean) => {
-      toggleState.wind = val;
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-
-  windFolder.add(currentConfig.wind, 'speed', 0.0, 5.0, 0.1).name(tr.gui.windSpeed);
-  windFolder.add(currentConfig.wind, 'direction', 0, 360, 1).name(tr.gui.windDirection);
-  windFolder.add(currentConfig.wind, 'elevation', -45, 45, 1).name(tr.gui.windElevation);
-  windFolder.add(currentConfig.wind, 'turbulence', 0.0, 2.0, 0.05).name(tr.gui.windTurbulence);
-  windFolder.add(currentConfig.wind, 'gustFrequency', 0.0, 1.0, 0.05).name(tr.gui.windGustFreq);
-  windFolder.add(currentConfig.wind, 'gustStrength', 0.0, 3.0, 0.1).name(tr.gui.windGustStrength);
-
-  const particleFolder = windFolder.addFolder(tr.gui.particlesFolder);
-  particleFolder.add(currentConfig.wind.particles, 'enabled').name(tr.gui.particlesEnabled);
-  particleFolder.add(currentConfig.wind.particles, 'count', 20, 500, 10).name(tr.gui.particlesCount);
-  particleFolder.add(currentConfig.wind.particles, 'size', 0.005, 0.08, 0.002).name(tr.gui.particlesSize);
-  particleFolder.addColor(currentConfig.wind.particles, 'color').name(tr.gui.particlesColor);
-  particleFolder.add(currentConfig.wind.particles, 'opacity', 0.1, 1.0, 0.05).name(tr.gui.particlesOpacity);
-  particleFolder.add(currentConfig.wind.particles, 'speedFactor', 0.2, 3.0, 0.1).name(tr.gui.particlesSpeed);
-  particleFolder.close();
-
-  windFolder.close();
-
-  // 8.5 Rain Particles Folder
-  if (!currentConfig.rain) currentConfig.rain = { ...DEFAULT_RAIN_CONFIG };
-  const rainFolder = gui.addFolder('🌧️ 雨エフェクト (Rain Particles)');
-  rainFolder
-    .add(currentConfig.rain, 'enabled')
-    .name('雨有効 (Enable)')
-    .onChange((val: boolean) => {
-      toggleState.rain = val;
-      rainEffect.updateConfig(currentConfig.rain!);
-      gui.controllersRecursive().forEach((c) => c.updateDisplay());
-    });
-  rainFolder
-    .add(currentConfig.rain, 'count', 100, 4000, 100)
-    .name('雨量・粒子数 (Count)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'speed', 2.0, 30.0, 0.5)
-    .name('落下速度 (Speed)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'length', 0.05, 1.0, 0.01)
-    .name('雨筋の長さ (Streak Length)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'angle', -30, 30, 1)
-    .name('傾き角度 (Slant Angle)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .addColor(currentConfig.rain, 'color')
-    .name('雨の色 (Rain Color)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'opacity', 0.05, 1.0, 0.05)
-    .name('不透明度 (Opacity)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'splashEnabled')
-    .name('地面の水しぶき (Splashes)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder
-    .add(currentConfig.rain, 'splashCount', 20, 500, 10)
-    .name('水しぶき数 (Splash Count)')
-    .onChange(() => rainEffect.updateConfig(currentConfig.rain!));
-  rainFolder.close();
-
-  // 9. Lip Sync Folder
-  const lipFolder = gui.addFolder(tr.gui.lipSyncFolder);
-  lipFolder
-    .add(currentConfig.lipSync, 'enabled')
-    .name(tr.gui.lipSyncEnabled);
-  lipFolder
-    .add(currentConfig.lipSync, 'voiceGender', {
-      '女性 / 高音 (Female)': 'female',
-      '男性 / 低音 (Male)': 'male',
-    })
-    .name(tr.gui.lipSyncGender)
-    .onChange((val: 'female' | 'male') => {
-      audioLipSync.setVoiceGender(val);
-    });
-  lipFolder
-    .add(currentConfig.lipSync, 'gain', 0.0, 1.5, 0.05)
-    .name(tr.gui.lipSyncGain);
-  lipFolder
-    .add(currentConfig.lipSync, 'smoothing', 0.05, 0.6, 0.01)
-    .name(tr.gui.lipSyncSmoothing);
-  lipFolder
-    .add(currentConfig.lipSync, 'audioDelay', 0.0, 0.2, 0.005)
-    .name(tr.gui.lipSyncAudioDelay)
-    .onChange((val: number) => {
-      audioLipSync.setAudioDelay(val);
-    });
-  lipFolder
-    .add(currentConfig.lipSync, 'rmsThreshold', 0.001, 0.05, 0.001)
-    .name(tr.gui.lipSyncRmsThreshold)
-    .onChange((val: number) => {
-      audioLipSync.rmsThreshold = val;
-    });
-  lipFolder.close();
-
-  // 10. Manga Emotion Effect Text Folder
-  const effectTextFolder = gui.addFolder(tr.character.emotionEffectText);
+  // 6. Manga Emotion Effect Text Folder
+  const effectTextFolder = visualGui.addFolder(tr.character.emotionEffectText);
   const effectTextState = {
     text: 'ワナワナ',
     preset: 'wanawana',
@@ -1954,7 +1782,7 @@ function setupGUI(mountPoint?: HTMLElement): void {
     duration: 1.8,
     scale: 1.0,
     offsetX: 0.0,
-    offsetY: 0.22,
+    offsetY: 0.04,
     offsetZ: 0.04,
     show: () => {
       if (!avatarInstance) return;
@@ -2047,8 +1875,8 @@ function setupGUI(mountPoint?: HTMLElement): void {
   effectTextFolder.add(effectTextState, 'clearAll').name(`✕ ${tr.character.clearAll}`);
   effectTextFolder.close();
 
-  // 11. Glowing Tears Effect Folder
-  const tearFolder = gui.addFolder('💧 涙・発光筋エフェクト (Glowing Tears)');
+  // 7. Glowing Tears Effect Folder
+  const tearFolder = visualGui.addFolder('💧 涙・発光筋エフェクト (Glowing Tears)');
   const tearState = {
     enabled: false,
     side: 'left',
@@ -2141,13 +1969,10 @@ function setupGUI(mountPoint?: HTMLElement): void {
   posFolder.add(tearState, 'leftOffsetY', 0.0, 0.15, 0.001).name('目の上下高さ (Y)').onChange(updateTearConfig);
   posFolder.add(tearState, 'leftOffsetZ', 0.02, 0.2, 0.001).name('顔の表面奥行き (Z)').onChange(updateTearConfig);
   posFolder.close();
-
   tearFolder.close();
 
-  // --------------------------------------------------
-  // 💦 Sweat (Manga Mark) Effect Folder
-  // --------------------------------------------------
-  const sweatFolder = gui.addFolder('💦 漫符汗エフェクト (焦り / じとー)');
+  // 8. Sweat (Manga Mark) Effect Folder
+  const sweatFolder = visualGui.addFolder('💦 漫符汗エフェクト (焦り / じとー)');
   const sweatState = {
     enabled: false,
     mode: 'fly4',
@@ -2273,19 +2098,58 @@ function setupGUI(mountPoint?: HTMLElement): void {
   sweatPosFolder.add(sweatState, 'jitoOffsetY', -0.05, 0.2, 0.005).name('こめかみ高さ (Y: jito)').onChange(updateSweatConfig);
   sweatPosFolder.add(sweatState, 'jitoOffsetZ', -0.05, 0.2, 0.005).name('こめかみ前後 (Z: jito)').onChange(updateSweatConfig);
   sweatPosFolder.close();
-
   sweatFolder.close();
 
-  // Close all GUI folders initially
-  gui.foldersRecursive().forEach((folder) => folder.close());
-  gui.folders.forEach((folder) => folder.close());
+  // 9. Lip Sync Folder
+  const lipFolder = visualGui.addFolder(tr.gui.lipSyncFolder);
+  lipFolder
+    .add(currentConfig.lipSync, 'enabled')
+    .name(tr.gui.lipSyncEnabled);
+  lipFolder
+    .add(currentConfig.lipSync, 'voiceGender', {
+      '女性 / 高音 (Female)': 'female',
+      '男性 / 低音 (Male)': 'male',
+    })
+    .name(tr.gui.lipSyncGender)
+    .onChange((val: 'female' | 'male') => {
+      audioLipSync.setVoiceGender(val);
+    });
+  lipFolder
+    .add(currentConfig.lipSync, 'gain', 0.0, 1.5, 0.05)
+    .name(tr.gui.lipSyncGain);
+  lipFolder
+    .add(currentConfig.lipSync, 'smoothing', 0.05, 0.6, 0.01)
+    .name(tr.gui.lipSyncSmoothing);
+  lipFolder
+    .add(currentConfig.lipSync, 'audioDelay', 0.0, 0.2, 0.005)
+    .name(tr.gui.lipSyncAudioDelay)
+    .onChange((val: number) => {
+      audioLipSync.setAudioDelay(val);
+    });
+  lipFolder
+    .add(currentConfig.lipSync, 'rmsThreshold', 0.001, 0.05, 0.001)
+    .name(tr.gui.lipSyncRmsThreshold)
+    .onChange((val: number) => {
+      audioLipSync.rmsThreshold = val;
+    });
+  lipFolder.close();
+
+  visualGui.folders.forEach((folder) => folder.close());
+}
+
+function setupGUI(): void {
+  destroyAllGuis();
+  syncToggleState();
+
+  const stageMount = document.getElementById('gui-mount-point-stage');
+  if (stageMount) setupStageGUI(stageMount);
+
+  const visualMount = document.getElementById('gui-mount-point-visual');
+  if (visualMount) setupVisualGUI(visualMount);
 }
 
 function rebuildGUI(): void {
-  if (gui) {
-    gui.destroy();
-  }
-  setupGUI(cachedGuiMountPoint);
+  setupGUI();
 }
 
 // --------------------------------------------------
@@ -2370,7 +2234,7 @@ function openImportModal(): void {
           }
           deepAssign(currentConfig, parsed);
           applyConfigToSceneAndRenderer(currentConfig);
-          gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+          updateAllGuisDisplay();
           syncTimeOfDayButtons();
           syncBgButtons();
           modal!.style.display = 'none';
@@ -2605,34 +2469,20 @@ function setupUnifiedUI(): void {
         <button class="studio-tab-btn ${currentActiveTab === 'character' ? 'active' : ''}" data-tab="character">
           <span>${tr.tabs.character}</span>
         </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'scenario' ? 'active' : ''}" data-tab="scenario">
-          <span>${tr.tabs.scenario}</span>
+        <button class="studio-tab-btn ${currentActiveTab === 'stage' ? 'active' : ''}" data-tab="stage">
+          <span>${tr.tabs.stage}</span>
         </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'scenes' ? 'active' : ''}" data-tab="scenes">
-          <span>${tr.tabs.scenes}</span>
+        <button class="studio-tab-btn ${currentActiveTab === 'visual' ? 'active' : ''}" data-tab="visual">
+          <span>${tr.tabs.visual}</span>
         </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'render' ? 'active' : ''}" data-tab="render">
-          <span>${tr.tabs.render}</span>
-        </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'histogram' ? 'active' : ''}" data-tab="histogram">
-          <span>${tr.tabs.histogram}</span>
-        </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'masters' ? 'active' : ''}" data-tab="masters">
-          <span>${tr.tabs.masters}</span>
-        </button>
-        <button class="studio-tab-btn ${currentActiveTab === 'aichat' ? 'active' : ''}" data-tab="aichat">
-          <span>${tr.tabs.aichat}</span>
+        <button class="studio-tab-btn ${currentActiveTab === 'system' ? 'active' : ''}" data-tab="system">
+          <span>${tr.tabs.system}</span>
         </button>
       </div>
 
       <div id="panel-body">
-        <!-- Loading Status (Shared) -->
-        <div id="loading-status" class="status-box">
-          ${tr.common.loadingModel} <span id="progress-text" style="color: #ffffff; font-weight: 600;">0%</span>
-        </div>
-
         <!-- ==================================================== -->
-        <!-- TAB 1: キャラクター・モーション・演出 (Character & FX) -->
+        <!-- TAB 1: Character (Model, Motion, Expression, FX, LipSync) -->
         <!-- ==================================================== -->
         <div id="tab-pane-character" class="tab-pane ${currentActiveTab === 'character' ? 'active' : ''}">
           <!-- VRM Model Selector -->
@@ -2643,6 +2493,12 @@ function setupUnifiedUI(): void {
               <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
               <button data-model="${resolveAssetUrl('/models/girl3.vrm')}" class="model-btn">👩 girl3.vrm</button>
               <button id="open-local-vrm-btn" class="model-btn">${tr.character.selectFile}</button>
+            </div>
+            <!-- Loading Status (Inside Character Model Selector) -->
+            <div id="loading-status" class="status-box" style="margin-top: 4px;">
+              ${avatarInstance?.vrm
+                ? `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (${currentModelUrl.startsWith('blob:') ? 'ローカルVRM' : currentModelUrl.split('/').pop()})`
+                : `${tr.common.loadingModel} <span id="progress-text" style="color: #ffffff; font-weight: 600;">0%</span>`}
             </div>
           </div>
 
@@ -2759,10 +2615,47 @@ function setupUnifiedUI(): void {
         </div>
 
         <!-- ==================================================== -->
-        <!-- TAB 2: シナリオ・分岐ロジック (Scenario & Logic) -->
+        <!-- TAB 2: Stage (Time of Day, Scenes, Scenarios, FX)    -->
         <!-- ==================================================== -->
-        <div id="tab-pane-scenario" class="tab-pane ${currentActiveTab === 'scenario' ? 'active' : ''}">
-          <!-- Interactive Branching Scenario Controls (Confession) -->
+        <div id="tab-pane-stage" class="tab-pane ${currentActiveTab === 'stage' ? 'active' : ''}">
+          <!-- 1. 時間帯・ライティング (Time of Day & Lighting) -->
+          <div class="section-box" style="border-left: 3px solid #f59e0b; padding-left: 6px;">
+            <label class="section-label" style="color: #fbbf24; font-weight: 700;">${tr.scenes.timeOfDayTitle}</label>
+            <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">時間帯によってライティング・マテリアル・ポストプロセスが変化します。</p>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div>
+                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">屋外 (Outdoor)</span>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+                  <button data-timeofday="morning" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'morning' ? 'active' : ''}" title="${tr.scenes.presetMorningParkTip}">${tr.scenes.morning}</button>
+                  <button data-timeofday="day" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'day' ? 'active' : ''}" title="${tr.scenes.presetDayParkTip}">${tr.scenes.day}</button>
+                  <button data-timeofday="evening" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'evening' ? 'active' : ''}" title="${tr.scenes.presetEveningParkTip}">${tr.scenes.evening}</button>
+                  <button data-timeofday="rainy" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'rainy' ? 'active' : ''}" title="${tr.scenes.presetRainyParkTip}">${tr.scenes.rainy}</button>
+                </div>
+              </div>
+              <div>
+                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">室内 (Indoor)</span>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                  <button data-timeofday="bright_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'bright_indoor' ? 'active' : ''}" title="${tr.scenes.presetBrightIndoorTip}">${tr.scenes.bright}</button>
+                  <button data-timeofday="dark_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'dark_indoor' ? 'active' : ''}" title="${tr.scenes.presetDarkIndoorTip}">${tr.scenes.dark}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 場所・背景 (Location & Background) -->
+          <div class="section-box">
+            <label class="section-label">${tr.scenes.locationTitle}</label>
+            <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">背景（場所）のみを切り替えます。時間帯パラメータは維持されます。</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
+              <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
+              <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
+              <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
+              <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
+              <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
+            </div>
+          </div>
+
+          <!-- 3. シナリオ・アニメーション演出 (Scenario & Sequences) -->
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
             <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.scenario.confessionTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -2774,7 +2667,6 @@ function setupUnifiedUI(): void {
             </div>
           </div>
 
-          <!-- Interactive 2-Girl Dialogue Scenario Controls (girl & girl2) -->
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #3b82f6; padding: 8px; border-radius: 4px;">
             <label class="section-label" style="color: #60a5fa; font-weight: 700;">${tr.scenario.twoGirlsTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -2832,118 +2724,27 @@ function setupUnifiedUI(): void {
               <button id="anim-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
             </div>
           </div>
+
+          <!-- Stage Details GUI Mount Point -->
+          <div id="gui-mount-point-stage" style="margin-top: 6px;"></div>
         </div>
 
         <!-- ==================================================== -->
-        <!-- TAB 3: シーン・環境 (Scenes & Env) -->
+        <!-- TAB 3: Visual (Materials, Light, PostFX, FX, Hist)  -->
         <!-- ==================================================== -->
-        <div id="tab-pane-scenes" class="tab-pane ${currentActiveTab === 'scenes' ? 'active' : ''}">
-          <!-- 1. 時間帯・ライティング (Time of Day & Lighting) -->
-          <div class="section-box" style="border-left: 3px solid #f59e0b; padding-left: 6px;">
-            <label class="section-label" style="color: #fbbf24; font-weight: 700;">${tr.scenes.timeOfDayTitle}</label>
-            <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">時間帯によってライティング・マテリアル・ポストプロセスが変化します。</p>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div>
-                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">屋外 (Outdoor)</span>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
-                  <button data-timeofday="morning" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'morning' ? 'active' : ''}" title="${tr.scenes.presetMorningParkTip}">${tr.scenes.morning}</button>
-                  <button data-timeofday="day" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'day' ? 'active' : ''}" title="${tr.scenes.presetDayParkTip}">${tr.scenes.day}</button>
-                  <button data-timeofday="evening" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'evening' ? 'active' : ''}" title="${tr.scenes.presetEveningParkTip}">${tr.scenes.evening}</button>
-                  <button data-timeofday="rainy" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'rainy' ? 'active' : ''}" title="${tr.scenes.presetRainyParkTip}">${tr.scenes.rainy}</button>
-                </div>
-              </div>
-              <div>
-                <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">室内 (Indoor)</span>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
-                  <button data-timeofday="bright_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'bright_indoor' ? 'active' : ''}" title="${tr.scenes.presetBrightIndoorTip}">${tr.scenes.bright}</button>
-                  <button data-timeofday="dark_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'dark_indoor' ? 'active' : ''}" title="${tr.scenes.presetDarkIndoorTip}">${tr.scenes.dark}</button>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div id="tab-pane-visual" class="tab-pane ${currentActiveTab === 'visual' ? 'active' : ''}">
+          <!-- Visual Details GUI Mount Point -->
+          <div id="gui-mount-point-visual"></div>
 
-          <!-- 2. 場所・背景 (Location & Background) -->
-          <div class="section-box">
-            <label class="section-label">${tr.scenes.locationTitle}</label>
-            <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">背景（場所）のみを切り替えます。時間帯パラメータは維持されます。</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-              <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
-              <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
-              <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
-              <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
-              <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
-            </div>
-          </div>
+          <!-- Color Histogram Mount Container (Below detailed parameters) -->
+          <div id="histogram-mount-point" style="margin-top: 8px;"></div>
         </div>
 
         <!-- ==================================================== -->
-        <!-- TAB 4: 描画・シェーダー・詳細設定 (Rendering) -->
+        <!-- TAB 4: AI & System (AI Chat, Config JSON, Masters)   -->
         <!-- ==================================================== -->
-        <div id="tab-pane-render" class="tab-pane ${currentActiveTab === 'render' ? 'active' : ''}">
-          <!-- Quick JSON Actions -->
-          <div class="section-box">
-            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-              <button id="quick-copy-json" class="action-btn primary" style="flex: 1; min-width: 80px;">📋 ${tr.common.copy}</button>
-              <button id="quick-download-json" class="action-btn">💾 ${tr.common.save}</button>
-              <button id="quick-import-json" class="action-btn">📥 ${tr.common.load}</button>
-              <button id="quick-reset-json" class="action-btn">🔄 ${tr.common.reset}</button>
-            </div>
-          </div>
-
-          <!-- lil-gui mount container -->
-          <div class="section-box" style="margin-top: 4px;">
-            <label class="section-label" style="color: #5684c8; font-size: 11.5px; margin-bottom: 2px;">${tr.render.detailedParamsTitle}</label>
-            <div id="gui-mount-point"></div>
-          </div>
-        </div>
-
-        <!-- ==================================================== -->
-        <!-- TAB 5: 色合いヒストグラム (Color Histogram) -->
-        <!-- ==================================================== -->
-        <div id="tab-pane-histogram" class="tab-pane ${currentActiveTab === 'histogram' ? 'active' : ''}">
-          <div id="histogram-mount-point"></div>
-        </div>
-
-        <!-- ==================================================== -->
-        <!-- TAB 6: マスターデータ管理 (Master Data Manager) -->
-        <!-- ==================================================== -->
-        <div id="tab-pane-masters" class="tab-pane ${currentActiveTab === 'masters' ? 'active' : ''}">
-          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 10px;">
-            <label class="section-label" style="color: #cccccc; font-size: 11px; margin-bottom: 6px;">${tr.masters.overviewTitle}</label>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
-              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
-                <span style="color: #888888;">${tr.masters.characterCount}</span> <strong id="master-count-characters" style="color: #ffffff;">2</strong> ${tr.masters.unitCount}
-              </div>
-              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
-                <span style="color: #888888;">${tr.masters.motionCount}</span> <strong id="master-count-motions" style="color: #ffffff;">13</strong> ${tr.masters.unitType}
-              </div>
-              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
-                <span style="color: #888888;">${tr.masters.soundCount}</span> <strong id="master-count-sounds" style="color: #ffffff;">14</strong> ${tr.masters.unitType}
-              </div>
-              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
-                <span style="color: #888888;">${tr.masters.sceneCount}</span> <strong id="master-count-scenes" style="color: #ffffff;">6</strong> ${tr.masters.unitType}
-              </div>
-            </div>
-          </div>
-
-          <div class="section-box">
-            <label class="section-label">${tr.masters.batchTitle}</label>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; gap: 4px;">
-                <button id="master-export-json-btn" class="action-btn primary" style="flex: 1;">${tr.masters.saveMasters}</button>
-                <button id="master-copy-json-btn" class="action-btn">${tr.masters.copyMasters}</button>
-              </div>
-              <input type="file" id="master-import-file-input" accept=".json" style="display: none;">
-              <button id="master-import-json-btn" class="action-btn">${tr.masters.loadMasters}</button>
-              <button id="master-reset-btn" class="action-btn" style="color: #f87171; border-color: #7f1d1d; background: #2d1e1e;">${tr.masters.resetMasters}</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ==================================================== -->
-        <!-- TAB 7: AIアバター会話 (AI Avatar Chat) -->
-        <!-- ==================================================== -->
-        <div id="tab-pane-aichat" class="tab-pane ${currentActiveTab === 'aichat' ? 'active' : ''}">
+        <div id="tab-pane-system" class="tab-pane ${currentActiveTab === 'system' ? 'active' : ''}">
+          <!-- AI Avatar Chat -->
           <div class="aichat-container">
             <div class="aichat-status-card">
               <div class="aichat-status-header">
@@ -2973,6 +2774,49 @@ function setupUnifiedUI(): void {
             <div class="aichat-input-row">
               <input type="text" id="ai-chat-input" class="aichat-input" placeholder="${tr.aichat.inputPlaceholder}" disabled />
               <button id="ai-chat-send-btn" class="aichat-send-btn" disabled>${tr.aichat.send}</button>
+            </div>
+          </div>
+
+          <!-- Configuration & Master Management -->
+          <div class="section-box" style="margin-top: 8px;">
+            <label class="section-label">⚙️ 設定JSON管理 (Config JSON)</label>
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <button id="quick-copy-json" class="action-btn primary" style="flex: 1; min-width: 70px;">📋 ${tr.common.copy}</button>
+              <button id="quick-download-json" class="action-btn" style="flex: 1; min-width: 70px;">💾 ${tr.common.save}</button>
+              <button id="quick-import-json" class="action-btn" style="flex: 1; min-width: 70px;">📥 ${tr.common.load}</button>
+              <button id="quick-reset-json" class="action-btn" style="flex: 1; min-width: 70px;">🔄 ${tr.common.reset}</button>
+            </div>
+          </div>
+
+          <!-- Master Data Management -->
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 10px;">
+            <label class="section-label" style="color: #cccccc; font-size: 11px; margin-bottom: 6px;">${tr.masters.overviewTitle}</label>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.characterCount}</span> <strong id="master-count-characters" style="color: #ffffff;">2</strong> ${tr.masters.unitCount}
+              </div>
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.motionCount}</span> <strong id="master-count-motions" style="color: #ffffff;">13</strong> ${tr.masters.unitType}
+              </div>
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.soundCount}</span> <strong id="master-count-sounds" style="color: #ffffff;">14</strong> ${tr.masters.unitType}
+              </div>
+              <div style="background: #282828; padding: 6px; border-radius: 4px; border: 1px solid #383838;">
+                <span style="color: #888888;">${tr.masters.sceneCount}</span> <strong id="master-count-scenes" style="color: #ffffff;">6</strong> ${tr.masters.unitType}
+              </div>
+            </div>
+          </div>
+
+          <div class="section-box">
+            <label class="section-label">${tr.masters.batchTitle}</label>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; gap: 4px;">
+                <button id="master-export-json-btn" class="action-btn primary" style="flex: 1;">${tr.masters.saveMasters}</button>
+                <button id="master-copy-json-btn" class="action-btn">${tr.masters.copyMasters}</button>
+              </div>
+              <input type="file" id="master-import-file-input" accept=".json" style="display: none;">
+              <button id="master-import-json-btn" class="action-btn">${tr.masters.loadMasters}</button>
+              <button id="master-reset-btn" class="action-btn" style="color: #f87171; border-color: #7f1d1d; background: #2d1e1e;">${tr.masters.resetMasters}</button>
             </div>
           </div>
         </div>
@@ -3019,7 +2863,7 @@ function setupUnifiedUI(): void {
         tabPanes.forEach((pane) => {
           pane.classList.toggle('active', pane.id === `tab-pane-${target}`);
         });
-        if (target === 'histogram') {
+        if (target === 'visual') {
           requestAnimationFrame(() => {
             captureAndRenderHistogram();
           });
@@ -3239,11 +3083,8 @@ function setupUnifiedUI(): void {
       }
     });
 
-    // Setup lil-gui inside gui-mount-point
-    const mountPoint = document.getElementById('gui-mount-point');
-    if (mountPoint) {
-      setupGUI(mountPoint);
-    }
+    // Setup Modular lil-guis for each tab
+    setupGUI();
 
     // Setup Quick JSON Actions
     document.getElementById('quick-copy-json')?.addEventListener('click', async () => {
@@ -3263,7 +3104,7 @@ function setupUnifiedUI(): void {
     document.getElementById('quick-reset-json')?.addEventListener('click', () => {
       deepAssign(currentConfig, DEFAULT_CONFIG);
       applyConfigToSceneAndRenderer(currentConfig);
-      gui.controllersRecursive().forEach((controller) => controller.updateDisplay());
+      updateAllGuisDisplay();
       syncTimeOfDayButtons();
       syncBgButtons();
       showToast(t().toasts.configReset);
@@ -3379,7 +3220,7 @@ function setupUnifiedUI(): void {
         updateBackgroundDisplay(currentConfig);
         updateMidgroundDisplay(currentConfig);
         syncBgButtons();
-        gui.controllersRecursive().forEach((c) => c.updateDisplay());
+        updateAllGuisDisplay();
       });
     });
 

@@ -181,9 +181,10 @@ export class EffectTextInstance {
       }
     }
 
-    // 3. Rise Animation (floats upward steadily from bottom to top)
+    // 3. Rise Animation (floats upward steadily with gentle swaying)
     if (this.animations.has('rise')) {
       posY += this.riseSpeed * this.elapsedTime;
+      posX += Math.sin(this.elapsedTime * 3.2) * 0.012;
     }
 
     // 4. Drop Animation (slow fall for gaan)
@@ -218,9 +219,18 @@ export class EffectTextInstance {
       rot += Math.sin(this.elapsedTime * 4.0) * 0.12;
     }
 
-    // 8. Pulse Animation (heartbeat scaling)
+    // 8. Pulse Animation (expressive heartbeat pulse: ba-thump, ba-thump scaling)
     if (this.animations.has('pulse')) {
-      scaleMultiplier *= 1.0 + Math.sin(this.elapsedTime * 8.0) * 0.12;
+      const beat = (this.elapsedTime * 2.6) % 1.0;
+      let pulseFactor = 0;
+      if (beat < 0.22) {
+        // 1st pulse (strong thump)
+        pulseFactor = Math.sin((beat / 0.22) * Math.PI) * 0.26;
+      } else if (beat >= 0.28 && beat < 0.48) {
+        // 2nd pulse (secondary thump)
+        pulseFactor = Math.sin(((beat - 0.28) / 0.20) * Math.PI) * 0.16;
+      }
+      scaleMultiplier *= (1.0 + pulseFactor);
     }
 
     // 9. FadeOut Animation (smooth decay near end of lifetime)

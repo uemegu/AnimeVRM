@@ -155,9 +155,9 @@ body {
 
 .studio-tab-btn {
   flex: 1;
-  min-width: 50px;
-  padding: 9px 4px;
-  font-size: 11px;
+  min-width: 60px;
+  padding: 10px 4px;
+  font-size: 11.5px;
   font-weight: 500;
   color: #888888;
   background: transparent;
@@ -375,7 +375,14 @@ body {
 }
 
 /* Blender-style lil-gui integration inside unified panel */
-#gui-mount-point .lil-gui {
+[id^="gui-mount-point"],
+.gui-mount-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+[id^="gui-mount-point"] .lil-gui,
+.lil-gui {
   --background-color: #242424 !important;
   --text-color: #cccccc !important;
   --title-background-color: #1e1e1e !important;
@@ -387,16 +394,22 @@ body {
   font-family: inherit !important;
   font-size: 11px !important;
   width: 100% !important;
+  max-width: 100% !important;
   border-radius: 6px !important;
+  box-sizing: border-box !important;
 }
 
-#gui-mount-point .lil-gui.root {
+[id^="gui-mount-point"] .lil-gui.root,
+.lil-gui.root {
   border: 1px solid #333333 !important;
   background: #202020 !important;
+  width: 100% !important;
 }
 
-#gui-mount-point .lil-gui .lil-gui {
+[id^="gui-mount-point"] .lil-gui .lil-gui,
+.lil-gui .lil-gui {
   border-top: 1px solid #2a2a2a !important;
+  width: 100% !important;
 }
 
 /* ==================================================== */

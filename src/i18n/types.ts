@@ -24,12 +24,9 @@ export interface Translations {
   };
   tabs: {
     character: string;
-    scenario: string;
-    scenes: string;
-    render: string;
-    histogram: string;
-    masters: string;
-    aichat: string;
+    stage: string;
+    visual: string;
+    system: string;
   };
   aichat: {
     title: string;

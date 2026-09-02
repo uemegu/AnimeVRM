@@ -23,13 +23,10 @@ export const ja: Translations = {
     selectLanguage: '言語切替',
   },
   tabs: {
-    character: 'キャラ・演出',
-    scenario: 'シナリオ',
-    scenes: 'シーン',
-    render: '描画・設定',
-    histogram: 'ヒストグラム',
-    masters: 'マスター',
-    aichat: 'AI会話',
+    character: 'Character',
+    stage: 'Stage',
+    visual: 'Settings',
+    system: 'Others',
   },
   aichat: {
     title: 'AIアバター会話 (Gemini Nano)',

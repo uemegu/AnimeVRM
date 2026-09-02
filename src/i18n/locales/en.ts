@@ -23,13 +23,10 @@ export const en: Translations = {
     selectLanguage: 'Language',
   },
   tabs: {
-    character: 'Character & FX',
-    scenario: 'Scenario',
-    scenes: 'Scenes',
-    render: 'Render & Config',
-    histogram: 'Histogram',
-    masters: 'Masters',
-    aichat: 'AI Chat',
+    character: 'Character',
+    stage: 'Stage',
+    visual: 'Settings',
+    system: 'Others',
   },
   aichat: {
     title: 'AI Avatar Chat (Gemini Nano)',

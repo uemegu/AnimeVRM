@@ -31,7 +31,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.34,
-    defaultOffset: { x: 0, y: 0.32, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
       position: 0.006,
       rotation: 0.035,
@@ -72,7 +72,7 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     animations: ['pop', 'shake'],
     defaultDuration: Infinity,
     defaultScale: 0.35,
-    defaultOffset: { x: 0, y: 0.32, z: 0.04 },
+    defaultOffset: { x: 0, y: 0.04, z: 0.04 },
     shakeIntensity: {
       position: 0.007,
       rotation: 0.04,
@@ -108,17 +108,17 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       slant: -4,
     },
     animations: ['pop', 'pulse', 'rise', 'fadeOut'],
-    defaultDuration: 2.0,
+    defaultDuration: Infinity,
     defaultScale: 0.38,
-    defaultOffset: { x: 0, y: 0.20, z: 0.04 },
-    riseSpeed: 0.16,
+    defaultOffset: { x: 0, y: -0.06, z: 0.04 }, // 低め（胸・肩の横）から湧き上がり開始
+    riseSpeed: 0.18,
     streamConfig: {
       phrase: 'ドキ',
       count: Infinity,
-      interval: 0.52,
-      spreadX: 0.26, // Spread wider away from center face
-      riseSpeed: 0.16,
-      particleDuration: 1.9,
+      interval: 0.46,
+      spreadX: 0.24,
+      riseSpeed: 0.18,
+      particleDuration: 2.1,
       particleScale: 0.38,
     },
   },
