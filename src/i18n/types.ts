@@ -29,6 +29,26 @@ export interface Translations {
     render: string;
     histogram: string;
     masters: string;
+    aichat: string;
+  };
+  aichat: {
+    title: string;
+    description: string;
+    llmModel: string;
+    llmGeminiNano: string;
+    llmLfm: string;
+    statusUnloaded: string;
+    statusLoading: string;
+    statusReady: string;
+    statusGenerating: string;
+    statusSynthesizing: string;
+    statusSpeaking: string;
+    statusError: string;
+    prepareAi: string;
+    inputPlaceholder: string;
+    send: string;
+    emptyHistory: string;
+    webgpuWarning: string;
   };
   histogram: {
     title: string;

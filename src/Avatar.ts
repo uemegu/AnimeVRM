@@ -197,6 +197,7 @@ export class Avatar {
   public initialRotationY: number = 0;
 
   private options: AvatarOptions;
+  private ownsEffectTextManager = false;
   private blinkTimer = 0;
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
   private currentExpression: string = 'neutral';
@@ -239,6 +240,7 @@ export class Avatar {
       this.initialRotationY = options.rotationY;
     }
 
+    this.ownsEffectTextManager = !options.effectTextManager;
     this.effectTextManager = options.effectTextManager ?? new EffectTextManager(scene);
     this.blinkTimer = this.getRandomBlinkInterval(3, 7);
     this.loadModel();
@@ -762,7 +764,11 @@ export class Avatar {
     this.tearEffect?.dispose();
     this.tearEffect = null;
 
-    this.effectTextManager?.dispose();
+    if (this.ownsEffectTextManager) {
+      this.effectTextManager?.dispose();
+    } else {
+      this.effectTextManager?.clear();
+    }
     this.effectTextManager = null;
 
     this.shaderController?.dispose();

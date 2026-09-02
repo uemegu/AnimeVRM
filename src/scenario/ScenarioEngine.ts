@@ -66,6 +66,7 @@ export class ScenarioEngine {
   private bgmAudio: HTMLAudioElement | null = null;
   private seAudio: HTMLAudioElement | null = null;
   private autoNextTimer: number | null = null;
+  private pendingEffectTextTimers: number[] = [];
   private boundVoiceEndHandler: (() => void) | null = null;
 
   constructor(options: ScenarioEngineOptions) {
@@ -153,6 +154,7 @@ export class ScenarioEngine {
 
     this.isPlayingState = false;
     this.clearAutoNextTimer();
+    this.clearPendingEffectTextTimers();
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
@@ -353,22 +355,26 @@ export class ScenarioEngine {
       avatar.resetFaceTexture();
     }
 
-    // 3D Manga Emotion Effect Text
+    // 3D Manga Emotion Effect Text (カメラワーク後に発火するようディレイを適用)
+    avatar.clearEffectText();
     if (effectText) {
-      if (typeof effectText === 'string') {
-        avatar.showEffectText({
-          stylePreset: effectText,
-          text: '',
-        });
-      } else {
-        avatar.showEffectText({
-          stylePreset: effectText.preset,
-          text: effectText.text ?? '',
-          duration: effectText.duration,
-        });
-      }
-    } else {
-      avatar.clearEffectText();
+      const delayMs = 900; // カメラがズーム・移動し画面が安定するまで約0.9秒ディレイ
+      const timer = window.setTimeout(() => {
+        if (!this.isPlayingState) return;
+        if (typeof effectText === 'string') {
+          avatar.showEffectText({
+            stylePreset: effectText,
+            text: '',
+          });
+        } else {
+          avatar.showEffectText({
+            stylePreset: effectText.preset,
+            text: effectText.text ?? '',
+            duration: effectText.duration,
+          });
+        }
+      }, delayMs);
+      this.pendingEffectTextTimers.push(timer);
     }
   }
 
@@ -380,6 +386,7 @@ export class ScenarioEngine {
     }
 
     this.clearAutoNextTimer();
+    this.clearPendingEffectTextTimers();
     this.stopVoice();
 
     // 0. Single Character Model Switch (if specified & not in multi-character package)
@@ -532,6 +539,13 @@ export class ScenarioEngine {
       clearTimeout(this.autoNextTimer);
       this.autoNextTimer = null;
     }
+  }
+
+  private clearPendingEffectTextTimers(): void {
+    for (const timer of this.pendingEffectTextTimers) {
+      clearTimeout(timer);
+    }
+    this.pendingEffectTextTimers = [];
   }
 
   public dispose(): void {
