@@ -125,6 +125,8 @@ export class AudioLipSync {
   private sourceNode: MediaElementAudioSourceNode | null = null;
   private delayNode: DelayNode | null = null;
   private gainNode: GainNode | null = null;
+  private pannerNode: StereoPannerNode | null = null;
+  private currentPan: number = 0; // -1.0 (Left) to 1.0 (Right)
   private events: AudioLipSyncEvents = {};
   private objectUrlToRevoke: string | null = null;
 
@@ -216,11 +218,21 @@ export class AudioLipSync {
     this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
     this.gainNode = this.audioContext.createGain();
 
-    // Playback Route: source -> analyser -> delay -> gain -> speakers
+    if (typeof this.audioContext.createStereoPanner === 'function') {
+      this.pannerNode = this.audioContext.createStereoPanner();
+      this.pannerNode.pan.setValueAtTime(this.currentPan, this.audioContext.currentTime);
+    }
+
+    // Playback Route: source -> analyser -> delay -> gain -> (panner) -> speakers
     this.sourceNode.connect(this.analyzerNode);
     this.analyzerNode.connect(this.delayNode);
     this.delayNode.connect(this.gainNode);
-    this.gainNode.connect(this.audioContext.destination);
+    if (this.pannerNode) {
+      this.gainNode.connect(this.pannerNode);
+      this.pannerNode.connect(this.audioContext.destination);
+    } else {
+      this.gainNode.connect(this.audioContext.destination);
+    }
 
     // Meyda's streaming analyzer uses the deprecated ScriptProcessorNode.
     // Read the current signal with AnalyserNode and use Meyda's synchronous
@@ -341,10 +353,23 @@ export class AudioLipSync {
   }
 
   /**
+   * Set stereo panning (-1.0 = 100% Left, 0.0 = Center, 1.0 = 100% Right)
+   */
+  public setPan(pan: number): void {
+    this.currentPan = Math.max(-1.0, Math.min(1.0, pan));
+    if (this.pannerNode && this.audioContext) {
+      this.pannerNode.pan.setValueAtTime(this.currentPan, this.audioContext.currentTime);
+    }
+  }
+
+  /**
    * Load audio from URL
    */
-  public loadAudioUrl(url: string, title?: string): void {
+  public loadAudioUrl(url: string, title?: string, pan?: number): void {
     this.initAudioContext();
+    if (typeof pan === 'number') {
+      this.setPan(pan);
+    }
     const resolvedUrl = resolveAssetUrl(url);
     this.audioTitle = title || url.split('/').pop() || 'Audio Track';
     this.audioElement.src = resolvedUrl;

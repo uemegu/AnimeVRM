@@ -275,10 +275,10 @@ export class DialogueCameraController {
       // Wide shot: Center view between all characters
       targetPos.set(0, 1.15, -0.3);
     } else {
-      // Focus on speaker's head/chest
+      // Focus on speaker's head/chest/eyes
       targetPos.set(
         speakerWorldPos.x,
-        speakerWorldPos.y + (zoomType === 'speaker_close' ? 1.30 : 1.25),
+        speakerWorldPos.y + (zoomType === 'speaker_extreme_close' ? 1.33 : (zoomType === 'speaker_close' ? 1.30 : 1.25)),
         speakerWorldPos.z
       );
     }
@@ -287,6 +287,19 @@ export class DialogueCameraController {
     const angle: CameraStartAngle = scene.cameraStartAngle || 'front';
 
     switch (zoomType) {
+      case 'speaker_extreme_close': {
+        // Extreme intimate close-up (もう1段近づけた超至近距離・顔/目線アップ・消えない安全距離)
+        const shotDist = (isMultiCharacter ? 0.95 : 0.85) * distMultiplier;
+        defaultFov = Math.max(20, this.baseFov - 6);
+        const angleOffsetX = speakerWorldPos.x < 0 ? 0.05 : (speakerWorldPos.x > 0 ? -0.05 : 0);
+        defaultCameraPos.set(
+          targetPos.x + angleOffsetX,
+          targetPos.y + 0.02,
+          targetPos.z + shotDist
+        );
+        break;
+      }
+
       case 'speaker_close': {
         // Close-up shot ("ギュイーン"と寄るバストアップ〜表情アップ - 近すぎて消えない安全距離)
         const shotDist = (isMultiCharacter ? 1.45 : 1.35) * distMultiplier;
