@@ -203,11 +203,12 @@ export class EffectTextManager {
       const baseScale = (normalizedOptions.scale ?? 1.0) * (preset.defaultScale ?? 0.35);
 
       // Organic, asymmetric positions around avatar with varying heights, depths, and angles
+      // Placed around the head, cheek, shoulder, and chest for a natural manga effect
       const positions = [
-        { x: 0.22, y: 0.13, z: 0.04, rot: -0.12, scaleMul: 1.05 },  // 右上（やや高め・外寄り）
-        { x: 0.25, y: -0.05, z: 0.05, rot: 0.09, scaleMul: 0.92 },   // 右下（肩付近・手前）
-        { x: -0.24, y: -0.09, z: 0.03, rot: -0.07, scaleMul: 0.98 }, // 左下（胸横・少し低め）
-        { x: -0.18, y: 0.08, z: 0.04, rot: 0.13, scaleMul: 1.02 },   // 左上（頭横・内寄り）
+        { x: 0.23, y: 0.02, z: 0.04, rot: -0.12, scaleMul: 1.05 },  // 右上（頬・耳の横）
+        { x: 0.25, y: -0.18, z: 0.05, rot: 0.09, scaleMul: 0.92 },   // 右下（肩・胸の横）
+        { x: -0.25, y: -0.22, z: 0.03, rot: -0.07, scaleMul: 0.98 }, // 左下（肩・胸の横）
+        { x: -0.20, y: -0.02, z: 0.04, rot: 0.13, scaleMul: 1.02 },  // 左上（頬・耳の横）
       ];
 
       const baseOffset = normalizedOptions.offset ?? preset.defaultOffset ?? { x: 0, y: 0, z: 0 };
