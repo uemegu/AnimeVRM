@@ -2,12 +2,14 @@ import { ScenarioChoice } from '../scenario/types';
 import { t } from '../i18n';
 
 export interface AdventureMessageWindowOptions {
+  container?: HTMLElement | null;
   onNextClick?: () => void;
   onStopClick?: () => void;
   typingSpeedMs?: number;
 }
 
 export class AdventureMessageWindow {
+  private parentContainer: HTMLElement | null = null;
   private container: HTMLDivElement | null = null;
   private contentEl: HTMLDivElement | null = null;
   private speakerEl: HTMLDivElement | null = null;
@@ -28,10 +30,15 @@ export class AdventureMessageWindow {
   private boundKeyHandler: ((e: KeyboardEvent) => void) | null = null;
 
   constructor(options: AdventureMessageWindowOptions = {}) {
+    this.parentContainer = options.container ?? null;
     this.typingSpeedMs = options.typingSpeedMs ?? 24;
     this.onNextClick = options.onNextClick;
     this.onStopClick = options.onStopClick;
     this.injectStyles();
+  }
+
+  private getParentContainer(): HTMLElement {
+    return this.parentContainer ?? document.getElementById('viewport-container') ?? document.body;
   }
 
   private injectStyles(): void {
@@ -42,18 +49,18 @@ export class AdventureMessageWindow {
     style.textContent = `
       /* --- Message Window Container --- */
       .adv-message-container {
-        position: fixed;
+        position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        height: clamp(210px, 30vh, 290px);
+        height: clamp(160px, 30%, 270px);
         background: linear-gradient(to bottom, rgba(3, 7, 18, 0) 0%, rgba(3, 7, 18, 0.78) 24%, rgba(3, 7, 18, 0.96) 100%);
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        padding: 40px 24px 24px;
+        padding: 36px 24px 20px;
         box-sizing: border-box;
-        z-index: 9990;
+        z-index: 50;
         pointer-events: auto;
         cursor: pointer;
         opacity: 0;
@@ -69,10 +76,10 @@ export class AdventureMessageWindow {
 
       /* --- Top Left Location Badge --- */
       .adv-location-badge {
-        position: fixed;
-        top: 20px;
-        left: 20px;
-        z-index: 9995;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        z-index: 60;
         background: rgba(15, 23, 42, 0.85);
         color: #e2e8f0;
         border: 1px solid rgba(148, 163, 184, 0.3);
@@ -99,10 +106,10 @@ export class AdventureMessageWindow {
 
       /* --- Top Right Floating Controls --- */
       .adv-top-controls {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 60;
         display: flex;
         gap: 8px;
         opacity: 0;
@@ -142,7 +149,7 @@ export class AdventureMessageWindow {
         width: 100%;
         color: #ccfbf1;
         font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', serif;
-        font-size: clamp(17px, 2.2vw, 22px);
+        font-size: clamp(16px, 2.2vw, 22px);
         font-weight: 500;
         line-height: 1.85;
         letter-spacing: 0.04em;
@@ -192,11 +199,11 @@ export class AdventureMessageWindow {
 
       /* --- Persona-Style Choice Dialog & Backdrop --- */
       .adv-choices-backdrop {
-        position: fixed;
+        position: absolute;
         inset: 0;
         background: radial-gradient(circle at center, rgba(15, 23, 42, 0.45) 0%, rgba(3, 7, 18, 0.8) 100%);
         backdrop-filter: blur(6px);
-        z-index: 9996;
+        z-index: 70;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.25s ease;
@@ -208,11 +215,11 @@ export class AdventureMessageWindow {
       }
 
       .adv-choices-container {
-        position: fixed;
-        top: 38%;
+        position: absolute;
+        top: 42%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 9998;
+        z-index: 75;
         display: flex;
         flex-direction: column;
         gap: 22px; /* 1と2が被らないよう十分な間隔を確保 */
@@ -598,6 +605,7 @@ export class AdventureMessageWindow {
 
   private createDOM(): void {
     if (this.container) return;
+    const parent = this.getParentContainer();
 
     // Location Badge (Top Left)
     const locationBadge = document.createElement('div');
@@ -605,7 +613,7 @@ export class AdventureMessageWindow {
     if (this.currentLocation) {
       locationBadge.innerHTML = `📍 ${this.escapeHTML(this.currentLocation)}`;
     }
-    document.body.appendChild(locationBadge);
+    parent.appendChild(locationBadge);
     this.locationBadgeEl = locationBadge;
 
     // Bottom Message Container
@@ -652,7 +660,7 @@ export class AdventureMessageWindow {
       }
     });
 
-    document.body.appendChild(container);
+    parent.appendChild(container);
     this.container = container;
 
     // Top Right Floating Controls (Stop Button)
@@ -668,22 +676,23 @@ export class AdventureMessageWindow {
       e.stopPropagation();
       this.onStopClick?.();
     });
-    document.body.appendChild(topControls);
+    parent.appendChild(topControls);
 
     this.createChoicesDOM();
   }
 
   private createChoicesDOM(): void {
     if (document.getElementById('adv-choices-backdrop')) return;
+    const parent = this.getParentContainer();
 
     const backdrop = document.createElement('div');
     backdrop.id = 'adv-choices-backdrop';
     backdrop.className = 'adv-choices-backdrop';
-    document.body.appendChild(backdrop);
+    parent.appendChild(backdrop);
 
     const choicesContainer = document.createElement('div');
     choicesContainer.className = 'adv-choices-container';
-    document.body.appendChild(choicesContainer);
+    parent.appendChild(choicesContainer);
     this.choicesContainerEl = choicesContainer;
   }
 

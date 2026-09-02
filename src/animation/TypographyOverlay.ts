@@ -19,7 +19,12 @@ export class TypographyOverlay {
     if (!bg) {
       bg = document.createElement('div');
       bg.id = 'animation-background';
-      document.body.prepend(bg);
+      const canvas = document.getElementById('app');
+      if (canvas && canvas.parentNode) {
+        canvas.parentNode.insertBefore(bg, canvas);
+      } else {
+        document.body.prepend(bg);
+      }
     }
     this.bgLayer = bg;
 
