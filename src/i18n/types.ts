@@ -37,6 +37,7 @@ export interface Translations {
     llmModel: string;
     llmGeminiNano: string;
     llmLfm: string;
+    ttsSteps: string;
     statusUnloaded: string;
     statusLoading: string;
     statusReady: string;
