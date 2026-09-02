@@ -32,11 +32,8 @@ export const ja: Translations = {
     aichat: 'AI会話',
   },
   aichat: {
-    title: 'AIアバター会話 (WebGPU)',
-    description: 'ブラウザ内のローカルLLMとIrodori-TTSを実行し、AIアバターと完全ローカルで会話します。',
-    llmModel: 'LLMモデル',
-    llmGeminiNano: 'Gemini Nano (Chrome組み込み・高速)',
-    llmLfm: 'LFM2.5-2.6B (WebGPU ONNX)',
+    title: 'AIアバター会話 (Gemini Nano)',
+    description: 'Chrome組み込みのGemini NanoとIrodori-TTSを実行し、AIアバターと完全ローカルで会話します。',
     ttsSteps: 'TTSステップ数',
     statusUnloaded: 'AI未ロード',
     statusLoading: '読み込み中...',

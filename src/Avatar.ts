@@ -277,7 +277,7 @@ export class Avatar {
 
         // Optimize geometry & joints
         VRMUtils.removeUnnecessaryVertices(gltf.scene);
-        VRMUtils.removeUnnecessaryJoints(gltf.scene);
+        VRMUtils.combineSkeletons(gltf.scene);
 
         // Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
         applySmoothNormalsToHierarchy(vrm.scene);

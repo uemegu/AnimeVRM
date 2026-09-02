@@ -32,11 +32,8 @@ export const en: Translations = {
     aichat: 'AI Chat',
   },
   aichat: {
-    title: 'AI Avatar Chat (WebGPU)',
-    description: 'Runs local LLM and Irodori-TTS locally in browser for completely client-side avatar chat.',
-    llmModel: 'LLM Model',
-    llmGeminiNano: 'Gemini Nano (Chrome Built-in / Fast)',
-    llmLfm: 'LFM2.5-2.6B (WebGPU ONNX)',
+    title: 'AI Avatar Chat (Gemini Nano)',
+    description: 'Runs Chrome built-in Gemini Nano and Irodori-TTS locally in browser for completely client-side avatar chat.',
     ttsSteps: 'TTS Steps',
     statusUnloaded: 'AI Unloaded',
     statusLoading: 'Loading...',

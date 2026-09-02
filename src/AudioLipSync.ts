@@ -30,7 +30,7 @@ interface FormantBands {
 }
 
 function calculateFormantBands(
-  spectrum: number[],
+  spectrum: ArrayLike<number>,
   sampleRate: number,
   bufferSize: number,
   gender: 'female' | 'male' = 'female'
@@ -119,7 +119,9 @@ export class AudioLipSync {
   public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
 
-  private analyzer: any = null;
+  private analyzerNode: AnalyserNode | null = null;
+  private analysisBuffer: Float32Array<ArrayBuffer> | null = null;
+  private analysisFrameId: number | null = null;
   private sourceNode: MediaElementAudioSourceNode | null = null;
   private delayNode: DelayNode | null = null;
   private gainNode: GainNode | null = null;
@@ -197,7 +199,7 @@ export class AudioLipSync {
   }
 
   /**
-   * AudioContext and Meyda Analyzer lazy initialization
+   * AudioContext and non-deprecated Web Audio analysis lazy initialization.
    */
   private initAudioContext(): void {
     if (this.audioContext) return;
@@ -206,62 +208,74 @@ export class AudioLipSync {
     this.audioContext = new AudioContextClass();
 
     this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
+    this.analyzerNode = this.audioContext.createAnalyser();
+    this.analyzerNode.fftSize = 512;
+    this.analyzerNode.smoothingTimeConstant = 0;
+    this.analysisBuffer = new Float32Array(this.analyzerNode.fftSize);
     this.delayNode = this.audioContext.createDelay(1.0);
     this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
     this.gainNode = this.audioContext.createGain();
 
-    // Playback Route: source -> delay -> gain -> speakers
-    this.sourceNode.connect(this.delayNode);
+    // Playback Route: source -> analyser -> delay -> gain -> speakers
+    this.sourceNode.connect(this.analyzerNode);
+    this.analyzerNode.connect(this.delayNode);
     this.delayNode.connect(this.gainNode);
     this.gainNode.connect(this.audioContext.destination);
 
-    // Initialize Meyda Analyzer directly from sourceNode with zero-latency extraction
-    this.analyzer = Meyda.createMeydaAnalyzer({
-      audioContext: this.audioContext,
-      source: this.sourceNode,
-      bufferSize: 512,
-      featureExtractors: ['mfcc', 'rms', 'powerSpectrum'],
-      callback: (features: { mfcc?: number[]; rms?: number; powerSpectrum?: number[] }) => {
-        if (!this.isPlaying) {
-          if (this.currentPhoneme !== 'nn') {
-            this.currentPhoneme = 'nn';
-            this.events.onPhonemeChange?.('nn');
-          }
-          return;
-        }
+    // Meyda's streaming analyzer uses the deprecated ScriptProcessorNode.
+    // Read the current signal with AnalyserNode and use Meyda's synchronous
+    // feature extraction instead, keeping analysis off the audio render path.
+    Meyda.bufferSize = this.analyzerNode.fftSize;
+    Meyda.sampleRate = this.audioContext.sampleRate;
+    this.scheduleAnalysis();
+  }
 
-        const rms = features?.rms ?? 0;
-        this.currentRms = rms;
-
-        // If audio level is too quiet (silence/noise floor), close mouth
-        if (rms < this.rmsThreshold) {
-          if (this.currentPhoneme !== 'nn') {
-            this.currentPhoneme = 'nn';
-            this.events.onPhonemeChange?.('nn');
-          }
-          return;
-        }
-
-        const mfcc = features?.mfcc;
-        const spectrum = features?.powerSpectrum;
-        if (mfcc && mfcc.length > 1) {
-          const phoneme = this.guessPhoneme(mfcc, spectrum);
-          if (this.currentPhoneme !== phoneme) {
-            this.currentPhoneme = phoneme;
-            this.events.onPhonemeChange?.(phoneme);
-          }
-        }
-      },
+  private scheduleAnalysis(): void {
+    this.analysisFrameId = requestAnimationFrame(() => {
+      this.analysisFrameId = null;
+      this.analyzeCurrentFrame();
+      if (this.audioContext?.state !== 'closed') {
+        this.scheduleAnalysis();
+      }
     });
+  }
 
-    this.analyzer.start();
+  private analyzeCurrentFrame(): void {
+    if (!this.isPlaying || !this.analyzerNode || !this.analysisBuffer) return;
+
+    this.analyzerNode.getFloatTimeDomainData(this.analysisBuffer);
+    const features = Meyda.extract(
+      ['mfcc', 'rms', 'powerSpectrum'],
+      this.analysisBuffer
+    );
+    const rms = features?.rms ?? 0;
+    this.currentRms = rms;
+
+    // If audio level is too quiet (silence/noise floor), close mouth.
+    if (rms < this.rmsThreshold) {
+      if (this.currentPhoneme !== 'nn') {
+        this.currentPhoneme = 'nn';
+        this.events.onPhonemeChange?.('nn');
+      }
+      return;
+    }
+
+    const mfcc = features?.mfcc;
+    const spectrum = features?.powerSpectrum;
+    if (mfcc && mfcc.length > 1) {
+      const phoneme = this.guessPhoneme(mfcc, spectrum);
+      if (this.currentPhoneme !== phoneme) {
+        this.currentPhoneme = phoneme;
+        this.events.onPhonemeChange?.(phoneme);
+      }
+    }
   }
 
   /**
    * High-accuracy hybrid phoneme classifier combining multi-dimensional MFCC
    * prototype matching with FFT spectral formant band energy ratios.
    */
-  public guessPhoneme(mfcc: number[], powerSpectrum?: number[]): Phoneme | 'nn' {
+  public guessPhoneme(mfcc: number[], powerSpectrum?: ArrayLike<number>): Phoneme | 'nn' {
     if (!mfcc || mfcc.length < 2) return 'nn';
 
     // c1 to c8 (skip c0 which is overall energy)
@@ -407,8 +421,13 @@ export class AudioLipSync {
    */
   public dispose(): void {
     this.stop();
-    this.analyzer?.stop();
-    this.analyzer = null;
+    if (this.analysisFrameId !== null) {
+      cancelAnimationFrame(this.analysisFrameId);
+      this.analysisFrameId = null;
+    }
+    this.analysisBuffer = null;
+    this.analyzerNode?.disconnect();
+    this.analyzerNode = null;
 
     if (this.objectUrlToRevoke) {
       URL.revokeObjectURL(this.objectUrlToRevoke);

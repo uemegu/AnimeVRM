@@ -1,9 +1,8 @@
 import { Avatar } from '../Avatar';
 import { AudioLipSync } from '../AudioLipSync';
-import { LfmService } from './LfmService';
 import { GeminiNanoService } from './GeminiNanoService';
 import { IrodoriTTSService } from './IrodoriTTSService';
-import { AvatarMotion, AvatarReply, ChatMessage, ChatState, LlmProvider } from './types';
+import { AvatarMotion, AvatarReply, ChatMessage, ChatState } from './types';
 
 export const MOTIONS: Record<AvatarMotion, string> = {
   idle: '/animations/Idle.fbx',
@@ -72,8 +71,6 @@ export function splitSpeechIntoChunks(text: string): string[] {
   const chunks: string[] = [];
   let leadingShortChunk = '';
   for (const chunk of rawChunks) {
-    // A short but complete sentence such as "こんにちは。" is an excellent
-    // first streaming chunk. Only merge tiny/incomplete fragments.
     const isCompleteShortSentence = chunk.length >= 4 && /[。．.!！?？]+$/u.test(chunk);
     if (chunk.length < MIN_SPEECH_CHUNK_CHARS && !isCompleteShortSentence) {
       if (chunks.length > 0) {
@@ -95,10 +92,8 @@ export function splitSpeechIntoChunks(text: string): string[] {
 }
 
 export class AvatarChatController {
-  private lfmService: LfmService;
   private geminiNanoService: GeminiNanoService;
   private ttsService: IrodoriTTSService;
-  private llmProvider: LlmProvider = 'gemini-nano';
   private avatar: Avatar | null = null;
   private audioLipSync: AudioLipSync | null = null;
   private state: ChatState = 'unloaded';
@@ -109,7 +104,6 @@ export class AvatarChatController {
 
   constructor(events: AvatarChatControllerEvents = {}) {
     this.events = events;
-    this.lfmService = new LfmService();
     this.geminiNanoService = new GeminiNanoService();
     this.ttsService = new IrodoriTTSService();
   }
@@ -124,22 +118,6 @@ export class AvatarChatController {
 
   public setAudioLipSync(audioLipSync: AudioLipSync | null): void {
     this.audioLipSync = audioLipSync;
-  }
-
-  public setLlmProvider(provider: LlmProvider): void {
-    if (this.llmProvider === provider) return;
-    this.llmProvider = provider;
-    // If not ready with the new provider, reset to unloaded
-    const isReady =
-      (provider === 'gemini-nano' ? this.geminiNanoService.ready : this.lfmService.ready) &&
-      this.ttsService.ready;
-    if (!isReady && this.state === 'ready') {
-      this.setState('unloaded', 'LLMが変更されました。「AIを準備」を押してください');
-    }
-  }
-
-  public getLlmProvider(): LlmProvider {
-    return this.llmProvider;
   }
 
   public setTtsNumSteps(numSteps: number): void {
@@ -178,18 +156,12 @@ export class AvatarChatController {
     }
 
     try {
-      this.setState('loading', 'AIモデルを初期化中...');
+      this.setState('loading', 'Gemini Nanoを初期化中...');
 
-      // 1. Load Selected LLM
-      if (this.llmProvider === 'gemini-nano') {
-        await this.geminiNanoService.load((msg) => {
-          this.setState('loading', msg);
-        });
-      } else {
-        await this.lfmService.load((msg) => {
-          this.setState('loading', msg);
-        });
-      }
+      // 1. Load Gemini Nano
+      await this.geminiNanoService.load((msg) => {
+        this.setState('loading', msg);
+      });
 
       // 2. Load TTS
       await this.ttsService.load((msg) => {
@@ -225,12 +197,9 @@ export class AvatarChatController {
     try {
       // 2. Generate LLM Reply
       this.setState('generating', '考え中...');
-      console.log(`[AvatarChatController] Generating reply with ${this.llmProvider}...`);
+      console.log('[AvatarChatController] Generating reply with Gemini Nano...');
       
-      const { reply } =
-        this.llmProvider === 'gemini-nano'
-          ? await this.geminiNanoService.generate(this.history)
-          : await this.lfmService.generate(this.history);
+      const { reply } = await this.geminiNanoService.generate(this.history);
 
       console.log('[AvatarChatController] LLM parsed reply:', reply);
 
@@ -242,8 +211,7 @@ export class AvatarChatController {
         motion: reply.motion,
       });
 
-      // 3. Generate speech in punctuation-delimited chunks. Once the first
-      // chunk is ready, play it while WebGPU generates the next one.
+      // 3. Generate speech in punctuation-delimited chunks.
       await this.streamAvatarReaction(reply, responseStartTime);
       this.isProcessing = false;
       this.setState('ready', '準備完了');
@@ -258,146 +226,74 @@ export class AvatarChatController {
 
   private async streamAvatarReaction(
     reply: AvatarReply,
-    responseStartTime: number
+    turnaroundStartTime: number
   ): Promise<void> {
-    const chunks = splitSpeechIntoChunks(reply.speech);
-    if (chunks.length === 0) return;
-
-    const numSteps = this.ttsNumSteps;
-    let hasStartedPlayback = false;
-    let hasLoggedSpeechStart = false;
-    console.log(
-      `[AvatarChatController] Streaming TTS: ${chunks.length} chunk(s), ${numSteps} steps`,
-      chunks
-    );
-
-    type Synthesis = Awaited<ReturnType<IrodoriTTSService['synthesize']>>;
-    type SettledSynthesis = { value: Synthesis } | { error: unknown };
-    const queueSynthesis = (index: number): Promise<SettledSynthesis> => {
-      const displayIndex = index + 1;
-      this.events.onTtsGpuActivityChange?.(true);
-      return this.ttsService
-        .synthesize(chunks[index], {
-          numSteps,
-          onProgress: (pct) => {
-            if (hasStartedPlayback) {
-              this.setState(
-                'speaking',
-                `再生中 · 次の音声生成中 (${displayIndex}/${chunks.length}, ${pct}%)`
-              );
-            } else {
-              this.setState(
-                'synthesizing',
-                `音声生成中 (${displayIndex}/${chunks.length}, ${pct}%)...`
-              );
-            }
-          },
-        })
-        .then(
-          (value) => ({ value }),
-          (error) => ({ error })
-        )
-        .finally(() => {
-          this.events.onTtsGpuActivityChange?.(false);
-        });
-    };
-
-    this.setState('synthesizing', `音声生成中 (1/${chunks.length}, 0%)...`);
-    let pendingSynthesis = queueSynthesis(0);
-
-    // Apply one expression and motion across all audio chunks.
-    if (this.avatar) {
-      this.avatar.setExpression(reply.expression, 1.0);
-      const motionUrl = MOTIONS[reply.motion] || MOTIONS.idle;
-      const isLoop = reply.motion === 'idle' || reply.motion === 'standing';
-      this.avatar.playAnimation(motionUrl, isLoop, 0.4);
+    if (!this.avatar || !this.audioLipSync) {
+      console.warn('[AvatarChatController] Avatar or AudioLipSync is missing, skipping reaction playback.');
+      return;
     }
 
-    for (let index = 0; index < chunks.length; index += 1) {
-      const synthesized = await pendingSynthesis;
-      if ('error' in synthesized) throw synthesized.error;
+    const chunks = splitSpeechIntoChunks(reply.speech);
+    if (chunks.length === 0) {
+      console.warn('[AvatarChatController] No speech text to synthesize.');
+      return;
+    }
 
-      hasStartedPlayback = true;
-      pendingSynthesis =
-        index + 1 < chunks.length
-          ? queueSynthesis(index + 1)
-          : Promise.resolve({ value: synthesized.value });
+    console.log(`[AvatarChatController] Synthesizing speech in ${chunks.length} chunk(s):`, chunks);
 
-      this.setState('speaking', `再生中 (${index + 1}/${chunks.length})`);
-      await this.playAudioChunk(synthesized.value.wavBlob, index, chunks.length, () => {
-        if (hasLoggedSpeechStart) return;
-        hasLoggedSpeechStart = true;
-        const speechStartMs = performance.now() - responseStartTime;
-        console.log(`[Chat] response -> speech start: ${speechStartMs.toFixed(1)} ms`);
+    // Initial avatar motion & expression on speech start
+    if (reply.motion && MOTIONS[reply.motion]) {
+      this.avatar.playAnimation(MOTIONS[reply.motion], false, 0.35, MOTIONS.idle);
+    }
+    if (reply.expression) {
+      this.avatar.setExpression(reply.expression, 0.85);
+    }
+
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkText = chunks[i];
+      const chunkLabel = `(${i + 1}/${chunks.length})`;
+
+      this.setState('synthesizing', `音声生成中 ${chunkLabel}...`);
+      this.events.onTtsGpuActivityChange?.(true);
+
+      const synthResult = await this.ttsService.synthesize(chunkText, {
+        numSteps: this.ttsNumSteps,
+        onProgress: (pct) => {
+          this.setState('synthesizing', `音声生成中 ${chunkLabel} (${pct}%)...`);
+        },
+      });
+
+      this.events.onTtsGpuActivityChange?.(false);
+
+      if (i === 0) {
+        const timeToFirstAudioMs = performance.now() - turnaroundStartTime;
+        console.log(`[Chat] Time to First Audio Playback: ${timeToFirstAudioMs.toFixed(1)} ms`);
+      }
+
+      this.setState('speaking', `再生中 ${chunkLabel}`);
+
+      const chunkFile = new File([synthResult.wavBlob], `speech_chunk_${i}.wav`, {
+        type: 'audio/wav',
+      });
+      this.audioLipSync.loadAudioFile(chunkFile);
+      await this.audioLipSync.play();
+
+      await new Promise<void>((resolve) => {
+        const checkPlaying = () => {
+          if (!this.audioLipSync?.isPlaying) {
+            resolve();
+          } else {
+            setTimeout(checkPlaying, 50);
+          }
+        };
+        setTimeout(checkPlaying, 100);
       });
     }
 
-    console.log('[AvatarChatController] Streaming speech playback completed.');
-  }
-
-  private playAudioChunk(
-    wavBlob: Blob,
-    index: number,
-    total: number,
-    onStarted: () => void
-  ): Promise<void> {
-    if (!this.audioLipSync) return Promise.resolve();
-
-    const lipSync = this.audioLipSync;
-    const audioElement = lipSync.audioElement;
-    const file = new File([wavBlob], `ai-response-${index + 1}.wav`, { type: 'audio/wav' });
-    console.log(
-      `[AvatarChatController] Playing audio chunk ${index + 1}/${total} (${wavBlob.size} bytes)`
-    );
-
-    return new Promise<void>((resolve, reject) => {
-      let settled = false;
-      const timeoutId = window.setTimeout(() => {
-        finish(new Error(`音声チャンク ${index + 1}/${total} の再生がタイムアウトしました`));
-      }, 60000);
-
-      const cleanup = () => {
-        window.clearTimeout(timeoutId);
-        audioElement.removeEventListener('ended', handleEnded);
-        audioElement.removeEventListener('error', handleError);
-      };
-      const finish = (error?: Error) => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        if (error) reject(error);
-        else resolve();
-      };
-      const handleEnded = () => finish();
-      const handleError = () => {
-        const mediaError = audioElement.error;
-        finish(
-          new Error(
-            `音声チャンクの再生に失敗しました${mediaError ? ` (code: ${mediaError.code})` : ''}`
-          )
-        );
-      };
-
-      audioElement.addEventListener('ended', handleEnded);
-      audioElement.addEventListener('error', handleError);
-
-      try {
-        lipSync.loadAudioFile(file);
-        void lipSync.play().then(
-          () => {
-            if (audioElement.paused) {
-              finish(new Error('ブラウザが音声再生を開始できませんでした'));
-              return;
-            }
-            onStarted();
-          },
-          (error) => {
-            finish(error instanceof Error ? error : new Error(String(error)));
-          }
-        );
-      } catch (error) {
-        finish(error instanceof Error ? error : new Error(String(error)));
-      }
-    });
+    // Reset expression to neutral and switch to idle after speaking completes
+    if (this.avatar) {
+      this.avatar.setExpression('neutral', 0.5);
+      this.avatar.playAnimation(MOTIONS.idle, true, 0.5);
+    }
   }
 }
