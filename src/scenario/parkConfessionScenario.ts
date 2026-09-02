@@ -123,7 +123,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/confess_love_2.wav',
           avatar: {
             motion: '/animations/Idle.fbx',
-            expression: 'happy',
+            expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/face_blush.png',
             effectText: {
@@ -145,7 +145,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/confess_love_3.wav',
           avatar: {
             motion: '/animations/Quick Formal Bow.fbx',
-            expression: 'happy',
+            expression: 'relaxed',
             expressionWeight: 0.9,
             faceTexture: '/textures/face_blush.png',
             effectText: 'kirakira',
@@ -421,7 +421,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/confess_love_2.wav',
           avatar: {
             motion: '/animations/Idle.fbx',
-            expression: 'happy',
+            expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/face_blush.png',
             effectText: {
@@ -443,7 +443,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/confess_love_3.wav',
           avatar: {
             motion: '/animations/Quick Formal Bow.fbx',
-            expression: 'happy',
+            expression: 'relaxed',
             expressionWeight: 0.9,
             faceTexture: '/textures/face_blush.png',
             effectText: 'kirakira',
