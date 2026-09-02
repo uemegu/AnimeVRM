@@ -871,6 +871,18 @@ export class AdventureMessageWindow {
     `;
   }
 
+  private playSE(url: string, volume = 0.5): void {
+    try {
+      const audio = new Audio(resolveAssetUrl(url));
+      audio.volume = volume;
+      audio.play().catch(() => {
+        // Safe catch for autoplay restrictions
+      });
+    } catch {
+      // Safe catch
+    }
+  }
+
   public showChoices(
     choices: ScenarioChoice[],
     onSelect: (choice: ScenarioChoice) => void
@@ -879,6 +891,9 @@ export class AdventureMessageWindow {
     if (this.nextIconEl) {
       this.nextIconEl.classList.remove('show');
     }
+
+    // Play Choices Shown SE
+    this.playSE('/se/items_shown.mp3', 0.6);
 
     let backdrop = document.getElementById('adv-choices-backdrop') as HTMLDivElement | null;
     if (!backdrop) {
@@ -955,8 +970,15 @@ export class AdventureMessageWindow {
         <span class="adv-choice-arrow">▸</span>
       `;
 
+      // Play Hover SE on mouseenter
+      btn.addEventListener('mouseenter', () => {
+        this.playSE('/se/items_hover.mp3', 0.45);
+      });
+
+      // Play Select SE on click
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        this.playSE('/se/items_chose.mp3', 0.65);
         this.hideChoices();
         onSelect(choice);
       });
