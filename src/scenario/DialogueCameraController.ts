@@ -92,6 +92,8 @@ export class DialogueCameraController {
   private backgroundPanOffset = new THREE.Vector2(0, 0);
 
   // Preallocated math helpers
+  private _workingPosition = new THREE.Vector3();
+  private _workingTarget = new THREE.Vector3();
   private _tempVecA = new THREE.Vector3();
   private _tempVecB = new THREE.Vector3();
   private _tempForward = new THREE.Vector3();
@@ -397,8 +399,8 @@ export class DialogueCameraController {
 
     // 2. Apply continuous subtle preset motions (pushIn, orbit, etc.)
     const workingPose = {
-      position: this._tempVecA.copy(this.currentPose.position),
-      target: this._tempVecB.copy(this.currentPose.target),
+      position: this._workingPosition.copy(this.currentPose.position),
+      target: this._workingTarget.copy(this.currentPose.target),
       fov: this.currentPose.fov,
     };
 
@@ -448,8 +450,13 @@ export class DialogueCameraController {
       const currentDistToTarget = workingPose.position.distanceTo(workingPose.target);
       const minSafeDistance = 1.15;
       if (currentDistToTarget < minSafeDistance) {
-        const backDir = this._tempVecA.subVectors(workingPose.position, workingPose.target).normalize();
-        workingPose.position.copy(workingPose.target).addScaledVector(backDir, minSafeDistance);
+        this._tempVecA.subVectors(workingPose.position, workingPose.target);
+        if (this._tempVecA.lengthSq() < 0.0001) {
+          this._tempVecA.set(0, 0, 1);
+        } else {
+          this._tempVecA.normalize();
+        }
+        workingPose.position.copy(workingPose.target).addScaledVector(this._tempVecA, minSafeDistance);
       }
     }
 
