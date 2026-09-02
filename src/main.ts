@@ -229,9 +229,35 @@ avatarChatController.setAudioLipSync(audioLipSync);
 let isTtsGpuExclusive = false;
 
 // --------------------------------------------------
+// Viewport & 16:9 Aspect Ratio Calculation
+// --------------------------------------------------
+function getViewportSize(): { width: number; height: number } {
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const targetAspect = 16 / 9;
+  const windowAspect = windowWidth / windowHeight;
+
+  let width: number;
+  let height: number;
+
+  if (windowAspect > targetAspect) {
+    // Window is wider than 16:9 -> Fit to height (pillarboxing)
+    height = windowHeight;
+    width = Math.round(height * targetAspect);
+  } else {
+    // Window is taller than 16:9 -> Fit to width (letterboxing)
+    width = windowWidth;
+    height = Math.round(width / targetAspect);
+  }
+
+  return { width, height };
+}
+
+// --------------------------------------------------
 // Renderer
 // --------------------------------------------------
 const canvas = document.querySelector<HTMLCanvasElement>('#app')!;
+const initialViewport = getViewportSize();
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -240,7 +266,7 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
 });
 
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(initialViewport.width, initialViewport.height, false);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = getToneMappingMode(currentConfig.postProcessing.toneMappingMode);
@@ -344,8 +370,9 @@ function loadAtmosphericBackground(
 }
 
 function updateBackgroundDisplay(cfg: AvatarConfig): void {
+  const container = document.getElementById('viewport-container');
   if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
-    document.body.style.backgroundColor = '#000000';
+    if (container) container.style.backgroundColor = '#000000';
     loadAtmosphericBackground(
       cfg.environment.backgroundImageUrl,
       cfg.environment.farFogEnabled !== false,
@@ -356,7 +383,7 @@ function updateBackgroundDisplay(cfg: AvatarConfig): void {
     });
   } else {
     scene.background = new THREE.Color(cfg.environment.backgroundColor);
-    document.body.style.backgroundColor = cfg.environment.backgroundColor;
+    if (container) container.style.backgroundColor = cfg.environment.backgroundColor;
   }
 }
 
@@ -520,7 +547,7 @@ function updateMidgroundDisplay(cfg: AvatarConfig): void {
 
 const camera = new THREE.PerspectiveCamera(
   currentConfig.camera.fov,
-  window.innerWidth / window.innerHeight,
+  16 / 9,
   0.05,
   100
 );
@@ -3499,14 +3526,13 @@ const timer = new THREE.Timer();
 timer.connect(document);
 
 function onResize(): void {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  const { width, height } = getViewportSize();
   const pr = Math.min(window.devicePixelRatio, 2);
 
-  camera.aspect = width / height;
+  camera.aspect = 16 / 9;
   camera.updateProjectionMatrix();
 
-  renderer.setSize(width, height);
+  renderer.setSize(width, height, false);
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
   composer.setSize(width, height);
