@@ -406,8 +406,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       },
       vignette: {
         enabled: true,
-        offset: 1.1,
-        darkness: 0.35,
+        offset: 1.15,
+        darkness: 0.08,
         color: '#1a1829',
       },
       chromaticAberration: {

@@ -67,8 +67,8 @@ const DEFAULT_CINEMATIC_CONFIG: AvatarConfig['postProcessing']['cinematic'] = {
   },
   vignette: {
     enabled: true,
-    offset: 1.1,
-    darkness: 0.35,
+    offset: 1.15,
+    darkness: 0.08,
     color: '#1a1829',
   },
   chromaticAberration: {
@@ -580,7 +580,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       cinematic: {
         diffusion: { enabled: true, strength: 0.35, radius: 2.2 },
         filmGrain: { enabled: true, strength: 0.04, speed: 1.0 },
-        vignette: { enabled: true, offset: 1.0, darkness: 0.45, color: '#2a1435' },
+        vignette: { enabled: true, offset: 1.15, darkness: 0.12, color: '#2a1435' },
         chromaticAberration: { enabled: true, offset: 0.002 },
       },
     },
@@ -761,7 +761,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       cinematic: {
         diffusion: { enabled: true, strength: 0.28, radius: 2.0 },
         filmGrain: { enabled: true, strength: 0.045, speed: 1.2 },
-        vignette: { enabled: true, offset: 1.1, darkness: 0.4, color: '#161c28' },
+        vignette: { enabled: true, offset: 1.15, darkness: 0.10, color: '#161c28' },
         chromaticAberration: { enabled: true, offset: 0.0018 },
       },
     },
@@ -1119,7 +1119,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       cinematic: {
         diffusion: { enabled: true, strength: 0.2, radius: 1.5 },
         filmGrain: { enabled: true, strength: 0.05, speed: 0.8 },
-        vignette: { enabled: true, offset: 0.9, darkness: 0.5, color: '#0d111d' },
+        vignette: { enabled: true, offset: 1.15, darkness: 0.14, color: '#0d111d' },
         chromaticAberration: { enabled: true, offset: 0.002 },
       },
     },

@@ -288,6 +288,7 @@ export function applyToonShader(
 
       // Safely inject Auto Line Weight into outline vertex shader while preserving MToon defines
       if (material.isOutline) {
+        material.alphaToCoverage = true;
         const prevOnBeforeCompile = material.onBeforeCompile;
         material.onBeforeCompile = (shader, renderer) => {
           if (prevOnBeforeCompile) {

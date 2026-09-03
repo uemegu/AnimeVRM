@@ -286,7 +286,7 @@ export class Avatar {
         vrm.scene.rotation.y = this.initialRotationY;
         vrm.scene.position.copy(this.initialPosition);
 
-        // Setup shadows and depth write
+        // Setup shadows, depth write, Alpha-to-Coverage, and texture filtering
         vrm.scene.traverse((obj) => {
           if ((obj as THREE.Mesh).isMesh) {
             const mesh = obj as THREE.Mesh;
@@ -295,7 +295,24 @@ export class Avatar {
 
             const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             for (const mat of materials) {
-              if (mat) mat.depthWrite = true;
+              if (mat) {
+                mat.depthWrite = true;
+                // Enable Alpha-to-Coverage so MSAA resolves cutout alpha boundaries smoothly
+                mat.alphaToCoverage = true;
+
+                // Maximize texture anisotropy & linear mipmap filtering to prevent staircasing
+                for (const key of Object.keys(mat)) {
+                  const val = (mat as any)[key];
+                  if (val && (val as THREE.Texture).isTexture) {
+                    const tex = val as THREE.Texture;
+                    tex.anisotropy = 16;
+                    tex.generateMipmaps = true;
+                    tex.minFilter = THREE.LinearMipmapLinearFilter;
+                    tex.magFilter = THREE.LinearFilter;
+                    tex.needsUpdate = true;
+                  }
+                }
+              }
             }
           }
         });
