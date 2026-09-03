@@ -82,6 +82,7 @@ export class ScenePresetManager {
     outline: AvatarConfig['outline'];
     wind: AvatarConfig['wind'];
     rain: AvatarConfig['rain'];
+    eyeGlow?: AvatarConfig['eyeGlow'];
   }): void {
     deepAssign(this.config.environment, combined.environment);
     deepAssign(this.config.lighting, combined.lighting);
@@ -92,6 +93,10 @@ export class ScenePresetManager {
     if (combined.rain) {
       if (!this.config.rain) this.config.rain = JSON.parse(JSON.stringify(combined.rain));
       else deepAssign(this.config.rain, combined.rain);
+    }
+    if (combined.eyeGlow) {
+      if (!this.config.eyeGlow) this.config.eyeGlow = JSON.parse(JSON.stringify(combined.eyeGlow));
+      else deepAssign(this.config.eyeGlow, combined.eyeGlow);
     }
 
     this.onConfigChange(this.config);

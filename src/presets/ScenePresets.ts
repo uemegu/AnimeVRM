@@ -31,6 +31,7 @@ export interface TimeOfDayPresetData {
   wind: AvatarConfig['wind'];
   rain: AvatarConfig['rain'];
   environment?: Partial<AvatarConfig['environment']>;
+  eyeGlow?: AvatarConfig['eyeGlow'];
 }
 
 export interface LocationPresetData {
@@ -52,6 +53,7 @@ export interface ScenePresetData {
   outline: AvatarConfig['outline'];
   wind: AvatarConfig['wind'];
   rain: AvatarConfig['rain'];
+  eyeGlow?: AvatarConfig['eyeGlow'];
 }
 
 const DEFAULT_CINEMATIC_CONFIG: AvatarConfig['postProcessing']['cinematic'] = {
@@ -319,6 +321,10 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         outlineWidthFactor: 0.001,
       },
     },
+    eyeGlow: {
+      enabled: true,
+      intensity: 1.25,
+    },
     outline: {
       enabled: true,
       useSmoothNormal: true,
@@ -332,14 +338,14 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       castShadows: false,
       ambient: {
         color: '#ffb8b8',
-        intensity: 0.35,
+        intensity: 0.5,
       },
       directional: {
         color: '#ffffff',
         intensity: 2.6,
-        posX: 0,
-        posY: 1.3,
-        posZ: 0.8,
+        posX: -0.7,
+        posY: 0.5,
+        posZ: 0.4,
       },
       rim: {
         enabled: false,
@@ -363,12 +369,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
           y: 4.3,
           z: -3.8,
         },
-        exposure: 0.24,
-        decay: 0.855,
-        density: 0.45,
-        weight: 0.1,
+        exposure: 0.38,
+        decay: 0.87,
+        density: 0.4,
+        weight: 0.08,
         color: '#fff2db',
-        shimmer: 0.4,
+        shimmer: 0.25,
       },
       lensFlare: {
         enabled: true,
@@ -1349,6 +1355,7 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
   outline: AvatarConfig['outline'];
   wind: AvatarConfig['wind'];
   rain: AvatarConfig['rain'];
+  eyeGlow?: AvatarConfig['eyeGlow'];
 } {
   const tod = TIME_OF_DAY_PRESETS[timeOfDayId] || TIME_OF_DAY_PRESETS.morning;
   const loc = LOCATION_PRESETS[locationId] || LOCATION_PRESETS.modern_park;
@@ -1401,5 +1408,6 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
     outline: JSON.parse(JSON.stringify(tod.outline || defaultOutline)),
     wind: JSON.parse(JSON.stringify(tod.wind || defaultWind)),
     rain: JSON.parse(JSON.stringify(tod.rain || defaultRain)),
+    eyeGlow: tod.eyeGlow ? JSON.parse(JSON.stringify(tod.eyeGlow)) : undefined,
   };
 }
