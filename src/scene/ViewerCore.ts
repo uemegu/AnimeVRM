@@ -224,6 +224,7 @@ export class ViewerCore {
     const midgroundGeo = new THREE.PlaneGeometry(16 / 9, 1);
     this.midgroundMesh = new THREE.Mesh(midgroundGeo, this.midgroundMat);
     this.midgroundMesh.renderOrder = -1;
+    this.midgroundMesh.visible = false;
     this.scene.add(this.midgroundMesh);
 
     this.initialControlsTarget = new THREE.Vector3(
@@ -564,7 +565,7 @@ export class ViewerCore {
   }
 
   public updateMidgroundDisplay(cfg: AvatarConfig): void {
-    const show = cfg.environment.showBackgroundImage && cfg.environment.showMidground !== false && !!cfg.environment.midgroundImageUrl;
+    const show = cfg.environment.showBackgroundImage && Boolean(cfg.environment.showMidground) && !!cfg.environment.midgroundImageUrl;
     this.midgroundMesh.visible = show;
     if (!show || !cfg.environment.midgroundImageUrl) return;
 

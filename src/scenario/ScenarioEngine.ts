@@ -8,6 +8,7 @@ import {
   ScenarioState,
   ScenarioCharacterPlacement,
   ScenarioSceneAvatarConfig,
+  ScenarioScrollingBackgroundConfig,
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
@@ -35,6 +36,8 @@ export interface ScenarioEngineOptions {
     strength?: number
   ) => void;
   onApplySceneCamera?: (scene: ScenarioScene) => void;
+  onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
+  onSwitchBackground?: (bgUrl: string) => void;
 }
 
 export class ScenarioEngine {
@@ -55,6 +58,8 @@ export class ScenarioEngine {
     strength?: number
   ) => void;
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
+  private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
+  private onSwitchBackground?: (bgUrl: string) => void;
 
   private messageWindow: AdventureMessageWindow;
   private currentPackage: ScenarioPackage | null = null;
@@ -83,6 +88,8 @@ export class ScenarioEngine {
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
     this.onApplySceneCamera = options.onApplySceneCamera;
+    this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
+    this.onSwitchBackground = options.onSwitchBackground;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -166,6 +173,7 @@ export class ScenarioEngine {
     });
 
     this.messageWindow.hide();
+    this.onUpdateScrollingBackground?.(undefined);
     this.onPlayStateChange?.(false);
     this.onFinished?.();
 
@@ -405,6 +413,14 @@ export class ScenarioEngine {
     if (scene.scenePreset && this.onSwitchScenePreset) {
       this.onSwitchScenePreset(scene.scenePreset);
     }
+
+    // 1.2 Switch Direct Background Image (Standard single background)
+    if (scene.background && this.onSwitchBackground) {
+      this.onSwitchBackground(scene.background);
+    }
+
+    // 1.5 Update Scrolling Background (2-plane loop scrolling & anime blur)
+    this.onUpdateScrollingBackground?.(scene.scrollingBackground);
 
     // 2. Camera Angle, Zoom & Preset
     if (this.onApplySceneCamera) {

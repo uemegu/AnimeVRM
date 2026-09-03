@@ -10,6 +10,7 @@ import { resolveAssetUrl } from '../utils/path';
 import { TimeOfDayId } from '../presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
+import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -341,6 +342,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #bfdbfe; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.twoGirlsDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #10b981; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #34d399; font-weight: 700;">${tr.scenario.townWalkTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-townwalk-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playTownWalk}</button>
+              <button id="scenario-townwalk-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #a7f3d0; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.townWalkDesc}
             </div>
           </div>
 
@@ -840,6 +852,29 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-twogirls-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Town Walk Scenario Play/Stop
+    document.getElementById('scenario-townwalk-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getTownWalkScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'SCENE TRANSITION',
+        });
+        showToast(t().toasts.townWalkStarted);
+      }
+    });
+
+    document.getElementById('scenario-townwalk-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);

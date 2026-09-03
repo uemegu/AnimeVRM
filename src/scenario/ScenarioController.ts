@@ -8,7 +8,10 @@ import { WindController } from '../wind/WindController';
 import { DialogueCameraController } from './DialogueCameraController';
 import { ScenarioEngine } from './ScenarioEngine';
 import { ScenarioPlayer, ScenarioStep } from '../animation/ScenarioPlayer';
+import { ScrollingBackgroundManager } from '../scene/ScrollingBackgroundManager';
+import { InterludeOverlay } from '../ui/InterludeOverlay';
 import {
+  ScenarioPackage,
   ScenarioCharacterPlacement,
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
@@ -26,6 +29,8 @@ import { AvatarManager } from '../avatar/AvatarManager';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
+  public scrollingBackgroundManager: ScrollingBackgroundManager;
+  public interludeOverlay: InterludeOverlay;
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
   public masterManager: MasterDataManager;
@@ -65,6 +70,13 @@ export class ScenarioController {
     this.onApplyConfig = options.onApplyConfig;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.masterManager = new MasterDataManager();
+
+    this.scrollingBackgroundManager = new ScrollingBackgroundManager({
+      scene: this.scene,
+      camera: this.camera,
+    });
+
+    this.interludeOverlay = new InterludeOverlay();
 
     this.dialogueCameraController = new DialogueCameraController({
       camera: this.camera,
@@ -111,11 +123,13 @@ export class ScenarioController {
       onPlayStateChange: () => {
         if (!this.scenarioPlayer.isPlaying) {
           this.dialogueCameraController.stop();
+          this.scrollingBackgroundManager.hide();
         }
         this.syncPlayStateUI();
       },
       onFinished: () => {
         this.dialogueCameraController.stop();
+        this.scrollingBackgroundManager.hide();
       },
     });
 
@@ -140,6 +154,7 @@ export class ScenarioController {
       onPlayStateChange: () => {
         if (!this.scenarioEngine.isPlaying) {
           this.dialogueCameraController.stop();
+          this.scrollingBackgroundManager.hide();
         }
         this.syncPlayStateUI();
       },
@@ -149,7 +164,32 @@ export class ScenarioController {
       onApplySceneCamera: (scene) => {
         this.dialogueCameraController.applyScene(scene);
       },
+      onUpdateScrollingBackground: (bgConfig) => {
+        if (bgConfig && bgConfig.enabled) {
+          this.scrollingBackgroundManager.show({
+            textureUrl: bgConfig.textureUrl,
+            speed: bgConfig.speed,
+            blur: bgConfig.blur,
+            direction: bgConfig.direction,
+            instantBlur: bgConfig.instantBlur,
+          });
+        } else {
+          this.scrollingBackgroundManager.hide();
+        }
+      },
+      onSwitchBackground: (bgUrl: string) => {
+        const cfg = this.getConfig();
+        cfg.environment.showBackgroundImage = true;
+        cfg.environment.backgroundImageUrl = resolveAssetUrl(bgUrl);
+        // ロケーションに応じた背景制御: 単体背景切り替え時は中景をオフにする
+        cfg.environment.showMidground = false;
+        cfg.environment.midgroundImageUrl = undefined;
+        this.onApplyConfig(cfg);
+      },
       onSwitchAvatar: async (modelUrl) => {
+        if (this.avatarManager.currentModelUrl === modelUrl && this.avatarManager.avatarInstance) {
+          return;
+        }
         this.avatarManager.loadAvatarModel(modelUrl);
       },
       onSetupScenarioCharacters: async (characters) => {
@@ -163,9 +203,45 @@ export class ScenarioController {
       },
       onFinished: () => {
         this.dialogueCameraController.stop();
+        this.scrollingBackgroundManager.hide();
         showToast('✨ シナリオが終了しました');
       },
     });
+  }
+
+  public async playWithInterlude(
+    scenario: ScenarioPackage,
+    options?: { title?: string; subtitle?: string; holdDurationMs?: number }
+  ): Promise<void> {
+    if (this.scenarioEngine.isPlaying) {
+      this.scenarioEngine.stop();
+    }
+    if (this.scenarioPlayer.isPlaying) {
+      this.scenarioPlayer.stop();
+    }
+
+    const title = options?.title ?? scenario.title;
+    const subtitle = options?.subtitle ?? 'SCENE TRANSITION';
+
+    await this.interludeOverlay.playTransition({
+      title,
+      subtitle,
+      holdDurationMs: options?.holdDurationMs ?? 320,
+      onCovered: async () => {
+        await this.scenarioEngine.play(scenario);
+      },
+    });
+  }
+
+  public update(delta: number): void {
+    let dialogueBg: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null = null;
+    if (this.dialogueCameraController?.isActive) {
+      this.dialogueCameraController.update(delta);
+      dialogueBg = this.dialogueCameraController.getBackgroundTransform();
+    }
+    if (this.scrollingBackgroundManager?.isVisible) {
+      this.scrollingBackgroundManager.update(delta, dialogueBg);
+    }
   }
 
   public syncPlayStateUI(): void {
