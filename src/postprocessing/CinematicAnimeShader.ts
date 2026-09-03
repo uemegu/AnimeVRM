@@ -46,10 +46,14 @@ export const CinematicAnimeShader = {
     uVignetteDarkness: { value: 0.08 },
     uVignetteColor: { value: new THREE.Color('#1a1829') },
 
-    // 6. Film Grain
-    uFilmGrainEnabled: { value: 1.0 },
+    // 6. Film Grain (Default OFF for clean digital anime look)
+    uFilmGrainEnabled: { value: 0.0 },
     uFilmGrainStrength: { value: 0.035 },
     uFilmGrainSpeed: { value: 1.0 },
+
+    // 7. Smart Sharpening (Digital anime crispness / CAS-like)
+    uSharpenEnabled: { value: 1.0 },
+    uSharpenAmount: { value: 0.22 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -95,6 +99,10 @@ export const CinematicAnimeShader = {
     uniform float uFilmGrainEnabled;
     uniform float uFilmGrainStrength;
     uniform float uFilmGrainSpeed;
+
+    // Smart Sharpening
+    uniform float uSharpenEnabled;
+    uniform float uSharpenAmount;
 
     varying vec2 vUv;
 
@@ -234,6 +242,28 @@ export const CinematicAnimeShader = {
         float grainMask = 1.0 - 2.0 * abs(lum - 0.5);
         grainMask = clamp(grainMask, 0.2, 1.0);
         color += noise * uFilmGrainStrength * grainMask;
+      }
+
+      // ----------------------------------------------------
+      // 7. Smart Sharpening (Contrast-Adaptive Line & Texture Enhancement)
+      // ----------------------------------------------------
+      if (uSharpenEnabled > 0.5 && uSharpenAmount > 0.001) {
+        vec2 px = 1.0 / uResolution;
+        vec3 colN = texture2D(tDiffuse, uv + vec2(0.0, -px.y)).rgb;
+        vec3 colS = texture2D(tDiffuse, uv + vec2(0.0,  px.y)).rgb;
+        vec3 colW = texture2D(tDiffuse, uv + vec2(-px.x, 0.0)).rgb;
+        vec3 colE = texture2D(tDiffuse, uv + vec2( px.x, 0.0)).rgb;
+
+        vec3 minNeighbor = min(min(colN, colS), min(colW, colE));
+        vec3 maxNeighbor = max(max(colN, colS), max(colW, colE));
+
+        // Adaptive high-pass unsharp masking
+        vec3 unsharp = (colN + colS + colW + colE) * 0.25;
+        vec3 delta = color - unsharp;
+
+        // Apply sharpness clamped to local contrast range to avoid haloing
+        vec3 sharpened = color + delta * (uSharpenAmount * 1.6);
+        color = clamp(sharpened, minNeighbor * 0.95, maxNeighbor * 1.05);
       }
 
       gl_FragColor = vec4(clamp(color, 0.0, 1.0), baseColor.a);

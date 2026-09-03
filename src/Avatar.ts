@@ -297,7 +297,6 @@ export class Avatar {
             for (const mat of materials) {
               if (mat) {
                 mat.depthWrite = true;
-                // Enable Alpha-to-Coverage so MSAA resolves cutout alpha boundaries smoothly
                 mat.alphaToCoverage = true;
 
                 // Maximize texture anisotropy & linear mipmap filtering to prevent staircasing

@@ -9,6 +9,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
+import Stats from 'three/addons/libs/stats.module.js';
 
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
@@ -55,6 +56,8 @@ import {
 
 // Active configuration state
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
+
+let guis: GUI[] = [];
 
 const windController = new WindController();
 
@@ -112,13 +115,16 @@ function applySceneConfig(combined: {
   wind: AvatarConfig['wind'];
   rain: AvatarConfig['rain'];
 }): void {
-  currentConfig.environment = JSON.parse(JSON.stringify(combined.environment));
-  currentConfig.lighting = JSON.parse(JSON.stringify(combined.lighting));
-  currentConfig.postProcessing = JSON.parse(JSON.stringify(combined.postProcessing));
-  currentConfig.materials = JSON.parse(JSON.stringify(combined.materials));
-  currentConfig.outline = JSON.parse(JSON.stringify(combined.outline));
-  currentConfig.wind = JSON.parse(JSON.stringify(combined.wind));
-  currentConfig.rain = JSON.parse(JSON.stringify(combined.rain));
+  deepAssign(currentConfig.environment, combined.environment);
+  deepAssign(currentConfig.lighting, combined.lighting);
+  deepAssign(currentConfig.postProcessing, combined.postProcessing);
+  deepAssign(currentConfig.materials, combined.materials);
+  deepAssign(currentConfig.outline, combined.outline);
+  deepAssign(currentConfig.wind, combined.wind);
+  if (combined.rain) {
+    if (!currentConfig.rain) currentConfig.rain = JSON.parse(JSON.stringify(combined.rain));
+    else deepAssign(currentConfig.rain, combined.rain);
+  }
 
   applyConfigToSceneAndRenderer(currentConfig);
   updateAllGuisDisplay();
@@ -300,6 +306,45 @@ function getToneMappingMode(mode: string): THREE.ToneMapping {
       return THREE.NoToneMapping;
   }
 }
+
+// --------------------------------------------------
+// Realtime Performance Monitor (Stats.js + Three.js Metrics)
+// --------------------------------------------------
+const stats = new Stats();
+stats.showPanel(0); // 0: FPS, 1: MS (ミリ秒/フレーム), 2: MB (メモリ)
+stats.dom.id = 'perf-stats-widget';
+stats.dom.style.position = 'fixed';
+stats.dom.style.top = '14px';
+stats.dom.style.left = '14px';
+stats.dom.style.zIndex = '99999';
+stats.dom.style.cursor = 'pointer';
+stats.dom.style.borderRadius = '8px';
+stats.dom.style.overflow = 'hidden';
+stats.dom.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4)';
+stats.dom.style.opacity = '0.9';
+stats.dom.title = 'クリックで表示切替 (FPS ⇄ MS ⇄ MB)';
+document.body.appendChild(stats.dom);
+
+// Three.js Render Metrics Badge (Calls / Triangles)
+const perfBadge = document.createElement('div');
+perfBadge.id = 'three-perf-badge';
+perfBadge.style.position = 'fixed';
+perfBadge.style.top = '66px';
+perfBadge.style.left = '14px';
+perfBadge.style.zIndex = '99999';
+perfBadge.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace';
+perfBadge.style.fontSize = '10px';
+perfBadge.style.fontWeight = 'bold';
+perfBadge.style.backgroundColor = 'rgba(15, 23, 42, 0.85)';
+perfBadge.style.color = '#38bdf8';
+perfBadge.style.padding = '3px 7px';
+perfBadge.style.borderRadius = '5px';
+perfBadge.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+perfBadge.style.pointerEvents = 'none';
+perfBadge.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+perfBadge.style.userSelect = 'none';
+perfBadge.textContent = 'Calls: -- | Tris: --';
+document.body.appendChild(perfBadge);
 
 // --------------------------------------------------
 // Scene & Camera
@@ -931,9 +976,6 @@ godRaysPass.uniforms['uWeight'].value = currentConfig.lighting.sunShafts?.weight
 godRaysPass.uniforms['uShimmer'].value = currentConfig.lighting.sunShafts?.shimmer ?? 0.4;
 composer.addPass(godRaysPass);
 
-// 4. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
-composer.addPass(new OutputPass());
-
 // Helper to update all Cinematic Uber Pass uniforms
 function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig): void {
   const pp = cfg.postProcessing;
@@ -975,10 +1017,13 @@ function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig): void 
   pass.uniforms['uFilmGrainEnabled'].value = (cin?.filmGrain?.enabled ?? false) ? 1.0 : 0.0;
   pass.uniforms['uFilmGrainStrength'].value = cin?.filmGrain?.strength ?? 0.035;
   pass.uniforms['uFilmGrainSpeed'].value = cin?.filmGrain?.speed ?? 1.0;
+
+  // 7. Smart Sharpening
+  pass.uniforms['uSharpenEnabled'].value = (cin?.sharpening?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uSharpenAmount'].value = cin?.sharpening?.amount ?? 0.22;
 }
 
-// 5. Cinematic Anime Post-Processing Pass (Uber Pass)
-// Integrates Chromatic Aberration, Diffusion Glow, Color Grading, Saturation/Brightness/Contrast, Vignette, Film Grain into a SINGLE pass!
+// 4. Cinematic Anime Post-Processing Pass (Uber Pass: Linear HDR space)
 const cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
 cinematicAnimePass.uniforms['uResolution'].value.set(
   window.innerWidth * pixelRatio,
@@ -987,10 +1032,52 @@ cinematicAnimePass.uniforms['uResolution'].value.set(
 updateCinematicPassUniforms(cinematicAnimePass, currentConfig);
 composer.addPass(cinematicAnimePass);
 
-// 6. SMAA (Subpixel Morphological Antialiasing) on sRGB edges
+// 5. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
+composer.addPass(new OutputPass());
+
+// 6. SMAA (Subpixel Morphological Antialiasing) on final sRGB buffer
 const smaaPass = new SMAAPass();
 smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
 composer.addPass(smaaPass);
+
+// --------------------------------------------------
+// Toggle State & Synchronization
+// --------------------------------------------------
+const toggleState = {
+  colorGrading: true,
+  bloom: true,
+  smoothNormal: true,
+  screenSpaceWidth: true,
+  rimBody: true,
+  rimCloth: true,
+  rimLight: true,
+  diffusion: true,
+  filmGrain: false,
+  vignette: true,
+  chromaticAberration: true,
+  sharpening: true,
+  eyeGlow: true,
+  wind: true,
+  rain: false,
+};
+
+function syncToggleState(): void {
+  toggleState.colorGrading = currentConfig.postProcessing.colorGrading?.enabled ?? false;
+  toggleState.bloom = currentConfig.postProcessing.bloom?.enabled ?? false;
+  toggleState.smoothNormal = currentConfig.outline.useSmoothNormal;
+  toggleState.screenSpaceWidth = currentConfig.outline.screenSpaceWidth;
+  toggleState.rimBody = currentConfig.materials.body.rimEnabled ?? false;
+  toggleState.rimCloth = currentConfig.materials.cloth.rimEnabled ?? false;
+  toggleState.rimLight = currentConfig.lighting.rim.enabled !== false;
+  toggleState.diffusion = currentConfig.postProcessing.cinematic?.diffusion.enabled ?? false;
+  toggleState.filmGrain = currentConfig.postProcessing.cinematic?.filmGrain.enabled ?? false;
+  toggleState.vignette = currentConfig.postProcessing.cinematic?.vignette.enabled ?? false;
+  toggleState.chromaticAberration = currentConfig.postProcessing.cinematic?.chromaticAberration.enabled ?? false;
+  toggleState.sharpening = currentConfig.postProcessing.cinematic?.sharpening.enabled ?? false;
+  toggleState.eyeGlow = currentConfig.eyeGlow?.enabled ?? true;
+  toggleState.wind = currentConfig.wind.enabled;
+  toggleState.rain = currentConfig.rain?.enabled ?? false;
+}
 
 // --------------------------------------------------
 // Avatar Initialization & Model Loading
@@ -1150,40 +1237,6 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
 
   syncToggleState();
 }
-
-const toggleState = {
-  colorGrading: true,
-  bloom: true,
-  smoothNormal: true,
-  screenSpaceWidth: true,
-  rimBody: true,
-  rimCloth: true,
-  rimLight: true,
-  diffusion: true,
-  filmGrain: true,
-  vignette: true,
-  chromaticAberration: true,
-  wind: true,
-  rain: false,
-};
-
-function syncToggleState(): void {
-  toggleState.colorGrading = currentConfig.postProcessing.colorGrading?.enabled ?? false;
-  toggleState.bloom = currentConfig.postProcessing.bloom?.enabled ?? false;
-  toggleState.smoothNormal = currentConfig.outline.useSmoothNormal;
-  toggleState.screenSpaceWidth = currentConfig.outline.screenSpaceWidth;
-  toggleState.rimBody = currentConfig.materials.body.rimEnabled ?? false;
-  toggleState.rimCloth = currentConfig.materials.cloth.rimEnabled ?? false;
-  toggleState.rimLight = currentConfig.lighting.rim.enabled !== false;
-  toggleState.diffusion = currentConfig.postProcessing.cinematic?.diffusion.enabled ?? false;
-  toggleState.filmGrain = currentConfig.postProcessing.cinematic?.filmGrain.enabled ?? false;
-  toggleState.vignette = currentConfig.postProcessing.cinematic?.vignette.enabled ?? false;
-  toggleState.chromaticAberration = currentConfig.postProcessing.cinematic?.chromaticAberration.enabled ?? false;
-  toggleState.wind = currentConfig.wind.enabled;
-  toggleState.rain = currentConfig.rain?.enabled ?? false;
-}
-
-let guis: GUI[] = [];
 
 function updateAllGuisDisplay(): void {
   guis.forEach((g) => {
@@ -1449,6 +1502,26 @@ function setupVisualGUI(container: HTMLElement): void {
   addMaterialFolder(tr.gui.matHair, 'hair');
   addMaterialFolder(tr.gui.matCloth, 'cloth');
 
+  // 1.5 Eye Highlight Glow Folder
+  if (!currentConfig.eyeGlow) {
+    currentConfig.eyeGlow = { enabled: true, intensity: 1.25 };
+  }
+  const eyeFolder = visualGui.addFolder(tr.gui.eyeGlowFolder);
+  eyeFolder
+    .add(currentConfig.eyeGlow, 'enabled')
+    .name(tr.gui.eyeGlowEnabled)
+    .onChange((val: boolean) => {
+      toggleState.eyeGlow = val;
+      avatarInstance?.shaderController?.updateEyeGlow(currentConfig.eyeGlow);
+    });
+  eyeFolder
+    .add(currentConfig.eyeGlow, 'intensity', 0.0, 3.0, 0.05)
+    .name(tr.gui.eyeGlowIntensity)
+    .onChange(() => {
+      avatarInstance?.shaderController?.updateEyeGlow(currentConfig.eyeGlow);
+    });
+  eyeFolder.close();
+
   // 2. Outline Folder
   const outlineFolder = visualGui.addFolder(tr.gui.outlineFolder);
   outlineFolder
@@ -1648,6 +1721,7 @@ function setupVisualGUI(container: HTMLElement): void {
     .name(tr.gui.flareEnabled)
     .onChange((enabled: boolean) => {
       sunEffect.flareGroup.visible = enabled;
+      sunEffect.sunGroup.visible = enabled;
     });
   flareFolder
     .add(currentConfig.lighting.lensFlare, 'sunSize', 0.2, 3.0, 0.05)
@@ -1885,6 +1959,23 @@ function setupVisualGUI(container: HTMLElement): void {
       cinematicAnimePass.uniforms['uChromaticAberrationOffset'].value = val;
     });
   caFolder.close();
+
+  // Smart Sharpening
+  const shpFolder = cinFolder.addFolder(tr.gui.sharpenFolder);
+  shpFolder
+    .add(cin.sharpening, 'enabled')
+    .name(tr.gui.sharpenEnabled)
+    .onChange((val: boolean) => {
+      cinematicAnimePass.uniforms['uSharpenEnabled'].value = val ? 1.0 : 0.0;
+      toggleState.sharpening = val;
+    });
+  shpFolder
+    .add(cin.sharpening, 'amount', 0.0, 1.0, 0.02)
+    .name(tr.gui.sharpenAmount)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uSharpenAmount'].value = val;
+    });
+  shpFolder.close();
 
   cinFolder.close();
 
@@ -3673,6 +3764,9 @@ function setupUnifiedUI(): void {
 
 setupUnifiedUI();
 
+// Ensure initial scene and GUI active states strictly match morning preset
+switchTimeOfDay('morning', false);
+
 // Initial load of default voice (001.wav)
 audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
 
@@ -3720,6 +3814,7 @@ if (viewportWrapperEl && typeof ResizeObserver !== 'undefined') {
 }
 
 function tick(timestamp?: number): void {
+  stats.begin();
   timer.update(timestamp);
   const delta = timer.getDelta();
   const elapsed = timer.getElapsed();
@@ -3823,23 +3918,8 @@ function tick(timestamp?: number): void {
   // Update Cinematic Anime Pass time uniform for dynamic film grain
   cinematicAnimePass.uniforms['uTime'].value = elapsed;
 
-  const cin = currentConfig.postProcessing.cinematic;
-  const usePost = currentConfig.postProcessing.bloom.enabled ||
-                  currentConfig.lighting.sunShafts?.enabled ||
-                  currentConfig.postProcessing.colorGrading.enabled ||
-                  (cin?.diffusion?.enabled && cin.diffusion.strength > 0) ||
-                  (cin?.filmGrain?.enabled && cin.filmGrain.strength > 0) ||
-                  (cin?.vignette?.enabled && cin.vignette.darkness > 0) ||
-                  (cin?.chromaticAberration?.enabled && cin.chromaticAberration.offset > 0) ||
-                  currentConfig.postProcessing.saturation !== 0 ||
-                  currentConfig.postProcessing.brightness !== 0 ||
-                  currentConfig.postProcessing.contrast !== 0;
-
-  if (usePost) {
-    composer.render();
-  } else {
-    renderer.render(scene, camera);
-  }
+  // Always render via composer for completely seamless and unified post-processing pipeline
+  composer.render();
 
   // Render Effect Texts (漫符・文字エフェクト) on top of post-processing & sun effects
   if (effectTextScene.children.length > 0) {
@@ -3848,6 +3928,16 @@ function tick(timestamp?: number): void {
     renderer.render(effectTextScene, camera);
     renderer.autoClear = true;
   }
+
+  // Update Three.js render metrics badge every 6 frames
+  if (renderer.info.render.frame % 6 === 0) {
+    const calls = renderer.info.render.calls;
+    const tris = renderer.info.render.triangles;
+    const triText = tris >= 1000 ? `${(tris / 1000).toFixed(1)}k` : `${tris}`;
+    perfBadge.textContent = `Calls: ${calls} | Tris: ${triText}`;
+  }
+
+  stats.end();
 
   requestAnimationFrame(tick);
 }

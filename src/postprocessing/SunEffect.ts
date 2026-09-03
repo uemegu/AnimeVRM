@@ -388,7 +388,7 @@ export class SunEffect {
       edgeFactor = Math.max(0.25, Math.min(1.0, (3.6 - distFromCenter) / 2.2));
     }
 
-    this.sunGroup.visible = (sunCfg.enabled || flareCfg.enabled) && inFront && edgeFactor > 0.1;
+    this.sunGroup.visible = flareCfg.enabled && inFront && edgeFactor > 0.1;
     this.flareGroup.visible = flareCfg.enabled && inFront && edgeFactor > 0.1;
 
     // 3. Occlusion Raycast check (smooth transition)
