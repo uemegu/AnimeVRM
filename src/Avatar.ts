@@ -566,6 +566,16 @@ export class Avatar {
     }
   }
 
+  public setLookAtCamera(enabled: boolean): void {
+    this.options.lookAtCamera = enabled;
+    if (!enabled && this.vrm?.lookAt) {
+      // Look straight forward in model space
+      const forwardPos = new THREE.Vector3(0, 1.4, 5.0);
+      this.vrm.scene.localToWorld(forwardPos);
+      this.vrm.lookAt.lookAt(forwardPos);
+    }
+  }
+
   private updateLookAt(): void {
     if (!this.options.lookAtCamera || !this.vrm?.lookAt) return;
     const targetPos = new THREE.Vector3();
