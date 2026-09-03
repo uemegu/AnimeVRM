@@ -407,7 +407,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       saturation: 0.26,
       brightness: 0.0,
-      contrast: 0.14,
+      contrast: 0,
       cinematic: { ...DEFAULT_CINEMATIC_CONFIG },
     },
     wind: {
