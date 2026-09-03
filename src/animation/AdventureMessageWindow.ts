@@ -29,6 +29,8 @@ export class AdventureMessageWindow {
   private isVisible = false;
   private isChoicesVisible = false;
   private boundKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+  private countdownIntervalId: number | null = null;
+  private countdownSeconds = 10;
 
   constructor(options: AdventureMessageWindowOptions = {}) {
     this.parentContainer = options.container ?? null;
@@ -567,35 +569,228 @@ export class AdventureMessageWindow {
         }
       }
 
-      /* Thinking Time Circular Badge (Solid Blue) */
-      .adv-thinking-circle-badge {
+      /* --- Right Side Graphic Stage & HUD (Persona / Anime Style) --- */
+      .adv-right-stage {
         position: absolute;
-        left: 2%;
-        bottom: 2%;
-        width: clamp(135px, 18.5vw, 180px);
-        height: clamp(135px, 18.5vw, 180px);
-        border-radius: 50%;
-        background: #1d4ed8;
-        border: 3px solid #000000;
-        box-shadow: -6px 6px 0px #000000;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 44%;
+        pointer-events: none;
+        user-select: none;
+        overflow: hidden;
+        z-index: 2;
+      }
+
+
+      /* Right Dynamic Graphic Slashes */
+      .adv-right-slash {
+        position: absolute;
+        transform: rotate(-22deg) skewX(-10deg);
+        border-radius: 4px;
+        pointer-events: none;
+      }
+
+      .adv-right-slash.s1 {
+        right: -20px;
+        top: 36%;
+        width: 320px;
+        height: 14px;
+        background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.35), rgba(56, 189, 248, 0.8));
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+        animation: slash-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+      }
+
+      .adv-right-slash.s2 {
+        right: -40px;
+        top: 42%;
+        width: 240px;
+        height: 6px;
+        background: #facc15;
+        box-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+        animation: slash-slide 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+      }
+
+      .adv-right-slash.s3 {
+        right: -10px;
+        top: 47%;
+        width: 380px;
+        height: 24px;
+        background: rgba(15, 23, 42, 0.7);
+        border-left: 4px solid #38bdf8;
+        animation: slash-slide 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+      }
+
+      @keyframes slash-slide {
+        0% {
+          opacity: 0;
+          transform: rotate(-22deg) skewX(-10deg) translateX(80px);
+        }
+        100% {
+          opacity: 1;
+          transform: rotate(-22deg) skewX(-10deg) translateX(0);
+        }
+      }
+
+
+      /* --- Thinking Time Stylish Widget (Bottom Right) --- */
+      .adv-thinking-widget {
+        position: absolute;
+        right: 4%;
+        bottom: 4%;
+        width: clamp(175px, 22.5vw, 235px);
+        height: clamp(175px, 22.5vw, 235px);
         display: flex;
-        flex-direction: column;
-        justify-content: center;
         align-items: center;
-        z-index: 12;
+        justify-content: center;
+        z-index: 15;
         user-select: none;
         pointer-events: none;
         animation: badge-pop-in 0.4s cubic-bezier(0.12, 1.25, 0.28, 1.15) 0.12s both;
       }
 
+      /* Outer Rotating Tech Dash Ring */
+      .adv-tt-spin-ring {
+        position: absolute;
+        inset: -14px;
+        border-radius: 50%;
+        border: 2.5px dashed rgba(56, 189, 248, 0.65);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+        animation: spin-clockwise 24s linear infinite;
+        pointer-events: none;
+      }
+
+      .adv-tt-spin-ring-inner {
+        position: absolute;
+        inset: -6px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(250, 204, 21, 0.35);
+        pointer-events: none;
+      }
+
+      @keyframes spin-clockwise {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      /* --- Countdown Badge & Digits (Big Bold with Box-Shadow, Top Right) --- */
+      .adv-countdown-container {
+        position: absolute;
+        top: -26px;
+        right: -8px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        z-index: 25;
+        transform: rotate(6deg);
+        pointer-events: none;
+        user-select: none;
+      }
+
+      .adv-countdown-ribbon {
+        background: #facc15;
+        color: #0f172a;
+        font-family: 'Impact', 'Arial Black', sans-serif;
+        font-size: clamp(10px, 1.1vw, 12px);
+        font-weight: 900;
+        padding: 2px 10px;
+        border: 2.5px solid #000000;
+        box-shadow: 3px 3px 0px #000000;
+        letter-spacing: 0.12em;
+        border-radius: 3px;
+        white-space: nowrap;
+        margin-bottom: -5px;
+        margin-right: 2px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .adv-countdown-box {
+        background: #ffffff;
+        border: 4px solid #000000;
+        box-shadow: 6px 6px 0px #000000;
+        border-radius: 8px;
+        padding: 2px 14px;
+        min-width: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.1s ease, border-color 0.2s ease, background 0.2s ease;
+      }
+
+      .adv-countdown-box.tick {
+        animation: countdown-tick-pop 0.22s cubic-bezier(0.12, 1.25, 0.28, 1.15);
+      }
+
+      @keyframes countdown-tick-pop {
+        0% {
+          transform: scale(1.16);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .adv-countdown-box.urgent {
+        background: #fee2e2;
+        border-color: #ef4444;
+        box-shadow: 6px 6px 0px #991b1b;
+      }
+
+      .adv-countdown-box.urgent .adv-countdown-digits {
+        color: #dc2626;
+        text-shadow: 1px 1px 0px #000000;
+      }
+
+      .adv-countdown-digits {
+        font-family: 'Impact', 'Montserrat', 'Arial Black', sans-serif;
+        font-size: clamp(38px, 4.6vw, 54px);
+        font-weight: 900;
+        color: #0f172a;
+        line-height: 1;
+        letter-spacing: 0.05em;
+        text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Main Circular Badge */
+      .adv-thinking-circle-badge {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #2563eb 0%, #1d4ed8 65%, #172554 100%);
+        border: 4px solid #000000;
+        box-shadow: 7px 7px 0px #000000, 0 0 24px rgba(37, 99, 235, 0.5);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      /* Inner subtle diagonal hazard stripes */
+      .adv-thinking-circle-badge::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.04) 0px,
+          rgba(255, 255, 255, 0.04) 10px,
+          transparent 10px,
+          transparent 20px
+        );
+        pointer-events: none;
+      }
+
       @keyframes badge-pop-in {
         0% {
           opacity: 0;
-          transform: scale(0.3) rotate(-15deg);
+          transform: scale(0.3) rotate(12deg);
         }
         100% {
           opacity: 1;
-          transform: scale(1) rotate(-4deg);
+          transform: scale(1) rotate(5deg);
         }
       }
 
@@ -609,16 +804,19 @@ export class AdventureMessageWindow {
         text-shadow: 2px 2px 0px #000000, 0 0 10px rgba(255, 255, 255, 0.5);
         line-height: 1.05;
         letter-spacing: 0.04em;
+        position: relative;
+        z-index: 2;
       }
 
       .adv-tt-line1 {
-        font-size: clamp(20px, 2.7vw, 26px);
+        font-size: clamp(26px, 3.4vw, 36px);
       }
 
       .adv-tt-line2 {
-        font-size: clamp(24px, 3.2vw, 32px);
+        font-size: clamp(32px, 4.2vw, 44px);
         font-weight: 900;
       }
+
 
       .adv-tt-char {
         display: inline-block;
@@ -898,7 +1096,7 @@ export class AdventureMessageWindow {
         bottom: 0;
         transform: scaleX(0);
         transform-origin: right center;
-        width: clamp(80px, 11vw, 150px);
+        width: clamp(40px, 5.5vw, 75px);
         pointer-events: none;
         z-index: 1;
         opacity: 0;
@@ -1254,19 +1452,35 @@ export class AdventureMessageWindow {
         <div class="adv-char-main">
           <img src="${resolveAssetUrl('/img/hero.png')}" alt="Hero" />
         </div>
+      </div>
+
+      <!-- Right Side Graphic Stage (Stylish Persona / Anime composition) -->
+      <div class="adv-right-stage">
+        <div class="adv-right-slash s1"></div>
+        <div class="adv-right-slash s2"></div>
+        <div class="adv-right-slash s3"></div>
+      </div>
+
+
+
+      <!-- Thinking Time Stylish Widget (Bottom Right) -->
+      <div class="adv-thinking-widget">
+        <!-- Outer Rotating Tech Dash Ring -->
+        <div class="adv-tt-spin-ring"></div>
+        <div class="adv-tt-spin-ring-inner"></div>
+
+        <!-- Big Bold Countdown Unit with Box-Shadow & Adjusted Ribbon Position -->
+        <div class="adv-countdown-container">
+          <div class="adv-countdown-ribbon">COUNTDOWN</div>
+          <div class="adv-countdown-box">
+            <span class="adv-countdown-digits" id="adv-countdown-digits">10</span>
+          </div>
+        </div>
+
+        <!-- Main Circular Badge -->
         <div class="adv-thinking-circle-badge">
           <div class="adv-tt-line adv-tt-line1">${this.buildAnimatedLetters('Thinking', 0.10, 0.026)}</div>
           <div class="adv-tt-line adv-tt-line2">${this.buildAnimatedLetters('Time', 0.32, 0.035)}</div>
-        </div>
-      </div>
-
-      <!-- Right Character: Aoi with dark blue silhouette shadow -->
-      <div class="adv-cutin-char adv-cutin-right">
-        <div class="adv-char-shadow">
-          <img src="${resolveAssetUrl('/img/aoi.png')}" alt="" />
-        </div>
-        <div class="adv-char-main">
-          <img src="${resolveAssetUrl('/img/aoi.png')}" alt="Aoi" />
         </div>
       </div>
 
@@ -1299,12 +1513,18 @@ export class AdventureMessageWindow {
       // Play Select SE on click
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
+        this.clearCountdownTimer();
         this.playSE('/se/items_chose.mp3', 0.65);
         this.hideChoices();
         onSelect(choice);
       });
       choicesContainer.appendChild(btn);
     });
+
+    // Start 10s Countdown Timer (auto-selects 1st choice on expiry)
+    this.clearCountdownTimer();
+    this.countdownSeconds = 10;
+    this.startCountdownTimer(choices, onSelect);
 
     requestAnimationFrame(() => {
       backdrop?.classList.add('visible');
@@ -1313,6 +1533,7 @@ export class AdventureMessageWindow {
   }
 
   public hideChoices(): void {
+    this.clearCountdownTimer();
     this.isChoicesVisible = false;
     const backdrop = document.getElementById('adv-choices-backdrop');
     if (backdrop) {
@@ -1327,6 +1548,60 @@ export class AdventureMessageWindow {
         this.choicesContainerEl = null;
       }
     }, 300);
+  }
+
+  private clearCountdownTimer(): void {
+    if (this.countdownIntervalId !== null) {
+      window.clearInterval(this.countdownIntervalId);
+      this.countdownIntervalId = null;
+    }
+  }
+
+  private startCountdownTimer(
+    choices: ScenarioChoice[],
+    onSelect: (choice: ScenarioChoice) => void
+  ): void {
+    this.updateCountdownDisplay();
+
+    this.countdownIntervalId = window.setInterval(() => {
+      if (!this.isChoicesVisible) {
+        this.clearCountdownTimer();
+        return;
+      }
+
+      this.countdownSeconds--;
+      this.updateCountdownDisplay();
+
+      if (this.countdownSeconds <= 0) {
+        this.clearCountdownTimer();
+        // 10 seconds elapsed: automatically select the first choice
+        if (this.isChoicesVisible && choices.length > 0) {
+          const autoChoice = choices[0];
+          this.playSE('/se/items_chose.mp3', 0.65);
+          this.hideChoices();
+          onSelect(autoChoice);
+        }
+      }
+    }, 1000);
+  }
+
+  private updateCountdownDisplay(): void {
+    const digitsEl = document.getElementById('adv-countdown-digits');
+    if (!digitsEl) return;
+    const formatted = String(Math.max(0, this.countdownSeconds)).padStart(2, '0');
+    digitsEl.textContent = formatted;
+
+    const boxEl = digitsEl.parentElement;
+    if (boxEl) {
+      if (this.countdownSeconds <= 3) {
+        boxEl.classList.add('urgent');
+      } else {
+        boxEl.classList.remove('urgent');
+      }
+      boxEl.classList.remove('tick');
+      void boxEl.offsetWidth; // Reflow to restart CSS animation
+      boxEl.classList.add('tick');
+    }
   }
 
   private typeNextChar(): void {
