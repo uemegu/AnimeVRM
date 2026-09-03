@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
-import type { AvatarConfig, MaterialStyleParams } from './Config';
+import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig } from './Config';
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 
 export type ToonShaderOptions = {
@@ -17,6 +17,7 @@ export type ToonShaderController = {
   patched: ReadonlyArray<string>;
   updateMaterialStyle: (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => void;
   updateOutline: (params: Partial<AvatarConfig['outline']>) => void;
+  updateEyeGlow: (cfg?: EyeGlowConfig) => void;
   applyFullConfig: (config: AvatarConfig) => void;
 };
 
@@ -321,6 +322,42 @@ export function applyToonShader(
     });
   });
 
+  // Apply eye highlight glow (luminous sparkle)
+  const applyEyeGlow = (eyeGlowCfg?: EyeGlowConfig) => {
+    const cfg = eyeGlowCfg || activeConfig?.eyeGlow;
+    const isEnabled = cfg ? cfg.enabled : true;
+    const intensity = isEnabled ? (cfg?.intensity ?? 1.25) : 0.0;
+    const eyeGlowColor = isEnabled ? new THREE.Color(intensity * 1.6, intensity * 1.6, intensity * 1.8) : new THREE.Color(0, 0, 0);
+
+    trackedMaterials.forEach(({ material }) => {
+      if (/EyeHighlight|Highlight.*Eye/i.test(material.name || '')) {
+        // VRM exports dummy black texture (Shader_NoneBlack) to emissiveMap slot.
+        // Replace with actual highlight map so emissive radiates along the eye highlight shape!
+        if (material.map && material.emissiveMap !== material.map) {
+          material.emissiveMap = material.map;
+          if (material.uniforms?.emissiveMap) {
+            material.uniforms.emissiveMap.value = material.map;
+          }
+          material.needsUpdate = true;
+        }
+
+        if (material.emissive) material.emissive.copy(eyeGlowColor);
+        if (material.uniforms?.emissive?.value) material.uniforms.emissive.value.copy(eyeGlowColor);
+        if (typeof material.emissiveIntensity === 'number') material.emissiveIntensity = intensity;
+        if (material.uniforms?.emissiveIntensity) material.uniforms.emissiveIntensity.value = intensity;
+
+        // Boost base color brightness slightly when enabled so difference is immediately visible
+        const c = isEnabled ? Math.min(2.5, 1.0 + intensity * 0.8) : 1.0;
+        if (material.color) {
+          material.color.setRGB(c, c, c * 1.05);
+        }
+        if (material.uniforms?.litFactor?.value) {
+          material.uniforms.litFactor.value.setRGB(c, c, c * 1.05);
+        }
+      }
+    });
+  };
+
   // Apply material params directly to MToon parameters
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
     const bodyEntry = trackedMaterials.find((entry) => entry.kind === 'body');
@@ -422,7 +459,10 @@ export function applyToonShader(
         }
       });
 
-    // If outline config exists, update outlines
+      // Enhance Eye Highlight with luminous glow if enabled
+      applyEyeGlow();
+
+      // If outline config exists, update outlines
     if (activeConfig?.outline) {
       applyOutline(activeConfig.outline);
     }
@@ -491,6 +531,7 @@ export function applyToonShader(
     update,
     updateMaterialStyle: applyMaterialStyle,
     updateOutline: applyOutline,
+    updateEyeGlow: applyEyeGlow,
     applyFullConfig: (newConfig) => {
       activeConfig = newConfig;
       if (newConfig.materials) {
@@ -498,6 +539,7 @@ export function applyToonShader(
         if (newConfig.materials.hair) applyMaterialStyle('hair', newConfig.materials.hair);
         if (newConfig.materials.cloth) applyMaterialStyle('cloth', newConfig.materials.cloth);
       }
+      applyEyeGlow(newConfig.eyeGlow);
       if (newConfig.outline) {
         applyOutline(newConfig.outline);
       }

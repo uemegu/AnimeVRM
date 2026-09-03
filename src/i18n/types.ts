@@ -260,6 +260,11 @@ export interface Translations {
     toggleFilmGrain: string;
     toggleVignette: string;
     toggleChromaticAberration: string;
+    toggleSharpening: string;
+    toggleEyeGlow: string;
+    eyeGlowFolder: string;
+    eyeGlowEnabled: string;
+    eyeGlowIntensity: string;
     matBody: string;
     matHair: string;
     matCloth: string;
@@ -376,6 +381,9 @@ export interface Translations {
     chromaticAberrationFolder: string;
     chromaticAberrationEnabled: string;
     chromaticAberrationOffset: string;
+    sharpenFolder: string;
+    sharpenEnabled: string;
+    sharpenAmount: string;
     windFolder: string;
     windEnabled: string;
     windSpeed: string;

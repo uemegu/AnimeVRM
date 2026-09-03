@@ -46,11 +46,22 @@ export interface CinematicChromaticAberrationConfig {
   offset: number;
 }
 
+export interface CinematicSharpenConfig {
+  enabled: boolean;
+  amount: number;
+}
+
 export interface CinematicPostProcessingConfig {
   diffusion: CinematicDiffusionConfig;
   filmGrain: CinematicFilmGrainConfig;
   vignette: CinematicVignetteConfig;
   chromaticAberration: CinematicChromaticAberrationConfig;
+  sharpening: CinematicSharpenConfig;
+}
+
+export interface EyeGlowConfig {
+  enabled: boolean;
+  intensity: number;
 }
 
 export interface DepthRimConfig {
@@ -142,6 +153,7 @@ export interface AvatarConfig {
     hair: MaterialStyleParams;
     cloth: MaterialStyleParams;
   };
+  eyeGlow?: EyeGlowConfig;
   outline: {
     enabled: boolean;
     useSmoothNormal: boolean;
@@ -288,6 +300,10 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       outlineWidthFactor: 0.001,
     },
   },
+  eyeGlow: {
+    enabled: true,
+    intensity: 1.25,
+  },
   outline: {
     enabled: true,
     useSmoothNormal: true,
@@ -352,9 +368,9 @@ export const DEFAULT_CONFIG: AvatarConfig = {
         z: -3.8,
       },
       exposure: 0.24,
-      decay: 0.88,
-      density: 0.8,
-      weight: 0.24,
+      decay: 0.82,
+      density: 0.35,
+      weight: 0.14,
       color: '#dcdbff',
       shimmer: 0.4,
     },
@@ -363,7 +379,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       sunSize: 1.25,
       sunColor: '#fff8ee',
       glowIntensity: 1.15,
-      starburstIntensity: 0.95,
+      starburstIntensity: 0.05,
       anamorphicIntensity: 1.1,
       ghostIntensity: 0.3,
       haloIntensity: 0.5,
@@ -396,11 +412,11 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     cinematic: {
       diffusion: {
         enabled: true,
-        strength: 0.25,
-        radius: 1.8,
+        strength: 0.24,
+        radius: 2.0,
       },
       filmGrain: {
-        enabled: true,
+        enabled: false,
         strength: 0.035,
         speed: 1.0,
       },
@@ -413,6 +429,10 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       chromaticAberration: {
         enabled: true,
         offset: 0.0015,
+      },
+      sharpening: {
+        enabled: false,
+        amount: 0.22,
       },
     },
   },
