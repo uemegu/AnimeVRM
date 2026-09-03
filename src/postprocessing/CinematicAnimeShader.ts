@@ -42,8 +42,8 @@ export const CinematicAnimeShader = {
 
     // 5. Vignette
     uVignetteEnabled: { value: 1.0 },
-    uVignetteOffset: { value: 1.1 },
-    uVignetteDarkness: { value: 0.35 },
+    uVignetteOffset: { value: 1.15 },
+    uVignetteDarkness: { value: 0.08 },
     uVignetteColor: { value: new THREE.Color('#1a1829') },
 
     // 6. Film Grain
