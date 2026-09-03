@@ -358,6 +358,7 @@ export class AudioLipSync {
   public setPan(pan: number): void {
     this.currentPan = Math.max(-1.0, Math.min(1.0, pan));
     if (this.pannerNode && this.audioContext) {
+      this.pannerNode.pan.value = this.currentPan;
       this.pannerNode.pan.setValueAtTime(this.currentPan, this.audioContext.currentTime);
     }
   }
@@ -367,9 +368,7 @@ export class AudioLipSync {
    */
   public loadAudioUrl(url: string, title?: string, pan?: number): void {
     this.initAudioContext();
-    if (typeof pan === 'number') {
-      this.setPan(pan);
-    }
+    this.setPan(typeof pan === 'number' ? pan : 0);
     const resolvedUrl = resolveAssetUrl(url);
     this.audioTitle = title || url.split('/').pop() || 'Audio Track';
     this.audioElement.src = resolvedUrl;

@@ -8,6 +8,7 @@ export interface MaterialStyleParams {
   color: string;
   shadowHueShift: number;
   shadowLightnessFactor: number;
+  shadowBoundaryTint: number;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   giEqualizationFactor: number;
@@ -19,6 +20,37 @@ export interface MaterialStyleParams {
   parametricRimLiftFactor: number;
   rimLightingMixFactor: number;
   outlineWidthFactor: number;
+}
+
+export interface CinematicDiffusionConfig {
+  enabled: boolean;
+  strength: number;
+  radius: number;
+}
+
+export interface CinematicFilmGrainConfig {
+  enabled: boolean;
+  strength: number;
+  speed: number;
+}
+
+export interface CinematicVignetteConfig {
+  enabled: boolean;
+  offset: number;
+  darkness: number;
+  color: string;
+}
+
+export interface CinematicChromaticAberrationConfig {
+  enabled: boolean;
+  offset: number;
+}
+
+export interface CinematicPostProcessingConfig {
+  diffusion: CinematicDiffusionConfig;
+  filmGrain: CinematicFilmGrainConfig;
+  vignette: CinematicVignetteConfig;
+  chromaticAberration: CinematicChromaticAberrationConfig;
 }
 
 export interface DepthRimConfig {
@@ -169,6 +201,7 @@ export interface AvatarConfig {
     saturation: number;
     brightness: number;
     contrast: number;
+    cinematic: CinematicPostProcessingConfig;
   };
   camera: {
     fov: number;
@@ -207,6 +240,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       color: '#fffffa',
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
+      shadowBoundaryTint: 0.35,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -223,6 +257,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       color: '#ffffff',
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
+      shadowBoundaryTint: 0.2,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -239,6 +274,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       color: '#ffffff',
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
+      shadowBoundaryTint: 0.1,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -357,6 +393,28 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     saturation: 0.26,
     brightness: 0.0,
     contrast: 0.0,
+    cinematic: {
+      diffusion: {
+        enabled: true,
+        strength: 0.25,
+        radius: 1.8,
+      },
+      filmGrain: {
+        enabled: true,
+        strength: 0.035,
+        speed: 1.0,
+      },
+      vignette: {
+        enabled: true,
+        offset: 1.1,
+        darkness: 0.35,
+        color: '#1a1829',
+      },
+      chromaticAberration: {
+        enabled: true,
+        offset: 0.0015,
+      },
+    },
   },
   camera: {
     fov: 30,
