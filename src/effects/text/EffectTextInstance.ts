@@ -146,7 +146,7 @@ export class EffectTextInstance {
       return false;
     }
 
-    this.updateSpriteTransform(progress);
+    this.updateSpriteTransform(progress, camera);
 
     if (this.onUpdateCallback) {
       this.onUpdateCallback(progress, this);
@@ -158,15 +158,36 @@ export class EffectTextInstance {
   /**
    * Calculate position, scale, opacity and rotation for current frame
    */
-  private updateSpriteTransform(progress: number): void {
+  private updateSpriteTransform(progress: number, camera?: THREE.Camera): void {
     // 1. Base Anchor Position
     this.getAnchorWorldPosition(_worldPos);
 
+    // Zoom-adaptive scaling & head-offset adjustment based on camera distance
+    let zoomScaleMul = 1.0;
+    let headOffsetYReduction = 0.0;
+
+    if (camera) {
+      const dist = camera.position.distanceTo(_worldPos);
+      const standardDist = 1.4; // standard framing distance (~1.35 - 1.5m)
+      if (dist < standardDist) {
+        // Normalized zoom ratio: 1.0 (standard 1.4m) down to 0.0 (extreme close <= 0.65m)
+        const t = THREE.MathUtils.clamp((dist - 0.65) / (standardDist - 0.65), 0.0, 1.0);
+        // Scale reduces to ~65% at close zoom (speaker / close / extreme close)
+        zoomScaleMul = THREE.MathUtils.lerp(0.65, 1.0, t);
+
+        // For head-overhead effects (offset.y > 0.2, e.g. yatta, kirakira, gaan, shiin, biku):
+        // Pull downward by up to 0.16m - 0.19m so they never clip through the top edge of the screen!
+        if (this.offset.y > 0.2) {
+          headOffsetYReduction = THREE.MathUtils.lerp(0.18, 0.0, t);
+        }
+      }
+    }
+
     let posX = _worldPos.x + this.offset.x;
-    let posY = _worldPos.y + this.offset.y;
+    let posY = _worldPos.y + this.offset.y - headOffsetYReduction;
     let posZ = _worldPos.z + this.offset.z;
 
-    let scaleMultiplier = 1.0;
+    let scaleMultiplier = zoomScaleMul;
     let rot = this.initialRotation;
     let opacity = 1.0;
 
@@ -176,15 +197,16 @@ export class EffectTextInstance {
       if (this.elapsedTime < popDuration) {
         const p = this.elapsedTime / popDuration;
         const overshoot = 1.35;
-        scaleMultiplier = p === 0 ? 0 : 1 + overshoot * Math.pow(p - 1, 3) + (overshoot - 1) * Math.pow(p - 1, 2);
-        scaleMultiplier = Math.max(0, scaleMultiplier);
+        const popScale = p === 0 ? 0 : 1 + overshoot * Math.pow(p - 1, 3) + (overshoot - 1) * Math.pow(p - 1, 2);
+        scaleMultiplier *= Math.max(0, popScale);
       }
     }
 
     // 3. Rise Animation (floats upward steadily with gentle swaying)
     if (this.animations.has('rise')) {
-      posY += this.riseSpeed * this.elapsedTime;
-      posX += Math.sin(this.elapsedTime * 3.2) * 0.012;
+      const riseFactor = camera ? zoomScaleMul : 1.0;
+      posY += this.riseSpeed * riseFactor * this.elapsedTime;
+      posX += Math.sin(this.elapsedTime * 3.2) * (0.012 * riseFactor);
     }
 
     // 4. Drop Animation (slow fall for gaan)

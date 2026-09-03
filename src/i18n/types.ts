@@ -130,6 +130,9 @@ export interface Translations {
     playConfession: string;
     stopScenario: string;
     confessionDesc: string;
+    townWalkTitle: string;
+    playTownWalk: string;
+    townWalkDesc: string;
     twoGirlsTitle: string;
     playTwoGirls: string;
     twoGirlsDesc: string;
@@ -226,6 +229,7 @@ export interface Translations {
     animStopped: string;
     confessionStarted: string;
     twoGirlsStarted: string;
+    townWalkStarted: string;
     scenarioStopped: string;
     motionLoaded: string;
     motionLoadFailed: string;

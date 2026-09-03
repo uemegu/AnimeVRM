@@ -197,6 +197,12 @@ function tick(timestamp?: number): void {
   viewerCore.updateBackgroundZoom(dialogueBg);
   viewerCore.updateMidgroundTransform(currentConfig, dialogueBg);
 
+  // Update scrolling background if active (with dialogue zoom & pan)
+  if (scenarioController.scrollingBackgroundManager?.isVisible) {
+    scenarioController.scrollingBackgroundManager.update(delta, dialogueBg);
+    viewerCore.midgroundMesh.visible = false;
+  }
+
   // Update Avatars
   const activeSpeakerId = scenarioController.scenarioEngine.currentScene?.speakerCharacterId;
   avatarManager.update(delta, elapsed, currentConfig, audioLipSync, activeSpeakerId);

@@ -63,7 +63,17 @@ export type ScreenTransitionType =
   | 'eyelid_close'  // 瞼を閉じるように上下から中央へ暗幕が閉じる
   | 'eyelid_blink'  // 瞬き（パチパチ）
   | 'fade_black'    // フェード黒
+  | 'interlude'     // 4分割スライス幕間トランジション (sayin5min風)
   | 'none';
+
+export interface ScenarioScrollingBackgroundConfig {
+  enabled: boolean;
+  textureUrl?: string; // e.g. '/textures/town_far.png'
+  speed?: number;      // slide speed (0 = stop, 1.2 = normal walking)
+  blur?: number;       // 0.0 (sharp) - 1.0 (strong anime blur)
+  direction?: 'left' | 'right';
+  instantBlur?: boolean;
+}
 
 export interface ScenarioScene {
   id: string;
@@ -75,6 +85,7 @@ export interface ScenarioScene {
   voiceUrl?: string;  // Direct voice audio URL (Backward compatibility)
   voicePan?: number;  // Stereo Panning (-1.0 = Left, 0 = Center, 1.0 = Right only)
   screenTransition?: ScreenTransitionType; // 画面トランジション演出 (瞼閉じなど)
+  scrollingBackground?: ScenarioScrollingBackgroundConfig; // 2枚板無限ループスライド＆ぼかし背景
   avatar?: ScenarioSceneAvatarConfig;
   avatars?: Record<string, ScenarioSceneAvatarConfig>; // Multi-character per-avatar action configs
   location?: string;
