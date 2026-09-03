@@ -149,8 +149,8 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
     animations: ['pop', 'drop', 'fadeOut'],
     defaultDuration: 2.3,
-    defaultScale: 0.70,
-    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned well above the forehead
+    defaultScale: 0.46,
+    defaultOffset: { x: 0, y: 0.24, z: 0.04 }, // Positioned just above head / forehead
     dropSpeed: 0.08,
   },
 
@@ -180,8 +180,8 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
     animations: ['float', 'fadeOut'],
     defaultDuration: 2.5,
-    defaultScale: 0.62,
-    defaultOffset: { x: 0, y: 0.38, z: 0 }, // Positioned above the head
+    defaultScale: 0.44,
+    defaultOffset: { x: 0, y: 0.23, z: 0 }, // Positioned above the head
     floatParams: {
       speed: 1.6,
       height: 0.03,
@@ -214,11 +214,11 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
     animations: ['pop', 'float', 'spinSmall', 'fadeOut'],
     defaultDuration: 2.2,
-    defaultScale: 0.70,
-    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned above the head
+    defaultScale: 0.45,
+    defaultOffset: { x: 0, y: 0.23, z: 0.04 }, // Positioned just above head
     floatParams: {
       speed: 3.2,
-      height: 0.04,
+      height: 0.03,
     },
   },
 
@@ -248,11 +248,11 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
     animations: ['pop', 'shake', 'fadeOut'],
     defaultDuration: 1.6,
-    defaultScale: 0.72,
-    defaultOffset: { x: 0, y: 0.40, z: 0.04 }, // Positioned above the head
+    defaultScale: 0.46,
+    defaultOffset: { x: 0, y: 0.23, z: 0.04 }, // Positioned just above head
     shakeIntensity: {
-      position: 0.03,
-      rotation: 0.2,
+      position: 0.02,
+      rotation: 0.15,
       frequency: 38,
     },
   },
@@ -283,11 +283,11 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
     animations: ['pop', 'pulse', 'float', 'fadeOut'],
     defaultDuration: 2.4,
-    defaultScale: 0.75,
-    defaultOffset: { x: 0, y: 0.42, z: 0.04 }, // Positioned above the head
+    defaultScale: 0.48,
+    defaultOffset: { x: 0, y: 0.24, z: 0.04 }, // Positioned just above head / forehead
     floatParams: {
-      speed: 3.5,
-      height: 0.04,
+      speed: 3.2,
+      height: 0.03,
     },
   },
 };

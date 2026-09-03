@@ -316,7 +316,14 @@ export class ScenarioEngine {
   }
 
   private applyAvatarAction(avatar: Avatar, config: ScenarioSceneAvatarConfig): void {
-    const { motion, expression, expressionWeight, faceTexture, effectText, position, rotationY } = config;
+    const { motion, expression, expressionWeight, faceTexture, effectText, position, rotationY, lookAtCamera } = config;
+
+    // LookAt camera control (e.g. false during side-by-side walk to look forward)
+    if (lookAtCamera !== undefined) {
+      avatar.setLookAtCamera(lookAtCamera);
+    } else {
+      avatar.setLookAtCamera(true);
+    }
 
     // Slot position / custom transform
     if (position !== undefined) {

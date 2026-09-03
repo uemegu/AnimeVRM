@@ -27,10 +27,11 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_1.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
+            expression: 'happy',
             expressionWeight: 0.85,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -55,10 +56,11 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_2.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.95,
+            expression: 'happy',
+            expressionWeight: 0.9,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -81,11 +83,12 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_3.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.9,
+            expression: 'happy',
+            expressionWeight: 1.0,
             position: [0.12, 0, 0],
             rotationY: -0.25,
             effectText: 'doki',
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -124,11 +127,12 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_admire.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.9,
+            expression: 'happy',
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -152,10 +156,11 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_shop.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
+            expression: 'happy',
             expressionWeight: 0.95,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -353,10 +358,11 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_1.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
+            expression: 'happy',
             expressionWeight: 0.85,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -381,10 +387,11 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_2.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.95,
+            expression: 'happy',
+            expressionWeight: 0.9,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -407,11 +414,12 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_3.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.9,
+            expression: 'happy',
+            expressionWeight: 1.0,
             position: [0.12, 0, 0],
             rotationY: -0.25,
             effectText: 'doki',
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -448,11 +456,12 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_admire.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
-            expressionWeight: 0.9,
+            expression: 'happy',
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,
@@ -474,10 +483,11 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           voiceUrl: '/voices/town_walk_shop.wav',
           avatar: {
             motion: '/animations/Walking.fbx',
-            expression: 'relaxed',
+            expression: 'happy',
             expressionWeight: 0.95,
             position: [0.12, 0, 0],
             rotationY: -0.22,
+            lookAtCamera: false,
           },
           scrollingBackground: {
             enabled: true,

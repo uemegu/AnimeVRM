@@ -168,17 +168,17 @@ export class EffectTextInstance {
 
     if (camera) {
       const dist = camera.position.distanceTo(_worldPos);
-      const standardDist = 1.4; // standard framing distance (~1.35 - 1.5m)
+      const standardDist = 1.8; // standard bust-up/wide distance (~1.8m)
       if (dist < standardDist) {
-        // Normalized zoom ratio: 1.0 (standard 1.4m) down to 0.0 (extreme close <= 0.65m)
-        const t = THREE.MathUtils.clamp((dist - 0.65) / (standardDist - 0.65), 0.0, 1.0);
-        // Scale reduces to ~65% at close zoom (speaker / close / extreme close)
-        zoomScaleMul = THREE.MathUtils.lerp(0.65, 1.0, t);
+        // Normalized zoom ratio: 1.0 (standard 1.8m) down to 0.0 (extreme close <= 0.70m)
+        const t = THREE.MathUtils.clamp((dist - 0.70) / (standardDist - 0.70), 0.0, 1.0);
+        // Scale reduces smoothly to ~60% at close zoom
+        zoomScaleMul = THREE.MathUtils.lerp(0.60, 1.0, t);
 
         // For head-overhead effects (offset.y > 0.2, e.g. yatta, kirakira, gaan, shiin, biku):
-        // Pull downward by up to 0.16m - 0.19m so they never clip through the top edge of the screen!
+        // Pull downward dynamically so they always stay neatly near the forehead/hair
         if (this.offset.y > 0.2) {
-          headOffsetYReduction = THREE.MathUtils.lerp(0.18, 0.0, t);
+          headOffsetYReduction = THREE.MathUtils.lerp(0.12, 0.0, t);
         }
       }
     }

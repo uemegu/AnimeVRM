@@ -43,6 +43,7 @@ export interface ScenarioSceneAvatarConfig {
     text?: string;
     duration?: number;
   };
+  lookAtCamera?: boolean;
 }
 
 export type CameraZoomType =
