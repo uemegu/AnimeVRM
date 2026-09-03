@@ -6242,131 +6242,200 @@ void main() {
         z-index: 1;
       }
 
-      /* Solid dynamic action bands */
+      /* Solid dynamic action bands (Visible & gentle continuous floating) */
       .adv-vfx-band {
         position: absolute;
-        left: -30%;
-        width: 160%;
+        left: -60%;
+        width: 220%;
         transform: rotate(-18deg);
-        opacity: 0;
         pointer-events: none;
       }
 
       .adv-vfx-band.b1 {
         top: 14%;
-        height: 40px;
-        background: #1d4ed8;
-        box-shadow: 0 0 20px rgba(29, 78, 216, 0.4);
-        animation: vfx-band-slash 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.02s forwards;
+        height: 42px;
+        background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #1e3a8a 100%);
+        background-size: 200% 100%;
+        box-shadow: 0 0 24px rgba(29, 78, 216, 0.45);
+        opacity: 0.7;
+        animation: vfx-light-flow-slow 7.5s linear infinite, vfx-band-sway-1 8s ease-in-out infinite alternate;
       }
 
       .adv-vfx-band.b2 {
         top: 60%;
-        height: 28px;
-        background: #0284c7;
-        box-shadow: 0 0 16px rgba(2, 132, 199, 0.4);
-        animation: vfx-band-slash 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s forwards;
+        height: 30px;
+        background: linear-gradient(90deg, #0369a1 0%, #0ea5e9 50%, #0369a1 100%);
+        background-size: 200% 100%;
+        box-shadow: 0 0 20px rgba(2, 132, 199, 0.45);
+        opacity: 0.75;
+        animation: vfx-light-flow-rev 6.5s linear infinite, vfx-band-sway-2 7s ease-in-out infinite alternate;
       }
 
       .adv-vfx-band.b3 {
-        top: 80%;
-        height: 16px;
-        background: #38bdf8;
-        animation: vfx-band-slash 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
+        top: 82%;
+        height: 18px;
+        background: linear-gradient(90deg, #0284c7 0%, #38bdf8 50%, #0284c7 100%);
+        background-size: 200% 100%;
+        opacity: 0.8;
+        animation: vfx-light-flow-slow 6s linear infinite, vfx-band-sway-3 6s ease-in-out infinite alternate;
       }
 
-      /* Glowing Laser Slashes */
+      /* Glowing Laser Slashes (Continuous dynamic floating & light streams) */
       .adv-vfx-beam {
         position: absolute;
-        left: -30%;
-        width: 160%;
+        left: -60%;
+        width: 220%;
         transform: rotate(-18deg);
-        opacity: 0;
         pointer-events: none;
       }
 
+      /* Cyan Laser Beam */
       .adv-vfx-beam.m1 {
         top: 22%;
-        height: 7px;
-        background: #38bdf8;
-        box-shadow: 0 0 18px #38bdf8, 0 0 34px rgba(56, 189, 248, 0.85);
-        animation: vfx-beam-slash 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards;
+        height: 8px;
+        background: linear-gradient(90deg, #0284c7 0%, #38bdf8 25%, #ffffff 50%, #38bdf8 75%, #0284c7 100%);
+        background-size: 200% 100%;
+        box-shadow: 0 0 20px #38bdf8, 0 0 36px rgba(56, 189, 248, 0.9);
+        opacity: 0.9;
+        animation: vfx-light-flow-fast 4.5s linear infinite, vfx-beam-sway-1 5.5s ease-in-out infinite alternate;
       }
 
+      /* Deep Blue Laser Beam */
       .adv-vfx-beam.m2 {
         top: 46%;
         height: 9px;
-        background: #2563eb;
+        background: linear-gradient(90deg, #1e40af 0%, #3b82f6 30%, #93c5fd 50%, #3b82f6 70%, #1e40af 100%);
+        background-size: 200% 100%;
         box-shadow: 0 0 22px #38bdf8, 0 0 44px rgba(37, 99, 235, 0.95);
-        animation: vfx-beam-slash 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.06s forwards;
+        opacity: 0.9;
+        animation: vfx-light-flow-slow 5.5s linear infinite, vfx-beam-sway-2 6.8s ease-in-out infinite alternate;
       }
 
+      /* Yellow Laser Beam */
       .adv-vfx-beam.m3 {
         top: 72%;
-        height: 6px;
-        background: #facc15;
-        box-shadow: 0 0 16px rgba(250, 204, 21, 0.85);
-        animation: vfx-beam-slash 0.52s cubic-bezier(0.16, 1, 0.3, 1) 0.10s forwards;
+        height: 8px;
+        background: linear-gradient(90deg, #ca8a04 0%, #facc15 25%, #fef08a 50%, #facc15 75%, #ca8a04 100%);
+        background-size: 200% 100%;
+        box-shadow: 0 0 18px rgba(250, 204, 21, 0.95), 0 0 32px rgba(250, 204, 21, 0.6);
+        opacity: 0.92;
+        animation: vfx-light-flow-fast 4.8s linear infinite, vfx-beam-sway-3 5.8s ease-in-out infinite alternate;
       }
 
       /* Sharp Speed Cuts */
       .adv-vfx-line {
         position: absolute;
-        left: -30%;
-        width: 160%;
+        left: -60%;
+        width: 220%;
         height: 2px;
         background: #38bdf8;
         transform: rotate(-18deg);
-        opacity: 0;
+        opacity: 0.8;
+        pointer-events: none;
       }
 
       .adv-vfx-line.l1 {
         top: 8%;
-        animation: vfx-beam-slash 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.02s forwards;
+        animation: vfx-beam-sway-1 4.2s ease-in-out infinite alternate;
       }
 
       .adv-vfx-line.l2 {
         top: 34%;
         height: 3px;
-        animation: vfx-beam-slash 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.07s forwards;
+        animation: vfx-beam-sway-3 5s ease-in-out infinite alternate;
       }
 
       .adv-vfx-line.l3 {
         top: 56%;
-        animation: vfx-beam-slash 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.09s forwards;
+        animation: vfx-beam-sway-2 5.5s ease-in-out infinite alternate;
       }
 
       .adv-vfx-line.l4 {
         top: 88%;
         height: 3px;
-        animation: vfx-beam-slash 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.14s forwards;
+        animation: vfx-beam-sway-1 6.2s ease-in-out infinite alternate;
       }
 
-      @keyframes vfx-band-slash {
+      /* Streaming light across borders */
+      @keyframes vfx-light-flow-fast {
         0% {
-          opacity: 0;
-          transform: scaleX(0.2) rotate(-18deg) translateX(-60%);
-        }
-        50% {
-          opacity: 1;
+          background-position: 200% 0;
         }
         100% {
-          opacity: 0.65;
-          transform: scaleX(1) rotate(-18deg) translateX(0);
+          background-position: -200% 0;
         }
       }
 
-      @keyframes vfx-beam-slash {
+      @keyframes vfx-light-flow-slow {
         0% {
-          opacity: 0;
-          transform: scaleX(0.1) rotate(-18deg) translateX(-50%);
-        }
-        50% {
-          opacity: 1;
+          background-position: 200% 0;
         }
         100% {
-          opacity: 0.85;
-          transform: scaleX(1) rotate(-18deg) translateX(0);
+          background-position: -200% 0;
+        }
+      }
+
+      @keyframes vfx-light-flow-rev {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      /* Vertical / Transverse Sway Motions (Visibly drifting without being too fast) */
+      @keyframes vfx-band-sway-1 {
+        0% {
+          transform: rotate(-18deg) translateY(-14px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(16px);
+        }
+      }
+
+      @keyframes vfx-band-sway-2 {
+        0% {
+          transform: rotate(-18deg) translateY(18px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(-16px);
+        }
+      }
+
+      @keyframes vfx-band-sway-3 {
+        0% {
+          transform: rotate(-18deg) translateY(-12px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(14px);
+        }
+      }
+
+      @keyframes vfx-beam-sway-1 {
+        0% {
+          transform: rotate(-18deg) translateY(-20px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(22px);
+        }
+      }
+
+      @keyframes vfx-beam-sway-2 {
+        0% {
+          transform: rotate(-18deg) translateY(24px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(-18px);
+        }
+      }
+
+      @keyframes vfx-beam-sway-3 {
+        0% {
+          transform: rotate(-18deg) translateY(-22px);
+        }
+        100% {
+          transform: rotate(-18deg) translateY(25px);
         }
       }
 
@@ -6595,19 +6664,137 @@ void main() {
         }
       }
 
+      /* Dynamic Persona Typography Title (Top Center) */
+      .adv-persona-title-container {
+        position: absolute;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%) skewX(-8deg);
+        z-index: 25;
+        pointer-events: none;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
+      }
+
+      /* Dynamic Slash Background Accent */
+      .adv-p-bg-slash {
+        position: absolute;
+        top: 50%;
+        left: -40px;
+        right: -40px;
+        height: clamp(38px, 4.8vw, 56px);
+        background: #0f172a;
+        transform: translateY(-50%) skewX(-10deg);
+        z-index: 1;
+        opacity: 0;
+        border-top: 3px solid #38bdf8;
+        border-bottom: 3px solid #38bdf8;
+        box-shadow: 0 0 24px rgba(56, 189, 248, 0.45);
+        animation: persona-slash-enter 0.34s cubic-bezier(0.16, 1, 0.3, 1) 0.04s forwards;
+      }
+
+      @keyframes persona-slash-enter {
+        0% {
+          opacity: 0;
+          transform: translateY(-50%) skewX(-10deg) scaleX(0.1);
+        }
+        100% {
+          opacity: 0.92;
+          transform: translateY(-50%) skewX(-10deg) scaleX(1);
+        }
+      }
+
+      .adv-persona-text-row {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: clamp(10px, 1.8vw, 22px);
+      }
+
+      .adv-p-word {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+
+      /* Persona Letter Cutout Tile */
+      .adv-p-char {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Impact', 'Montserrat', 'Arial Black', sans-serif;
+        font-size: clamp(28px, 3.8vw, 48px);
+        font-weight: 900;
+        line-height: 1;
+        padding: clamp(4px, 0.6vw, 8px) clamp(8px, 1.1vw, 14px);
+        background: #0f172a;
+        color: #ffffff;
+        border: 2.5px solid #ffffff;
+        box-shadow: 4px 4px 0px #0b1d47;
+        border-radius: 3px;
+        opacity: 0;
+        transform-origin: center center;
+        animation: persona-char-slam 0.28s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
+        animation-delay: var(--delay, 0s);
+      }
+
+      /* High-contrast tiles for Persona typography rhythm */
+      .adv-p-char.accent {
+        background: #ffffff;
+        color: #0f172a;
+        border-color: #0f172a;
+        box-shadow: 4px 4px 0px #0284c7;
+      }
+
+      .adv-p-char.accent-cyan {
+        background: #0284c7;
+        color: #ffffff;
+        border-color: #ffffff;
+        box-shadow: 4px 4px 0px #0b1d47;
+      }
+
+      .adv-p-char.bang {
+        background: #facc15;
+        color: #0f172a;
+        border-color: #0f172a;
+        box-shadow: 4px 4px 0px #0b1d47;
+        font-size: clamp(30px, 4.2vw, 52px);
+      }
+
+      @keyframes persona-char-slam {
+        0% {
+          opacity: 0;
+          transform: scale(2.8) translateY(-40px) rotate(-16deg);
+          filter: blur(6px);
+        }
+        65% {
+          opacity: 1;
+          transform: scale(0.92) translateY(3px) rotate(calc(var(--rot, 0deg) * -0.5));
+          filter: blur(0);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0) rotate(var(--rot, 0deg));
+        }
+      }
+
       /* Choices Container */
       .adv-choices-container {
         position: absolute;
-        top: 48%;
-        left: 54%;
+        top: 54%;
+        left: 51%;
         transform: translate(-50%, -50%);
         z-index: 20;
         display: flex;
         flex-direction: column;
-        gap: 15px;
-        width: 44%;
-        max-width: 470px;
-        min-width: 320px;
+        gap: 20px;
+        width: 52%;
+        max-width: 580px;
+        min-width: 350px;
         pointer-events: none;
         opacity: 0;
         transition: opacity 0.2s ease;
@@ -6618,30 +6805,31 @@ void main() {
         opacity: 1;
       }
 
-      /* Blue-Themed Stylish Anime Choice Card (Solid Colors) */
+      /* Pop & Bold Anime Choice Card (White bg, thick outline, solid shadow) */
       .adv-choice-btn {
         position: relative;
-        background: #0b1d47;
-        color: #f0f9ff;
+        background: #ffffff;
+        color: #0f172a;
         font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', sans-serif;
-        font-size: clamp(14px, 1.55vw, 18px);
-        font-weight: 700;
+        font-size: clamp(15px, 1.6vw, 19px);
+        font-weight: 800;
         letter-spacing: 0.02em;
-        padding: 13px 20px 13px 16px;
-        border: 1.5px solid #38bdf8;
-        border-radius: 4px;
+        padding: 16px 24px 16px 56px;
+        border: 3.5px solid #0f172a;
+        border-radius: 8px;
         overflow: visible;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        box-shadow: 7px 7px 0px #0b1d47;
         cursor: pointer;
         text-align: left;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         user-select: none;
         transform-origin: center center;
-        transform: skewX(-8deg);
+        transform: skewX(-6deg);
         opacity: 0;
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        z-index: 1;
+        transition: transform 0.2s cubic-bezier(0.18, 1.25, 0.32, 1.15), background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
       }
 
       .adv-choice-btn.slam-in {
@@ -6651,88 +6839,85 @@ void main() {
       @keyframes choice-slice-in {
         0% {
           opacity: 0;
-          transform: translate(90px, -6px) skewX(-8deg) scaleX(1.12);
+          transform: translate(90px, -6px) skewX(-6deg) scaleX(1.12);
           filter: blur(8px);
         }
         65% {
           opacity: 1;
-          transform: translate(-5px, 1px) skewX(-8deg) scaleX(0.98);
+          transform: translate(-5px, 1px) skewX(-6deg) scaleX(0.98);
           filter: blur(0);
         }
         100% {
           opacity: 1;
-          transform: translate(0, 0) skewX(-8deg) scaleX(1);
+          transform: translate(0, 0) skewX(-6deg) scaleX(1);
         }
       }
 
+      /* Number Badge: Large, Bold, Overflowing/Popping Out of the Card (Ahead of speech tail) */
       .adv-choice-badge {
+        position: absolute;
+        left: -18px;
+        top: -12px;
         background: #0284c7;
         color: #ffffff;
-        border: 1.5px solid #38bdf8;
+        border: 3px solid #0f172a;
+        box-shadow: 3px 3px 0px #0f172a;
         font-family: 'Impact', 'Arial Black', sans-serif;
-        font-size: 14px;
+        font-size: clamp(24px, 2.5vw, 32px);
         font-weight: 900;
-        padding: 3px 10px;
-        border-radius: 3px;
-        transform: skewX(-6deg);
+        padding: 3px 12px;
+        border-radius: 6px;
+        transform: rotate(-6deg);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         letter-spacing: 0.05em;
+        line-height: 1;
         flex-shrink: 0;
-        transition: all 0.15s ease;
+        z-index: 15;
+        transition: transform 0.2s cubic-bezier(0.18, 1.25, 0.32, 1.15), background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
       }
 
       .adv-choice-text {
+        position: relative;
+        z-index: 5;
         flex: 1;
         line-height: 1.4;
-        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
       }
 
-      .adv-choice-arrow {
-        color: #38bdf8;
-        font-size: 16px;
-        margin-left: auto;
-        flex-shrink: 0;
-        transition: transform 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
-      }
-
+      /* Hover States: Slightly bigger, deeper shadow, pop colors */
       .adv-choice-btn:hover {
-        background: #0284c7;
-        border-color: #38bdf8;
-        border-left-color: transparent;
-        transform: translate(-10px, 0) skewX(-8deg) scale(1.025);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        color: #ffffff;
+        background: #ffffff;
+        border-color: #0284c7;
+        color: #0284c7;
+        transform: translate(-10px, -2px) skewX(-6deg) scale(1.05);
+        box-shadow: 11px 11px 0px #0b1d47;
       }
 
       .adv-choice-btn:hover .adv-choice-badge {
-        background: #38bdf8;
-        color: #0284c7;
-        transform: skewX(-6deg) scale(1.08);
-      }
-
-      .adv-choice-btn:hover .adv-choice-arrow {
-        transform: translateX(4px) scale(1.2);
-        color: #ffffff;
-        text-shadow: 0 0 10px #38bdf8;
+        background: #facc15;
+        color: #0f172a;
+        border-color: #0f172a;
+        transform: rotate(-2deg) scale(1.12);
+        box-shadow: 4px 4px 0px #0f172a;
       }
 
       .adv-choice-btn:active {
-        transform: translate(-8px, 0) skewX(-8deg) scale(0.98);
+        transform: translate(-6px, 1px) skewX(-6deg) scale(0.99);
+        box-shadow: 5px 5px 0px #0b1d47;
       }
 
-      /* Seamless Slender Speech Balloon Arrow Extending Towards Hero on Hover */
+      /* Seamless Speech Balloon Arrow on Hover (Behind badge z-index:1, no box-shadow, matching cyan border) */
       .adv-choice-speech-tail {
         position: absolute;
-        right: 100%;
+        right: calc(100% - 3px);
         top: 0;
         bottom: 0;
         transform: scaleX(0);
         transform-origin: right center;
-        width: clamp(180px, 24vw, 320px);
+        width: clamp(80px, 11vw, 150px);
         pointer-events: none;
-        z-index: 10;
+        z-index: 1;
         opacity: 0;
         overflow: visible;
         transition: transform 0.22s cubic-bezier(0.12, 1.25, 0.28, 1.15), opacity 0.18s ease;
@@ -6804,12 +6989,19 @@ void main() {
       <div class="adv-eyelid adv-eyelid-bottom"></div>
     `,e.appendChild(t),this.eyelidOverlayEl=t}setEyelidClosed(e){this.createEyelidOverlay(),e?this.eyelidOverlayEl?.classList.add(`closed`):this.eyelidOverlayEl?.classList.remove(`closed`)}resetEyelids(){this.eyelidOverlayEl&&this.eyelidOverlayEl.classList.remove(`closed`)}setLocation(e){this.currentLocation=e,this.locationBadgeEl&&(this.locationBadgeEl.innerHTML=`📍 ${this.escapeHTML(e)}`,e?this.locationBadgeEl.classList.add(`visible`):this.locationBadgeEl.classList.remove(`visible`))}setText(e,t=``){this.show(),this.hideChoices(),this.stopTyping(),this.fullText=e,this.currentSpeaker=t,this.currentDisplayedLength=0,this.nextIconEl&&this.nextIconEl.classList.remove(`show`),this.typeNextChar()}isShowingChoices(){return this.isChoicesVisible}buildAnimatedLetters(e,t,n=.032){return e.split(``).map((e,r)=>e===` `?`<span class="adv-tt-space">&nbsp;</span>`:`<span class="adv-tt-char" style="animation-delay: ${(t+r*n).toFixed(3)}s">${e}</span>`).join(``)}getSpeechTailSVG(e,t){let n=30;return n=t===1?30:e===0?56:e===1?16:-14,`
       <div class="adv-choice-speech-tail">
-        <svg class="adv-speech-tail-svg" viewBox="0 0 300 60" preserveAspectRatio="none">
-          <!-- Seamless Speech Balloon Arrow Polygon Fill (Solid color matching button hover) -->
-          <polygon points="300,20 300,40 0,${n}" fill="#0284c7" />
-          <!-- Speech Balloon Arrow Outline (Left, Top, Bottom only - right is open into button) -->
-          <path d="M 300,20 L 0,${n} L 300,40" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+        <svg class="adv-speech-tail-svg" viewBox="0 0 150 60" preserveAspectRatio="none">
+          <!-- Seamless Speech Balloon Arrow Polygon Fill (White matching button) -->
+          <polygon points="150,16 150,44 0,${n}" fill="#ffffff" />
+          <!-- Speech Balloon Arrow Outline with cyan border matching button hover -->
+          <path d="M 150,16 L 0,${n} L 150,44" fill="none" stroke="#0284c7" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" />
         </svg>
+      </div>
+    `}buildPersonaChoiceTitle(){let e=[{letters:[{ch:`M`,cls:`accent`,rot:-6},{ch:`a`,cls:``,rot:3},{ch:`k`,cls:``,rot:-4},{ch:`e`,cls:``,rot:2}]},{letters:[{ch:`Y`,cls:`accent-cyan`,rot:4},{ch:`o`,cls:``,rot:-3},{ch:`u`,cls:``,rot:5},{ch:`r`,cls:``,rot:-2}]},{letters:[{ch:`C`,cls:`accent`,rot:-5},{ch:`h`,cls:``,rot:3},{ch:`o`,cls:``,rot:-3},{ch:`i`,cls:``,rot:4},{ch:`c`,cls:``,rot:-4},{ch:`e`,cls:``,rot:3},{ch:`!`,cls:`bang`,rot:-6},{ch:`!`,cls:`bang`,rot:6}]}],t=.08;return`
+      <div class="adv-persona-title-container">
+        <div class="adv-p-bg-slash"></div>
+        <div class="adv-persona-text-row">
+          ${e.map(e=>`<div class="adv-p-word">${e.letters.map(e=>{let n=t.toFixed(3);return t+=.038,`<span class="adv-p-char${e.cls?` ${e.cls}`:``}" style="--delay: ${n}s; --rot: ${e.rot}deg;">${e.ch}</span>`}).join(``)}</div>`).join(``)}
+        </div>
       </div>
     `}playSE(e,t=.5){try{let n=new Audio(K(e));n.volume=t,n.play().catch(()=>{})}catch{}}showChoices(e,t){this.isChoicesVisible=!0,this.nextIconEl&&this.nextIconEl.classList.remove(`show`),this.playSE(`/se/items_shown.mp3`,.6);let n=document.getElementById(`adv-choices-backdrop`);if(!n){let e=this.getParentContainer();n=document.createElement(`div`),n.id=`adv-choices-backdrop`,n.className=`adv-choices-backdrop`,e.appendChild(n)}n.innerHTML=`
       <div class="adv-vfx-speedlines">
@@ -6829,6 +7021,9 @@ void main() {
         <div class="adv-vfx-ring r2"></div>
         <div class="adv-vfx-ring r3"></div>
       </div>
+
+      <!-- Persona Dynamic Cutout Typography Title -->
+      ${this.buildPersonaChoiceTitle()}
 
       <!-- Left Character: Hero with dark blue silhouette shadow -->
       <div class="adv-cutin-char adv-cutin-left">
@@ -6860,7 +7055,6 @@ void main() {
         ${this.getSpeechTailSVG(i,e.length)}
         <span class="adv-choice-badge">0${i+1}</span>
         <span class="adv-choice-text">${this.escapeHTML(n.text)}</span>
-        <span class="adv-choice-arrow">▸</span>
       `,a.addEventListener(`mouseenter`,()=>{this.playSE(`/se/items_hover.mp3`,.45)}),a.addEventListener(`click`,e=>{e.stopPropagation(),this.playSE(`/se/items_chose.mp3`,.65),this.hideChoices(),t(n)}),r.appendChild(a)}),requestAnimationFrame(()=>{n?.classList.add(`visible`),r.classList.add(`visible`)})}hideChoices(){this.isChoicesVisible=!1;let e=document.getElementById(`adv-choices-backdrop`);e&&e.classList.remove(`visible`),this.choicesContainerEl&&this.choicesContainerEl.classList.remove(`visible`),setTimeout(()=>{!this.isChoicesVisible&&e&&(e.innerHTML=``,this.choicesContainerEl=null)},300)}typeNextChar(){this.currentDisplayedLength<this.fullText.length?(this.currentDisplayedLength++,this.renderContent(this.fullText.slice(0,this.currentDisplayedLength)),this.typingTimer=window.setTimeout(()=>{this.typeNextChar()},this.typingSpeedMs)):(this.renderContent(this.fullText),this.nextIconEl&&!this.isChoicesVisible&&this.nextIconEl.classList.add(`show`))}renderContent(e){if(!this.contentEl)return;this.speakerEl&&(this.currentSpeaker?(this.speakerEl.innerHTML=`<span class="adv-speaker-name">${this.escapeHTML(this.currentSpeaker)}</span>`,this.speakerEl.style.display=`block`):(this.speakerEl.innerHTML=``,this.speakerEl.style.display=`none`));let t=e.split(`
 `).map(e=>this.escapeHTML(e).replace(/「/g,`<span class="adv-quote-mark">「</span>`).replace(/」/g,`<span class="adv-quote-mark">」</span>`)).join(`<br>`);this.contentEl.innerHTML=`<div>${t}</div>`}stopTyping(){this.typingTimer!==null&&(clearTimeout(this.typingTimer),this.typingTimer=null)}createDOM(){if(this.container)return;let e=this.getParentContainer(),t=document.createElement(`div`);t.className=`adv-location-badge`,this.currentLocation&&(t.innerHTML=`📍 ${this.escapeHTML(this.currentLocation)}`),e.appendChild(t),this.locationBadgeEl=t;let n=document.createElement(`div`);n.className=`adv-message-container`;let r=document.createElement(`div`);r.className=`adv-message-body`;let i=document.createElement(`div`);r.appendChild(i),this.speakerEl=i;let a=document.createElement(`div`);r.appendChild(a),this.contentEl=a;let o=document.createElement(`div`);o.className=`adv-next-indicator`,o.innerHTML=`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
