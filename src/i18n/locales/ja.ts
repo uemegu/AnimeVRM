@@ -73,7 +73,8 @@ export const ja: Translations = {
   character: {
     modelSwitch: '👤 モデル切替 (VRM Model)',
     selectFile: '📁 ファイル選択',
-    motion: '💃 モーション (Motion: 全13種)',
+    selectMotionFile: '📁 FBX選択',
+    motion: '💃 モーション (Motion)',
     motions: {
       idle: '待機',
       standingIdle: '立ち待機',
@@ -226,6 +227,8 @@ export const ja: Translations = {
     confessionStarted: '🌸 告白イベントシナリオを開始しました',
     twoGirlsStarted: '👥 2人会話シナリオを開始しました',
     scenarioStopped: '⏹ シナリオを停止しました',
+    motionLoaded: '💃 モーションを読み込みました: ',
+    motionLoadFailed: '❌ モーションの読み込みに失敗しました',
   },
   gui: {
     detailedTitle: '詳細パラメータ',

@@ -73,6 +73,7 @@ export interface Translations {
   character: {
     modelSwitch: string;
     selectFile: string;
+    selectMotionFile: string;
     motion: string;
     motions: {
       idle: string;
@@ -226,6 +227,8 @@ export interface Translations {
     confessionStarted: string;
     twoGirlsStarted: string;
     scenarioStopped: string;
+    motionLoaded: string;
+    motionLoadFailed: string;
   };
   gui: {
     detailedTitle: string;

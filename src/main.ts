@@ -691,6 +691,7 @@ const animationPlayer = new ShortAnimationPlayer({
 let avatarInstance: Avatar | null = null;
 let currentModelUrl = resolveAssetUrl('/models/girl.vrm');
 let currentMotionUrl = resolveAssetUrl('/animations/Idle.fbx');
+const customMotions: Array<{ name: string; url: string }> = [];
 let currentExprName = 'neutral';
 const scenarioAvatars = new Map<string, Avatar>();
 let isMultiAvatarScenarioActive = false;
@@ -2773,20 +2774,27 @@ function setupUnifiedUI(): void {
           <div class="section-box">
             <label class="section-label">${tr.character.motion}</label>
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="motion-buttons">
-              <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn active">${tr.character.motions.idle}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Standing Idle.fbx')}" class="motion-btn">${tr.character.motions.standingIdle}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Female Standing Pose.fbx')}" class="motion-btn">${tr.character.motions.standingPose}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn">${tr.character.motions.walking}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Jogging.fbx')}" class="motion-btn">${tr.character.motions.jogging}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn">${tr.character.motions.greeting}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn">${tr.character.motions.bow}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn">${tr.character.motions.acknowledging}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn">${tr.character.motions.dismissing}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Salute.fbx')}" class="motion-btn">${tr.character.motions.salute}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Excited.fbx')}" class="motion-btn">${tr.character.motions.excited}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn">${tr.character.motions.angry}</button>
-              <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn">${tr.character.motions.punching}</button>
-              <button data-motion="none" class="motion-btn">${tr.character.motions.stop}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Idle.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Idle.fbx') ? 'active' : ''}">${tr.character.motions.idle}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Standing Idle.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Standing Idle.fbx') ? 'active' : ''}">${tr.character.motions.standingIdle}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Female Standing Pose.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Female Standing Pose.fbx') ? 'active' : ''}">${tr.character.motions.standingPose}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Walking.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Walking.fbx') ? 'active' : ''}">${tr.character.motions.walking}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Jogging.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Jogging.fbx') ? 'active' : ''}">${tr.character.motions.jogging}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Standing Greeting.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Standing Greeting.fbx') ? 'active' : ''}">${tr.character.motions.greeting}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Quick Formal Bow.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Quick Formal Bow.fbx') ? 'active' : ''}">${tr.character.motions.bow}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Acknowledging.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Acknowledging.fbx') ? 'active' : ''}">${tr.character.motions.acknowledging}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Dismissing Gesture.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Dismissing Gesture.fbx') ? 'active' : ''}">${tr.character.motions.dismissing}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Salute.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Salute.fbx') ? 'active' : ''}">${tr.character.motions.salute}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Excited.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Excited.fbx') ? 'active' : ''}">${tr.character.motions.excited}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Angry.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Angry.fbx') ? 'active' : ''}">${tr.character.motions.angry}</button>
+              <button data-motion="${resolveAssetUrl('/animations/Punching.fbx')}" class="motion-btn ${currentMotionUrl === resolveAssetUrl('/animations/Punching.fbx') ? 'active' : ''}">${tr.character.motions.punching}</button>
+              <button data-motion="none" class="motion-btn ${currentMotionUrl === 'none' ? 'active' : ''}">${tr.character.motions.stop}</button>
+              ${customMotions
+                .map(
+                  (m) =>
+                    `<button data-motion="${m.url}" class="motion-btn ${currentMotionUrl === m.url ? 'active' : ''}" style="border-color: #3b82f6;">💃 ${m.name}</button>`
+                )
+                .join('')}
+              <button id="open-local-fbx-btn" class="motion-btn">${tr.character.selectMotionFile}</button>
             </div>
           </div>
 
@@ -3532,6 +3540,7 @@ function setupUnifiedUI(): void {
     // Motion Buttons
     const motionButtons = document.querySelectorAll<HTMLButtonElement>('.motion-btn');
     motionButtons.forEach((btn) => {
+      if (btn.id === 'open-local-fbx-btn') return;
       btn.addEventListener('click', async () => {
         motionButtons.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
@@ -3540,12 +3549,43 @@ function setupUnifiedUI(): void {
         if (!avatarInstance) return;
 
         if (motionUrl === 'none') {
+          currentMotionUrl = 'none';
           avatarInstance.stopAnimation();
         } else if (motionUrl) {
-          const isLoop = isMotionLoop(motionUrl);
+          currentMotionUrl = motionUrl;
+          const isLoop = motionUrl.startsWith('blob:') || isMotionLoop(motionUrl);
           await avatarInstance.playAnimation(motionUrl, isLoop);
         }
       });
+    });
+
+    document.getElementById('open-local-fbx-btn')?.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.fbx';
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          const existing = customMotions.find((m) => m.name === file.name);
+          if (existing) {
+            existing.url = blobUrl;
+          } else {
+            customMotions.push({ name: file.name, url: blobUrl });
+          }
+          currentMotionUrl = blobUrl;
+          renderUI();
+          if (avatarInstance) {
+            const action = await avatarInstance.playAnimation(blobUrl, true);
+            if (action) {
+              showToast(`${t().toasts.motionLoaded}${file.name}`);
+            } else {
+              showToast(t().toasts.motionLoadFailed);
+            }
+          }
+        }
+      };
+      input.click();
     });
 
     // Expression Buttons

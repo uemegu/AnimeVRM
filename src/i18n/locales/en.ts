@@ -73,7 +73,8 @@ export const en: Translations = {
   character: {
     modelSwitch: '👤 Model Switch (VRM Model)',
     selectFile: '📁 Select File',
-    motion: '💃 Motion (13 Presets)',
+    selectMotionFile: '📁 Select FBX',
+    motion: '💃 Motion',
     motions: {
       idle: 'Idle',
       standingIdle: 'Standing Idle',
@@ -226,6 +227,8 @@ export const en: Translations = {
     confessionStarted: '🌸 Started confession event scenario',
     twoGirlsStarted: '👥 Started 2-girl dialogue scenario',
     scenarioStopped: '⏹ Scenario stopped',
+    motionLoaded: '💃 Motion loaded: ',
+    motionLoadFailed: '❌ Failed to load motion',
   },
   gui: {
     detailedTitle: 'Detailed Parameters',

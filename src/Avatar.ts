@@ -63,8 +63,28 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   const _vec3 = new THREE.Vector3();
   const _vec3b = new THREE.Vector3();
 
+  const findMixamoNode = (name: string): THREE.Object3D | null => {
+    const direct = asset!.getObjectByName(name);
+    if (direct) return direct;
+    if (name.includes(':')) {
+      const raw = name.split(':').pop()!;
+      return asset!.getObjectByName(raw) || asset!.getObjectByName(`mixamorig${raw}`) || null;
+    }
+    if (name.startsWith('mixamorig')) {
+      const raw = name.slice('mixamorig'.length);
+      return asset!.getObjectByName(`mixamorig:${raw}`) || asset!.getObjectByName(raw) || null;
+    }
+    return asset!.getObjectByName(`mixamorig${name}`) || asset!.getObjectByName(`mixamorig:${name}`) || null;
+  };
+
+  const normalizeMixamoKey = (name: string): string => {
+    const clean = name.replace(/^.*mixamorig\d*[:_]?/i, 'mixamorig');
+    if (clean.startsWith('mixamorig')) return clean;
+    return `mixamorig${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+  };
+
   // Adjust with reference to hips height.
-  const motionHips = asset.getObjectByName('mixamorigHips');
+  const motionHips = findMixamoNode('mixamorigHips');
   const motionHipsHeight = motionHips ? motionHips.position.y : 1;
   const vrmHips = vrm.humanoid?.getNormalizedBoneNode('hips');
   const vrmHipsY = vrmHips ? vrmHips.getWorldPosition(_vec3).y : 1;
@@ -129,12 +149,13 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
 
   clip.tracks.forEach((track) => {
     const trackSplitted = track.name.split('.');
-    const mixamoRigName = trackSplitted[0];
-    const vrmBoneName = mixamoVRMBoneMap[mixamoRigName];
+    const rawRigName = trackSplitted[0];
+    const mixamoRigName = normalizeMixamoKey(rawRigName);
+    const vrmBoneName = mixamoVRMBoneMap[mixamoRigName] || mixamoVRMBoneMap[rawRigName];
     if (!vrmBoneName) return;
 
     const vrmNodeName = vrm.humanoid?.getNormalizedBoneNode(vrmBoneName as any)?.name;
-    const mixamoRigNode = asset!.getObjectByName(mixamoRigName);
+    const mixamoRigNode = findMixamoNode(rawRigName) || findMixamoNode(mixamoRigName);
 
     if (vrmNodeName != null && mixamoRigNode != null) {
       const propertyName = trackSplitted[1];
