@@ -54,6 +54,29 @@ export interface ScenePresetData {
   rain: AvatarConfig['rain'];
 }
 
+const DEFAULT_CINEMATIC_CONFIG: AvatarConfig['postProcessing']['cinematic'] = {
+  diffusion: {
+    enabled: true,
+    strength: 0.25,
+    radius: 1.8,
+  },
+  filmGrain: {
+    enabled: true,
+    strength: 0.035,
+    speed: 1.0,
+  },
+  vignette: {
+    enabled: true,
+    offset: 1.1,
+    darkness: 0.35,
+    color: '#1a1829',
+  },
+  chromaticAberration: {
+    enabled: true,
+    offset: 0.0015,
+  },
+};
+
 // ====================================================
 // 1. 時間帯パラメータ定義 (Time of Day Parameters)
 // ====================================================
@@ -68,6 +91,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fffffa',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.35,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -84,6 +108,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.2,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -100,6 +125,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.1,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -199,6 +225,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.26,
       brightness: 0,
       contrast: 0,
+      cinematic: { ...DEFAULT_CINEMATIC_CONFIG },
     },
     wind: {
       enabled: false,
@@ -240,6 +267,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fffafa',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.35,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -256,6 +284,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.2,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -272,6 +301,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.1,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -371,6 +401,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.26,
       brightness: 0.0,
       contrast: 0.14,
+      cinematic: { ...DEFAULT_CINEMATIC_CONFIG },
     },
     wind: {
       enabled: false,
@@ -412,6 +443,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fffafa',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.45,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -428,6 +460,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.3,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -444,6 +477,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.15,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -543,6 +577,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.26,
       brightness: -0.04,
       contrast: 0.08,
+      cinematic: {
+        diffusion: { enabled: true, strength: 0.35, radius: 2.2 },
+        filmGrain: { enabled: true, strength: 0.04, speed: 1.0 },
+        vignette: { enabled: true, offset: 1.0, darkness: 0.45, color: '#2a1435' },
+        chromaticAberration: { enabled: true, offset: 0.002 },
+      },
     },
     wind: {
       enabled: false,
@@ -584,6 +624,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fff5f5',
         shadowHueShift: 0,
         shadowLightnessFactor: 0.14,
+        shadowBoundaryTint: 0.25,
         shadingToonyFactor: 1,
         shadingShiftFactor: 0.02,
         giEqualizationFactor: 0.88,
@@ -600,6 +641,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.15,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -616,6 +658,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.05,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -715,6 +758,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.2,
       brightness: 0,
       contrast: -0.07,
+      cinematic: {
+        diffusion: { enabled: true, strength: 0.28, radius: 2.0 },
+        filmGrain: { enabled: true, strength: 0.045, speed: 1.2 },
+        vignette: { enabled: true, offset: 1.1, darkness: 0.4, color: '#161c28' },
+        chromaticAberration: { enabled: true, offset: 0.0018 },
+      },
     },
     wind: {
       enabled: false,
@@ -761,6 +810,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fffafa',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.3,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -777,6 +827,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.2,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -793,6 +844,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.1,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -888,6 +940,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.4,
       brightness: 0.0,
       contrast: 0.0,
+      cinematic: { ...DEFAULT_CINEMATIC_CONFIG },
     },
     wind: {
       enabled: false,
@@ -929,6 +982,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#fffafa',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.2,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -945,6 +999,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.1,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -961,6 +1016,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         shadowHueShift: 0.03,
         shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.05,
         shadingToonyFactor: 1,
         shadingShiftFactor: -0.05,
         giEqualizationFactor: 0.9,
@@ -1060,6 +1116,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       saturation: 0.18,
       brightness: -0.3,
       contrast: -0.09,
+      cinematic: {
+        diffusion: { enabled: true, strength: 0.2, radius: 1.5 },
+        filmGrain: { enabled: true, strength: 0.05, speed: 0.8 },
+        vignette: { enabled: true, offset: 0.9, darkness: 0.5, color: '#0d111d' },
+        chromaticAberration: { enabled: true, offset: 0.002 },
+      },
     },
     wind: {
       enabled: false,

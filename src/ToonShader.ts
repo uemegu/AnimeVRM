@@ -130,7 +130,8 @@ function computeAutoShadowColor(
   material: MToonLikeMaterial,
   kind: StyleKind | 'other',
   hueShiftAmount = 0.03,
-  lightnessFactor = 0.2
+  lightnessFactor = 0.2,
+  boundaryTint = 0.0
 ): THREE.Color {
   const base = new THREE.Color();
   if (material.map) {
@@ -152,18 +153,20 @@ function computeAutoShadowColor(
   const isSkin = kind === 'body' || kind === 'face';
 
   if (isSkin) {
-    // Warm blood scatter for anime skin with Hue Shift control (shifts towards peach-red 0.98)
-    const targetHue = (0.98 + hueShiftAmount + 1.0) % 1.0;
-    const h = (hsl.h * 0.2 + targetHue * 0.8 + 1.0) % 1.0;
-    const s = Math.min(Math.max(hsl.s * 1.6, 0.38), 0.9);
-    const l = Math.max(hsl.l * lightnessFactor, 0.02);
+    // Warm blood scatter for anime skin with Hue Shift and boundary tint
+    // Boundary tint warms hue towards vibrant coral-peach (0.97 - 0.02)
+    const tintHueOffset = boundaryTint * -0.04;
+    const targetHue = (0.98 + hueShiftAmount + tintHueOffset + 1.0) % 1.0;
+    const h = (hsl.h * 0.15 + targetHue * 0.85 + 1.0) % 1.0;
+    const s = Math.min(Math.max(hsl.s * (1.6 + boundaryTint * 0.5), 0.38), 0.95);
+    const l = Math.max(hsl.l * (lightnessFactor + boundaryTint * 0.04), 0.02);
     const res = new THREE.Color();
     res.setHSL(h, s, l);
     return res;
   } else {
     // Anime shadow hue shift (cool or warm based on slider)
     const h = (hsl.h + hueShiftAmount + 1.0) % 1.0;
-    const s = Math.min(hsl.s * 1.25, 1.0);
+    const s = Math.min(hsl.s * (1.25 + boundaryTint * 0.3), 1.0);
     const l = Math.max(hsl.l * lightnessFactor, 0.02);
     const res = new THREE.Color();
     res.setHSL(h, s, l);
@@ -336,7 +339,8 @@ export function applyToonShader(
           referenceMaterial,
           matKind,
           params.shadowHueShift ?? 0.03,
-          params.shadowLightnessFactor ?? 0.2
+          params.shadowLightnessFactor ?? 0.2,
+          params.shadowBoundaryTint ?? 0.0
         );
         if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShadeColor);
         if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShadeColor);
@@ -350,10 +354,12 @@ export function applyToonShader(
           if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.set(effectiveColor);
         }
 
-        // Shading Toony Factor
+        // Shading Toony Factor (mildly soften edge if boundary tint is active to show warm SSS gradient)
         if (typeof params.shadingToonyFactor === 'number') {
-          material.shadingToonyFactor = params.shadingToonyFactor;
-          if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = params.shadingToonyFactor;
+          const boundarySoftening = (params.shadowBoundaryTint ?? 0) * 0.03;
+          const effectiveToony = Math.max(0.0, params.shadingToonyFactor - boundarySoftening);
+          material.shadingToonyFactor = effectiveToony;
+          if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = effectiveToony;
         }
 
         // Shading Shift Factor (Face protection: positive shift prevents cheek cuts)

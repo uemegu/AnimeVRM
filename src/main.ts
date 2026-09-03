@@ -8,13 +8,11 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
-import { HueSaturationShader } from 'three/addons/shaders/HueSaturationShader.js';
-import { BrightnessContrastShader } from 'three/addons/shaders/BrightnessContrastShader.js';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 
 import { Avatar } from './Avatar';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
-import { ColorGradingShader } from './ColorGradingShader';
+import { CinematicAnimeShader } from './postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from './postprocessing/GodRaysShader';
 import { SunEffect } from './postprocessing/SunEffect';
 import { ColorHistogram } from './histogram/ColorHistogram';
@@ -936,26 +934,60 @@ composer.addPass(godRaysPass);
 // 4. OutputPass: Converts Linear HDR to sRGB color space & applies Tone Mapping
 composer.addPass(new OutputPass());
 
-// 6. Perceptual sRGB Post-Processing Passes (Color Grading, Hue/Sat, Brightness/Contrast, SMAA)
-const colorGradingPass = new ShaderPass(ColorGradingShader);
-colorGradingPass.uniforms['uEnabled'].value = currentConfig.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
-(colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.shadowTint);
-(colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(currentConfig.postProcessing.colorGrading.highlightTint);
-colorGradingPass.uniforms['uStrength'].value = currentConfig.postProcessing.colorGrading.strength;
-colorGradingPass.uniforms['uGradingContrast'].value = currentConfig.postProcessing.colorGrading.contrast;
-colorGradingPass.uniforms['uGamma'].value = currentConfig.postProcessing.colorGrading.gamma;
-composer.addPass(colorGradingPass);
+// Helper to update all Cinematic Uber Pass uniforms
+function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig): void {
+  const pp = cfg.postProcessing;
+  const cin = pp.cinematic;
 
-const hueSaturationPass = new ShaderPass(HueSaturationShader);
-hueSaturationPass.uniforms['saturation'].value = currentConfig.postProcessing.saturation;
-composer.addPass(hueSaturationPass);
+  // 1. Chromatic Aberration
+  pass.uniforms['uChromaticAberrationEnabled'].value = (cin?.chromaticAberration?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uChromaticAberrationOffset'].value = cin?.chromaticAberration?.offset ?? 0.0015;
 
-const brightnessContrastPass = new ShaderPass(BrightnessContrastShader);
-brightnessContrastPass.uniforms['brightness'].value = currentConfig.postProcessing.brightness;
-brightnessContrastPass.uniforms['contrast'].value = currentConfig.postProcessing.contrast;
-composer.addPass(brightnessContrastPass);
+  // 2. Diffusion / Soft Glow
+  pass.uniforms['uDiffusionEnabled'].value = (cin?.diffusion?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uDiffusionStrength'].value = cin?.diffusion?.strength ?? 0.25;
+  pass.uniforms['uDiffusionRadius'].value = cin?.diffusion?.radius ?? 1.8;
 
-// 7. SMAA (Subpixel Morphological Antialiasing) on sRGB edges
+  // 3. Color Grading
+  if (pp.colorGrading) {
+    pass.uniforms['uColorGradingEnabled'].value = pp.colorGrading.enabled ? 1.0 : 0.0;
+    (pass.uniforms['uShadowTint'].value as THREE.Color).set(pp.colorGrading.shadowTint);
+    (pass.uniforms['uHighlightTint'].value as THREE.Color).set(pp.colorGrading.highlightTint);
+    pass.uniforms['uGradingStrength'].value = pp.colorGrading.strength;
+    pass.uniforms['uGradingContrast'].value = pp.colorGrading.contrast;
+    pass.uniforms['uGamma'].value = pp.colorGrading.gamma;
+  }
+
+  // 4. Basic Adjustments
+  pass.uniforms['uSaturation'].value = pp.saturation;
+  pass.uniforms['uBrightness'].value = pp.brightness;
+  pass.uniforms['uContrast'].value = pp.contrast;
+
+  // 5. Vignette
+  pass.uniforms['uVignetteEnabled'].value = (cin?.vignette?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uVignetteOffset'].value = cin?.vignette?.offset ?? 1.1;
+  pass.uniforms['uVignetteDarkness'].value = cin?.vignette?.darkness ?? 0.35;
+  if (cin?.vignette?.color) {
+    (pass.uniforms['uVignetteColor'].value as THREE.Color).set(cin.vignette.color);
+  }
+
+  // 6. Film Grain
+  pass.uniforms['uFilmGrainEnabled'].value = (cin?.filmGrain?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uFilmGrainStrength'].value = cin?.filmGrain?.strength ?? 0.035;
+  pass.uniforms['uFilmGrainSpeed'].value = cin?.filmGrain?.speed ?? 1.0;
+}
+
+// 5. Cinematic Anime Post-Processing Pass (Uber Pass)
+// Integrates Chromatic Aberration, Diffusion Glow, Color Grading, Saturation/Brightness/Contrast, Vignette, Film Grain into a SINGLE pass!
+const cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
+cinematicAnimePass.uniforms['uResolution'].value.set(
+  window.innerWidth * pixelRatio,
+  window.innerHeight * pixelRatio
+);
+updateCinematicPassUniforms(cinematicAnimePass, currentConfig);
+composer.addPass(cinematicAnimePass);
+
+// 6. SMAA (Subpixel Morphological Antialiasing) on sRGB edges
 const smaaPass = new SMAAPass();
 smaaPass.enabled = currentConfig.postProcessing.antialiasing.smaa;
 composer.addPass(smaaPass);
@@ -1062,14 +1094,8 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
   bloomPass.radius = cfg.postProcessing.bloom.radius;
   bloomPass.threshold = cfg.postProcessing.bloom.threshold;
 
-  if (cfg.postProcessing.colorGrading) {
-    colorGradingPass.uniforms['uEnabled'].value = cfg.postProcessing.colorGrading.enabled ? 1.0 : 0.0;
-    (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(cfg.postProcessing.colorGrading.shadowTint);
-    (colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(cfg.postProcessing.colorGrading.highlightTint);
-    colorGradingPass.uniforms['uStrength'].value = cfg.postProcessing.colorGrading.strength;
-    colorGradingPass.uniforms['uGradingContrast'].value = cfg.postProcessing.colorGrading.contrast;
-    colorGradingPass.uniforms['uGamma'].value = cfg.postProcessing.colorGrading.gamma;
-  }
+  // Update Cinematic Anime Uber Pass Uniforms (Color Grading, Sat/Bri/Con, Film Grain, Vignette, Diffusion, Aberration)
+  updateCinematicPassUniforms(cinematicAnimePass, cfg);
 
   if (cfg.lighting.sunShafts) {
     godRaysPass.uniforms['uExposure'].value = cfg.lighting.sunShafts.enabled ? cfg.lighting.sunShafts.exposure : 0;
@@ -1079,10 +1105,6 @@ function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
     (godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(cfg.lighting.sunShafts.color);
     godRaysPass.uniforms['uShimmer'].value = cfg.lighting.sunShafts.shimmer;
   }
-
-  hueSaturationPass.uniforms['saturation'].value = cfg.postProcessing.saturation;
-  brightnessContrastPass.uniforms['brightness'].value = cfg.postProcessing.brightness;
-  brightnessContrastPass.uniforms['contrast'].value = cfg.postProcessing.contrast;
 
   // Lighting
   ambientLight.color.set(cfg.lighting.ambient.color);
@@ -1137,6 +1159,10 @@ const toggleState = {
   rimBody: true,
   rimCloth: true,
   rimLight: true,
+  diffusion: true,
+  filmGrain: true,
+  vignette: true,
+  chromaticAberration: true,
   wind: true,
   rain: false,
 };
@@ -1149,6 +1175,10 @@ function syncToggleState(): void {
   toggleState.rimBody = currentConfig.materials.body.rimEnabled ?? false;
   toggleState.rimCloth = currentConfig.materials.cloth.rimEnabled ?? false;
   toggleState.rimLight = currentConfig.lighting.rim.enabled !== false;
+  toggleState.diffusion = currentConfig.postProcessing.cinematic?.diffusion.enabled ?? false;
+  toggleState.filmGrain = currentConfig.postProcessing.cinematic?.filmGrain.enabled ?? false;
+  toggleState.vignette = currentConfig.postProcessing.cinematic?.vignette.enabled ?? false;
+  toggleState.chromaticAberration = currentConfig.postProcessing.cinematic?.chromaticAberration.enabled ?? false;
   toggleState.wind = currentConfig.wind.enabled;
   toggleState.rain = currentConfig.rain?.enabled ?? false;
 }
@@ -1400,6 +1430,7 @@ function setupVisualGUI(container: HTMLElement): void {
     folder.add(params, 'emissiveIntensity', 0.0, 5.0, 0.1).name(tr.gui.emissiveIntensity).onChange(update);
     folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name(tr.gui.shadowHueShift).onChange(update);
     folder.add(params, 'shadowLightnessFactor', 0.02, 1.0, 0.01).name(tr.gui.shadowLightness).onChange(update);
+    folder.add(params, 'shadowBoundaryTint', 0.0, 1.0, 0.02).name(tr.gui.shadowBoundaryTint).onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name(tr.gui.shadingShift).onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name(tr.gui.giFactor).onChange(update);
@@ -1759,43 +1790,141 @@ function setupVisualGUI(container: HTMLElement): void {
     .name(tr.gui.bloomRadius)
     .onChange((val: number) => (bloomPass.radius = val));
 
+  // 3. Cinematic Film Effects Folder (映画風撮影処理)
+  const cinFolder = postFolder.addFolder(tr.gui.cinematicFolder);
+  const cin = currentConfig.postProcessing.cinematic;
+
+  // Diffusion / Soft Glow
+  const diffFolder = cinFolder.addFolder(tr.gui.diffusionFolder);
+  diffFolder
+    .add(cin.diffusion, 'enabled')
+    .name(tr.gui.diffusionEnabled)
+    .onChange((val: boolean) => {
+      cinematicAnimePass.uniforms['uDiffusionEnabled'].value = val ? 1.0 : 0.0;
+      toggleState.diffusion = val;
+    });
+  diffFolder
+    .add(cin.diffusion, 'strength', 0.0, 1.0, 0.02)
+    .name(tr.gui.diffusionStrength)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uDiffusionStrength'].value = val;
+    });
+  diffFolder
+    .add(cin.diffusion, 'radius', 0.1, 5.0, 0.1)
+    .name(tr.gui.diffusionRadius)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uDiffusionRadius'].value = val;
+    });
+  diffFolder.close();
+
+  // Film Grain
+  const grainFolder = cinFolder.addFolder(tr.gui.filmGrainFolder);
+  grainFolder
+    .add(cin.filmGrain, 'enabled')
+    .name(tr.gui.filmGrainEnabled)
+    .onChange((val: boolean) => {
+      cinematicAnimePass.uniforms['uFilmGrainEnabled'].value = val ? 1.0 : 0.0;
+      toggleState.filmGrain = val;
+    });
+  grainFolder
+    .add(cin.filmGrain, 'strength', 0.0, 0.15, 0.005)
+    .name(tr.gui.filmGrainStrength)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uFilmGrainStrength'].value = val;
+    });
+  grainFolder
+    .add(cin.filmGrain, 'speed', 0.0, 3.0, 0.1)
+    .name(tr.gui.filmGrainSpeed)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uFilmGrainSpeed'].value = val;
+    });
+  grainFolder.close();
+
+  // Vignette
+  const vigFolder = cinFolder.addFolder(tr.gui.vignetteFolder);
+  vigFolder
+    .add(cin.vignette, 'enabled')
+    .name(tr.gui.vignetteEnabled)
+    .onChange((val: boolean) => {
+      cinematicAnimePass.uniforms['uVignetteEnabled'].value = val ? 1.0 : 0.0;
+      toggleState.vignette = val;
+    });
+  vigFolder
+    .add(cin.vignette, 'offset', 0.2, 2.0, 0.05)
+    .name(tr.gui.vignetteOffset)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uVignetteOffset'].value = val;
+    });
+  vigFolder
+    .add(cin.vignette, 'darkness', 0.0, 1.0, 0.02)
+    .name(tr.gui.vignetteDarkness)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uVignetteDarkness'].value = val;
+    });
+  vigFolder
+    .addColor(cin.vignette, 'color')
+    .name(tr.gui.vignetteColor)
+    .onChange((hex: string) => {
+      (cinematicAnimePass.uniforms['uVignetteColor'].value as THREE.Color).set(hex);
+    });
+  vigFolder.close();
+
+  // Chromatic Aberration
+  const caFolder = cinFolder.addFolder(tr.gui.chromaticAberrationFolder);
+  caFolder
+    .add(cin.chromaticAberration, 'enabled')
+    .name(tr.gui.chromaticAberrationEnabled)
+    .onChange((val: boolean) => {
+      cinematicAnimePass.uniforms['uChromaticAberrationEnabled'].value = val ? 1.0 : 0.0;
+      toggleState.chromaticAberration = val;
+    });
+  caFolder
+    .add(cin.chromaticAberration, 'offset', 0.0, 0.008, 0.0002)
+    .name(tr.gui.chromaticAberrationOffset)
+    .onChange((val: number) => {
+      cinematicAnimePass.uniforms['uChromaticAberrationOffset'].value = val;
+    });
+  caFolder.close();
+
+  cinFolder.close();
+
   // Color Grading
   const cgFolder = postFolder.addFolder(tr.gui.cgFolder);
   cgFolder
     .add(currentConfig.postProcessing.colorGrading, 'enabled')
     .name(tr.gui.cgEnabled)
     .onChange((enabled: boolean) => {
-      colorGradingPass.uniforms['uEnabled'].value = enabled ? 1.0 : 0.0;
+      cinematicAnimePass.uniforms['uColorGradingEnabled'].value = enabled ? 1.0 : 0.0;
     });
   cgFolder
     .addColor(currentConfig.postProcessing.colorGrading, 'shadowTint')
     .name(tr.gui.cgShadowTint)
     .onChange((hex: string) => {
-      (colorGradingPass.uniforms['uShadowTint'].value as THREE.Color).set(hex);
+      (cinematicAnimePass.uniforms['uShadowTint'].value as THREE.Color).set(hex);
     });
   cgFolder
     .addColor(currentConfig.postProcessing.colorGrading, 'highlightTint')
     .name(tr.gui.cgHighlightTint)
     .onChange((hex: string) => {
-      (colorGradingPass.uniforms['uHighlightTint'].value as THREE.Color).set(hex);
+      (cinematicAnimePass.uniforms['uHighlightTint'].value as THREE.Color).set(hex);
     });
   cgFolder
     .add(currentConfig.postProcessing.colorGrading, 'strength', 0, 1, 0.02)
     .name(tr.gui.cgStrength)
     .onChange((val: number) => {
-      colorGradingPass.uniforms['uStrength'].value = val;
+      cinematicAnimePass.uniforms['uGradingStrength'].value = val;
     });
   cgFolder
     .add(currentConfig.postProcessing.colorGrading, 'contrast', 0, 0.5, 0.01)
     .name(tr.gui.cgContrast)
     .onChange((val: number) => {
-      colorGradingPass.uniforms['uGradingContrast'].value = val;
+      cinematicAnimePass.uniforms['uGradingContrast'].value = val;
     });
   cgFolder
     .add(currentConfig.postProcessing.colorGrading, 'gamma', 0.7, 1.4, 0.02)
     .name(tr.gui.cgGamma)
     .onChange((val: number) => {
-      colorGradingPass.uniforms['uGamma'].value = val;
+      cinematicAnimePass.uniforms['uGamma'].value = val;
     });
   cgFolder.close();
 
@@ -1803,15 +1932,15 @@ function setupVisualGUI(container: HTMLElement): void {
   postFolder
     .add(currentConfig.postProcessing, 'saturation', -1.0, 1.0, 0.02)
     .name(tr.gui.saturation)
-    .onChange((val: number) => (hueSaturationPass.uniforms['saturation'].value = val));
+    .onChange((val: number) => (cinematicAnimePass.uniforms['uSaturation'].value = val));
   postFolder
     .add(currentConfig.postProcessing, 'brightness', -0.5, 0.5, 0.01)
     .name(tr.gui.brightness)
-    .onChange((val: number) => (brightnessContrastPass.uniforms['brightness'].value = val));
+    .onChange((val: number) => (cinematicAnimePass.uniforms['uBrightness'].value = val));
   postFolder
     .add(currentConfig.postProcessing, 'contrast', -0.5, 0.5, 0.01)
     .name(tr.gui.contrast)
-    .onChange((val: number) => (brightnessContrastPass.uniforms['contrast'].value = val));
+    .onChange((val: number) => (cinematicAnimePass.uniforms['uContrast'].value = val));
   postFolder.close();
 
   // 6. Manga Emotion Effect Text Folder
@@ -3572,6 +3701,9 @@ function onResize(): void {
   renderer.setPixelRatio(pr);
   composer.setPixelRatio(pr);
   composer.setSize(width, height);
+  if (cinematicAnimePass) {
+    cinematicAnimePass.uniforms['uResolution'].value.set(width * pr, height * pr);
+  }
   if (smaaPass) {
     smaaPass.setSize(width * pr, height * pr);
   }
@@ -3688,9 +3820,17 @@ function tick(timestamp?: number): void {
     godRaysPass.uniforms['uTime'].value = elapsed;
   }
 
+  // Update Cinematic Anime Pass time uniform for dynamic film grain
+  cinematicAnimePass.uniforms['uTime'].value = elapsed;
+
+  const cin = currentConfig.postProcessing.cinematic;
   const usePost = currentConfig.postProcessing.bloom.enabled ||
                   currentConfig.lighting.sunShafts?.enabled ||
                   currentConfig.postProcessing.colorGrading.enabled ||
+                  (cin?.diffusion?.enabled && cin.diffusion.strength > 0) ||
+                  (cin?.filmGrain?.enabled && cin.filmGrain.strength > 0) ||
+                  (cin?.vignette?.enabled && cin.vignette.darkness > 0) ||
+                  (cin?.chromaticAberration?.enabled && cin.chromaticAberration.offset > 0) ||
                   currentConfig.postProcessing.saturation !== 0 ||
                   currentConfig.postProcessing.brightness !== 0 ||
                   currentConfig.postProcessing.contrast !== 0;
