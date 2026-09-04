@@ -257,7 +257,7 @@ flowchart TD
 
 | パラメータ名 | 型 | デフォルト (body) | 説明 |
 | :--- | :--- | :--- | :--- |
-| `color` | `string` | `#fffffa` | 基本色・血色感（Base Color / Tint） |
+| `color` | `string` | `#fff6f0` | 基本色・血色感（Base Color / Tint） |
 | `matcapEnabled` | `boolean` | `true` | ハイライト (MatCap / スフィアマップ) の表示 ON/OFF |
 | `emissiveIntensity` | `number` | `0.0` | 自己発光（エミッシブ）強度 |
 | `shadowHueShift` | `number` | `0.02` | 影色の色相シフト量（正: 暖色寄り, 負: 寒色寄り） |

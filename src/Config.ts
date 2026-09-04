@@ -249,7 +249,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   materials: {
     body: {
-      color: '#fffffa',
+      color: '#fff6f0',
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
       shadowBoundaryTint: 0.35,

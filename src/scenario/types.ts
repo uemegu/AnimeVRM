@@ -74,6 +74,7 @@ export interface ScenarioScrollingBackgroundConfig {
   blur?: number;       // 0.0 (sharp) - 1.0 (strong anime blur)
   direction?: 'left' | 'right';
   instantBlur?: boolean;
+  featherWidth?: number; // 0.0 - 0.5 (ratio of edge width for seamless alpha blending, default 0.15)
 }
 
 export interface ScenarioScene {
