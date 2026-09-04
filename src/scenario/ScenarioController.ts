@@ -9,6 +9,7 @@ import { DialogueCameraController } from './DialogueCameraController';
 import { ScenarioEngine } from './ScenarioEngine';
 import { ScenarioPlayer, ScenarioStep } from '../animation/ScenarioPlayer';
 import { ScrollingBackgroundManager } from '../scene/ScrollingBackgroundManager';
+import { PanoramaBackgroundController } from '../scene/PanoramaBackgroundController';
 import { InterludeOverlay } from '../ui/InterludeOverlay';
 import {
   ScenarioPackage,
@@ -44,6 +45,7 @@ export class ScenarioController {
   private getConfig: () => AvatarConfig;
   private onApplyConfig: (cfg: AvatarConfig) => void;
   private onSwitchScenePreset: (presetId: ScenePresetId) => void;
+  private panoramaController?: PanoramaBackgroundController;
 
   private savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
   private savedCameraTargetBeforeMultiAvatar: THREE.Vector3 | null = null;
@@ -56,10 +58,13 @@ export class ScenarioController {
     audioLipSync: AudioLipSync;
     sharedEffectTextManager: EffectTextManager;
     windController: WindController;
+    panoramaController?: PanoramaBackgroundController;
     getConfig: () => AvatarConfig;
     onApplyConfig: (cfg: AvatarConfig) => void;
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
   }) {
+    this.panoramaController = options.panoramaController;
+    const panoramaController = options.panoramaController;
     this.scene = options.scene;
     this.camera = options.camera;
     this.controls = options.controls;
@@ -81,6 +86,7 @@ export class ScenarioController {
     this.dialogueCameraController = new DialogueCameraController({
       camera: this.camera,
       controls: this.controls,
+      panoramaController: options.panoramaController,
       getAvatar: (charId?: string) => {
         if (this.avatarManager.isMultiAvatarScenarioActive) {
           if (charId && this.avatarManager.scenarioAvatars.has(charId)) {
@@ -194,6 +200,24 @@ export class ScenarioController {
         cfg.environment.midgroundImageUrl = undefined;
         this.onApplyConfig(cfg);
       },
+      onSwitchPanoramaBackground: (bgUrl: string | null) => {
+        if (bgUrl && panoramaController) {
+          const cfg = this.getConfig();
+          cfg.environment.showMidground = false;
+          cfg.environment.midgroundImageUrl = undefined;
+          cfg.environment.showFloor = false;
+          panoramaController.load({
+            imageUrl: resolveAssetUrl(bgUrl),
+            initialYaw: 0,
+            initialPitch: 0,
+            initialFov: cfg.camera.fov || 30,
+          });
+        } else if (panoramaController && panoramaController.isActive) {
+          panoramaController.deactivate();
+          const cfg = this.getConfig();
+          this.onApplyConfig(cfg);
+        }
+      },
       onSwitchAvatar: async (modelUrl) => {
         if (this.avatarManager.currentModelUrl === modelUrl && this.avatarManager.avatarInstance) {
           return;
@@ -276,7 +300,15 @@ export class ScenarioController {
       this.savedCameraTargetBeforeMultiAvatar = this.controls.target.clone();
     }
 
-    if (characters.length > 1) {
+    const hasFrontAndBack =
+      characters.some((c) => (Array.isArray(c.position) ? c.position[2] > 0.3 : false)) &&
+      characters.some((c) => (Array.isArray(c.position) ? c.position[2] < -0.3 : false));
+
+    if (this.panoramaController?.isActive || hasFrontAndBack) {
+      this.camera.position.set(0, 1.15, 0);
+      this.controls.target.set(0, 1.25, -1.0);
+      this.controls.update();
+    } else if (characters.length > 1) {
       this.camera.position.set(0, 1.15, 3.45);
       this.controls.target.set(0, 0.95, 0);
       this.controls.update();

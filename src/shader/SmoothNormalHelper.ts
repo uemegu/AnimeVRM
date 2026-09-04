@@ -78,9 +78,6 @@ export function computeSmoothNormalsAndCurvature(geometry: THREE.BufferGeometry)
   const smoothNormalAttr = new THREE.BufferAttribute(smoothNormals, 3);
   geometry.setAttribute('smoothNormal', smoothNormalAttr);
   geometry.setAttribute('curvature', new THREE.BufferAttribute(curvatures, 1));
-  
-  // Apply smooth normals directly to normal attribute for clean outline hull extrusion
-  geometry.setAttribute('normal', smoothNormalAttr);
 }
 
 /**

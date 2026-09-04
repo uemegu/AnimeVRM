@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { WindController, WIND_PRESETS } from '../../wind/WindController';
@@ -207,5 +208,208 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
   });
   animFolder.close();
 
-  stageGui.folders.forEach((folder) => folder.close());
+  // 4. 360° Panorama Background Folder
+  const panoramaFolder = stageGui.addFolder(tr.gui.panoramaFolder);
+  const panorama = ctx.viewerCore.panoramaController;
+  const avatarManager = ctx.avatarManager;
+
+  const panoramaState = {
+    enabled: panorama.isActive,
+    testClassroom: async () => {
+      showToast('🌐 教室360°パノラマ画像を読み込み中...');
+      try {
+        await panorama.load({
+          imageUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          initialYaw: Math.PI,
+          initialPitch: 0,
+          initialFov: 60,
+        });
+        panoramaState.enabled = true;
+
+        // アバターが原点(0,0,0)にいる場合はカメラと重ならず股あたりまで綺麗に映るよう正面(-1.0m)へ自動配置
+        const currentPos = avatarManager.getAvatarPosition();
+        if (Math.abs(currentPos.x) < 0.01 && Math.abs(currentPos.z) < 0.01) {
+          avatarManager.setAvatarPosition(0, 0, -1.0);
+          avatarManager.setAvatarRotationY(0);
+        }
+
+        updateAllInspectorsDisplay();
+        showToast('✓ 教室360°パノラマを表示しました');
+      } catch (err) {
+        console.error('Failed to load panorama texture', err);
+        showToast('❌ パノラマ画像の読み込みに失敗しました');
+      }
+    },
+    resetView: () => {
+      panorama.resetView(Math.PI, 0, 60);
+      updateAllInspectorsDisplay();
+      showToast('🔄 視点を正面にリセットしました');
+    },
+    playDemo: async () => {
+      if (!panorama.isActive) {
+        await panoramaState.testClassroom();
+      }
+      showToast('🎬 カメラ演出デモを再生します');
+      panorama.playDemoAnimation().then(() => {
+        showToast('✓ カメラ演出デモが完了しました');
+      });
+    },
+    get yawDeg() {
+      return THREE.MathUtils.radToDeg(panorama.targetYaw);
+    },
+    set yawDeg(val: number) {
+      panorama.targetYaw = THREE.MathUtils.degToRad(val);
+    },
+    get pitchDeg() {
+      return THREE.MathUtils.radToDeg(panorama.targetPitch);
+    },
+    set pitchDeg(val: number) {
+      panorama.targetPitch = THREE.MathUtils.degToRad(val);
+    },
+    // Avatar controls
+    get avatarVisible() {
+      return avatarManager.getAvatarVisible();
+    },
+    set avatarVisible(val: boolean) {
+      avatarManager.setAvatarVisible(val);
+    },
+    get avatarX() {
+      return avatarManager.getAvatarPosition().x;
+    },
+    set avatarX(val: number) {
+      const pos = avatarManager.getAvatarPosition();
+      avatarManager.setAvatarPosition(val, pos.y, pos.z);
+    },
+    get avatarY() {
+      return avatarManager.getAvatarPosition().y;
+    },
+    set avatarY(val: number) {
+      const pos = avatarManager.getAvatarPosition();
+      avatarManager.setAvatarPosition(pos.x, val, pos.z);
+    },
+    get avatarZ() {
+      return avatarManager.getAvatarPosition().z;
+    },
+    set avatarZ(val: number) {
+      const pos = avatarManager.getAvatarPosition();
+      avatarManager.setAvatarPosition(pos.x, pos.y, val);
+    },
+    get avatarRotDeg() {
+      return THREE.MathUtils.radToDeg(avatarManager.getAvatarRotationY());
+    },
+    set avatarRotDeg(val: number) {
+      avatarManager.setAvatarRotationY(THREE.MathUtils.degToRad(val));
+    },
+    presetFront: () => {
+      avatarManager.setAvatarPosition(0, 0, -1.0);
+      avatarManager.setAvatarRotationY(0);
+      updateAllInspectorsDisplay();
+      showToast('👤 股・ウエスト寄りに配置しました (-1.0m)');
+    },
+    presetClose: () => {
+      avatarManager.setAvatarPosition(0, 0, -0.7);
+      avatarManager.setAvatarRotationY(0);
+      updateAllInspectorsDisplay();
+      showToast('👤 胸元アップに配置しました (-0.7m)');
+    },
+    presetFar: () => {
+      avatarManager.setAvatarPosition(0, 0, -1.6);
+      avatarManager.setAvatarRotationY(0);
+      updateAllInspectorsDisplay();
+      showToast('👤 少し引きの位置に配置しました (-1.6m)');
+    },
+    presetSide: () => {
+      avatarManager.setAvatarPosition(0.65, 0, -0.95);
+      avatarManager.setAvatarRotationY(-0.3);
+      updateAllInspectorsDisplay();
+      showToast('👤 アバターを横並びに配置しました');
+    },
+    presetOrigin: () => {
+      avatarManager.setAvatarPosition(0, 0, 0);
+      avatarManager.setAvatarRotationY(0);
+      updateAllInspectorsDisplay();
+      showToast('👤 アバターを原点 (0,0,0) に戻しました');
+    },
+  };
+
+  panoramaFolder
+    .add(panoramaState, 'testClassroom')
+    .name(tr.gui.panoramaTestClassroom);
+
+  panoramaFolder
+    .add(panoramaState, 'enabled')
+    .name(tr.gui.panoramaEnabled)
+    .listen()
+    .onChange(async (val: boolean) => {
+      if (val) {
+        if (!panorama.isActive) {
+          await panoramaState.testClassroom();
+        }
+      } else {
+        panorama.deactivate();
+        ctx.viewerCore.updateBackgroundDisplay(currentConfig);
+        ctx.viewerCore.updateMidgroundDisplay(currentConfig);
+        showToast('パノラマ表示をOFFにしました');
+      }
+    });
+
+  panoramaFolder
+    .add(panoramaState, 'resetView')
+    .name(tr.gui.panoramaReset);
+
+  panoramaFolder
+    .add(panoramaState, 'playDemo')
+    .name(tr.gui.panoramaDemo);
+
+  // Avatar subfolder in Panorama
+  const avatarFolder = panoramaFolder.addFolder(tr.gui.panoramaAvatarFolder);
+  avatarFolder.add(panoramaState, 'presetFront').name(tr.gui.panoramaAvatarFront);
+  avatarFolder.add(panoramaState, 'presetClose').name(tr.gui.panoramaAvatarClose);
+  avatarFolder.add(panoramaState, 'presetFar').name(tr.gui.panoramaAvatarFar);
+  avatarFolder.add(panoramaState, 'presetSide').name(tr.gui.panoramaAvatarSide);
+  avatarFolder.add(panoramaState, 'presetOrigin').name(tr.gui.panoramaAvatarOrigin);
+  avatarFolder.add(panoramaState, 'avatarVisible').name(tr.gui.panoramaAvatarVisible).listen();
+  avatarFolder.add(panoramaState, 'avatarX', -5.0, 5.0, 0.05).name(tr.gui.panoramaAvatarX).listen();
+  avatarFolder.add(panoramaState, 'avatarY', -2.0, 2.0, 0.05).name(tr.gui.panoramaAvatarY).listen();
+  avatarFolder.add(panoramaState, 'avatarZ', -5.0, 5.0, 0.05).name(tr.gui.panoramaAvatarZ).listen();
+  avatarFolder.add(panoramaState, 'avatarRotDeg', -180, 180, 1).name(tr.gui.panoramaAvatarRot).listen();
+  avatarFolder.open();
+
+  panoramaFolder
+    .add(panorama, 'cameraY', 0.2, 2.5, 0.05)
+    .name(tr.gui.panoramaCameraY);
+
+  panoramaFolder
+    .add(panorama, 'sensitivity', 0.001, 0.01, 0.0005)
+    .name(tr.gui.panoramaSensitivity);
+
+  panoramaFolder
+    .add(panorama, 'invertDrag')
+    .name(tr.gui.panoramaInvertDrag);
+
+  panoramaFolder
+    .add(panorama, 'idleMotionEnabled')
+    .name(tr.gui.panoramaIdleMotion);
+
+  panoramaFolder
+    .add(panorama, 'targetFov', 35, 80, 1)
+    .name(tr.gui.panoramaFov)
+    .listen();
+
+  panoramaFolder
+    .add(panoramaState, 'yawDeg', -180, 180, 1)
+    .name(tr.gui.panoramaYaw)
+    .listen();
+
+  panoramaFolder
+    .add(panoramaState, 'pitchDeg', -80, 80, 1)
+    .name(tr.gui.panoramaPitch)
+    .listen();
+
+  panoramaFolder.open();
+
+  stageGui.folders.forEach((folder) => {
+    if (folder !== panoramaFolder) folder.close();
+  });
 }
+

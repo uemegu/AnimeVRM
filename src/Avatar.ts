@@ -296,9 +296,8 @@ export class Avatar {
 
         this.vrm = vrm;
 
-        // Optimize geometry & joints
-        VRMUtils.removeUnnecessaryVertices(gltf.scene);
-        VRMUtils.combineSkeletons(gltf.scene);
+        // VRM 0.0 rotation fix if needed
+        VRMUtils.rotateVRM0(vrm);
 
         // Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
         applySmoothNormalsToHierarchy(vrm.scene);
@@ -307,17 +306,23 @@ export class Avatar {
         vrm.scene.rotation.y = this.initialRotationY;
         vrm.scene.position.copy(this.initialPosition);
 
-        // Setup shadows, depth write, Alpha-to-Coverage, and texture filtering
+        // Setup shadows, depth write, Alpha-to-Coverage, and disable frustum culling (prevents SkinnedMesh face/hair clipping)
         vrm.scene.traverse((obj) => {
           if ((obj as THREE.Mesh).isMesh) {
             const mesh = obj as THREE.Mesh;
             mesh.castShadow = true;
             mesh.receiveShadow = false;
+            // SkinnedMesh GPU vertices deviate from static CPU boundingSphere, causing Three.js to cull Face/Hair
+            mesh.frustumCulled = false;
 
             const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             for (const mat of materials) {
               if (mat) {
-                mat.depthWrite = true;
+                // Only enable depthWrite on opaque materials to prevent occluding transparent face features (eyes, eyebrows, eyelashes)
+                const isTransparent = mat.transparent || (mat as any).alphaMode === 'BLEND';
+                if (!isTransparent) {
+                  mat.depthWrite = true;
+                }
                 mat.alphaToCoverage = true;
 
                 // Maximize texture anisotropy & linear mipmap filtering to prevent staircasing
@@ -669,12 +674,16 @@ export class Avatar {
     if (!textureUrl) {
       // Reset to original texture
       faceSkinMaterials.forEach((mat) => {
-        const orig = this.originalFaceTextures.get(mat) ?? null;
-        mat.map = orig;
-        if (mat.uniforms && mat.uniforms.map) {
-          mat.uniforms.map.value = orig;
+        if (this.originalFaceTextures.has(mat)) {
+          const orig = this.originalFaceTextures.get(mat) ?? null;
+          if (orig) {
+            mat.map = orig;
+            if (mat.uniforms && mat.uniforms.map) {
+              mat.uniforms.map.value = orig;
+            }
+            mat.needsUpdate = true;
+          }
         }
-        mat.needsUpdate = true;
       });
       return;
     }

@@ -11,6 +11,7 @@ import { TimeOfDayId } from '../presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
+import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -353,6 +354,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #a7f3d0; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.townWalkDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #f97316; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #fb923c; font-weight: 700;">${tr.scenario.behindYouTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-behindyou-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playBehindYou}</button>
+              <button id="scenario-behindyou-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fed7aa; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.behindYouDesc}
             </div>
           </div>
 
@@ -880,10 +892,36 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       showToast(t().toasts.scenarioStopped);
     });
 
+    // Interactive Behind You Scenario Play/Stop
+    document.getElementById('scenario-behindyou-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getBehindYouScenario(getLanguage());
+        scenarioController.scenarioEngine.play(scenario);
+        showToast(t().toasts.behindYouStarted);
+      }
+    });
+
+    document.getElementById('scenario-behindyou-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
     // Background Buttons
     const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
     bgButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
         const bg = btn.getAttribute('data-bg');
         const mid = btn.getAttribute('data-mid');
         const loc = btn.getAttribute('data-location');

@@ -81,6 +81,8 @@ export interface ScenarioScene {
   id: string;
   speaker?: string;
   speakerCharacterId?: string; // Character ID speaking in this scene (e.g. 'girl_01')
+  lipSyncCharacterId?: string | null; // Optional override for lip-sync character (or null/'none' to disable)
+  cameraTargetCharacterId?: string; // Optional character ID for camera framing/focus (if different from speaker)
   text: string;
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   voice?: string;     // Sound Master ID (e.g. 'confess_intro_1')
@@ -95,6 +97,8 @@ export interface ScenarioScene {
   avatars?: Record<string, ScenarioSceneAvatarConfig>; // Multi-character per-avatar action configs
   location?: string;
   background?: string;
+  panoramaBackgroundUrl?: string; // 360° Equirectangular パノラマ背景URL
+  usePanoramaCamera?: boolean;    // パノラマ用の固定視点カメラ（原点固定・視線回転）
   scenePreset?: ScenePresetId;
   cameraStartAngle?: CameraStartAngle;
   cameraPreset?: CameraPreset;
@@ -122,6 +126,7 @@ export interface ScenarioPackage {
   id: string;
   title: string;
   characters?: ScenarioCharacterPlacement[]; // Placements for multi-character scenarios
+  panoramaBackgroundUrl?: string; // パッケージ全体のデフォルト360°パノラマ背景URL
   bgm?: string;       // Sound Master ID (e.g. 'bgm_main')
   bgmUrl?: string;    // Direct BGM URL (Backward compatibility)
   bgmVolume?: number;

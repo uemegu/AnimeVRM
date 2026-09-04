@@ -16,6 +16,7 @@ import { WindParticles } from '../wind/WindParticles';
 import { RainEffect } from '../effects/rain';
 import { EffectTextManager } from '../effects/text';
 import { ColorHistogram } from '../histogram/ColorHistogram';
+import { PanoramaBackgroundController } from './PanoramaBackgroundController';
 
 export function getToneMappingMode(mode: string): THREE.ToneMapping {
   switch (mode) {
@@ -124,6 +125,7 @@ export class ViewerCore {
 
   public effectTextScene: THREE.Scene;
   public sharedEffectTextManager: EffectTextManager;
+  public panoramaController: PanoramaBackgroundController;
 
   public windParticles: WindParticles;
   public rainEffect: RainEffect;
@@ -258,6 +260,22 @@ export class ViewerCore {
     this.controls.minDistance = 0.5;
     this.controls.maxDistance = 10;
     this.controls.maxPolarAngle = Math.PI / 2 + 0.1;
+
+    this.panoramaController = new PanoramaBackgroundController({
+      scene: this.scene,
+      camera: this.camera,
+      controls: this.controls,
+      domElement: this.canvas,
+      onStateChange: (active) => {
+        if (active) {
+          this.floor.visible = false;
+          this.midgroundMesh.visible = false;
+        } else {
+          this.floor.visible = initialConfig.environment.showFloor;
+          this.updateMidgroundDisplay(initialConfig);
+        }
+      },
+    });
 
     // 6. Lights
     this.ambientLight = new THREE.AmbientLight(
@@ -434,6 +452,7 @@ export class ViewerCore {
   }
 
   public updateBackgroundDisplay(cfg: AvatarConfig): void {
+    if (this.panoramaController?.isActive) return;
     const container = document.getElementById('viewport-container');
     if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
       if (container) container.style.backgroundColor = '#000000';
@@ -496,6 +515,7 @@ export class ViewerCore {
   }
 
   public updateBackgroundZoom(dialogueBackgroundTransform?: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null): void {
+    if (this.panoramaController?.isActive) return;
     if (!this.scene.background || !(this.scene.background instanceof THREE.Texture)) return;
     const bgTex = this.scene.background;
 
