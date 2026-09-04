@@ -429,6 +429,17 @@ export class ScenarioEngine {
     // 1.5 Update Scrolling Background (2-plane loop scrolling & anime blur)
     this.onUpdateScrollingBackground?.(scene.scrollingBackground);
 
+    // 1.8 Scene specific SE or Package SE
+    const seUrl = scene.seUrl || (scene.scrollingBackground?.enabled ? '/se/walking.mp3' : undefined);
+    if (seUrl) {
+      this.startSe(seUrl, scene.seVolume ?? 0.65, scene.seLoop ?? true);
+    } else if (this.currentPackage?.se || this.currentPackage?.seUrl) {
+      const pkgSe = this.currentPackage.se || this.currentPackage.seUrl;
+      this.startSe(pkgSe, this.currentPackage.seVolume ?? 0.2, true);
+    } else {
+      this.stopSe();
+    }
+
     // 2. Camera Angle, Zoom & Preset
     if (this.onApplySceneCamera) {
       this.onApplySceneCamera(scene);
@@ -528,17 +539,27 @@ export class ScenarioEngine {
     }
   }
 
-  private startSe(seUrl?: string, volume: number = 0.2): void {
+  private currentSeUrl: string | null = null;
+
+  private startSe(seUrl?: string, volume: number = 0.2, loop: boolean = true): void {
     if (!seUrl) return;
+    const resolvedUrl = resolveAssetUrl(seUrl);
     try {
       if (!this.seAudio) {
-        this.seAudio = new Audio(resolveAssetUrl(seUrl));
-        this.seAudio.loop = true;
+        this.seAudio = new Audio(resolvedUrl);
+        this.seAudio.loop = loop;
+        this.seAudio.volume = volume;
+        this.currentSeUrl = resolvedUrl;
+        this.seAudio.play().catch(() => {});
       } else {
-        this.seAudio.src = resolveAssetUrl(seUrl);
+        this.seAudio.loop = loop;
+        this.seAudio.volume = volume;
+        if (this.currentSeUrl !== resolvedUrl || this.seAudio.paused) {
+          this.seAudio.src = resolvedUrl;
+          this.currentSeUrl = resolvedUrl;
+          this.seAudio.play().catch(() => {});
+        }
       }
-      this.seAudio.volume = volume;
-      this.seAudio.play().catch(() => {});
     } catch {
       // Audio fallback
     }
@@ -548,6 +569,7 @@ export class ScenarioEngine {
     if (this.seAudio) {
       this.seAudio.pause();
       this.seAudio.currentTime = 0;
+      this.currentSeUrl = null;
     }
   }
 

@@ -5,7 +5,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
   id: 'town_walk',
   title: '放課後の並木道 〜君と歩く帰り道〜',
   bgmUrl: '/bgm/bgm.mp3',
-  bgmVolume: 0.3,
+  bgmVolume: 0.18,
   chapters: [
     {
       id: 'main',
@@ -344,7 +344,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
   id: 'town_walk',
   title: 'Walking with Aoi on the Avenue',
   bgmUrl: '/bgm/bgm.mp3',
-  bgmVolume: 0.3,
+  bgmVolume: 0.18,
   chapters: [
     {
       id: 'main',
