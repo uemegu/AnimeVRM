@@ -88,6 +88,9 @@ export interface ScenarioScene {
   voicePan?: number;  // Stereo Panning (-1.0 = Left, 0 = Center, 1.0 = Right only)
   screenTransition?: ScreenTransitionType; // 画面トランジション演出 (瞼閉じなど)
   scrollingBackground?: ScenarioScrollingBackgroundConfig; // 2枚板無限ループスライド＆ぼかし背景
+  seUrl?: string;     // Scene specific SE URL (e.g. '/se/walking.mp3')
+  seVolume?: number;  // Scene specific SE volume (default 0.3)
+  seLoop?: boolean;   // Whether scene SE loops (default true for continuous action)
   avatar?: ScenarioSceneAvatarConfig;
   avatars?: Record<string, ScenarioSceneAvatarConfig>; // Multi-character per-avatar action configs
   location?: string;
