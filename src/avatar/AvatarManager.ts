@@ -217,4 +217,44 @@ export class AvatarManager {
       });
     }
   }
+
+  public setAvatarPosition(x: number, y: number, z: number): void {
+    if (this.avatarInstance) {
+      this.avatarInstance.setPosition(x, y, z);
+    }
+  }
+
+  public getAvatarPosition(): THREE.Vector3 {
+    if (this.avatarInstance?.vrm) {
+      return this.avatarInstance.vrm.scene.position;
+    }
+    return new THREE.Vector3(0, 0, 0);
+  }
+
+  public setAvatarRotationY(rad: number): void {
+    if (this.avatarInstance) {
+      this.avatarInstance.setRotationY(rad);
+    }
+  }
+
+  public getAvatarRotationY(): number {
+    if (this.avatarInstance?.vrm) {
+      return this.avatarInstance.vrm.scene.rotation.y;
+    }
+    return 0;
+  }
+
+  public setAvatarVisible(visible: boolean): void {
+    if (this.avatarInstance?.vrm) {
+      this.avatarInstance.vrm.scene.visible = visible;
+    }
+  }
+
+  public getAvatarVisible(): boolean {
+    if (this.avatarInstance?.vrm) {
+      return this.avatarInstance.vrm.scene.visible;
+    }
+    return true;
+  }
 }
+

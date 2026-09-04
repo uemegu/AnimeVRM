@@ -38,6 +38,7 @@ export interface ScenarioEngineOptions {
   onApplySceneCamera?: (scene: ScenarioScene) => void;
   onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   onSwitchBackground?: (bgUrl: string) => void;
+  onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
 }
 
 export class ScenarioEngine {
@@ -60,6 +61,7 @@ export class ScenarioEngine {
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
   private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   private onSwitchBackground?: (bgUrl: string) => void;
+  private onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
 
   private messageWindow: AdventureMessageWindow;
   private currentPackage: ScenarioPackage | null = null;
@@ -90,6 +92,7 @@ export class ScenarioEngine {
     this.onApplySceneCamera = options.onApplySceneCamera;
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
     this.onSwitchBackground = options.onSwitchBackground;
+    this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -174,6 +177,7 @@ export class ScenarioEngine {
 
     this.messageWindow.hide();
     this.onUpdateScrollingBackground?.(undefined);
+    this.onSwitchPanoramaBackground?.(null);
     this.onPlayStateChange?.(false);
     this.onFinished?.();
 
@@ -422,7 +426,11 @@ export class ScenarioEngine {
     }
 
     // 1.2 Switch Direct Background Image (Standard single background)
-    if (scene.background && this.onSwitchBackground) {
+    const panoramaUrl = scene.panoramaBackgroundUrl || this.currentPackage?.panoramaBackgroundUrl;
+    if (panoramaUrl) {
+      this.onSwitchPanoramaBackground?.(panoramaUrl);
+    } else if (scene.background && this.onSwitchBackground) {
+      this.onSwitchPanoramaBackground?.(null);
       this.onSwitchBackground(scene.background);
     }
 

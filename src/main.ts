@@ -126,6 +126,7 @@ const scenarioController = new ScenarioController({
   audioLipSync,
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
+  panoramaController: viewerCore.panoramaController,
   getConfig: () => currentConfig,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
@@ -182,10 +183,12 @@ function tick(timestamp?: number): void {
     return;
   }
 
-  if (avatarManager.animationPlayer.isPlaying) {
-    avatarManager.animationPlayer.update(delta);
-  } else if (scenarioController.dialogueCameraController?.isActive) {
+  if (scenarioController.dialogueCameraController?.isActive) {
     scenarioController.dialogueCameraController.update(delta);
+  } else if (avatarManager.animationPlayer.isPlaying) {
+    avatarManager.animationPlayer.update(delta);
+  } else if (viewerCore.panoramaController.isActive) {
+    viewerCore.panoramaController.update(delta, elapsed);
   } else {
     viewerCore.controls.update();
   }
@@ -204,7 +207,11 @@ function tick(timestamp?: number): void {
   }
 
   // Update Avatars
-  const activeSpeakerId = scenarioController.scenarioEngine.currentScene?.speakerCharacterId;
+  const currentScene = scenarioController.scenarioEngine.currentScene;
+  const activeSpeakerId =
+    currentScene?.lipSyncCharacterId !== undefined
+      ? (currentScene.lipSyncCharacterId ?? 'none')
+      : currentScene?.speakerCharacterId;
   avatarManager.update(delta, elapsed, currentConfig, audioLipSync, activeSpeakerId);
 
   // Update Wind & Rain Particles

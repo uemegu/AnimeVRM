@@ -247,6 +247,7 @@ export function applyToonShader(
     if (!(object as THREE.Mesh).isMesh) return;
 
     const mesh = object as THREE.Mesh;
+    mesh.frustumCulled = false;
     const sourceMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 
     sourceMaterials.forEach((sourceMaterial) => {

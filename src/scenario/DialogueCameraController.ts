@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Avatar } from '../Avatar';
+import type { PanoramaBackgroundController } from '../scene/PanoramaBackgroundController';
 import {
   ScenarioScene,
   CameraZoomType,
@@ -99,12 +100,14 @@ export class DialogueCameraController {
   private _tempForward = new THREE.Vector3();
   private _tempRight = new THREE.Vector3();
   private readonly _yAxis = new THREE.Vector3(0, 1, 0);
+  private panoramaController?: PanoramaBackgroundController;
 
-  constructor(options: DialogueCameraControllerOptions) {
+  constructor(options: DialogueCameraControllerOptions & { panoramaController?: PanoramaBackgroundController }) {
     this.camera = options.camera;
     this.controls = options.controls;
     this.getAvatar = options.getAvatar;
     this.getAvatars = options.getAvatars;
+    this.panoramaController = options.panoramaController;
     this.baseFov = this.camera.fov || 30;
   }
 
@@ -138,6 +141,7 @@ export class DialogueCameraController {
     this.currentPose.fov = this.camera.fov;
 
     this.controls.enabled = false;
+    this.panoramaController?.setCameraControlEnabled(false);
   }
 
   /**
@@ -150,6 +154,8 @@ export class DialogueCameraController {
     this.isTransitioning = false;
     this.backgroundZoomScale = 1.0;
     this.backgroundPanOffset.set(0, 0);
+
+    this.panoramaController?.setCameraControlEnabled(true);
 
     if (instant) {
       this.camera.position.copy(this.baseState.position);
@@ -184,8 +190,15 @@ export class DialogueCameraController {
     this.currentStrength = scene.cameraStrength ?? 1.0;
 
     // 1. Determine target focus point
-    const speakerId = scene.speakerCharacterId || scene.character || defaultSpeakerId;
-    const { targetPos, defaultCameraPos, defaultFov } = this.calculateShotFraming(scene, speakerId);
+    const focusId =
+      scene.cameraTargetCharacterId ||
+      (typeof scene.cameraTarget === 'string' && !(scene.cameraTarget in AVATAR_POSITION_PRESETS)
+        ? scene.cameraTarget
+        : undefined) ||
+      scene.speakerCharacterId ||
+      scene.character ||
+      defaultSpeakerId;
+    const { targetPos, defaultCameraPos, defaultFov } = this.calculateShotFraming(scene, focusId);
 
     // 2. Set up transition
     this.transitionStart.position.copy(this.camera.position);
@@ -270,6 +283,13 @@ export class DialogueCameraController {
         targetPos.set(p[0], p[1] + 1.25, p[2]);
       } else if (Array.isArray(scene.cameraTarget)) {
         targetPos.set(scene.cameraTarget[0], scene.cameraTarget[1], scene.cameraTarget[2]);
+      } else if (typeof scene.cameraTarget === 'string') {
+        const charAvatar = this.getAvatar(scene.cameraTarget);
+        if (charAvatar?.vrm?.scene) {
+          const p = new THREE.Vector3();
+          charAvatar.vrm.scene.getWorldPosition(p);
+          targetPos.set(p.x, p.y + 1.25, p.z);
+        }
       }
     } else if (zoomType === 'wide') {
       // Wide shot: Center view between all characters
@@ -283,73 +303,110 @@ export class DialogueCameraController {
       );
     }
 
-    // 4. Calculate Camera Position based on Zoom Type and Start Angle
     const angle: CameraStartAngle = scene.cameraStartAngle || 'front';
+    const isBehind = speakerWorldPos.z > 0.3;
+    const isPanoramaActive = Boolean(this.panoramaController?.isActive);
+    const hasPanoramaUrl = Boolean(scene.panoramaBackgroundUrl || scene.usePanoramaCamera);
+    const isAtPlayerOrigin = Math.abs(this.camera.position.x) < 0.2 && Math.abs(this.camera.position.z) < 0.2;
+    const hasFrontAndBack =
+      allAvatars.length > 1 &&
+      allAvatars.some((a) => (a.vrm?.scene ? a.vrm.scene.position.z > 0.3 : a.initialPosition.z > 0.3)) &&
+      allAvatars.some((a) => (a.vrm?.scene ? a.vrm.scene.position.z < -0.3 : a.initialPosition.z < -0.3));
 
-    switch (zoomType) {
-      case 'speaker_extreme_close': {
-        // Extreme intimate close-up (もう1段近づけた超至近距離・顔/目線アップ・消えない安全距離)
-        const shotDist = (isMultiCharacter ? 0.95 : 0.85) * distMultiplier;
-        defaultFov = Math.max(20, this.baseFov - 6);
-        const angleOffsetX = speakerWorldPos.x < 0 ? 0.05 : (speakerWorldPos.x > 0 ? -0.05 : 0);
-        defaultCameraPos.set(
-          targetPos.x + angleOffsetX,
-          targetPos.y + 0.02,
-          targetPos.z + shotDist
-        );
-        break;
+    const isSurrounded = isPanoramaActive || hasPanoramaUrl || hasFrontAndBack || (isMultiCharacter && isAtPlayerOrigin);
+
+    if (isSurrounded) {
+      // In 360 panorama mode or surrounded formation, camera sits at player position (origin [0, 1.15, 0])
+      // and turns towards the active speaker. Zoom is performed safely via FOV narrowing to avoid mesh penetration.
+      defaultCameraPos.set(0, 1.15, 0);
+
+      switch (zoomType) {
+        case 'speaker_extreme_close': {
+          defaultFov = Math.max(18, this.baseFov - 10);
+          break;
+        }
+        case 'speaker_close': {
+          defaultFov = Math.max(22, this.baseFov - 6);
+          break;
+        }
+        case 'speaker': {
+          defaultFov = this.baseFov;
+          break;
+        }
+        case 'wide': {
+          defaultFov = this.baseFov + 6;
+          break;
+        }
+        default: {
+          defaultFov = this.baseFov;
+          break;
+        }
       }
+    } else {
+      const zDir = isBehind ? -1 : 1;
 
-      case 'speaker_close': {
-        // Close-up shot ("ギュイーン"と寄るバストアップ〜表情アップ - 近すぎて消えない安全距離)
-        const shotDist = (isMultiCharacter ? 1.45 : 1.35) * distMultiplier;
-        defaultFov = Math.max(22, this.baseFov - 4);
-        // Slightly angled towards speaker for dynamic cinematic look
-        const angleOffsetX = speakerWorldPos.x < 0 ? 0.09 : (speakerWorldPos.x > 0 ? -0.09 : 0);
-        defaultCameraPos.set(
-          targetPos.x + angleOffsetX,
-          targetPos.y + 0.02,
-          targetPos.z + shotDist
-        );
-        break;
-      }
+      switch (zoomType) {
+        case 'speaker_extreme_close': {
+          // Extreme intimate close-up
+          const shotDist = (isMultiCharacter ? 0.95 : 0.85) * distMultiplier;
+          defaultFov = Math.max(20, this.baseFov - 6);
+          const angleOffsetX = speakerWorldPos.x < 0 ? 0.05 : (speakerWorldPos.x > 0 ? -0.05 : 0);
+          defaultCameraPos.set(
+            targetPos.x + angleOffsetX,
+            targetPos.y + 0.02,
+            targetPos.z + shotDist * zDir
+          );
+          break;
+        }
 
-      case 'speaker': {
-        // Standard speaker bust-up focus (余裕を持ったバストアップ距離)
-        const shotDist = (isMultiCharacter ? 1.85 : 1.70) * distMultiplier;
-        defaultFov = this.baseFov;
-        // Subtle angled view facing inwards
-        const inwardOffset = speakerWorldPos.x < 0 ? 0.12 : (speakerWorldPos.x > 0 ? -0.12 : 0);
-        defaultCameraPos.set(
-          targetPos.x + inwardOffset,
-          targetPos.y + 0.04,
-          targetPos.z + shotDist
-        );
-        break;
-      }
+        case 'speaker_close': {
+          // Close-up shot
+          const shotDist = (isMultiCharacter ? 1.45 : 1.35) * distMultiplier;
+          defaultFov = Math.max(22, this.baseFov - 4);
+          const angleOffsetX = speakerWorldPos.x < 0 ? 0.09 : (speakerWorldPos.x > 0 ? -0.09 : 0);
+          defaultCameraPos.set(
+            targetPos.x + angleOffsetX,
+            targetPos.y + 0.02,
+            targetPos.z + shotDist * zDir
+          );
+          break;
+        }
 
-      case 'medium': {
-        const shotDist = 2.40 * distMultiplier;
-        defaultFov = this.baseFov;
-        defaultCameraPos.set(targetPos.x, targetPos.y + 0.05, targetPos.z + shotDist);
-        break;
-      }
+        case 'speaker': {
+          // Standard speaker bust-up focus
+          const shotDist = (isMultiCharacter ? 1.85 : 1.70) * distMultiplier;
+          defaultFov = this.baseFov;
+          const inwardOffset = speakerWorldPos.x < 0 ? 0.12 : (speakerWorldPos.x > 0 ? -0.12 : 0);
+          defaultCameraPos.set(
+            targetPos.x + inwardOffset,
+            targetPos.y + 0.04,
+            targetPos.z + shotDist * zDir
+          );
+          break;
+        }
 
-      case 'wide': {
-        // Wide shot showing all characters and the environment
-        const shotDist = (isMultiCharacter ? 3.60 : 3.00) * distMultiplier;
-        defaultFov = this.baseFov;
-        defaultCameraPos.set(0, 1.18, shotDist);
-        break;
-      }
+        case 'medium': {
+          const shotDist = 2.40 * distMultiplier;
+          defaultFov = this.baseFov;
+          defaultCameraPos.set(targetPos.x, targetPos.y + 0.05, targetPos.z + shotDist * zDir);
+          break;
+        }
 
-      case 'none':
-      case 'hold': {
-        // Maintain current relative position
-        defaultCameraPos.copy(this.camera.position);
-        targetPos.copy(this.controls.target);
-        defaultFov = this.camera.fov;
-        break;
+        case 'wide': {
+          // Wide shot showing all characters and the environment
+          const shotDist = (isMultiCharacter ? 3.60 : 3.00) * distMultiplier;
+          defaultFov = this.baseFov;
+          defaultCameraPos.set(0, 1.18, shotDist * zDir);
+          break;
+        }
+
+        case 'none':
+        case 'hold': {
+          defaultCameraPos.copy(this.camera.position);
+          targetPos.copy(this.controls.target);
+          defaultFov = this.camera.fov;
+          break;
+        }
       }
     }
 
@@ -394,11 +451,45 @@ export class DialogueCameraController {
         this.transitionTarget.position,
         easeT
       );
-      this.currentPose.target.lerpVectors(
-        this.transitionStart.target,
-        this.transitionTarget.target,
-        easeT
-      );
+
+      // Smooth spherical yaw rotation for looking around / 180° turns
+      const startDir = new THREE.Vector3().subVectors(this.transitionStart.target, this.transitionStart.position);
+      const endDir = new THREE.Vector3().subVectors(this.transitionTarget.target, this.transitionTarget.position);
+      const startDist = startDir.length();
+      const endDist = endDir.length();
+
+      if (startDist > 0.001 && endDist > 0.001) {
+        startDir.normalize();
+        endDir.normalize();
+
+        const startYaw = Math.atan2(startDir.x, startDir.z);
+        let endYaw = Math.atan2(endDir.x, endDir.z);
+
+        // Normalize delta yaw to [-PI, PI] for shortest rotation
+        let diffYaw = endYaw - startYaw;
+        while (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+        while (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+
+        const currentYaw = startYaw + diffYaw * easeT;
+        const currentPitch = THREE.MathUtils.lerp(startDir.y, endDir.y, easeT);
+        const currentDist = THREE.MathUtils.lerp(startDist, endDist, easeT);
+
+        const horizLen = Math.sqrt(Math.max(0, 1 - currentPitch * currentPitch));
+        const currentDir = new THREE.Vector3(
+          Math.sin(currentYaw) * horizLen,
+          currentPitch,
+          Math.cos(currentYaw) * horizLen
+        ).normalize();
+
+        this.currentPose.target.copy(this.currentPose.position).addScaledVector(currentDir, currentDist);
+      } else {
+        this.currentPose.target.lerpVectors(
+          this.transitionStart.target,
+          this.transitionTarget.target,
+          easeT
+        );
+      }
+
       this.currentPose.fov = THREE.MathUtils.lerp(
         this.transitionStart.fov,
         this.transitionTarget.fov,
