@@ -166,13 +166,21 @@ export class ScenarioController {
       },
       onUpdateScrollingBackground: (bgConfig) => {
         if (bgConfig && bgConfig.enabled) {
+          const bgUrl = bgConfig.textureUrl || '/textures/town_far.png';
           this.scrollingBackgroundManager.show({
-            textureUrl: bgConfig.textureUrl,
+            textureUrl: bgUrl,
             speed: bgConfig.speed,
             blur: bgConfig.blur,
             direction: bgConfig.direction,
             instantBlur: bgConfig.instantBlur,
+            featherWidth: bgConfig.featherWidth,
           });
+          // スクロール背景表示時は固定背景画像・中景レイヤーを確実にオフにして背後の透けを排除
+          const cfg = this.getConfig();
+          cfg.environment.showMidground = false;
+          cfg.environment.midgroundImageUrl = undefined;
+          cfg.environment.showBackgroundImage = false;
+          this.onApplyConfig(cfg);
         } else {
           this.scrollingBackgroundManager.hide();
         }

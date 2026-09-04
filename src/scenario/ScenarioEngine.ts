@@ -366,7 +366,7 @@ export class ScenarioEngine {
     // Dynamic Face Texture (e.g. Blush / Red cheeks)
     if (faceTexture) {
       avatar.setFaceTexture(faceTexture);
-    } else if (faceTexture === null) {
+    } else {
       avatar.resetFaceTexture();
     }
 

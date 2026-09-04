@@ -94,7 +94,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '澄んだ朝陽と淡い光条、透明感あふれるブルー・バイオレットのグラデーション',
     materials: {
       body: {
-        color: '#fffffa',
+        color: '#fff6f0',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.35,
@@ -270,7 +270,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '青空と強い太陽光、抜けの良い昼光サンシャフトと華やかなアニメフレア',
     materials: {
       body: {
-        color: '#fffafa',
+        color: '#fff6f0',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.35,
@@ -453,7 +453,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: 'ドラマチックな茜色の夕日、西日のサンシャフトと夕焼けレンズフレア',
     materials: {
       body: {
-        color: '#fffafa',
+        color: '#fff6f0',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.45,
@@ -640,7 +640,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: 'しっとりとした雨天・雨雲越しの柔らかな拡散光と雨粒パーティクル',
     materials: {
       body: {
-        color: '#fff5f5',
+        color: '#fff6f0',
         shadowHueShift: 0,
         shadowLightnessFactor: 0.14,
         shadowBoundaryTint: 0.25,
@@ -827,7 +827,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '均一で明るい室内照明、教室やオフィスに最適な自然なセルルック',
     materials: {
       body: {
-        color: '#fffafa',
+        color: '#fff6f0',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.3,
@@ -1011,7 +1011,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '窓からの夜光と落ち着いた間接照明、エモーショナルな夜間教室・室内',
     materials: {
       body: {
-        color: '#fffafa',
+        color: '#fff6f0',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.2,

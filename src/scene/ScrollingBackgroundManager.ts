@@ -9,6 +9,7 @@ const ScrollingBlurShader = {
     uTint: { value: new THREE.Color(1, 1, 1) },
     uZoomScale: { value: 1.0 },
     uPanOffset: { value: new THREE.Vector2(0, 0) },
+    uFeatherWidth: { value: 0.2 }, // Ratio of edge width for alpha feather fade (0.0 - 0.5)
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -24,6 +25,7 @@ const ScrollingBlurShader = {
     uniform vec3 uTint;
     uniform float uZoomScale;
     uniform vec2 uPanOffset;
+    uniform float uFeatherWidth;
     varying vec2 vUv;
 
     // High frequency pseudo-random hash for frosted glass micro-facet roughness
@@ -34,21 +36,27 @@ const ScrollingBlurShader = {
     }
 
     void main() {
-      // Dynamic camera parallax & zoom transform (matches other scenario scene.background)
+      // Horizontal edge feather alpha gradient
+      float edgeAlpha = 1.0;
+      if (uFeatherWidth > 0.001) {
+        float leftEdge = smoothstep(0.0, uFeatherWidth, vUv.x);
+        float rightEdge = smoothstep(1.0, 1.0 - uFeatherWidth, vUv.x);
+        edgeAlpha = leftEdge * rightEdge;
+      }
+
+      // Dynamic camera parallax & zoom transform
       vec2 baseUv = (vUv - 0.5) / max(1.0, uZoomScale) + 0.5 - uPanOffset;
 
       if (uBlurAmount <= 0.002) {
         vec4 col = texture2D(tDiffuse, baseUv);
-        gl_FragColor = vec4(col.rgb * uTint, col.a * uOpacity);
+        gl_FragColor = vec4(col.rgb * uTint, col.a * uOpacity * edgeAlpha);
         return;
       }
 
-      // Frosted Glass Effect (すりガラス調・散乱と微細ノイズテクスチャ)
-      // 1. Calculate frosted micro-jitter
-      float noise = (hash21(gl_FragCoord.xy) - 0.5) * 2.0;
+      // Frosted Glass Effect (Texture UV coherent noise to avoid pixel shimmer)
+      float noise = (hash21(baseUv * 600.0) - 0.5) * 2.0;
       float baseRadius = uBlurAmount * 0.012;
 
-      // 2. 16-tap Poisson-disk distributed samples with frosted jitter
       vec4 sum = vec4(0.0);
       float totalWeight = 0.0;
 
@@ -72,7 +80,6 @@ const ScrollingBlurShader = {
       taps[15] = vec2( 0.95,     0.75);
 
       for (int i = 0; i < 16; i++) {
-        // Micro-displacement per tap imitating ground glass surface refraction
         vec2 jitterOffset = vec2(noise * 0.0018 * uBlurAmount);
         vec2 sampleUv = baseUv + taps[i] * baseRadius + jitterOffset;
         float w = 1.0 - length(taps[i]) * 0.45;
@@ -81,15 +88,11 @@ const ScrollingBlurShader = {
       }
 
       vec4 frostedColor = sum / totalWeight;
-
-      // 3. Subtle frosted luminescence / milky white diffuse veil (すりガラスの白濁散乱)
       vec3 milkyWhite = vec3(0.96, 0.98, 1.0);
       vec3 finalRgb = mix(frostedColor.rgb, milkyWhite, 0.09 * uBlurAmount);
-
-      // 4. Micro-grain dither for tactile matte texture
       finalRgb += (noise * 0.014 * uBlurAmount);
 
-      gl_FragColor = vec4(finalRgb * uTint, frostedColor.a * uOpacity);
+      gl_FragColor = vec4(finalRgb * uTint, frostedColor.a * uOpacity * edgeAlpha);
     }
   `,
 };
@@ -102,6 +105,7 @@ export interface ScrollingBackgroundOptions {
   blur?: number;  // 0.0 - 1.0
   direction?: 'left' | 'right';
   planeDistance?: number;
+  featherWidth?: number; // 0.0 - 0.5 (ratio of edge width for seamless alpha blending)
 }
 
 export class ScrollingBackgroundManager {
@@ -109,8 +113,8 @@ export class ScrollingBackgroundManager {
   private camera: THREE.PerspectiveCamera;
 
   private rootGroup: THREE.Group;
-  private planeMeshes: [THREE.Mesh, THREE.Mesh];
-  private materials: [THREE.ShaderMaterial, THREE.ShaderMaterial];
+  private planeMeshes: THREE.Mesh[];
+  private materials: THREE.ShaderMaterial[];
   private geometry: THREE.PlaneGeometry;
 
   private textureLoader = new THREE.TextureLoader();
@@ -123,6 +127,7 @@ export class ScrollingBackgroundManager {
   private direction: 'left' | 'right' = 'left';
   private targetBlur = 0.0;
   private currentBlur = 0.0;
+  private featherWidth = 0.2; // default 20% edge feather blend
   private planeDistance = 4.5; // distance in front of camera
 
   private slideOffset = 0.0;
@@ -136,39 +141,49 @@ export class ScrollingBackgroundManager {
     this.rootGroup = new THREE.Group();
     this.rootGroup.name = 'ScrollingBackgroundGroup';
     this.rootGroup.visible = false;
-    // Set renderOrder to render behind avatars but in front of clear scene background
     this.rootGroup.renderOrder = -5;
 
     // Create plane geometry
     this.geometry = new THREE.PlaneGeometry(1, 1);
 
-    // Create 2 materials
-    const matA = new THREE.ShaderMaterial({
-      uniforms: THREE.UniformsUtils.clone(ScrollingBlurShader.uniforms),
-      vertexShader: ScrollingBlurShader.vertexShader,
-      fragmentShader: ScrollingBlurShader.fragmentShader,
-      depthWrite: false,
-      depthTest: true,
-      side: THREE.DoubleSide,
-    });
-    const matB = new THREE.ShaderMaterial({
-      uniforms: THREE.UniformsUtils.clone(ScrollingBlurShader.uniforms),
-      vertexShader: ScrollingBlurShader.vertexShader,
-      fragmentShader: ScrollingBlurShader.fragmentShader,
-      depthWrite: false,
-      depthTest: true,
-      side: THREE.DoubleSide,
-    });
-    this.materials = [matA, matB];
+    // 3 Overlapping Feather Planes with deterministic layer ordering
+    this.materials = [
+      new THREE.ShaderMaterial({
+        uniforms: THREE.UniformsUtils.clone(ScrollingBlurShader.uniforms),
+        vertexShader: ScrollingBlurShader.vertexShader,
+        fragmentShader: ScrollingBlurShader.fragmentShader,
+        depthWrite: false,
+        depthTest: true,
+        transparent: true,
+        side: THREE.DoubleSide,
+      }),
+      new THREE.ShaderMaterial({
+        uniforms: THREE.UniformsUtils.clone(ScrollingBlurShader.uniforms),
+        vertexShader: ScrollingBlurShader.vertexShader,
+        fragmentShader: ScrollingBlurShader.fragmentShader,
+        depthWrite: false,
+        depthTest: true,
+        transparent: true,
+        side: THREE.DoubleSide,
+      }),
+      new THREE.ShaderMaterial({
+        uniforms: THREE.UniformsUtils.clone(ScrollingBlurShader.uniforms),
+        vertexShader: ScrollingBlurShader.vertexShader,
+        fragmentShader: ScrollingBlurShader.fragmentShader,
+        depthWrite: false,
+        depthTest: true,
+        transparent: true,
+        side: THREE.DoubleSide,
+      }),
+    ];
 
-    const meshA = new THREE.Mesh(this.geometry, matA);
-    const meshB = new THREE.Mesh(this.geometry, matB);
-    meshA.renderOrder = -5;
-    meshB.renderOrder = -5;
-    this.planeMeshes = [meshA, meshB];
+    this.planeMeshes = this.materials.map((mat, i) => {
+      const mesh = new THREE.Mesh(this.geometry, mat);
+      mesh.renderOrder = -5 + i; // Deterministic draw order avoids Z-fighting
+      this.rootGroup.add(mesh);
+      return mesh;
+    });
 
-    this.rootGroup.add(meshA);
-    this.rootGroup.add(meshB);
     this.scene.add(this.rootGroup);
   }
 
@@ -186,11 +201,18 @@ export class ScrollingBackgroundManager {
     blur?: number;
     direction?: 'left' | 'right';
     instantBlur?: boolean;
+    featherWidth?: number;
   }): void {
     const url = options?.textureUrl || '/textures/town_far.png';
     this.speed = options?.speed ?? this.speed;
     this.direction = options?.direction ?? this.direction;
     this.targetBlur = Math.max(0, Math.min(1, options?.blur ?? 0.0));
+
+    if (options?.featherWidth !== undefined) {
+      this.setFeatherWidth(options.featherWidth);
+    } else {
+      this.setFeatherWidth(this.featherWidth);
+    }
 
     if (options?.instantBlur) {
       this.currentBlur = this.targetBlur;
@@ -231,6 +253,13 @@ export class ScrollingBackgroundManager {
     }
   }
 
+  public setFeatherWidth(width: number): void {
+    this.featherWidth = Math.max(0, Math.min(0.49, width));
+    for (const mat of this.materials) {
+      mat.uniforms.uFeatherWidth.value = this.featherWidth;
+    }
+  }
+
   public loadTexture(url: string): void {
     const resolvedUrl = resolveAssetUrl(url);
     if (this.currentTextureUrl === resolvedUrl && this.currentTexture) {
@@ -246,10 +275,10 @@ export class ScrollingBackgroundManager {
         tex.wrapT = THREE.ClampToEdgeWrapping;
         this.currentTexture = tex;
 
-        this.materials[0].uniforms.tDiffuse.value = tex;
-        this.materials[1].uniforms.tDiffuse.value = tex;
-        this.materials[0].needsUpdate = true;
-        this.materials[1].needsUpdate = true;
+        for (const mat of this.materials) {
+          mat.uniforms.tDiffuse.value = tex;
+          mat.needsUpdate = true;
+        }
       },
       undefined,
       (err) => {
@@ -259,8 +288,9 @@ export class ScrollingBackgroundManager {
   }
 
   private applyBlurToMaterials(blurVal: number): void {
-    this.materials[0].uniforms.uBlurAmount.value = blurVal;
-    this.materials[1].uniforms.uBlurAmount.value = blurVal;
+    for (const mat of this.materials) {
+      mat.uniforms.uBlurAmount.value = blurVal;
+    }
   }
 
   public update(
@@ -269,7 +299,7 @@ export class ScrollingBackgroundManager {
   ): void {
     if (!this._isVisible) return;
 
-    // Apply camera zoom & pan transform (matching ViewerCore.updateBackgroundZoom in other scenarios)
+    // Apply camera zoom & pan transform
     const zoomScale = dialogueBackgroundTransform ? Math.max(1.0, dialogueBackgroundTransform.zoomScale) : 1.0;
     const panX = dialogueBackgroundTransform ? dialogueBackgroundTransform.panOffsetX : 0.0;
     const panY = dialogueBackgroundTransform ? dialogueBackgroundTransform.panOffsetY : 0.0;
@@ -281,7 +311,7 @@ export class ScrollingBackgroundManager {
 
     // Smooth blur transition
     if (Math.abs(this.currentBlur - this.targetBlur) > 0.001) {
-      const step = delta * 3.5; // smooth interpolation rate
+      const step = delta * 3.5;
       if (this.currentBlur < this.targetBlur) {
         this.currentBlur = Math.min(this.targetBlur, this.currentBlur + step);
       } else {
@@ -300,14 +330,12 @@ export class ScrollingBackgroundManager {
   }
 
   /**
-   * Position and scale the 2 planes aligned with camera view frustum.
+   * Position and scale the planes aligned with camera view frustum.
    */
   private updatePlanesTransform(_delta: number): void {
-    // 1. Calculate camera coordinate frame
     const forward = new THREE.Vector3();
     this.camera.getWorldDirection(forward);
 
-    // 2. Center plane position in front of camera
     const centerPos = this.camera.position
       .clone()
       .addScaledVector(forward, this.planeDistance);
@@ -315,42 +343,46 @@ export class ScrollingBackgroundManager {
     this.rootGroup.position.copy(centerPos);
     this.rootGroup.quaternion.copy(this.camera.quaternion);
 
-    // 3. Frustum size calculation at planeDistance
     const vFovRad = THREE.MathUtils.degToRad(this.camera.fov);
     const frustumHeight = 2 * this.planeDistance * Math.tan(vFovRad / 2);
     const frustumWidth = frustumHeight * this.camera.aspect;
 
-    // Expand width and height to ensure no screen edges bleed
     this.planeHeight = frustumHeight * 1.6;
-    // Each plane width covers 1.8x the frustum width for seamless loop
     this.planeWidth = frustumWidth * 1.8;
 
-    // 4. Modulo wrap slideOffset within [-planeWidth, 0]
-    const loopSpan = this.planeWidth;
+    // 3 planes overlapping by feather width with slight Z offset to prevent Z-fighting
+    const featherRatio = Math.max(0, Math.min(0.49, this.featherWidth));
+    const stepSpan = this.planeWidth * (1.0 - featherRatio);
+    const loopSpan = stepSpan;
+
     let normOffset = this.slideOffset % loopSpan;
     if (normOffset > 0) {
       normOffset -= loopSpan;
     }
 
-    // Plane 0 and Plane 1 seamless contiguous alignment
-    const posX0 = normOffset;
-    const posX1 = normOffset + loopSpan;
+    // Positions for 3 planes (left, center, right)
+    const positions = [
+      normOffset - stepSpan,
+      normOffset,
+      normOffset + stepSpan,
+    ];
 
-    const meshA = this.planeMeshes[0];
-    const meshB = this.planeMeshes[1];
-
-    meshA.position.set(posX0, 0, 0);
-    meshA.scale.set(this.planeWidth, this.planeHeight, 1);
-
-    meshB.position.set(posX1, 0, 0);
-    meshB.scale.set(this.planeWidth, this.planeHeight, 1);
+    for (let i = 0; i < 3; i++) {
+      const mesh = this.planeMeshes[i];
+      if (mesh) {
+        // Slight Z offset per layer (-0.004 * i) prevents depth buffer collision
+        mesh.position.set(positions[i], 0, -0.004 * i);
+        mesh.scale.set(this.planeWidth, this.planeHeight, 1);
+      }
+    }
   }
 
   public dispose(): void {
     this.hide();
     this.geometry.dispose();
-    this.materials[0].dispose();
-    this.materials[1].dispose();
+    for (const mat of this.materials) {
+      mat.dispose();
+    }
     if (this.currentTexture) {
       this.currentTexture.dispose();
     }
