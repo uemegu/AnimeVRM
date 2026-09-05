@@ -101,7 +101,19 @@ npm run build
 
 # ビルド成果物のプレビュー
 npm run preview
+
+# ヘッドレス画面キャプチャ検証 (Playwright)
+npm run capture
 ```
+
+### 📸 ヘッドレス画面キャプチャ検証
+Playwright（Headless Chrome / WebGL有効）を使用して、ローカル開発サーバー（`http://localhost:5173`）上のレンダリング結果を自動撮影できます。
+シェーダーやライティングの調整後、正面光・斜め45度光・真横光・斜めアングルの4パターンの顔クローズアップを撮影し、目視・検証に活用できます。
+
+```bash
+npm run capture
+```
+※ 詳細は [AGENTS.md](./AGENTS.md) を参照してください。
 
 ---
 
