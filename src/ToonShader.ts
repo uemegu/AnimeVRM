@@ -47,13 +47,24 @@ type MToonLikeMaterial = THREE.Material & {
   userData: Record<string, any>;
 };
 
-const DEFAULT_FACE_PATTERN = /Face|Mouth|Eye|Brow|Eyelash|Eyeline|顔|目|眉|口/i;
+const DEFAULT_FACE_PATTERN = /Face|Mouth|顔|口/i;
 const DEFAULT_BODY_PATTERN = /Body.*SKIN|body|skin|肌|体/i;
 const DEFAULT_HAIR_PATTERN = /Hair|hair|髪/i;
 const DEFAULT_CLOTH_PATTERN = /Shoes|Cloth|Tops|Bottoms|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|suit|pant|服|靴|衣/i;
 const NON_HAIR_EXCLUSION_PATTERN = /Face|Mouth|Eye|Brow|Eyelash|Skin|Body|Cloth|Tops|Bottoms|Shoes|Dress|Skirt|Suit|Shirt|Pant|Onepiece|肌|体|顔|目|服|靴|衣/i;
 
-type StyleKind = 'body' | 'hair' | 'cloth' | 'face';
+export function isEyeMaterial(matName: string): boolean {
+  if (/Eyeline|Eyelash|アイライン|まつ毛|まつげ/i.test(matName)) {
+    return false;
+  }
+  return /EyeWhite|EyeIris|EyeHighlight|Eye|目|Iris|白目|瞳|虹彩/i.test(matName);
+}
+
+export function isFaceFeatureMaterial(matName: string): boolean {
+  return /FaceEyeline|FaceEyelash|FaceBrow|Eyeline|Eyelash|Brow|眉|アイライン|まつ毛|まつげ/i.test(matName);
+}
+
+type StyleKind = 'body' | 'hair' | 'cloth' | 'face' | 'eye';
 
 const textureColorCache = new WeakMap<THREE.Texture, THREE.Color>();
 
@@ -192,7 +203,14 @@ function classifyStyleMaterial(
   const matName = material.name || '';
   const meshName = mesh.name || '';
 
-  // 1. First check material name (handles merged meshes correctly)
+  // 1. First check specific face features & eye materials by name
+  if (isEyeMaterial(matName)) {
+    return 'eye';
+  }
+  if (isFaceFeatureMaterial(matName)) {
+    // Eyeliner, eyelash, and brows are facial line drawings, not skin
+    return null;
+  }
   if (regexTest(DEFAULT_FACE_PATTERN, matName)) {
     return 'face';
   }
@@ -206,7 +224,10 @@ function classifyStyleMaterial(
     return 'body';
   }
 
-  // 2. Fallback to mesh name
+  // 2. Fallback to mesh name (ensure eye and facial features are never classified as skin)
+  if (isEyeMaterial(matName) || isFaceFeatureMaterial(matName)) {
+    return isEyeMaterial(matName) ? 'eye' : null;
+  }
   if (regexTest(DEFAULT_FACE_PATTERN, meshName)) {
     return 'face';
   }
@@ -234,7 +255,7 @@ export function applyToonShader(
 
   let activeConfig = options.config;
 
-  const styledNames: Record<StyleKind, string[]> = { body: [], hair: [], cloth: [], face: [] };
+  const styledNames: Record<StyleKind, string[]> = { body: [], hair: [], cloth: [], face: [], eye: [] };
   const trackedMaterials: Array<{
     material: MToonLikeMaterial;
     kind: StyleKind | 'other';
@@ -359,12 +380,42 @@ export function applyToonShader(
     });
   };
 
+  // Keep eyes clear and prevent shadows on eyeballs (sclera/iris/highlights)
+  const setupEyeMaterials = () => {
+    allMToonMaterials.forEach(({ material }) => {
+      const matName = material.name || '';
+      if (isEyeMaterial(matName)) {
+        // Eyeballs should never be shaded by skin or directional lighting
+        const whiteColor = new THREE.Color(1, 1, 1);
+        if (material.shadeColorFactor) material.shadeColorFactor.copy(whiteColor);
+        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(whiteColor);
+
+        // Always fully lit (shadingShiftFactor = 1.0) so curvature/creases never cast shadow
+        material.shadingShiftFactor = 1.0;
+        if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = 1.0;
+
+        material.shadingToonyFactor = 1.0;
+        if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = 1.0;
+
+        // Suppress rim lighting on eyeball to avoid unnatural glowing white rings
+        const blackColor = new THREE.Color(0, 0, 0);
+        if (material.parametricRimColorFactor) material.parametricRimColorFactor.copy(blackColor);
+        if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.copy(blackColor);
+
+        if ((material as any).uniforms?.receiveShadow) {
+          (material as any).uniforms.receiveShadow.value = false;
+        }
+        material.needsUpdate = true;
+      }
+    });
+  };
+
   // Apply material params directly to MToon parameters
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
     const bodyEntry = trackedMaterials.find((entry) => entry.kind === 'body');
 
     trackedMaterials
-      .filter((entry) => entry.kind === kind || (kind === 'body' && entry.kind === 'face'))
+      .filter((entry) => (entry.kind === kind || (kind === 'body' && entry.kind === 'face')) && !isEyeMaterial(entry.material.name || '') && !isFaceFeatureMaterial(entry.material.name || ''))
       .forEach(({ material, kind: matKind }) => {
         // Base Color / Tint (litFactor)
         if (params.color) {
@@ -401,9 +452,9 @@ export function applyToonShader(
           if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = effectiveToony;
         }
 
-        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts)
+        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows)
         if (typeof params.shadingShiftFactor === 'number') {
-          const shift = matKind === 'face' ? Math.max(params.shadingShiftFactor, 0.45) : params.shadingShiftFactor;
+          const shift = matKind === 'face' ? Math.max(params.shadingShiftFactor, 0.65) : params.shadingShiftFactor;
           material.shadingShiftFactor = shift;
           if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
         }
@@ -520,6 +571,9 @@ export function applyToonShader(
     applyOutline(activeConfig.outline);
   }
 
+  // Ensure eye materials are unlit & shadow-free immediately on load
+  setupEyeMaterials();
+
   const update = () => {};
 
   return {
@@ -528,11 +582,18 @@ export function applyToonShader(
       ...styledNames.hair,
       ...styledNames.cloth,
       ...styledNames.face,
+      ...styledNames.eye,
     ],
     update,
-    updateMaterialStyle: applyMaterialStyle,
+    updateMaterialStyle: (kind, params) => {
+      applyMaterialStyle(kind, params);
+      setupEyeMaterials();
+    },
     updateOutline: applyOutline,
-    updateEyeGlow: applyEyeGlow,
+    updateEyeGlow: (cfg) => {
+      applyEyeGlow(cfg);
+      setupEyeMaterials();
+    },
     applyFullConfig: (newConfig) => {
       activeConfig = newConfig;
       if (newConfig.materials) {
@@ -544,6 +605,7 @@ export function applyToonShader(
       if (newConfig.outline) {
         applyOutline(newConfig.outline);
       }
+      setupEyeMaterials();
     },
     dispose: () => {},
   };

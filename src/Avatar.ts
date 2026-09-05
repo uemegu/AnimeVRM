@@ -7,7 +7,7 @@ import {
   ToonShaderController,
   ToonShaderOptions,
 } from './ToonShader';
-import { applySmoothNormalsToHierarchy } from './shader/SmoothNormalHelper';
+import { applySmoothNormalsToHierarchy, flattenEyeOrbitNormals } from './shader/SmoothNormalHelper';
 import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
@@ -299,7 +299,10 @@ export class Avatar {
         // VRM 0.0 rotation fix if needed
         VRMUtils.rotateVRM0(vrm);
 
-        // Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
+        // 1. Flatten eye orbit normals to prevent crease/step shadows at inner eye corners
+        flattenEyeOrbitNormals(vrm.scene);
+
+        // 2. Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
         applySmoothNormalsToHierarchy(vrm.scene);
 
         // Adjust model orientation & initial position
