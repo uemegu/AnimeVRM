@@ -21,7 +21,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
   ],
   bgmUrl: resolveAssetUrl('/bgm/bgm.mp3'),
   bgmVolume: 0.25,
-  panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+  panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
   chapters: [
     {
       id: 'main',
@@ -33,7 +33,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speaker: 'あなた',
           location: '放課後の教室',
           scenePreset: 'morning_school',
-          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '（放課後、誰もいない教室でぼーっと窓の外を眺めていると……）',
           avatars: {
             girl_01: {
@@ -59,7 +59,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: '放課後の教室',
           scenePreset: 'morning_school',
-          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '「ねえねえ、ちょっとここだけの内緒話なんだけど……聞いてくれる？」',
           voiceUrl: resolveAssetUrl('/voices/behind_intro_1.wav'),
           avatars: {
@@ -505,7 +505,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
   ],
   bgmUrl: resolveAssetUrl('/bgm/bgm.mp3'),
   bgmVolume: 0.25,
-  panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+  panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
   chapters: [
     {
       id: 'main',
@@ -516,7 +516,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speaker: 'You',
           location: 'Classroom After School',
           scenePreset: 'morning_school',
-          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '(After school, gazing blankly out the classroom window...)',
           avatars: {
             girl_01: {
@@ -541,7 +541,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: 'Classroom After School',
           scenePreset: 'morning_school',
-          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '"Hey, can you keep a secret just between us...?"',
           voiceUrl: resolveAssetUrl('/voices/behind_intro_1.wav'),
           avatars: {

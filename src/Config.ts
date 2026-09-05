@@ -315,12 +315,12 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   environment: {
     showBackgroundImage: true,
-    backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
+    backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.avif'),
     backgroundColor: '#ffffff',
     showFloor: false,
     floorColor: '#ffffff',
     showMidground: true,
-    midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.jpg'),
+    midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.avif'),
     midgroundPosition: {
       x: 0,
       y: 1.35,

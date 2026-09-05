@@ -315,10 +315,10 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <label class="section-label">${tr.scenes.locationTitle}</label>
             <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">背景（場所）のみを切り替えます。時間帯パラメータは維持されます。</p>
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
-              <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.jpg')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.jpg')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
-              <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.jpeg')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
-              <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.jpg')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
-              <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.jpg')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
+              <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.avif')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.avif')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
+              <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
+              <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
+              <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
               <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
             </div>
           </div>

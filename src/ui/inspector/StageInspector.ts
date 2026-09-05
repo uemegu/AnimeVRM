@@ -219,7 +219,7 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
       showToast('🌐 教室360°パノラマ画像を読み込み中...');
       try {
         await panorama.load({
-          imageUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          imageUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           initialYaw: Math.PI,
           initialPitch: 0,
           initialFov: 60,
