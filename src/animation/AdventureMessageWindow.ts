@@ -6,6 +6,8 @@ export interface AdventureMessageWindowOptions {
   container?: HTMLElement | null;
   onNextClick?: () => void;
   onStopClick?: () => void;
+  onAutoToggle?: (isAuto: boolean) => void;
+  onTypingComplete?: () => void;
   typingSpeedMs?: number;
 }
 
@@ -26,8 +28,11 @@ export class AdventureMessageWindow {
   private typingSpeedMs = 24;
   private onNextClick?: () => void;
   private onStopClick?: () => void;
+  private onAutoToggle?: (isAuto: boolean) => void;
+  private onTypingComplete?: () => void;
   private isVisible = false;
   private isChoicesVisible = false;
+  private isAutoMode = false;
   private boundKeyHandler: ((e: KeyboardEvent) => void) | null = null;
   private countdownIntervalId: number | null = null;
   private countdownSeconds = 10;
@@ -37,6 +42,8 @@ export class AdventureMessageWindow {
     this.typingSpeedMs = options.typingSpeedMs ?? 24;
     this.onNextClick = options.onNextClick;
     this.onStopClick = options.onStopClick;
+    this.onAutoToggle = options.onAutoToggle;
+    this.onTypingComplete = options.onTypingComplete;
     this.injectStyles();
   }
 
@@ -121,6 +128,61 @@ export class AdventureMessageWindow {
 
       .adv-top-controls.visible {
         opacity: 1;
+      }
+
+      .adv-auto-btn {
+        background: rgba(15, 23, 42, 0.75);
+        color: #94a3b8;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-family: sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        user-select: none;
+      }
+
+      .adv-auto-btn:hover {
+        background: rgba(30, 41, 59, 0.9);
+        color: #f1f5f9;
+        border-color: rgba(56, 189, 248, 0.6);
+        transform: scale(1.05);
+      }
+
+      .adv-auto-btn.active {
+        background: linear-gradient(135deg, rgba(2, 132, 199, 0.85) 0%, rgba(14, 165, 233, 0.95) 100%);
+        color: #ffffff;
+        border-color: #38bdf8;
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .adv-auto-btn .adv-auto-icon {
+        font-size: 10px;
+        transition: transform 0.2s ease;
+      }
+
+      .adv-auto-btn.active .adv-auto-icon {
+        animation: adv-auto-pulse 1.2s infinite alternate ease-in-out;
+      }
+
+      @keyframes adv-auto-pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.35);
+          opacity: 1;
+          text-shadow: 0 0 6px #ffffff;
+        }
       }
 
       .adv-stop-btn {
@@ -1177,6 +1239,10 @@ export class AdventureMessageWindow {
     this.boundKeyHandler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         this.onStopClick?.();
+      } else if (e.key === 'a' || e.key === 'A') {
+        if (!this.isChoicesVisible) {
+          this.toggleAutoMode();
+        }
       }
     };
     window.addEventListener('keydown', this.boundKeyHandler);
@@ -1617,6 +1683,7 @@ export class AdventureMessageWindow {
       if (this.nextIconEl && !this.isChoicesVisible) {
         this.nextIconEl.classList.add('show');
       }
+      this.onTypingComplete?.();
     }
   }
 
@@ -1704,6 +1771,7 @@ export class AdventureMessageWindow {
         if (this.nextIconEl) {
           this.nextIconEl.classList.add('show');
         }
+        this.onTypingComplete?.();
       } else {
         this.onNextClick?.();
       }
@@ -1712,15 +1780,28 @@ export class AdventureMessageWindow {
     parent.appendChild(container);
     this.container = container;
 
-    // Top Right Floating Controls (Stop Button)
+    // Top Right Floating Controls (Auto & Stop Buttons)
     const topControls = document.createElement('div');
     topControls.id = 'adv-top-controls';
     topControls.className = 'adv-top-controls';
     topControls.innerHTML = `
+      <button class="adv-auto-btn" id="adv-auto-btn" title="${t().scenario.autoMode} (A)">
+        <span class="adv-auto-icon">▶</span> ${t().scenario.autoMode}
+      </button>
       <button class="adv-stop-btn" title="${t().scenario.endScenario} (ESC)">
         <span>⏹</span> ${t().scenario.endScenario}
       </button>
     `;
+
+    const autoBtn = topControls.querySelector<HTMLButtonElement>('#adv-auto-btn');
+    if (autoBtn) {
+      autoBtn.classList.toggle('active', this.isAutoMode);
+      autoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleAutoMode();
+      });
+    }
+
     topControls.querySelector('.adv-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       this.onStopClick?.();
@@ -1728,6 +1809,21 @@ export class AdventureMessageWindow {
     parent.appendChild(topControls);
 
     this.createChoicesDOM();
+  }
+
+  public setAutoMode(enabled: boolean): void {
+    this.isAutoMode = enabled;
+    const autoBtn = document.getElementById('adv-auto-btn');
+    if (autoBtn) {
+      autoBtn.classList.toggle('active', enabled);
+    }
+  }
+
+  public toggleAutoMode(): boolean {
+    const nextState = !this.isAutoMode;
+    this.setAutoMode(nextState);
+    this.onAutoToggle?.(nextState);
+    return nextState;
   }
 
   private createChoicesDOM(): void {

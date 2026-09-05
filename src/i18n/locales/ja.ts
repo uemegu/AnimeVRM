@@ -152,6 +152,7 @@ export const ja: Translations = {
     playing: '再生中...',
     shortAnimTitle: '🎬 ショートアニメーション演出',
     playAnim: '▶ アニメーション再生',
+    autoMode: 'AUTO',
     endScenario: 'シナリオ終了',
     thinkingTime: 'Thinking Time',
     steps: {

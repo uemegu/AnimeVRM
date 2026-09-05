@@ -27,7 +27,32 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
       id: 'main',
       title: '背後のエミリ',
       scenes: [
-        // Scene 1: アオイとの2人きりの内緒話
+        // Scene 0: 窓の外（誰もいない方向）を眺めているプロローグ
+        {
+          id: 'scene_0_prologue',
+          speaker: 'あなた',
+          location: '放課後の教室',
+          scenePreset: 'morning_school',
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          text: '（放課後、誰もいない教室でぼーっと窓の外を眺めていると……）',
+          avatars: {
+            girl_01: {
+              motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
+              expression: 'normal',
+              expressionWeight: 1,
+            },
+            girl_02: {
+              motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
+              expression: 'neutral',
+              expressionWeight: 0.5,
+            },
+          },
+          cameraTarget: [1.8, 1.15, 0], // 右側の窓（誰もいない方向）
+          cameraTransitionEasing: 'cut',
+          cameraPreset: 'hold',
+          autoNextSec: 2.5,
+        },
+        // Scene 1: アオイに話しかけられて振り向く
         {
           id: 'scene_1_intro',
           speaker: 'アオイ',
@@ -51,7 +76,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           },
           cameraZoom: 'speaker',
           cameraTransitionEasing: 'smooth',
-          cameraTransitionDuration: 0.8,
+          cameraTransitionDuration: 1.2, // 窓の外からアオイへスムーズに旋回！
           cameraPreset: 'hold',
         },
         // Scene 2: エミリの噂話を始める
@@ -487,6 +512,30 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
       title: 'Emily Behind You',
       scenes: [
         {
+          id: 'scene_0_prologue',
+          speaker: 'You',
+          location: 'Classroom After School',
+          scenePreset: 'morning_school',
+          panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.png'),
+          text: '(After school, gazing blankly out the classroom window...)',
+          avatars: {
+            girl_01: {
+              motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
+              expression: 'happy',
+              expressionWeight: 0.7,
+            },
+            girl_02: {
+              motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
+              expression: 'neutral',
+              expressionWeight: 0.5,
+            },
+          },
+          cameraTarget: [1.8, 1.15, 0],
+          cameraTransitionEasing: 'cut',
+          cameraPreset: 'hold',
+          autoNextSec: 2.5,
+        },
+        {
           id: 'scene_1_intro',
           speaker: 'Aoi',
           speakerCharacterId: 'girl_01',
@@ -510,7 +559,8 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           },
           cameraZoom: 'speaker',
           cameraTransitionEasing: 'smooth',
-          cameraTransitionDuration: 0.8,
+          cameraTransitionDuration: 1.2,
+          cameraPreset: 'hold',
         },
         {
           id: 'scene_2_gossip',
