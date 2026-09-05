@@ -362,9 +362,6 @@ export class Avatar {
         this.shaderController = applyToonShader(vrm, this.scene, shaderOpts);
         this.shaderController.update();
 
-        // Apply UV shadow mask texture to face if available (suppresses shadows on cheeks, under nose, mouth)
-        this.initFaceShadowMask();
-
         // Initialize animation mixer and play default animation if available
         this.mixer = new THREE.AnimationMixer(vrm.scene);
         if (this.options.defaultAnimationUrl) {
@@ -723,92 +720,6 @@ export class Avatar {
 
   public resetFaceTexture(): void {
     this.setFaceTexture(null);
-  }
-
-  /**
-   * Applies the default UV shadow mask (/textures/face_shadow_mask.png) to face materials.
-   */
-  private initFaceShadowMask(): void {
-    this.setFaceShadowMask('/textures/face_shadow_mask.png');
-  }
-
-  /**
-   * Applies a UV shadow mask texture to face skin materials.
-   * White (1.0) areas suppress shadows (cheeks, under nose, mouth).
-   * Black (0.0) areas allow normal shading (chin, jawline, outer contours).
-   */
-  public setFaceShadowMask(textureUrl: string | null): void {
-    if (!this.vrm) return;
-
-    const faceSkinMaterials: any[] = [];
-    this.vrm.scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        const mesh = obj as THREE.Mesh;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        for (const mat of materials) {
-          if (mat && mat.name && /Face.*SKIN|Face_00|Face/i.test(mat.name) && !/Eye|Brow|Eyelash|Eyeline/i.test(mat.name)) {
-            faceSkinMaterials.push(mat);
-          }
-        }
-      }
-    });
-
-    if (!textureUrl) {
-      faceSkinMaterials.forEach((mat) => {
-        mat.shadingShiftTexture = null;
-        if (mat.uniforms?.shadingShiftTexture) {
-          mat.uniforms.shadingShiftTexture.value = null;
-        }
-        mat.needsUpdate = true;
-      });
-      if (this.shaderController && this.options.config?.materials?.body) {
-        this.shaderController.updateMaterialStyle('body', this.options.config.materials.body);
-      }
-      return;
-    }
-
-    const applyMask = (tex: THREE.Texture) => {
-      tex.flipY = false;
-      tex.colorSpace = THREE.NoColorSpace;
-      tex.wrapS = THREE.ClampToEdgeWrapping;
-      tex.wrapT = THREE.ClampToEdgeWrapping;
-
-      faceSkinMaterials.forEach((mat) => {
-        mat.shadingShiftTexture = tex;
-        mat.shadingShiftTextureScale = 1.0;
-        if (mat.uniforms?.shadingShiftTexture) {
-          mat.uniforms.shadingShiftTexture.value = tex;
-        }
-        if (mat.uniforms?.shadingShiftTextureScale) {
-          mat.uniforms.shadingShiftTextureScale.value = 1.0;
-        }
-        mat.needsUpdate = true;
-      });
-
-      // Re-apply style so shadingShiftFactor uses optimal anime threshold with mask
-      if (this.shaderController && this.options.config?.materials?.body) {
-        this.shaderController.updateMaterialStyle('body', this.options.config.materials.body);
-      }
-    };
-
-    if (this.loadedTextureCache.has(textureUrl)) {
-      applyMask(this.loadedTextureCache.get(textureUrl)!);
-    } else {
-      this.textureLoader.load(
-        resolveAssetUrl(textureUrl),
-        (tex) => {
-          this.loadedTextureCache.set(textureUrl, tex);
-          applyMask(tex);
-        },
-        undefined,
-        (err) => {
-          // If default mask file does not exist, silently ignore
-          if (!textureUrl.includes('face_shadow_mask.png')) {
-            console.error(`Failed to load face shadow mask: ${textureUrl}`, err);
-          }
-        }
-      );
-    }
   }
 
   private currentEffectKey: string | null = null;

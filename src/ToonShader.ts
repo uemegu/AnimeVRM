@@ -454,10 +454,7 @@ export function applyToonShader(
 
         // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows)
         if (typeof params.shadingShiftFactor === 'number') {
-          const hasMask = !!((material as any).shadingShiftTexture || (material as any).uniforms?.shadingShiftTexture?.value);
-          const shift = matKind === 'face'
-            ? (hasMask ? params.shadingShiftFactor : Math.max(params.shadingShiftFactor, 0.65))
-            : params.shadingShiftFactor;
+          const shift = matKind === 'face' ? Math.max(params.shadingShiftFactor, 0.65) : params.shadingShiftFactor;
           material.shadingShiftFactor = shift;
           if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
         }
