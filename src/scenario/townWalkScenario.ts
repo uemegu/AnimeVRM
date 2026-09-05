@@ -15,7 +15,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
         // 前半: 歩きながらの会話パート
         // ・アオイと自キャラが並んで街を歩く
         // ・自キャラは横にいるアオイを見ている (左側からアオイへZoomした構図)
-        // ・背景は town_far.png、2枚の板が無限ループで横スライド
+        // ・背景は town_far.avif、2枚の板が無限ループで横スライド
         // ・アオイにフォーカスして背景はアニメ調にぼかす
         // ・アオイは歩行モーション (Walking)
         // ============================================================
@@ -35,7 +35,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -64,7 +64,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -92,7 +92,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -136,7 +136,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -164,7 +164,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -185,7 +185,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           location: '街の広場・カフェ前',
           text: '「あっ、見て見て！ ほら、あそこの看板……ちょっと止まって！」',
           voiceUrl: '/voices/town_walk_stop.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
             expression: 'relaxed',
@@ -204,7 +204,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
 
         // ============================================================
         // 後半: 街で立ち止まって会話しているパート
-        // ・背景は通常の1枚背景（town_far.png）固定表示
+        // ・背景は通常の1枚背景（town_far.avif）固定表示
         // ・アオイは歩きモーション以外
         // ============================================================
         {
@@ -213,7 +213,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           location: '街の広場・カフェ前',
           text: '「ここだよ！ ねこちゃんの看板のカフェ！ ここのアップルパイ、すっごく評判なんだって〜」',
           voiceUrl: '/voices/town_walk_cafe_1.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
             expression: 'relaxed',
@@ -234,7 +234,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           location: '街の広場・カフェ前',
           text: '「もし急ぎの用事がないなら……ちょっと寄っていかない？ 一緒に食べよ！」',
           voiceUrl: '/voices/town_walk_cafe_2.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
             expression: 'relaxed',
@@ -270,7 +270,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           location: '街の広場・カフェ前',
           text: '「わぁ、本当！？ やったぁ〜！ ありがとう、優しい〜！ じゃあ一番大きいやつ頼んじゃお♪ 行こ！」',
           voiceUrl: '/voices/town_walk_treat.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
             expression: 'happy',
@@ -296,7 +296,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           conditions: ['choice_ask'],
           text: '「えーっ！？ なんで私が奢る前提なの〜！？ ……まぁ、半分こならいいけどねっ♪ 行こ！」',
           voiceUrl: '/voices/town_walk_ask.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',
             expression: 'relaxed',
@@ -319,7 +319,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: '',
           location: '街の広場・カフェ前',
           text: '―― 爽やかな風が吹き抜ける放課後の並木道。二人は並んでカフェの扉を開けた。 【シナリオ終了】',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Idle.fbx',
             expression: 'relaxed',
@@ -366,7 +366,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -395,7 +395,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -423,7 +423,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -465,7 +465,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -491,7 +491,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           },
           scrollingBackground: {
             enabled: true,
-            textureUrl: '/textures/town_far.png',
+            textureUrl: '/textures/town_far.avif',
             speed: 0.65,
             blur: 1.0,
             direction: 'left',
@@ -507,7 +507,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           location: 'Town Square - Before Cafe',
           text: '"Look, look! Over there, that cute cat signboard... wait, let\'s stop here!"',
           voiceUrl: '/voices/town_walk_stop.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
             expression: 'relaxed',
@@ -529,7 +529,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           location: 'Town Square - Before Cafe',
           text: '"Right here! The cafe with the cat signboard! Their apple pie is supposedly super delicious!"',
           voiceUrl: '/voices/town_walk_cafe_1.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
             expression: 'relaxed',
@@ -550,7 +550,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           location: 'Town Square - Before Cafe',
           text: '"If you\'re not in a hurry... want to drop by? Let\'s eat together!"',
           voiceUrl: '/voices/town_walk_cafe_2.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
             expression: 'relaxed',
@@ -584,7 +584,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           location: 'Town Square - Before Cafe',
           text: '"Really?! Yay! Thank you, you\'re so sweet! I\'m ordering the biggest slice! Let\'s go!"',
           voiceUrl: '/voices/town_walk_treat.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
             expression: 'happy',
@@ -608,7 +608,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           conditions: ['choice_ask'],
           text: '"What?! Why are you assuming I\'m treating?! ...Well, I guess going half-and-half is fine! Let\'s go!"',
           voiceUrl: '/voices/town_walk_ask.wav',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',
             expression: 'relaxed',
@@ -631,7 +631,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: '',
           location: 'Town Square - Before Cafe',
           text: '--- Under the gentle breeze of the after-school avenue, the two opened the cafe door side by side. [Scenario End]',
-          background: '/textures/town_far.png',
+          background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Idle.fbx',
             expression: 'relaxed',

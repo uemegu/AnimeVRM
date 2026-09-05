@@ -69,7 +69,7 @@ export type ScreenTransitionType =
 
 export interface ScenarioScrollingBackgroundConfig {
   enabled: boolean;
-  textureUrl?: string; // e.g. '/textures/town_far.png'
+  textureUrl?: string; // e.g. '/textures/town_far.avif'
   speed?: number;      // slide speed (0 = stop, 1.2 = normal walking)
   blur?: number;       // 0.0 (sharp) - 1.0 (strong anime blur)
   direction?: 'left' | 'right';

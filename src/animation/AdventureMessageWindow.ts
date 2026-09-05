@@ -1513,10 +1513,10 @@ export class AdventureMessageWindow {
       <!-- Left Character: Hero with dark blue silhouette shadow -->
       <div class="adv-cutin-char adv-cutin-left">
         <div class="adv-char-shadow">
-          <img src="${resolveAssetUrl('/img/hero.png')}" alt="" />
+          <img src="${resolveAssetUrl('/img/hero.avif')}" alt="" />
         </div>
         <div class="adv-char-main">
-          <img src="${resolveAssetUrl('/img/hero.png')}" alt="Hero" />
+          <img src="${resolveAssetUrl('/img/hero.avif')}" alt="Hero" />
         </div>
       </div>
 

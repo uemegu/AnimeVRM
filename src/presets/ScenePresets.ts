@@ -1203,12 +1203,12 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'outdoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.jpg'),
+      backgroundImageUrl: resolveAssetUrl('/textures/modern-park-far.avif'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',
       showMidground: true,
-      midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.jpg'),
+      midgroundImageUrl: resolveAssetUrl('/textures/modern-park-mid.avif'),
       midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
       midgroundScale: 1.15,
       midgroundOpacity: 1.0,
@@ -1223,7 +1223,7 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'outdoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/school-gate-far.jpeg'),
+      backgroundImageUrl: resolveAssetUrl('/textures/school-gate-far.avif'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',
@@ -1243,7 +1243,7 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'indoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/school-corridor-far.jpg'),
+      backgroundImageUrl: resolveAssetUrl('/textures/school-corridor-far.avif'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',
@@ -1263,7 +1263,7 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'outdoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/park-background.jpg'),
+      backgroundImageUrl: resolveAssetUrl('/textures/park-background.avif'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',

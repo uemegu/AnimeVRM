@@ -172,7 +172,7 @@ export class ScenarioController {
       },
       onUpdateScrollingBackground: (bgConfig) => {
         if (bgConfig && bgConfig.enabled) {
-          const bgUrl = bgConfig.textureUrl || '/textures/town_far.png';
+          const bgUrl = bgConfig.textureUrl || '/textures/town_far.avif';
           this.scrollingBackgroundManager.show({
             textureUrl: bgUrl,
             speed: bgConfig.speed,

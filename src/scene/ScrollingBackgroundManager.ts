@@ -203,7 +203,7 @@ export class ScrollingBackgroundManager {
     instantBlur?: boolean;
     featherWidth?: number;
   }): void {
-    const url = options?.textureUrl || '/textures/town_far.png';
+    const url = options?.textureUrl || '/textures/town_far.avif';
     this.speed = options?.speed ?? this.speed;
     this.direction = options?.direction ?? this.direction;
     this.targetBlur = Math.max(0, Math.min(1, options?.blur ?? 0.0));
