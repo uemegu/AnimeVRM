@@ -4,100 +4,111 @@ import { resolveAssetUrl } from './utils/path';
 export const PHONEMES = ['aa', 'ee', 'ih', 'oh', 'ou'] as const;
 export type Phoneme = (typeof PHONEMES)[number];
 
-// Female / Anime voice prototype vectors (higher F1/F2, sharper high end)
-const MFCC_PROFILES_FEMALE: Record<Phoneme, number[]> = {
-  aa: [-32.0, -16.0, 10.0, -12.0, -8.0, 4.0, -2.0, 1.0],
-  ih: [18.0, 24.0, -20.0, 16.0, -10.0, -14.0, 8.0, -4.0],
-  ou: [-38.0, 10.0, 18.0, 6.0, -4.0, -10.0, -2.0, 0.0],
-  ee: [-4.0, 16.0, -8.0, 12.0, -16.0, 4.0, 4.0, -2.0],
-  oh: [-24.0, 6.0, 16.0, -6.0, -12.0, 2.0, -4.0, 0.0],
-};
-
-// Male voice prototype vectors (lower F1/F2, richer low-mid resonance)
-const MFCC_PROFILES_MALE: Record<Phoneme, number[]> = {
-  aa: [-38.0, -12.0, 14.0, -16.0, -6.0, 6.0, -4.0, 0.0],
-  ih: [12.0, 18.0, -14.0, 12.0, -6.0, -10.0, 6.0, -2.0],
-  ou: [-44.0, 14.0, 22.0, 4.0, -2.0, -6.0, 0.0, 2.0],
-  ee: [-10.0, 12.0, -4.0, 8.0, -12.0, 2.0, 2.0, -1.0],
-  oh: [-30.0, 8.0, 20.0, -8.0, -8.0, 4.0, -2.0, 1.0],
-};
-
-interface FormantBands {
-  low: number;     // F1 low: 'ih', 'ou'
-  midLow: number;  // F1 high / F2 low: 'aa', 'oh'
-  midHigh: number; // F2 high: 'ee', 'ih'
-  high: number;    // F3 / high consonants
+interface FormantTargets {
+  f1: number;
+  f2: number;
+  weightF1: number;
+  weightF2: number;
 }
 
-function calculateFormantBands(
+// Japanese vowel formant targets in Hz (Female/Anime Voice & Male Voice)
+// F1 (Mouth Openness / Jaw height), F2 (Tongue frontness / Lip rounding)
+const VOWEL_TARGETS: Record<'female' | 'male', Record<Phoneme, FormantTargets>> = {
+  female: {
+    aa: { f1: 950, f2: 1550, weightF1: 1.0, weightF2: 0.85 }, // あ: 口を大きく開く (High F1, Mid F2)
+    ih: { f1: 340, f2: 2950, weightF1: 1.1, weightF2: 1.0 },  // い: 閉口・前舌 (Low F1, High F2)
+    ou: { f1: 380, f2: 1100, weightF1: 1.1, weightF2: 0.95 }, // う: 閉口・後舌円唇 (Low F1, Low F2)
+    ee: { f1: 580, f2: 2350, weightF1: 1.0, weightF2: 1.0 },  // え: 半開・前舌 (Mid F1, High-Mid F2)
+    oh: { f1: 540, f2: 950, weightF1: 1.0, weightF2: 0.95 },  // お: 半開・後舌円唇 (Mid F1, Low F2)
+  },
+  male: {
+    aa: { f1: 780, f2: 1300, weightF1: 1.0, weightF2: 0.85 },
+    ih: { f1: 280, f2: 2400, weightF1: 1.1, weightF2: 1.0 },
+    ou: { f1: 320, f2: 950, weightF1: 1.1, weightF2: 0.95 },
+    ee: { f1: 480, f2: 1950, weightF1: 1.0, weightF2: 1.0 },
+    oh: { f1: 460, f2: 850, weightF1: 1.0, weightF2: 0.95 },
+  },
+};
+
+/**
+ * Smoothed spectral envelope analysis to accurately locate F1 and F2 formant resonance peaks
+ */
+function findFormantPeaks(
   spectrum: ArrayLike<number>,
   sampleRate: number,
   bufferSize: number,
   gender: 'female' | 'male' = 'female'
-): FormantBands {
+): { f1: number; f2: number } {
   const binWidth = sampleRate / bufferSize;
-  let low = 0, midLow = 0, midHigh = 0, high = 0;
+  const numBins = spectrum.length;
 
-  // Gender-specific formant boundaries (Hz)
+  // Smoothing window (~180 Hz) to eliminate pitch harmonics and extract vocal tract envelope
+  const smoothRadius = Math.max(2, Math.round(180 / (2 * binWidth)));
+  const smoothed = new Float32Array(numBins);
+
+  for (let i = 0; i < numBins; i++) {
+    let sum = 0;
+    let count = 0;
+    for (let w = -smoothRadius; w <= smoothRadius; w++) {
+      const idx = i + w;
+      if (idx >= 0 && idx < numBins) {
+        sum += spectrum[idx];
+        count++;
+      }
+    }
+    smoothed[i] = sum / (count || 1);
+  }
+
   const isFemale = gender === 'female';
-  const fLowMax = isFemale ? 550 : 450;
-  const fMidLowMax = isFemale ? 1600 : 1300;
-  const fMidHighMax = isFemale ? 2800 : 2200;
-  const fHighMax = isFemale ? 6000 : 4800;
+  const f1MinHz = isFemale ? 260 : 200;
+  const f1MaxHz = isFemale ? 1250 : 1050;
+  const f2MinHz = isFemale ? 800 : 700;
+  const f2MaxHz = isFemale ? 3800 : 3400;
 
-  for (let i = 0; i < spectrum.length; i++) {
-    const freq = i * binWidth;
-    const val = spectrum[i];
-    if (freq >= 120 && freq < fLowMax) {
-      low += val;
-    } else if (freq >= fLowMax && freq < fMidLowMax) {
-      midLow += val;
-    } else if (freq >= fMidLowMax && freq < fMidHighMax) {
-      midHigh += val;
-    } else if (freq >= fMidHighMax && freq < fHighMax) {
-      high += val;
+  const f1MinBin = Math.round(f1MinHz / binWidth);
+  const f1MaxBin = Math.round(f1MaxHz / binWidth);
+
+  let f1PeakIdx = -1;
+  let f1MaxVal = -1;
+
+  for (let i = f1MinBin; i <= f1MaxBin; i++) {
+    if (smoothed[i] > f1MaxVal) {
+      if (
+        (i === f1MinBin || smoothed[i] >= smoothed[i - 1]) &&
+        (i === f1MaxBin || smoothed[i] >= smoothed[i + 1])
+      ) {
+        f1MaxVal = smoothed[i];
+        f1PeakIdx = i;
+      }
     }
   }
 
-  const total = low + midLow + midHigh + high + 1e-6;
-  return {
-    low: low / total,
-    midLow: midLow / total,
-    midHigh: midHigh / total,
-    high: high / total,
-  };
-}
+  // F2 peak search above F1 peak + separation margin
+  const f2MinBin = Math.max(
+    f1PeakIdx + Math.round(200 / binWidth),
+    Math.round(f2MinHz / binWidth)
+  );
+  const f2MaxBin = Math.round(f2MaxHz / binWidth);
 
-function getFormantVowelScore(vowel: Phoneme, bands: FormantBands): number {
-  switch (vowel) {
-    case 'aa':
-      return Math.max(0, bands.midLow * 2.0 + bands.midHigh * 0.5 - bands.low * 0.8 - bands.high * 0.5);
-    case 'ih':
-      return Math.max(0, bands.midHigh * 1.5 + bands.high * 1.8 + bands.low * 0.8 - bands.midLow * 1.5);
-    case 'ou':
-      return Math.max(0, bands.low * 1.8 + bands.midLow * 0.8 - bands.midHigh * 1.5 - bands.high * 2.0);
-    case 'ee':
-      return Math.max(0, bands.midHigh * 1.4 + bands.midLow * 0.8 - bands.high * 0.5 - bands.low * 0.4);
-    case 'oh':
-      return Math.max(0, bands.midLow * 1.4 + bands.low * 1.2 - bands.midHigh * 1.2 - bands.high * 1.5);
-  }
-}
+  let f2PeakIdx = -1;
+  let f2MaxVal = -1;
 
-function cosineSimilarity(a: number[], b: number[]): number {
-  let dot = 0;
-  let normA = 0;
-  let normB = 0;
-  const len = Math.min(a.length, b.length);
-  for (let i = 0; i < len; i++) {
-    const weight = 1.0 / Math.sqrt(i + 1);
-    const wa = a[i] * weight;
-    const wb = b[i] * weight;
-    dot += wa * wb;
-    normA += wa * wa;
-    normB += wb * wb;
+  for (let i = f2MinBin; i <= f2MaxBin; i++) {
+    if (smoothed[i] > f2MaxVal) {
+      if (
+        (i === f2MinBin || smoothed[i] >= smoothed[i - 1]) &&
+        (i === f2MaxBin || smoothed[i] >= smoothed[i + 1])
+      ) {
+        f2MaxVal = smoothed[i];
+        f2PeakIdx = i;
+      }
+    }
   }
-  if (normA <= 0 || normB <= 0) return 0;
-  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+
+  const f1 = f1PeakIdx > 0 ? f1PeakIdx * binWidth : isFemale ? 550 : 450;
+  const f2 = f2PeakIdx > 0 ? f2PeakIdx * binWidth : isFemale ? 1600 : 1400;
+
+  return { f1, f2 };
 }
 
 export interface AudioLipSyncEvents {
@@ -211,7 +222,7 @@ export class AudioLipSync {
 
     this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
     this.analyzerNode = this.audioContext.createAnalyser();
-    this.analyzerNode.fftSize = 512;
+    this.analyzerNode.fftSize = 1024;
     this.analyzerNode.smoothingTimeConstant = 0;
     this.analysisBuffer = new Float32Array(this.analyzerNode.fftSize);
     this.delayNode = this.audioContext.createDelay(1.0);
@@ -272,10 +283,9 @@ export class AudioLipSync {
       return;
     }
 
-    const mfcc = features?.mfcc;
     const spectrum = features?.powerSpectrum;
-    if (mfcc && mfcc.length > 1) {
-      const phoneme = this.guessPhoneme(mfcc, spectrum);
+    if (spectrum && spectrum.length > 0) {
+      const phoneme = this.guessPhoneme(features.mfcc, spectrum);
       if (this.currentPhoneme !== phoneme) {
         this.currentPhoneme = phoneme;
         this.events.onPhonemeChange?.(phoneme);
@@ -284,45 +294,39 @@ export class AudioLipSync {
   }
 
   /**
-   * High-accuracy hybrid phoneme classifier combining multi-dimensional MFCC
-   * prototype matching with FFT spectral formant band energy ratios.
+   * High-accuracy Japanese phoneme classifier combining spectral formant peak tracking
+   * (F1 mouth opening, F2 tongue frontness/rounding) with log-frequency distance modeling.
    */
-  public guessPhoneme(mfcc: number[], powerSpectrum?: ArrayLike<number>): Phoneme | 'nn' {
-    if (!mfcc || mfcc.length < 2) return 'nn';
-
-    // c1 to c8 (skip c0 which is overall energy)
-    const vec = mfcc.slice(1, 9);
-    const profiles = this.voiceGender === 'male' ? MFCC_PROFILES_MALE : MFCC_PROFILES_FEMALE;
-
-    // Calculate spectral formant band ratios if power spectrum is available
-    let bands: FormantBands | null = null;
-    if (powerSpectrum && powerSpectrum.length > 0 && this.audioContext) {
-      bands = calculateFormantBands(powerSpectrum, this.audioContext.sampleRate, 512, this.voiceGender);
+  public guessPhoneme(_mfcc?: number[], powerSpectrum?: ArrayLike<number>): Phoneme | 'nn' {
+    if (!powerSpectrum || powerSpectrum.length === 0 || !this.audioContext) {
+      return 'nn';
     }
 
+    const bufferSize = this.analyzerNode ? this.analyzerNode.fftSize : 1024;
+    const { f1, f2 } = findFormantPeaks(
+      powerSpectrum,
+      this.audioContext.sampleRate,
+      bufferSize,
+      this.voiceGender
+    );
+
+    const targets = VOWEL_TARGETS[this.voiceGender] || VOWEL_TARGETS.female;
     let bestPhoneme: Phoneme | 'nn' = 'nn';
-    let maxScore = -Infinity;
+    let minDist = Infinity;
 
     for (const p of PHONEMES) {
-      // 1. MFCC Cosine Similarity normalized to [0, 1]
-      const mfccSim = (cosineSimilarity(vec, profiles[p]) + 1.0) * 0.5;
+      const target = targets[p];
+      const dF1 = Math.log(f1 / target.f1) * target.weightF1;
+      const dF2 = Math.log(f2 / target.f2) * target.weightF2;
+      let dist = Math.sqrt(dF1 * dF1 + dF2 * dF2);
 
-      // 2. Formant Energy Ratio Score [0, 1]
-      let formantScore = 0.5;
-      if (bands) {
-        formantScore = Math.min(1.0, getFormantVowelScore(p, bands));
-      }
-
-      // Hybrid combination
-      let score = 0.55 * mfccSim + 0.45 * formantScore;
-
-      // 3. Hysteresis: slight bonus to currently active phoneme to suppress chatter/jitter
+      // Hysteresis: prevent rapid fluttering between adjacent vowels
       if (this.currentPhoneme === p) {
-        score += 0.08;
+        dist *= 0.82;
       }
 
-      if (score > maxScore) {
-        maxScore = score;
+      if (dist < minDist) {
+        minDist = dist;
         bestPhoneme = p;
       }
     }
