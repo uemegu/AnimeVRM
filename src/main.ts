@@ -227,4 +227,12 @@ function tick(timestamp?: number): void {
   requestAnimationFrame(tick);
 }
 
+// Expose for testing/capture automation
+if (typeof window !== 'undefined') {
+  (window as any).__viewerCore = viewerCore;
+  (window as any).__avatarManager = avatarManager;
+  (window as any).__currentConfig = currentConfig;
+  (window as any).__applyConfig = applyConfigToSceneAndRenderer;
+}
+
 tick();
