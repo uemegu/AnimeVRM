@@ -99,6 +99,107 @@ export function applySmoothNormalsToHierarchy(root: THREE.Object3D): void {
 }
 
 /**
+ * Flattens normals around the eye socket / inner corner of the eyes on face skin meshes.
+ * In anime-style rendering, steep normals along the eye orbit crease catch lateral light
+ * and create unwanted dark shadow lines (crease shadows) near the inner eye corner.
+ * Flattening these normals towards the front (+Z) prevents premature shadowing.
+ */
+export function flattenEyeOrbitNormals(root: THREE.Object3D): void {
+  root.traverse((obj) => {
+    if (!(obj as THREE.Mesh).isMesh) return;
+    const mesh = obj as THREE.Mesh;
+    if (!mesh.geometry) return;
+
+    const isFaceMesh = /Face/i.test(mesh.name);
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const hasSkinMaterial = materials.some((m) => m && /Face.*SKIN|Face|顔/i.test(m.name || ''));
+
+    if (!isFaceMesh && !hasSkinMaterial) return;
+
+    const geo = mesh.geometry;
+    const posAttr = geo.getAttribute('position');
+    const normAttr = geo.getAttribute('normal');
+    if (!posAttr || !normAttr) return;
+
+    let eyeMinY = Infinity, eyeMaxY = -Infinity;
+    let eyeMinX = Infinity, eyeMaxX = -Infinity;
+    let eyeMinZ = Infinity, eyeMaxZ = -Infinity;
+    let eyeCount = 0;
+
+    if (geo.groups && geo.groups.length > 0) {
+      for (const group of geo.groups) {
+        const mat = materials[group.materialIndex ?? 0];
+        if (mat && /EyeWhite|EyeIris|Eye/i.test(mat.name || '') && !/Eyeline|Eyelash/i.test(mat.name || '')) {
+          const indexAttr = geo.index;
+          const start = group.start;
+          const end = start + group.count;
+          for (let i = start; i < end; i++) {
+            const idx = indexAttr ? indexAttr.getX(i) : i;
+            const x = posAttr.getX(idx);
+            const y = posAttr.getY(idx);
+            const z = posAttr.getZ(idx);
+            eyeMinX = Math.min(eyeMinX, Math.abs(x));
+            eyeMaxX = Math.max(eyeMaxX, Math.abs(x));
+            eyeMinY = Math.min(eyeMinY, y);
+            eyeMaxY = Math.max(eyeMaxY, y);
+            eyeMinZ = Math.min(eyeMinZ, z);
+            eyeMaxZ = Math.max(eyeMaxZ, z);
+            eyeCount++;
+          }
+        }
+      }
+    }
+
+    if (eyeCount === 0) {
+      eyeMinX = 0.015;
+      eyeMaxX = 0.060;
+      eyeMinY = 1.415;
+      eyeMaxY = 1.465;
+      eyeMinZ = 0.035;
+      eyeMaxZ = 0.065;
+    } else {
+      eyeMinX = Math.max(0.010, eyeMinX - 0.006);
+      eyeMaxX = eyeMaxX + 0.008;
+      eyeMinY = eyeMinY - 0.008;
+      eyeMaxY = eyeMaxY + 0.008;
+    }
+
+    const count = posAttr.count;
+    let modified = false;
+
+    for (let i = 0; i < count; i++) {
+      const x = posAttr.getX(i);
+      const absX = Math.abs(x);
+      const y = posAttr.getY(i);
+      const z = posAttr.getZ(i);
+
+      if (absX >= eyeMinX && absX <= eyeMaxX && y >= eyeMinY && y <= eyeMaxY && z >= eyeMinZ - 0.01) {
+        let nx = normAttr.getX(i);
+        let ny = normAttr.getY(i);
+        let nz = normAttr.getZ(i);
+
+        // Proximity to inner corner (where absX is closest to eyeMinX)
+        const innerFactor = Math.max(0, 1.0 - (absX - eyeMinX) / (eyeMaxX - eyeMinX));
+        const blend = 0.55 + 0.4 * innerFactor; // 55% to 95% front-facing
+        nx = nx * (1 - blend);
+        ny = ny * (1 - blend);
+        nz = nz * (1 - blend) + blend * 1.0;
+
+        const len = Math.hypot(nx, ny, nz);
+        if (len > 1e-5) {
+          normAttr.setXYZ(i, nx / len, ny / len, nz / len);
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      normAttr.needsUpdate = true;
+    }
+  });
+}
+
+/**
  * Toggles between smooth normals and original normals in-place across all meshes in the scene.
  */
 export function toggleSmoothNormalsInHierarchy(root: THREE.Object3D, useSmooth: boolean): void {
