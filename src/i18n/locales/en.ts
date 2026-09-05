@@ -152,6 +152,7 @@ export const en: Translations = {
     playing: 'Playing...',
     shortAnimTitle: '🎬 Short Animation Performance',
     playAnim: '▶ Play Animation',
+    autoMode: 'AUTO',
     endScenario: 'End Scenario',
     thinkingTime: 'Thinking Time',
     steps: {

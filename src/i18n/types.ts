@@ -152,6 +152,7 @@ export interface Translations {
     playing: string;
     shortAnimTitle: string;
     playAnim: string;
+    autoMode: string;
     endScenario: string;
     thinkingTime: string;
     steps: {

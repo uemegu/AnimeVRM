@@ -75,6 +75,7 @@ export class ScenarioEngine {
   private autoNextTimer: number | null = null;
   private pendingEffectTextTimers: number[] = [];
   private boundVoiceEndHandler: (() => void) | null = null;
+  private isAutoMode = false;
 
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
@@ -102,7 +103,58 @@ export class ScenarioEngine {
       onStopClick: () => {
         this.stop();
       },
+      onAutoToggle: (enabled) => {
+        this.setAutoMode(enabled);
+      },
+      onTypingComplete: () => {
+        this.handleTypingComplete();
+      },
     });
+  }
+
+  public get autoMode(): boolean {
+    return this.isAutoMode;
+  }
+
+  public setAutoMode(enabled: boolean): void {
+    this.isAutoMode = enabled;
+    this.messageWindow.setAutoMode(enabled);
+
+    if (!this.isPlayingState) return;
+    const scene = this.currentScene;
+    if (!scene) return;
+
+    if (enabled) {
+      const voiceKey = scene.voice || scene.voiceUrl;
+      const audioLipSync = this.getAudioLipSync();
+      const isVoicePlaying = Boolean(voiceKey && audioLipSync.isPlaying);
+
+      if (!isVoicePlaying) {
+        if (scene.choices && scene.choices.length > 0) {
+          if (!this.messageWindow.isShowingChoices()) {
+            this.messageWindow.showChoices(scene.choices, (choice) => {
+              this.selectChoice(choice);
+            });
+          }
+        } else {
+          this.clearAutoNextTimer();
+          const delaySec = scene.autoNextSec ?? 0.8;
+          this.autoNextTimer = window.setTimeout(() => {
+            this.next();
+          }, delaySec * 1000);
+        }
+      }
+    } else {
+      if (!scene.autoNextSec) {
+        this.clearAutoNextTimer();
+      }
+    }
+  }
+
+  public toggleAutoMode(): boolean {
+    const nextState = !this.isAutoMode;
+    this.setAutoMode(nextState);
+    return nextState;
   }
 
   public get isPlaying(): boolean {
@@ -155,6 +207,7 @@ export class ScenarioEngine {
     this.startBgm(bgmPath || undefined, scenarioPackage.bgmVolume);
     this.startSe(sePath || undefined, scenarioPackage.seVolume);
 
+    this.messageWindow.setAutoMode(this.isAutoMode);
     this.messageWindow.show();
     this.executeCurrentScene();
   }
@@ -494,11 +547,7 @@ export class ScenarioEngine {
         audioLipSync.audioElement.removeEventListener('ended', this.boundVoiceEndHandler);
       }
       this.boundVoiceEndHandler = () => {
-        if (scene.autoNextSec && (!scene.choices || scene.choices.length === 0)) {
-          this.autoNextTimer = window.setTimeout(() => {
-            this.next();
-          }, scene.autoNextSec * 1000);
-        }
+        this.handleVoiceEnded();
       };
       audioLipSync.audioElement.addEventListener('ended', this.boundVoiceEndHandler, {
         once: true,
@@ -511,15 +560,67 @@ export class ScenarioEngine {
     }
     this.messageWindow.setText(scene.text, scene.speaker ?? '');
 
-    // 6. Reset choices (shown after user reads text and clicks)
+    // 6. Reset choices (shown after user reads text or automatically in Auto mode)
     this.messageWindow.hideChoices();
-    if (scene.autoNextSec && !voiceKey && (!scene.choices || scene.choices.length === 0)) {
-      this.autoNextTimer = window.setTimeout(() => {
-        this.next();
-      }, scene.autoNextSec * 1000);
-    }
 
     this.onSceneChange?.(scene, this.getState());
+  }
+
+  private handleVoiceEnded(): void {
+    if (!this.isPlayingState) return;
+    const scene = this.currentScene;
+    if (!scene) return;
+
+    // If scene has choices, reveal choice dialog in Auto mode
+    if (scene.choices && scene.choices.length > 0) {
+      if (this.isAutoMode || scene.autoNextSec) {
+        if (!this.messageWindow.isShowingChoices()) {
+          this.messageWindow.showChoices(scene.choices, (choice) => {
+            this.selectChoice(choice);
+          });
+        }
+      }
+      return;
+    }
+
+    // Normal dialogue line
+    if (this.isAutoMode || scene.autoNextSec) {
+      const delaySec = scene.autoNextSec ?? 0.8;
+      this.clearAutoNextTimer();
+      this.autoNextTimer = window.setTimeout(() => {
+        this.next();
+      }, delaySec * 1000);
+    }
+  }
+
+  private handleTypingComplete(): void {
+    if (!this.isPlayingState) return;
+    const scene = this.currentScene;
+    if (!scene) return;
+
+    const voiceKey = scene.voice || scene.voiceUrl;
+    // If voice exists, voice ended handler takes precedence
+    if (voiceKey) return;
+
+    // No voice: Calculate reading delay based on text length
+    if (this.isAutoMode || scene.autoNextSec) {
+      // Base reading speed: 1.2s + 0.055s per char (clamped between 2.0s and 6.0s, or explicit scene.autoNextSec)
+      const calculatedSec = Math.max(2.0, Math.min(6.0, 1.2 + scene.text.length * 0.055));
+      const delaySec = scene.autoNextSec ?? calculatedSec;
+
+      this.clearAutoNextTimer();
+      this.autoNextTimer = window.setTimeout(() => {
+        if (scene.choices && scene.choices.length > 0) {
+          if (!this.messageWindow.isShowingChoices()) {
+            this.messageWindow.showChoices(scene.choices, (choice) => {
+              this.selectChoice(choice);
+            });
+          }
+        } else {
+          this.next();
+        }
+      }, delaySec * 1000);
+    }
   }
 
   private startBgm(bgmUrl?: string, volume: number = 0.4): void {
