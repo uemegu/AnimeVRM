@@ -272,7 +272,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 5,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.1,
-      outlineWidthFactor: 0.002,
+      outlineWidthFactor: 0.0016,
     },
     hair: {
       color: '#ffffff',
@@ -306,7 +306,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
       rimLightingMixFactor: 1.0,
-      outlineWidthFactor: 0.002,
+      outlineWidthFactor: 0.0016,
     },
   },
   eyeGlow: {
@@ -319,7 +319,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     screenSpaceWidth: true,
     autoLineWeight: true,
     darknessFactor: 0.1,
-    widthFactor: 0.002,
+    widthFactor: 0.0016,
     lightingMixFactor: 0.0,
   },
   environment: {

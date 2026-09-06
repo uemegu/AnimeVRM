@@ -312,18 +312,29 @@ export function applyToonShader(
       // Safely inject Auto Line Weight into outline vertex shader while preserving MToon defines
       if (material.isOutline) {
         material.alphaToCoverage = true;
+        material.userData.uAutoLineWeight = {
+          value: (activeConfig?.outline?.autoLineWeight ?? true) ? 1.0 : 0.0,
+        };
         const prevOnBeforeCompile = material.onBeforeCompile;
         material.onBeforeCompile = (shader, renderer) => {
           if (prevOnBeforeCompile) {
             prevOnBeforeCompile(shader, renderer);
           }
+          shader.uniforms.uAutoLineWeight = material.userData.uAutoLineWeight;
+          shader.vertexShader = shader.vertexShader.replace(
+            'void main() {',
+            /* glsl */ `
+            uniform float uAutoLineWeight;
+            void main() {
+            `
+          );
           shader.vertexShader = shader.vertexShader.replace(
             'vec3 outlineOffset = outlineWidthFactor * worldNormalLength * objectNormal;',
             /* glsl */ `
             vec3 outlineOffset = outlineWidthFactor * worldNormalLength * objectNormal;
             // Auto Line Weight: View Angle silhouette modulation
             float dotNV = abs(dot(normalize(transformedNormal), vec3(0.0, 0.0, 1.0)));
-            float lineWeight = 1.0 + (1.0 - dotNV) * 0.45;
+            float lineWeight = mix(1.0, 1.0 + (1.0 - dotNV) * 0.45, uAutoLineWeight);
             outlineOffset *= lineWeight;
             `
           );
@@ -539,6 +550,17 @@ export function applyToonShader(
       if (outlineCfg.screenSpaceWidth !== undefined) {
         const mode = outlineCfg.screenSpaceWidth ? 'screenCoordinates' : 'worldCoordinates';
         material.outlineWidthMode = mode;
+      }
+
+      // Auto line weight modulation toggle
+      if (typeof outlineCfg.autoLineWeight === 'boolean') {
+        const weightVal = outlineCfg.autoLineWeight ? 1.0 : 0.0;
+        if (material.userData.uAutoLineWeight) {
+          material.userData.uAutoLineWeight.value = weightVal;
+        }
+        if (material.uniforms?.uAutoLineWeight) {
+          material.uniforms.uAutoLineWeight.value = weightVal;
+        }
       }
 
       // Lighting mix

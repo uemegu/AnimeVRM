@@ -133,8 +133,8 @@ flowchart TD
         E2[2. UnrealBloomPass: HDR ハイライト発光・グロー]
         E3[3. GodRaysShader: ボリュメトリック サンシャフト & 光条]
         E4[4. CinematicAnimeShader: 色収差・ディフュージョン・スプリットトーニング・粒状感・ビネット・シャープニング]
-        E5[5. OutputPass: Linear HDR → sRGB & ToneMapping]
-        E6[6. SMAAPass: 輪郭部サブピクセル アンチエイリアシング]
+        E5[5. SMAAPass: 輪郭部サブピクセル アンチエイリアシング]
+        E6[6. OutputPass: Linear HDR → sRGB & ToneMapping]
         E1 --> E2 --> E3 --> E4 --> E5 --> E6
     end
 
@@ -187,8 +187,8 @@ flowchart TD
 | **2** | `UnrealBloomPass` | 高輝度部分を抽出・ぼかし、ふんわりとした光の溢れ（グロー）を付加 |
 | **3** | `GodRaysShader` | 太陽光源を中心としたボリュメトリックな光条（サンシャフト）を描画 |
 | **4** | `CinematicAnimeShader` | **色収差**、**ディフュージョン（ソフトグロー）**、**カラーグレーディング（スプリットトーニング＋S字カーブ）**、**彩度・明度・コントラスト**、**フィルムグレイン（粒状感）**、**ビネット**、**スマート輪郭シャープニング** を 1 パスで高品質統合処理 |
-| **5** | `OutputPass` | Linear HDR 色空間から sRGB への変換およびトーンマッピング（ACESFilmic / AgX / Reinhard / Linear 等）の適用 |
-| **6** | `SMAAPass` | 最終画像のエッジに対してサブピクセル アンチエイリアシングを適用 |
+| **5** | `SMAAPass` | 輪郭部やハイコントラストエッジに対してサブピクセル アンチエイリアシングを適用（Linear 色空間） |
+| **6** | `OutputPass` | Linear HDR 色空間から sRGB への変換およびトーンマッピング（ACESFilmic / AgX / Reinhard / Linear 等）の適用 |
 
 ### 7. 漫符・オノマトペ 3D エフェクト演出
 - **漫符・汗エフェクト (`SweatEffect.ts`)**:
@@ -282,7 +282,7 @@ flowchart TD
 | `screenSpaceWidth` | `boolean` | `true` | 画面空間固定幅（距離による線幅減衰の防止） |
 | `autoLineWeight` | `boolean` | `true` | 視線角度・法線向きによる線の抑揚自動調整 |
 | `darknessFactor` | `number` | `0.1` | 輪郭線の暗さ係数（ベース色からの暗度） |
-| `widthFactor` | `number` | `0.002` | 輪郭線の太さ基準値 |
+| `widthFactor` | `number` | `0.0016` | 輪郭線の太さ基準値 |
 | `lightingMixFactor` | `number` | `0.0` | ライティングによる輪郭線色の変化度合い |
 
 ### 3. ライティング・太陽・フレア設定 (`lighting`)

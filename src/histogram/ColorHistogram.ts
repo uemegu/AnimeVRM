@@ -297,23 +297,29 @@ export class ColorHistogram {
   }
 
   /**
-   * Captures and calculates the histogram from the WebGL context.
+   * Captures and calculates the histogram directly from the canvas bitmap.
    */
-  public computeHistogram(renderer: THREE.WebGLRenderer): HistogramData | null {
-    const gl = renderer.getContext();
-    if (!gl) return null;
+  public computeHistogram(source: HTMLCanvasElement | THREE.WebGLRenderer): HistogramData | null {
+    const canvas = source instanceof HTMLCanvasElement ? source : source.domElement;
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) return null;
 
-    const width = gl.drawingBufferWidth;
-    const height = gl.drawingBufferHeight;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    if (width <= 0 || height <= 0) return null;
+    // Fast 2D bitmap snapshot
+    const helperCanvas = document.createElement('canvas');
+    helperCanvas.width = width;
+    helperCanvas.height = height;
+    const helperCtx = helperCanvas.getContext('2d');
+    if (!helperCtx) return null;
+
+    helperCtx.drawImage(canvas, 0, 0);
+    const imgData = helperCtx.getImageData(0, 0, width, height);
+    const buffer = imgData.data;
 
     // Step sampling if resolution is large (> 1M pixels) to keep calculation under a few milliseconds
     const totalPixels = width * height;
     const step = totalPixels > 1000000 ? 2 : 1;
-
-    const buffer = new Uint8Array(width * height * 4);
-    gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
     const rHist = new Uint32Array(256);
     const gHist = new Uint32Array(256);
