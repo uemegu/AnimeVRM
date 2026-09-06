@@ -43,7 +43,7 @@ export class ScenePresetManager {
       if (tod === 'day') return 'day_school';
       if (tod === 'evening') return 'evening_school';
       if (tod === 'rainy') return 'rainy_school';
-    } else if (loc === 'classroom') {
+    } else if (loc === 'classroom' || loc === 'cafe') {
       if (tod === 'dark_indoor') return 'dark_indoor';
       return 'bright_indoor';
     }
@@ -159,6 +159,8 @@ export class ScenePresetManager {
 
     const loc = (presetId.includes('school')
       ? 'school_gate'
+      : presetId === 'bright_indoor'
+      ? 'cafe'
       : presetId.includes('indoor')
       ? 'classroom'
       : 'modern_park') as LocationId;

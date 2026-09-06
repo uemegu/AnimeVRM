@@ -282,7 +282,7 @@ flowchart TD
 | `screenSpaceWidth` | `boolean` | `true` | 画面空間固定幅（距離による線幅減衰の防止） |
 | `autoLineWeight` | `boolean` | `true` | 視線角度・法線向きによる線の抑揚自動調整 |
 | `darknessFactor` | `number` | `0.1` | 輪郭線の暗さ係数（ベース色からの暗度） |
-| `widthFactor` | `number` | `0.001` | 輪郭線の太さ基準値 |
+| `widthFactor` | `number` | `0.002` | 輪郭線の太さ基準値 |
 | `lightingMixFactor` | `number` | `0.0` | ライティングによる輪郭線色の変化度合い |
 
 ### 3. ライティング・太陽・フレア設定 (`lighting`)
