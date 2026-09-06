@@ -172,7 +172,7 @@ setupUnifiedPanel({
 
 // Initial load
 avatarManager.loadAvatarModel(avatarManager.currentModelUrl);
-scenePresetManager.switchTimeOfDay('morning', false);
+scenePresetManager.switchTimeOfDay('day', false);
 audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
 
 // --------------------------------------------------

@@ -34,7 +34,7 @@ export class ScenePresetManager {
     if (tod && tod in TIME_OF_DAY_PRESETS) {
       return tod;
     }
-    return 'morning';
+    return 'day';
   }
 
   public getScenePresetIdFromState(tod: TimeOfDayId, loc?: string): ScenePresetId {
@@ -53,7 +53,7 @@ export class ScenePresetManager {
     if (tod === 'rainy') return 'rainy_park';
     if (tod === 'dark_indoor') return 'dark_indoor';
     if (tod === 'bright_indoor') return 'bright_indoor';
-    return 'morning_park';
+    return 'day_park';
   }
 
   public getActivePresetId(): ScenePresetId {
@@ -124,7 +124,7 @@ export class ScenePresetManager {
   }
 
   public switchLocation(locationId: LocationId, notify = false): void {
-    const currentTod = (this.config.activeScene?.timeOfDay || 'morning') as TimeOfDayId;
+    const currentTod = (this.config.activeScene?.timeOfDay || 'day') as TimeOfDayId;
     const currentPresetId = this.getScenePresetIdFromState(currentTod, locationId);
     this.config.activeScene = {
       presetId: currentPresetId,
