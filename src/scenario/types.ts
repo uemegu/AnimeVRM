@@ -85,14 +85,6 @@ export interface ScenarioScrollingBackgroundConfig {
   featherWidth?: number; // 0.0 - 0.5 (ratio of edge width for seamless alpha blending, default 0.15)
 }
 
-export interface ScenarioDepthOfFieldConfig {
-  enabled: boolean;
-  focus?: number;     // Focus distance in meters (or auto distance from camera to cameraTarget)
-  aperture?: number;  // Blur strength / aperture size (e.g. 0.04 - 0.08 for creamy blur)
-  maxblur?: number;   // Max blur radius in UV space (e.g. 0.015 - 0.035)
-  duration?: number;  // Transition duration in seconds (default 0.6)
-}
-
 export interface ScenarioScene {
   id: string;
   speaker?: string;
@@ -125,7 +117,6 @@ export interface ScenarioScene {
   cameraTransitionEasing?: CameraTransitionEasing;
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
   cameraPosition?: [number, number, number]; // Direct camera position override (e.g. over-the-shoulder)
-  dof?: ScenarioDepthOfFieldConfig; // Cinematic Depth of Field (Bokeh focus)
   choices?: ScenarioChoice[];
   conditions?: string[];
   goto?: string;

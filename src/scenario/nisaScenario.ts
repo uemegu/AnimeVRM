@@ -40,7 +40,6 @@ export const NISA_SCENARIO_JA: ScenarioPackage = {
           text: '「あのね……ずっと一人で悩んでて、誰にも言えなかったんだけど……あなたにだけは、正直に相談したくて……。」',
           voiceUrl: '/voices/nisa_02.wav',
           avatar: {
-            motion: '/animations/Female Standing Pose.fbx',
             expression: 'sorrow',
             expressionWeight: 0.7,
             effectText: 'doki',
@@ -59,9 +58,9 @@ export const NISA_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/nisa_03.wav',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
-            expression: 'neutral',
+            expression: 'happy',
             expressionWeight: 0.9,
-            effectText: 'wanawana',
+            effectText: 'doki',
           },
           cameraZoom: 'speaker',
           cameraPreset: 'hold',
@@ -75,7 +74,7 @@ export const NISA_SCENARIO_JA: ScenarioPackage = {
           voiceUrl: '/voices/nisa_04.wav',
           avatar: {
             motion: '/animations/Idle.fbx',
-            expression: 'neutral',
+            expression: 'angry',
             expressionWeight: 0.8,
           },
           cameraZoom: 'speaker',
@@ -100,7 +99,6 @@ export const NISA_SCENARIO_JA: ScenarioPackage = {
               trailLength: 1.0,
               loop: false,
             },
-            effectText: 'gaan',
           },
           cameraZoom: 'speaker',
           cameraPreset: 'pushIn',

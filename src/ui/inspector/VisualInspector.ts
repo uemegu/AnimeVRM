@@ -415,9 +415,8 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   aaFolder
     .add(currentConfig.postProcessing.antialiasing, 'msaaSamples', [0, 2, 4, 8])
     .name(tr.gui.msaaSamples)
-    .onChange((samples: number) => {
-      if (viewerCore.composer.renderTarget1) viewerCore.composer.renderTarget1.samples = samples;
-      if (viewerCore.composer.renderTarget2) viewerCore.composer.renderTarget2.samples = samples;
+    .onChange((samples: number | string) => {
+      viewerCore.setMsaaSamples(Number(samples));
     });
   aaFolder
     .add(currentConfig.postProcessing.antialiasing, 'smaa')
