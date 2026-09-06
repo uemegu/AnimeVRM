@@ -10,6 +10,7 @@ import Stats from 'three/addons/libs/stats.module.js';
 
 import { AvatarConfig, DEFAULT_CONFIG } from '../Config';
 import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
+import { DepthOfFieldShader } from '../postprocessing/DepthOfFieldShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { WindParticles } from '../wind/WindParticles';
@@ -141,10 +142,18 @@ export class ViewerCore {
 
   public composer: EffectComposer;
   public renderPass: RenderPass;
+  public dofPass: ShaderPass;
   public bloomPass: UnrealBloomPass;
   public godRaysPass: ShaderPass;
   public cinematicAnimePass: ShaderPass;
   public smaaPass: SMAAPass;
+
+  // Depth of field transition state
+  private dofStart = { focus: 2.15, aperture: 0.0, maxblur: 0.0 };
+  private dofCurrent = { focus: 2.15, aperture: 0.0, maxblur: 0.0, enabled: false };
+  private dofTarget = { focus: 2.15, aperture: 0.0, maxblur: 0.0, enabled: false };
+  private dofDuration = 0.5;
+  private dofElapsed = 0.5;
 
   public stats: Stats;
   public perfBadge: HTMLDivElement;
@@ -329,14 +338,27 @@ export class ViewerCore {
       {
         type: THREE.HalfFloatType,
         format: THREE.RGBAFormat,
-        samples: initialConfig.postProcessing.antialiasing.msaaSamples,
+        samples: 0,
       }
     );
     this.composer = new EffectComposer(this.renderer, composerRenderTarget);
     this.composer.setPixelRatio(pixelRatio);
 
+    const targetW = window.innerWidth * pixelRatio;
+    const targetH = window.innerHeight * pixelRatio;
+    this.composer.renderTarget1.depthTexture = new THREE.DepthTexture(targetW, targetH);
+    this.composer.renderTarget2.depthTexture = new THREE.DepthTexture(targetW, targetH);
+
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
+
+    this.dofPass = new ShaderPass(DepthOfFieldShader, 'tColor');
+    this.dofPass.uniforms['tDepth'].value = this.composer.renderTarget1.depthTexture;
+    this.dofPass.uniforms['uNear'].value = this.camera.near;
+    this.dofPass.uniforms['uFar'].value = this.camera.far;
+    this.dofPass.uniforms['uEnabled'].value = 0.0;
+    this.dofPass.uniforms['uResolution'].value.set(targetW, targetH);
+    this.composer.addPass(this.dofPass);
 
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio),
@@ -616,12 +638,99 @@ export class ViewerCore {
     this.renderer.setPixelRatio(pr);
     this.composer.setPixelRatio(pr);
     this.composer.setSize(width, height);
+    const targetW = width * pr;
+    const targetH = height * pr;
+    if (this.composer.renderTarget1?.depthTexture) {
+      this.composer.renderTarget1.depthTexture.image.width = targetW;
+      this.composer.renderTarget1.depthTexture.image.height = targetH;
+      this.composer.renderTarget1.depthTexture.needsUpdate = true;
+    }
+    if (this.composer.renderTarget2?.depthTexture) {
+      this.composer.renderTarget2.depthTexture.image.width = targetW;
+      this.composer.renderTarget2.depthTexture.image.height = targetH;
+      this.composer.renderTarget2.depthTexture.needsUpdate = true;
+    }
+    if (this.dofPass) {
+      this.dofPass.uniforms['uResolution'].value.set(targetW, targetH);
+      this.dofPass.uniforms['uNear'].value = this.camera.near;
+      this.dofPass.uniforms['uFar'].value = this.camera.far;
+    }
     if (this.cinematicAnimePass) {
-      this.cinematicAnimePass.uniforms['uResolution'].value.set(width * pr, height * pr);
+      this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     }
     if (this.smaaPass) {
-      this.smaaPass.setSize(width * pr, height * pr);
+      this.smaaPass.setSize(targetW, targetH);
     }
+  }
+
+  /**
+   * Set Depth of Field (DoF) targets and transition parameters.
+   */
+  public setDepthOfField(params: {
+    enabled: boolean;
+    focus?: number;
+    aperture?: number;
+    maxblur?: number;
+    duration?: number;
+  }): void {
+    this.dofStart.focus = this.dofCurrent.focus;
+    this.dofStart.aperture = this.dofCurrent.aperture;
+    this.dofStart.maxblur = this.dofCurrent.maxblur;
+
+    this.dofTarget.enabled = params.enabled;
+    if (params.focus !== undefined) this.dofTarget.focus = params.focus;
+    if (params.aperture !== undefined) {
+      this.dofTarget.aperture = params.enabled ? params.aperture : 0.0;
+    } else if (!params.enabled) {
+      this.dofTarget.aperture = 0.0;
+    }
+    if (params.maxblur !== undefined) {
+      this.dofTarget.maxblur = params.enabled ? params.maxblur : 0.0;
+    } else if (!params.enabled) {
+      this.dofTarget.maxblur = 0.0;
+    }
+
+    const dur = Math.max(0.01, params.duration ?? 0.6);
+    this.dofDuration = dur;
+    this.dofElapsed = 0;
+
+    if (!params.enabled && dur <= 0.05) {
+      this.dofCurrent.enabled = false;
+      this.dofCurrent.aperture = 0;
+      this.dofCurrent.maxblur = 0;
+      this.dofPass.uniforms['uEnabled'].value = 0.0;
+    }
+  }
+
+  private updateDepthOfField(delta: number): void {
+    if (!this.dofPass) return;
+
+    this.dofElapsed += delta;
+    const t = Math.min(1.0, this.dofElapsed / this.dofDuration);
+    // Smooth ease-out interpolation
+    const ease = 1 - Math.pow(1 - t, 3);
+
+    this.dofCurrent.focus = THREE.MathUtils.lerp(this.dofStart.focus, this.dofTarget.focus, ease);
+    this.dofCurrent.aperture = THREE.MathUtils.lerp(this.dofStart.aperture, this.dofTarget.aperture, ease);
+    this.dofCurrent.maxblur = THREE.MathUtils.lerp(this.dofStart.maxblur, this.dofTarget.maxblur, ease);
+
+    const isEffectivelyEnabled =
+      this.dofTarget.enabled ||
+      (this.dofCurrent.aperture > 0.001 && this.dofCurrent.maxblur > 0.0005);
+
+    // Bind the active readBuffer depthTexture from the preceding RenderPass
+    if (this.composer.readBuffer?.depthTexture) {
+      this.dofPass.uniforms['tDepth'].value = this.composer.readBuffer.depthTexture;
+    } else if (this.composer.renderTarget1?.depthTexture) {
+      this.dofPass.uniforms['tDepth'].value = this.composer.renderTarget1.depthTexture;
+    }
+
+    this.dofPass.uniforms['uEnabled'].value = isEffectivelyEnabled ? 1.0 : 0.0;
+    this.dofPass.uniforms['uFocus'].value = this.dofCurrent.focus;
+    this.dofPass.uniforms['uAperture'].value = this.dofCurrent.aperture;
+    this.dofPass.uniforms['uMaxBlur'].value = this.dofCurrent.maxblur;
+    this.dofPass.uniforms['uNear'].value = this.camera.near;
+    this.dofPass.uniforms['uFar'].value = this.camera.far;
   }
 
   public applyConfig(cfg: AvatarConfig): void {
@@ -633,12 +742,13 @@ export class ViewerCore {
     this.renderer.shadowMap.enabled = cfg.lighting.castShadows;
     this.dirLight.castShadow = cfg.lighting.castShadows;
 
-    this.smaaPass.enabled = cfg.postProcessing.antialiasing.smaa;
+    // Use SMAA for clean anti-aliasing without breaking hardware depthTexture
+    this.smaaPass.enabled = true;
     if (this.composer.renderTarget1) {
-      this.composer.renderTarget1.samples = cfg.postProcessing.antialiasing.msaaSamples;
+      this.composer.renderTarget1.samples = 0;
     }
     if (this.composer.renderTarget2) {
-      this.composer.renderTarget2.samples = cfg.postProcessing.antialiasing.msaaSamples;
+      this.composer.renderTarget2.samples = 0;
     }
 
     this.renderer.toneMapping = getToneMappingMode(cfg.postProcessing.toneMappingMode);
@@ -717,8 +827,9 @@ export class ViewerCore {
       this.godRaysPass.uniforms['uTime'].value = elapsed;
     }
 
-    // 3. Cinematic Pass time
+    // 3. Cinematic Pass time & DoF update
     this.cinematicAnimePass.uniforms['uTime'].value = elapsed;
+    this.updateDepthOfField(delta);
 
     // 4. Composer render
     this.composer.render();

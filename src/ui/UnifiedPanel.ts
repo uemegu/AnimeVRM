@@ -12,6 +12,7 @@ import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { getBehindYouScenario } from '../scenario/behindYouScenario';
+import { getDofEavesdropScenario } from '../scenario/dofEavesdropScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -365,6 +366,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #fed7aa; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.behindYouDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #f472b6; font-weight: 700;">📸 教室の告白と盗み聞き（被写界深度DoFテスト）</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-dof-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25); font-size: 12px; padding: 7px;">▶ 再生（DoF前ボケ演出）</button>
+              <button id="scenario-dof-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fbcfe8; line-height: 1.4; margin-top: 5px;">
+              エミリの告白を聞いてしまったアオイにズーム！手前のエミリを一眼レフのように前ボケさせ、奥のアオイのショック顔にピントを合わせるフォーカス演出。
             </div>
           </div>
 
@@ -910,6 +922,29 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-behindyou-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive DoF Focus Eavesdrop Scenario Play/Stop
+    document.getElementById('scenario-dof-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getDofEavesdropScenario();
+        scenarioController.scenarioEngine.play(scenario);
+        showToast('📸 被写界深度（DoF）テストシナリオを開始しました');
+      }
+    });
+
+    document.getElementById('scenario-dof-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);

@@ -9,6 +9,7 @@ import {
   ScenarioCharacterPlacement,
   ScenarioSceneAvatarConfig,
   ScenarioScrollingBackgroundConfig,
+  ScenarioDepthOfFieldConfig,
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
@@ -17,6 +18,7 @@ import { ScenePresetId } from '../presets/ScenePresets';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { resolveAssetUrl } from '../utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
+import * as THREE from 'three';
 
 export interface ScenarioEngineOptions {
   getAvatar: (characterId?: string) => Avatar | null;
@@ -36,6 +38,7 @@ export interface ScenarioEngineOptions {
     strength?: number
   ) => void;
   onApplySceneCamera?: (scene: ScenarioScene) => void;
+  onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   onSwitchBackground?: (bgUrl: string) => void;
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
@@ -59,6 +62,7 @@ export class ScenarioEngine {
     strength?: number
   ) => void;
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
+  private onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   private onSwitchBackground?: (bgUrl: string) => void;
   private onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
@@ -77,6 +81,19 @@ export class ScenarioEngine {
   private boundVoiceEndHandler: (() => void) | null = null;
   private isAutoMode = false;
 
+  // Active smooth avatar position/rotation interpolations (e.g. walk past, run away)
+  private activeMoveTransitions = new Map<
+    Avatar,
+    {
+      startPos: THREE.Vector3;
+      targetPos: THREE.Vector3;
+      startRotY: number;
+      targetRotY?: number;
+      duration: number;
+      elapsed: number;
+    }
+  >();
+
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
     this.getAvatars = options.getAvatars;
@@ -91,6 +108,7 @@ export class ScenarioEngine {
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
     this.onApplySceneCamera = options.onApplySceneCamera;
+    this.onApplyDepthOfField = options.onApplyDepthOfField;
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
     this.onSwitchBackground = options.onSwitchBackground;
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
@@ -218,6 +236,8 @@ export class ScenarioEngine {
     this.isPlayingState = false;
     this.clearAutoNextTimer();
     this.clearPendingEffectTextTimers();
+    this.activeMoveTransitions.clear();
+    this.onApplyDepthOfField?.({ enabled: false, duration: 0.2 });
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
@@ -398,6 +418,25 @@ export class ScenarioEngine {
       avatar.setRotationY(rotationY);
     }
 
+    // Smooth position/rotation interpolation (moveTo)
+    if (config.moveTo) {
+      const startPos = new THREE.Vector3();
+      if (avatar.vrm?.scene) {
+        avatar.vrm.scene.getWorldPosition(startPos);
+      } else {
+        startPos.copy(avatar.initialPosition);
+      }
+      const startRotY = avatar.vrm?.scene ? avatar.vrm.scene.rotation.y : avatar.initialRotationY;
+      this.activeMoveTransitions.set(avatar, {
+        startPos,
+        targetPos: new THREE.Vector3(...config.moveTo.target),
+        startRotY,
+        targetRotY: config.moveTo.rotationY,
+        duration: Math.max(0.01, config.moveTo.duration),
+        elapsed: 0,
+      });
+    }
+
     // Motion (resolve Master ID or FBX path)
     if (motion) {
       const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
@@ -511,6 +550,9 @@ export class ScenarioEngine {
         scene.cameraStrength ?? 1.0
       );
     }
+
+    // 2.5 Depth of Field (DoF Bokeh focus)
+    this.onApplyDepthOfField?.(scene.dof);
 
     // 3. Avatar Control (Motion, Expression, 3D Manga Effect)
     if (scene.avatars) {
@@ -707,6 +749,34 @@ export class ScenarioEngine {
       clearTimeout(timer);
     }
     this.pendingEffectTextTimers = [];
+  }
+
+  /**
+   * Update frame-by-frame animations (such as avatar moveTo transitions).
+   */
+  public update(delta: number): void {
+    if (!this.isPlayingState) return;
+
+    for (const [avatar, move] of this.activeMoveTransitions.entries()) {
+      move.elapsed += delta;
+      const t = Math.min(1.0, move.elapsed / move.duration);
+      // Linear progress for walking/running
+      const currentX = THREE.MathUtils.lerp(move.startPos.x, move.targetPos.x, t);
+      const currentY = THREE.MathUtils.lerp(move.startPos.y, move.targetPos.y, t);
+      const currentZ = THREE.MathUtils.lerp(move.startPos.z, move.targetPos.z, t);
+      avatar.setPosition(currentX, currentY, currentZ);
+
+      if (move.targetRotY !== undefined) {
+        let diff = move.targetRotY - move.startRotY;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        avatar.setRotationY(move.startRotY + diff * t);
+      }
+
+      if (t >= 1.0) {
+        this.activeMoveTransitions.delete(avatar);
+      }
+    }
   }
 
   public dispose(): void {

@@ -423,6 +423,11 @@ export class DialogueCameraController {
       defaultCameraPos.set(targetPos.x - 1.3 * distMultiplier, targetPos.y, targetPos.z + 0.4);
     }
 
+    // Direct camera position override (e.g. precise over-the-shoulder positioning)
+    if (scene.cameraPosition) {
+      defaultCameraPos.set(scene.cameraPosition[0], scene.cameraPosition[1], scene.cameraPosition[2]);
+    }
+
     return { targetPos, defaultCameraPos, defaultFov };
   }
 

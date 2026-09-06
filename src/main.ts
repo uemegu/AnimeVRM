@@ -134,6 +134,13 @@ const scenarioController = new ScenarioController({
   onSwitchScenePreset: (presetId) => {
     scenePresetManager.switchScene(presetId, false);
   },
+  onApplyDepthOfField: (dof) => {
+    if (dof) {
+      viewerCore.setDepthOfField(dof);
+    } else {
+      viewerCore.setDepthOfField({ enabled: false });
+    }
+  },
 });
 
 // --------------------------------------------------
@@ -192,6 +199,9 @@ function tick(timestamp?: number): void {
   } else {
     viewerCore.controls.update();
   }
+
+  // Update scenario engine dynamic motions (e.g. moveTo position transitions)
+  scenarioController.update(delta);
 
   // Update dynamic background and midground transforms
   const dialogueBg = scenarioController.dialogueCameraController?.isActive
