@@ -320,7 +320,19 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
               <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
               <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
+              <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.avif')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
               <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
+            </div>
+          </div>
+
+          <!-- Avatar Framing -->
+          <div class="section-box">
+            <label class="section-label">${tr.scenes.avatarFramingTitle}</label>
+            <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">${tr.scenes.avatarFramingDesc}</p>
+            <div style="display: flex; gap: 6px;" id="avatar-framing-buttons">
+              <button data-framing="full" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.full}</button>
+              <button data-framing="bust" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.bust}</button>
+              <button data-framing="close" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.close}</button>
             </div>
           </div>
 
@@ -959,6 +971,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         }
         const bg = btn.getAttribute('data-bg');
         const mid = btn.getAttribute('data-mid');
+        const near = btn.getAttribute('data-near');
         const loc = btn.getAttribute('data-location');
         if (loc) {
           if (!currentConfig.activeScene) {
@@ -970,6 +983,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         if (bg === 'none') {
           currentConfig.environment.showBackgroundImage = false;
           currentConfig.environment.showMidground = false;
+          currentConfig.environment.showNearground = false;
         } else if (bg) {
           currentConfig.environment.showBackgroundImage = true;
           currentConfig.environment.backgroundImageUrl = bg;
@@ -979,11 +993,31 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           } else {
             currentConfig.environment.showMidground = false;
           }
+          if (near) {
+            currentConfig.environment.showNearground = true;
+            currentConfig.environment.neargroundImageUrl = near;
+          } else {
+            currentConfig.environment.showNearground = false;
+          }
         }
         viewerCore.updateBackgroundDisplay(currentConfig);
         viewerCore.updateMidgroundDisplay(currentConfig);
+        viewerCore.updateNeargroundDisplay(currentConfig);
         syncBgButtons(currentConfig.environment.showBackgroundImage, currentConfig.environment.backgroundImageUrl);
         inspectorManager.updateAllInspectorsDisplay();
+      });
+    });
+
+    // Avatar Framing Buttons
+    const framingButtons = document.querySelectorAll<HTMLButtonElement>('.framing-btn');
+    framingButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const framing = btn.getAttribute('data-framing') as 'full' | 'bust' | 'close';
+        if (framing) {
+          framingButtons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          viewerCore.setCameraFraming(framing);
+        }
       });
     });
 

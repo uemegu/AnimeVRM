@@ -133,6 +133,15 @@ export interface EnvironmentConfig {
   };
   midgroundScale: number;
   midgroundOpacity: number;
+  showNearground: boolean;
+  neargroundImageUrl?: string;
+  neargroundPosition: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  neargroundScale: number;
+  neargroundOpacity: number;
   farFogEnabled: boolean;
   farFogColor: string;
   farFogIntensity: number;
@@ -234,7 +243,7 @@ export interface AvatarConfig {
   activeScene?: {
     presetId?: string;
     timeOfDay?: 'morning' | 'day' | 'evening' | 'bright_indoor' | 'dark_indoor' | string;
-    location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'none' | 'outdoor' | 'indoor' | string;
+    location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'none' | 'outdoor' | 'indoor' | string;
   };
   wind: WindConfig;
   rain: RainConfig;
@@ -328,6 +337,15 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     midgroundScale: 1.15,
     midgroundOpacity: 1.0,
+    showNearground: false,
+    neargroundImageUrl: undefined,
+    neargroundPosition: {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
+    neargroundScale: 1.0,
+    neargroundOpacity: 1.0,
     farFogEnabled: true,
     farFogColor: '#ffffff',
     farFogIntensity: 0.24,

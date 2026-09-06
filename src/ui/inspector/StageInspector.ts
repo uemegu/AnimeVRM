@@ -349,6 +349,7 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
         panorama.deactivate();
         ctx.viewerCore.updateBackgroundDisplay(currentConfig);
         ctx.viewerCore.updateMidgroundDisplay(currentConfig);
+        ctx.viewerCore.updateNeargroundDisplay(currentConfig);
         showToast('パノラマ表示をOFFにしました');
       }
     });

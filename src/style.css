@@ -323,7 +323,7 @@ body {
   border-color: #4772b3;
 }
 
-.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn, .timeofday-btn {
+.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn, .timeofday-btn, .framing-btn {
   background: #363636;
   border: 1px solid #444444;
   border-radius: 4px;
@@ -335,13 +335,13 @@ body {
   text-align: center;
 }
 
-.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover, .timeofday-btn:hover {
+.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover, .timeofday-btn:hover, .framing-btn:hover {
   background: #464646;
   border-color: #555555;
   color: #ffffff;
 }
 
-.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active, .timeofday-btn.active {
+.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active, .timeofday-btn.active, .framing-btn.active {
   background: #4772b3;
   color: #ffffff;
   border-color: #385d94;

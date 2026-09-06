@@ -161,10 +161,14 @@ export class ViewerCore {
   private textureLoader = new THREE.TextureLoader();
   private backgroundTextureCache = new Map<string, THREE.Texture>();
   private midgroundTextureCache = new Map<string, THREE.Texture>();
+  private neargroundTextureCache = new Map<string, THREE.Texture>();
 
   public midgroundMat: THREE.MeshBasicMaterial;
   public midgroundMesh: THREE.Mesh;
+  public neargroundMat: THREE.MeshBasicMaterial;
+  public neargroundMesh: THREE.Mesh;
   public initialControlsTarget: THREE.Vector3;
+  private framingAnimationId: number | null = null;
 
   constructor(canvas: HTMLCanvasElement, initialConfig: AvatarConfig) {
     this.canvas = canvas;
@@ -224,7 +228,7 @@ export class ViewerCore {
     this.windParticles = new WindParticles(this.scene);
     this.rainEffect = new RainEffect(this.scene, initialConfig.rain);
 
-    // 4. Midground Setup
+    // 4. Midground Setup (Behind avatar)
     this.midgroundMat = new THREE.MeshBasicMaterial({
       transparent: true,
       opacity: 1.0,
@@ -237,6 +241,20 @@ export class ViewerCore {
     this.midgroundMesh.renderOrder = -1;
     this.midgroundMesh.visible = false;
     this.scene.add(this.midgroundMesh);
+
+    // 4.1 Nearground Setup (In front of avatar, e.g. cafe table)
+    this.neargroundMat = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 1.0,
+      depthWrite: false,
+      depthTest: true,
+      side: THREE.DoubleSide,
+    });
+    const neargroundGeo = new THREE.PlaneGeometry(16 / 9, 1);
+    this.neargroundMesh = new THREE.Mesh(neargroundGeo, this.neargroundMat);
+    this.neargroundMesh.renderOrder = 2; // Avatar is 0, near layer is in front
+    this.neargroundMesh.visible = false;
+    this.scene.add(this.neargroundMesh);
 
     this.initialControlsTarget = new THREE.Vector3(
       DEFAULT_CONFIG.camera.target.x,
@@ -279,9 +297,11 @@ export class ViewerCore {
         if (active) {
           this.floor.visible = false;
           this.midgroundMesh.visible = false;
+          this.neargroundMesh.visible = false;
         } else {
           this.floor.visible = initialConfig.environment.showFloor;
           this.updateMidgroundDisplay(initialConfig);
+          this.updateNeargroundDisplay(initialConfig);
         }
       },
     });
@@ -621,6 +641,161 @@ export class ViewerCore {
     this.updateMidgroundTransform(cfg);
   }
 
+  public loadNeargroundTexture(url: string): Promise<THREE.Texture> {
+    if (this.neargroundTextureCache.has(url)) {
+      return Promise.resolve(this.neargroundTextureCache.get(url)!);
+    }
+    return new Promise((resolve, reject) => {
+      this.textureLoader.load(
+        url,
+        (texture) => {
+          texture.colorSpace = THREE.SRGBColorSpace;
+          texture.needsUpdate = true;
+          this.neargroundTextureCache.set(url, texture);
+          resolve(texture);
+        },
+        undefined,
+        (err) => reject(err)
+      );
+    });
+  }
+
+  public updateNeargroundTransform(
+    cfg: AvatarConfig,
+    dialogueBackgroundTransform?: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null
+  ): void {
+    if (!this.neargroundMesh.visible) return;
+
+    const env = cfg.environment;
+    const userPosX = env.neargroundPosition?.x ?? 0;
+    const userPosY = env.neargroundPosition?.y ?? 0;
+    const baseScaleMul = env.neargroundScale ?? 1.0;
+
+    let zoomMultiplier = 1.0;
+    let panZoomOffsetX = 0;
+    let panZoomOffsetY = 0;
+    if (dialogueBackgroundTransform) {
+      zoomMultiplier = dialogueBackgroundTransform.zoomScale;
+      panZoomOffsetX = dialogueBackgroundTransform.panOffsetX;
+      panZoomOffsetY = dialogueBackgroundTransform.panOffsetY;
+    }
+    const scaleMul = baseScaleMul * zoomMultiplier;
+
+    const panDeltaX = this.controls.target.x - this.initialControlsTarget.x;
+    const panDeltaY = this.controls.target.y - this.initialControlsTarget.y;
+
+    const forward = new THREE.Vector3();
+    this.camera.getWorldDirection(forward);
+
+    const right = new THREE.Vector3().crossVectors(forward, this.camera.up).normalize();
+    const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+
+    // The nearground layer MUST be positioned in front of the avatar (controls.target)
+    const targetDist = this.camera.position.distanceTo(this.controls.target);
+    const baseDist = Math.max(targetDist * 0.65, 0.4);
+
+    const vFovRad = THREE.MathUtils.degToRad(this.camera.fov);
+    const frustumHeight = 2 * baseDist * Math.tan(vFovRad / 2);
+    const screenAspect = 16 / 9;
+    const frustumWidth = frustumHeight * screenAspect;
+
+    // Maintain texture aspect ratio (cafe_near is 1448 x 1086)
+    const tex = this.neargroundMat.map;
+    const imgAspect =
+      tex && tex.image && (tex.image as any).width && (tex.image as any).height
+        ? ((tex.image as any).width / (tex.image as any).height)
+        : 1448 / 1086;
+
+    // Near plane width matches frustum width, height calculated from aspect ratio
+    const planeWidth = (frustumWidth / (16 / 9)) * (16 / 9) * scaleMul;
+    const planeHeight = planeWidth / imgAspect;
+
+    // Nearground is a foreground element fixed to the screen frame.
+    // In the user-specified framing (cam.y=1.2549, baseDist=0.7774, frustumHeight=0.4166),
+    // the target worldPosition is y=1.2194 (offset from camera center = -0.0355).
+    // Ratio to frustumHeight: -0.0355 / 0.4166 ≈ -0.0852136.
+    const defaultYOffset = -0.0852136 * frustumHeight;
+
+    const planePos = this.camera.position
+      .clone()
+      .addScaledVector(forward, baseDist)
+      .addScaledVector(right, userPosX + panZoomOffsetX * 0.8)
+      .addScaledVector(up, defaultYOffset + userPosY + panZoomOffsetY * 0.8);
+
+    this.neargroundMesh.position.copy(planePos);
+    this.neargroundMesh.quaternion.copy(this.camera.quaternion);
+    this.neargroundMesh.scale.set(planeWidth / (16 / 9), planeHeight, 1);
+  }
+
+  public updateNeargroundDisplay(cfg: AvatarConfig): void {
+    const show =
+      cfg.environment.showBackgroundImage &&
+      Boolean(cfg.environment.showNearground) &&
+      !!cfg.environment.neargroundImageUrl;
+    this.neargroundMesh.visible = show;
+    if (!show || !cfg.environment.neargroundImageUrl) return;
+
+    this.neargroundMat.opacity = cfg.environment.neargroundOpacity ?? 1.0;
+
+    this.loadNeargroundTexture(cfg.environment.neargroundImageUrl).then((texture) => {
+      this.neargroundMat.map = texture;
+      this.neargroundMat.needsUpdate = true;
+      this.updateNeargroundTransform(cfg);
+    });
+
+    this.updateNeargroundTransform(cfg);
+  }
+
+  public setCameraFraming(framing: 'full' | 'bust' | 'close', duration = 0.35): void {
+    if (this.framingAnimationId !== null) {
+      cancelAnimationFrame(this.framingAnimationId);
+      this.framingAnimationId = null;
+    }
+
+    const startTarget = this.controls.target.clone();
+    const startPos = this.camera.position.clone();
+
+    let endTarget: THREE.Vector3;
+    let endPos: THREE.Vector3;
+
+    switch (framing) {
+      case 'full':
+        endTarget = new THREE.Vector3(0, 0.85, 0);
+        endPos = new THREE.Vector3(0, 0.85, 3.0);
+        break;
+      case 'bust':
+        // Exactly matches user tuned coordinates: y=1.2549, z=1.196
+        endTarget = new THREE.Vector3(0, 1.2549, 0);
+        endPos = new THREE.Vector3(0, 1.2549, 1.196);
+        break;
+      case 'close':
+        // Close-up on face
+        endTarget = new THREE.Vector3(0, 1.30, 0);
+        endPos = new THREE.Vector3(0, 1.30, 0.85);
+        break;
+    }
+
+    const startTime = performance.now();
+    const animate = (currentTime: number) => {
+      const elapsed = (currentTime - startTime) / 1000;
+      const progress = Math.min(elapsed / duration, 1.0);
+      const ease = 1 - Math.pow(1 - progress, 3);
+
+      this.controls.target.lerpVectors(startTarget, endTarget, ease);
+      this.camera.position.lerpVectors(startPos, endPos, ease);
+      this.camera.lookAt(this.controls.target);
+      this.controls.update();
+
+      if (progress < 1.0) {
+        this.framingAnimationId = requestAnimationFrame(animate);
+      } else {
+        this.framingAnimationId = null;
+        this.initialControlsTarget.copy(endTarget);
+      }
+    };
+    this.framingAnimationId = requestAnimationFrame(animate);
+  }
+
   public onResize(): void {
     const { width, height } = getViewportSize();
     const pr = Math.min(window.devicePixelRatio, 2);
@@ -736,6 +911,7 @@ export class ViewerCore {
   public applyConfig(cfg: AvatarConfig): void {
     this.updateBackgroundDisplay(cfg);
     this.updateMidgroundDisplay(cfg);
+    this.updateNeargroundDisplay(cfg);
     this.floor.visible = cfg.environment.showFloor;
     this.floorMat.color.set(cfg.environment.floorColor);
 

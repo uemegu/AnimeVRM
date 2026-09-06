@@ -182,7 +182,15 @@ export interface Translations {
       schoolGate: string;
       classroom: string;
       oldPark: string;
+      cafe: string;
       offSingleColor: string;
+    };
+    avatarFramingTitle: string;
+    avatarFramingDesc: string;
+    avatarFraming: {
+      full: string;
+      bust: string;
+      close: string;
     };
     presetMorningParkTip: string;
     presetDayParkTip: string;
@@ -339,6 +347,12 @@ export interface Translations {
     midZ: string;
     midScale: string;
     midOpacity: string;
+    nearFolder: string;
+    showNearground: string;
+    nearX: string;
+    nearY: string;
+    nearScale: string;
+    nearOpacity: string;
     showFloor: string;
     floorColor: string;
     lightFolder: string;
