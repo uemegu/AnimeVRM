@@ -137,13 +137,6 @@ const scenarioController = new ScenarioController({
   onSwitchScenePreset: (presetId) => {
     scenePresetManager.switchScene(presetId, false);
   },
-  onApplyDepthOfField: (dof) => {
-    if (dof) {
-      viewerCore.setDepthOfField(dof);
-    } else {
-      viewerCore.setDepthOfField({ enabled: false });
-    }
-  },
 });
 
 // --------------------------------------------------
@@ -328,6 +321,7 @@ function debugPositions() {
 (window as any).getPositions = debugPositions;
 (window as any).scenarioController = scenarioController;
 (window as any).avatarManager = avatarManager;
+(window as any).viewerCore = viewerCore;
 
 console.info(
   '%c💡 [Debug] コンソールで debugPositions() または debugPose() を実行すると、アバター・前景・カメラの現在位置を出力＆コピーできます。',

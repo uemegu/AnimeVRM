@@ -9,7 +9,6 @@ import {
   ScenarioCharacterPlacement,
   ScenarioSceneAvatarConfig,
   ScenarioScrollingBackgroundConfig,
-  ScenarioDepthOfFieldConfig,
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
@@ -38,7 +37,6 @@ export interface ScenarioEngineOptions {
     strength?: number
   ) => void;
   onApplySceneCamera?: (scene: ScenarioScene) => void;
-  onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   onSwitchBackground?: (bgUrl: string) => void;
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
@@ -62,7 +60,6 @@ export class ScenarioEngine {
     strength?: number
   ) => void;
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
-  private onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   private onSwitchBackground?: (bgUrl: string) => void;
   private onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
@@ -73,14 +70,6 @@ export class ScenarioEngine {
   private sceneIndex = 0;
   private flags: Set<string> = new Set();
   private isPlayingState = false;
-
-  private bgmAudio: HTMLAudioElement | null = null;
-  private seAudio: HTMLAudioElement | null = null;
-  private autoNextTimer: number | null = null;
-  private pendingEffectTextTimers: number[] = [];
-  private boundVoiceEndHandler: (() => void) | null = null;
-  private isAutoMode = false;
-
   // Active smooth avatar position/rotation interpolations (e.g. walk past, run away)
   private activeMoveTransitions = new Map<
     Avatar,
@@ -94,11 +83,18 @@ export class ScenarioEngine {
     }
   >();
 
+  private bgmAudio: HTMLAudioElement | null = null;
+  private seAudio: HTMLAudioElement | null = null;
+  private autoNextTimer: number | null = null;
+  private pendingEffectTextTimers: number[] = [];
+  private boundVoiceEndHandler: (() => void) | null = null;
+  private isAutoMode = false;
+
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
     this.getAvatars = options.getAvatars;
     this.getAudioLipSync = options.getAudioLipSync;
-    this.masterManager = options.masterManager || new MasterDataManager();
+    this.masterManager = options.masterManager ?? new MasterDataManager();
     this.onPlayStateChange = options.onPlayStateChange;
     this.onSceneChange = options.onSceneChange;
     this.onFinished = options.onFinished;
@@ -108,7 +104,6 @@ export class ScenarioEngine {
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
     this.onApplySceneCamera = options.onApplySceneCamera;
-    this.onApplyDepthOfField = options.onApplyDepthOfField;
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
     this.onSwitchBackground = options.onSwitchBackground;
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
@@ -244,7 +239,6 @@ export class ScenarioEngine {
     this.clearAutoNextTimer();
     this.clearPendingEffectTextTimers();
     this.activeMoveTransitions.clear();
-    this.onApplyDepthOfField?.({ enabled: false, duration: 0.2 });
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
@@ -566,9 +560,6 @@ export class ScenarioEngine {
         scene.cameraStrength ?? 1.0
       );
     }
-
-    // 2.5 Depth of Field (DoF Bokeh focus)
-    this.onApplyDepthOfField?.(scene.dof);
 
     // 3. Avatar Control (Motion, Expression, 3D Manga Effect)
     if (scene.avatars) {
