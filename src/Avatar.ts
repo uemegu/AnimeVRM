@@ -15,6 +15,18 @@ import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './
 import { TearEffect, TearConfig } from './effects/tears';
 import { SweatEffect, SweatConfig } from './effects/sweat';
 
+export interface YandereOptions {
+  enabled?: boolean;
+  color?: string; // 瞳の単色カラー (デフォルト: '#3b080f' 妖しい深紅)
+  hideHighlights?: boolean; // 目の光（ハイライト）を消す (デフォルト: true)
+  flatIrisTexture?: boolean; // 瞳テクスチャを単色ベタ塗りにする (デフォルト: true)
+  dimEyeWhite?: boolean; // 白目をわずかに暗くする (デフォルト: true)
+  tiltHead?: boolean; // 首を少しかしげる (デフォルト: true)
+  tiltAngle?: number; // 傾き角度（ラジアン、デフォルト: 0.16）
+  suppressBlink?: boolean; // まばたきを抑制してじっと見つめる (デフォルト: true)
+  applyExpression?: boolean; // 虚ろな笑み・見開きのヤンデレ表情にする (デフォルト: true)
+}
+
 export interface AvatarOptions {
   modelUrl: string;
   defaultAnimationUrl?: string;
@@ -222,6 +234,33 @@ export class Avatar {
   private blinkTimer = 0;
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
   private currentExpression: string = 'neutral';
+
+  private isYandereActive = false;
+  private yandereConfig: Required<YandereOptions> = {
+    enabled: false,
+    color: '#3b080f',
+    hideHighlights: true,
+    flatIrisTexture: true,
+    dimEyeWhite: true,
+    tiltHead: true,
+    tiltAngle: 0.26,
+    suppressBlink: true,
+    applyExpression: true,
+  };
+  private originalEyeStates: Array<{
+    mesh?: THREE.Mesh;
+    material: THREE.Material;
+    type: 'highlight' | 'iris' | 'white';
+    originalVisible?: boolean;
+    originalOpacity?: number;
+    originalMap?: THREE.Texture | null;
+    originalColor?: THREE.Color;
+    originalShadeColor?: THREE.Color;
+    morphTargetName?: string;
+    originalMorphWeight?: number;
+  }> = [];
+  private solidTextureCache: Map<string, THREE.CanvasTexture> = new Map();
+  private originalExpressionBeforeYandere: string = 'neutral';
 
   public phonemeWeights: Record<Phoneme, number> = {
     aa: 0,
@@ -462,6 +501,10 @@ export class Avatar {
   public setExpression(expressionName: string, weight = 1.0): void {
     if (!this.vrm?.expressionManager) return;
 
+    if (expressionName !== 'yandere') {
+      this.resetYandereFacialMorphs();
+    }
+
     this.currentExpression = expressionName;
 
     const manager = this.vrm.expressionManager;
@@ -578,6 +621,15 @@ export class Avatar {
     if (!this.options.autoBlink || !this.vrm?.expressionManager) return;
     const manager = this.vrm.expressionManager;
 
+    // Suppress blinking in Yandere mode so the avatar stares unblinkingly at the user
+    if (this.isYandereActive && this.yandereConfig.suppressBlink) {
+      if (this.blinkState !== 0) {
+        this.blinkState = 0;
+        manager.setValue('blink', 0.0);
+      }
+      return;
+    }
+
     // Do not blink if eyes are closed (happy, relaxed, blink, winking, etc.)
     if (this.isEyesClosed()) {
       // If currently mid-blink animation when eyes were closed by an expression, reset blink state
@@ -685,6 +737,26 @@ export class Avatar {
     // Update VRM internal state (expressions, humanoid, spring bones)
     this.vrm.update(delta);
 
+    // Apply Yandere pose (head tilt) and custom facial morphs after vrm.update
+    if (this.isYandereActive) {
+      if (this.yandereConfig.tiltHead) {
+        const rawHead = this.vrm.humanoid?.getRawBoneNode?.('head');
+        const rawNeck = this.vrm.humanoid?.getRawBoneNode?.('neck');
+        const tilt = this.yandereConfig.tiltAngle;
+        if (rawHead) {
+          rawHead.rotation.z += tilt;
+          rawHead.rotation.x -= 0.05; // Slightly pull chin down for an eerie upturned gaze
+        }
+        if (rawNeck) {
+          rawNeck.rotation.z += tilt * 0.4;
+        }
+      }
+
+      if (this.yandereConfig.applyExpression) {
+        this.applyYandereFacialMorphs();
+      }
+    }
+
     // Update toon face shader & uniforms
     this.shaderController?.update();
 
@@ -771,6 +843,274 @@ export class Avatar {
 
   public resetFaceTexture(): void {
     this.setFaceTexture(null);
+  }
+
+  private getSolidCanvasTexture(hexColor: string): THREE.CanvasTexture {
+    if (this.solidTextureCache.has(hexColor)) {
+      return this.solidTextureCache.get(hexColor)!;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 16;
+    canvas.height = 16;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = hexColor;
+      ctx.fillRect(0, 0, 16, 16);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    this.solidTextureCache.set(hexColor, texture);
+    return texture;
+  }
+
+  /**
+   * Toggle or configure Yandere (darkness) mode.
+   * Disables eye highlights, makes iris textures solid flat color, adjusts head tilt and expression.
+   */
+  public setYandereMode(enabled: boolean, options?: Partial<YandereOptions>): void {
+    if (!this.vrm) return;
+
+    if (!enabled) {
+      if (!this.isYandereActive) return;
+      this.isYandereActive = false;
+      this.yandereConfig.enabled = false;
+
+      // Restore eyes to original state
+      for (const state of this.originalEyeStates) {
+        if (state.type === 'highlight') {
+          if (state.originalVisible !== undefined) {
+            state.material.visible = state.originalVisible;
+          }
+          if (typeof state.originalOpacity === 'number') {
+            (state.material as any).opacity = state.originalOpacity;
+          }
+          if (state.mesh && state.morphTargetName && typeof state.originalMorphWeight === 'number') {
+            const dict = state.mesh.morphTargetDictionary;
+            const inf = state.mesh.morphTargetInfluences;
+            if (dict && inf && dict[state.morphTargetName] !== undefined) {
+              inf[dict[state.morphTargetName]] = state.originalMorphWeight;
+            }
+          }
+          state.material.needsUpdate = true;
+        } else if (state.type === 'iris') {
+          const mat = state.material as any;
+          if (state.originalMap !== undefined) {
+            mat.map = state.originalMap;
+            if (mat.uniforms?.map) mat.uniforms.map.value = state.originalMap;
+          }
+          if (state.originalColor) {
+            mat.color?.copy(state.originalColor);
+            if (mat.uniforms?.litFactor?.value) mat.uniforms.litFactor.value.copy(state.originalColor);
+          }
+          if (state.originalShadeColor && mat.shadeColorFactor) {
+            mat.shadeColorFactor.copy(state.originalShadeColor);
+            if (mat.uniforms?.shadeColorFactor?.value) mat.uniforms.shadeColorFactor.value.copy(state.originalShadeColor);
+          }
+          mat.needsUpdate = true;
+        } else if (state.type === 'white') {
+          const mat = state.material as any;
+          if (state.originalColor) {
+            mat.color?.copy(state.originalColor);
+            if (mat.uniforms?.litFactor?.value) mat.uniforms.litFactor.value.copy(state.originalColor);
+          }
+          mat.needsUpdate = true;
+        }
+      }
+      this.originalEyeStates = [];
+      this.resetYandereFacialMorphs();
+
+      // Restore expression
+      this.setExpression(this.originalExpressionBeforeYandere || 'neutral');
+      return;
+    }
+
+    // Enable / update Yandere Mode
+    if (!this.isYandereActive) {
+      this.originalExpressionBeforeYandere = this.currentExpression;
+    }
+    this.isYandereActive = true;
+    this.yandereConfig = {
+      ...this.yandereConfig,
+      ...options,
+      enabled: true,
+    };
+
+    const shouldBackup = this.originalEyeStates.length === 0;
+    const solidColor = this.yandereConfig.color || '#3b080f';
+    const solidTexture = this.getSolidCanvasTexture(solidColor);
+
+    this.vrm.scene.traverse((obj) => {
+      if (!(obj as THREE.Mesh).isMesh) return;
+      const mesh = obj as THREE.Mesh;
+
+      // Check morph targets (e.g. Fcl_EYE_Highlight_Hide)
+      if (this.yandereConfig.hideHighlights && mesh.morphTargetDictionary && mesh.morphTargetInfluences) {
+        const hideMorphName = 'Fcl_EYE_Highlight_Hide';
+        if (mesh.morphTargetDictionary[hideMorphName] !== undefined) {
+          const idx = mesh.morphTargetDictionary[hideMorphName];
+          if (shouldBackup) {
+            this.originalEyeStates.push({
+              mesh,
+              material: (Array.isArray(mesh.material) ? mesh.material[0] : mesh.material) as THREE.Material,
+              type: 'highlight',
+              morphTargetName: hideMorphName,
+              originalMorphWeight: mesh.morphTargetInfluences[idx],
+            });
+          }
+          mesh.morphTargetInfluences[idx] = 1.0;
+        }
+      }
+
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      materials.forEach((mat) => {
+        if (!mat) return;
+        const matName = mat.name || '';
+
+        // 1. Eye Highlights (目の光を消す)
+        if (/EyeHighlight|Highlight.*Eye/i.test(matName)) {
+          if (this.yandereConfig.hideHighlights) {
+            if (shouldBackup) {
+              this.originalEyeStates.push({
+                material: mat,
+                type: 'highlight',
+                originalVisible: mat.visible,
+                originalOpacity: (mat as any).opacity,
+              });
+            }
+            mat.visible = false;
+            (mat as any).opacity = 0;
+            if ((mat as any).emissiveIntensity !== undefined) {
+              (mat as any).emissiveIntensity = 0;
+            }
+            mat.needsUpdate = true;
+          }
+        }
+        // 2. Eye Iris (瞳テクスチャを単色化)
+        else if (/EyeIris|Iris|瞳|虹彩/i.test(matName)) {
+          const m = mat as any;
+          if (shouldBackup) {
+            this.originalEyeStates.push({
+              material: mat,
+              type: 'iris',
+              originalMap: m.map ?? null,
+              originalColor: m.color ? m.color.clone() : undefined,
+              originalShadeColor: m.shadeColorFactor ? m.shadeColorFactor.clone() : undefined,
+            });
+          }
+
+          if (this.yandereConfig.flatIrisTexture) {
+            m.map = solidTexture;
+            if (m.uniforms?.map) m.uniforms.map.value = solidTexture;
+          }
+          if (m.color) {
+            m.color.set(solidColor);
+            if (m.uniforms?.litFactor?.value) m.uniforms.litFactor.value.set(solidColor);
+          }
+          if (m.shadeColorFactor) {
+            m.shadeColorFactor.set(solidColor);
+            if (m.uniforms?.shadeColorFactor?.value) m.uniforms.shadeColorFactor.value.set(solidColor);
+          }
+          m.needsUpdate = true;
+        }
+        // 3. Eye White (白目をトーンダウン)
+        else if (/EyeWhite|白目/i.test(matName)) {
+          const m = mat as any;
+          if (this.yandereConfig.dimEyeWhite) {
+            if (shouldBackup) {
+              this.originalEyeStates.push({
+                material: mat,
+                type: 'white',
+                originalColor: m.color ? m.color.clone() : undefined,
+              });
+            }
+            const dimColor = '#a8adb8';
+            if (m.color) {
+              m.color.set(dimColor);
+              if (m.uniforms?.litFactor?.value) m.uniforms.litFactor.value.set(dimColor);
+            }
+            m.needsUpdate = true;
+          }
+        }
+      });
+    });
+
+    // 4. Apply Yandere Expression (虚ろな微笑み・見開き)
+    if (this.yandereConfig.applyExpression) {
+      if (this.vrm.expressionManager) {
+        const mgr = this.vrm.expressionManager;
+        ['happy', 'angry', 'sad', 'surprised', 'relaxed', 'neutral', 'aa', 'ih', 'ou', 'ee', 'oh', 'blink'].forEach((name) => {
+          mgr.setValue(name, 0.0);
+        });
+      }
+      this.currentExpression = 'yandere';
+      this.applyYandereFacialMorphs();
+    }
+  }
+
+  /**
+   * Directly apply custom VRoid morph targets for creepy open-eyed smile.
+   * Mouth smiles while eyes remain unblinking and wide open.
+   */
+  private applyYandereFacialMorphs(): void {
+    if (!this.vrm) return;
+    this.vrm.scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const mesh = obj as THREE.Mesh;
+        const d = mesh.morphTargetDictionary;
+        const inf = mesh.morphTargetInfluences;
+        if (d && inf) {
+          // 1. Mouth creepy smile (pure mouth joy, eyes unaffected!)
+          if (d['Fcl_MTH_Joy'] !== undefined) inf[d['Fcl_MTH_Joy']] = 0.95;
+          if (d['Fcl_MTH_Up'] !== undefined) inf[d['Fcl_MTH_Up']] = 0.6;
+          if (d['Fcl_MTH_Small'] !== undefined) inf[d['Fcl_MTH_Small']] = 0.35;
+
+          // 2. Wide unblinking eye spread (highlights missing, dark iris fully visible)
+          if (d['Fcl_EYE_Spread'] !== undefined) inf[d['Fcl_EYE_Spread']] = 0.65;
+          if (d['Fcl_EYE_Surprised'] !== undefined) inf[d['Fcl_EYE_Surprised']] = 0.45;
+
+          // 3. Brow sorrow/madness
+          if (d['Fcl_BRW_Sorrow'] !== undefined) inf[d['Fcl_BRW_Sorrow']] = 0.45;
+        }
+      }
+    });
+  }
+
+  /**
+   * Reset custom VRoid morph targets applied during Yandere mode.
+   */
+  private resetYandereFacialMorphs(): void {
+    if (!this.vrm) return;
+    this.vrm.scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        const mesh = obj as THREE.Mesh;
+        const d = mesh.morphTargetDictionary;
+        const inf = mesh.morphTargetInfluences;
+        if (d && inf) {
+          const morphsToReset = [
+            'Fcl_MTH_Joy',
+            'Fcl_MTH_Up',
+            'Fcl_MTH_Small',
+            'Fcl_EYE_Spread',
+            'Fcl_EYE_Surprised',
+            'Fcl_BRW_Sorrow',
+          ];
+          morphsToReset.forEach((name) => {
+            if (d[name] !== undefined) {
+              inf[d[name]] = 0.0;
+            }
+          });
+        }
+      }
+    });
+  }
+
+  public isYandereMode(): boolean {
+    return this.isYandereActive;
+  }
+
+  public getYandereConfig(): Required<YandereOptions> {
+    return { ...this.yandereConfig };
   }
 
   private currentEffectKey: string | null = null;
@@ -880,6 +1220,10 @@ export class Avatar {
       this.effectTextManager?.clear();
     }
     this.effectTextManager = null;
+
+    this.solidTextureCache.forEach((tex) => tex.dispose());
+    this.solidTextureCache.clear();
+    this.originalEyeStates = [];
 
     this.shaderController?.dispose();
     this.shaderController = null;

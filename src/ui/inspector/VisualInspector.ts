@@ -987,5 +987,140 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     });
   lipFolder.close();
 
+  // 10. Yandere Dark Mode Folder (ヤンデレ闇落ち状態)
+  const yandereFolder = visualGui.addFolder('🖤 ヤンデレ闇落ち状態 (Yandere Mode)');
+  const yandereState = {
+    enabled: false,
+    color: '#3b080f',
+    hideHighlights: true,
+    flatIrisTexture: true,
+    dimEyeWhite: true,
+    tiltHead: true,
+    tiltAngle: 0.16,
+    suppressBlink: true,
+    applyExpression: true,
+    applyYandereVoice1: () => {
+      const av = getAvatar();
+      if (!av) return;
+      yandereState.enabled = true;
+      av.setYandereMode(true, {
+        color: yandereState.color,
+        hideHighlights: yandereState.hideHighlights,
+        flatIrisTexture: yandereState.flatIrisTexture,
+        dimEyeWhite: yandereState.dimEyeWhite,
+        tiltHead: yandereState.tiltHead,
+        tiltAngle: yandereState.tiltAngle,
+        suppressBlink: yandereState.suppressBlink,
+        applyExpression: yandereState.applyExpression,
+      });
+      av.showEffectText({
+        text: '……ずっと一緒だよ？',
+        stylePreset: 'doki',
+        anchor: 'head',
+        duration: 3.5,
+        scale: 1.1,
+      });
+      showToast('🖤 「……ずっと一緒だよ？」');
+      yandereFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+    },
+    applyYandereVoice2: () => {
+      const av = getAvatar();
+      if (!av) return;
+      yandereState.enabled = true;
+      av.setYandereMode(true, {
+        color: yandereState.color,
+        hideHighlights: yandereState.hideHighlights,
+        flatIrisTexture: yandereState.flatIrisTexture,
+        dimEyeWhite: yandereState.dimEyeWhite,
+        tiltHead: yandereState.tiltHead,
+        tiltAngle: yandereState.tiltAngle,
+        suppressBlink: yandereState.suppressBlink,
+        applyExpression: yandereState.applyExpression,
+      });
+      av.showEffectText({
+        text: 'ねぇ、誰と話してたの？',
+        stylePreset: 'iraira',
+        anchor: 'head',
+        duration: 3.5,
+        scale: 1.1,
+      });
+      showToast('🖤 「ねぇ、誰と話してたの？」');
+      yandereFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+    },
+  };
+
+  const updateYandere = () => {
+    const av = getAvatar();
+    if (!av) return;
+    av.setYandereMode(yandereState.enabled, {
+      color: yandereState.color,
+      hideHighlights: yandereState.hideHighlights,
+      flatIrisTexture: yandereState.flatIrisTexture,
+      dimEyeWhite: yandereState.dimEyeWhite,
+      tiltHead: yandereState.tiltHead,
+      tiltAngle: yandereState.tiltAngle,
+      suppressBlink: yandereState.suppressBlink,
+      applyExpression: yandereState.applyExpression,
+    });
+  };
+
+  yandereFolder
+    .add(yandereState, 'enabled')
+    .name('闇落ちモード ON/OFF')
+    .onChange((val: boolean) => {
+      updateYandere();
+      showToast(val ? '🖤 ヤンデレ闇落ち状態を発動しました' : '✨ 通常状態に戻りました');
+    });
+
+  yandereFolder
+    .add(yandereState, 'hideHighlights')
+    .name('目の光(ハイライト)消去')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'flatIrisTexture')
+    .name('瞳テクスチャ単色化')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .addColor(yandereState, 'color')
+    .name('瞳の単色カラー')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'dimEyeWhite')
+    .name('白目をトーンダウン')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'tiltHead')
+    .name('小首をかしげる')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'tiltAngle', -0.4, 0.4, 0.02)
+    .name('首の傾き角度')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'suppressBlink')
+    .name('瞬き停止(じっと見つめる)')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'applyExpression')
+    .name('虚ろな微笑み表情')
+    .onChange(updateYandere);
+
+  yandereFolder
+    .add(yandereState, 'applyYandereVoice1')
+    .name('💬 「……ずっと一緒だよ？」');
+
+  yandereFolder
+    .add(yandereState, 'applyYandereVoice2')
+    .name('💬 「ねぇ、誰と話してたの？」');
+
+  yandereFolder.close();
+
   visualGui.folders.forEach((folder) => folder.close());
 }
