@@ -24,3 +24,11 @@
 - **遠景 (Background)**: `scene.background` に設定。画面全体に広がる背景。
 - **中景 (Midground)**: `ViewerCore.midgroundMesh`。アバターより奥（`renderOrder = -1`）に配置される環境オブジェクト（公園の樹木など）。
 - **近景 (Nearground)**: `ViewerCore.neargroundMesh`。アバターより手前（`renderOrder = 2`）に配置される前景オブジェクト（カフェのテーブルなど）。アバターを挟み込むことで「座っている」「奥に立っている」シチュエーションを表現する。
+
+---
+
+## ブラウザ検証・ヘッドレステスト (`npx playwright`)
+
+ブラウザ上での描画検証やUIテストを行う際は、直接バイナリを叩くのではなく **`npx playwright`** を使用してください。
+プロジェクト内に永続インストールされていない場合でも `npx` を介して一貫した実行が可能です。
+

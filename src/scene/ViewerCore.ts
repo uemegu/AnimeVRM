@@ -185,6 +185,7 @@ export class ViewerCore {
       antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
+      preserveDrawingBuffer: true,
     });
     this.renderer.setSize(initialViewport.width, initialViewport.height, true);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -409,11 +410,11 @@ export class ViewerCore {
     updateCinematicPassUniforms(this.cinematicAnimePass, initialConfig);
     this.composer.addPass(this.cinematicAnimePass);
 
-    this.composer.addPass(new OutputPass());
-
     this.smaaPass = new SMAAPass();
     this.smaaPass.enabled = initialConfig.postProcessing.antialiasing.smaa;
     this.composer.addPass(this.smaaPass);
+
+    this.composer.addPass(new OutputPass());
 
     // Initial resize setup
     window.addEventListener('resize', () => this.onResize());
@@ -919,7 +920,7 @@ export class ViewerCore {
     this.dirLight.castShadow = cfg.lighting.castShadows;
 
     // Use SMAA for clean anti-aliasing without breaking hardware depthTexture
-    this.smaaPass.enabled = true;
+    this.smaaPass.enabled = cfg.postProcessing.antialiasing.smaa;
     if (this.composer.renderTarget1) {
       this.composer.renderTarget1.samples = 0;
     }
@@ -1027,20 +1028,7 @@ export class ViewerCore {
     }
   }
 
-  public captureAndRenderHistogram(colorHistogram: ColorHistogram, cfg: AvatarConfig): void {
-    const usePost =
-      cfg.postProcessing.bloom.enabled ||
-      cfg.lighting.sunShafts?.enabled ||
-      cfg.postProcessing.colorGrading.enabled ||
-      cfg.postProcessing.saturation !== 0 ||
-      cfg.postProcessing.brightness !== 0 ||
-      cfg.postProcessing.contrast !== 0;
-
-    if (usePost) {
-      this.composer.render();
-    } else {
-      this.renderer.render(this.scene, this.camera);
-    }
-    colorHistogram.computeHistogram(this.renderer);
+  public captureAndRenderHistogram(colorHistogram: ColorHistogram, _cfg?: AvatarConfig): void {
+    colorHistogram.computeHistogram(this.canvas);
   }
 }

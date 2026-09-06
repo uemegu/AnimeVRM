@@ -108,7 +108,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -142,7 +142,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     eyeGlow: {
@@ -155,7 +155,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -288,7 +288,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -322,7 +322,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     eyeGlow: {
@@ -335,7 +335,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -471,7 +471,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -505,7 +505,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     outline: {
@@ -514,7 +514,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -658,7 +658,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -692,7 +692,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     outline: {
@@ -701,7 +701,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -845,7 +845,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -879,7 +879,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     eyeGlow: {
@@ -892,7 +892,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     environment: {
@@ -1034,7 +1034,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
       hair: {
         color: '#ffffff',
@@ -1068,7 +1068,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.002,
+        outlineWidthFactor: 0.0016,
       },
     },
     outline: {
@@ -1077,7 +1077,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.002,
+      widthFactor: 0.0016,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -1425,7 +1425,7 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
     screenSpaceWidth: true,
     autoLineWeight: true,
     darknessFactor: 0.1,
-    widthFactor: 0.002,
+    widthFactor: 0.0016,
     lightingMixFactor: 0,
   };
 
