@@ -341,7 +341,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     lighting: {
       castShadows: false,
       ambient: {
-        color: '#c379a8',
+        color: '#b30071',
         intensity: 1,
       },
       directional: {
@@ -409,8 +409,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       colorGrading: {
         enabled: true,
-        shadowTint: '#2038a2',
-        highlightTint: '#949494',
+        shadowTint: '#0b1b60',
+        highlightTint: '#9a8518',
         strength: 0.5,
         contrast: 0.13,
         gamma: 1.0,
@@ -1395,7 +1395,7 @@ export function getScenePreset(presetId: ScenePresetId | string): ScenePresetDat
   if (presetId in SCENE_PRESETS) {
     return SCENE_PRESETS[presetId];
   }
-  return SCENE_PRESETS.morning_park;
+  return SCENE_PRESETS.day_park;
 }
 
 export function getTimeOfDayPreset(timeOfDayId: TimeOfDayId): TimeOfDayPresetData {
