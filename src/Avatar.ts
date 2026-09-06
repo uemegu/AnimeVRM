@@ -477,6 +477,46 @@ export class Avatar {
     if (expressionName !== 'neutral') {
       manager.setValue(expressionName, weight);
     }
+
+    // If eyes are closed by the new expression, cancel ongoing procedural blink to avoid eyelid clipping
+    if (this.isEyesClosed() && expressionName !== 'blink') {
+      this.blinkState = 0;
+      manager.setValue('blink', 0.0);
+      this.blinkTimer = this.getRandomBlinkInterval(3.0, 6.0);
+    }
+  }
+
+  /**
+   * Check if the eyes are already closed or squinted (e.g. happy >= 0.5, relaxed >= 0.5, blink >= 0.5)
+   * to suppress auto-blinking and avoid eyelid clipping / double-blinking.
+   */
+  public isEyesClosed(): boolean {
+    if (!this.vrm?.expressionManager) return false;
+    const manager = this.vrm.expressionManager;
+
+    // Explicit blink expression set externally
+    if (this.currentExpression === 'blink') return true;
+
+    // Happy expression (usually squinted/closed eyes in anime VRM models, e.g. 0.9 or >= 0.5)
+    const happy = manager.getValue('happy') ?? 0;
+    if (happy >= 0.5) return true;
+
+    // Relaxed expression (sleepy / eyes closed in many models)
+    const relaxed = manager.getValue('relaxed') ?? 0;
+    if (relaxed >= 0.5) return true;
+
+    // Blink left / right (winking)
+    const blinkLeft = (manager.getValue('blinkLeft') ?? manager.getValue('blink_l') ?? 0);
+    const blinkRight = (manager.getValue('blinkRight') ?? manager.getValue('blink_r') ?? 0);
+    if (blinkLeft >= 0.5 || blinkRight >= 0.5) return true;
+
+    // If blinkState is 0 (not currently in procedural blink animation), but blink is high (e.g. set by animation clip or external script)
+    if (this.blinkState === 0) {
+      const blink = manager.getValue('blink') ?? 0;
+      if (blink >= 0.5) return true;
+    }
+
+    return false;
   }
 
   public updateLipSync(
@@ -538,8 +578,19 @@ export class Avatar {
     if (!this.options.autoBlink || !this.vrm?.expressionManager) return;
     const manager = this.vrm.expressionManager;
 
-    // Do not blink if happy or during certain expressions
-    if (manager.getValue('happy') === 1.0) return;
+    // Do not blink if eyes are closed (happy, relaxed, blink, winking, etc.)
+    if (this.isEyesClosed()) {
+      // If currently mid-blink animation when eyes were closed by an expression, reset blink state
+      if (this.blinkState !== 0) {
+        this.blinkState = 0;
+        if (this.currentExpression !== 'blink') {
+          manager.setValue('blink', 0.0);
+        }
+      }
+      // Refresh blink timer so avatar doesn't immediately blink upon opening eyes
+      this.blinkTimer = this.getRandomBlinkInterval(3.0, 6.0);
+      return;
+    }
 
     this.blinkTimer -= delta;
     if (this.blinkTimer < 0 && this.blinkState === 0) {

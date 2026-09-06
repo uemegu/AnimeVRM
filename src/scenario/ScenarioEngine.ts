@@ -208,6 +208,13 @@ export class ScenarioEngine {
     this.flags.clear();
     this.isPlayingState = true;
 
+    const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
+    allAvatars.forEach((avatar) => {
+      avatar.setTearsEnabled(false);
+      avatar.resetFaceTexture();
+      avatar.clearEffectText();
+    });
+
     this.onPlayStateChange?.(true);
 
     // Setup multi-character placements if defined
@@ -246,6 +253,7 @@ export class ScenarioEngine {
     allAvatars.forEach((avatar) => {
       avatar.resetFaceTexture();
       avatar.clearEffectText();
+      avatar.setTearsEnabled(false);
     });
 
     this.messageWindow.hide();
@@ -486,6 +494,14 @@ export class ScenarioEngine {
         }
       }, delayMs);
       this.pendingEffectTextTimers.push(timer);
+    }
+
+    // Tears effect
+    if (config.tears !== undefined) {
+      if (config.tearConfig) {
+        avatar.setTearConfig(config.tearConfig);
+      }
+      avatar.setTearsEnabled(config.tears);
     }
   }
 

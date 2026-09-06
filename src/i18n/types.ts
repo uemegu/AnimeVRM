@@ -139,6 +139,9 @@ export interface Translations {
     behindYouTitle: string;
     playBehindYou: string;
     behindYouDesc: string;
+    nisaTitle: string;
+    playNisa: string;
+    nisaDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -243,6 +246,7 @@ export interface Translations {
     twoGirlsStarted: string;
     townWalkStarted: string;
     behindYouStarted: string;
+    nisaStarted: string;
     scenarioStopped: string;
     motionLoaded: string;
     motionLoadFailed: string;
