@@ -339,7 +339,7 @@ export class Avatar {
         VRMUtils.rotateVRM0(vrm);
 
         // 1. Flatten eye orbit normals to prevent crease/step shadows at inner eye corners
-        flattenEyeOrbitNormals(vrm.scene);
+        //flattenEyeOrbitNormals(vrm.scene);
 
         // 2. Precompute Smooth Normals & Curvature for high-quality silhouette outline & auto line weight
         applySmoothNormalsToHierarchy(vrm.scene);
