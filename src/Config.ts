@@ -353,7 +353,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   lighting: {
     castShadows: false,
     ambient: {
-      color: '#f6ccff',
+      color: '#c379a8',
       intensity: 0.35,
     },
     directional: {

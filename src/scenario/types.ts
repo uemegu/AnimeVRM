@@ -1,6 +1,7 @@
 import { EffectPresetName } from '../effects/text/types';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { ScenePresetId } from '../presets/ScenePresets';
+import { TearConfig } from '../effects/tears';
 
 export interface ScenarioChoice {
   text: string;
@@ -49,6 +50,8 @@ export interface ScenarioSceneAvatarConfig {
     duration: number; // seconds
     rotationY?: number;
   };
+  tears?: boolean;
+  tearConfig?: Partial<TearConfig>;
 }
 
 export type CameraZoomType =
