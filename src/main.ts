@@ -87,6 +87,7 @@ const avatarManager = new AvatarManager({
     applyConfigToSceneAndRenderer(currentConfig);
   },
 });
+(window as any).avatarManager = avatarManager;
 
 const inspectorManager = new InspectorManager();
 

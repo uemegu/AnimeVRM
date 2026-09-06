@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Avatar } from '../Avatar';
+import { Avatar, YandereOptions } from '../Avatar';
 import { AvatarConfig } from '../Config';
 import { EffectTextManager } from '../effects/text';
 import { WindController } from '../wind/WindController';
@@ -255,6 +255,23 @@ export class AvatarManager {
       return this.avatarInstance.vrm.scene.visible;
     }
     return true;
+  }
+
+  public setYandereMode(enabled: boolean, options?: Partial<YandereOptions>): void {
+    if (this.avatarInstance) {
+      this.avatarInstance.setYandereMode(enabled, options);
+    }
+    for (const av of this.scenarioAvatars.values()) {
+      av.setYandereMode(enabled, options);
+    }
+  }
+
+  public isYandereMode(): boolean {
+    return this.avatarInstance?.isYandereMode() ?? false;
+  }
+
+  public getYandereConfig(): Required<YandereOptions> | null {
+    return this.avatarInstance?.getYandereConfig() ?? null;
   }
 }
 

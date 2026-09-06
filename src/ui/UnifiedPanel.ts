@@ -197,8 +197,11 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
           <!-- Expressions -->
           <div class="section-box">
-            <label class="section-label">${tr.character.expression}</label>
-            <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="expression-buttons">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label">${tr.character.expression}</label>
+              <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;" id="expression-buttons">
               <button data-expr="neutral" class="expr-btn active">${tr.character.expressions.neutral}</button>
               <button data-expr="happy" class="expr-btn">${tr.character.expressions.happy}</button>
               <button data-expr="angry" class="expr-btn">${tr.character.expressions.angry}</button>
@@ -226,6 +229,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="border-color: #e11d48; color: #fda4af;">${tr.character.presets.doki}</button>
               <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="border-color: #ca8a04; color: #fde047;">${tr.character.presets.biku}</button>
               <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="border-color: #16a34a; color: #86efac;">${tr.character.presets.yatta}</button>
+              <button id="quick-yandere-effect-btn" class="effect-text-btn" style="border-color: #991b1b; color: #f87171; font-weight: 700;">🖤 ずっと一緒…</button>
               <button id="quick-sweat-btn" class="effect-text-btn" data-expr="surprised" style="border-color: #0284c7; color: #7dd3fc; font-weight: 700;">${tr.character.presets.sweat}</button>
               <button id="quick-jito-btn" class="effect-text-btn" data-expr="relaxed" style="border-color: #0f766e; color: #99f6e4; font-weight: 700; grid-column: span 2;">${tr.character.presets.jito}</button>
             </div>
@@ -1148,8 +1152,56 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
     // Expression Buttons
     const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+    // Yandere Mode Toggle Button
+    const yandereToggleBtn = document.getElementById('yandere-toggle-btn') as HTMLButtonElement | null;
+    const updateYandereButtonUI = (isActive: boolean) => {
+      if (!yandereToggleBtn) return;
+      yandereToggleBtn.style.background = isActive ? '#881337' : '#2a1118';
+      yandereToggleBtn.style.borderColor = isActive ? '#f43f5e' : '#dc2626';
+      yandereToggleBtn.style.color = isActive ? '#ffffff' : '#fca5a5';
+      yandereToggleBtn.textContent = isActive ? '🖤 闇落ち中 (解除)' : '🖤 ヤンデレ闇落ち';
+    };
+
+    yandereToggleBtn?.addEventListener('click', () => {
+      const isYandere = avatarManager.isYandereMode();
+      const nextState = !isYandere;
+      avatarManager.setYandereMode(nextState);
+      updateYandereButtonUI(nextState);
+      if (nextState) {
+        exprButtons.forEach((b) => b.classList.remove('active'));
+        showToast('🖤 ヤンデレ闇落ち状態を発動しました');
+      } else {
+        exprButtons.forEach((b) => {
+          b.classList.toggle('active', b.getAttribute('data-expr') === 'neutral');
+        });
+        showToast('✨ 通常状態に戻りました');
+      }
+    });
+
+    // Quick Yandere Effect Text Button
+    document.getElementById('quick-yandere-effect-btn')?.addEventListener('click', () => {
+      const av = avatarManager.avatarInstance;
+      if (av) {
+        avatarManager.setYandereMode(true);
+        updateYandereButtonUI(true);
+        exprButtons.forEach((b) => b.classList.remove('active'));
+        av.showEffectText({
+          text: '……ずっと一緒だよ？',
+          stylePreset: 'doki',
+          anchor: 'head',
+          duration: 4.0,
+          scale: 1.1,
+        });
+        showToast('🖤 「……ずっと一緒だよ？」');
+      }
+    });
+
     exprButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
+        if (avatarManager.isYandereMode()) {
+          avatarManager.setYandereMode(false);
+          updateYandereButtonUI(false);
+        }
         exprButtons.forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
 
