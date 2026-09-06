@@ -14,6 +14,7 @@ import { InterludeOverlay } from '../ui/InterludeOverlay';
 import {
   ScenarioPackage,
   ScenarioCharacterPlacement,
+  ScenarioDepthOfFieldConfig,
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
@@ -45,6 +46,7 @@ export class ScenarioController {
   private getConfig: () => AvatarConfig;
   private onApplyConfig: (cfg: AvatarConfig) => void;
   private onSwitchScenePreset: (presetId: ScenePresetId) => void;
+  private onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   private panoramaController?: PanoramaBackgroundController;
 
   private savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
@@ -62,6 +64,7 @@ export class ScenarioController {
     getConfig: () => AvatarConfig;
     onApplyConfig: (cfg: AvatarConfig) => void;
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
+    onApplyDepthOfField?: (dof?: ScenarioDepthOfFieldConfig) => void;
   }) {
     this.panoramaController = options.panoramaController;
     const panoramaController = options.panoramaController;
@@ -74,6 +77,7 @@ export class ScenarioController {
     this.getConfig = options.getConfig;
     this.onApplyConfig = options.onApplyConfig;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
+    this.onApplyDepthOfField = options.onApplyDepthOfField;
     this.masterManager = new MasterDataManager();
 
     this.scrollingBackgroundManager = new ScrollingBackgroundManager({
@@ -169,6 +173,9 @@ export class ScenarioController {
       },
       onApplySceneCamera: (scene) => {
         this.dialogueCameraController.applyScene(scene);
+      },
+      onApplyDepthOfField: (dof) => {
+        this.onApplyDepthOfField?.(dof);
       },
       onUpdateScrollingBackground: (bgConfig) => {
         if (bgConfig && bgConfig.enabled) {
@@ -266,6 +273,9 @@ export class ScenarioController {
   }
 
   public update(delta: number): void {
+    if (this.scenarioEngine.isPlaying) {
+      this.scenarioEngine.update(delta);
+    }
     let dialogueBg: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null = null;
     if (this.dialogueCameraController?.isActive) {
       this.dialogueCameraController.update(delta);
