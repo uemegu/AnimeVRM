@@ -345,6 +345,39 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .onChange(() => viewerCore.updateMidgroundDisplay(currentConfig));
   midFolder.close();
 
+  // Nearground layer folder (e.g. cafe table)
+  const nearFolder = sunFolder.addFolder(tr.gui.nearFolder);
+  if (!currentConfig.environment.neargroundPosition) {
+    currentConfig.environment.neargroundPosition = { x: 0, y: 0, z: 0 };
+  }
+  if (currentConfig.environment.neargroundScale === undefined) {
+    currentConfig.environment.neargroundScale = 1.0;
+  }
+  if (currentConfig.environment.neargroundOpacity === undefined) {
+    currentConfig.environment.neargroundOpacity = 1.0;
+  }
+  nearFolder
+    .add(currentConfig.environment, 'showNearground')
+    .name(tr.gui.showNearground)
+    .onChange(() => viewerCore.updateNeargroundDisplay(currentConfig));
+  nearFolder
+    .add(currentConfig.environment.neargroundPosition, 'x', -5, 5, 0.05)
+    .name(tr.gui.nearX)
+    .onChange(() => viewerCore.updateNeargroundDisplay(currentConfig));
+  nearFolder
+    .add(currentConfig.environment.neargroundPosition, 'y', -2, 5, 0.05)
+    .name(tr.gui.nearY)
+    .onChange(() => viewerCore.updateNeargroundDisplay(currentConfig));
+  nearFolder
+    .add(currentConfig.environment, 'neargroundScale', 0.5, 5, 0.05)
+    .name(tr.gui.nearScale)
+    .onChange(() => viewerCore.updateNeargroundDisplay(currentConfig));
+  nearFolder
+    .add(currentConfig.environment, 'neargroundOpacity', 0, 1, 0.05)
+    .name(tr.gui.nearOpacity)
+    .onChange(() => viewerCore.updateNeargroundDisplay(currentConfig));
+  nearFolder.close();
+
   // Floor
   const floorFolder = sunFolder.addFolder(tr.gui.envFolder);
   floorFolder

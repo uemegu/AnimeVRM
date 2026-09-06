@@ -70,6 +70,7 @@ const avatarManager = new AvatarManager({
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
     viewerCore.midgroundMesh.visible = false;
+    viewerCore.neargroundMesh.visible = false;
     viewerCore.sunEffect.sunGroup.visible = false;
     viewerCore.sunEffect.flareGroup.visible = false;
     viewerCore.renderer.setClearColor(0x000000, 0);
@@ -77,6 +78,7 @@ const avatarManager = new AvatarManager({
   onExitTransparent: () => {
     viewerCore.updateBackgroundDisplay(currentConfig);
     viewerCore.updateMidgroundDisplay(currentConfig);
+    viewerCore.updateNeargroundDisplay(currentConfig);
     viewerCore.sunEffect.sunGroup.visible =
       (currentConfig.lighting.sunShafts?.enabled || currentConfig.lighting.lensFlare?.enabled) ?? false;
     viewerCore.sunEffect.flareGroup.visible = currentConfig.lighting.lensFlare?.enabled ?? false;
@@ -203,17 +205,19 @@ function tick(timestamp?: number): void {
   // Update scenario engine dynamic motions (e.g. moveTo position transitions)
   scenarioController.update(delta);
 
-  // Update dynamic background and midground transforms
+  // Update dynamic background, midground, and nearground transforms
   const dialogueBg = scenarioController.dialogueCameraController?.isActive
     ? scenarioController.dialogueCameraController.getBackgroundTransform()
     : null;
   viewerCore.updateBackgroundZoom(dialogueBg);
   viewerCore.updateMidgroundTransform(currentConfig, dialogueBg);
+  viewerCore.updateNeargroundTransform(currentConfig, dialogueBg);
 
   // Update scrolling background if active (with dialogue zoom & pan)
   if (scenarioController.scrollingBackgroundManager?.isVisible) {
     scenarioController.scrollingBackgroundManager.update(delta, dialogueBg);
     viewerCore.midgroundMesh.visible = false;
+    viewerCore.neargroundMesh.visible = false;
   }
 
   // Update Avatars
@@ -238,3 +242,91 @@ function tick(timestamp?: number): void {
 }
 
 tick();
+
+// ====================================================
+// Debug Utility: Position & Framing Inspection
+// ====================================================
+function debugPositions() {
+  const avatar = avatarManager.avatarInstance;
+  const vrm = avatar?.vrm;
+
+  const avatarWorldPos = vrm?.scene ? vrm.scene.getWorldPosition(new THREE.Vector3()) : (avatar?.initialPosition ?? null);
+  const headPos = vrm?.humanoid?.getNormalizedBoneNode('head')?.getWorldPosition(new THREE.Vector3()) ?? null;
+  const chestPos = (vrm?.humanoid?.getNormalizedBoneNode('upperChest') || vrm?.humanoid?.getNormalizedBoneNode('chest'))?.getWorldPosition(new THREE.Vector3()) ?? null;
+  const hipsPos = vrm?.humanoid?.getNormalizedBoneNode('hips')?.getWorldPosition(new THREE.Vector3()) ?? null;
+
+  const neargroundMesh = viewerCore.neargroundMesh;
+  const midgroundMesh = viewerCore.midgroundMesh;
+  const cam = viewerCore.camera;
+  const controls = viewerCore.controls;
+
+  const camPos = cam.position.clone();
+  const targetPos = controls.target.clone();
+  const camDist = camPos.distanceTo(targetPos);
+
+  const debugData = {
+    avatar: {
+      position: avatarWorldPos ? { x: +avatarWorldPos.x.toFixed(4), y: +avatarWorldPos.y.toFixed(4), z: +avatarWorldPos.z.toFixed(4) } : null,
+      rotationYDeg: avatar ? +(THREE.MathUtils.radToDeg(avatar.initialRotationY)).toFixed(2) : null,
+      bones: {
+        head: headPos ? { x: +headPos.x.toFixed(4), y: +headPos.y.toFixed(4), z: +headPos.z.toFixed(4) } : null,
+        chest: chestPos ? { x: +chestPos.x.toFixed(4), y: +chestPos.y.toFixed(4), z: +chestPos.z.toFixed(4) } : null,
+        hips: hipsPos ? { x: +hipsPos.x.toFixed(4), y: +hipsPos.y.toFixed(4), z: +hipsPos.z.toFixed(4) } : null,
+      }
+    },
+    nearground: {
+      visible: neargroundMesh.visible,
+      worldPosition: { x: +neargroundMesh.position.x.toFixed(4), y: +neargroundMesh.position.y.toFixed(4), z: +neargroundMesh.position.z.toFixed(4) },
+      worldScale: { x: +neargroundMesh.scale.x.toFixed(4), y: +neargroundMesh.scale.y.toFixed(4), z: +neargroundMesh.scale.z.toFixed(4) },
+      config: {
+        showNearground: currentConfig.environment.showNearground,
+        neargroundPosition: currentConfig.environment.neargroundPosition,
+        neargroundScale: currentConfig.environment.neargroundScale,
+        neargroundOpacity: currentConfig.environment.neargroundOpacity,
+        neargroundImageUrl: currentConfig.environment.neargroundImageUrl,
+      }
+    },
+    midground: {
+      visible: midgroundMesh.visible,
+      worldPosition: { x: +midgroundMesh.position.x.toFixed(4), y: +midgroundMesh.position.y.toFixed(4), z: +midgroundMesh.position.z.toFixed(4) },
+      config: {
+        showMidground: currentConfig.environment.showMidground,
+        midgroundPosition: currentConfig.environment.midgroundPosition,
+        midgroundScale: currentConfig.environment.midgroundScale,
+        midgroundOpacity: currentConfig.environment.midgroundOpacity,
+      }
+    },
+    camera: {
+      position: { x: +camPos.x.toFixed(4), y: +camPos.y.toFixed(4), z: +camPos.z.toFixed(4) },
+      target: { x: +targetPos.x.toFixed(4), y: +targetPos.y.toFixed(4), z: +targetPos.z.toFixed(4) },
+      distance: +camDist.toFixed(4),
+      fov: cam.fov,
+    }
+  };
+
+  console.group('%c🎯 [Debug Positions & Framing]', 'color: #38bdf8; font-weight: bold; font-size: 13px;');
+  console.log('%c👤 アバター位置 (Avatar):', 'color: #a78bfa; font-weight: bold;', debugData.avatar);
+  console.log('%c☕ 前景位置 (Nearground):', 'color: #f59e0b; font-weight: bold;', debugData.nearground);
+  console.log('%c🌳 中景位置 (Midground):', 'color: #10b981; font-weight: bold;', debugData.midground);
+  console.log('%c📷 カメラ (Camera):', 'color: #ec4899; font-weight: bold;', debugData.camera);
+  console.log('%c📋 コピペ用JSON (Copyable JSON):', 'color: #94a3b8; font-weight: bold;', JSON.stringify(debugData, null, 2));
+  console.groupEnd();
+
+  // Try copying to clipboard
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(JSON.stringify(debugData, null, 2))
+      .then(() => console.log('%c✓ クリップボードに位置情報をコピーしました！', 'color: #22c55e; font-weight: bold;'))
+      .catch(() => {});
+  }
+
+  return debugData;
+}
+
+(window as any).debugPositions = debugPositions;
+(window as any).debugPose = debugPositions;
+(window as any).getPositions = debugPositions;
+
+console.info(
+  '%c💡 [Debug] コンソールで debugPositions() または debugPose() を実行すると、アバター・前景・カメラの現在位置を出力＆コピーできます。',
+  'color: #38bdf8; font-size: 11px; padding: 2px 4px;'
+);
