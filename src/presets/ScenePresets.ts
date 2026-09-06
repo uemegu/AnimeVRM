@@ -94,7 +94,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '澄んだ朝陽と淡い光条、透明感あふれるブルー・バイオレットのグラデーション',
     materials: {
       body: {
-        color: '#fff6f0',
+        color: '#ffffff',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.35,
@@ -108,7 +108,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -125,7 +125,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -142,8 +142,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
+    },
+    eyeGlow: {
+      enabled: true,
+      intensity: 1.25,
     },
     outline: {
       enabled: true,
@@ -151,7 +155,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.001,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -162,7 +166,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       directional: {
         color: '#ffffff',
-        intensity: 2.6,
+        intensity: 3.2,
         posX: 4.1,
         posY: 0.1,
         posZ: 2,
@@ -216,7 +220,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.09,
+        strength: 0.01,
         radius: 0.06,
         threshold: 0.9,
       },
@@ -270,7 +274,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '青空と強い太陽光、抜けの良い昼光サンシャフトと華やかなアニメフレア',
     materials: {
       body: {
-        color: '#fff6f0',
+        color: '#ffffff',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.35,
@@ -284,7 +288,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -301,7 +305,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -318,7 +322,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
     },
     eyeGlow: {
@@ -330,19 +334,19 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       useSmoothNormal: true,
       screenSpaceWidth: true,
       autoLineWeight: true,
-      darknessFactor: 0.08,
-      widthFactor: 0.001,
+      darknessFactor: 0.1,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     lighting: {
       castShadows: false,
       ambient: {
-        color: '#ffb8b8',
-        intensity: 0.5,
+        color: '#c38f79',
+        intensity: 1,
       },
       directional: {
         color: '#ffffff',
-        intensity: 2.6,
+        intensity: 3.2,
         posX: -0.7,
         posY: 0.5,
         posZ: 0.4,
@@ -369,22 +373,22 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
           y: 4.3,
           z: -3.8,
         },
-        exposure: 0.38,
-        decay: 0.87,
-        density: 0.4,
+        exposure: 0.22,
+        decay: 0.83,
+        density: 0.35,
         weight: 0.08,
         color: '#fff2db',
         shimmer: 0.25,
       },
       lensFlare: {
         enabled: true,
-        sunSize: 1.25,
-        sunColor: '#fff8ee',
-        glowIntensity: 1.25,
+        sunSize: 1.3,
+        sunColor: '#fffbf5',
+        glowIntensity: 0.95,
         starburstIntensity: 0.05,
-        anamorphicIntensity: 1.2,
-        ghostIntensity: 0.85,
-        haloIntensity: 0.9,
+        anamorphicIntensity: 1.15,
+        ghostIntensity: 0.35,
+        haloIntensity: 0.5,
       },
     },
     environment: {
@@ -399,7 +403,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.08,
+        strength: 0.01,
         radius: 0.06,
         threshold: 0.9,
       },
@@ -467,7 +471,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -484,7 +488,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -501,7 +505,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
     },
     outline: {
@@ -510,7 +514,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       screenSpaceWidth: true,
       autoLineWeight: true,
       darknessFactor: 0.1,
-      widthFactor: 0.001,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -654,7 +658,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -671,7 +675,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -688,7 +692,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
     },
     outline: {
@@ -696,8 +700,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       useSmoothNormal: true,
       screenSpaceWidth: true,
       autoLineWeight: true,
-      darknessFactor: 0.08,
-      widthFactor: 0.001,
+      darknessFactor: 0.1,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -827,7 +831,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     description: '均一で明るい室内照明、教室やオフィスに最適な自然なセルルック',
     materials: {
       body: {
-        color: '#fff6f0',
+        color: '#ffffff',
         shadowHueShift: 0.02,
         shadowLightnessFactor: 0.16,
         shadowBoundaryTint: 0.3,
@@ -841,7 +845,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -858,7 +862,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -875,32 +879,37 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
+    },
+    eyeGlow: {
+      enabled: true,
+      intensity: 1.25,
     },
     outline: {
       enabled: true,
       useSmoothNormal: true,
       screenSpaceWidth: true,
       autoLineWeight: true,
-      darknessFactor: 0.08,
-      widthFactor: 0.001,
+      darknessFactor: 0.1,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     environment: {
       showMidground: false,
-      farFogEnabled: false,
-      farFogIntensity: 0,
+      farFogEnabled: true,
+      farFogColor: '#808080',
+      farFogIntensity: 0.18,
     },
     lighting: {
       castShadows: false,
       ambient: {
-        color: '#ffebeb',
-        intensity: 0.65,
+        color: '#ffcbc2',
+        intensity: 0.5,
       },
       directional: {
         color: '#ffffff',
-        intensity: 2.2,
+        intensity: 2.9,
         posX: -3.5,
         posY: 0,
         posZ: 1.8,
@@ -950,7 +959,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.05,
+        strength: 0.01,
         radius: 0.12,
         threshold: 0.9,
       },
@@ -1025,7 +1034,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 5,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
       hair: {
         color: '#ffffff',
@@ -1042,7 +1051,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 0,
         parametricRimLiftFactor: 0.1,
         rimLightingMixFactor: 0.2,
-        outlineWidthFactor: 0.0008,
+        outlineWidthFactor: 0.0016,
       },
       cloth: {
         color: '#ffffff',
@@ -1059,7 +1068,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         parametricRimFresnelPowerFactor: 4,
         parametricRimLiftFactor: 0.02,
         rimLightingMixFactor: 1,
-        outlineWidthFactor: 0.001,
+        outlineWidthFactor: 0.002,
       },
     },
     outline: {
@@ -1067,8 +1076,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       useSmoothNormal: true,
       screenSpaceWidth: true,
       autoLineWeight: true,
-      darknessFactor: 0.08,
-      widthFactor: 0.001,
+      darknessFactor: 0.1,
+      widthFactor: 0.002,
       lightingMixFactor: 0,
     },
     lighting: {
@@ -1317,9 +1326,9 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       neargroundPosition: { x: 0, y: 0, z: 0 },
       neargroundScale: 1.0,
       neargroundOpacity: 1.0,
-      farFogEnabled: false,
-      farFogColor: '#ffffff',
-      farFogIntensity: 0.0,
+      farFogEnabled: true,
+      farFogColor: '#808080',
+      farFogIntensity: 0.18,
     },
   },
   none: {
@@ -1374,7 +1383,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
   day_school: buildScenePreset('day_school', 'day', 'school_gate'),
   evening_school: buildScenePreset('evening_school', 'evening', 'school_gate'),
   rainy_school: buildScenePreset('rainy_school', 'rainy', 'school_gate'),
-  bright_indoor: buildScenePreset('bright_indoor', 'bright_indoor', 'classroom'),
+  bright_indoor: buildScenePreset('bright_indoor', 'bright_indoor', 'cafe'),
   dark_indoor: buildScenePreset('dark_indoor', 'dark_indoor', 'classroom'),
   morning_outdoor: buildScenePreset('morning_outdoor', 'morning', 'modern_park'),
   day_outdoor: buildScenePreset('day_outdoor', 'day', 'modern_park'),
@@ -1416,7 +1425,7 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
     screenSpaceWidth: true,
     autoLineWeight: true,
     darknessFactor: 0.1,
-    widthFactor: 0.001,
+    widthFactor: 0.002,
     lightingMixFactor: 0,
   };
 

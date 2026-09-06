@@ -258,7 +258,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   materials: {
     body: {
-      color: '#fff6f0',
+      color: '#ffffff',
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
       shadowBoundaryTint: 0.35,
@@ -272,7 +272,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 5,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.1,
-      outlineWidthFactor: 0.001,
+      outlineWidthFactor: 0.002,
     },
     hair: {
       color: '#ffffff',
@@ -289,7 +289,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 0,
       parametricRimLiftFactor: 0.1,
       rimLightingMixFactor: 0.2,
-      outlineWidthFactor: 0.0008,
+      outlineWidthFactor: 0.0016,
     },
     cloth: {
       color: '#ffffff',
@@ -306,7 +306,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       parametricRimFresnelPowerFactor: 4,
       parametricRimLiftFactor: 0.02,
       rimLightingMixFactor: 1.0,
-      outlineWidthFactor: 0.001,
+      outlineWidthFactor: 0.002,
     },
   },
   eyeGlow: {
@@ -319,7 +319,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     screenSpaceWidth: true,
     autoLineWeight: true,
     darknessFactor: 0.1,
-    widthFactor: 0.001,
+    widthFactor: 0.002,
     lightingMixFactor: 0.0,
   },
   environment: {
@@ -358,7 +358,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     directional: {
       color: '#ffffff',
-      intensity: 2.6,
+      intensity: 3.2,
       posX: 4.1,
       posY: 0.1,
       posZ: 2.0,
@@ -412,7 +412,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.09,
+      strength: 0.01,
       radius: 0.06,
       threshold: 0.9,
     },
