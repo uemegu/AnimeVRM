@@ -262,6 +262,7 @@ export function applyToonShader(
   }> = [];
   const allMToonMaterials: Array<{ material: MToonLikeMaterial; kind: StyleKind | 'other' }> = [];
   const processedMaterials = new Set<THREE.Material>();
+  const originalBaseColors = new Map<MToonLikeMaterial, THREE.Color>();
 
   // Traverse and register materials
   vrm.scene.traverse((object) => {
@@ -277,6 +278,7 @@ export function applyToonShader(
 
       const material = sourceMaterial as MToonLikeMaterial;
       if (!material.isMToonMaterial) return;
+      originalBaseColors.set(material, (material.color ?? material.uniforms?.litFactor?.value ?? new THREE.Color(1, 1, 1)).clone());
 
       const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
@@ -430,8 +432,11 @@ export function applyToonShader(
       .forEach(({ material, kind: matKind }) => {
         // Base Color / Tint (litFactor)
         if (params.color) {
-          if (material.color) material.color.set(params.color);
-          if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.set(params.color);
+          // White is a neutral tint: preserve VRM base colors as well as textures.
+          // Always start from the imported color so repeated updates do not compound.
+          const tintedColor = originalBaseColors.get(material)!.clone().multiply(new THREE.Color(params.color));
+          if (material.color) material.color.copy(tintedColor);
+          if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.copy(tintedColor);
         }
 
         // Shade Color (Face uses body material as reference so skin shadow matches body perfectly)

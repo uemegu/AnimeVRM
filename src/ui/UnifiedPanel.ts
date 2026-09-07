@@ -213,6 +213,31 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
           </div>
 
+          <!-- Eye & Head Look-At Control -->
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #3b82f6; padding: 8px; border-radius: 4px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label" style="color: #60a5fa; font-weight: 700;">👀 視線 & 顔の向き (LookAt)</label>
+              <button id="reset-lookat-btn" style="font-size: 10px; padding: 2px 6px; background: #2a2a2a; border: 1px solid #444444; color: #94a3b8; border-radius: 4px; cursor: pointer;">リセット</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;">
+              <button id="toggle-head-lookat-btn" class="model-btn" style="flex: 1; min-width: 100px; font-size: 10.5px;">👤 顔カメラ: OFF</button>
+              <button id="toggle-eye-lookat-btn" class="model-btn active" style="flex: 1; min-width: 100px; font-size: 10.5px;">👁️ 目カメラ: ON</button>
+              <button id="toggle-eye-wander-btn" class="model-btn" style="flex: 1; min-width: 100px; font-size: 10.5px; border-color: #f59e0b; color: #fbbf24;">👀 目が泳ぐ: OFF</button>
+            </div>
+            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 70px; color: #94a3b8;">視線 左右:</span>
+                <input type="range" id="slider-eye-yaw" min="-0.6" max="0.6" step="0.02" value="0" style="flex: 1;">
+                <span id="label-eye-yaw" style="width: 38px; text-align: right; color: #cbd5e1; font-family: monospace;">0.00</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="width: 70px; color: #94a3b8;">視線 上下:</span>
+                <input type="range" id="slider-eye-pitch" min="-0.5" max="0.5" step="0.02" value="0" style="flex: 1;">
+                <span id="label-eye-pitch" style="width: 38px; text-align: right; color: #cbd5e1; font-family: monospace;">0.00</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Manga Emotion Effect Texts -->
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -1159,6 +1184,109 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         });
         showToast('🖤 「……ずっと一緒だよ？」');
       }
+    });
+
+    // LookAt & Face direction controls
+    const toggleHeadBtn = document.getElementById('toggle-head-lookat-btn') as HTMLButtonElement | null;
+    const toggleEyeBtn = document.getElementById('toggle-eye-lookat-btn') as HTMLButtonElement | null;
+    const toggleWanderBtn = document.getElementById('toggle-eye-wander-btn') as HTMLButtonElement | null;
+    const sliderEyeYaw = document.getElementById('slider-eye-yaw') as HTMLInputElement | null;
+    const sliderEyePitch = document.getElementById('slider-eye-pitch') as HTMLInputElement | null;
+    const labelEyeYaw = document.getElementById('label-eye-yaw');
+    const labelEyePitch = document.getElementById('label-eye-pitch');
+    const resetLookAtBtn = document.getElementById('reset-lookat-btn');
+
+    let isHeadLookAt = false;
+    let isEyeLookAt = true;
+    let isEyeWander = false;
+
+    toggleHeadBtn?.addEventListener('click', () => {
+      const av = avatarManager.avatarInstance;
+      isHeadLookAt = !isHeadLookAt;
+      if (av) {
+        av.setHeadLookAtCamera(isHeadLookAt);
+      }
+      toggleHeadBtn.classList.toggle('active', isHeadLookAt);
+      toggleHeadBtn.textContent = isHeadLookAt ? '👤 顔カメラ: ON' : '👤 顔カメラ: OFF';
+      showToast(isHeadLookAt ? '👤 顔のカメラ追従をONにしました' : '👤 顔のカメラ追従をOFFにしました');
+    });
+
+    toggleEyeBtn?.addEventListener('click', () => {
+      const av = avatarManager.avatarInstance;
+      isEyeLookAt = !isEyeLookAt;
+      if (av) {
+        av.setEyeLookAt({ mode: isEyeLookAt ? 'camera' : 'forward' });
+        av.setLookAtCamera(isEyeLookAt);
+      }
+      toggleEyeBtn.classList.toggle('active', isEyeLookAt);
+      toggleEyeBtn.textContent = isEyeLookAt ? '👁️ 目カメラ: ON' : '👁️ 目カメラ: OFF';
+      showToast(isEyeLookAt ? '👁️ 視線カメラ注視をONにしました' : '👁️ 視線カメラ注視をOFFにしました (正面固定)');
+    });
+
+    toggleWanderBtn?.addEventListener('click', () => {
+      const av = avatarManager.avatarInstance;
+      isEyeWander = !isEyeWander;
+      if (av) {
+        av.setEyeWander(isEyeWander, 1.0);
+      }
+      toggleWanderBtn.classList.toggle('active', isEyeWander);
+      toggleWanderBtn.textContent = isEyeWander ? '👀 目が泳ぐ: ON' : '👀 目が泳ぐ: OFF';
+      showToast(isEyeWander ? '👀 目が泳ぐ演出をONにしました' : '👀 目が泳ぐ演出をOFFにしました');
+    });
+
+    sliderEyeYaw?.addEventListener('input', () => {
+      const val = parseFloat(sliderEyeYaw.value);
+      if (labelEyeYaw) labelEyeYaw.textContent = val.toFixed(2);
+      const av = avatarManager.avatarInstance;
+      if (av) {
+        const pitch = sliderEyePitch ? parseFloat(sliderEyePitch.value) : 0;
+        av.setEyeOffset(val, pitch);
+      }
+    });
+
+    sliderEyePitch?.addEventListener('input', () => {
+      const val = parseFloat(sliderEyePitch.value);
+      if (labelEyePitch) labelEyePitch.textContent = val.toFixed(2);
+      const av = avatarManager.avatarInstance;
+      if (av) {
+        const yaw = sliderEyeYaw ? parseFloat(sliderEyeYaw.value) : 0;
+        av.setEyeOffset(yaw, val);
+      }
+    });
+
+    resetLookAtBtn?.addEventListener('click', () => {
+      const av = avatarManager.avatarInstance;
+      isHeadLookAt = false;
+      isEyeLookAt = true;
+      isEyeWander = false;
+
+      if (toggleHeadBtn) {
+        toggleHeadBtn.classList.remove('active');
+        toggleHeadBtn.textContent = '👤 顔カメラ: OFF';
+      }
+      if (toggleEyeBtn) {
+        toggleEyeBtn.classList.add('active');
+        toggleEyeBtn.textContent = '👁️ 目カメラ: ON';
+      }
+      if (toggleWanderBtn) {
+        toggleWanderBtn.classList.remove('active');
+        toggleWanderBtn.textContent = '👀 目が泳ぐ: OFF';
+      }
+      if (sliderEyeYaw) {
+        sliderEyeYaw.value = '0';
+        if (labelEyeYaw) labelEyeYaw.textContent = '0.00';
+      }
+      if (sliderEyePitch) {
+        sliderEyePitch.value = '0';
+        if (labelEyePitch) labelEyePitch.textContent = '0.00';
+      }
+
+      if (av) {
+        av.setHeadLookAtCamera(false);
+        av.setEyeLookAt({ mode: 'camera', offset: { x: 0, y: 0 }, wander: false });
+        av.setLookAtCamera(true);
+      }
+      showToast('🔄 視線・顔の向きをリセットしました');
     });
 
     exprButtons.forEach((btn) => {

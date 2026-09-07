@@ -27,6 +27,25 @@ export interface YandereOptions {
   applyExpression?: boolean; // 虚ろな笑み・見開きのヤンデレ表情にする (デフォルト: true)
 }
 
+export interface EyeLookAtConfig {
+  mode?: 'camera' | 'forward' | 'custom';
+  targetPos?: THREE.Vector3;
+  offset?: { x: number; y: number }; // 水平(yaw), 垂直(pitch) オフセット (ラジアン)
+  wander?: boolean; // 目が泳ぐか
+  wanderIntensity?: number; // 目が泳ぐ強さ (0.0 - 2.0, デフォルト 1.0)
+  wanderSpeed?: number; // 目が泳ぐ速度 (デフォルト 1.0)
+}
+
+export interface HeadLookAtConfig {
+  enabled?: boolean;
+  targetPos?: THREE.Vector3;
+  weight?: number; // 0.0 - 1.0 (追従ウェイト)
+  offset?: { x: number; y: number }; // 水平(yaw), 垂直(pitch) オフセット (ラジアン)
+  maxYaw?: number; // 最大水平角度 (デフォルト 約45度: 0.785 rad)
+  maxPitch?: number; // 最大垂直角度 (デフォルト 約25度: 0.436 rad)
+  smoothSpeed?: number; // 補間速度 (デフォルト 8.0)
+}
+
 export interface AvatarOptions {
   modelUrl: string;
   defaultAnimationUrl?: string;
@@ -35,6 +54,9 @@ export interface AvatarOptions {
   rotationY?: number;
   autoBlink?: boolean;
   lookAtCamera?: boolean;
+  headLookAtCamera?: boolean;
+  eyeLookAtCamera?: boolean;
+  eyeWander?: boolean;
   enableBreathing?: boolean;
   effectTextManager?: EffectTextManager;
   onProgress?: (progress: number) => void;
@@ -271,6 +293,33 @@ export class Avatar {
   };
   public isLipSyncActive: boolean = false;
 
+  // Eye Look-At & Eye Wander state
+  private eyeLookAtConfig: Required<EyeLookAtConfig> = {
+    mode: 'camera',
+    targetPos: undefined as any,
+    offset: { x: 0, y: 0 },
+    wander: false,
+    wanderIntensity: 1.0,
+    wanderSpeed: 1.0,
+  };
+  private eyeWanderTimer = 0;
+  private eyeWanderInterval = 0.3;
+  private eyeWanderCurrentOffset = new THREE.Vector2(0, 0);
+  private eyeWanderTargetOffset = new THREE.Vector2(0, 0);
+
+  // Head Look-At state
+  private headLookAtConfig: Required<HeadLookAtConfig> = {
+    enabled: false,
+    targetPos: undefined as any,
+    weight: 1.0,
+    offset: { x: 0, y: 0 },
+    maxYaw: THREE.MathUtils.degToRad(45),
+    maxPitch: THREE.MathUtils.degToRad(25),
+    smoothSpeed: 8.0,
+  };
+  private currentHeadYaw = 0;
+  private currentHeadPitch = 0;
+
   constructor(scene: THREE.Scene, camera: THREE.Camera, options: AvatarOptions) {
     this.scene = scene;
     this.camera = camera;
@@ -282,12 +331,19 @@ export class Avatar {
       rotationY: options.rotationY,
       autoBlink: options.autoBlink ?? true,
       lookAtCamera: options.lookAtCamera ?? true,
+      headLookAtCamera: options.headLookAtCamera ?? false,
+      eyeLookAtCamera: options.eyeLookAtCamera ?? (options.lookAtCamera ?? true),
+      eyeWander: options.eyeWander ?? false,
       enableBreathing: options.enableBreathing ?? true,
       effectTextManager: options.effectTextManager,
       onProgress: options.onProgress ?? (() => {}),
       onLoaded: options.onLoaded ?? (() => {}),
       onError: options.onError ?? ((err) => console.error(err)),
     };
+
+    this.eyeLookAtConfig.mode = (options.eyeLookAtCamera ?? (options.lookAtCamera ?? true)) ? 'camera' : 'forward';
+    this.eyeLookAtConfig.wander = !!options.eyeWander;
+    this.headLookAtConfig.enabled = !!options.headLookAtCamera;
 
     if (options.position) {
       if (options.position instanceof THREE.Vector3) {
@@ -679,6 +735,7 @@ export class Avatar {
 
   public setLookAtCamera(enabled: boolean): void {
     this.options.lookAtCamera = enabled;
+    this.eyeLookAtConfig.mode = enabled ? 'camera' : 'forward';
     if (!enabled && this.vrm?.lookAt) {
       // Look straight forward in model space
       const forwardPos = new THREE.Vector3(0, 1.4, 5.0);
@@ -687,11 +744,289 @@ export class Avatar {
     }
   }
 
-  private updateLookAt(): void {
-    if (!this.options.lookAtCamera || !this.vrm?.lookAt) return;
-    const targetPos = new THREE.Vector3();
-    this.camera.getWorldPosition(targetPos);
-    this.vrm.lookAt.lookAt(targetPos);
+  /**
+   * Configure eye look-at (mode, target, offset, wandering/restless eye movement).
+   */
+  public setEyeLookAt(config: Partial<EyeLookAtConfig>): void {
+    if (config.mode !== undefined) this.eyeLookAtConfig.mode = config.mode;
+    if (config.targetPos !== undefined) this.eyeLookAtConfig.targetPos = config.targetPos;
+    if (config.offset !== undefined) {
+      this.eyeLookAtConfig.offset = {
+        x: config.offset.x ?? this.eyeLookAtConfig.offset.x,
+        y: config.offset.y ?? this.eyeLookAtConfig.offset.y,
+      };
+    }
+    if (config.wander !== undefined) this.eyeLookAtConfig.wander = config.wander;
+    if (config.wanderIntensity !== undefined) this.eyeLookAtConfig.wanderIntensity = config.wanderIntensity;
+    if (config.wanderSpeed !== undefined) this.eyeLookAtConfig.wanderSpeed = config.wanderSpeed;
+  }
+
+  /**
+   * Adjust eye offset angles in radians (e.g. looking up, down, side glances).
+   * x: Horizontal yaw offset (positive: right, negative: left)
+   * y: Vertical pitch offset (positive: up, negative: down)
+   */
+  public setEyeOffset(x: number, y: number): void {
+    this.eyeLookAtConfig.offset.x = x;
+    this.eyeLookAtConfig.offset.y = y;
+  }
+
+  /**
+   * Toggle or set wandering/restless eye movement (saccade/darting gaze).
+   */
+  public setEyeWander(enabled: boolean, intensity: number = 1.0): void {
+    this.eyeLookAtConfig.wander = enabled;
+    this.eyeLookAtConfig.wanderIntensity = intensity;
+    if (!enabled) {
+      this.eyeWanderCurrentOffset.set(0, 0);
+      this.eyeWanderTargetOffset.set(0, 0);
+    }
+  }
+
+  /**
+   * Set head/face look-at camera tracking.
+   * Naturally bends neck (35%) and head (65%) on top of FBX animations with physiological limits.
+   */
+  public setHeadLookAtCamera(enabled: boolean, options?: Partial<HeadLookAtConfig>): void {
+    this.headLookAtConfig.enabled = enabled;
+    if (options) {
+      this.setHeadLookAt(options);
+    }
+  }
+
+  /**
+   * Detailed configuration for head/neck look-at.
+   */
+  public setHeadLookAt(config: Partial<HeadLookAtConfig>): void {
+    if (config.enabled !== undefined) this.headLookAtConfig.enabled = config.enabled;
+    if (config.targetPos !== undefined) this.headLookAtConfig.targetPos = config.targetPos;
+    if (config.weight !== undefined) this.headLookAtConfig.weight = config.weight;
+    if (config.offset !== undefined) {
+      this.headLookAtConfig.offset = {
+        x: config.offset.x ?? this.headLookAtConfig.offset.x,
+        y: config.offset.y ?? this.headLookAtConfig.offset.y,
+      };
+    }
+    if (config.maxYaw !== undefined) this.headLookAtConfig.maxYaw = config.maxYaw;
+    if (config.maxPitch !== undefined) this.headLookAtConfig.maxPitch = config.maxPitch;
+    if (config.smoothSpeed !== undefined) this.headLookAtConfig.smoothSpeed = config.smoothSpeed;
+  }
+
+  public getEyeLookAtConfig(): Readonly<Required<EyeLookAtConfig>> {
+    return this.eyeLookAtConfig;
+  }
+
+  public getHeadLookAtConfig(): Readonly<Required<HeadLookAtConfig>> {
+    return this.headLookAtConfig;
+  }
+
+  /**
+   * Update Head/Neck look-at by additively blending camera orientation onto active FBX animations.
+   */
+  private updateHeadLookAt(delta: number): void {
+    if (!this.vrm?.humanoid) return;
+
+    const headNode = this.vrm.humanoid.getNormalizedBoneNode('head');
+    const neckNode = this.vrm.humanoid.getNormalizedBoneNode('neck');
+    if (!headNode || !neckNode) return;
+
+    let targetYaw = 0;
+    let targetPitch = 0;
+
+    if (this.headLookAtConfig.enabled) {
+      const chestNode =
+        this.vrm.humanoid.getNormalizedBoneNode('chest') ||
+        this.vrm.humanoid.getNormalizedBoneNode('spine') ||
+        this.vrm.humanoid.getNormalizedBoneNode('hips');
+
+      const targetWorldPos = this.headLookAtConfig.targetPos
+        ? this.headLookAtConfig.targetPos.clone()
+        : new THREE.Vector3();
+      if (!this.headLookAtConfig.targetPos) {
+        this.camera.getWorldPosition(targetWorldPos);
+      }
+
+      // Reference orientation comes from chest (stable torso plane)
+      const refQuatNode = chestNode || this.vrm.scene;
+      const refWorldQuat = new THREE.Quaternion();
+      refQuatNode.getWorldQuaternion(refWorldQuat);
+
+      // Reference position comes from neck/head origin (avoids artificial ~13deg chest-to-head upward tilt)
+      const originNode = neckNode || headNode || refQuatNode;
+      const refWorldPos = new THREE.Vector3();
+      originNode.getWorldPosition(refWorldPos);
+
+      // Vector from neck/head to target
+      const dirWorld = targetWorldPos.sub(refWorldPos).normalize();
+      // Direction in chest local space (+Z is forward, +Y is up, +X is left/right)
+      const dirLocal = dirWorld.clone().applyQuaternion(refWorldQuat.clone().invert());
+
+      // Raw horizontal (yaw) and vertical (pitch) angles
+      const rawYaw = Math.atan2(dirLocal.x, dirLocal.z);
+      const rawPitch = Math.atan2(dirLocal.y, Math.hypot(dirLocal.x, dirLocal.z));
+
+      // Natural physiological motion limits (clamp)
+      const maxYaw = this.headLookAtConfig.maxYaw;
+      // Limit upward tilt (max 10 deg) so character never raises chin too high and looks condescending
+      const maxPitchUp = THREE.MathUtils.degToRad(10);
+      const maxPitchDown = this.headLookAtConfig.maxPitch;
+
+      // Soft angle falloff if target is largely behind the avatar (> 85 deg)
+      const absYaw = Math.abs(rawYaw);
+      let angleWeight = 1.0;
+      if (absYaw > THREE.MathUtils.degToRad(85)) {
+        angleWeight = Math.max(0, 1.0 - (absYaw - THREE.MathUtils.degToRad(85)) / THREE.MathUtils.degToRad(45));
+      }
+
+      const clampedYaw = THREE.MathUtils.clamp(rawYaw, -maxYaw, maxYaw) * angleWeight;
+      const clampedPitch = THREE.MathUtils.clamp(rawPitch, -maxPitchDown, maxPitchUp) * angleWeight;
+
+      targetYaw = (clampedYaw + this.headLookAtConfig.offset.x) * this.headLookAtConfig.weight;
+      targetPitch = (clampedPitch + this.headLookAtConfig.offset.y) * this.headLookAtConfig.weight;
+    } else if (this.headLookAtConfig.offset.x !== 0 || this.headLookAtConfig.offset.y !== 0) {
+      // Apply pure offset (e.g. slight chin-down correction for walking) even if not looking at camera
+      targetYaw = this.headLookAtConfig.offset.x;
+      targetPitch = this.headLookAtConfig.offset.y;
+    }
+
+    // Smooth exponential damping so head smoothly glides towards target
+    const smoothRate = Math.min(1.0, 1.0 - Math.exp(-delta * this.headLookAtConfig.smoothSpeed));
+    this.currentHeadYaw = THREE.MathUtils.lerp(this.currentHeadYaw, targetYaw, smoothRate);
+    this.currentHeadPitch = THREE.MathUtils.lerp(this.currentHeadPitch, targetPitch, smoothRate);
+
+    if (Math.abs(this.currentHeadYaw) < 0.0001 && Math.abs(this.currentHeadPitch) < 0.0001) {
+      return;
+    }
+
+    // Distribute rotation naturally: 35% neck, 65% head
+    const neckRatio = 0.35;
+    const headRatio = 0.65;
+
+    const neckYaw = this.currentHeadYaw * neckRatio;
+    const neckPitch = this.currentHeadPitch * neckRatio;
+    const headYaw = this.currentHeadYaw * headRatio;
+    const headPitch = this.currentHeadPitch * headRatio;
+
+    // Relative delta quaternions (Euler: -pitch for looking up, yaw for looking left/right)
+    const qNeckDelta = new THREE.Quaternion().setFromEuler(new THREE.Euler(-neckPitch, neckYaw, 0, 'YXZ'));
+    const qHeadDelta = new THREE.Quaternion().setFromEuler(new THREE.Euler(-headPitch, headYaw, 0, 'YXZ'));
+
+    // Multiply additive delta on top of the FBX animation frame rotation
+    neckNode.quaternion.multiply(qNeckDelta);
+    headNode.quaternion.multiply(qHeadDelta);
+  }
+
+  /**
+   * Update Eye look-at with custom mode, directional offset and wandering saccade movement.
+   */
+  private updateEyeLookAt(delta: number, elapsed: number): void {
+    if (!this.vrm?.lookAt) return;
+
+    // Process procedural eye wander (psychological & NLP eye-accessing cues: up-right, down-left, etc.)
+    if (this.eyeLookAtConfig.wander) {
+      this.eyeWanderTimer += delta * this.eyeLookAtConfig.wanderSpeed;
+      if (this.eyeWanderTimer >= this.eyeWanderInterval) {
+        this.eyeWanderTimer = 0;
+        // 0.16〜0.38秒ごとに次の方向へサッカード
+        this.eyeWanderInterval = 0.16 + Math.random() * 0.22;
+
+        const intensity = this.eyeLookAtConfig.wanderIntensity;
+
+        // 心理学・NLPアイアクセシングキュー（嘘をつく時・動揺した時の視線方向）
+        // 1. 上右 (右上: 視覚的創造 / 嘘や言い訳を思い浮かべる): yaw > 0, pitch > 0
+        // 2. 下左 (左下: 内的対話 / 心の中で葛藤・自問自答): yaw < 0, pitch < 0
+        // 3. 下右 (右下: 感情・照れ・うつむき): yaw > 0, pitch < 0
+        // 4. 上左 (左上: 過去の記憶をたどる): yaw < 0, pitch > 0
+        // 5. 中央 (相手の目元をチラッと見てすぐ逸らす)
+        const roll = Math.random();
+        let targetYaw = 0;
+        let targetPitch = 0;
+
+        if (roll < 0.32) {
+          // 上右 (右上: 嘘をつく・想像・作り話の典型的な視線)
+          targetYaw = (0.13 + Math.random() * 0.11) * intensity;
+          targetPitch = (0.09 + Math.random() * 0.08) * intensity;
+        } else if (roll < 0.58) {
+          // 下左 (左下: 自問自答・後ろめたさ・動揺)
+          targetYaw = (-0.12 - Math.random() * 0.10) * intensity;
+          targetPitch = (-0.08 - Math.random() * 0.08) * intensity;
+        } else if (roll < 0.74) {
+          // 下右 (右下: 照れ・感情・うつむきがち)
+          targetYaw = (0.10 + Math.random() * 0.09) * intensity;
+          targetPitch = (-0.09 - Math.random() * 0.07) * intensity;
+        } else if (roll < 0.88) {
+          // 上左 (左上: 記憶を想起・迷い)
+          targetYaw = (-0.11 - Math.random() * 0.09) * intensity;
+          targetPitch = (0.08 + Math.random() * 0.07) * intensity;
+        } else {
+          // チラ見 (相手の目元をチラッと確認してすぐ逸らす)
+          targetYaw = (Math.random() - 0.5) * 0.03 * intensity;
+          targetPitch = (Math.random() - 0.5) * 0.02 * intensity;
+        }
+
+        this.eyeWanderTargetOffset.set(targetYaw, targetPitch);
+      }
+
+      // 素早いサッカード跳躍補間 (人間は約30〜40msで視線を跳躍させる)
+      const t = Math.min(1.0, 1.0 - Math.exp(-delta * 28.0));
+      this.eyeWanderCurrentOffset.lerp(this.eyeWanderTargetOffset, t);
+    } else {
+      const t = Math.min(1.0, 1.0 - Math.exp(-delta * 14.0));
+      this.eyeWanderCurrentOffset.lerp(new THREE.Vector2(0, 0), t);
+    }
+
+    // Determine base target position
+    const baseTargetPos = new THREE.Vector3();
+    const headNode =
+      this.vrm.humanoid?.getNormalizedBoneNode('head') ||
+      this.vrm.humanoid?.getRawBoneNode('head');
+    const headWorldPos = new THREE.Vector3();
+    if (headNode) {
+      headNode.getWorldPosition(headWorldPos);
+    } else {
+      this.vrm.scene.getWorldPosition(headWorldPos);
+      headWorldPos.y += 1.4;
+    }
+
+    if (this.eyeLookAtConfig.mode === 'camera') {
+      this.camera.getWorldPosition(baseTargetPos);
+    } else if (this.eyeLookAtConfig.mode === 'custom' && this.eyeLookAtConfig.targetPos) {
+      baseTargetPos.copy(this.eyeLookAtConfig.targetPos);
+    } else {
+      // 'forward' mode: 5 meters in front of the model's head
+      const forwardVec = new THREE.Vector3(0, 0, 5.0);
+      if (headNode) {
+        const headWorldQuat = new THREE.Quaternion();
+        headNode.getWorldQuaternion(headWorldQuat);
+        forwardVec.applyQuaternion(headWorldQuat);
+      } else {
+        const vrmWorldQuat = new THREE.Quaternion();
+        this.vrm.scene.getWorldQuaternion(vrmWorldQuat);
+        forwardVec.applyQuaternion(vrmWorldQuat);
+      }
+      baseTargetPos.copy(headWorldPos).add(forwardVec);
+    }
+
+    // Vector from head to target
+    const toTarget = baseTargetPos.clone().sub(headWorldPos);
+    const dist = Math.max(0.5, toTarget.length());
+
+    // Total eye yaw/pitch offsets
+    const totalYaw = this.eyeLookAtConfig.offset.x + this.eyeWanderCurrentOffset.x;
+    const totalPitch = this.eyeLookAtConfig.offset.y + this.eyeWanderCurrentOffset.y;
+
+    if (Math.abs(totalYaw) > 0.0001 || Math.abs(totalPitch) > 0.0001) {
+      const upVec = new THREE.Vector3(0, 1, 0);
+      const rightVec = new THREE.Vector3();
+      rightVec.crossVectors(toTarget, upVec).normalize();
+      const realUpVec = new THREE.Vector3().crossVectors(rightVec, toTarget).normalize();
+
+      toTarget.addScaledVector(rightVec, Math.sin(totalYaw) * dist);
+      toTarget.addScaledVector(realUpVec, Math.sin(totalPitch) * dist);
+    }
+
+    const finalTargetPos = headWorldPos.clone().add(toTarget);
+    this.vrm.lookAt.lookAt(finalTargetPos);
   }
 
   private updateBreathing(elapsed: number): void {
@@ -718,11 +1053,14 @@ export class Avatar {
       this.mixer.update(delta);
     }
 
+    // Apply procedural Head Look-At on top of FBX animation (before vrm.update)
+    this.updateHeadLookAt(delta);
+
     // Update eye blinking
     this.updateBlink(delta);
 
-    // Update camera look-at tracking
-    this.updateLookAt();
+    // Update eye look-at tracking & wandering
+    this.updateEyeLookAt(delta, elapsed);
 
     // If no FBX animation is active, apply procedural breathing
     if (!this.currentAction) {
