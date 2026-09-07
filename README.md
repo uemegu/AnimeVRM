@@ -14,12 +14,14 @@
   - [1. モデルロード & ジオメトリ前処理](#1-モデルロード--ジオメトリ前処理)
   - [2. トゥーンシェーディング & マテリアル処理](#2-トゥーンシェーディング--マテリアル処理)
   - [3. 高品質アウトライン (反転法線押し出し法)](#3-高品質アウトライン-反転法線押し出し法)
-  - [4. 環境光・太陽光・大気エフェクト](#4-環境光太陽光大気エフェクト)
-  - [5. 風・雨・環境物理パーティクル](#5-風雨環境物理パーティクル)
-  - [6. シネマティック ポストプロセス パイプライン](#6-シネマティック-ポストプロセス-パイプライン)
-  - [7. 漫符・オノマトペ 3D エフェクト演出](#7-漫符オノマトペ-3d-エフェクト演出)
-  - [8. マルチアバター & インタラクティブADVシナリオエンジン](#8-マルチアバター--インタラクティブadvシナリオエンジン)
-  - [9. オンデバイス AI チャット & ローカル音声合成 (WebGPU)](#9-オンデバイス-ai-チャット--ローカル音声合成-webgpu)
+  - [4. 多層背景システム (遠景 / 中景 / 近景) & スクロール・パノラマ](#4-多層背景システム-遠景--中景--近景--スクロールパノラマ)
+  - [5. 環境光・太陽光・大気エフェクト](#5-環境光太陽光大気エフェクト)
+  - [6. 風・雨・環境物理パーティクル](#6-風雨環境物理パーティクル)
+  - [7. シネマティック ポストプロセス パイプライン](#7-シネマティック-ポストプロセス-パイプライン)
+  - [8. 漫符・オノマトペ 3D エフェクト演出](#8-漫符オノマトペ-3d-エフェクト演出)
+  - [9. ヤンデレ闇落ちモード (Yandere Mode)](#9-ヤンデレ闇落ちモード-yandere-mode)
+  - [10. マルチアバター & インタラクティブADVシナリオエンジン](#10-マルチアバター--インタラクティブadvシナリオエンジン)
+  - [11. オンデバイス AI チャット & ローカル音声合成 (WebGPU)](#11-オンデバイス-ai-チャット--ローカル音声合成-webgpu)
 - [🖥️ 統合スタジオ UI (Unified Studio Panel)](#️-統合スタジオ-ui-unified-studio-panel)
 - [⚙️ 設定パラメータ (Configuration)](#️-設定パラメータ-configuration)
   - [マテリアル設定 (`materials`)](#1-マテリアル設定-materialsbody--hair--cloth)
@@ -30,6 +32,7 @@
   - [シネマティック ポストプロセス設定 (`postProcessing`)](#6-シネマティック-ポストプロセス設定-postprocessing)
   - [カメラ・リップシンク設定 (`camera` / `lipSync`)](#7-カメラリップシンク設定-camera--lipsync)
 - [🎬 シーンプリセット (Scene Presets)](#-シーンプリセット-scene-presets)
+- [🖼️ 画像アセット標準化ガイドライン (AVIF)](#️-画像アセット標準化ガイドライン-avif)
 - [💾 設定の保存・読み込み (JSON)](#-設定の保存読み込み-json)
 - [📁 ディレクトリ構成](#-ディレクトリ構成)
 - [🛠️ 技術スタック](#️-技術スタック)
@@ -42,19 +45,32 @@
   - 肌・髪・衣装の自動マテリアル分類とパラメトリック調整
   - **Auto HSV Shadow**: テクスチャ平均色から肌の血色感（暖色シフト）や髪・衣装の青紫系影色を自動計算
   - 影境界のチーク・発色感（`shadowBoundaryTint`）
+  - **眼窩法線平坦化 (`flattenEyeOrbitNormals`)**: 目頭・眼窩周辺の法線を前向きへブレンド補正し、アニメ調のすっきりした目元と不要な影落ち・黒ずみ防止を実現
   - 顔部分の不要な影落ち・割れを抑制するフェイシャル保護
 - **高品質アウトライン (Inverted Hull)**:
   - **Smooth Normal (スムーズ法線)**: 頂点法線のハードエッジによる輪郭線破綻を解消
   - **Screen-Space Width**: カメラ距離に依存しない一定の輪郭線幅
   - **Auto Line Weight**: 視線角度（シルエット）に応じた線の抑揚自動補正
   - テクスチャ色に応じた自動輪郭線カラー（色相維持＋暗度・彩度調整）
+- **多層背景システム (Far / Mid / Near 3層背景 & スクロール・パノラマ)**:
+  - **遠景 (Far Background)**: `scene.background` に設定される広域背景＋大気霞み（Far Fog）
+  - **中景 (Midground)**: アバターより奥（`renderOrder = -1`）に配置される透過環境プレーン（公園の樹木など）
+  - **近景 (Nearground)**: アバターより手前（`renderOrder = 2`）に配置される前景オブジェクト（カフェのテーブルなど）。アバターを挟み込むことで「席に座っている」「奥に立っている」シチュエーションを表現
+  - **横スクロール背景 (`ScrollingBackgroundManager`)**: 歩行アニメーションと完全連動。すりガラス風被写界深度ブラー、左右フェザー減衰、パララックス移動
+  - **360度パノラマ背景 (`PanoramaBackgroundController`)**: ドラッグ操作によるスムーズな全天周視点移動
+  - **AVIF 形式全面標準化**: ロスレス透過（`--qalpha 100`）と高圧縮（`-q 85`）を両立
+- **ヤンデレ闇落ちモード (`Yandere Mode`)**:
+  - ハイライト完全消灯（`hideHighlights`）
+  - 瞳テクスチャ単色化＆暗褐色濁り（`flatIrisTexture`）
+  - 白目トーンダウン（`dimEyeWhite`）
+  - 首かしげ傾き演出（`tiltHead`, `tiltAngle`）
+  - まばたき抑制（`suppressBlink` で一切瞬きをしない狂気表現）
+  - 虚ろな見開き微笑みモーフ直接制御（`Fcl_MTH_Joy`, `Fcl_EYE_Spread`, `Fcl_BRW_Sorrow` 等）
+  - 「🖤 ずっと一緒…」オノマトペやホラーシナリオとの即時連動
 - **太陽光・レンズフレア・大気エフェクト**:
   - **God Rays (Sun Shafts)**: スクリーン空間でのボリュメトリックな光条・木漏れ日・シマー（陽炎・空気の揺らぎ）
   - **アニメ調プロシージャル Lens Flare**: 太陽本体、グロー、スターバースト放射光、アナモルフィック・ストリークフレア、ゴーストリング、ハロー
   - **大気霞み (Far Fog)**: 遠景の地平線・空に合わせたグラデーション空気層
-- **多層背景システム (Layered Background & Keying)**:
-  - 遠景＋中景（クロマキー/ルミナンスキーイング自動透過プレーン）による奥行き・視差表現
-  - OrbitControls のパン操作に応じた中景プレーンのスマート追従
 - **風・雨・環境物理 & 花びらパーティクル連動**:
   - **WindController**: 風速・風向（方位角/仰角）・乱流（Turbulence）・突風（Gust）をリアルタイム計算し、VRM SpringBone（揺れもの）の外力へダイナミックに反映
   - **WindParticles**: 風向・風速に合わせて空間をひらひらと舞い踊る花びら・光の粒子
@@ -65,12 +81,15 @@
 - **漫画調・漫符 & 3D オノマトペ エフェクト**:
   - **汗・冷や汗エフェクト (`SweatEffect`)**: 4方向飛び散りバースト（`fly4`）およびこめかみ垂れ下がり（`jito`）
   - **涙エフェクト (`TearEffect`)**: 目元から流れるアニメ調の涙演出
-  - **3D オノマトペ テキスト (`EffectTextManager`)**: 「ワナワナ」「ドキドキ」「キラキラ」「ガーン」等の漫画文字を空間上にポップ＆ストリーム放出
+  - **3D オノマトペ テキスト (`EffectTextManager`)**: 「ワナワナ」「ドキドキ」「キラキラ」「ガーン」「🖤 ずっと一緒…」等の漫画文字を空間上にポップ＆ストリーム放出
   - **瞳発光エフェクト (`eyeGlow`)**: 感情に応じた瞳のルミナンス強調
-- **マルチアバター & インタラクティブ会話ADVシナリオ**:
-  - 複数アバターの同時配置・掛け合い対話（例: 「放課後の寄り道〜アオイとエミリ〜」）
-  - プレイヤー選択肢付きインタラクティブ分岐シナリオ（例: 「夕暮れの公園と放課後の期待」）
-  - 発話者にフォーカスするダイアログカメラ演出（グイン/スムーズなカメラワーク補間）
+- **多彩なインタラクティブ ADV シナリオエンジン**:
+  - **新NISA投資シナリオ (`nisaScenario`)**: 音声付きフルボイス、オルカン全力ガチホか暴落狼狽売りかのプレイヤー選択肢分岐、資産暴落チャート演出
+  - **後ろにいるよ（Behind You）ホラーシナリオ (`behindYouScenario`)**: 夜間演出、暗転、ヤンデレ闇落ちモードへの戦慄の変貌
+  - **街歩きシナリオ (`townWalkScenario`)**: スクロール背景と歩行モーションがシームレスに同期
+  - **公園告白シナリオ (`parkConfessionScenario`)**: 選択肢付きマルチエンディング分岐
+  - **放課後2人会話シナリオ (`twoGirlsConversationScenario`)**: アオイ・エミリの掛け合い対話
+  - 発話者にフォーカスするダイアログカメラ演出（滑らかなカメラワーク補間）
   - Meyda 音声解析による高精度リアルタイムリップシンク
 - **オンデバイス AI 対話 & ブラウザ内音声合成 (WebGPU / WASM)**:
   - **Gemini Nano (Window AI)**: Chrome 組み込み AI による完全ローカル対話生成
@@ -107,29 +126,31 @@ npm run preview
 
 ## 🎨 描画 & 演出パイプライン
 
-AnimeVRM では、ジオメトリ前処理、シェーディング、環境物理、マルチアバター演出、そして多層ポストプロセスまで一貫したパイプラインで描画を行います。
+AnimeVRM では、ジオメトリ前処理、シェーディング、多層環境演出、マルチアバター協調、そしてシネマティックポストプロセスまで一貫したパイプラインで描画を行います。
 
 ```mermaid
 flowchart TD
     A[VRM モデルロード / AvatarManager] --> B[ジオメトリ前処理]
     B --> B1[VRMUtils: 不要頂点・ジョイント最適化]
     B --> B2[SmoothNormalHelper: スムーズ法線 & 曲率事前計算]
-    B --> B3[ToonShader: アウトライン頂点シェーダーへ Auto Line Weight 注入]
+    B --> B3[SmoothNormalHelper: flattenEyeOrbitNormals 眼窩法線平坦化]
+    B --> B4[ToonShader: アウトライン頂点シェーダーへ Auto Line Weight 注入]
 
-    B3 --> C[シェーディング & マテリアル適用]
+    B4 --> C[シェーディング & マテリアル適用]
     C --> C1[マテリアル自動分類: body, hair, cloth, face]
     C --> C2[Auto HSV Shadow: テクスチャ色から影色を自動計算]
     C --> C3[MToon パラメータ適用: Toony, Shift, GI, Rim, ShadowBoundaryTint]
+    C --> C4[ヤンデレモード制御: 瞳単色化・ハイライト消灯・白目トーンダウン]
 
-    C --> D[メイン描画ループ tick]
+    C4 --> D[メイン描画ループ tick]
     D --> D1[物理・環境更新: WindController, SpringBone, RainEffect, WindParticles]
-    D --> D2[アバター & シナリオ演出: ScenarioController, DialogueCamera, LipSync]
+    D --> D2[アバター & シナリオ演出: ScenarioEngine, DialogueCamera, LipSync]
     D --> D3[3D 漫符・テキスト演出: SweatEffect, TearEffect, EffectTextManager]
-    D --> D4[背景・太陽・レンズフレア: Layered Background, SunEffect]
+    D --> D4[3層背景・太陽・フレア: Far / Mid / Near, ScrollingBg, SunEffect]
     D --> D5[Post-Processing パイプライン ViewerCore.composer]
 
     subgraph EffectComposer [EffectComposer Cinematic Pipeline]
-        E1[1. RenderPass: 3Dシーン HalfFloatType / MSAA]
+        E1[1. RenderPass: 3Dシーン HalfFloatType / MSAA: 4]
         E2[2. UnrealBloomPass: HDR ハイライト発光・グロー]
         E3[3. GodRaysShader: ボリュメトリック サンシャフト & 光条]
         E4[4. CinematicAnimeShader: 色収差・ディフュージョン・スプリットトーニング・粒状感・ビネット・シャープニング]
@@ -147,6 +168,8 @@ flowchart TD
   `@pixiv/three-vrm` の `VRMLoaderPlugin` を用いてロードし、`VRMUtils.removeUnnecessaryVertices` / `removeUnnecessaryJoints` で負荷を最適化。
 - **スムーズ法線の事前計算 (`SmoothNormalHelper.ts`)**:
   モデルのハードエッジ（法線の不連続面）による裏面押し出し輪郭線の裂けを解消するため、空間ハッシュマップを用いて同座標頂点の平均法線（`smoothNormal`）と曲率（`curvature`）をロード時に事前計算。
+- **眼窩法線の平坦化 (`flattenEyeOrbitNormals`)**:
+  目頭・眼窩周辺の法線を前向き（Z方向）へブレンド補正し、アニメキャラクター特有の平坦ですっきりした目元を維持。不要な影落ちや黒ずみを防止。
 - **Auto Line Weight 注入 (`ToonShader.ts`)**:
   MToon アウトラインマテリアルの `onBeforeCompile` をフックし、視線角度ベクトルとの内積（`dotNV`）に応じた線の抑揚コードを頂点シェーダーへ注入。
 
@@ -165,53 +188,81 @@ flowchart TD
 - `outlineWidthMode = 'screenCoordinates'` により、カメラ距離に左右されない安定した線幅を維持。
 - テクスチャ平均色から明度を下げ彩度を微調整したアウトラインカラー（`getDarkenedOutlineColor`）を自動適用。
 
-### 4. 環境光・太陽光・大気エフェクト
-- **多層背景 (`ViewerCore.ts`)**: 遠景画像に大気霞み（Far Fog）をブレンド。中景画像は自動ルミナンスキーイングで白背景を透過し、カメラ操作に追従するビルボードプレーンとして描画。
+### 4. 多層背景システム (遠景 / 中景 / 近景) & スクロール・パノラマ
+- **3層構造 (Far / Mid / Near)**:
+  - **遠景 (Background / Far)**: `scene.background` に設定。大気霞み（Far Fog）とブレンド。
+  - **中景 (Midground)**: アバターの背後（`renderOrder = -1`）に配置される環境レイヤー（公園の樹木など）。自動ルミナンスキーイングで白背景を透過。
+  - **近景 (Nearground)**: アバターの手前（`renderOrder = 2`）に配置される前景レイヤー（カフェのテーブルなど）。アバターを前後から挟み込むことでリアルな空間深度とシチュエーションを表現。
+- **横スクロール背景 (`ScrollingBackgroundManager.ts`)**:
+  歩行アニメーションに合わせて背景をスムーズに横スクロール。すりガラス風ノイズブラー（`uBlurAmount`）、エッジ透過フェザー（`uFeatherWidth`）、パララックス・ズーム制御を搭載。
+- **360度パノラマ背景 (`PanoramaBackgroundController.ts`)**:
+  全天周パノラマ画像を球体/天球上にマッピングし、スムーズなドラッグ操作と自動アイドリング視点移動を提供。
+
+### 5. 環境光・太陽光・大気エフェクト
 - **サンシャフト・ゴッドレイ (`GodRaysShader.ts`)**: 太陽位置から放射状にスクリーンサンプリングを行い、光条とシマー（揺らぎ）を付加。
 - **レンズフレア (`SunEffect.ts`)**: 太陽光源軸上に、アナモルフィックフレア、ゴーストリング、スターバースト光、ハローをプロシージャル描画。
+- **大気霞み (Far Fog)**: 遠景の地平線・空に合わせたグラデーション空気層。
 
-### 5. 風・雨・環境物理パーティクル
+### 6. 風・雨・環境物理パーティクル
 - **風コントローラー (`WindController.ts`)**:
-  ベース風速・風向、パーリンノイズ風の乱流（Turbulence）、突風（Gust）を重ね合わせた 3D ベクトルを毎フレーム計算。VRM の `SpringBone` 外力に注入。
+  ベース風速・風向、乱流（Turbulence）、突風（Gust）を重ね合わせた 3D ベクトルを毎フレーム計算。VRM の `SpringBone` 外力に注入。
 - **風パーティクル (`WindParticles.ts`)**:
   風向と風速に同期して舞う花びらや光の粒子を Instanced/Points で描画。
 - **雨エフェクト (`RainEffect.ts`)**:
   降雨の密度・落下速度・風連動スプラッシュをプロシージャル制御。
 
-### 6. シネマティック ポストプロセス パイプライン
+### 7. シネマティック ポストプロセス パイプライン
 `EffectComposer`（レンダーターゲット: `HalfFloatType`, `MSAA: 4`）上で以下の順にパスを実行します。
 
 | 順序 | パス名 | 役割・処理内容 |
 | :--- | :--- | :--- |
-| **1** | `RenderPass` | 背景・中景・床・VRM モデル・パーティクル・3D エフェクトを描画 |
+| **1** | `RenderPass` | 背景・近景・中景・床・VRM モデル・パーティクル・3D エフェクトを描画 |
 | **2** | `UnrealBloomPass` | 高輝度部分を抽出・ぼかし、ふんわりとした光の溢れ（グロー）を付加 |
 | **3** | `GodRaysShader` | 太陽光源を中心としたボリュメトリックな光条（サンシャフト）を描画 |
 | **4** | `CinematicAnimeShader` | **色収差**、**ディフュージョン（ソフトグロー）**、**カラーグレーディング（スプリットトーニング＋S字カーブ）**、**彩度・明度・コントラスト**、**フィルムグレイン（粒状感）**、**ビネット**、**スマート輪郭シャープニング** を 1 パスで高品質統合処理 |
 | **5** | `SMAAPass` | 輪郭部やハイコントラストエッジに対してサブピクセル アンチエイリアシングを適用（Linear 色空間） |
 | **6** | `OutputPass` | Linear HDR 色空間から sRGB への変換およびトーンマッピング（ACESFilmic / AgX / Reinhard / Linear 等）の適用 |
 
-### 7. 漫符・オノマトペ 3D エフェクト演出
+### 8. 漫符・オノマトペ 3D エフェクト演出
 - **漫符・汗エフェクト (`SweatEffect.ts`)**:
   - `fly4`: 驚きや慌てた際に頭上4方向へ放物線状に飛び散る漫符水滴。
   - `jito`: 困惑や焦り時にこめかみ付近からタラーッと垂れ下がる冷や汗。
 - **涙エフェクト (`TearEffect.ts`)**:
   - 悲しみや感動時に目元から流れるアニメ調の涙。
 - **オノマトペ 3D テキスト (`EffectTextManager.ts`)**:
-  - 「ワナワナ」「ドキドキ」「キラキラ」「ガーン」「シーン」「ビクッ」等の漫画文字テクスチャを Canvas 2D で動的生成し、ビルボード Sprite として 3D 空間に配置。ポップアップやストリーム上昇アニメーションを実行。
+  - 「ワナワナ」「ドキドキ」「キラキラ」「ガーン」「シーン」「ビクッ」「🖤 ずっと一緒…」等の漫画文字テクスチャを Canvas 2D で動的生成し、ビルボード Sprite として 3D 空間に配置。ポップアップやストリーム上昇アニメーションを実行。
 
-### 8. マルチアバター & インタラクティブADVシナリオエンジン
-- **複数アバター協調制御 (`twoGirlsConversationScenario.ts`)**:
-  2体以上のアバター（アオイ・エミリなど）を同時にシーン内に配置し、それぞれの立ち位置・モーション・視線・表情・セリフを完全同期。
-- **選択肢分岐シナリオ (`parkConfessionScenario.ts`)**:
-  夕暮れの公園での告白イベントなど、プレイヤーの選択肢によって展開やセリフ・エンディングが分岐。
+### 9. ヤンデレ闇落ちモード (Yandere Mode)
+- **表情・視覚変化の即時適用 (`Avatar.ts`)**:
+  - **ハイライト消灯**: `EyeHighlight` マテリアルの非表示化・発光ゼロ化
+  - **瞳の濁り・単色化**: 瞳テクスチャを暗褐色（`#3b080f` など）の単色へ切り替え
+  - **白目トーンダウン**: 白目マテリアルを暗めのグレーへ減光
+  - **首かしげ演出**: 頭部ボーンを傾斜角（`tiltAngle`）で不気味に傾斜
+  - **無瞬き**: まばたきアニメーションを完全停止
+  - **狂気の微笑み**: VRoid 固有モーフ（`Fcl_MTH_Joy`, `Fcl_EYE_Spread`, `Fcl_BRW_Sorrow` 等）をダイレクト操作し、目が笑っていない見開き笑顔を生成
+
+### 10. マルチアバター & インタラクティブADVシナリオエンジン
+- **新NISA投資シナリオ (`nisaScenario.ts`)**:
+  - 投資ブームに乗ったオルカン積立投資と、その後の暴落パニックを描くフルボイス付きインタラクティブドラマ。
+  - ガチホするか狼狽売りするかのプレイヤー選択肢分岐、暴落資産チャート表示演出。
+- **後ろにいるよ（Behind You）ホラーシナリオ (`behindYouScenario.ts`)**:
+  - 夜間教室の静寂から突如背後に現れるサスペンス・ホラー演出。暗転からヤンデレモードへの劇的変貌。
+- **街歩きシナリオ (`townWalkScenario.ts`)**:
+  - スクロール背景と歩行モーションが同期し、街並みを歩きながら会話する演出。
+- **公園告白シナリオ (`parkConfessionScenario.ts`)**:
+  - 夕暮れの公園での告白イベント。選択肢によって展開やエンディングが分岐。
+- **2人女子会話シナリオ (`twoGirlsConversationScenario.ts`)**:
+  - アオイとエミリの複数アバター協調掛け合い対話。
 - **ダイアログカメラ (`DialogueCameraController.ts`)**:
-  話者に合わせたバストアップ・クローズアップ・引き・回り込み（Orbit）カメラワークを滑らかに補間遷移。
+  - 話者に合わせたバストアップ・クローズアップ・引き・回り込み（Orbit）カメラワークを滑らかに補間遷移。
+- **リアルタイム リップシンク (`AudioLipSync.ts`)**:
+  - Meyda 音声解析により、音声のスペクトル・RMSから口パクモーフ（`aa`, `ih`, `ou`, `ee`, `oh`）を高精度制御。
 
-### 9. オンデバイス AI チャット & ローカル音声合成 (WebGPU)
+### 11. オンデバイス AI チャット & ローカル音声合成 (WebGPU)
 - **Gemini Nano (`GeminiNanoService.ts`)**:
-  Chrome 組み込みの `window.ai` を用い、クラウド通信不要でアバターとリアルタイム日本語対話。セリフから感情表情やジェスチャーモーションを推論。
+  Chrome 組み込みの `window.ai` を用い、完全ローカルでアバターと対話。会話文から感情表現やジェスチャーを自動推論。
 - **Irodori-TTS (`IrodoriTTSService.ts`)**:
-  ONNX Runtime Web と WebGPU / WASM を活用し、ブラウザ内で日本語音声合成を高速実行。Meyda スペクトル解析と連携してリアルタイムに口パク（リップシンク）同期。
+  ONNX Runtime Web と WebGPU / WASM を活用し、ブラウザ内で日本語ニューラル音声合成を高速実行。
 
 ---
 
@@ -224,16 +275,17 @@ flowchart TD
 ```
 
 1. **👤 キャラクター (Character)**:
-   - **モデル切り替え**: サンプルモデル（`girl.vrm`, `girl2.vrm`, `girl3.vrm`）またはローカルの VRM ファイル読み込み
+   - **モデル切り替え**: サンプルモデル（`girl.vrm`, `girl2.vrm`, `girl3.vrm`）またはローカル VRM ファイル読み込み
    - **モーション**: 待機、歩行、挨拶、お辞儀、ダンス等の再生＆ループ設定
    - **表情・感情**: 喜怒哀楽、ウインク等のモーフコントロール
-   - **漫符・演出エフェクト**: 汗（飛び散り/冷や汗）、涙、オノマトペテキスト（ドキドキ、キラキラ等）、瞳発光
+   - **🖤 ヤンデレ闇落ちボタン**: ワンクリックでハイライト消灯・瞳濁り・見開き笑顔のヤンデレ状態へ即座に移行/解除
+   - **漫符・演出エフェクト**: 汗（飛び散り/冷や汗）、涙、オノマトペテキスト（ドキドキ、キラキラ、🖤 ずっと一緒… 等）、瞳発光
    - **AI 会話モード**: Gemini Nano + Irodori-TTS によるローカル対話
 2. **🎪 ステージ (Stage)**:
-   - **シーンプリセット**: 公園・校門・教室 × 朝・昼・夕・雨のワンクリック切り替え
-   - **背景・中景設定**: 遠景画像、ルミナンスキーイング透過中景、床面グリッド
+   - **シーンプリセット**: 公園・校門・教室・カフェ × 朝・昼・夕・雨・夜間のワンクリック切り替え
+   - **多層背景設定**: 遠景画像、ルミナンス透過中景、近景レイヤー（カフェテーブル等）、床面グリッド
    - **環境・天候**: 風速・風向・乱流・突風・花びらパーティクル、雨エフェクト
-   - **ADV シナリオ**: 公園告白シナリオ（分岐あり）、2人女子会話シナリオの再生・一時停止・シーク
+   - **ADV シナリオエンジン**: 新NISA投資シナリオ、後ろにいるよホラーシナリオ、街歩きシナリオ、公園告白シナリオ、2人女子会話シナリオの再生・一時停止・外部JSON読み込み
 3. **🎨 ビジュアル (Visual)**:
    - **ライティング**: 主光源、環境光、リムライト、深度リム
    - **太陽 & 大気**: サンシャフト（God Rays）、プロシージャルレンズフレア、大気霞み
@@ -257,7 +309,7 @@ flowchart TD
 
 | パラメータ名 | 型 | デフォルト (body) | 説明 |
 | :--- | :--- | :--- | :--- |
-| `color` | `string` | `#fff6f0` | 基本色・血色感（Base Color / Tint） |
+| `color` | `string` | `#ffffff` | 基本色・血色感（Base Color / Tint） |
 | `matcapEnabled` | `boolean` | `true` | ハイライト (MatCap / スフィアマップ) の表示 ON/OFF |
 | `emissiveIntensity` | `number` | `0.0` | 自己発光（エミッシブ）強度 |
 | `shadowHueShift` | `number` | `0.02` | 影色の色相シフト量（正: 暖色寄り, 負: 寒色寄り） |
@@ -266,12 +318,12 @@ flowchart TD
 | `shadingToonyFactor` | `number` | `1.0` | トゥーンの硬さ（`1.0` で完全なセル調2値境界） |
 | `shadingShiftFactor` | `number` | `-0.05` | 明暗境界の位置オフセット |
 | `giEqualizationFactor` | `number` | `0.9` | 環境光の均一化率（アニメ調のフラットさを向上） |
-| `rimEnabled` | `boolean` | `true` | パラメトリックリムライトの有効/無効 |
+| `rimEnabled` | `boolean` | `false` | パラメトリックリムライトの有効/無効 |
 | `rimColor` | `string` | `#ffffff` | リムライトの発光色 |
 | `parametricRimFresnelPowerFactor` | `number` | `5.0` | リムの急峻度（高いほどシルエットの端だけに絞られる） |
 | `parametricRimLiftFactor` | `number` | `0.1` | リム光の持ち上げ量 |
 | `rimLightingMixFactor` | `number` | `0.1` | 光源方向によるリムの変調比率 |
-| `outlineWidthFactor` | `number` | `0.001` | 個別のアウトライン太さ係数 |
+| `outlineWidthFactor` | `number` | `0.0016` | 個別のアウトライン太さ係数 |
 
 ### 2. アウトライン設定 (`outline`)
 
@@ -290,11 +342,11 @@ flowchart TD
 | パラメータ名 | 型 | デフォルト | 説明 |
 | :--- | :--- | :--- | :--- |
 | `castShadows` | `boolean` | `false` | シャドウマップによる落ち影の有無 |
-| `ambient.color` / `intensity` | `string` / `number` | `#3e407a` / `0.5` | 環境光の色と強度 |
-| `directional.color` / `intensity` | `string` / `number` | `#fffbf0` / `1.8` | 主光源の色と強度 |
-| `directional.posX / Y / Z` | `number` | `-3.7 / 0.8 / 0.7` | 主光源の 3D 位置 |
-| `rim.enabled` / `color` / `intensity` | `boolean` / `string` / `number` | `true` / `#ffaa60` / `0.3` | 補助環境リム光 |
-| `depthRim.enabled` / `power` / `intensity` | `boolean` / `number` / `number` | `true` / `3.5` / `1.0` | 深度リムライト効果 |
+| `ambient.color` / `intensity` | `string` / `number` | `#b30071` / `1.0` | 環境光の色と強度 |
+| `directional.color` / `intensity` | `string` / `number` | `#ffffff` / `3.2` | 主光源の色と強度 |
+| `directional.posX / Y / Z` | `number` | `-0.7 / 0.5 / 0.4` | 主光源の 3D 位置 |
+| `rim.enabled` / `color` / `intensity` | `boolean` / `string` / `number` | `false` / `#dde8ff` / `0.05` | 補助環境リム光 |
+| `depthRim.enabled` / `power` / `intensity` | `boolean` / `number` / `number` | `true` / `4.0` / `0.8` | 深度リムライト効果 |
 | `sunShafts.enabled` / `color` / `exposure` | `boolean` / `string` / `number` | `true` / `#ff7826` / `0.36` | 太陽光条（God Rays） |
 | `sunShafts.decay` / `density` / `weight` | `number` | `0.83 / 0.5 / 0.48` | サンシャフトの減衰・密度・重み |
 | `sunShafts.shimmer` | `number` | `0.25` | サンシャフトの陽炎・揺らぎ強度 |
@@ -308,10 +360,16 @@ flowchart TD
 | パラメータ名 | 型 | デフォルト | 説明 |
 | :--- | :--- | :--- | :--- |
 | `showBackgroundImage` | `boolean` | `true` | 背景画像の表示 ON/OFF |
-| `backgroundImageUrl` | `string` | `/textures/modern-park-far.jpg` | 遠景画像の URL / パス |
+| `backgroundImageUrl` | `string` | `/textures/modern-park-far.avif` | 遠景画像の URL / パス |
 | `showMidground` | `boolean` | `true` | 中景レイヤー（自動透過）の表示 ON/OFF |
-| `midgroundImageUrl` | `string` | `/textures/modern-park-mid.jpg` | 中景画像の URL / パス |
-| `farFogEnabled` / `farFogColor` / `farFogIntensity` | `boolean` / `string` / `number` | `true` / `#ff7e4d` / `0.08` | 遠景の大気霞み（フォグ）設定 |
+| `midgroundImageUrl` | `string` | `/textures/modern-park-mid.avif` | 中景画像の URL / パス |
+| `midgroundPosition` | `{ x, y, z }` | `{ 0, 1.35, -0.25 }` | 中景プレーンの位置 |
+| `midgroundScale` / `midgroundOpacity` | `number` / `number` | `1.15 / 1.0` | 中景プレーンの拡大率・不透明度 |
+| `showNearground` | `boolean` | `false` | 近景レイヤー（アバター手前）の表示 ON/OFF |
+| `neargroundImageUrl` | `string` | `undefined` (`/textures/cafe_near.avif` 等) | 近景画像の URL / パス |
+| `neargroundPosition` | `{ x, y, z }` | `{ 0, 0, 0 }` | 近景プレーンの位置 |
+| `neargroundScale` / `neargroundOpacity` | `number` / `number` | `1.0 / 1.0` | 近景プレーンの拡大率・不透明度 |
+| `farFogEnabled` / `farFogColor` / `farFogIntensity` | `boolean` / `string` / `number` | `true` / `#ffffff` / `0.12` | 遠景の大気霞み（フォグ）設定 |
 | `rain.enabled` / `density` / `speed` | `boolean` / `number` / `number` | `false` / `1200` / `1.0` | 雨エフェクトの有効化・密度・落下速度 |
 | `rain.splashEnabled` / `angle` | `boolean` / `number` | `true` / `0.0` | 地面水しぶき有効化・降雨傾き角度 |
 
@@ -337,10 +395,10 @@ flowchart TD
 | `colorGrading.shadowTint` / `highlightTint` | `string` | `#391752 / #ffad70` | 影（暗部）と明部（ハイライト）のティントカラー |
 | `colorGrading.strength` / `contrast` / `gamma` | `number` | `0.65 / 0.18 / 0.95` | ブレンド強度・S字コントラスト・ガンマ |
 | `cinematic.chromaticAberration.enabled / offset` | `boolean` / `number` | `true / 0.0015` | 色収差の有効化・オフセット量 |
-| `cinematic.diffusion.enabled / strength / radius`| `boolean` / `number` / `number` | `true / 0.24 / 1.8` | ディフュージョン（ソフトグロー）設定 |
-| `cinematic.filmGrain.enabled / strength / speed` | `boolean` / `number` / `number` | `true / 0.035 / 1.0` | 映画調フィルムグレイン設定 |
-| `cinematic.vignette.enabled / darkness / offset` | `boolean` / `number` | `true / 0.35 / 1.1` | 周辺減光（ビネット）設定 |
-| `cinematic.sharpening.enabled / amount` | `boolean` / `number` | `true / 0.22` | スマート輪郭シャープニング設定 |
+| `cinematic.diffusion.enabled / strength / radius`| `boolean` / `number` | `true / 0.24 / 2.0` | ディフュージョン（ソフトグロー）設定 |
+| `cinematic.filmGrain.enabled / strength / speed` | `boolean` / `number` | `false / 0.035 / 1.0` | 映画調フィルムグレイン設定 |
+| `cinematic.vignette.enabled / darkness / offset` | `boolean` / `number` | `true / 0.08 / 1.15` | 周辺減光（ビネット）設定 |
+| `cinematic.sharpening.enabled / amount` | `boolean` / `number` | `false / 0.22` | スマート輪郭シャープニング設定 |
 
 ### 7. カメラ・リップシンク設定 (`camera` / `lipSync`)
 
@@ -355,16 +413,36 @@ flowchart TD
 
 ### 📊 主なプリセット比較
 
-| プリセットID | ロケーション | 時間帯 / 天候 | 背景 | 主光源 (Dir Light) | サンシャフト / フレア | ポストプロセス特徴 | 特殊効果 |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **`morning_park`** | 近代公園 | 🌅 朝 (Morning) | 近代公園 (2層) | `#ffffff` / `2.6` (右上高) | 澄んだ朝陽 (白黄) | コントラスト高・爽快 | 花びら舞い |
-| **`day_park`** | 近代公園 | ☀️ 昼 (Day) | 近代公園 (2層) | `#ffffff` / `2.6` (左斜め前) | 昼の自然光サンシャフト・フレア | 高彩度・ニュートラル | 花びら舞い |
-| **`evening_park`** | 近代公園 | 🌇 夕方 (Evening) | 近代公園 (2層) | `#fffbf0` / `1.8` (左低) | 茜色の夕陽・大型フレア | スプリットトーニング (紫/橙) | 花びら舞い |
-| **`rainy_park`** | 近代公園 | 🌧️ 雨 (Rainy) | 近代公園 (2層) | `#b0c4de` / `1.2` (薄曇) | OFF | 落ち着いた彩度・冷色 | **雨・水滴エフェクト** |
-| **`morning_school`** | 校門前 | 🌅 朝 (Morning) | 校門前 (単層) | `#ffffff` / `2.6` (右上高) | 澄んだ朝陽 (白黄) | コントラスト高・爽快 | 花びら舞い |
-| **`evening_school`** | 校門前 | 🌇 夕方 (Evening) | 校門前 (単層) | `#fffbf0` / `1.8` (左低) | 茜色の夕陽・大型フレア | スプリットトーニング (紫/橙) | 花びら舞い |
-| **`bright_indoor`** | 教室 | 💡 室内 (Bright) | 教室廊下 (単層) | `#ffffff` / `2.2` (窓光) | OFF | フラット・クリア | 風・雨 OFF |
-| **`dark_indoor`** | 教室 | 🌙 夜間 (Dark) | 教室廊下 (単層) | `#b7cdf0` / `2.5` (月光) | 月光サンシャフト | 影に夜闇・冷光 | **髪ハイライト自動消灯** |
+| プリセットID | ロケーション | 時間帯 / 天候 | 背景レイヤー構成 | 主光源 (Dir Light) | サンシャフト / フレア | 特殊効果 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **`morning_park`** | 近代公園 | 🌅 朝 (Morning) | 遠景＋透過中景 (2層) | `#ffffff` / `3.2` (右上高) | 澄んだ朝陽 (白黄) | 花びら舞い |
+| **`day_park`** | 近代公園 | ☀️ 昼 (Day) | 遠景＋透過中景 (2層) | `#ffffff` / `2.6` (左斜め前) | 昼の自然光サンシャフト・フレア | 高彩度・ニュートラル |
+| **`evening_park`** | 近代公園 | 🌇 夕方 (Evening) | 遠景＋透過中景 (2層) | `#fffbf0` / `1.8` (左低) | 茜色の夕陽・大型フレア | スプリットトーニング (紫/橙) |
+| **`rainy_park`** | 近代公園 | 🌧️ 雨 (Rainy) | 遠景＋透過中景 (2層) | `#b0c4de` / `1.2` (薄曇) | OFF | **雨滴・水しぶきエフェクト** |
+| **`morning_school`** | 校門前 | 🌅 朝 (Morning) | 校門前 (単層) | `#ffffff` / `3.2` (右上高) | 澄んだ朝陽 (白黄) | 花びら舞い |
+| **`evening_school`** | 校門前 | 🌇 夕方 (Evening) | 校門前 (単層) | `#fffbf0` / `1.8` (左低) | 茜色の夕陽・大型フレア | 夕景グラデーション |
+| **`bright_indoor`** | 教室 | 💡 室内 (Bright) | 教室廊下 (単層) | `#ffffff` / `2.2` (窓光) | OFF | フラット・室内照明 |
+| **`dark_indoor`** | 教室 | 🌙 夜間 (Dark) | 教室廊下 (単層) | `#b7cdf0` / `2.5` (月光) | 月光サンシャフト | **髪ハイライト自動消灯** |
+| **`cafe` (ロケーション)**| カフェ | ☕ 室内・オープンテラス | **遠景＋近景テーブル (3層)** | プリセット連動 | OFF / 窓光 | **近景テーブル挟み込み描画** |
+
+---
+
+## 🖼️ 画像アセット標準化ガイドライン (AVIF)
+
+プロジェクト内で使用する背景やテクスチャ画像は、パフォーマンスと軽量化のため **AVIF形式 (`.avif`)** を標準として採用しています。画像を追加・更新する際は `avifenc` を使用して変換してください。
+
+### 変換コマンド
+
+1. **通常画像（背景・遠景・不透明テクスチャ）**:
+   ```bash
+   avifenc -s 6 -q 85 input.png output.avif
+   ```
+
+2. **透過画像（中景・近景・アルファチャンネル付きテクスチャ）**:
+   ```bash
+   avifenc -s 6 -q 85 --qalpha 100 input.png output.avif
+   ```
+   > `--qalpha 100` を指定することで、透過部分の境界や半透明グラデーションが劣化せず完全ロスレスで維持されます。
 
 ---
 
@@ -386,10 +464,11 @@ vrm-genshin-like/
 ├── public/
 │   ├── animations/        # 待機・歩行・挨拶・ダンス等の Mixamo FBX アニメーション
 │   ├── bgm/               # シナリオ用 BGM (bgm.mp3 等)
+│   ├── img/               # UI・ダイアログ用キャラクター立ち絵 (AVIF)
 │   ├── models/            # サンプル VRM モデル (girl.vrm, girl2.vrm, girl3.vrm)
 │   ├── se/                # 環境音・UI効果音 (蝉の声、決定音、選択ホバー音 等)
-│   ├── textures/          # 背景・中景テクスチャ画像 (公園・学校・教室)
-│   └── voices/            # シナリオ会話・リップシンク用音声ファイル
+│   ├── textures/          # 多層背景テクスチャ画像 (Far/Mid/Near, AVIF形式)
+│   └── voices/            # シナリオ音声・リップシンク用音声ファイル (WAV形式)
 ├── src/
 │   ├── ai/                # オンデバイス AI 対話 & ローカル音声合成
 │   │   ├── AvatarChatController.ts  # 対話制御・モーション/表情推論
@@ -400,7 +479,8 @@ vrm-genshin-like/
 │   │   ├── AdventureMessageWindow.ts# 選択肢付きタイプライター風メッセージウィンドウ
 │   │   ├── ScenarioPlayer.ts        # 旧シナリオプレイヤー
 │   │   ├── ShortAnimationPlayer.ts  # ショート演出再生
-│   │   └── TypographyOverlay.ts     # 前後タイポグラフィ文字演出
+│   │   ├── TypographyOverlay.ts     # 前後タイポグラフィ文字演出
+│   │   └── types.ts                 # アニメーション演出型定義
 │   ├── avatar/            # アバター管理
 │   │   └── AvatarManager.ts         # VRM ロード、マルチアバター同時配置、モーション制御
 │   ├── effects/           # 漫画調漫符・環境エフェクト
@@ -413,6 +493,7 @@ vrm-genshin-like/
 │   ├── i18n/              # 国際化 (多言語対応)
 │   │   ├── locales/ja.ts            # 日本語辞書
 │   │   ├── locales/en.ts            # 英語辞書
+│   │   ├── types.ts                 # 辞書型定義
 │   │   └── index.ts                 # 言語切り替え・翻訳ヘルパー
 │   ├── postprocessing/    # ポストプロセス シェーダー
 │   │   ├── CinematicAnimeShader.ts  # 色収差・ディフュージョン・トーニング・粒状感・ビネット・シャープ
@@ -424,22 +505,30 @@ vrm-genshin-like/
 │   │   ├── DialogueCameraController.ts # ダイアログカメラワーク自動制御
 │   │   ├── ScenarioEngine.ts        # 選択肢分岐対応 シナリオ実行エンジン
 │   │   ├── ScenarioController.ts    # シナリオ再生・ステージ連動コントローラー
-│   │   ├── parkConfessionScenario.ts# 公園告白シナリオ（分岐付き）
-│   │   └── twoGirlsConversationScenario.ts # 2人女子掛け合いシナリオ
+│   │   ├── behindYouScenario.ts     # 後ろにいるよ ホラーADVシナリオ (ヤンデレ連動)
+│   │   ├── nisaScenario.ts          # 新NISA投資ADVシナリオ (ボイス・資産チャート演出)
+│   │   ├── parkConfessionScenario.ts# 公園告白シナリオ（選択肢分岐付き）
+│   │   ├── townWalkScenario.ts      # 街歩きシナリオ (スクロール背景連動)
+│   │   ├── twoGirlsConversationScenario.ts # 2人女子放課後掛け合いシナリオ
+│   │   └── types.ts                 # シナリオデータ・ステップ型定義
 │   ├── scene/             # Three.js コア・シーン管理
+│   │   ├── PanoramaBackgroundController.ts # 360度パノラマ背景コントローラー
 │   │   ├── ScenePresetManager.ts    # プリセット切り替えマネージャー
-│   │   └── ViewerCore.ts            # シーン、カメラ、レンダラー、Composer 統合
+│   │   ├── ScrollingBackgroundManager.ts  # 横スクロール背景 (ブラー・フェザー・パララックス)
+│   │   └── ViewerCore.ts            # 3層背景 (Far/Mid/Near)、カメラ、Composer 統合
 │   ├── shader/            # シェーダー補助
-│   │   └── SmoothNormalHelper.ts    # スムーズ法線・曲率事前計算
+│   │   └── SmoothNormalHelper.ts    # スムーズ法線・曲率事前計算・眼窩法線平坦化
 │   ├── ui/                # 統合スタジオ UI
 │   │   ├── inspector/               # 各種インスペクター (Visual, Stage, Manager)
 │   │   ├── components/              # モーダル、トースト
 │   │   └── UnifiedPanel.ts          # 4タブ構成 統合スタジオパネル
+│   ├── utils/             # ユーティリティ
+│   │   └── path.ts                  # アセットパス解決 (resolveAssetUrl)
 │   ├── wind/              # 風物理シミュレーション
 │   │   ├── WindController.ts        # 風速・風向・乱流・突風計算 & SpringBone 連動
 │   │   └── WindParticles.ts         # 風連動パーティクル演出
 │   ├── AudioLipSync.ts    # Meyda スペクトル解析 & リアルタイムリップシンク
-│   ├── Avatar.ts          # 個別 VRM アバターの描画・マテリアル・アニメーション
+│   ├── Avatar.ts          # 個別 VRM アバターの描画・ヤンデレモード・マテリアル・モーフ制御
 │   ├── Config.ts          # 全設定パラメータの型定義・デフォルト値・JSON入出力
 │   ├── ToonShader.ts      # MToon パラメータ制御・Auto HSV 影色計算・アウトライン制御
 │   ├── main.ts            # アプリケーション初期化・エントリポイント
