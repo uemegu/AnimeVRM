@@ -256,6 +256,9 @@ export class Avatar {
   private blinkTimer = 0;
   private blinkState: 0 | 1 | 2 | 3 = 0; // 0: open, 1: closing, 2: closed, 3: opening
   private currentExpression: string = 'neutral';
+  private emotionWeights: Map<string, number> = new Map();
+  private targetEmotionWeights: Map<string, number> = new Map();
+  private expressionTransitionDuration: number = 0.25;
 
   private isYandereActive = false;
   private yandereConfig: Required<YandereOptions> = {
@@ -554,7 +557,13 @@ export class Avatar {
     }
   }
 
-  public setExpression(expressionName: string, weight = 1.0): void {
+  /**
+   * Set facial expression with smooth crossfade interpolation.
+   * @param expressionName Preset name ('happy', 'angry', 'sad', 'surprised', 'relaxed', 'neutral') or custom morph name
+   * @param weight Target intensity weight (default: 1.0)
+   * @param duration Transition duration in seconds for smooth interpolation (default: 0.25s, 0 for instant)
+   */
+  public setExpression(expressionName: string, weight = 1.0, duration = 0.25): void {
     if (!this.vrm?.expressionManager) return;
 
     if (expressionName !== 'yandere') {
@@ -562,19 +571,41 @@ export class Avatar {
     }
 
     this.currentExpression = expressionName;
+    this.expressionTransitionDuration = Math.max(0, duration);
 
     const manager = this.vrm.expressionManager;
-    const presets = ['happy', 'angry', 'sad', 'surprised', 'relaxed', 'neutral', 'aa', 'ih', 'ou', 'ee', 'oh'];
+    const emotionPresets = ['happy', 'angry', 'sad', 'surprised', 'relaxed'];
 
-    // Reset preset expressions
-    presets.forEach((name) => {
-      if (name !== 'blink') {
-        manager.setValue(name, 0.0);
+    // Ensure preset emotions are registered in the weight maps
+    emotionPresets.forEach((name) => {
+      if (!this.emotionWeights.has(name)) {
+        this.emotionWeights.set(name, manager.getValue(name) ?? 0.0);
+        this.targetEmotionWeights.set(name, 0.0);
       }
     });
 
-    if (expressionName !== 'neutral') {
-      manager.setValue(expressionName, weight);
+    // If custom expression name is specified, register it
+    const isSpecial = ['neutral', 'blink', 'blinkLeft', 'blinkRight', 'aa', 'ih', 'ou', 'ee', 'oh', 'yandere'].includes(expressionName);
+    if (!isSpecial && !this.emotionWeights.has(expressionName)) {
+      this.emotionWeights.set(expressionName, manager.getValue(expressionName) ?? 0.0);
+      this.targetEmotionWeights.set(expressionName, 0.0);
+    }
+
+    // Set target weights: target expression gets `weight`, all other tracked emotions decay to 0.0
+    for (const key of this.targetEmotionWeights.keys()) {
+      if (key === expressionName && expressionName !== 'neutral') {
+        this.targetEmotionWeights.set(key, weight);
+      } else {
+        this.targetEmotionWeights.set(key, 0.0);
+      }
+    }
+
+    // If duration is 0, apply immediately
+    if (this.expressionTransitionDuration <= 0) {
+      for (const [name, target] of this.targetEmotionWeights.entries()) {
+        this.emotionWeights.set(name, target);
+        manager.setValue(name, target);
+      }
     }
 
     // If eyes are closed by the new expression, cancel ongoing procedural blink to avoid eyelid clipping
@@ -582,6 +613,32 @@ export class Avatar {
       this.blinkState = 0;
       manager.setValue('blink', 0.0);
       this.blinkTimer = this.getRandomBlinkInterval(3.0, 6.0);
+    }
+  }
+
+  /**
+   * Update smooth crossfading of facial expressions towards their target weights.
+   */
+  private updateExpressions(delta: number): void {
+    if (!this.vrm?.expressionManager) return;
+    const manager = this.vrm.expressionManager;
+
+    // Faster damping: lambda ~ 3.5 / duration ensures ~97% transition completion within duration
+    const lambda = this.expressionTransitionDuration > 0
+      ? 3.5 / Math.max(0.01, this.expressionTransitionDuration)
+      : 100;
+
+    for (const [name, target] of this.targetEmotionWeights.entries()) {
+      const current = this.emotionWeights.get(name) ?? 0;
+      if (Math.abs(target - current) > 0.0005) {
+        const next = THREE.MathUtils.damp(current, target, lambda, delta);
+        const finalVal = Math.abs(target - next) < 0.001 ? target : next;
+        this.emotionWeights.set(name, finalVal);
+        manager.setValue(name, finalVal);
+      } else if (current !== target) {
+        this.emotionWeights.set(name, target);
+        manager.setValue(name, target);
+      }
     }
   }
 
@@ -1056,6 +1113,9 @@ export class Avatar {
     // Apply procedural Head Look-At on top of FBX animation (before vrm.update)
     this.updateHeadLookAt(delta);
 
+    // Update smooth emotion expressions
+    this.updateExpressions(delta);
+
     // Update eye blinking
     this.updateBlink(delta);
 
@@ -1381,6 +1441,8 @@ export class Avatar {
           mgr.setValue(name, 0.0);
         });
       }
+      this.emotionWeights.clear();
+      this.targetEmotionWeights.clear();
       this.currentExpression = 'yandere';
       this.applyYandereFacialMorphs();
     }
@@ -1562,6 +1624,8 @@ export class Avatar {
     this.solidTextureCache.forEach((tex) => tex.dispose());
     this.solidTextureCache.clear();
     this.originalEyeStates = [];
+    this.emotionWeights.clear();
+    this.targetEmotionWeights.clear();
 
     this.shaderController?.dispose();
     this.shaderController = null;
