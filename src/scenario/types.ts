@@ -45,6 +45,11 @@ export interface ScenarioSceneAvatarConfig {
     duration?: number;
   };
   lookAtCamera?: boolean;
+  headLookAtCamera?: boolean; // 顔（首・頭）をカメラへ向ける（FBX歩行中も自然にカメラを振り向く）
+  eyeLookAtCamera?: boolean;  // 目をカメラへ向ける（未指定時は lookAtCamera に従う）
+  eyeWander?: boolean | number; // 目が泳ぐ演出（true または強度 0.0 - 2.0）
+  eyeOffset?: [number, number]; // 視線オフセット [yaw, pitch] (ラジアン)
+  headOffset?: [number, number]; // 顔・首オフセット [yaw, pitch] (ラジアン)
   moveTo?: {
     target: [number, number, number];
     duration: number; // seconds

@@ -395,14 +395,38 @@ export class ScenarioEngine {
   }
 
   private applyAvatarAction(avatar: Avatar, config: ScenarioSceneAvatarConfig): void {
-    const { motion, expression, expressionWeight, faceTexture, effectText, position, rotationY, lookAtCamera } = config;
+    const {
+      motion,
+      expression,
+      expressionWeight,
+      faceTexture,
+      effectText,
+      position,
+      rotationY,
+      lookAtCamera,
+      headLookAtCamera,
+      eyeLookAtCamera,
+      eyeWander,
+      eyeOffset,
+      headOffset,
+    } = config;
 
-    // LookAt camera control (e.g. false during side-by-side walk to look forward)
-    if (lookAtCamera !== undefined) {
-      avatar.setLookAtCamera(lookAtCamera);
-    } else {
-      avatar.setLookAtCamera(true);
-    }
+    // Eye LookAt camera & offset control
+    const effectiveEyeLookAt =
+      eyeLookAtCamera !== undefined ? eyeLookAtCamera : (lookAtCamera !== undefined ? lookAtCamera : true);
+    avatar.setEyeLookAt({
+      mode: effectiveEyeLookAt ? 'camera' : 'forward',
+      offset: eyeOffset ? { x: eyeOffset[0], y: eyeOffset[1] } : { x: 0, y: 0 },
+      wander: typeof eyeWander === 'boolean' ? eyeWander : (typeof eyeWander === 'number' ? eyeWander > 0 : false),
+      wanderIntensity: typeof eyeWander === 'number' ? eyeWander : 1.0,
+    });
+    avatar.setLookAtCamera(effectiveEyeLookAt);
+
+    // Head / Face LookAt camera control (e.g. natural head turn towards camera during walking)
+    const effectiveHeadLookAt = headLookAtCamera !== undefined ? headLookAtCamera : false;
+    avatar.setHeadLookAtCamera(effectiveHeadLookAt, {
+      offset: headOffset ? { x: headOffset[0], y: headOffset[1] } : { x: 0, y: 0 },
+    });
 
     // Slot position / custom transform
     if (position !== undefined) {
@@ -550,18 +574,7 @@ export class ScenarioEngine {
       this.stopSe();
     }
 
-    // 2. Camera Angle, Zoom & Preset
-    if (this.onApplySceneCamera) {
-      this.onApplySceneCamera(scene);
-    } else if (this.onApplyCamera && (scene.cameraStartAngle || scene.cameraPreset)) {
-      this.onApplyCamera(
-        scene.cameraStartAngle,
-        scene.cameraPreset,
-        scene.cameraStrength ?? 1.0
-      );
-    }
-
-    // 3. Avatar Control (Motion, Expression, 3D Manga Effect)
+    // 2. Avatar Control (Motion, Expression, Position, 3D Manga Effect)
     if (scene.avatars) {
       for (const [charKey, config] of Object.entries(scene.avatars)) {
         const avatar = this.getAvatar(charKey);
@@ -575,6 +588,17 @@ export class ScenarioEngine {
       if (avatar) {
         this.applyAvatarAction(avatar, scene.avatar);
       }
+    }
+
+    // 3. Camera Angle, Zoom & Preset (calculated after avatar positions are updated)
+    if (this.onApplySceneCamera) {
+      this.onApplySceneCamera(scene);
+    } else if (this.onApplyCamera && (scene.cameraStartAngle || scene.cameraPreset)) {
+      this.onApplyCamera(
+        scene.cameraStartAngle,
+        scene.cameraPreset,
+        scene.cameraStrength ?? 1.0
+      );
     }
 
     // 3.5 Screen Transition (Eyelid close / blink)
