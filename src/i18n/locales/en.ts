@@ -186,6 +186,7 @@ export const en: Translations = {
       classroom: '🏫 Classroom',
       oldPark: '🌲 Classic Park',
       cafe: '☕ Café',
+      town: '🏙️ Town',
       offSingleColor: 'OFF (Solid Color)',
     },
     avatarFramingTitle: '📷 Avatar Framing',

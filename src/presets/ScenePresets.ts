@@ -2,7 +2,7 @@ import { resolveAssetUrl } from '../utils/path';
 import type { AvatarConfig } from '../Config';
 
 export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'bright_indoor' | 'dark_indoor';
-export type LocationId = 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'none';
+export type LocationId = 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'none';
 
 export type ScenePresetId =
   | 'morning_park'
@@ -167,9 +167,9 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       directional: {
         color: '#ffffff',
         intensity: 3.2,
-        posX: 4.1,
-        posY: 0.1,
-        posZ: 2,
+        posX: 1.1,
+        posY: 2.5,
+        posZ: 2.3,
       },
       rim: {
         enabled: false,
@@ -348,8 +348,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
         color: '#ffffff',
         intensity: 3.2,
         posX: -0.7,
-        posY: 0.5,
-        posZ: 0.4,
+        posY: 1.5,
+        posZ: 2.6,
       },
       rim: {
         enabled: false,
@@ -1329,6 +1329,31 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       farFogEnabled: true,
       farFogColor: '#808080',
       farFogIntensity: 0.18,
+    },
+  },
+  town: {
+    id: 'town',
+    name: '街',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/town_far.avif'),
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#ffffff',
+      farFogIntensity: 0.15,
     },
   },
   none: {
