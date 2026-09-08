@@ -163,7 +163,7 @@ export class DialogueCameraController {
       this.camera.fov = this.baseState.fov;
       this.camera.updateProjectionMatrix();
       this.camera.lookAt(this.controls.target);
-      this.controls.enabled = true;
+      this.controls.enabled = false;
       this.controls.update();
     } else {
       // Smoothly return to base state
@@ -172,7 +172,7 @@ export class DialogueCameraController {
       this.camera.fov = this.baseState.fov;
       this.camera.updateProjectionMatrix();
       this.camera.lookAt(this.controls.target);
-      this.controls.enabled = true;
+      this.controls.enabled = false;
       this.controls.update();
     }
   }

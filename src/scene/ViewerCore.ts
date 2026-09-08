@@ -279,6 +279,8 @@ export class ViewerCore {
     this.controls.minDistance = 0.5;
     this.controls.maxDistance = 10;
     this.controls.maxPolarAngle = Math.PI / 2 + 0.1;
+    this.camera.lookAt(this.controls.target);
+    this.controls.update();
 
     this.panoramaController = new PanoramaBackgroundController({
       scene: this.scene,

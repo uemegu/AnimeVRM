@@ -14,6 +14,7 @@ import { ColorHistogram } from './histogram/ColorHistogram';
 import { ViewerCore } from './scene/ViewerCore';
 import { ScenePresetManager } from './scene/ScenePresetManager';
 import { AvatarManager } from './avatar/AvatarManager';
+import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
 import { setupUnifiedPanel } from './ui/UnifiedPanel';
@@ -85,9 +86,19 @@ const avatarManager = new AvatarManager({
   },
   onAvatarLoaded: () => {
     applyConfigToSceneAndRenderer(currentConfig);
+    avatarTransformController?.syncInitialTransform();
   },
 });
 (window as any).avatarManager = avatarManager;
+
+// 3.5 Avatar Transform Controller (Trackpad / Keyboard manipulation)
+// カメラOrbitControlsを無効化し、マウス/トラックパッド操作の対象をアバター自身にバインド
+viewerCore.controls.enabled = false;
+const avatarTransformController = new AvatarTransformController({
+  domElement: canvas,
+  avatarManager,
+});
+(window as any).avatarTransformController = avatarTransformController;
 
 const inspectorManager = new InspectorManager();
 
@@ -152,6 +163,7 @@ setupUnifiedPanel({
   audioLipSync,
   avatarChatController,
   colorHistogram,
+  avatarTransformController,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
   },
@@ -187,12 +199,18 @@ function tick(timestamp?: number): void {
   }
 
   if (scenarioController.dialogueCameraController?.isActive) {
+    avatarTransformController.setEnabled(false);
     scenarioController.dialogueCameraController.update(delta);
   } else if (avatarManager.animationPlayer.isPlaying) {
+    avatarTransformController.setEnabled(false);
     avatarManager.animationPlayer.update(delta);
   } else if (viewerCore.panoramaController.isActive) {
+    avatarTransformController.setEnabled(false);
     viewerCore.panoramaController.update(delta, elapsed);
   } else {
+    avatarTransformController.setEnabled(true);
+    // OrbitControls disabled (enabled=false) so user input won't move camera/sun,
+    // but update() keeps camera lookAt and framing transitions correctly synchronized.
     viewerCore.controls.update();
   }
 

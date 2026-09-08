@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eye Atelier — 目もとのかたち</title>
+  <style>
+    :root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;color:#37322f;background:#f4f1ec;font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0}button,input{font:inherit}button{cursor:pointer;border:1px solid #d9d0c6;border-radius:8px;background:#fffefa;color:#4f4841;padding:11px 17px;transition:background .15s}button:hover{background:#e9e1d7}button:disabled{cursor:wait;opacity:.45}button:focus-visible,input:focus-visible{outline:3px solid #ad7460;outline-offset:4px}.primary{background:#785445;color:white;border-color:#785445}.primary:hover{background:#654737}header{height:92px;padding:0 4.5vw;border-bottom:1px solid #ded7cf;display:flex;align-items:center;justify-content:space-between}.brand{font-family:Georgia,serif;font-size:29px;letter-spacing:-1px}.brand span{display:block;font:10px sans-serif;letter-spacing:3px;margin-top:6px;color:#928579}.pill{font-size:12px;display:flex;gap:8px;align-items:center}.dot{width:7px;height:7px;background:#ab9d8f;border-radius:50%}.dot.live{background:#789378}main{padding:36px 4.5vw;max-width:1580px;margin:auto}.intro{display:flex;align-items:end;justify-content:space-between;margin-bottom:24px}h1{font-size:23px;font-weight:500;margin:0 0 9px}.intro p{color:#84796e;font-size:13px;margin:0}.step{font:11px sans-serif;letter-spacing:2px;color:#a2988b}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:28px}.canvas{position:relative;min-height:470px;aspect-ratio:1.35;background:#353432;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center}.canvas img{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}.empty{color:#d1c7bc;text-align:center;font-size:14px;line-height:2}.empty svg{display:block;margin:0 auto 20px;opacity:.8}.preview-label{position:absolute;top:20px;left:20px;color:white;background:#292622aa;border:1px solid #ffffff26;padding:7px 12px;border-radius:20px;font-size:11px;z-index:1}.canvas-footer{display:flex;justify-content:space-between;gap:12px;margin-top:13px;align-items:center}.views{display:flex;gap:5px}.views button{font-size:12px;padding:9px 13px}.selected{background:#e4d8ca;border-color:#b8a692}.hint{color:#8a7e72;font-size:11px;line-height:1.8}.panel{background:#fcfaf7;border:1px solid #e4dcd3;border-radius:12px;padding:25px}.panel-title{font-size:14px;font-weight:600;margin:0}.panel-subtitle{font-size:11px;color:#96897c;margin:8px 0 25px;line-height:1.8}.control{margin:25px 0}.control label{display:flex;justify-content:space-between;align-items:center;font-size:13px}.control output{font:13px ui-monospace,monospace;color:#8b6552;background:#f0e8df;border-radius:5px;padding:4px 7px;min-width:43px;text-align:center}input[type=range]{width:100%;accent-color:#956f58;margin:18px 0 4px;cursor:pointer}.ends{display:flex;justify-content:space-between;color:#a3988b;font-size:10px}.divider{height:1px;background:#e4ddd4;margin:25px 0}.row{display:flex;gap:8px;align-items:center}.row button{flex:1;font-size:12px}.full{width:100%;margin-top:10px}.check{font-size:12px;display:flex;gap:9px;align-items:center}.check input{accent-color:#956f58;width:16px;height:16px}.save-note{font-size:10px;color:#a09488;line-height:1.8;margin-bottom:0}.status{min-height:44px;margin:18px 0 0;color:#807567;font-size:12px;line-height:1.8;overflow-wrap:anywhere}.status.error{color:#a54435}.bottom{display:flex;gap:30px;margin-top:25px;font-size:11px;color:#8e8275}.bottom b{font-weight:500;color:#685e54}.busy{opacity:.68}#connect{margin-top:18px}.example{font-size:12px;padding:9px 13px}footer{font-size:10px;color:#b3a697;padding:10px 4.5vw 30px;letter-spacing:1px}
+    .canvas img{clip-path:inset(7% 5% 1% 4%)}
+    @media(min-width:851px){header{height:76px}main{padding-top:24px}.canvas{height:calc(100vh - 285px);min-height:360px;aspect-ratio:auto}.panel{max-height:calc(100vh - 220px);min-height:430px;overflow-y:auto}.intro{margin-bottom:20px}}
+    @media(max-width:850px){header{height:76px}.workspace{grid-template-columns:1fr}.canvas{min-height:300px;aspect-ratio:1.4}.intro{align-items:start;gap:10px}.step{display:none}.panel{padding:22px}.bottom{flex-direction:column;gap:8px}main{padding-top:24px}.canvas-footer{align-items:start}.brand{font-size:25px}}
+  </style>
+</head>
+<body>
+  <header><div class="brand">Eye Atelier<span>目もとのかたち</span></div><div class="pill"><i class="dot" id="dot"></i><span id="connection">接続待ち</span></div></header>
+  <main>
+    <div class="intro"><div><h1>目もとを、思い描いたかたちに。</h1><p>下まぶたの丸みと、目頭のライン。左右いっしょに、少しずつ。</p></div><span class="step">VROID EYE STUDY / 01</span></div>
+    <div class="workspace">
+      <section aria-label="モデルのプレビュー">
+        <div class="canvas" id="canvas">
+          <div class="preview-label" id="preview-label">LIVE PREVIEW</div>
+          <div class="empty" id="empty"><svg width="90" height="48" viewBox="0 0 90 48" fill="none"><path d="M5 26 Q45 -11 85 26 Q45 58 5 26Z" stroke="currentColor" stroke-width="1.4"/><circle cx="45" cy="24" r="12" stroke="currentColor" stroke-width="1.4"/></svg>モデルの目もとを、ここで調整できます。<br><button class="primary" id="connect">開いているモデルに接続</button></div>
+          <img id="preview" alt="現在のモデルの顔プレビュー" hidden>
+        </div>
+        <div class="canvas-footer"><div class="views"><button data-angle="-25" disabled>左から</button><button data-angle="0" class="selected" disabled>正面</button><button data-angle="25" disabled>右から</button><button id="zoom" disabled>拡大</button></div><button id="refresh" class="example" disabled>更新 ↻</button></div>
+        <p class="hint">スライダーを離すとモデルに反映します。プレビューの更新には数秒かかることがあります。</p>
+      </section>
+      <aside class="panel" aria-label="目の調整">
+        <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目の縁に沿って調整します。<br>瞳の丸さや大きさはそのまま。</p>
+        <div class="control"><label for="flatness">下まぶたの丸みを減らす<output id="flatness-value">0%</output></label><input id="flatness" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>もとの丸み</span><span>平らにする</span></div></div>
+        <div class="control"><label for="length">目頭のラインを伸ばす<output id="length-value">0%</output></label><input id="length" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>追加なし</span><span>目頭の下まで</span></div></div>
+        <div class="control"><label for="thickness">ラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="120" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
+        <button id="suggest" class="full" disabled>添付イメージに寄せる</button>
+        <div class="divider"></div>
+        <div class="row"><button id="compare" aria-pressed="false" disabled>変更前を見る</button><button id="reset" disabled>調整をリセット</button></div>
+        <div class="control"><label for="blink">まばたきを確認<output id="blink-value">0%</output></label><input id="blink" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>開く</span><span>閉じる</span></div></div>
+        <button class="primary full" id="save" disabled>編集したモデルを別名保存</button><p class="save-note">.blend形式で保存します。元の顔もファイル内に残ります。<br>試作版：VRM書き出し・全表情の互換性は未検証です。</p>
+      </aside>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite">Blenderでモデルを開き、MCPサーバーを起動した状態で接続してください。</p>
+    <div class="bottom"><span><b>01</b>　元の顔を残して編集</span><span><b>02</b>　左右の目を同時に調整</span><span><b>03</b>　正面・斜め・まばたきを確認</span></div>
+  </main><footer>LOCAL WORKSPACE · モデルはこのコンピューター内で処理します</footer>
+  <script src="/app.js"></script>
+</body></html>
