@@ -139,8 +139,8 @@ export class ShortAnimationPlayer {
     this.camera.updateProjectionMatrix();
     this.camera.lookAt(this.controls.target);
 
-    // 2. Re-enable OrbitControls
-    this.controls.enabled = true;
+    // 2. Keep OrbitControls disabled
+    this.controls.enabled = false;
     this.controls.update();
 
     // 3. Exit transparent background mode

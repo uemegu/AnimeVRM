@@ -23,6 +23,7 @@ import { ScenarioController } from '../scenario/ScenarioController';
 import { InspectorManager } from './inspector/InspectorManager';
 import { showToast } from './components/Toast';
 import { openImportModal } from './components/ImportExportModal';
+import { AvatarTransformController } from '../avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
 
 export interface UnifiedPanelContext {
@@ -35,6 +36,7 @@ export interface UnifiedPanelContext {
   audioLipSync: AudioLipSync;
   avatarChatController: AvatarChatController;
   colorHistogram: ColorHistogram;
+  avatarTransformController?: AvatarTransformController;
   onApplyConfig: (cfg: AvatarConfig) => void;
   onResize: () => void;
   onTtsGpuActivityChange: (active: boolean) => void;
@@ -363,6 +365,20 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-framing="full" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.full}</button>
               <button data-framing="bust" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.bust}</button>
               <button data-framing="close" class="framing-btn" style="flex: 1;">${tr.scenes.avatarFraming.close}</button>
+            </div>
+          </div>
+
+          <!-- Avatar Manipulation Guide -->
+          <div class="section-box" style="background: #18181b; border: 1px solid #27272a; border-radius: 6px; padding: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="section-label" style="margin: 0; color: #38bdf8; font-weight: 600;">🎮 アバター操作 (トラックパッド / キーボード)</label>
+              <button id="reset-avatar-transform-btn" style="font-size: 10px; padding: 2px 8px; background: #27272a; border: 1px solid #3f3f46; color: #cbd5e1; border-radius: 4px; cursor: pointer;">↺ リセット (R)</button>
+            </div>
+            <div style="font-size: 10px; color: #94a3b8; line-height: 1.5; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 4px;">
+              <div>• <b>ドラッグ</b>: 向き回転</div>
+              <div>• <b>Shift+ドラッグ</b>: 平行移動</div>
+              <div>• <b>2本指スクロール</b>: 前後移動</div>
+              <div>• <b>WASD / 矢印</b>: 移動・回転</div>
             </div>
           </div>
 
@@ -1049,6 +1065,13 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           viewerCore.setCameraFraming(framing);
         }
       });
+    });
+
+    // Reset Avatar Transform Button
+    const resetTransformBtn = document.getElementById('reset-avatar-transform-btn');
+    resetTransformBtn?.addEventListener('click', () => {
+      ctx.avatarTransformController?.resetTransform();
+      showToast('アバターの位置と向きをリセットしました');
     });
 
     // Model Buttons
