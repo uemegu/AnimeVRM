@@ -471,6 +471,21 @@ export class Avatar {
           this.animHeadQuat.copy(restHead.quaternion);
         }
 
+        // Limit eye lookAt maximum range to ~0.65 of full scale so eyes don't push into corners
+        if (vrm.lookAt) {
+          const l = vrm.lookAt;
+          const applier = (l as any).applier;
+          const eyeMaxRatio = 0.65;
+          if (applier) {
+            if (applier.rangeMapHorizontalInner) {
+              applier.rangeMapHorizontalInner.outputScale *= eyeMaxRatio;
+            }
+            if (applier.rangeMapHorizontalOuter) {
+              applier.rangeMapHorizontalOuter.outputScale *= eyeMaxRatio;
+            }
+          }
+        }
+
         // Apply toon shading in-place
         const shaderOpts: ToonShaderOptions = {
           bodyPattern: /Body.*SKIN|body|skin|肌|体/i,
@@ -1199,6 +1214,24 @@ export class Avatar {
     const toTarget = baseTargetPos.clone().sub(headWorldPos);
     const dist = Math.max(0.5, toTarget.length());
 
+    // Clamp relative horizontal angle from head orientation to ~32 deg so eyes don't roll excessively to edges
+    const headQuat = new THREE.Quaternion();
+    if (headNode) {
+      headNode.getWorldQuaternion(headQuat);
+    } else {
+      this.vrm.scene.getWorldQuaternion(headQuat);
+    }
+    const localDir = toTarget.clone().applyQuaternion(headQuat.clone().invert());
+    const rawEyeYaw = Math.atan2(localDir.x, localDir.z);
+    const maxEyeYaw = THREE.MathUtils.degToRad(32);
+    if (Math.abs(rawEyeYaw) > maxEyeYaw) {
+      const clampedYaw = Math.sign(rawEyeYaw) * maxEyeYaw;
+      const xzLen = Math.hypot(localDir.x, localDir.z);
+      localDir.x = Math.sin(clampedYaw) * xzLen;
+      localDir.z = Math.cos(clampedYaw) * xzLen;
+      toTarget.copy(localDir.applyQuaternion(headQuat));
+    }
+
     // Total eye yaw/pitch offsets
     const totalYaw = this.eyeLookAtConfig.offset.x + this.eyeWanderCurrentOffset.x;
     const totalPitch = this.eyeLookAtConfig.offset.y + this.eyeWanderCurrentOffset.y;
@@ -1275,6 +1308,18 @@ export class Avatar {
 
     // Update VRM internal state (expressions, humanoid, spring bones)
     this.vrm.update(delta);
+
+    // Limit maximum horizontal eye gaze on ExpressionApplier to 0.65 to avoid unnatural eye corners
+    if (this.vrm.expressionManager) {
+      const left = this.vrm.expressionManager.getValue('lookLeft');
+      if (left !== null && left > 0.65) {
+        this.vrm.expressionManager.setValue('lookLeft', 0.65);
+      }
+      const right = this.vrm.expressionManager.getValue('lookRight');
+      if (right !== null && right > 0.65) {
+        this.vrm.expressionManager.setValue('lookRight', 0.65);
+      }
+    }
 
     // Apply Yandere pose (head tilt) and custom facial morphs after vrm.update
     if (this.isYandereActive) {

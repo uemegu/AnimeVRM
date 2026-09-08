@@ -195,9 +195,11 @@ export class ScenarioController {
         const cfg = this.getConfig();
         cfg.environment.showBackgroundImage = true;
         cfg.environment.backgroundImageUrl = resolveAssetUrl(bgUrl);
-        // ロケーションに応じた背景制御: 単体背景切り替え時は中景をオフにする
+        // ロケーションに応じた背景制御: 単体背景切り替え時は中景・近景をオフにする
         cfg.environment.showMidground = false;
         cfg.environment.midgroundImageUrl = undefined;
+        cfg.environment.showNearground = false;
+        cfg.environment.neargroundImageUrl = undefined;
         this.onApplyConfig(cfg);
       },
       onSwitchPanoramaBackground: (bgUrl: string | null) => {

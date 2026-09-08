@@ -29,12 +29,16 @@
         <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目の縁に沿って調整します。<br>瞳の丸さや大きさはそのまま。</p>
         <div class="control"><label for="flatness">下まぶたの丸みを減らす<output id="flatness-value">0%</output></label><input id="flatness" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>もとの丸み</span><span>平らにする</span></div></div>
         <div class="control"><label for="length">目頭のラインを伸ばす<output id="length-value">0%</output></label><input id="length" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>追加なし</span><span>目頭の下まで</span></div></div>
-        <div class="control"><label for="thickness">ラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="120" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
+        <div class="control"><label for="thickness">上まぶた側のラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="120" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
+        <div class="control"><label for="corner_ratio">目頭の太さ（上まぶた比）<output id="corner_ratio-value">18%</output></label><input id="corner_ratio" type="range" min="0" max="100" value="18" disabled><div class="ends"><span>目頭を細く</span><span>同じ太さ</span></div></div>
+        <div class="control"><label for="upper_peak">上まぶたの山の位置<output id="upper_peak-value">元の位置</output></label><input id="upper_peak" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>目頭寄り</span><span>目尻寄り</span></div></div>
         <button id="suggest" class="full" disabled>添付イメージに寄せる</button>
         <div class="divider"></div>
         <div class="row"><button id="compare" aria-pressed="false" disabled>変更前を見る</button><button id="reset" disabled>調整をリセット</button></div>
         <div class="control"><label for="blink">まばたきを確認<output id="blink-value">0%</output></label><input id="blink" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>開く</span><span>閉じる</span></div></div>
-        <button class="primary full" id="save" disabled>編集したモデルを別名保存</button><p class="save-note">.blend形式で保存します。元の顔もファイル内に残ります。<br>試作版：VRM書き出し・全表情の互換性は未検証です。</p>
+        <div class="control"><label for="expression">表情を確認</label><select id="expression" disabled style="width:100%;margin-top:12px;padding:10px;border:1px solid #d9d0c6;border-radius:8px;background:#fffefa;font:inherit;color:inherit"><option value="none">通常の顔</option></select></div>
+        <button class="primary full" id="export" disabled>VRMを書き出す</button>
+        <button class="full" id="save" disabled>編集用の .blend を別名保存</button><p class="save-note">VRMは通常の顔で書き出し、表情の接続を検証します。<br>.blendには再編集用の元の顔も残ります。</p>
       </aside>
     </div>
     <p class="status" id="status" role="status" aria-live="polite">Blenderでモデルを開き、MCPサーバーを起動した状態で接続してください。</p>

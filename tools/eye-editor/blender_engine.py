@@ -10,6 +10,8 @@ import bpy
 from mathutils import Quaternion, Vector
 
 SESSION = globals().get('SESSION')
+DEFAULTS = dict(flatness=0.0, length=0.0, thickness=0.45, corner_ratio=0.18,
+                upper_peak=0.0, blink=0.0, expression='none', before=False)
 
 
 def boundary_loops(mesh, material):
@@ -85,6 +87,8 @@ def detect(source):
 def initialize():
     global SESSION
     if SESSION:
+        upgrade_session()
+        repair_expression_bindings()
         return status()
     if bpy.context.mode != 'OBJECT':
         raise ValueError('初回だけBlenderをオブジェクトモードにしてください。')
@@ -115,33 +119,54 @@ def initialize():
     SESSION = dict(source=source, preview=preview, eyes=eyes, movable=movable,
                    coords=original_coords, values=original_values,
                    hidden=source.hide_get(), render_hidden=source.hide_render,
-                   params=dict(flatness=0.0, length=0.0, thickness=0.45, blink=0.0, before=False), lines=lines)
+                   params=dict(DEFAULTS), lines=lines)
     SESSION['params'].update(params)
     source.hide_set(True)
     source.hide_render = True
     if not lines:
         make_lines()
+    upgrade_session()
+    repair_expression_bindings()
     update(SESSION['params'])
     return status()
+
+
+def upgrade_session():
+    s = SESSION
+    for name, value in DEFAULTS.items():
+        s['params'].setdefault(name, value)
+    basis = s['coords'][next(iter(s['coords']))]
+    for eye in s['eyes']:
+        eye['lower_points'] = sorted([basis[i] for i in eye['lower']], key=lambda c: c.x)
+        eye['upper_points'] = sorted([basis[i] for i in eye['upper']], key=lambda c: abs(c.x))
+        eye['inner_x'] = abs(eye['upper_points'][0].x)
+        peak = max(eye['upper_points'], key=lambda c: c.z)
+        eye['peak_t'] = (abs(peak.x) - eye['inner_x']) / eye['width']
+
+
+def interpolate(points, coordinate, absolute=False):
+    axis = (lambda p: abs(p.x)) if absolute else (lambda p: p.x)
+    if coordinate <= axis(points[0]):
+        return points[0]
+    for a, b in zip(points, points[1:]):
+        if coordinate <= axis(b):
+            return a.lerp(b, (coordinate - axis(a)) / max(axis(b) - axis(a), 1e-9))
+    return points[-1]
 
 
 def warp(point, params):
     p = point.copy()
     amount = params['flatness']
-    if not amount:
+    peak_shift = params.get('upper_peak', 0.0)
+    if not amount and not peak_shift:
         return p
-    basis = SESSION['coords'][next(iter(SESSION['coords']))]
     for eye in SESSION['eyes']:
         if p.x * eye['sign'] <= 0:
             continue
-        lower = sorted([basis[i] for i in eye['lower']], key=lambda c: c.x)
+        lower = eye['lower_points']
         if not lower[0].x <= p.x <= lower[-1].x:
             continue
-        for a, b in zip(lower, lower[1:]):
-            if a.x <= p.x <= b.x:
-                t = (p.x - a.x) / max(b.x - a.x, 1e-9)
-                edge = a.lerp(b, t)
-                break
+        edge = interpolate(lower, p.x)
         floor = min(v.z for v in lower) + eye['width'] * 0.16
         lift = max(0.0, floor - edge.z) * amount
         # A compact field shared by every expression: coincident closed lids
@@ -151,7 +176,91 @@ def warp(point, params):
         weight = max(0.0, 1 - distance * distance) ** 2 * max(0.0, 1 - depth * depth) ** 2
         p.z += lift * weight
         p.y -= lift * weight * 0.65
+        if peak_shift:
+            # Resample the upper profile around a movable apex. Endpoints stay
+            # fixed. Evaluate the same field for every expression to preserve
+            # coincident closed-lid positions; iris/white are excluded by caller.
+            upper = eye['upper_points']
+            t = (abs(point.x) - eye['inner_x']) / eye['width']
+            original_peak = eye['peak_t']
+            target_peak = max(.15, min(.85, original_peak + peak_shift * .25))
+            old_t = (t * original_peak / target_peak if t < target_peak else
+                     original_peak + (t-target_peak) * (1-original_peak) / (1-target_peak))
+            edge_upper = interpolate(upper, abs(point.x), absolute=True)
+            target = interpolate(upper, eye['inner_x'] + old_t * eye['width'], absolute=True)
+            distance = abs(point.z-edge_upper.z) / (eye['width'] * (.50 if point.z >= edge_upper.z else .25))
+            depth = abs(point.y-edge_upper.y) / (eye['width'] * .50)
+            influence = max(0.0, 1-distance*distance)**2 * max(0.0, 1-depth*depth)**2
+            p.z += (target.z-edge_upper.z) * influence
     return p
+
+
+def expression_collections():
+    armature = SESSION['source'].find_armature()
+    if not armature or not hasattr(armature.data, 'vrm_addon_extension'):
+        return []
+    ext = armature.data.vrm_addon_extension
+    if ext.spec_version == '1.0':
+        return [(name, expression.morph_target_binds, 'node')
+                for name, expression in ext.vrm1.expressions.all_name_to_expression_dict().items()]
+    return [(g.preset_name if g.preset_name != 'unknown' else g.name, g.binds, 'mesh')
+            for g in ext.vrm0.blend_shape_master.blend_shape_groups]
+
+
+def repair_expression_bindings():
+    """Redirect source binds, preserving key/weight and unrelated expressions.
+
+    Explicit line binds are necessary: Blender drivers are not VRM expressions.
+    Repeated calls are idempotent, including reopening an edited .blend file.
+    """
+    s = SESSION
+    source, preview = s['source'], s['preview']
+    repaired = 0
+    for _, binds, attr in expression_collections():
+        for bind in list(binds):
+            if getattr(bind, attr).mesh_object_name == source.name:
+                getattr(bind, attr).mesh_object_name = preview.name
+                repaired += 1
+        face_binds = [b for b in binds if getattr(b, attr).mesh_object_name == preview.name]
+        for bind in face_binds:
+            for line in s['lines']:
+                if bind.index not in line.data.shape_keys.key_blocks:
+                    continue
+                match = next((b for b in binds if getattr(b, attr).mesh_object_name == line.name
+                              and b.index == bind.index), None)
+                if match is None:
+                    match = binds.add()
+                    getattr(match, attr).mesh_object_name = line.name
+                    match.index = bind.index
+                    repaired += 1
+                if match.weight != bind.weight:
+                    match.weight = bind.weight
+    # Preserve first-person visibility semantics where the source was listed.
+    armature = source.find_armature()
+    if armature and hasattr(armature.data, 'vrm_addon_extension'):
+        ext = armature.data.vrm_addon_extension
+        if ext.spec_version == '1.0':
+            annotations = ext.vrm1.first_person.mesh_annotations
+            for annotation in list(annotations):
+                if annotation.node.mesh_object_name == source.name:
+                    annotation.node.mesh_object_name = preview.name
+                if annotation.node.mesh_object_name == preview.name:
+                    for line in s['lines']:
+                        if not any(a.node.mesh_object_name == line.name for a in annotations):
+                            a = annotations.add()
+                            a.node.mesh_object_name = line.name
+                            a.type = annotation.type
+    return repaired
+
+
+def line_width(u, t, params):
+    # u=0 is the upper lid, u=4/6 the inner corner. Keep the profile
+    # anchored to this landmark even when the line length changes.
+    inner = min(1.0, max(0.0, u / (4/6)))
+    smooth = inner * inner * (3 - 2 * inner)
+    ratio = 1 - (1 - params.get('corner_ratio', .18)) * smooth
+    taper = max(0.0, math.sin(math.pi * t)) ** .25
+    return params['thickness'] / 1000 * ratio * taper
 
 
 def make_lines():
@@ -209,6 +318,9 @@ def update(params):
     s = SESSION
     if not s:
         raise ValueError('先にモデルへ接続してください。')
+    upgrade_session()
+    if 'expression' in params and params['expression'] not in {'none'} | {n for n, _, _ in expression_collections()}:
+        raise ValueError('このモデルには指定された表情がありません。')
     s['params'].update(params)
     p = s['params']
     preview = s['preview']
@@ -216,6 +328,13 @@ def update(params):
         for i in s['movable']:
             key.data[i].co = warp(s['coords'][key.name][i], p)
         key.value = s['values'][key.name]
+    for name, binds, attr in expression_collections():
+        if name == p['expression']:
+            for bind in binds:
+                if getattr(bind, attr).mesh_object_name == preview.name:
+                    key = preview.data.shape_keys.key_blocks.get(bind.index)
+                    if key:
+                        key.value = bind.weight
     close = preview.data.shape_keys.key_blocks.get('Fcl_EYE_Close')
     if close:
         close.value = p['blink']
@@ -235,7 +354,7 @@ def update(params):
                 normal = Vector((-tangent.z, 0, tangent.x)).normalized()
                 if normal.dot(pos - eye['center']) < 0:
                     normal.negate()
-                width = p['thickness'] / 1000 * math.sin(math.pi * t) ** 0.45
+                width = line_width(u, t, p)
                 pos.y -= 0.00065
                 key.data[j*2].co = pos - normal * width * .22
                 key.data[j*2+1].co = pos + normal * width * .78
@@ -271,7 +390,8 @@ def status():
         return dict(connected=False)
     return dict(connected=True, model=SESSION['source'].name,
                 params=SESSION['params'], eye_vertices=[len(e['loop']) for e in SESSION['eyes']],
-                expressions=len(SESSION['coords']))
+                expressions=len(SESSION['coords']),
+                expression_names=[n for n, binds, _ in expression_collections() if len(binds)])
 
 
 def view(angle=0, zoom=1):
@@ -310,8 +430,52 @@ def save(directory):
     path = os.path.join(directory, 'eye-edit-' + datetime.now().strftime('%Y%m%d-%H%M%S-%f') + '.blend')
     previous = dict(SESSION['params'])
     try:
-        update(dict(blink=0.0, before=False))
+        repair_expression_bindings()
+        update(dict(blink=0.0, expression='none', before=False))
         bpy.ops.wm.save_as_mainfile(filepath=path, copy=True)
     finally:
         update(previous)
     return dict(path=path)
+
+
+def export_vrm(directory):
+    """Use the installed VRM exporter, then validate its serialized bindings."""
+    import importlib.util
+    s = SESSION
+    armature = s['source'].find_armature()
+    if not armature or not hasattr(armature.data, 'vrm_addon_extension'):
+        raise ValueError('VRMアドオンのArmatureを特定できません。')
+    if armature.data.vrm_addon_extension.spec_version != '1.0':
+        raise ValueError('ブラウザからのVRM書き出しは現在VRM 1.0に対応しています。')
+    os.makedirs(directory, exist_ok=True)
+    path = os.path.join(directory, 'eye-edit-' + datetime.now().strftime('%Y%m%d-%H%M%S-%f') + '.vrm')
+    previous = dict(s['params'])
+    arm_hidden = (armature.hide_get(), armature.hide_viewport)
+    try:
+        repair_expression_bindings()
+        update(dict(blink=0.0, expression='none', before=False))
+        armature.hide_viewport = False
+        armature.hide_set(False)
+        # Export with no preview expression baked as the initial mesh weights.
+        for key in s['preview'].data.shape_keys.key_blocks[1:]:
+            key.value = 0.0
+        bpy.context.view_layer.update()
+        expected = {name: [(getattr(b, attr).mesh_object_name, b.index, b.weight) for b in binds
+                           if getattr(b, attr).mesh_object_name == s['preview'].name
+                           or (getattr(b, attr).mesh_object_name in {o.name for o in s['lines']}
+                               and s['params']['length'] > 0 and s['params']['thickness'] > 0)]
+                    for name, binds, attr in expression_collections()}
+        outcome = bpy.ops.export_scene.vrm(filepath=path, armature_object_name=armature.name,
+                    use_addon_preferences=False, export_invisibles=False, export_only_selections=False,
+                    export_gltf_animations=False, export_try_sparse_sk=False)
+        if 'FINISHED' not in outcome or not os.path.isfile(path):
+            raise RuntimeError('VRM書き出しが完了しませんでした。BlenderのVRM検証エラーを確認してください。')
+        spec = importlib.util.spec_from_file_location('eye_editor_verify_vrm', os.path.join(os.path.dirname(__file__), 'verify_vrm.py'))
+        verifier = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(verifier)
+        report = verifier.verify(path, expected, s['source'].name)
+        return dict(path=path, validation=report)
+    finally:
+        armature.hide_viewport = arm_hidden[1]
+        armature.hide_set(arm_hidden[0])
+        update(previous)
