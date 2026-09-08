@@ -186,6 +186,7 @@ export const ja: Translations = {
       classroom: '🏫 教室',
       oldPark: '🌲 旧公園',
       cafe: '☕ カフェ',
+      town: '🏙️ 街',
       offSingleColor: 'OFF (単色)',
     },
     avatarFramingTitle: '📷 アバター位置 (構図)',

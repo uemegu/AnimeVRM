@@ -186,6 +186,7 @@ export interface Translations {
       classroom: string;
       oldPark: string;
       cafe: string;
+      town: string;
       offSingleColor: string;
     };
     avatarFramingTitle: string;

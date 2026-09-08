@@ -145,7 +145,7 @@ export class ScenarioEngine {
       if (!isVoicePlaying) {
         if (scene.choices && scene.choices.length > 0) {
           if (!this.messageWindow.isShowingChoices()) {
-            this.messageWindow.showChoices(scene.choices, (choice) => {
+            this.showChoicesWithAttention(scene.choices, (choice) => {
               this.selectChoice(choice);
             });
           }
@@ -271,7 +271,7 @@ export class ScenarioEngine {
     // If scene has choices and not yet displayed, show choices on user click!
     if (scene.choices && scene.choices.length > 0) {
       if (!this.messageWindow.isShowingChoices()) {
-        this.messageWindow.showChoices(scene.choices, (choice) => {
+        this.showChoicesWithAttention(scene.choices, (choice) => {
           this.selectChoice(choice);
         });
       }
@@ -411,22 +411,31 @@ export class ScenarioEngine {
       headOffset,
     } = config;
 
-    // Eye LookAt camera & offset control
-    const effectiveEyeLookAt =
-      eyeLookAtCamera !== undefined ? eyeLookAtCamera : (lookAtCamera !== undefined ? lookAtCamera : true);
-    avatar.setEyeLookAt({
-      mode: effectiveEyeLookAt ? 'camera' : 'forward',
-      offset: eyeOffset ? { x: eyeOffset[0], y: eyeOffset[1] } : { x: 0, y: 0 },
-      wander: typeof eyeWander === 'boolean' ? eyeWander : (typeof eyeWander === 'number' ? eyeWander > 0 : false),
-      wanderIntensity: typeof eyeWander === 'number' ? eyeWander : 1.0,
-    });
-    avatar.setLookAtCamera(effectiveEyeLookAt);
+    const isMultiCharacter = Boolean(this.currentPackage?.characters && this.currentPackage.characters.length > 1);
+    const hasExplicitLookAt =
+      lookAtCamera !== undefined ||
+      headLookAtCamera !== undefined ||
+      eyeLookAtCamera !== undefined ||
+      config.lookAtTarget !== undefined;
 
-    // Head / Face LookAt camera control (e.g. natural head turn towards camera during walking)
-    const effectiveHeadLookAt = headLookAtCamera !== undefined ? headLookAtCamera : false;
-    avatar.setHeadLookAtCamera(effectiveHeadLookAt, {
-      offset: headOffset ? { x: headOffset[0], y: headOffset[1] } : { x: 0, y: 0 },
-    });
+    if (!isMultiCharacter || hasExplicitLookAt) {
+      // Eye LookAt camera & offset control
+      const effectiveEyeLookAt =
+        eyeLookAtCamera !== undefined ? eyeLookAtCamera : (lookAtCamera !== undefined ? lookAtCamera : true);
+      avatar.setEyeLookAt({
+        mode: effectiveEyeLookAt ? 'camera' : 'forward',
+        offset: eyeOffset ? { x: eyeOffset[0], y: eyeOffset[1] } : { x: 0, y: 0 },
+        wander: typeof eyeWander === 'boolean' ? eyeWander : (typeof eyeWander === 'number' ? eyeWander > 0 : false),
+        wanderIntensity: typeof eyeWander === 'number' ? eyeWander : 1.0,
+      });
+      avatar.setLookAtCamera(effectiveEyeLookAt);
+
+      // Head / Face LookAt camera control (e.g. natural head turn towards camera during walking)
+      const effectiveHeadLookAt = headLookAtCamera !== undefined ? headLookAtCamera : false;
+      avatar.setHeadLookAtCamera(effectiveHeadLookAt, {
+        offset: headOffset ? { x: headOffset[0], y: headOffset[1] } : { x: 0, y: 0 },
+      });
+    }
 
     // Slot position / custom transform
     if (position !== undefined) {
@@ -523,6 +532,233 @@ export class ScenarioEngine {
     }
   }
 
+  /**
+   * 選択肢表示時に自キャラの反応を待つ視線へ切り替えつつ選択肢を表示する。
+   */
+  private showChoicesWithAttention(
+    choices: ScenarioChoice[],
+    onSelect: (choice: ScenarioChoice) => void
+  ): void {
+    this.applyWaitingPlayerAttention();
+    this.messageWindow.showChoices(choices, onSelect);
+  }
+
+  /**
+   * 会話シチュエーションに応じた注目方向（顔の向き＋目線）の自動制御。
+   * - 自キャラに喋りかけている時は自キャラ（カメラ）
+   * - 喋ってないキャラは喋っているキャラ
+   * - 自キャラの反応を待っている時は自キャラ（カメラ）
+   * - 顔の向きは浅い角度（maxYaw 約20度）とし、目線でしっかり対象を捉える。
+   */
+  private applyConversationAttention(scene: ScenarioScene): void {
+    const isMultiCharacter = Boolean(this.currentPackage?.characters && this.currentPackage.characters.length > 1);
+    if (!isMultiCharacter) {
+      return;
+    }
+
+    const characters = this.currentPackage!.characters!;
+    const charIds = characters.map((c) => c.id);
+
+    // 1. スピーカー（喋っているキャラ）の特定
+    const speakerId = scene.speakerCharacterId || scene.character || scene.avatar?.character;
+    const isMultipleSpeakers =
+      Boolean(scene.speaker?.includes('&') || scene.speaker?.includes('＆')) ||
+      (!speakerId && charIds.length > 1);
+    const hasChoices = Boolean(scene.choices && scene.choices.length > 0);
+
+    // 2. 会話相手（dialogueTarget）の決定
+    // 未指定時のデフォルトは 'player'（自キャラに喋りかけている）
+    const dialogueTarget = scene.dialogueTarget || 'player';
+
+    // 3. 各アバターへの適用
+    for (const charId of charIds) {
+      const avatar = this.getAvatar(charId);
+      if (!avatar) continue;
+
+      const customConfig = scene.avatars?.[charId];
+
+      // 個別に lookAtTarget が明示されている場合はそれを優先
+      if (customConfig?.lookAtTarget) {
+        this.applyCustomLookAtTarget(avatar, charId, customConfig.lookAtTarget, customConfig);
+        continue;
+      }
+      if (customConfig?.lookAtCamera !== undefined && customConfig.headLookAtCamera !== undefined) {
+        // 個別にカメラ追従フラグが明示されている場合はスキップ
+        continue;
+      }
+
+      const isSpeaker = speakerId === charId;
+      const shallowAngle = customConfig?.shallowHeadAngle ?? true;
+      const maxYaw = customConfig?.headMaxYaw;
+      const weight = customConfig?.headWeight;
+      const wander =
+        typeof customConfig?.eyeWander === 'boolean'
+          ? customConfig.eyeWander
+          : (typeof customConfig?.eyeWander === 'number' ? customConfig.eyeWander > 0 : false);
+      const wanderIntensity = typeof customConfig?.eyeWander === 'number' ? customConfig.eyeWander : 1.0;
+
+      if (hasChoices || isMultipleSpeakers) {
+        // 自キャラの反応を待っている時、または全員で呼びかけている時 -> 全アバターが自キャラ（カメラ）を向く
+        avatar.setConversationLookAt({
+          target: 'camera',
+          shallowAngle,
+          maxYaw,
+          weight,
+          wander,
+          wanderIntensity,
+        });
+      } else if (isSpeaker) {
+        // 喋っているキャラ
+        if (dialogueTarget === 'player') {
+          // 自キャラに喋りかけている -> 自キャラ（カメラ）を向く
+          avatar.setConversationLookAt({
+            target: 'camera',
+            shallowAngle,
+            maxYaw,
+            weight,
+            wander,
+            wanderIntensity,
+          });
+        } else {
+          // 相手キャラに喋りかけている (partner または 特定キャラID)
+          const targetCharId =
+            dialogueTarget === 'partner'
+              ? charIds.find((id) => id !== charId)
+              : dialogueTarget;
+          const targetAvatar = targetCharId ? this.getAvatar(targetCharId) : null;
+
+          if (targetAvatar) {
+            avatar.setConversationLookAt({
+              target: () => targetAvatar.getHeadWorldPosition(),
+              shallowAngle,
+              maxYaw,
+              weight,
+              wander,
+              wanderIntensity,
+            });
+          } else {
+            avatar.setConversationLookAt({
+              target: 'camera',
+              shallowAngle,
+              maxYaw,
+              weight,
+              wander,
+              wanderIntensity,
+            });
+          }
+        }
+      } else {
+        // 喋っていないキャラ -> 喋っているキャラ（スピーカー）の頭部を向く
+        const speakerAvatar = speakerId ? this.getAvatar(speakerId) : null;
+        if (speakerAvatar) {
+          avatar.setConversationLookAt({
+            target: () => speakerAvatar.getHeadWorldPosition(),
+            shallowAngle,
+            maxYaw,
+            weight,
+            wander,
+            wanderIntensity,
+          });
+        } else {
+          avatar.setConversationLookAt({
+            target: 'camera',
+            shallowAngle,
+            maxYaw,
+            weight,
+            wander,
+            wanderIntensity,
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * 自キャラの反応を待っている時（選択肢が表示された時など）の注目方向制御。
+   * 全てのアバターが自キャラ（カメラ）の方を浅い角度＋目線で向く。
+   */
+  private applyWaitingPlayerAttention(): void {
+    const isMultiCharacter = Boolean(this.currentPackage?.characters && this.currentPackage.characters.length > 1);
+    if (!isMultiCharacter) return;
+
+    for (const character of this.currentPackage!.characters!) {
+      const avatar = this.getAvatar(character.id);
+      if (avatar) {
+        avatar.setConversationLookAt({
+          target: 'camera',
+          shallowAngle: true,
+        });
+      }
+    }
+  }
+
+  private applyCustomLookAtTarget(
+    avatar: Avatar,
+    currentCharId: string,
+    target: string,
+    customConfig?: ScenarioSceneAvatarConfig
+  ): void {
+    const shallowAngle = customConfig?.shallowHeadAngle ?? true;
+    const maxYaw = customConfig?.headMaxYaw;
+    const weight = customConfig?.headWeight;
+    const wander = typeof customConfig?.eyeWander === 'boolean' ? customConfig.eyeWander : false;
+    const wanderIntensity = typeof customConfig?.eyeWander === 'number' ? customConfig.eyeWander : 1.0;
+
+    if (target === 'player' || target === 'camera') {
+      avatar.setConversationLookAt({
+        target: 'camera',
+        shallowAngle,
+        maxYaw,
+        weight,
+        wander,
+        wanderIntensity,
+      });
+    } else if (target === 'forward') {
+      avatar.setConversationLookAt({
+        target: 'forward',
+      });
+    } else if (target === 'partner') {
+      const charIds = this.currentPackage?.characters?.map((c) => c.id) ?? [];
+      const partnerId = charIds.find((id) => id !== currentCharId);
+      const partnerAvatar = partnerId ? this.getAvatar(partnerId) : null;
+      if (partnerAvatar) {
+        avatar.setConversationLookAt({
+          target: () => partnerAvatar.getHeadWorldPosition(),
+          shallowAngle,
+          maxYaw,
+          weight,
+          wander,
+          wanderIntensity,
+        });
+      }
+    } else if (target === 'speaker') {
+      const speakerId = this.currentScene?.speakerCharacterId;
+      const speakerAvatar = speakerId ? this.getAvatar(speakerId) : null;
+      if (speakerAvatar && speakerAvatar !== avatar) {
+        avatar.setConversationLookAt({
+          target: () => speakerAvatar.getHeadWorldPosition(),
+          shallowAngle,
+          maxYaw,
+          weight,
+          wander,
+          wanderIntensity,
+        });
+      }
+    } else {
+      const targetAvatar = this.getAvatar(target);
+      if (targetAvatar) {
+        avatar.setConversationLookAt({
+          target: () => targetAvatar.getHeadWorldPosition(),
+          shallowAngle,
+          maxYaw,
+          weight,
+          wander,
+          wanderIntensity,
+        });
+      }
+    }
+  }
+
   private executeCurrentScene(): void {
     const scene = this.currentScene;
     if (!scene) {
@@ -590,6 +826,9 @@ export class ScenarioEngine {
       }
     }
 
+    // 2.5 Conversation Attention (LookAt target & shallow head angle)
+    this.applyConversationAttention(scene);
+
     // 3. Camera Angle, Zoom & Preset (calculated after avatar positions are updated)
     if (this.onApplySceneCamera) {
       this.onApplySceneCamera(scene);
@@ -648,7 +887,7 @@ export class ScenarioEngine {
     if (scene.choices && scene.choices.length > 0) {
       if (this.isAutoMode || scene.autoNextSec) {
         if (!this.messageWindow.isShowingChoices()) {
-          this.messageWindow.showChoices(scene.choices, (choice) => {
+          this.showChoicesWithAttention(scene.choices, (choice) => {
             this.selectChoice(choice);
           });
         }
@@ -685,7 +924,7 @@ export class ScenarioEngine {
       this.autoNextTimer = window.setTimeout(() => {
         if (scene.choices && scene.choices.length > 0) {
           if (!this.messageWindow.isShowingChoices()) {
-            this.messageWindow.showChoices(scene.choices, (choice) => {
+            this.showChoicesWithAttention(scene.choices, (choice) => {
               this.selectChoice(choice);
             });
           }

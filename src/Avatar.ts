@@ -30,6 +30,7 @@ export interface YandereOptions {
 export interface EyeLookAtConfig {
   mode?: 'camera' | 'forward' | 'custom';
   targetPos?: THREE.Vector3;
+  targetGetter?: () => THREE.Vector3 | null;
   offset?: { x: number; y: number }; // 水平(yaw), 垂直(pitch) オフセット (ラジアン)
   wander?: boolean; // 目が泳ぐか
   wanderIntensity?: number; // 目が泳ぐ強さ (0.0 - 2.0, デフォルト 1.0)
@@ -39,6 +40,7 @@ export interface EyeLookAtConfig {
 export interface HeadLookAtConfig {
   enabled?: boolean;
   targetPos?: THREE.Vector3;
+  targetGetter?: () => THREE.Vector3 | null;
   weight?: number; // 0.0 - 1.0 (追従ウェイト)
   offset?: { x: number; y: number }; // 水平(yaw), 垂直(pitch) オフセット (ラジアン)
   maxYaw?: number; // 最大水平角度 (デフォルト 約45度: 0.785 rad)
@@ -300,6 +302,7 @@ export class Avatar {
   private eyeLookAtConfig: Required<EyeLookAtConfig> = {
     mode: 'camera',
     targetPos: undefined as any,
+    targetGetter: undefined as any,
     offset: { x: 0, y: 0 },
     wander: false,
     wanderIntensity: 1.0,
@@ -314,6 +317,7 @@ export class Avatar {
   private headLookAtConfig: Required<HeadLookAtConfig> = {
     enabled: false,
     targetPos: undefined as any,
+    targetGetter: undefined as any,
     weight: 1.0,
     offset: { x: 0, y: 0 },
     maxYaw: THREE.MathUtils.degToRad(45),
@@ -322,6 +326,13 @@ export class Avatar {
   };
   private currentHeadYaw = 0;
   private currentHeadPitch = 0;
+  private lastNeckDeltaInverse = new THREE.Quaternion();
+  private lastHeadDeltaInverse = new THREE.Quaternion();
+  private hasAppliedHeadLookAt = false;
+  private restNeckRotation: THREE.Quaternion | null = null;
+  private restHeadRotation: THREE.Quaternion | null = null;
+  private animNeckQuat = new THREE.Quaternion();
+  private animHeadQuat = new THREE.Quaternion();
 
   constructor(scene: THREE.Scene, camera: THREE.Camera, options: AvatarOptions) {
     this.scene = scene;
@@ -448,6 +459,18 @@ export class Avatar {
         // Initial VRM update to initialize bone matrices and texture uniforms
         vrm.update(0);
 
+        // Cache initial rest/bind rotations for neck and head bones
+        const restNeck = vrm.humanoid?.getNormalizedBoneNode('neck');
+        if (restNeck) {
+          this.restNeckRotation = restNeck.quaternion.clone();
+          this.animNeckQuat.copy(restNeck.quaternion);
+        }
+        const restHead = vrm.humanoid?.getNormalizedBoneNode('head');
+        if (restHead) {
+          this.restHeadRotation = restHead.quaternion.clone();
+          this.animHeadQuat.copy(restHead.quaternion);
+        }
+
         // Apply toon shading in-place
         const shaderOpts: ToonShaderOptions = {
           bodyPattern: /Body.*SKIN|body|skin|肌|体/i,
@@ -520,6 +543,9 @@ export class Avatar {
 
     try {
       const clip = await loadMixamoAnimation(url, this.vrm);
+      if (!this.vrm || !this.mixer) {
+        return null;
+      }
       const action = this.mixer.clipAction(clip);
 
       if (loop) {
@@ -544,6 +570,11 @@ export class Avatar {
       return action;
     } catch (err) {
       console.error(`Failed to play animation ${url}:`, err);
+      const fallbackUrl = this.options.defaultAnimationUrl || '/animations/Idle.fbx';
+      if (url !== fallbackUrl) {
+        console.warn(`Falling back to default animation: ${fallbackUrl}`);
+        return this.playAnimation(fallbackUrl, loop, crossFadeDuration, returnToIdleUrl);
+      }
       return null;
     }
   }
@@ -807,6 +838,7 @@ export class Avatar {
   public setEyeLookAt(config: Partial<EyeLookAtConfig>): void {
     if (config.mode !== undefined) this.eyeLookAtConfig.mode = config.mode;
     if (config.targetPos !== undefined) this.eyeLookAtConfig.targetPos = config.targetPos;
+    if (config.targetGetter !== undefined) this.eyeLookAtConfig.targetGetter = config.targetGetter;
     if (config.offset !== undefined) {
       this.eyeLookAtConfig.offset = {
         x: config.offset.x ?? this.eyeLookAtConfig.offset.x,
@@ -857,6 +889,7 @@ export class Avatar {
   public setHeadLookAt(config: Partial<HeadLookAtConfig>): void {
     if (config.enabled !== undefined) this.headLookAtConfig.enabled = config.enabled;
     if (config.targetPos !== undefined) this.headLookAtConfig.targetPos = config.targetPos;
+    if (config.targetGetter !== undefined) this.headLookAtConfig.targetGetter = config.targetGetter;
     if (config.weight !== undefined) this.headLookAtConfig.weight = config.weight;
     if (config.offset !== undefined) {
       this.headLookAtConfig.offset = {
@@ -867,6 +900,78 @@ export class Avatar {
     if (config.maxYaw !== undefined) this.headLookAtConfig.maxYaw = config.maxYaw;
     if (config.maxPitch !== undefined) this.headLookAtConfig.maxPitch = config.maxPitch;
     if (config.smoothSpeed !== undefined) this.headLookAtConfig.smoothSpeed = config.smoothSpeed;
+  }
+
+  /**
+   * アバター頭部（Headボーン）のワールド座標を取得する。
+   * 相手キャラの目線・顔向きターゲットとして使用。
+   */
+  public getHeadWorldPosition(out: THREE.Vector3 = new THREE.Vector3()): THREE.Vector3 {
+    const headNode =
+      this.vrm?.humanoid?.getNormalizedBoneNode('head') ||
+      this.vrm?.humanoid?.getRawBoneNode('head');
+    if (headNode) {
+      headNode.getWorldPosition(out);
+    } else if (this.vrm?.scene) {
+      this.vrm.scene.getWorldPosition(out);
+      out.y += 1.4;
+    } else {
+      out.copy(this.initialPosition);
+      out.y += 1.4;
+    }
+    return out;
+  }
+
+  /**
+   * 会話時の自然な注目（顔の向き＋目線）を設定する。
+   * 顔の向きは浅い角度（maxYaw 約20度、控えめなウェイト）とし、目線はターゲットをしっかり捉える。
+   */
+  public setConversationLookAt(options: {
+    target: 'camera' | 'forward' | THREE.Vector3 | (() => THREE.Vector3 | null);
+    shallowAngle?: boolean;
+    maxYaw?: number;
+    weight?: number;
+    wander?: boolean;
+    wanderIntensity?: number;
+  }): void {
+    const isCamera = options.target === 'camera';
+    const isForward = options.target === 'forward';
+    const isGetter = typeof options.target === 'function';
+    const isVec = options.target instanceof THREE.Vector3;
+
+    const shallow = options.shallowAngle ?? true;
+    const maxYaw = options.maxYaw ?? (shallow ? THREE.MathUtils.degToRad(20) : THREE.MathUtils.degToRad(45));
+    const maxPitch = shallow ? THREE.MathUtils.degToRad(15) : THREE.MathUtils.degToRad(25);
+    const weight = options.weight ?? (shallow ? 0.6 : 0.85);
+
+    if (isForward) {
+      this.setLookAtCamera(false);
+      this.setHeadLookAt({ enabled: false, targetGetter: undefined, targetPos: undefined });
+      return;
+    }
+
+    const targetPos = options.target instanceof THREE.Vector3 ? options.target : undefined;
+    const targetGetter = typeof options.target === 'function' ? options.target : undefined;
+
+    this.setEyeLookAt({
+      mode: isCamera ? 'camera' : 'custom',
+      targetPos,
+      targetGetter,
+      wander: options.wander ?? false,
+      wanderIntensity: options.wanderIntensity ?? 1.0,
+      offset: { x: 0, y: 0 },
+    });
+
+    this.setHeadLookAt({
+      enabled: true,
+      targetPos,
+      targetGetter,
+      maxYaw,
+      maxPitch,
+      weight,
+      smoothSpeed: 7.0,
+      offset: { x: 0, y: 0 },
+    });
   }
 
   public getEyeLookAtConfig(): Readonly<Required<EyeLookAtConfig>> {
@@ -896,15 +1001,19 @@ export class Avatar {
         this.vrm.humanoid.getNormalizedBoneNode('spine') ||
         this.vrm.humanoid.getNormalizedBoneNode('hips');
 
-      const targetWorldPos = this.headLookAtConfig.targetPos
-        ? this.headLookAtConfig.targetPos.clone()
-        : new THREE.Vector3();
-      if (!this.headLookAtConfig.targetPos) {
+      const dynamicTarget = this.headLookAtConfig.targetGetter ? this.headLookAtConfig.targetGetter() : null;
+      const targetWorldPos = dynamicTarget
+        ? dynamicTarget.clone()
+        : (this.headLookAtConfig.targetPos
+          ? this.headLookAtConfig.targetPos.clone()
+          : new THREE.Vector3());
+      if (!dynamicTarget && !this.headLookAtConfig.targetPos) {
         this.camera.getWorldPosition(targetWorldPos);
       }
 
-      // Reference orientation comes from chest (stable torso plane)
-      const refQuatNode = chestNode || this.vrm.scene;
+      // Reference orientation comes from avatar root orientation (stable model plane,
+      // immune to individual animation torso twist poses like Female Standing Pose)
+      const refQuatNode = this.vrm.scene;
       const refWorldQuat = new THREE.Quaternion();
       refQuatNode.getWorldQuaternion(refWorldQuat);
 
@@ -951,7 +1060,8 @@ export class Avatar {
     this.currentHeadYaw = THREE.MathUtils.lerp(this.currentHeadYaw, targetYaw, smoothRate);
     this.currentHeadPitch = THREE.MathUtils.lerp(this.currentHeadPitch, targetPitch, smoothRate);
 
-    if (Math.abs(this.currentHeadYaw) < 0.0001 && Math.abs(this.currentHeadPitch) < 0.0001) {
+    // If head look-at is disabled and has smoothly returned to neutral, don't override animation
+    if (!this.headLookAtConfig.enabled && Math.abs(this.currentHeadYaw) < 0.0001 && Math.abs(this.currentHeadPitch) < 0.0001) {
       return;
     }
 
@@ -968,9 +1078,27 @@ export class Avatar {
     const qNeckDelta = new THREE.Quaternion().setFromEuler(new THREE.Euler(-neckPitch, neckYaw, 0, 'YXZ'));
     const qHeadDelta = new THREE.Quaternion().setFromEuler(new THREE.Euler(-headPitch, headYaw, 0, 'YXZ'));
 
-    // Multiply additive delta on top of the FBX animation frame rotation
+    // If no animation is currently driving bones, ensure bones start from bind/rest pose
+    if (!this.currentAction) {
+      if (this.restNeckRotation) {
+        neckNode.quaternion.copy(this.restNeckRotation);
+      }
+      if (this.restHeadRotation) {
+        headNode.quaternion.copy(this.restHeadRotation);
+      }
+    }
+
+    // Multiply additive delta on top of the clean FBX animation frame rotation.
+    // This preserves expressive character acting (nodding, head shaking, tilting)
+    // while keeping attention focused naturally towards the conversational target.
     neckNode.quaternion.multiply(qNeckDelta);
     headNode.quaternion.multiply(qHeadDelta);
+
+    // Record inverse quaternions to cleanly cancel this delta next frame before mixer.update,
+    // permanently preventing relative delta compounding regardless of animation pauses or clamps.
+    this.lastNeckDeltaInverse.copy(qNeckDelta).invert();
+    this.lastHeadDeltaInverse.copy(qHeadDelta).invert();
+    this.hasAppliedHeadLookAt = true;
   }
 
   /**
@@ -1045,7 +1173,10 @@ export class Avatar {
       headWorldPos.y += 1.4;
     }
 
-    if (this.eyeLookAtConfig.mode === 'camera') {
+    const dynamicEyeTarget = this.eyeLookAtConfig.targetGetter ? this.eyeLookAtConfig.targetGetter() : null;
+    if (dynamicEyeTarget) {
+      baseTargetPos.copy(dynamicEyeTarget);
+    } else if (this.eyeLookAtConfig.mode === 'camera') {
       this.camera.getWorldPosition(baseTargetPos);
     } else if (this.eyeLookAtConfig.mode === 'custom' && this.eyeLookAtConfig.targetPos) {
       baseTargetPos.copy(this.eyeLookAtConfig.targetPos);
@@ -1104,6 +1235,16 @@ export class Avatar {
 
   public update(delta: number, elapsed: number, windCallback?: () => void): void {
     if (!this.vrm) return;
+
+    // Cancel previous frame's procedural Head Look-At before animation mixer runs,
+    // restoring bone transforms to their pure animation/rest state and completely preventing accumulation.
+    if (this.hasAppliedHeadLookAt && this.vrm.humanoid) {
+      const neckNode = this.vrm.humanoid.getNormalizedBoneNode('neck');
+      const headNode = this.vrm.humanoid.getNormalizedBoneNode('head');
+      if (neckNode) neckNode.quaternion.multiply(this.lastNeckDeltaInverse);
+      if (headNode) headNode.quaternion.multiply(this.lastHeadDeltaInverse);
+      this.hasAppliedHeadLookAt = false;
+    }
 
     // Update animation mixer first to update bone transformations
     if (this.mixer) {

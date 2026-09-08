@@ -47,6 +47,10 @@ export interface ScenarioSceneAvatarConfig {
   lookAtCamera?: boolean;
   headLookAtCamera?: boolean; // 顔（首・頭）をカメラへ向ける（FBX歩行中も自然にカメラを振り向く）
   eyeLookAtCamera?: boolean;  // 目をカメラへ向ける（未指定時は lookAtCamera に従う）
+  lookAtTarget?: 'player' | 'speaker' | 'partner' | 'camera' | 'forward' | string; // 個別の視線・顔向きターゲット指定
+  shallowHeadAngle?: boolean; // 顔の向きを浅い角度にするか（デフォルト true）
+  headMaxYaw?: number; // 首の最大水平回転角度（ラジアン）
+  headWeight?: number; // 首の回転追従ウェイト
   eyeWander?: boolean | number; // 目が泳ぐ演出（true または強度 0.0 - 2.0）
   eyeOffset?: [number, number]; // 視線オフセット [yaw, pitch] (ラジアン)
   headOffset?: [number, number]; // 顔・首オフセット [yaw, pitch] (ラジアン)
@@ -95,6 +99,7 @@ export interface ScenarioScene {
   speaker?: string;
   speakerCharacterId?: string; // Character ID speaking in this scene (e.g. 'girl_01')
   lipSyncCharacterId?: string | null; // Optional override for lip-sync character (or null/'none' to disable)
+  dialogueTarget?: 'player' | 'partner' | string; // 会話相手（自キャラ 'player'、相手キャラ 'partner'、またはキャラID）。未指定時のデフォルトは 'player'
   cameraTargetCharacterId?: string; // Optional character ID for camera framing/focus (if different from speaker)
   text: string;
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL

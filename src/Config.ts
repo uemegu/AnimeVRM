@@ -360,8 +360,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       color: '#ffffff',
       intensity: 3.2,
       posX: -0.7,
-      posY: 0.5,
-      posZ: 0.4,
+      posY: 1.5,
+      posZ: 2.6,
     },
     rim: {
       enabled: false,
