@@ -1,6 +1,6 @@
 const $ = (id) => document.getElementById(id);
 let token, connected = false, busy = false, before = false, angle = 0, zoom = 1;
-const sliders = ['flatness', 'length', 'thickness', 'blink'];
+const sliders = ['flatness', 'length', 'thickness', 'corner_ratio', 'upper_peak', 'blink'];
 const session = fetch('/api/session').then(r => r.json()).then(r => { token = r.token; });
 
 async function api(path, data = {}) {
@@ -13,7 +13,7 @@ async function api(path, data = {}) {
 function message(text, error = false) { $('status').textContent = text; $('status').classList.toggle('error', error); }
 function lock(value) {
   busy = value;
-  document.querySelectorAll('button,input').forEach(e => { e.disabled = value || (!connected && e.id !== 'connect'); });
+  document.querySelectorAll('button,input,select').forEach(e => { e.disabled = value || (!connected && e.id !== 'connect'); });
   $('canvas').classList.toggle('busy', value);
 }
 async function run(action) {
@@ -21,13 +21,16 @@ async function run(action) {
   lock(true);
   try { await action(); } catch (e) { message(e.message, true); } finally { lock(false); }
 }
-function values() { return Object.fromEntries(sliders.map(id => [id, Number($(id).value) / 100])); }
+function values() { return { ...Object.fromEntries(sliders.map(id => [id, Number($(id).value) / 100])), expression: $('expression').value }; }
 function labels() {
   for (const id of sliders) $(id + '-value').textContent = id === 'thickness' ? (Number($(id).value) / 100).toFixed(2) : $(id).value + '%';
+  const peak = Number($('upper_peak').value);
+  $('upper_peak-value').textContent = peak === 0 ? '元の位置' : `${peak < 0 ? '目頭' : '目尻'} ${Math.abs(peak)}%`;
 }
 function synchronize(params) {
   for (const id of sliders) $(id).value = Math.round(params[id] * 100);
   before = params.before;
+  $('expression').value = params.expression || 'none';
   $('compare').textContent = before ? '編集中の顔に戻る' : '変更前を見る';
   $('compare').setAttribute('aria-pressed', String(before));
   $('preview-label').textContent = before ? 'BEFORE / 元の顔' : 'AFTER / 調整中';
@@ -53,6 +56,11 @@ $('connect').onclick = () => run(async () => {
   message('モデルの目の縁を読み取っています…');
   const result = await api('connect');
   connected = true;
+  const expressionLabels = { happy: 'happy / 喜び', angry: 'angry / 怒り', sad: 'sad / 悲しみ', relaxed: 'relaxed / リラックス', surprised: 'surprised / 驚き', aa: 'aa / あ', ih: 'ih / い', ou: 'ou / う', ee: 'ee / え', oh: 'oh / お' };
+  $('expression').replaceChildren(new Option('通常の顔', 'none'));
+  for (const name of result.expression_names || []) {
+    if (!name.startsWith('blink') && !name.startsWith('look')) $('expression').add(new Option(expressionLabels[name] || name, name));
+  }
   synchronize(result.params);
   $('connection').textContent = result.model + ' に接続中';
   $('dot').classList.add('live');
@@ -64,8 +72,9 @@ for (const id of sliders) {
   $(id).oninput = labels;
   $(id).onchange = () => run(() => apply());
 }
-$('suggest').onclick = () => run(() => apply({ flatness: .85, length: .85, thickness: .55, blink: 0 }));
-$('reset').onclick = () => run(() => apply({ flatness: 0, length: 0, thickness: .45, blink: 0 }));
+$('expression').onchange = () => run(() => apply());
+$('suggest').onclick = () => run(() => apply({ flatness: .85, length: .85, thickness: .7, corner_ratio: .15, upper_peak: .5, blink: 0, expression: 'none' }));
+$('reset').onclick = () => run(() => apply({ flatness: 0, length: 0, thickness: .45, corner_ratio: .18, upper_peak: 0, blink: 0, expression: 'none' }));
 $('compare').onclick = () => run(async () => {
   const result = await api('update', { before: !before });
   synchronize(result.params);
@@ -89,4 +98,9 @@ $('save').onclick = () => run(async () => {
   message('モデルを別ファイルに保存しています…');
   const result = await api('save');
   message('保存しました：' + result.path);
+});
+$('export').onclick = () => run(async () => {
+  message('VRMを書き出し、表情の接続を検証しています…');
+  const result = await api('export');
+  message(`VRMを保存しました（表情バインド ${result.validation.bindings} 件を検証）：${result.path}`);
 });

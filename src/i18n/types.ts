@@ -136,6 +136,9 @@ export interface Translations {
     twoGirlsTitle: string;
     playTwoGirls: string;
     twoGirlsDesc: string;
+    trioTitle: string;
+    playTrio: string;
+    trioDesc: string;
     behindYouTitle: string;
     playBehindYou: string;
     behindYouDesc: string;
@@ -245,6 +248,7 @@ export interface Translations {
     animStopped: string;
     confessionStarted: string;
     twoGirlsStarted: string;
+    trioStarted: string;
     townWalkStarted: string;
     behindYouStarted: string;
     nisaStarted: string;

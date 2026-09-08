@@ -10,6 +10,7 @@ import { resolveAssetUrl } from '../utils/path';
 import { TimeOfDayId } from '../presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
+import { getTrioConversationScenario } from '../scenario/trioConversationScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
@@ -402,6 +403,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #bfdbfe; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.twoGirlsDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #8b5cf6; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #a78bfa; font-weight: 700;">${tr.scenario.trioTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-trio-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playTrio}</button>
+              <button id="scenario-trio-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #ddd6fe; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.trioDesc}
             </div>
           </div>
 
@@ -934,6 +946,25 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-twogirls-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive 3-Person Dialogue Scenario Play/Stop
+    document.getElementById('scenario-trio-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        scenarioController.scenarioEngine.play(getTrioConversationScenario(getLanguage()));
+        showToast(t().toasts.trioStarted);
+      }
+    });
+
+    document.getElementById('scenario-trio-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);

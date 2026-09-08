@@ -51,7 +51,7 @@ def connect():
                    f" spec = importlib.util.spec_from_file_location('vroid_eye_editor', {path!r})\n"
                    " engine = importlib.util.module_from_spec(spec)\n"
                    " sys.modules['vroid_eye_editor'] = engine\n"
-                   " spec.loader.exec_module(engine)\n"
+                   "engine.__spec__.loader.exec_module(engine)\n"
                    "result = engine.initialize()")
 
 
@@ -107,8 +107,9 @@ class Handler(BaseHTTPRequestHandler):
                 result = connect()
             elif path == '/api/update':
                 params = {}
-                ranges = dict(flatness=(0, 1), length=(0, 1), thickness=(0, 1.2), blink=(0, 1))
-                if set(data) - set(ranges) - {'before'}:
+                ranges = dict(flatness=(0, 1), length=(0, 1), thickness=(0, 1.2),
+                              corner_ratio=(0, 1), upper_peak=(-1, 1), blink=(0, 1))
+                if set(data) - set(ranges) - {'before', 'expression'}:
                     raise ValueError('Unknown parameter')
                 for key, bounds in ranges.items():
                     if key in data:
@@ -117,6 +118,10 @@ class Handler(BaseHTTPRequestHandler):
                     if type(data['before']) is not bool:
                         raise ValueError('Invalid comparison state')
                     params['before'] = data['before']
+                if 'expression' in data:
+                    if not isinstance(data['expression'], str) or len(data['expression']) > 100:
+                        raise ValueError('Invalid expression')
+                    params['expression'] = data['expression']
                 result = invoke('update', params)
             elif path == '/api/view':
                 result = invoke('view', numeric(data, 'angle', -40, 40), numeric(data, 'zoom', .7, 2))
@@ -128,6 +133,8 @@ class Handler(BaseHTTPRequestHandler):
                     capture.unlink(missing_ok=True)
             elif path == '/api/save':
                 result = invoke('save', str(ROOT / 'output'))
+            elif path == '/api/export':
+                result = invoke('export_vrm', str(ROOT / 'output'))
             else:
                 return self.respond(404, dict(error='Not found'))
             self.respond(200, result)

@@ -37,6 +37,7 @@ export function updateScenarioPlayStateUI(
   const playBtn = document.getElementById('scenario-play-btn');
   const confessionBtn = document.getElementById('scenario-confession-btn');
   const twogirlsBtn = document.getElementById('scenario-twogirls-btn');
+  const trioBtn = document.getElementById('scenario-trio-btn');
   const statusBox = document.getElementById('scenario-status-box');
   const panel = document.getElementById('panel-container');
   const gearBtn = document.getElementById('settings-open-btn');
@@ -59,6 +60,13 @@ export function updateScenarioPlayStateUI(
     twogirlsBtn.style.background = isTwoGirlsPlaying
       ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
       : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)';
+  }
+  if (trioBtn) {
+    const isTrioPlaying = isEnginePlaying && isMultiAvatarScenarioActive;
+    trioBtn.textContent = isTrioPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playTrio;
+    trioBtn.style.background = isTrioPlaying
+      ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
+      : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
   }
   if (statusBox) {
     statusBox.style.display = isPlayerPlaying ? 'block' : 'none';
