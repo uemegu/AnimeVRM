@@ -1,5 +1,5 @@
 import * as T from 'three';
-import { MotionEngine, type Recipe } from './engine';
+import { MotionEngine, totalDuration, type Recipe } from './engine';
 
 type Prop = string | { type: 'I' | 'L' | 'D'; value: number } | { type: 'f' | 'i' | 'l'; value: number[] };
 interface Node { name: string; props: Prop[]; children: Node[]; }
@@ -13,10 +13,11 @@ const named = (name: string, type: string) => `${name}\0\x01${type}`;
 
 /** FBX 7.4 binary, uncompressed baked curves, centimetres, Y-up. No mesh is required. */
 export function exportFBX(engine: MotionEngine, recipe: Recipe): ArrayBuffer {
+  const duration = totalDuration(recipe);
   const rests = [...engine.rest.values()];
   const ids = new Map(rests.map((r, index) => [r.node, 1000 + index]));
-  const count = Math.ceil(recipe.duration * recipe.fps) + 1;
-  const times = Array.from({ length: count }, (_, frame) => Math.min(frame / recipe.fps, recipe.duration));
+  const count = Math.ceil(duration * recipe.fps - 1e-8) + 1;
+  const times = Array.from({ length: count }, (_, frame) => Math.min(frame / recipe.fps, duration));
   const rotations = rests.map(() => [[], [], []] as number[][]);
   const positions = rests.map(() => [[], [], []] as number[][]);
   for (let frame = 0; frame < count; frame++) {
@@ -34,7 +35,7 @@ export function exportFBX(engine: MotionEngine, recipe: Recipe): ArrayBuffer {
   }
   const objects: Node[] = [], connections: Node[] = [];
   const connect = (child: number, parent: number, property?: string) => connections.push(n('C', [property ? 'OP' : 'OO', l(child), l(parent), ...(property ? [property] : [])]));
-  objects.push(n('AnimationStack', [l(10), named('mixamo.com', 'AnimStack'), ''], [n('Properties70', [], [n('P', ['LocalStart', 'KTime', 'Time', '', l(0)]), n('P', ['LocalStop', 'KTime', 'Time', '', l(ticks(recipe.duration))]), n('P', ['ReferenceStart', 'KTime', 'Time', '', l(0)]), n('P', ['ReferenceStop', 'KTime', 'Time', '', l(ticks(recipe.duration))])])]));
+  objects.push(n('AnimationStack', [l(10), named('mixamo.com', 'AnimStack'), ''], [n('Properties70', [], [n('P', ['LocalStart', 'KTime', 'Time', '', l(0)]), n('P', ['LocalStop', 'KTime', 'Time', '', l(ticks(duration))]), n('P', ['ReferenceStart', 'KTime', 'Time', '', l(0)]), n('P', ['ReferenceStop', 'KTime', 'Time', '', l(ticks(duration))])])]));
   objects.push(n('AnimationLayer', [l(11), named('BaseLayer', 'AnimLayer'), ''])); connect(11, 10);
   let next = 10000;
   rests.forEach((r, index) => {
