@@ -157,5 +157,36 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
   expect(state5.avatars.girl_02.eyeMode).toBe('camera');
   await page.screenshot({ path: 'scratch/trio_scene_choice.png' });
 
-  console.log('All 5 scenes tested and screenshots captured successfully!');
+  // Click the first choice (Cafe route)
+  console.log('Selecting Choice 1 (Cafe Route)...');
+  await page.evaluate(() => {
+    const sc = window.scenarioController;
+    const choices = sc?.scenarioEngine?.currentScene?.choices;
+    if (sc?.scenarioEngine && choices && choices.length > 0) {
+      sc.scenarioEngine.selectChoice(choices[0]);
+    } else {
+      const choiceBtn = document.querySelector('.adv-choice-btn');
+      if (choiceBtn) choiceBtn.click();
+    }
+  });
+  await page.waitForTimeout(2000);
+  const state6 = await getAvatarsState();
+  console.log('--- Scene 6 State (Route Cafe 1: Emiri Zoom) ---');
+  console.log(JSON.stringify(state6, null, 2));
+  expect(state6.sceneId).toBe('route_cafe_1');
+  await page.screenshot({ path: 'scratch/trio_scene_cafe_1_emiri_zoom.png' });
+
+  // Advance to Route Cafe 2: Aoi speaks, camera pulls back to wide
+  console.log('Advancing to Route Cafe 2 (Aoi speaks, camera pulls back)...');
+  await page.evaluate(() => {
+    window.scenarioController?.scenarioEngine?.next();
+  });
+  await page.waitForTimeout(2000);
+  const state7 = await getAvatarsState();
+  console.log('--- Scene 7 State (Route Cafe 2: Camera Pull Back) ---');
+  console.log(JSON.stringify(state7, null, 2));
+  expect(state7.sceneId).toBe('route_cafe_2');
+  await page.screenshot({ path: 'scratch/trio_scene_cafe_2_pull_back.png' });
+
+  console.log('All scenes tested and screenshots captured successfully!');
 });
