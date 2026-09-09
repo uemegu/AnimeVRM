@@ -2,6 +2,8 @@ import { EffectPresetName } from '../effects/text/types';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { ScenePresetId } from '../presets/ScenePresets';
 import { TearConfig } from '../effects/tears';
+import { FocusLinesConfig } from '../effects/FocusLinesOverlay';
+import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
 
 export interface ScenarioChoice {
   text: string;
@@ -61,6 +63,7 @@ export interface ScenarioSceneAvatarConfig {
   };
   tears?: boolean;
   tearConfig?: Partial<TearConfig>;
+  sweat?: boolean | 'fly4' | 'jito';
 }
 
 export type CameraZoomType =
@@ -128,6 +131,9 @@ export interface ScenarioScene {
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
   cameraPosition?: [number, number, number]; // Direct camera position override (e.g. over-the-shoulder)
   choices?: ScenarioChoice[];
+  choiceDelaySec?: number; // 選択肢表示前のディレイ秒数（アバターの視線移動をしっかり見せるための待ち時間、デフォルト 1.0s）
+  focusLines?: boolean | FocusLinesConfig; // 画面中央に向かうダイナミック効果線（集中線）
+  dreamBackground?: boolean | 'heart' | AnimeDreamBackgroundConfig; // アニメ風ハート・パステル夢心地背景エフェクト
   conditions?: string[];
   goto?: string;
   waitClick?: boolean;

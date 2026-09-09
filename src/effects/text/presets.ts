@@ -290,4 +290,43 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
       height: 0.03,
     },
   },
+
+  asease: {
+    name: 'asease',
+    spawnMode: 'single',
+    style: {
+      fontFamily: '"Mochiy Pop One", "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Meiryo", "Arial Black", sans-serif',
+      fontWeight: '900',
+      textColor: ['#e0f7fa', '#00b4d8'],
+      gradientDirection: 'vertical',
+      strokeColor: '#ffffff',
+      strokeWidth: 16,
+      outerStrokeColor: '#03045e',
+      outerStrokeWidth: 8,
+      shadowColor: 'rgba(3, 4, 94, 0.85)',
+      shadowOffset: { x: 5, y: 7 },
+      shadowBlur: 0,
+      decorations: ['sweat'],
+      decorationColor: '#00b4d8',
+      charJitter: {
+        rotationRange: 0.1,
+        offsetYRange: 6,
+        scaleRange: 0.08,
+      },
+      slant: -4,
+      firstCharScale: 1.15,
+      splitRepeatTilt: true,
+      halfTiltRange: 0.12,
+    },
+    animations: ['pop', 'shake'],
+    defaultDuration: Infinity,
+    defaultScale: 0.38,
+    defaultOffset: { x: 0, y: 0.16, z: 0.04 }, // Positioned nicely near head
+    shakeIntensity: {
+      position: 0.012,
+      rotation: 0.08,
+      frequency: 24, // Nervous comic sweat shudder
+    },
+  },
 };
+

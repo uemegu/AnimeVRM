@@ -26,12 +26,42 @@
         <p class="hint">スライダーを離すとモデルに反映します。プレビューの更新には数秒かかることがあります。</p>
       </section>
       <aside class="panel" aria-label="目の調整">
-        <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目の縁に沿って調整します。<br>瞳の丸さや大きさはそのまま。</p>
+        <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目・瞳・眉をそれぞれ調整できます。<br>左右は対称に動きます。</p>
+        <div class="row"><button id="export-settings" disabled>設定をExport</button><button id="import-settings" disabled>設定をImport</button></div>
+        <input id="settings-file" type="file" accept=".json,application/json" hidden disabled>
+        <p class="hint">JSONで保存・読み込み。目・瞳・眉の調整値をまとめて置き換えます。</p>
         <div class="control"><label for="flatness">下まぶたの丸みを減らす<output id="flatness-value">0%</output></label><input id="flatness" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>もとの丸み</span><span>平らにする</span></div></div>
         <div class="control"><label for="length">目頭のラインを伸ばす<output id="length-value">0%</output></label><input id="length" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>追加なし</span><span>目頭の下まで</span></div></div>
         <div class="control"><label for="thickness">上まぶた側のラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="120" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
         <div class="control"><label for="corner_ratio">目頭の太さ（上まぶた比）<output id="corner_ratio-value">18%</output></label><input id="corner_ratio" type="range" min="0" max="100" value="18" disabled><div class="ends"><span>目頭を細く</span><span>同じ太さ</span></div></div>
         <div class="control"><label for="upper_peak">上まぶたの山の位置<output id="upper_peak-value">元の位置</output></label><input id="upper_peak" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>目頭寄り</span><span>目尻寄り</span></div></div>
+        <details open style="border-top:1px solid #e4ddd4;padding-top:18px;margin-top:25px">
+          <summary style="cursor:pointer;font-size:14px">目全体の位置・サイズ</summary>
+          <p class="hint">まぶた・白目・瞳・ラインを一緒に調整します。</p>
+          <div class="control"><label for="eye_x">目の左右位置<output id="eye_x-value">元の位置</output></label><input id="eye_x" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>内側に寄せる</span><span>外側に離す</span></div></div>
+          <div class="control"><label for="eye_z">目の上下位置<output id="eye_z-value">元の位置</output></label><input id="eye_z" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>下へ</span><span>上へ</span></div></div>
+          <div class="control"><label for="eye_width">目の横幅<output id="eye_width-value">100%</output></label><input id="eye_width" type="range" min="75" max="125" value="100" disabled><div class="ends"><span>狭く</span><span>広く</span></div></div>
+          <div class="control"><label for="eye_height">目の縦幅<output id="eye_height-value">100%</output></label><input id="eye_height" type="range" min="75" max="125" value="100" disabled><div class="ends"><span>低く</span><span>高く</span></div></div>
+          <button id="reset-eye" class="full" disabled>目全体の位置・サイズを戻す</button>
+        </details>
+        <details open style="border-top:1px solid #e4ddd4;padding-top:18px;margin-top:25px">
+          <summary style="cursor:pointer;font-size:14px">瞳の位置・サイズ</summary>
+          <p class="hint">目の中で瞳とハイライトを調整します。位置は目全体の調整に重ねて反映します。</p>
+          <div class="control"><label for="iris_x">瞳の左右位置<output id="iris_x-value">元の位置</output></label><input id="iris_x" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>内側へ</span><span>外側へ</span></div></div>
+          <div class="control"><label for="iris_z">瞳の上下位置<output id="iris_z-value">元の位置</output></label><input id="iris_z" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>下へ</span><span>上へ</span></div></div>
+          <div class="control"><label for="iris_width">瞳の横幅<output id="iris_width-value">100%</output></label><input id="iris_width" type="range" min="60" max="140" value="100" disabled><div class="ends"><span>狭く</span><span>広く</span></div></div>
+          <div class="control"><label for="iris_height">瞳の縦幅<output id="iris_height-value">100%</output></label><input id="iris_height" type="range" min="60" max="140" value="100" disabled><div class="ends"><span>低く</span><span>高く</span></div></div>
+          <button id="reset-iris" class="full" disabled>瞳の位置・サイズを戻す</button>
+        </details>
+        <details open style="border-top:1px solid #e4ddd4;padding-top:18px;margin-top:25px">
+          <summary style="cursor:pointer;font-size:14px">眉毛の位置・湾曲</summary>
+          <p class="hint">眉だけを調整します。元の眉の形に重ねて適用します。</p>
+          <div class="control"><label for="brow_x">眉の左右位置<output id="brow_x-value">元の位置</output></label><input id="brow_x" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>内側へ</span><span>外側へ</span></div></div>
+          <div class="control"><label for="brow_z">眉の上下位置<output id="brow_z-value">元の位置</output></label><input id="brow_z" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>下へ</span><span>上へ</span></div></div>
+          <div class="control"><label for="brow_peak">眉の湾曲位置<output id="brow_peak-value">元の位置</output></label><input id="brow_peak" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>眉頭寄り</span><span>眉尻寄り</span></div></div>
+          <div class="control"><label for="brow_curve">眉の曲がり具合<output id="brow_curve-value">元の形</output></label><input id="brow_curve" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>下に反らす</span><span>上に反らす</span></div></div>
+          <button id="reset-brow" class="full" disabled>眉の調整を戻す</button>
+        </details>
         <button id="suggest" class="full" disabled>添付イメージに寄せる</button>
         <div class="divider"></div>
         <div class="row"><button id="compare" aria-pressed="false" disabled>変更前を見る</button><button id="reset" disabled>調整をリセット</button></div>

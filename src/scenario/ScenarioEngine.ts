@@ -17,6 +17,8 @@ import { ScenePresetId } from '../presets/ScenePresets';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { resolveAssetUrl } from '../utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
+import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
+import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
 import * as THREE from 'three';
 
 export interface ScenarioEngineOptions {
@@ -38,6 +40,10 @@ export interface ScenarioEngineOptions {
   ) => void;
   onApplySceneCamera?: (scene: ScenarioScene) => void;
   onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
+  onUpdateDreamBackground?: (
+    config?: boolean | 'heart' | AnimeDreamBackgroundConfig,
+    scene?: ScenarioScene
+  ) => void;
   onSwitchBackground?: (bgUrl: string) => void;
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
 }
@@ -61,6 +67,10 @@ export class ScenarioEngine {
   ) => void;
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
   private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
+  private onUpdateDreamBackground?: (
+    config?: boolean | 'heart' | AnimeDreamBackgroundConfig,
+    scene?: ScenarioScene
+  ) => void;
   private onSwitchBackground?: (bgUrl: string) => void;
   private onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
 
@@ -86,9 +96,11 @@ export class ScenarioEngine {
   private bgmAudio: HTMLAudioElement | null = null;
   private seAudio: HTMLAudioElement | null = null;
   private autoNextTimer: number | null = null;
+  private pendingChoiceTimer: number | null = null;
   private pendingEffectTextTimers: number[] = [];
   private boundVoiceEndHandler: (() => void) | null = null;
   private isAutoMode = false;
+  private focusLinesOverlay: FocusLinesOverlay = new FocusLinesOverlay();
 
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
@@ -105,6 +117,7 @@ export class ScenarioEngine {
     this.onApplyCamera = options.onApplyCamera;
     this.onApplySceneCamera = options.onApplySceneCamera;
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
+    this.onUpdateDreamBackground = options.onUpdateDreamBackground;
     this.onSwitchBackground = options.onSwitchBackground;
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
 
@@ -237,7 +250,9 @@ export class ScenarioEngine {
 
     this.isPlayingState = false;
     this.clearAutoNextTimer();
+    this.clearPendingChoiceTimer();
     this.clearPendingEffectTextTimers();
+    this.focusLinesOverlay.hide();
     this.activeMoveTransitions.clear();
     this.stopAudioAndVoice();
     this.stopBgm();
@@ -252,6 +267,7 @@ export class ScenarioEngine {
 
     this.messageWindow.hide();
     this.onUpdateScrollingBackground?.(undefined);
+    this.onUpdateDreamBackground?.(undefined);
     this.onSwitchPanoramaBackground?.(null);
     this.onPlayStateChange?.(false);
     this.onFinished?.();
@@ -271,9 +287,14 @@ export class ScenarioEngine {
     // If scene has choices and not yet displayed, show choices on user click!
     if (scene.choices && scene.choices.length > 0) {
       if (!this.messageWindow.isShowingChoices()) {
-        this.showChoicesWithAttention(scene.choices, (choice) => {
-          this.selectChoice(choice);
-        });
+        const isWaiting = this.pendingChoiceTimer !== null;
+        this.showChoicesWithAttention(
+          scene.choices,
+          (choice) => {
+            this.selectChoice(choice);
+          },
+          isWaiting // If already waiting during delay, clicking again shows choices immediately
+        );
       }
       return;
     }
@@ -328,6 +349,7 @@ export class ScenarioEngine {
 
   public selectChoice(choice: ScenarioChoice): void {
     if (!this.isPlayingState) return;
+    this.clearPendingChoiceTimer();
 
     // 1. Add flag
     if (choice.flag) {
@@ -510,12 +532,11 @@ export class ScenarioEngine {
         if (typeof effectText === 'string') {
           avatar.showEffectText({
             stylePreset: effectText,
-            text: '',
           });
         } else {
           avatar.showEffectText({
             stylePreset: effectText.preset,
-            text: effectText.text ?? '',
+            text: effectText.text,
             duration: effectText.duration,
           });
         }
@@ -530,17 +551,52 @@ export class ScenarioEngine {
       }
       avatar.setTearsEnabled(config.tears);
     }
+
+    // Sweat effect
+    if (config.sweat !== undefined) {
+      if (config.sweat === false) {
+        avatar.setSweatEnabled(false);
+      } else {
+        const mode = typeof config.sweat === 'string' ? config.sweat : 'fly4';
+        avatar.showSweat({ mode, duration: 4.0 });
+      }
+    }
+  }
+
+  private clearPendingChoiceTimer(): void {
+    if (this.pendingChoiceTimer !== null) {
+      window.clearTimeout(this.pendingChoiceTimer);
+      this.pendingChoiceTimer = null;
+    }
   }
 
   /**
    * 選択肢表示時に自キャラの反応を待つ視線へ切り替えつつ選択肢を表示する。
+   * choiceDelaySec（デフォルト 1.0s）のディレイを設けることで、
+   * アバターが自キャラを向く動作が選択肢UIで隠れずにしっかり視認できるようにする。
    */
   private showChoicesWithAttention(
     choices: ScenarioChoice[],
-    onSelect: (choice: ScenarioChoice) => void
+    onSelect: (choice: ScenarioChoice) => void,
+    immediate = false
   ): void {
+    this.clearPendingChoiceTimer();
     this.applyWaitingPlayerAttention();
-    this.messageWindow.showChoices(choices, onSelect);
+
+    const scene = this.currentScene;
+    const delaySec = immediate ? 0 : (scene?.choiceDelaySec !== undefined ? scene.choiceDelaySec : 1.0);
+
+    if (delaySec <= 0) {
+      this.messageWindow.showChoices(choices, onSelect);
+      return;
+    }
+
+    this.pendingChoiceTimer = window.setTimeout(() => {
+      this.pendingChoiceTimer = null;
+      if (this.isPlayingState && this.currentScene === scene) {
+        this.messageWindow.showChoices(choices, onSelect);
+      }
+    }, delaySec * 1000);
   }
 
   /**
@@ -767,6 +823,7 @@ export class ScenarioEngine {
     }
 
     this.clearAutoNextTimer();
+    this.clearPendingChoiceTimer();
     this.clearPendingEffectTextTimers();
     this.stopVoice();
 
@@ -799,6 +856,15 @@ export class ScenarioEngine {
     // 1.5 Update Scrolling Background (2-plane loop scrolling & anime blur)
     this.onUpdateScrollingBackground?.(scene.scrollingBackground);
 
+    // 1.6 Anime Dream Background (Heart / Pastel fluffy dreamy effect, e.g. for spiral camera)
+    const dreamBgConfig =
+      scene.dreamBackground !== undefined
+        ? scene.dreamBackground
+        : scene.cameraPreset === 'spiralRise'
+        ? 'heart'
+        : undefined;
+    this.onUpdateDreamBackground?.(dreamBgConfig, scene);
+
     // 1.8 Scene specific SE or Package SE
     const seUrl = scene.seUrl || (scene.scrollingBackground?.enabled ? '/se/walking.mp3' : undefined);
     if (seUrl) {
@@ -808,6 +874,14 @@ export class ScenarioEngine {
       this.startSe(pkgSe, this.currentPackage.seVolume ?? 0.2, true);
     } else {
       this.stopSe();
+    }
+
+    // 1.9 Dynamic Focus Lines Overlay (画面中央に向かう集中線)
+    if (scene.focusLines) {
+      const config = typeof scene.focusLines === 'object' ? scene.focusLines : undefined;
+      this.focusLinesOverlay.show(config);
+    } else {
+      this.focusLinesOverlay.hide();
     }
 
     // 2. Avatar Control (Motion, Expression, Position, 3D Manga Effect)
@@ -872,8 +946,13 @@ export class ScenarioEngine {
     }
     this.messageWindow.setText(scene.text, scene.speaker ?? '');
 
-    // 6. Reset choices (shown after user reads text or automatically in Auto mode)
+    // 6. Reset and display choices with attention delay if present
     this.messageWindow.hideChoices();
+    if (scene.choices && scene.choices.length > 0) {
+      this.showChoicesWithAttention(scene.choices, (choice) => {
+        this.selectChoice(choice);
+      });
+    }
 
     this.onSceneChange?.(scene, this.getState());
   }
@@ -883,14 +962,12 @@ export class ScenarioEngine {
     const scene = this.currentScene;
     if (!scene) return;
 
-    // If scene has choices, reveal choice dialog in Auto mode
+    // If scene has choices, ensure choice dialog is revealed
     if (scene.choices && scene.choices.length > 0) {
-      if (this.isAutoMode || scene.autoNextSec) {
-        if (!this.messageWindow.isShowingChoices()) {
-          this.showChoicesWithAttention(scene.choices, (choice) => {
-            this.selectChoice(choice);
-          });
-        }
+      if (!this.messageWindow.isShowingChoices()) {
+        this.showChoicesWithAttention(scene.choices, (choice) => {
+          this.selectChoice(choice);
+        }, true);
       }
       return;
     }
@@ -1051,6 +1128,8 @@ export class ScenarioEngine {
 
   public dispose(): void {
     this.stop();
+    this.clearPendingChoiceTimer();
+    this.focusLinesOverlay.dispose();
     this.messageWindow.dispose();
   }
 }

@@ -27,10 +27,12 @@ import {
   updateScenarioDebugUI,
 } from '../ui/helpers';
 import { AvatarManager } from '../avatar/AvatarManager';
+import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
   public scrollingBackgroundManager: ScrollingBackgroundManager;
+  public dreamBackground: AnimeDreamBackground;
   public interludeOverlay: InterludeOverlay;
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
@@ -81,6 +83,8 @@ export class ScenarioController {
       camera: this.camera,
     });
 
+    this.dreamBackground = new AnimeDreamBackground(this.scene, this.camera);
+
     this.interludeOverlay = new InterludeOverlay();
 
     this.dialogueCameraController = new DialogueCameraController({
@@ -130,12 +134,14 @@ export class ScenarioController {
         if (!this.scenarioPlayer.isPlaying) {
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
+          this.dreamBackground.stop(true);
         }
         this.syncPlayStateUI();
       },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
+        this.dreamBackground.stop(true);
       },
     });
 
@@ -235,9 +241,18 @@ export class ScenarioController {
       onSwitchScenePreset: (presetId) => {
         this.onSwitchScenePreset(presetId as ScenePresetId);
       },
+      onUpdateDreamBackground: (config) => {
+        if (config) {
+          const cfg = typeof config === 'object' ? config : undefined;
+          this.dreamBackground.play(cfg);
+        } else {
+          this.dreamBackground.stop();
+        }
+      },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
+        this.dreamBackground.stop(true);
         showToast('✨ シナリオが終了しました');
       },
     });
@@ -253,6 +268,7 @@ export class ScenarioController {
     if (this.scenarioPlayer.isPlaying) {
       this.scenarioPlayer.stop();
     }
+    this.dreamBackground.stop(true);
 
     const title = options?.title ?? scenario.title;
     const subtitle = options?.subtitle ?? 'SCENE TRANSITION';
@@ -271,13 +287,14 @@ export class ScenarioController {
     if (this.scenarioEngine.isPlaying) {
       this.scenarioEngine.update(delta);
     }
-    let dialogueBg: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null = null;
-    if (this.dialogueCameraController?.isActive) {
-      this.dialogueCameraController.update(delta);
-      dialogueBg = this.dialogueCameraController.getBackgroundTransform();
-    }
+    const dialogueBg = this.dialogueCameraController?.isActive
+      ? this.dialogueCameraController.getBackgroundTransform()
+      : null;
     if (this.scrollingBackgroundManager?.isVisible) {
       this.scrollingBackgroundManager.update(delta, dialogueBg);
+    }
+    if (this.dreamBackground) {
+      this.dreamBackground.update(delta);
     }
   }
 

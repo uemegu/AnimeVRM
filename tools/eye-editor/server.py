@@ -11,6 +11,7 @@ import socket
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
+from settings_schema import RANGES, import_document
 
 ROOT = Path(__file__).resolve().parent
 TOKEN = secrets.token_urlsafe(32)
@@ -107,8 +108,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = connect()
             elif path == '/api/update':
                 params = {}
-                ranges = dict(flatness=(0, 1), length=(0, 1), thickness=(0, 1.2),
-                              corner_ratio=(0, 1), upper_peak=(-1, 1), blink=(0, 1))
+                ranges = dict(RANGES, blink=(0,1))
                 if set(data) - set(ranges) - {'before', 'expression'}:
                     raise ValueError('Unknown parameter')
                 for key, bounds in ranges.items():
@@ -135,6 +135,11 @@ class Handler(BaseHTTPRequestHandler):
                 result = invoke('save', str(ROOT / 'output'))
             elif path == '/api/export':
                 result = invoke('export_vrm', str(ROOT / 'output'))
+            elif path == '/api/settings/export':
+                result = invoke('export_settings')
+            elif path == '/api/settings/import':
+                import_document(data)  # Reject invalid files before any Blender call.
+                result = invoke('import_settings', data)
             else:
                 return self.respond(404, dict(error='Not found'))
             self.respond(200, result)

@@ -45,8 +45,20 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
         speakerCharacterId: curScene?.speakerCharacterId,
         dialogueTarget: curScene?.dialogueTarget,
         voiceUrl: curScene?.voiceUrl,
-        activePreset: win.__viewer?.scenePresetManager?.getActivePresetId?.() || win.config?.activeScene?.presetId,
+        activePreset: win.scenePresetManager?.getActivePresetId?.() || win.__viewer?.scenePresetManager?.getActivePresetId?.() || win.config?.activeScene?.presetId || curScene?.scenePreset,
         isAudioPlaying: Boolean(sc?.soundManager?.isPlayingVoice?.() || sc?.soundManager?.currentVoiceAudio),
+        focusLinesVisible: document.querySelector('.focus-lines-overlay')?.style.opacity === '1',
+        cameraPreset: sc?.dialogueCameraController?.currentPreset,
+        cameraPosition: win.__viewer?.camera?.position ? [
+          +win.__viewer.camera.position.x.toFixed(2),
+          +win.__viewer.camera.position.y.toFixed(2),
+          +win.__viewer.camera.position.z.toFixed(2)
+        ] : null,
+        cameraTarget: win.__viewer?.controls?.target ? [
+          +win.__viewer.controls.target.x.toFixed(2),
+          +win.__viewer.controls.target.y.toFixed(2),
+          +win.__viewer.controls.target.z.toFixed(2)
+        ] : null,
         avatars: {}
       };
 
@@ -86,6 +98,8 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
             hasDynamicHeadTarget: Boolean(headCfg.targetGetter),
             neckAngleDeg: neckDeg.toFixed(1),
             headAngleDeg: headDeg.toFixed(1),
+            expression: av.currentExpression,
+            effectKey: av.currentEffectKey,
           };
         }
       }
@@ -98,12 +112,13 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
   console.log('--- Scene 1 State (Aoi -> Player) ---');
   console.log(JSON.stringify(state1, null, 2));
   expect(state1.sceneId).toBe('trio_intro_1');
+  expect(state1.activePreset).toBe('day_school');
   expect(state1.dialogueTarget).toBe('player');
   expect(state1.avatars.girl_01.eyeMode).toBe('camera');
   expect(state1.avatars.girl_02.hasDynamicEyeTarget).toBe(true);
   await page.screenshot({ path: 'scratch/trio_scene_1.png' });
 
-  // Advance to Scene 2: Emily -> Aoi (partner)
+  // Advance to Scene 2: Emily -> Aoi (partner) - Emiri angry face & dynamic focus lines!
   console.log('Advancing to Scene 2 (Emily -> Aoi)...');
   await page.evaluate(() => {
     window.scenarioController?.scenarioEngine?.next();
@@ -114,9 +129,11 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
   console.log(JSON.stringify(state2, null, 2));
   expect(state2.sceneId).toBe('trio_intro_2');
   expect(state2.dialogueTarget).toBe('partner');
+  expect(state2.avatars.girl_02.expression).toBe('angry');
+  expect(state2.focusLinesVisible).toBe(true);
   await page.screenshot({ path: 'scratch/trio_scene_2.png' });
 
-  // Advance to Scene 3: Aoi -> Emily (partner)
+  // Advance to Scene 3: Aoi -> Emily (partner) - Aoi cold sweat (asease)
   console.log('Advancing to Scene 3 (Aoi -> Emily)...');
   await page.evaluate(() => {
     window.scenarioController?.scenarioEngine?.next();
@@ -127,6 +144,8 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
   console.log(JSON.stringify(state3, null, 2));
   expect(state3.sceneId).toBe('trio_intro_3');
   expect(state3.dialogueTarget).toBe('partner');
+  expect(state3.avatars.girl_01.effectKey).toContain('asease');
+  expect(state3.focusLinesVisible).toBe(false);
   await page.screenshot({ path: 'scratch/trio_scene_3.png' });
 
   // Advance to Scene 4: Emily -> Player
@@ -171,9 +190,10 @@ test('Verify Trio 3-person conversation scenario with conversational LookAt atte
   });
   await page.waitForTimeout(2000);
   const state6 = await getAvatarsState();
-  console.log('--- Scene 6 State (Route Cafe 1: Emiri Zoom) ---');
+  console.log('--- Scene 6 State (Route Cafe 1: Emiri Spiral Rise) ---');
   console.log(JSON.stringify(state6, null, 2));
   expect(state6.sceneId).toBe('route_cafe_1');
+  expect(state6.cameraPreset).toBe('spiralRise');
   await page.screenshot({ path: 'scratch/trio_scene_cafe_1_emiri_zoom.png' });
 
   // Advance to Route Cafe 2: Aoi speaks, camera pulls back to wide

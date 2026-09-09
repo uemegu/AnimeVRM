@@ -543,6 +543,10 @@ export class ViewerCore {
     const bgTex = this.scene.background;
 
     if (dialogueBackgroundTransform) {
+      if (bgTex.wrapS !== THREE.RepeatWrapping) {
+        bgTex.wrapS = THREE.RepeatWrapping;
+        bgTex.needsUpdate = true;
+      }
       const zoom = Math.max(1.0, dialogueBackgroundTransform.zoomScale);
       const invZoom = 1.0 / zoom;
       bgTex.center.set(0.5, 0.5);

@@ -190,7 +190,7 @@ timer.connect(document);
 function tick(timestamp?: number): void {
   viewerCore.stats.begin();
   timer.update(timestamp);
-  const delta = timer.getDelta();
+  const delta = Math.min(timer.getDelta(), 0.1);
   const elapsed = timer.getElapsed();
 
   if (isTtsGpuExclusive) {
@@ -340,6 +340,7 @@ function debugPositions() {
 (window as any).scenarioController = scenarioController;
 (window as any).avatarManager = avatarManager;
 (window as any).viewerCore = viewerCore;
+(window as any).scenePresetManager = scenePresetManager;
 
 console.info(
   '%c💡 [Debug] コンソールで debugPositions() または debugPose() を実行すると、アバター・前景・カメラの現在位置を出力＆コピーできます。',

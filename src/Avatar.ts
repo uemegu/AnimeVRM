@@ -299,10 +299,13 @@ export class Avatar {
   public isLipSyncActive: boolean = false;
 
   // Eye Look-At & Eye Wander state
-  private eyeLookAtConfig: Required<EyeLookAtConfig> = {
+  private eyeLookAtConfig: Omit<Required<EyeLookAtConfig>, 'targetPos' | 'targetGetter'> & {
+    targetPos?: THREE.Vector3;
+    targetGetter?: () => THREE.Vector3 | null;
+  } = {
     mode: 'camera',
-    targetPos: undefined as any,
-    targetGetter: undefined as any,
+    targetPos: undefined,
+    targetGetter: undefined,
     offset: { x: 0, y: 0 },
     wander: false,
     wanderIntensity: 1.0,
@@ -314,10 +317,13 @@ export class Avatar {
   private eyeWanderTargetOffset = new THREE.Vector2(0, 0);
 
   // Head Look-At state
-  private headLookAtConfig: Required<HeadLookAtConfig> = {
+  private headLookAtConfig: Omit<Required<HeadLookAtConfig>, 'targetPos' | 'targetGetter'> & {
+    targetPos?: THREE.Vector3;
+    targetGetter?: () => THREE.Vector3 | null;
+  } = {
     enabled: false,
-    targetPos: undefined as any,
-    targetGetter: undefined as any,
+    targetPos: undefined,
+    targetGetter: undefined,
     weight: 1.0,
     offset: { x: 0, y: 0 },
     maxYaw: THREE.MathUtils.degToRad(45),
@@ -852,8 +858,8 @@ export class Avatar {
    */
   public setEyeLookAt(config: Partial<EyeLookAtConfig>): void {
     if (config.mode !== undefined) this.eyeLookAtConfig.mode = config.mode;
-    if (config.targetPos !== undefined) this.eyeLookAtConfig.targetPos = config.targetPos;
-    if (config.targetGetter !== undefined) this.eyeLookAtConfig.targetGetter = config.targetGetter;
+    if ('targetPos' in config) this.eyeLookAtConfig.targetPos = config.targetPos;
+    if ('targetGetter' in config) this.eyeLookAtConfig.targetGetter = config.targetGetter;
     if (config.offset !== undefined) {
       this.eyeLookAtConfig.offset = {
         x: config.offset.x ?? this.eyeLookAtConfig.offset.x,
@@ -903,8 +909,8 @@ export class Avatar {
    */
   public setHeadLookAt(config: Partial<HeadLookAtConfig>): void {
     if (config.enabled !== undefined) this.headLookAtConfig.enabled = config.enabled;
-    if (config.targetPos !== undefined) this.headLookAtConfig.targetPos = config.targetPos;
-    if (config.targetGetter !== undefined) this.headLookAtConfig.targetGetter = config.targetGetter;
+    if ('targetPos' in config) this.headLookAtConfig.targetPos = config.targetPos;
+    if ('targetGetter' in config) this.headLookAtConfig.targetGetter = config.targetGetter;
     if (config.weight !== undefined) this.headLookAtConfig.weight = config.weight;
     if (config.offset !== undefined) {
       this.headLookAtConfig.offset = {
@@ -990,11 +996,11 @@ export class Avatar {
   }
 
   public getEyeLookAtConfig(): Readonly<Required<EyeLookAtConfig>> {
-    return this.eyeLookAtConfig;
+    return this.eyeLookAtConfig as any;
   }
 
   public getHeadLookAtConfig(): Readonly<Required<HeadLookAtConfig>> {
-    return this.headLookAtConfig;
+    return this.headLookAtConfig as any;
   }
 
   /**
