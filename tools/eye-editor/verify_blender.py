@@ -7,6 +7,7 @@ s = engine.SESSION
 previous = dict(s['params'])
 source_coords = {k.name: [p.co.copy() for p in k.data] for k in s['source'].data.shape_keys.key_blocks}
 try:
+    engine.update({k: engine.DEFAULTS[k] for k in ('eye_x','eye_z','eye_width','eye_height','iris_x','iris_z','iris_width','iris_height','brow_x','brow_z','brow_peak','brow_curve')})
     engine.repair_expression_bindings()
     count = sum(len(binds) for _, binds, _ in engine.expression_collections())
     engine.repair_expression_bindings()

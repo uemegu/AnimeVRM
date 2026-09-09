@@ -387,6 +387,18 @@ export class ShortAnimationPlayer {
         break;
       }
 
+      case 'spiralRise': {
+        // Dynamic spiral rise around target
+        const angle = -0.45 * strength * easeInOutCubic(t);
+        const upDist = 0.45 * strength * easeInOutCubic(t);
+        this._rel.subVectors(startPos, startTarget);
+        this._rel.applyAxisAngle(this._yAxis, angle);
+        this.camera.position.copy(startTarget).add(this._rel);
+        this.camera.position.y += upDist;
+        this.controls.target.copy(startTarget);
+        break;
+      }
+
       case 'punchIn': {
         // Fast snap in and settle back
         let punchFactor: number;

@@ -69,7 +69,7 @@ export class EffectTextInstance {
     this.onCompleteCallback = options.onComplete;
 
     // Create Canvas Texture
-    const { texture, aspect } = createEffectTextTexture(options.text, mergedStyle);
+    const { texture, aspect } = createEffectTextTexture(options.text ?? '', mergedStyle);
     this.aspect = aspect;
 
     // Initial Rotation

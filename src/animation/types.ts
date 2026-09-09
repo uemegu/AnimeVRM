@@ -22,7 +22,8 @@ export type CameraPreset =
   | 'lowAngleUp'
   | 'riseUp'
   | 'diveDown'
-  | 'punchIn';
+  | 'punchIn'
+  | 'spiralRise';
 
 export type TextAnimationPreset =
   | 'static'

@@ -8,6 +8,7 @@ export default defineConfig({
     dedupe: ['onnxruntime-web', 'onnxruntime-common'],
   },
   build: {
+    rollupOptions: { input: { viewer: 'index.html', motion: 'motion.html' } },
     outDir: 'docs',
     emptyOutDir: true,
   },

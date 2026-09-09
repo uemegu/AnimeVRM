@@ -402,8 +402,12 @@ export class DialogueCameraController {
 
         case 'none':
         case 'hold': {
-          defaultCameraPos.copy(this.camera.position);
-          targetPos.copy(this.controls.target);
+          if (!scene.cameraPosition) {
+            defaultCameraPos.copy(this.camera.position);
+          }
+          if (!scene.cameraTarget) {
+            targetPos.copy(this.controls.target);
+          }
           defaultFov = this.camera.fov;
           break;
         }
@@ -423,7 +427,24 @@ export class DialogueCameraController {
       defaultCameraPos.set(targetPos.x - 1.3 * distMultiplier, targetPos.y, targetPos.z + 0.4);
     }
 
-    // Direct camera position override (e.g. precise over-the-shoulder positioning)
+    // Direct camera target override (takes final precedence)
+    if (scene.cameraTarget) {
+      if (typeof scene.cameraTarget === 'string' && scene.cameraTarget in AVATAR_POSITION_PRESETS) {
+        const p = AVATAR_POSITION_PRESETS[scene.cameraTarget as AvatarSlotPosition];
+        targetPos.set(p[0], p[1] + 1.25, p[2]);
+      } else if (Array.isArray(scene.cameraTarget)) {
+        targetPos.set(scene.cameraTarget[0], scene.cameraTarget[1], scene.cameraTarget[2]);
+      } else if (typeof scene.cameraTarget === 'string') {
+        const charAvatar = this.getAvatar(scene.cameraTarget);
+        if (charAvatar?.vrm?.scene) {
+          const p = new THREE.Vector3();
+          charAvatar.vrm.scene.getWorldPosition(p);
+          targetPos.set(p.x, p.y + 1.25, p.z);
+        }
+      }
+    }
+
+    // Direct camera position override (takes final precedence)
     if (scene.cameraPosition) {
       defaultCameraPos.set(scene.cameraPosition[0], scene.cameraPosition[1], scene.cameraPosition[2]);
     }
@@ -553,11 +574,39 @@ export class DialogueCameraController {
           workingPose.position.y += riseY;
           break;
         }
+        case 'spiralRise': {
+          // ローアングルから上昇しながら2秒で1周（360度）旋回し、
+          // 最後は通常のエミリのズームポジション（正面・目線高さ）にピタッと着地する
+          const duration = 2.0;
+          const progress = Math.min(1.0, this.sceneElapsed / duration);
+          const easeT = easeInOutCubic(progress);
+
+          // 終点（通常のエミリのズーム）: Target=(0.38, 1.25, -1.15), Position=(0.38, 1.25, -0.48)
+          // 始点: ローアングル(0.72m)から見上げ、Targetは胸元(1.15m)から顔(1.25m)へチルト
+          const targetY = 1.15 + (1.25 - 1.15) * easeT;
+          workingPose.target.set(0.38, targetY, -1.15);
+
+          // 2秒で360度（-2π -> 0）を綺麗に1周旋回（右側外回りで背後を回り、正面へ戻る）
+          const angle = -Math.PI * 2 * (1.0 - easeT);
+
+          // ローアングル（0.72m）から通常ズーム高さ（1.25m）へ上昇
+          const currentY = 0.72 + (1.25 - 0.72) * easeT;
+
+          // 旋回半径（開始時0.82m -> ズーム時0.67m）
+          const radius = 0.82 + (0.67 - 0.82) * easeT;
+
+          workingPose.position.set(
+            workingPose.target.x + Math.sin(angle) * radius,
+            currentY,
+            workingPose.target.z + Math.cos(angle) * radius
+          );
+          break;
+        }
       }
 
-      // 安全ガード: 顔の突き抜けやクリッピングを防ぐため最小距離 1.15m を保証
+      // 安全ガード: 顔の突き抜けやクリッピングを防ぐため最小距離 0.65m を保証
       const currentDistToTarget = workingPose.position.distanceTo(workingPose.target);
-      const minSafeDistance = 1.15;
+      const minSafeDistance = 0.65;
       if (currentDistToTarget < minSafeDistance) {
         this._tempVecA.subVectors(workingPose.position, workingPose.target);
         if (this._tempVecA.lengthSq() < 0.0001) {
@@ -582,10 +631,22 @@ export class DialogueCameraController {
     const rawZoom = Math.pow(distRatio, 0.45) * Math.pow(fovRatio, 0.8);
     this.backgroundZoomScale = Math.max(1.0, Math.min(1.65, rawZoom));
 
-    // Background horizontal/vertical pan parallax offset based on target shift
-    const panX = workingPose.target.x - this.baseState.target.x;
-    const panY = workingPose.target.y - this.baseState.target.y;
-    this.backgroundPanOffset.set(panX * 0.15, panY * 0.1);
+    // Background horizontal/vertical pan parallax offset based on target shift AND camera yaw/pitch rotation
+    const baseDir = new THREE.Vector3().subVectors(this.baseState.target, this.baseState.position);
+    const curDir = new THREE.Vector3().subVectors(workingPose.target, workingPose.position);
+    const baseYaw = Math.atan2(baseDir.x, baseDir.z);
+    const curYaw = Math.atan2(curDir.x, curDir.z);
+    let deltaYaw = curYaw - baseYaw;
+    while (deltaYaw < -Math.PI) deltaYaw += Math.PI * 2;
+    while (deltaYaw > Math.PI) deltaYaw -= Math.PI * 2;
+
+    const basePitch = Math.asin(Math.max(-1, Math.min(1, baseDir.y / Math.max(0.001, baseDir.length()))));
+    const curPitch = Math.asin(Math.max(-1, Math.min(1, curDir.y / Math.max(0.001, curDir.length()))));
+    const deltaPitch = curPitch - basePitch;
+
+    const panX = (workingPose.target.x - this.baseState.target.x) * 0.15 + deltaYaw * 0.22;
+    const panY = (workingPose.target.y - this.baseState.target.y) * 0.10 + deltaPitch * 0.18;
+    this.backgroundPanOffset.set(panX, panY);
   }
 
   private applyCameraPose(pose: { position: THREE.Vector3; target: THREE.Vector3; fov: number }): void {

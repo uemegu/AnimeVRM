@@ -1,6 +1,8 @@
 const $ = (id) => document.getElementById(id);
 let token, connected = false, busy = false, before = false, angle = 0, zoom = 1;
-const sliders = ['flatness', 'length', 'thickness', 'corner_ratio', 'upper_peak', 'blink'];
+const placementDefaults = { eye_x: 0, eye_z: 0, eye_width: 1, eye_height: 1, iris_x: 0, iris_z: 0, iris_width: 1, iris_height: 1 };
+const browDefaults = { brow_x: 0, brow_z: 0, brow_peak: 0, brow_curve: 0 };
+const sliders = ['flatness', 'length', 'thickness', 'corner_ratio', 'upper_peak', 'blink', ...Object.keys(placementDefaults), ...Object.keys(browDefaults)];
 const session = fetch('/api/session').then(r => r.json()).then(r => { token = r.token; });
 
 async function api(path, data = {}) {
@@ -26,6 +28,11 @@ function labels() {
   for (const id of sliders) $(id + '-value').textContent = id === 'thickness' ? (Number($(id).value) / 100).toFixed(2) : $(id).value + '%';
   const peak = Number($('upper_peak').value);
   $('upper_peak-value').textContent = peak === 0 ? '元の位置' : `${peak < 0 ? '目頭' : '目尻'} ${Math.abs(peak)}%`;
+  for (const id of ['eye_x', 'eye_z', 'iris_x', 'iris_z', 'brow_x', 'brow_z', 'brow_peak', 'brow_curve']) {
+    const value = Number($(id).value);
+    const direction = (id.endsWith('_x') || id === 'brow_peak') ? (value < 0 ? '内側' : '外側') : (value < 0 ? '下' : '上');
+    $(id + '-value').textContent = value === 0 ? (id === 'brow_curve' ? '元の形' : '元の位置') : `${direction} ${Math.abs(value)}%`;
+  }
 }
 function synchronize(params) {
   for (const id of sliders) $(id).value = Math.round(params[id] * 100);
@@ -74,7 +81,10 @@ for (const id of sliders) {
 }
 $('expression').onchange = () => run(() => apply());
 $('suggest').onclick = () => run(() => apply({ flatness: .85, length: .85, thickness: .7, corner_ratio: .15, upper_peak: .5, blink: 0, expression: 'none' }));
-$('reset').onclick = () => run(() => apply({ flatness: 0, length: 0, thickness: .45, corner_ratio: .18, upper_peak: 0, blink: 0, expression: 'none' }));
+$('reset').onclick = () => run(() => apply({ flatness: 0, length: 0, thickness: .45, corner_ratio: .18, upper_peak: 0, blink: 0, expression: 'none', ...placementDefaults, ...browDefaults }));
+$('reset-brow').onclick = () => run(() => apply(browDefaults));
+$('reset-eye').onclick = () => run(() => apply(Object.fromEntries(Object.entries(placementDefaults).filter(([k]) => k.startsWith('eye_')))));
+$('reset-iris').onclick = () => run(() => apply(Object.fromEntries(Object.entries(placementDefaults).filter(([k]) => k.startsWith('iris_')))));
 $('compare').onclick = () => run(async () => {
   const result = await api('update', { before: !before });
   synchronize(result.params);
@@ -103,4 +113,31 @@ $('export').onclick = () => run(async () => {
   message('VRMを書き出し、表情の接続を検証しています…');
   const result = await api('export');
   message(`VRMを保存しました（表情バインド ${result.validation.bindings} 件を検証）：${result.path}`);
+});
+$('export-settings').onclick = () => run(async () => {
+  const settings = await api('settings/export');
+  const blob = new Blob([JSON.stringify(settings, null, 2) + '\n'], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `eye-atelier-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  message('設定JSONのダウンロードを開始しました。別のモデルへの再適用に使えます。');
+});
+$('import-settings').onclick = () => { $('settings-file').value = ''; $('settings-file').click(); };
+$('settings-file').onchange = () => run(async () => {
+  const file = $('settings-file').files[0];
+  if (!file) return;
+  if (file.size > 8192) throw new Error('設定ファイルは8KB以下のJSONを選んでください。');
+  let document;
+  try { document = JSON.parse(await file.text()); }
+  catch { throw new Error('JSONを読み取れませんでした。設定は変更していません。'); }
+  message('設定を検証してモデルに適用しています…');
+  const result = await api('settings/import', document);
+  synchronize(result.params);
+  await screenshot();
+  message(`「${file.name}」を適用しました。新しいモデルの顔立ちに合わせて見た目を確認してください。`);
 });

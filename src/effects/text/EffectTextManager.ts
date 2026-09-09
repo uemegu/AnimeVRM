@@ -13,6 +13,7 @@ const DEFAULT_PRESET_TEXTS: Record<string, string> = {
   kirakira: 'キラキラ',
   biku: 'ビクッ',
   yatta: 'やったー！',
+  asease: 'アセアセ',
 };
 
 /**

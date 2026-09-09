@@ -3,15 +3,19 @@ import json
 import math
 import os
 import tempfile
+import importlib.util
 from collections import Counter, defaultdict
 from datetime import datetime
 
 import bpy
 from mathutils import Quaternion, Vector
+from mathutils.bvhtree import BVHTree
 
 SESSION = globals().get('SESSION')
-DEFAULTS = dict(flatness=0.0, length=0.0, thickness=0.45, corner_ratio=0.18,
-                upper_peak=0.0, blink=0.0, expression='none', before=False)
+_schema_spec = importlib.util.spec_from_file_location('eye_atelier_schema', os.path.join(os.path.dirname(__file__), 'settings_schema.py'))
+settings_schema = importlib.util.module_from_spec(_schema_spec)
+_schema_spec.loader.exec_module(settings_schema)
+DEFAULTS = dict(settings_schema.DEFAULTS, blink=0.0, expression='none', before=False)
 
 
 def boundary_loops(mesh, material):
@@ -87,6 +91,16 @@ def detect(source):
 def initialize():
     global SESSION
     if SESSION:
+        try:
+            valid = (bpy.data.objects.get(SESSION['source'].name) == SESSION['source']
+                     and bpy.data.objects.get(SESSION['preview'].name) == SESSION['preview']
+                     and SESSION['source'].data == SESSION.get('source_mesh', SESSION['source'].data)
+                     and len(SESSION['source'].data.vertices) == len(next(iter(SESSION['coords'].values()))))
+        except ReferenceError:
+            valid = False
+        if not valid:
+            SESSION = None
+    if SESSION:
         upgrade_session()
         repair_expression_bindings()
         return status()
@@ -116,7 +130,7 @@ def initialize():
         lines, params = [], {}
     original_values = {k.name: k.value for k in source.data.shape_keys.key_blocks}
     original_coords = {k.name: [p.co.copy() for p in k.data] for k in source.data.shape_keys.key_blocks}
-    SESSION = dict(source=source, preview=preview, eyes=eyes, movable=movable,
+    SESSION = dict(source=source, source_mesh=source.data, preview=preview, eyes=eyes, movable=movable,
                    coords=original_coords, values=original_values,
                    hidden=source.hide_get(), render_hidden=source.hide_render,
                    params=dict(DEFAULTS), lines=lines)
@@ -136,12 +150,126 @@ def upgrade_session():
     for name, value in DEFAULTS.items():
         s['params'].setdefault(name, value)
     basis = s['coords'][next(iter(s['coords']))]
+    mesh = s['source'].data
+    iris_mats = {i for i, m in enumerate(mesh.materials) if m and 'EyeIris' in m.name}
+    detail_mats = iris_mats | {i for i, m in enumerate(mesh.materials) if m and 'EyeHighlight' in m.name}
+    eye_mats = detail_mats | {i for i, m in enumerate(mesh.materials) if m and 'EyeWhite' in m.name}
+    s['iris_vertices'] = {v for poly in mesh.polygons if poly.material_index in detail_mats for v in poly.vertices}
+    s['eye_vertices'] = {v for poly in mesh.polygons if poly.material_index in eye_mats for v in poly.vertices}
+    iris_only = {v for poly in mesh.polygons if poly.material_index in iris_mats for v in poly.vertices}
+    brow_mats = {i for i,m in enumerate(mesh.materials) if m and 'FaceBrow' in m.name}
+    s['brow_vertices'] = {v for poly in mesh.polygons if poly.material_index in brow_mats for v in poly.vertices}
+    skin_faces = [list(poly.vertices) for poly in mesh.polygons
+                  if mesh.materials[poly.material_index] and 'Face_00_SKIN' in mesh.materials[poly.material_index].name]
+    s['skin_surface'] = BVHTree.FromPolygons(basis, skin_faces)
+    s['skin_front'] = min(p.y for p in basis)-.1
+    s['editable'] = s['movable'] | s['eye_vertices'] | s['brow_vertices']
     for eye in s['eyes']:
         eye['lower_points'] = sorted([basis[i] for i in eye['lower']], key=lambda c: c.x)
         eye['upper_points'] = sorted([basis[i] for i in eye['upper']], key=lambda c: abs(c.x))
         eye['inner_x'] = abs(eye['upper_points'][0].x)
         peak = max(eye['upper_points'], key=lambda c: c.z)
         eye['peak_t'] = (abs(peak.x) - eye['inner_x']) / eye['width']
+        points = [basis[i] for i in eye['loop']]
+        eye['height'] = max(p.z for p in points) - min(p.z for p in points)
+        iris = [basis[i] for i in iris_only if basis[i].x * eye['sign'] > 0]
+        eye['iris_center'] = Vector([(min(p[j] for p in iris)+max(p[j] for p in iris))/2 for j in range(3)])
+        brow = [basis[i] for i in s['brow_vertices'] if basis[i].x * eye['sign'] > 0]
+        if brow:
+            xmin, xmax = min(abs(p.x) for p in brow), max(abs(p.x) for p in brow)
+            eye['brow_min'], eye['brow_width'] = xmin, xmax-xmin
+            # Centerline samples group the two edges of the eyebrow strip.
+            groups = []
+            for point in sorted(brow, key=lambda p:abs(p.x)):
+                if not groups or abs(point.x)-abs(groups[-1][0].x) > (xmax-xmin)*.035:
+                    groups.append([])
+                groups[-1].append(point)
+            eye['brow_profile'] = [sum(group,Vector())/len(group) for group in groups]
+
+
+def position_brow(point, reference, eye, params):
+    p = point.copy()
+    if not any(params[k] for k in ('brow_x','brow_z','brow_peak','brow_curve')):
+        return p
+    width = eye['brow_width']
+    t = min(1.0,max(0.0,(abs(reference.x)-eye['brow_min'])/width))
+    peak = .5 + params['brow_peak']*.3
+    old_t = t*.5/peak if t <= peak else .5+(t-peak)*.5/(1-peak)
+    profile = eye['brow_profile']
+    old = interpolate(profile,abs(reference.x),absolute=True)
+    remapped = interpolate(profile,eye['brow_min']+old_t*width,absolute=True)
+    # Add a smooth arch with zero displacement/slope at its ends and peak.
+    phase = t/peak if t<=peak else (1-t)/(1-peak)
+    arch = phase*phase*(3-2*phase)
+    if params['brow_peak']:
+        p.z += remapped.z-old.z
+    p.z += width*.20*params['brow_curve']*arch + eye['height']*.35*params['brow_z']
+    p.x += eye['sign']*eye['width']*.20*params['brow_x']
+    # Preserve the original depth relative to skin as the brow moves across
+    # the curved forehead. Never bake a Shrinkwrap modifier into the mesh.
+    surface = SESSION['skin_surface']
+    old_hit = surface.ray_cast(Vector((point.x,SESSION['skin_front'],point.z)), Vector((0,1,0)))[0]
+    new_hit = surface.ray_cast(Vector((p.x,SESSION['skin_front'],p.z)), Vector((0,1,0)))[0]
+    if old_hit is not None and new_hit is not None:
+        p.y += new_hit.y-old_hit.y
+    return p
+
+
+def export_settings():
+    if not SESSION:
+        raise ValueError('先にモデルへ接続してください。')
+    upgrade_session()
+    return settings_schema.export_document(SESSION['params'])
+
+
+def import_settings(document):
+    params = settings_schema.import_document(document)
+    if not SESSION:
+        raise ValueError('先にモデルへ接続してください。')
+    previous = dict(SESSION['params'])
+    try:
+        return update(dict(params, blink=0.0, expression='none', before=False))
+    except Exception:
+        update(previous)
+        raise
+
+
+def smooth_falloff(value, full, end):
+    t = min(1.0, max(0.0, (value-full)/(end-full)))
+    return 1-t*t*(3-2*t)
+
+
+def position_iris(point, eye, params):
+    """Iris and highlight share a center; apply before the whole-eye transform."""
+    p = point.copy()
+    if any(params[k] != DEFAULTS[k] for k in ('iris_x', 'iris_z', 'iris_width', 'iris_height')):
+        center = eye['iris_center']
+        p.x = center.x + (p.x-center.x)*params['iris_width'] + eye['sign']*eye['width']*.20*params['iris_x']
+        p.z = center.z + (p.z-center.z)*params['iris_height'] + eye['height']*.20*params['iris_z']
+    return p
+
+
+def position_eye(point, eye, params, rigid=False, reference=None):
+    """Affine transform inside the opening, smooth falloff into facial skin.
+
+    Skin weights use the original expression position, independent of other
+    sliders. The nose centerline is fixed. Eye meshes/line ribbons move fully.
+    """
+    p = point.copy()
+    if all(params[k] == DEFAULTS[k] for k in ('eye_x', 'eye_z', 'eye_width', 'eye_height')):
+        return p
+    center = eye['center']
+    weight = 1.0
+    if not rigid:
+        ref = reference if reference is not None else point
+        radius = math.hypot((ref.x-center.x)/(eye['width']*.80),
+                            (ref.z-center.z)/(eye['height']*.95))
+        weight = smooth_falloff(radius, 1.0, 1.65)
+        weight *= smooth_falloff(abs(ref.y-center.y)/eye['width'], .50, 1.10)
+        weight *= 1-smooth_falloff(abs(ref.x), 0.0, eye['inner_x']*.75)
+    p.x += ((p.x-center.x)*(params['eye_width']-1) + eye['sign']*eye['width']*.15*params['eye_x'])*weight
+    p.z += ((p.z-center.z)*(params['eye_height']-1) + eye['height']*.20*params['eye_z'])*weight
+    return p
 
 
 def interpolate(points, coordinate, absolute=False):
@@ -325,8 +453,17 @@ def update(params):
     p = s['params']
     preview = s['preview']
     for key in preview.data.shape_keys.key_blocks:
-        for i in s['movable']:
-            key.data[i].co = warp(s['coords'][key.name][i], p)
+        for i in s['editable']:
+            original = s['coords'][key.name][i]
+            reference = s['coords'][next(iter(s['coords']))][i]
+            eye = s['eyes'][0] if reference.x < 0 else s['eyes'][1]
+            if i in s['brow_vertices']:
+                key.data[i].co = position_brow(original, reference, eye, p)
+                continue
+            point = warp(original, p) if i in s['movable'] else original.copy()
+            if i in s['iris_vertices']:
+                point = position_iris(point, eye, p)
+            key.data[i].co = position_eye(point, eye, p, rigid=i in s['eye_vertices'], reference=original)
         key.value = s['values'][key.name]
     for name, binds, attr in expression_collections():
         if name == p['expression']:
@@ -356,8 +493,8 @@ def update(params):
                     normal.negate()
                 width = line_width(u, t, p)
                 pos.y -= 0.00065
-                key.data[j*2].co = pos - normal * width * .22
-                key.data[j*2+1].co = pos + normal * width * .78
+                key.data[j*2].co = position_eye(pos - normal * width * .22, eye, p, rigid=True)
+                key.data[j*2+1].co = position_eye(pos + normal * width * .78, eye, p, rigid=True)
                 if key == obj.data.shape_keys.key_blocks[0]:
                     weights = defaultdict(float)
                     for idx, w in ((ia, 1-blend), (ib, blend)):

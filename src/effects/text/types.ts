@@ -43,7 +43,8 @@ export type EffectPresetName =
   | 'kirakira'  // 輝き・星・ポップ（頭上中央・星装飾）
   | 'doki'      // ドキドキ・鼓動（左右から「ドキ」が拍動上昇）
   | 'biku'      // ビクッ・驚き（頭上中央・衝撃）
-  | 'yatta';    // やったー！・歓喜・喜び（頭上中央・ポップジャンプ）
+  | 'yatta'     // やったー！・歓喜・喜び（頭上中央・ポップジャンプ）
+  | 'asease';   // 冷や汗・焦り・弁明（頭上中央・水滴・小刻みシェイク）
 
 /**
  * Decoration types drawn onto the 2D canvas
@@ -176,8 +177,8 @@ export interface EffectTextPreset {
  * Options when showing an effect text
  */
 export interface ShowEffectTextOptions {
-  /** The text string to display (e.g. "ワナワナ", "ガーン") */
-  text: string;
+  /** The text string to display (e.g. "ワナワナ", "ガーン"). Defaults to preset text if omitted */
+  text?: string;
   /** Target VRM instance or THREE.Object3D */
   target?: VRM | THREE.Object3D;
   /** Anchor bone or position (default: 'head') */
