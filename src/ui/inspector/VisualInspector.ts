@@ -3,6 +3,7 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
 import { InspectorContext } from './InspectorManager';
+import { DEFAULT_FAST_MOTION_CONFIG } from '../../effects/motion';
 
 export function setupVisualInspector(container: HTMLElement, ctx: InspectorContext, guis: GUI[]): void {
   const tr = t();
@@ -957,6 +958,53 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   sweatPosFolder.add(sweatState, 'jitoOffsetZ', -0.05, 0.2, 0.005).name('こめかみ前後 (Z: jito)').onChange(updateSweatConfig);
   sweatPosFolder.close();
   sweatFolder.close();
+
+  // 8.5 Fast Motion Effects Folder (Arms & Legs Anime Motion Effects)
+  if (!currentConfig.fastMotion) {
+    currentConfig.fastMotion = { ...DEFAULT_FAST_MOTION_CONFIG };
+  }
+  const motionConfig = currentConfig.fastMotion;
+  const updateMotionConfig = () => {
+    getAvatar()?.applyConfig(currentConfig);
+    for (const av of avatarManager.scenarioAvatars.values()) {
+      av.applyConfig(currentConfig);
+    }
+  };
+
+  const motionFolder = visualGui.addFolder('⚡ 高速モーションエフェクト (スピード線・残像)');
+  motionFolder.add(motionConfig, 'enabled').name('エフェクト有効 (Enable)').onChange(updateMotionConfig);
+  motionFolder.add(motionConfig, 'enableArms').name('腕のモーション (Arms)').onChange(updateMotionConfig);
+  motionFolder.add(motionConfig, 'enableLegs').name('脚のモーション (Legs)').onChange(updateMotionConfig);
+  motionFolder.add(motionConfig, 'speedLinesEnabled').name('スピード線 (Speed Lines)').onChange(updateMotionConfig);
+  motionFolder.add(motionConfig, 'afterimagesEnabled').name('残像 (Afterimages)').onChange(updateMotionConfig);
+  motionFolder.add(motionConfig, 'directionalBlurEnabled').name('逆方向ブラー (Outline Blur)').onChange(updateMotionConfig);
+
+  const speedParamFolder = motionFolder.addFolder('📊 速度しきい値 (Speed Thresholds)');
+  speedParamFolder.add(motionConfig, 'minSpeed', 0.5, 6.0, 0.1).name('開始速度 (m/s)').onChange(updateMotionConfig);
+  speedParamFolder.add(motionConfig, 'maxSpeed', 2.0, 12.0, 0.1).name('最大速度 (m/s)').onChange(updateMotionConfig);
+  speedParamFolder.add(motionConfig, 'stopSpeed', 0.2, 4.0, 0.1).name('終了速度 (m/s)').onChange(updateMotionConfig);
+  speedParamFolder.close();
+
+  const ribbonFolder = motionFolder.addFolder('✨ スピード線調整 (Ribbon Lines)');
+  ribbonFolder.add(motionConfig, 'trailDuration', 0.06, 0.30, 0.01).name('保持時間 (秒)').onChange(updateMotionConfig);
+  ribbonFolder.add(motionConfig, 'ribbonCount', 1, 4, 1).name('線の本数').onChange(updateMotionConfig);
+  ribbonFolder.add(motionConfig, 'ribbonMaxWidth', 0.01, 0.12, 0.005).name('最大幅 (m)').onChange(updateMotionConfig);
+  ribbonFolder.close();
+
+  const afterimageFolder = motionFolder.addFolder('👥 残像調整 (Afterimages)');
+  afterimageFolder.add(motionConfig, 'afterimageCount', 1, 3, 1).name('残像数').onChange(updateMotionConfig);
+  afterimageFolder.add(motionConfig, 'afterimageInterval', 0.02, 0.10, 0.005).name('残像間隔 (秒)').onChange(updateMotionConfig);
+  afterimageFolder.add(motionConfig, 'afterimageOpacity', 0.05, 0.80, 0.02).name('基本不透明度').onChange(updateMotionConfig);
+  afterimageFolder.close();
+
+  const blurFolder = motionFolder.addFolder('💨 方向性アウトラインブラー (Blur)');
+  blurFolder.add(motionConfig, 'blurSamples', 3, 12, 1).name('サンプル数').onChange(updateMotionConfig);
+  blurFolder.add(motionConfig, 'blurMaxDistance', 0.01, 0.15, 0.005).name('最大ブラー距離 (m)').onChange(updateMotionConfig);
+  blurFolder.close();
+
+  motionFolder.addColor(motionConfig, 'effectColor').name('メイン色 (発光)').onChange(updateMotionConfig);
+  motionFolder.addColor(motionConfig, 'accentColor').name('アクセント色 (シアン等)').onChange(updateMotionConfig);
+  motionFolder.close();
 
   // 9. Lip Sync Folder
   const lipFolder = visualGui.addFolder(tr.gui.lipSyncFolder);

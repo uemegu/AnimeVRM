@@ -15,6 +15,17 @@ class SettingsTest(unittest.TestCase):
         result = import_document(dict(format='eye-atelier-settings', version=1, parameters={'flatness':.3}))
         self.assertEqual(result['brow_curve'],0)
         self.assertEqual(result['iris_width'],1)
+        for key in ('corner_angle', 'jaw_roundness', 'face_slim'):
+            self.assertEqual(result[key], 0)
+
+    def test_extended_line_and_contour_settings(self):
+        values = dict(DEFAULTS, thickness=3, corner_ratio=3, corner_angle=-1,
+                      jaw_roundness=1, face_slim=1)
+        self.assertEqual(import_document(export_document(values)), values)
+        for key, value in dict(thickness=3.01, corner_ratio=3.01, corner_angle=1.01,
+                               jaw_roundness=-.01, face_slim=1.01).items():
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                import_document(export_document(dict(values, **{key:value})))
 
     def test_invalid_documents(self):
         valid = export_document(DEFAULTS)

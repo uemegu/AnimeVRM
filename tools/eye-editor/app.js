@@ -1,8 +1,10 @@
 const $ = (id) => document.getElementById(id);
+let resetParams;
 let token, connected = false, busy = false, before = false, angle = 0, zoom = 1;
 const placementDefaults = { eye_x: 0, eye_z: 0, eye_width: 1, eye_height: 1, iris_x: 0, iris_z: 0, iris_width: 1, iris_height: 1 };
 const browDefaults = { brow_x: 0, brow_z: 0, brow_peak: 0, brow_curve: 0 };
-const sliders = ['flatness', 'length', 'thickness', 'corner_ratio', 'upper_peak', 'blink', ...Object.keys(placementDefaults), ...Object.keys(browDefaults)];
+const contourDefaults = { jaw_roundness: 0, face_slim: 0 };
+const sliders = ['flatness', 'length', 'thickness', 'corner_ratio', 'corner_angle', ...Object.keys(contourDefaults), 'upper_peak', 'blink', ...Object.keys(placementDefaults), ...Object.keys(browDefaults)];
 const session = fetch('/api/session').then(r => r.json()).then(r => { token = r.token; });
 
 async function api(path, data = {}) {
@@ -26,6 +28,8 @@ async function run(action) {
 function values() { return { ...Object.fromEntries(sliders.map(id => [id, Number($(id).value) / 100])), expression: $('expression').value }; }
 function labels() {
   for (const id of sliders) $(id + '-value').textContent = id === 'thickness' ? (Number($(id).value) / 100).toFixed(2) : $(id).value + '%';
+  const tilt = Number($('corner_angle').value);
+  $('corner_angle-value').textContent = tilt === 0 ? '元の角度' : `${(tilt * .35).toFixed(1)}°`;
   const peak = Number($('upper_peak').value);
   $('upper_peak-value').textContent = peak === 0 ? '元の位置' : `${peak < 0 ? '目頭' : '目尻'} ${Math.abs(peak)}%`;
   for (const id of ['eye_x', 'eye_z', 'iris_x', 'iris_z', 'brow_x', 'brow_z', 'brow_peak', 'brow_curve']) {
@@ -63,6 +67,7 @@ $('connect').onclick = () => run(async () => {
   message('モデルの目の縁を読み取っています…');
   const result = await api('connect');
   connected = true;
+  resetParams = result.reset_params;
   const expressionLabels = { happy: 'happy / 喜び', angry: 'angry / 怒り', sad: 'sad / 悲しみ', relaxed: 'relaxed / リラックス', surprised: 'surprised / 驚き', aa: 'aa / あ', ih: 'ih / い', ou: 'ou / う', ee: 'ee / え', oh: 'oh / お' };
   $('expression').replaceChildren(new Option('通常の顔', 'none'));
   for (const name of result.expression_names || []) {
@@ -73,7 +78,7 @@ $('connect').onclick = () => run(async () => {
   $('dot').classList.add('live');
   await api('view', { angle, zoom });
   await screenshot();
-  message('接続しました。スライダーを動かして、目もとを調整してください。');
+  message(result.rebased ? '出力済みVRMに接続しました。現在の顔を基準に続けて編集できます。' : '接続しました。スライダーを動かして、目もとを調整してください。');
 });
 for (const id of sliders) {
   $(id).oninput = labels;
@@ -81,7 +86,9 @@ for (const id of sliders) {
 }
 $('expression').onchange = () => run(() => apply());
 $('suggest').onclick = () => run(() => apply({ flatness: .85, length: .85, thickness: .7, corner_ratio: .15, upper_peak: .5, blink: 0, expression: 'none' }));
-$('reset').onclick = () => run(() => apply({ flatness: 0, length: 0, thickness: .45, corner_ratio: .18, upper_peak: 0, blink: 0, expression: 'none', ...placementDefaults, ...browDefaults }));
+$('reset').onclick = () => run(() => apply(resetParams || { flatness: 0, length: 0, thickness: .45, corner_ratio: .18, corner_angle: 0, ...contourDefaults, upper_peak: 0, blink: 0, expression: 'none', ...placementDefaults, ...browDefaults }));
+$('reset-contour').onclick = () => run(() => apply(contourDefaults));
+$('suggest-contour').onclick = () => run(() => apply({ jaw_roundness: .65, face_slim: .35 }));
 $('reset-brow').onclick = () => run(() => apply(browDefaults));
 $('reset-eye').onclick = () => run(() => apply(Object.fromEntries(Object.entries(placementDefaults).filter(([k]) => k.startsWith('eye_')))));
 $('reset-iris').onclick = () => run(() => apply(Object.fromEntries(Object.entries(placementDefaults).filter(([k]) => k.startsWith('iris_')))));

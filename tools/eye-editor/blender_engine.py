@@ -106,34 +106,71 @@ def initialize():
         return status()
     if bpy.context.mode != 'OBJECT':
         raise ValueError('初回だけBlenderをオブジェクトモードにしてください。')
-    source = bpy.data.objects.get('Face')
-    if not source or source.type != 'MESH' or not source.data.shape_keys:
-        raise ValueError('シェイプキーを持つFaceオブジェクトが見つかりません。')
-    eyes, movable = detect(source)
-    existing = [o for o in bpy.data.objects if o.get('eye_editor_role') == 'face']
-    if len(existing) > 1:
-        raise ValueError('編集対象が複数あります。一つのモデルを開いてください。')
-    if existing:
-        preview = existing[0]
-        lines = sorted([o for o in bpy.data.objects if o.get('eye_editor_role') == 'line'],
+    faces = [o for o in bpy.context.scene.objects if o.type == 'MESH' and o.data.shape_keys
+             and any(m and 'Face_00_SKIN' in m.name for m in o.data.materials)
+             and any(m and 'EyeIris' in m.name for m in o.data.materials)]
+    previews = [o for o in faces if o.get('eye_editor_role') == 'face']
+    restored = [(o, bpy.data.objects.get(o.get('eye_editor_source', 'Face'))) for o in previews]
+    restored = [(o, source) for o, source in restored if source in faces and source != o]
+    if len(restored) == 1 and len(faces) == 2:
+        preview, source = restored[0]
+        lines = sorted([o for o in bpy.context.scene.objects if o.get('eye_editor_role') == 'line'],
                        key=lambda o: o['eye_editor_side'])
         if len(lines) != 2 or len(preview.data.vertices) != len(source.data.vertices):
-            raise ValueError('保存した編集データの構造が変わっています。元のモデルから開始してください。')
+            raise ValueError('保存した編集データの構造が変わっています。')
         params = json.loads(preview.get('eye_editor_settings', '{}'))
-    else:
+        source_lines = [bpy.data.objects.get(n) for n in json.loads(preview.get('eye_editor_line_sources', '[]'))]
+        if any(o is None for o in source_lines):
+            raise ValueError('再編集用の元ラインが見つかりません。')
+        baseline = json.loads(preview.get('eye_editor_line_baseline', '{}'))
+    elif len(faces) == 1:
+        source = faces[0]
+        # Exported custom properties survive VRM import. They describe baked
+        # geometry, not an editable session: never replay the facial settings.
+        baked = source.get('eye_editor_role') == 'face' or source.name.startswith('EyeEditor.Preview')
+        source_lines = sorted([o for o in bpy.context.scene.objects if o.type == 'MESH'
+                               and o.find_armature() == source.find_armature()
+                               and (o.get('eye_editor_role') == 'line' or o.name.startswith('EyeEditor.InnerLine'))],
+                              key=lambda o: o.get('eye_editor_side', -1 if sum(v.co.x for v in o.data.vertices)<0 else 1)) if baked else []
+        if source_lines and (len(source_lines) != 2 or any(not o.data.shape_keys for o in source_lines)):
+            raise ValueError('出力済みモデルの左右ラインを特定できません。')
+        # Validate detection before creating the reversible copies.
+        detect(source)
+        old = json.loads(source.get('eye_editor_settings', '{}')) if baked else {}
+        baseline = {k: old.get(k, DEFAULTS[k]) for k in ('length','thickness','corner_ratio','corner_angle')}
+        if source_lines and baseline['length'] == 0:
+            baseline['length'] = 1.0
+        params = baseline if source_lines else {}
         preview = source.copy()
         preview.data = source.data.copy()
         preview.name = 'EyeEditor.Preview'
         preview['eye_editor_preview'] = True
         preview['eye_editor_role'] = 'face'
+        preview['eye_editor_source'] = source.name
+        preview['eye_editor_rebased'] = bool(baked)
+        preview['eye_editor_line_sources'] = json.dumps([o.name for o in source_lines])
+        preview['eye_editor_line_baseline'] = json.dumps(baseline if source_lines else {})
         source.users_collection[0].objects.link(preview)
-        lines, params = [], {}
+        source['eye_editor_role'] = 'source'
+        lines = []
+        for index, original in enumerate(source_lines):
+            line = original.copy()
+            line.data = original.data.copy()
+            line.name = 'EyeEditor.InnerLine'
+            original.users_collection[0].objects.link(line)
+            line['eye_editor_role'] = 'line'
+            line['eye_editor_side'] = (-1,1)[index]
+            original['eye_editor_role'] = 'source_line'
+            lines.append(line)
+    else:
+        raise ValueError('編集する顔を一つに絞ってください。元VRMと出力済みVRMの両方に対応しています。')
+    eyes, movable = detect(source)
     original_values = {k.name: k.value for k in source.data.shape_keys.key_blocks}
     original_coords = {k.name: [p.co.copy() for p in k.data] for k in source.data.shape_keys.key_blocks}
     SESSION = dict(source=source, source_mesh=source.data, preview=preview, eyes=eyes, movable=movable,
                    coords=original_coords, values=original_values,
                    hidden=source.hide_get(), render_hidden=source.hide_render,
-                   params=dict(DEFAULTS), lines=lines)
+                   params=dict(DEFAULTS), lines=lines, source_lines=source_lines, line_baseline=baseline)
     SESSION['params'].update(params)
     source.hide_set(True)
     source.hide_render = True
@@ -147,6 +184,10 @@ def initialize():
 
 def upgrade_session():
     s = SESSION
+    s.setdefault('source_lines', [])
+    if s['source_lines'] and 'line_coords' not in s:
+        s['line_coords'] = [{k.name: [v.co.copy() for v in k.data] for k in o.data.shape_keys.key_blocks}
+                            for o in s['source_lines']]
     for name, value in DEFAULTS.items():
         s['params'].setdefault(name, value)
     basis = s['coords'][next(iter(s['coords']))]
@@ -161,7 +202,26 @@ def upgrade_session():
     s['brow_vertices'] = {v for poly in mesh.polygons if poly.material_index in brow_mats for v in poly.vertices}
     skin_faces = [list(poly.vertices) for poly in mesh.polygons
                   if mesh.materials[poly.material_index] and 'Face_00_SKIN' in mesh.materials[poly.material_index].name]
+    s['skin_vertices'] = {i for face in skin_faces for i in face}
     s['skin_surface'] = BVHTree.FromPolygons(basis, skin_faces)
+    # Use the front facial surface, excluding the ears and back of the head.
+    eye_center = sum((e['center'] for e in s['eyes']), Vector()) / 2
+    eye_width = sum(e['width'] for e in s['eyes']) / 2
+    front_limit = eye_center.y + eye_width * .6
+    front = [basis[i] for i in s['skin_vertices'] if basis[i].y < front_limit]
+    chin = min(p.z for p in front)
+    cheek = eye_center.z - eye_width * .25
+    height = cheek - chin
+    profile = []
+    for j in range(25):
+        z = chin + height*j/24
+        nearby = [abs(p.x) for p in front if abs(p.z-z) <= height/16]
+        profile.append(max(nearby, default=0.0))
+    s['contour'] = dict(chin=chin, cheek=cheek, height=height,
+                        width=profile[-1], profile=profile, front=front_limit,
+                        top=min(basis[i].z for e in s['eyes'] for i in e['loop'])-height*.02,
+                        depth=eye_width)
+
     s['skin_front'] = min(p.y for p in basis)-.1
     s['editable'] = s['movable'] | s['eye_vertices'] | s['brow_vertices']
     for eye in s['eyes']:
@@ -237,6 +297,56 @@ def import_settings(document):
 def smooth_falloff(value, full, end):
     t = min(1.0, max(0.0, (value-full)/(end-full)))
     return 1-t*t*(3-2*t)
+
+
+def position_contour(point, reference, params):
+    """Basis-derived lateral displacement shared by every expression.
+
+    Keep facial features and ears fixed; all zero controls are an exact no-op.
+    """
+    p = point.copy()
+    if not params['jaw_roundness'] and not params['face_slim']:
+        return p
+    c = SESSION['contour']
+    t = (reference.z-c['chin'])/c['height']
+    if not 0 < t < 1.2:
+        return p
+    u = min(1.0, t)*24
+    j = min(23, int(u))
+    current = c['profile'][j]*(1-(u-j)) + c['profile'][j+1]*(u-j)
+    if current <= 1e-6:
+        return p
+    lateral = 1-smooth_falloff(abs(reference.x)/current, .40, .92)
+    depth = smooth_falloff(reference.y, c['front'], c['front']+c['depth']*.65)
+    upper = smooth_falloff(reference.z, c['top']-c['height']*.25, c['top'])
+    tip = 1-smooth_falloff(t, 0, .12)
+    target = c['width']*math.sqrt(max(0, 1-(1-min(t,1))**2))
+    # Bound the profile correction so unusual faces cannot fold inward.
+    delta = max(-current*.25, min(current*.12, target-current))
+    delta = delta*params['jaw_roundness'] - current*.20*params['face_slim']
+    p.x += (1 if reference.x > 0 else -1)*delta*lateral*depth*upper*tip
+    return p
+
+
+def angle_line(point, eye, coords, u, params):
+    """Bend the inner arc around its upper attachment, in mirrored eye space."""
+    p = warp(point, params)
+    angle = params['corner_angle']*math.radians(35)
+    if not angle:
+        return p
+    anchor = warp(line_sample(eye, coords, .06)[0], params)
+    weight = 1-smooth_falloff(u, .06, .60)
+    a = angle*weight
+    x, z = (p.x-anchor.x)*eye['sign'], p.z-anchor.z
+    p.x = anchor.x+eye['sign']*(math.cos(a)*x-math.sin(a)*z)
+    p.z = anchor.z+math.sin(a)*x+math.cos(a)*z
+    # Follow the facial surface rather than pushing the ribbon through it.
+    surface = SESSION['skin_surface']
+    old = surface.ray_cast(Vector((point.x,SESSION['skin_front'],point.z)), Vector((0,1,0)))[0]
+    hit = surface.ray_cast(Vector((p.x,SESSION['skin_front'],p.z)), Vector((0,1,0)))[0]
+    if old is not None and hit is not None:
+        p.y += hit.y-old.y
+    return p
 
 
 def position_iris(point, eye, params):
@@ -343,11 +453,13 @@ def repair_expression_bindings():
     """
     s = SESSION
     source, preview = s['source'], s['preview']
+    replacements = {source.name: preview.name}
+    replacements.update({old.name: new.name for old,new in zip(s.get('source_lines', []), s['lines'])})
     repaired = 0
     for _, binds, attr in expression_collections():
         for bind in list(binds):
-            if getattr(bind, attr).mesh_object_name == source.name:
-                getattr(bind, attr).mesh_object_name = preview.name
+            if getattr(bind, attr).mesh_object_name in replacements:
+                getattr(bind, attr).mesh_object_name = replacements[getattr(bind, attr).mesh_object_name]
                 repaired += 1
         face_binds = [b for b in binds if getattr(b, attr).mesh_object_name == preview.name]
         for bind in face_binds:
@@ -370,8 +482,8 @@ def repair_expression_bindings():
         if ext.spec_version == '1.0':
             annotations = ext.vrm1.first_person.mesh_annotations
             for annotation in list(annotations):
-                if annotation.node.mesh_object_name == source.name:
-                    annotation.node.mesh_object_name = preview.name
+                if annotation.node.mesh_object_name in replacements:
+                    annotation.node.mesh_object_name = replacements[annotation.node.mesh_object_name]
                 if annotation.node.mesh_object_name == preview.name:
                     for line in s['lines']:
                         if not any(a.node.mesh_object_name == line.name for a in annotations):
@@ -442,6 +554,58 @@ def line_sample(eye, coords, u):
     return coords[path[j]].lerp(coords[path[j+1]], t), path[j], path[j+1], t
 
 
+def ribbon_sample(eye, coords, t, params):
+    u = .06 + t*params['length']*.91
+    pos, ia, ib, blend = line_sample(eye, coords, u)
+    pos = angle_line(pos, eye, coords, u, params)
+    prev = angle_line(line_sample(eye, coords, max(0,u-.005))[0], eye, coords, max(0,u-.005), params)
+    nxt = angle_line(line_sample(eye, coords, min(1,u+.005))[0], eye, coords, min(1,u+.005), params)
+    tangent = nxt-prev
+    normal = Vector((-tangent.z,0,tangent.x)).normalized()
+    if normal.dot(pos-eye['center']) < 0:
+        normal.negate()
+    width = line_width(u,t,params)
+    pos.y -= .00065
+    return (position_eye(pos-normal*width*.22,eye,params,rigid=True),
+            position_eye(pos+normal*width*.78,eye,params,rigid=True), ia,ib,blend)
+
+
+def update_imported_line(index, eye, obj, params):
+    """Retain imported topology and morphs; apply only the new edit delta.
+
+    VRM triangulates/splits our 66-vertex strip (often to 128 vertices).
+    Correspondence is geometric, never based on the old vertex indices.
+    """
+    s = SESSION
+    baseline = dict(DEFAULTS, **s['line_baseline'])
+    line_params = dict(baseline, **{k:params[k] for k in s['line_baseline']})
+    basis_name = next(iter(s['coords']))
+    if 'line_mapping' not in s:
+        s['line_mapping'] = {}
+    if index not in s['line_mapping']:
+        samples = [v for j in range(33) for v in ribbon_sample(eye,s['coords'][basis_name],j/32,baseline)[:2]]
+        s['line_mapping'][index] = [min(range(66), key=lambda j:(point-samples[j]).length_squared)
+                                    for point in s['line_coords'][index][basis_name]]
+    changed = any(line_params[k] != baseline[k] for k in s['line_baseline'])
+    for key in obj.data.shape_keys.key_blocks:
+        face_coords = s['coords'].get(key.name, s['coords'][basis_name])
+        if changed:
+            old = [v for j in range(33) for v in ribbon_sample(eye,face_coords,j/32,baseline)[:2]]
+            new = [v for j in range(33) for v in ribbon_sample(eye,face_coords,j/32,line_params)[:2]]
+        for i, original in enumerate(s['line_coords'][index][key.name]):
+            point = original.copy()
+            if changed:
+                j = s['line_mapping'][index][i]
+                point += new[j]-old[j]
+            point = warp(point,params)
+            key.data[i].co = position_eye(point,eye,params,rigid=True)
+        face_key = s['preview'].data.shape_keys.key_blocks.get(key.name)
+        key.value = face_key.value if face_key else 0.0
+    obj.hide_set(params['before'] or params['length']==0 or params['thickness']==0)
+    obj.hide_render = obj.hide_get()
+    obj.data.update()
+
+
 def update(params):
     s = SESSION
     if not s:
@@ -463,7 +627,8 @@ def update(params):
             point = warp(original, p) if i in s['movable'] else original.copy()
             if i in s['iris_vertices']:
                 point = position_iris(point, eye, p)
-            key.data[i].co = position_eye(point, eye, p, rigid=i in s['eye_vertices'], reference=original)
+            point = position_eye(point, eye, p, rigid=i in s['eye_vertices'], reference=original)
+            key.data[i].co = position_contour(point, reference, p) if i in s['skin_vertices'] else point
         key.value = s['values'][key.name]
     for name, binds, attr in expression_collections():
         if name == p['expression']:
@@ -475,7 +640,10 @@ def update(params):
     close = preview.data.shape_keys.key_blocks.get('Fcl_EYE_Close')
     if close:
         close.value = p['blink']
-    for eye, obj in zip(s['eyes'], s['lines']):
+    for index, (eye, obj) in enumerate(zip(s['eyes'], s['lines'])):
+        if s['source_lines']:
+            update_imported_line(index, eye, obj, p)
+            continue
         for key in obj.data.shape_keys.key_blocks:
             coords = s['coords'][key.name]
             for j in range(33):
@@ -483,18 +651,9 @@ def update(params):
                 # Length zero hides this whole object; increasing it traces
                 # more of the existing opening, without moving the eye itself.
                 u = 0.06 + t * p['length'] * 0.91
-                pos, ia, ib, blend = line_sample(eye, coords, u)
-                pos = warp(pos, p)
-                prev = warp(line_sample(eye, coords, max(0, u - .005))[0], p)
-                nxt = warp(line_sample(eye, coords, min(1, u + .005))[0], p)
-                tangent = nxt - prev
-                normal = Vector((-tangent.z, 0, tangent.x)).normalized()
-                if normal.dot(pos - eye['center']) < 0:
-                    normal.negate()
-                width = line_width(u, t, p)
-                pos.y -= 0.00065
-                key.data[j*2].co = position_eye(pos - normal * width * .22, eye, p, rigid=True)
-                key.data[j*2+1].co = position_eye(pos + normal * width * .78, eye, p, rigid=True)
+                left, right, ia, ib, blend = ribbon_sample(eye, coords, t, p)
+                key.data[j*2].co = left
+                key.data[j*2+1].co = right
                 if key == obj.data.shape_keys.key_blocks[0]:
                     weights = defaultdict(float)
                     for idx, w in ((ia, 1-blend), (ib, blend)):
@@ -508,6 +667,9 @@ def update(params):
         obj.hide_set(p['before'] or p['length'] == 0 or p['thickness'] == 0)
         obj.hide_render = obj.hide_get()
         obj.data.update()
+    for original in s['source_lines']:
+        original.hide_set(not p['before'])
+        original.hide_render = not p['before']
     s['source'].hide_set(not p['before'])
     s['source'].hide_render = not p['before']
     preview.hide_set(p['before'])
@@ -526,6 +688,8 @@ def status():
     if not SESSION:
         return dict(connected=False)
     return dict(connected=True, model=SESSION['source'].name,
+                rebased=bool(SESSION['preview'].get('eye_editor_rebased')),
+                reset_params=dict(DEFAULTS, **(SESSION.get('line_baseline', {}) if SESSION.get('source_lines') else {})),
                 params=SESSION['params'], eye_vertices=[len(e['loop']) for e in SESSION['eyes']],
                 expressions=len(SESSION['coords']),
                 expression_names=[n for n, binds, _ in expression_collections() if len(binds)])

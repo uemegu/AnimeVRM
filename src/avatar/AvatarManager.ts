@@ -46,10 +46,12 @@ export class AvatarManager {
     windController: WindController;
     getConfig: () => AvatarConfig;
     avatarChatController?: AvatarChatController;
+    renderer?: THREE.WebGLRenderer;
     onEnterTransparent: () => void;
     onExitTransparent: () => void;
     onAvatarLoaded?: (avatar: Avatar) => void;
   }) {
+    this.renderer = options.renderer ?? null;
     this.scene = options.scene;
     this.camera = options.camera;
     this.controls = options.controls;
@@ -99,6 +101,18 @@ export class AvatarManager {
     });
   }
 
+  public renderer: THREE.WebGLRenderer | null = null;
+
+  public setRenderer(renderer: THREE.WebGLRenderer): void {
+    this.renderer = renderer;
+    if (this.avatarInstance) {
+      this.avatarInstance.renderer = renderer;
+    }
+    for (const av of this.scenarioAvatars.values()) {
+      av.renderer = renderer;
+    }
+  }
+
   public setChatController(controller: AvatarChatController): void {
     this.avatarChatController = controller;
   }
@@ -127,6 +141,7 @@ export class AvatarManager {
       lookAtCamera: true,
       enableBreathing: true,
       effectTextManager: this.sharedEffectTextManager,
+      renderer: this.renderer ?? undefined,
       onProgress: (progress) => {
         const el = document.getElementById('progress-text');
         if (el) el.textContent = `${progress.toFixed(0)}%`;
@@ -198,9 +213,14 @@ export class AvatarManager {
         } else {
           av.updateLipSync(undefined, cfg.lipSync.gain, cfg.lipSync.smoothing, delta);
         }
-        av.update(delta, elapsed, () => {
-          this.windController.update(av.vrm ?? null, cfg.wind, elapsed);
-        });
+        av.update(
+          delta,
+          elapsed,
+          () => {
+            this.windController.update(av.vrm ?? null, cfg.wind, elapsed);
+          },
+          this.renderer ?? undefined
+        );
       }
     } else if (this.avatarInstance) {
       if (cfg.lipSync.enabled) {
@@ -212,9 +232,14 @@ export class AvatarManager {
         );
       }
 
-      this.avatarInstance.update(delta, elapsed, () => {
-        this.windController.update(this.avatarInstance?.vrm ?? null, cfg.wind, elapsed);
-      });
+      this.avatarInstance.update(
+        delta,
+        elapsed,
+        () => {
+          this.windController.update(this.avatarInstance?.vrm ?? null, cfg.wind, elapsed);
+        },
+        this.renderer ?? undefined
+      );
     }
   }
 

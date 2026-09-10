@@ -145,6 +145,9 @@ export interface Translations {
     nisaTitle: string;
     playNisa: string;
     nisaDesc: string;
+    fastMotionTitle: string;
+    playFastMotion: string;
+    fastMotionDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -252,6 +255,7 @@ export interface Translations {
     townWalkStarted: string;
     behindYouStarted: string;
     nisaStarted: string;
+    fastMotionStarted: string;
     scenarioStopped: string;
     motionLoaded: string;
     motionLoadFailed: string;

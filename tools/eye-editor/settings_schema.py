@@ -1,11 +1,12 @@
 """Portable settings format and shared, strict numeric validation."""
 import math
 
-DEFAULTS = dict(flatness=0.0, length=0.0, thickness=.45, corner_ratio=.18, upper_peak=0.0,
+DEFAULTS = dict(flatness=0.0, length=0.0, thickness=.45, corner_ratio=.18, corner_angle=0.0, jaw_roundness=0.0, face_slim=0.0, upper_peak=0.0,
                 eye_x=0.0, eye_z=0.0, eye_width=1.0, eye_height=1.0,
                 iris_x=0.0, iris_z=0.0, iris_width=1.0, iris_height=1.0,
                 brow_x=0.0, brow_z=0.0, brow_peak=0.0, brow_curve=0.0)
-RANGES = dict(flatness=(0,1), length=(0,1), thickness=(0,1.2), corner_ratio=(0,1),
+RANGES = dict(flatness=(0,1), length=(0,1), thickness=(0,3), corner_ratio=(0,3), corner_angle=(-1,1),
+              jaw_roundness=(0,1), face_slim=(0,1),
               upper_peak=(-1,1), eye_x=(-1,1), eye_z=(-1,1), eye_width=(.75,1.25), eye_height=(.75,1.25),
               iris_x=(-1,1), iris_z=(-1,1), iris_width=(.6,1.4), iris_height=(.6,1.4),
               brow_x=(-1,1), brow_z=(-1,1), brow_peak=(-1,1), brow_curve=(-1,1))

@@ -68,6 +68,7 @@ const avatarManager = new AvatarManager({
   windController,
   getConfig: () => currentConfig,
   avatarChatController,
+  renderer: viewerCore.renderer,
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
     viewerCore.midgroundMesh.visible = false;
