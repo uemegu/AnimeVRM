@@ -11,8 +11,8 @@ export const sources = [
   ['@hair', '髪をかきあげる', '右腕'],
   ...Object.entries(basics).map(([id, pose]) => [id, pose.label, pose.mask]),
 ];
-export const masks = ['全身', '上半身', '下半身', '右腕', '左腕', '体幹', '頭', '右手', '左手'];
-export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; }
+export const masks = ['全身', '上半身', '下半身', '右腕', '左腕', '体幹', '頭', '右手', '左手', '右手首', '左手首', '右脚', '左脚'];
+export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; balance?: boolean; }
 export interface Recipe { version: 1; duration: number; fps: number; layers: Layer[]; loop?: boolean; transition?: number; }
 export interface Rest { node: T.Object3D; p: T.Vector3; q: T.Quaternion; s: T.Vector3; world: T.Quaternion; parentWorld: T.Quaternion; }
 interface Source { root: T.Group; clip: T.AnimationClip; rest: Map<string, Rest>; tracks: { bone: string; property: string; sample: T.Interpolant }[]; }
@@ -22,6 +22,8 @@ const clean = (name: string) => name.replace(/^.*mixamorig\d*[:_]?/i, '');
 export function matches(name: string, mask: string) {
   const n = clean(name);
   if (mask === '全身') return true;
+  if (mask === '右手首' || mask === '左手首') return n === (mask === '右手首' ? 'RightHand' : 'LeftHand');
+  if (mask === '右脚' || mask === '左脚') return n.startsWith(mask === '右脚' ? 'Right' : 'Left') && /UpLeg|Leg|Foot|Toe/.test(n);
   if (mask === '右手' || mask === '左手') return n.startsWith(mask === '右手' ? 'RightHand' : 'LeftHand');
   if (mask === '右腕' || mask === '左腕') return n.startsWith(mask === '右腕' ? 'Right' : 'Left') && /Shoulder|Arm|Hand/.test(n);
   if (mask === '体幹') return /Spine/.test(n);
@@ -39,6 +41,9 @@ export class MotionEngine {
   cache = new Map<string, Source>();
   custom = new Map<string, SavedMotion>();
   private customTracks = new Map<string, { bone: string; p: T.Interpolant; q: T.Interpolant }[]>();
+  groundAdjustment?: () => number;
+  private grounded = false;
+  private floating = false;
   root!: T.Group;
   rest!: Map<string, Rest>;
   async load(name: string) {
@@ -55,14 +60,18 @@ export class MotionEngine {
   sample(recipe: Recipe, time: number) {
     if (recipe.loop && time > recipe.duration) {
       this.sampleContent(recipe, recipe.duration);
+      const endGrounded = this.grounded, endFloating = this.floating;
       const end = [...this.rest.values()].map(r => ({ p: r.node.position.clone(), q: r.node.quaternion.clone() }));
       this.sampleContent(recipe, 0);
+      this.grounded ||= endGrounded; this.floating ||= endFloating;
       const blend = T.MathUtils.smoothstep(time, recipe.duration, totalDuration(recipe));
       [...this.rest.values()].forEach((r, index) => { r.node.position.copy(end[index].p.lerp(r.node.position, blend)); r.node.quaternion.copy(end[index].q.slerp(r.node.quaternion, blend)); });
     } else this.sampleContent(recipe, Math.max(0, time));
+    if (this.grounded && !this.floating && this.groundAdjustment) this.rest.get('Hips')!.node.position.y += this.groundAdjustment();
     this.rest.get('Hips')?.node.updateWorldMatrix(true, true);
   }
   private sampleContent(recipe: Recipe, time: number) {
+    this.grounded = false; this.floating = false;
     for (const r of this.rest.values()) { r.node.position.copy(r.p); r.node.quaternion.copy(r.q); r.node.scale.copy(r.s); }
     // Idle is the stable underlying pose, while each card overrides only its selected region.
     this.applySource('Standing Idle', recipe.loop && recipe.transition === 0 ? 0 : time % this.cache.get('Standing Idle')!.clip.duration, '全身', 1);
@@ -75,8 +84,23 @@ export class MotionEngine {
       const length = Math.max(1 / 30, (layer.to - layer.from) / 30);
       const phase = elapsed * layer.speed;
       const local = layer.poseMode === 'hold' ? layer.to / 30 : layer.from / 30 + (layer.loop ? phase % length : Math.min(length, phase));
-      if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0);
-      else if (layer.source.startsWith('saved:')) this.applySaved(layer.source, local, layer.mask, w);
+      if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0, layer.balance !== false);
+      else if (layer.source.startsWith('saved:')) {
+        const before = ['RightArm', 'LeftArm'].map(name => this.rest.get(name)!.node.quaternion.clone());
+        this.applySaved(layer.source, local, layer.mask, w);
+        // Respect an authored torso. Add support only when a reusable motion
+        // contains an arm without any torso tracks and is used in full-body mode.
+        const tracks = this.custom.get(layer.source)?.tracks ?? [];
+        if (layer.mask === '全身' && layer.balance !== false && !tracks.some(t => /^Spine/.test(t.bone))) {
+          ['Right', 'Left'].forEach((side, i) => {
+            if (!tracks.some(t => t.bone === `${side}Arm`)) return;
+            const strength = Math.min(1, before[i].angleTo(this.rest.get(`${side}Arm`)!.node.quaternion) / 1.5);
+            const direction = side === 'Right' ? -1 : 1;
+            this.rest.get('Spine')!.node.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(0, 0, .07 * direction * strength)));
+            this.rest.get(side === 'Right' ? 'LeftShoulder' : 'RightShoulder')!.node.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(.04 * strength, 0, -.035 * direction * strength)));
+          });
+        }
+      }
       else this.applySource(layer.source, local, layer.mask, w);
     }
     this.root.updateMatrixWorld(true);
@@ -96,17 +120,27 @@ export class MotionEngine {
       }
     }
   }
-  procedural(name: string, time: number, mask: string, weight: number, contactGap = 0) {
+  procedural(name: string, time: number, mask: string, weight: number, contactGap = 0, balance = true) {
     const amount = T.MathUtils.smoothstep(Math.min(time / .7, 1), 0, 1) * weight;
     const rotate = (bone: string, x: number, y: number, z: number) => {
       const r = this.rest.get(bone); if (r && matches(bone, mask)) r.node.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(x * amount, y * amount, z * amount)));
     };
+    const pose = basics[name];
+    if (mask === '全身' && balance && !pose?.wrist && !pose?.fingers && !pose?.leg) {
+      const side = name === '@raise' || name === '@hair' ? 'Right' : pose?.reach?.side;
+      if (side) { const direction = side === 'Right' ? -1 : 1; rotate('Spine', 0, 0, .055 * direction); rotate('Spine1', 0, 0, .035 * direction); rotate('Head', 0, 0, -.04 * direction); rotate(side === 'Right' ? 'LeftShoulder' : 'RightShoulder', .04, 0, -.035 * direction); }
+      else if (pose?.rotations) for (const [bone, x, y, z] of pose.rotations) {
+        if (/Head|Neck/.test(bone)) rotate('Spine1', -.15 * x, -.15 * y, -.15 * z);
+        else if (/Spine/.test(bone)) rotate('Head', -.2 * x, -.2 * y, -.2 * z);
+      }
+    }
     if (name === '@twist') { rotate('Spine', 0, .35, 0); rotate('Spine1', 0, .45, 0); }
     if (name === '@bend') { rotate('Spine', .35, 0, 0); rotate('Spine1', .45, 0, 0); }
-    if (name === '@raise') { rotate('RightArm', 0, 0, -2.5); rotate('RightForeArm', 0, -.25, 0); }
+    if (name === '@raise') this.reach('Right', 'RightArm', new T.Vector3(-22, 52, 4), mask, amount);
     if (name === '@hair') this.hairReach(time, mask, amount, contactGap);
-    const pose = basics[name];
     if (!pose) return;
+    if (pose.leg) this.legPose(pose.leg, mask, amount, balance);
+    if (pose.wrist) { const w = pose.wrist; const phase = time * Math.PI; rotate(`${w.side}Hand`, w.circle ? .5 * Math.sin(phase) : w.x, w.y, w.circle ? .35 * Math.cos(phase) : w.z); }
     for (const rotation of pose.rotations ?? []) rotate(...rotation);
     if (pose.reach) this.reach(pose.reach.side, pose.reach.anchor, new T.Vector3(...pose.reach.offset), mask, amount, pose.reach.contact, contactGap);
     if (pose.fingers) {
@@ -172,6 +206,52 @@ export class MotionEngine {
     upper.quaternion.copy(before[0].slerp(upper.quaternion, amount)); elbow.quaternion.copy(before[1].slerp(elbow.quaternion, amount));
     upper.updateWorldMatrix(true, true);
   }
+  private legPose(pose: NonNullable<(typeof basics)[string]['leg']>, mask: string, amount: number, balance: boolean) {
+    if (amount <= 0) return;
+    const hips = this.rest.get('Hips')!.node;
+    if (pose.float) { if (mask === '全身' || mask === '下半身') { hips.position.y += pose.float * amount; this.floating = true; } return; }
+    const sides = (['Right', 'Left'] as const).filter(side => matches(`${side}UpLeg`, mask));
+    if (!sides.length) return;
+    this.grounded = true;
+    hips.updateWorldMatrix(true, true);
+    const scale = hips.getWorldScale(new T.Vector3()).x;
+    const targets = new Map(['Right', 'Left'].map(side => { const foot = this.rest.get(`${side}Foot`)!.node; return [side, { p: foot.getWorldPosition(new T.Vector3()), q: foot.getWorldQuaternion(new T.Quaternion()) }]; }));
+    const full = mask === '全身' || mask === '下半身';
+    if (full) {
+      hips.position.y -= (pose.squat ?? 5) * amount;
+      if (pose.side && balance && mask === '全身') { hips.position.x += (pose.side === 'Right' ? 3 : -3) * amount; this.rest.get('Spine')!.node.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(0, 0, (pose.side === 'Right' ? -.04 : .04) * amount))); }
+    }
+    for (const side of sides) {
+      const target = targets.get(side)!;
+      if (pose.side === side && pose.offset) target.p.add(new T.Vector3(...pose.offset).multiplyScalar(scale * amount));
+      const upper = this.rest.get(`${side}UpLeg`)!.node, knee = this.rest.get(`${side}Leg`)!.node, foot = this.rest.get(`${side}Foot`)!.node;
+      this.solveLimb(upper, knee, foot, target.p, new T.Vector3(0, 0, 1));
+      foot.quaternion.copy(foot.parent!.getWorldQuaternion(new T.Quaternion()).invert().multiply(target.q));
+    }
+    hips.updateWorldMatrix(true, true);
+    // A supporting sole stays at its original level. Explicit float is the only
+    // primitive allowed to lift both feet; all corrections are baked into hips.
+    const lowest = Math.min(...['Right', 'Left'].map(side => this.rest.get(`${side}Foot`)!.node.getWorldPosition(new T.Vector3()).y));
+    const baseline = Math.min(...[...targets.values()].map(t => t.p.y));
+    hips.position.y -= (lowest - baseline) / scale;
+    hips.updateWorldMatrix(true, true);
+  }
+  private solveLimb(upper: T.Object3D, joint: T.Object3D, end: T.Object3D, target: T.Vector3, pole: T.Vector3) {
+    upper.updateWorldMatrix(true, true);
+    const a = upper.getWorldPosition(new T.Vector3()), b = joint.getWorldPosition(new T.Vector3()), c = end.getWorldPosition(new T.Vector3());
+    const l1 = a.distanceTo(b), l2 = b.distanceTo(c), direction = target.clone().sub(a).normalize();
+    const distance = T.MathUtils.clamp(a.distanceTo(target), Math.abs(l1 - l2) + 1e-5, l1 + l2 - 1e-5);
+    const goal = a.clone().addScaledVector(direction, distance);
+    pole.addScaledVector(direction, -pole.dot(direction)); if (pole.lengthSq() < 1e-8) pole.set(1, 0, 0).addScaledVector(direction, -direction.x); pole.normalize();
+    const along = (l1 * l1 - l2 * l2 + distance * distance) / (2 * distance);
+    const bend = a.clone().addScaledVector(direction, along).addScaledVector(pole, Math.sqrt(Math.max(0, l1 * l1 - along * along)));
+    for (const [bone, child, position] of [[upper, joint, bend], [joint, end, goal]] as const) {
+      bone.updateWorldMatrix(true, true); const origin = bone.getWorldPosition(new T.Vector3());
+      const delta = new T.Quaternion().setFromUnitVectors(child.getWorldPosition(new T.Vector3()).sub(origin).normalize(), position.clone().sub(origin).normalize());
+      const parent = bone.parent!.getWorldQuaternion(new T.Quaternion()); bone.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
+    }
+    upper.updateWorldMatrix(true, true);
+  }
   removeSaved(id: string) { this.custom.delete(id); this.customTracks.delete(id); }
   registerSaved(motion: SavedMotion) {
     this.custom.set(motion.id, motion);
@@ -197,14 +277,14 @@ export class MotionEngine {
 
 }
 export function newLayer(source: string, engine: MotionEngine, duration: number): Layer {
-  return { id: crypto.randomUUID(), source, mask: engine.custom.get(source)?.mask ?? sources.find(s => s[0] === source)?.[2] ?? '全身', weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true };
+  return { id: crypto.randomUUID(), source, mask: engine.custom.has(source) ? '全身' : (source.startsWith('@') && !basics[source]?.wrist && !basics[source]?.fingers ? '全身' : sources.find(s => s[0] === source)?.[2] ?? '全身'), weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true };
 }
 export function validateRecipe(value: unknown, savedIds = new Set<string>()): Recipe {
   const r = value as Recipe;
   const finite = (v: number, min: number, max: number) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
   if (!r || r.version !== 1 || !finite(r.duration, .5, 60) || ![24, 30, 60].includes(r.fps) || !Array.isArray(r.layers) || r.layers.length > 32) throw new Error('レシピの形式が正しくありません');
   for (const l of r.layers) if (!(sources.some(s => s[0] === l.source) || savedIds.has(l.source)) || !masks.includes(l.mask) || !finite(l.weight, 0, 1) || !finite(l.start, 0, 60) || !finite(l.duration, .1, 60) || !finite(l.speed, .1, 3) || !finite(l.from, 0, 100000) || !finite(l.to, l.from + 1, 100001) || !finite(l.fade, 0, 5) || typeof l.loop !== 'boolean' || typeof l.enabled !== 'boolean') throw new Error('レシピの動作設定が正しくありません');
-  for (const l of r.layers) if (l.repeatEvery !== undefined && l.repeatEvery !== 0 && !finite(l.repeatEvery, l.duration, 60) || l.envelope !== undefined && !['flat', 'sine'].includes(l.envelope) || l.poseMode !== undefined && !['motion', 'hold'].includes(l.poseMode) || l.contactGap !== undefined && !finite(l.contactGap, -10, 20)) throw new Error('配置の繰り返し・接触設定が正しくありません');
+  for (const l of r.layers) if (l.balance !== undefined && typeof l.balance !== 'boolean' || l.repeatEvery !== undefined && l.repeatEvery !== 0 && !finite(l.repeatEvery, l.duration, 60) || l.envelope !== undefined && !['flat', 'sine'].includes(l.envelope) || l.poseMode !== undefined && !['motion', 'hold'].includes(l.poseMode) || l.contactGap !== undefined && !finite(l.contactGap, -10, 20)) throw new Error('配置の繰り返し・接触設定が正しくありません');
   if (r.loop !== undefined && typeof r.loop !== 'boolean' || r.transition !== undefined && !finite(r.transition, 0, 10)) throw new Error('ループ設定が正しくありません');
   return { version: 1, duration: r.duration, fps: r.fps, loop: r.loop ?? false, transition: r.transition ?? 1, layers: r.layers.map(l => ({ ...l, id: crypto.randomUUID() })) };
 }

@@ -263,6 +263,8 @@ export class ScenarioEngine {
       avatar.resetFaceTexture();
       avatar.clearEffectText();
       avatar.setTearsEnabled(false);
+      avatar.setMotionBlurEnabled(false);
+      avatar.setMotionSpeed(1.0);
     });
 
     this.messageWindow.hide();
@@ -495,6 +497,7 @@ export class ScenarioEngine {
     }
 
     // Motion (resolve Master ID or FBX path)
+    const effectiveSpeed = config.motionSpeed ?? this.currentScene?.motionSpeed ?? 1.0;
     if (motion) {
       const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
       const motionLower = resolvedMotion.toLowerCase();
@@ -507,8 +510,11 @@ export class ScenarioEngine {
         resolvedMotion,
         isLoop,
         0.5,
-        resolveAssetUrl('/animations/Idle.fbx')
+        resolveAssetUrl('/animations/Idle.fbx'),
+        effectiveSpeed
       );
+    } else if (config.motionSpeed !== undefined || this.currentScene?.motionSpeed !== undefined) {
+      avatar.setMotionSpeed(effectiveSpeed);
     }
 
     // Expression
@@ -560,6 +566,11 @@ export class ScenarioEngine {
         const mode = typeof config.sweat === 'string' ? config.sweat : 'fly4';
         avatar.showSweat({ mode, duration: 4.0 });
       }
+    }
+
+    // Fast Motion Directional Blur override per avatar
+    if (config.motionBlur !== undefined) {
+      avatar.setMotionBlurEnabled(config.motionBlur);
     }
   }
 
@@ -882,6 +893,12 @@ export class ScenarioEngine {
       this.focusLinesOverlay.show(config);
     } else {
       this.focusLinesOverlay.hide();
+    }
+
+    // 1.95 Fast Motion Directional Blur (シーン単位でのブラーON/OFF。デフォルトOFF)
+    const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
+    for (const av of allAvatars) {
+      av.setMotionBlurEnabled(!!scene.motionBlur);
     }
 
     // 2. Avatar Control (Motion, Expression, Position, 3D Manga Effect)

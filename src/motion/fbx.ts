@@ -46,6 +46,9 @@ export function exportFBX(engine: MotionEngine, recipe: Recipe): ArrayBuffer {
     const attribute = next++;
     objects.push(n('NodeAttribute', [l(attribute), named(r.node.name, 'NodeAttribute'), 'LimbNode'], [n('TypeFlags', ['Skeleton'])])); connect(attribute, id);
     for (const [channel, values, property] of [['R', rotations[index], 'Lcl Rotation'], ['T', positions[index], 'Lcl Translation']] as const) {
+      // Non-root translations describe the reference skeleton, not motion.
+      // Retargeters must keep the destination rig's own limb lengths and axes.
+      if (channel === 'T' && !/Hips$/.test(r.node.name)) continue;
       const curveNode = next++;
       objects.push(n('AnimationCurveNode', [l(curveNode), named(channel, 'AnimCurveNode'), ''], [n('Properties70', [], ['X', 'Y', 'Z'].map((axis, a) => p(`d|${axis}`, 'Number', [values[a][0]])))]));
       connect(curveNode, 11); connect(curveNode, id, property);

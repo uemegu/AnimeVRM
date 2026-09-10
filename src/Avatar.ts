@@ -14,6 +14,7 @@ import { resolveAssetUrl } from './utils/path';
 import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './effects/text';
 import { TearEffect, TearConfig } from './effects/tears';
 import { SweatEffect, SweatConfig } from './effects/sweat';
+import { FastMotionEffect, FastMotionConfig } from './effects/motion';
 
 export interface YandereOptions {
   enabled?: boolean;
@@ -61,6 +62,7 @@ export interface AvatarOptions {
   eyeWander?: boolean;
   enableBreathing?: boolean;
   effectTextManager?: EffectTextManager;
+  renderer?: THREE.WebGLRenderer;
   onProgress?: (progress: number) => void;
   onLoaded?: (avatar: Avatar) => void;
   onError?: (error: unknown) => void;
@@ -249,6 +251,8 @@ export class Avatar {
   public effectTextManager: EffectTextManager | null = null;
   public tearEffect: TearEffect | null = null;
   public sweatEffect: SweatEffect | null = null;
+  public fastMotionEffect: FastMotionEffect | null = null;
+  public renderer: THREE.WebGLRenderer | null = null;
 
   public initialPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
   public initialRotationY: number = 0;
@@ -516,6 +520,9 @@ export class Avatar {
         // Initialize sweat effect
         this.sweatEffect = new SweatEffect(vrm, { enabled: false });
 
+        // Initialize fast motion effect (arms & legs anime motion effects)
+        this.fastMotionEffect = new FastMotionEffect(vrm, this.scene, this.options.config?.fastMotion);
+
         this.options.onLoaded?.(this);
       },
       (progress) => {
@@ -537,12 +544,14 @@ export class Avatar {
     url: string,
     loop: boolean = true,
     crossFadeDuration: number = 0.5,
-    returnToIdleUrl?: string
+    returnToIdleUrl?: string,
+    timeScale: number = 1.0
   ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm) return null;
 
     // If identical animation is already running, just continue playing seamlessly!
     if (this.currentAnimationUrl === url && this.currentAction && this.currentAction.isRunning()) {
+      this.currentAction.timeScale = timeScale;
       if (loop) {
         this.returnToIdleUrl = null;
         this.currentAction.setLoop(THREE.LoopRepeat, Infinity);
@@ -580,6 +589,7 @@ export class Avatar {
       }
 
       action.reset();
+      action.timeScale = timeScale;
 
       if (this.currentAction && this.currentAction !== action) {
         action.crossFadeFrom(this.currentAction, crossFadeDuration, false);
@@ -776,6 +786,23 @@ export class Avatar {
 
   public applyConfig(config: AvatarConfig): void {
     this.shaderController?.applyFullConfig(config);
+    if (config.fastMotion) {
+      this.fastMotionEffect?.updateConfig(config.fastMotion);
+    }
+  }
+
+  public setMotionBlurEnabled(enabled: boolean): void {
+    this.fastMotionEffect?.updateConfig({ directionalBlurEnabled: enabled });
+  }
+
+  public setMotionSpeed(speed: number): void {
+    if (this.currentAction) {
+      this.currentAction.timeScale = speed;
+    }
+  }
+
+  public getMotionSpeed(): number {
+    return this.currentAction ? this.currentAction.timeScale : 1.0;
   }
 
   private getRandomBlinkInterval(min: number, max: number): number {
@@ -1272,7 +1299,7 @@ export class Avatar {
     }
   }
 
-  public update(delta: number, elapsed: number, windCallback?: () => void): void {
+  public update(delta: number, elapsed: number, windCallback?: () => void, renderer?: THREE.WebGLRenderer): void {
     if (!this.vrm) return;
 
     // Cancel previous frame's procedural Head Look-At before animation mixer runs,
@@ -1358,6 +1385,9 @@ export class Avatar {
 
     // Update sweat mark effect
     this.sweatEffect?.update(delta);
+
+    // Update fast motion effects (speed lines, afterimages, directional outline blur)
+    this.fastMotionEffect?.update(delta, elapsed, this.camera, renderer ?? this.renderer ?? this.options.renderer);
   }
 
   private originalFaceTextures: Map<THREE.Material, THREE.Texture | null> = new Map();
@@ -1805,6 +1835,9 @@ export class Avatar {
 
     this.tearEffect?.dispose();
     this.tearEffect = null;
+
+    this.fastMotionEffect?.dispose();
+    this.fastMotionEffect = null;
 
     if (this.ownsEffectTextManager) {
       this.effectTextManager?.dispose();

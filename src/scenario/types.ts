@@ -36,6 +36,7 @@ export interface ScenarioCharacterPlacement {
 export interface ScenarioSceneAvatarConfig {
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   motion?: string;    // Motion Master ID (e.g. 'greeting') or FBX URL
+  motionSpeed?: number; // アニメーション再生速度倍率 (デフォルト 1.0, 高速アクション用)
   expression?: string;
   expressionWeight?: number;
   faceTexture?: string;
@@ -64,6 +65,7 @@ export interface ScenarioSceneAvatarConfig {
   tears?: boolean;
   tearConfig?: Partial<TearConfig>;
   sweat?: boolean | 'fly4' | 'jito';
+  motionBlur?: boolean; // 高速動作時の方向性輪郭ブラーのON/OFF
 }
 
 export type CameraZoomType =
@@ -134,6 +136,8 @@ export interface ScenarioScene {
   choiceDelaySec?: number; // 選択肢表示前のディレイ秒数（アバターの視線移動をしっかり見せるための待ち時間、デフォルト 1.0s）
   focusLines?: boolean | FocusLinesConfig; // 画面中央に向かうダイナミック効果線（集中線）
   dreamBackground?: boolean | 'heart' | AnimeDreamBackgroundConfig; // アニメ風ハート・パステル夢心地背景エフェクト
+  motionBlur?: boolean; // シーン全体で高速動作時の方向性輪郭ブラーをONにするか (デフォルトOFF)
+  motionSpeed?: number; // シーン全体または発話者のモーション再生速度倍率 (デフォルト 1.0)
   conditions?: string[];
   goto?: string;
   waitClick?: boolean;

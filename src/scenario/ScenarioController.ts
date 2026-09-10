@@ -372,6 +372,7 @@ export class ScenarioController {
           lookAtCamera: false,
           enableBreathing: true,
           effectTextManager: this.sharedEffectTextManager,
+          renderer: this.avatarManager.renderer ?? undefined,
           onLoaded: (loadedAvatar) => {
             this.avatarManager.scenarioAvatars.set(placement.id, loadedAvatar);
             resolve();

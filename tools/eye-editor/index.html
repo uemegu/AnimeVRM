@@ -26,14 +26,16 @@
         <p class="hint">スライダーを離すとモデルに反映します。プレビューの更新には数秒かかることがあります。</p>
       </section>
       <aside class="panel" aria-label="目の調整">
-        <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目・瞳・眉をそれぞれ調整できます。<br>左右は対称に動きます。</p>
+        <h2 class="panel-title">かたちの調整</h2><p class="panel-subtitle">目・瞳・眉・輪郭をそれぞれ調整できます。<br>左右は対称に動きます。</p>
         <div class="row"><button id="export-settings" disabled>設定をExport</button><button id="import-settings" disabled>設定をImport</button></div>
         <input id="settings-file" type="file" accept=".json,application/json" hidden disabled>
-        <p class="hint">JSONで保存・読み込み。目・瞳・眉の調整値をまとめて置き換えます。</p>
+        <p class="hint">JSONで保存・読み込み。目・瞳・眉・輪郭の調整値をまとめて置き換えます。</p>
         <div class="control"><label for="flatness">下まぶたの丸みを減らす<output id="flatness-value">0%</output></label><input id="flatness" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>もとの丸み</span><span>平らにする</span></div></div>
         <div class="control"><label for="length">目頭のラインを伸ばす<output id="length-value">0%</output></label><input id="length" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>追加なし</span><span>目頭の下まで</span></div></div>
-        <div class="control"><label for="thickness">上まぶた側のラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="120" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
-        <div class="control"><label for="corner_ratio">目頭の太さ（上まぶた比）<output id="corner_ratio-value">18%</output></label><input id="corner_ratio" type="range" min="0" max="100" value="18" disabled><div class="ends"><span>目頭を細く</span><span>同じ太さ</span></div></div>
+        <div class="control"><label for="thickness">上まぶた側のラインの太さ<output id="thickness-value">0.45</output></label><input id="thickness" type="range" min="0" max="300" value="45" disabled><div class="ends"><span>細く</span><span>太く</span></div></div>
+        <div class="control"><label for="corner_ratio">目頭の太さ（上まぶた比）<output id="corner_ratio-value">18%</output></label><input id="corner_ratio" type="range" min="0" max="300" value="18" disabled><div class="ends"><span>目頭を細く</span><span>上まぶたの3倍</span></div></div>
+        <div class="control"><label for="corner_angle">目頭ラインの角度<output id="corner_angle-value">元の角度</output></label><input id="corner_angle" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>−35°</span><span>＋35°</span></div></div>
+        <p class="hint">追加ラインの長さを上げると太さ・角度が反映されます。角度は左右対称に変わります。</p>
         <div class="control"><label for="upper_peak">上まぶたの山の位置<output id="upper_peak-value">元の位置</output></label><input id="upper_peak" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>目頭寄り</span><span>目尻寄り</span></div></div>
         <details open style="border-top:1px solid #e4ddd4;padding-top:18px;margin-top:25px">
           <summary style="cursor:pointer;font-size:14px">目全体の位置・サイズ</summary>
@@ -61,6 +63,14 @@
           <div class="control"><label for="brow_peak">眉の湾曲位置<output id="brow_peak-value">元の位置</output></label><input id="brow_peak" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>眉頭寄り</span><span>眉尻寄り</span></div></div>
           <div class="control"><label for="brow_curve">眉の曲がり具合<output id="brow_curve-value">元の形</output></label><input id="brow_curve" type="range" min="-100" max="100" value="0" disabled><div class="ends"><span>下に反らす</span><span>上に反らす</span></div></div>
           <button id="reset-brow" class="full" disabled>眉の調整を戻す</button>
+        </details>
+        <details open style="border-top:1px solid #e4ddd4;padding-top:18px;margin-top:25px">
+          <summary style="cursor:pointer;font-size:14px">頬・顎の輪郭</summary>
+          <p class="hint">頬から顎を卵形に近づけ、顔の下半分の幅を抑えます。正面と斜め、表情を変えて確認してください。</p>
+          <div class="control"><label for="jaw_roundness">エラの角を丸める<output id="jaw_roundness-value">0%</output></label><input id="jaw_roundness" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>元の輪郭</span><span>卵形へ</span></div></div>
+          <div class="control"><label for="face_slim">頬・顎の幅を抑える<output id="face_slim-value">0%</output></label><input id="face_slim" type="range" min="0" max="100" value="0" disabled><div class="ends"><span>元の幅</span><span>細く</span></div></div>
+          <button id="suggest-contour" class="full" disabled>卵形の調整から試す</button>
+          <button id="reset-contour" class="full" disabled>輪郭の調整を戻す</button>
         </details>
         <button id="suggest" class="full" disabled>添付イメージに寄せる</button>
         <div class="divider"></div>
