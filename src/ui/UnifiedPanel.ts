@@ -11,6 +11,7 @@ import { TimeOfDayId } from '../presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
 import { getTrioConversationScenario } from '../scenario/trioConversationScenario';
+import { getHaremConversationScenario } from '../scenario/haremScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
@@ -161,6 +162,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
               <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
               <button data-model="${resolveAssetUrl('/models/girl3.vrm')}" class="model-btn">👩 girl3.vrm</button>
+              <button data-model="${resolveAssetUrl('/models/girl4.vrm')}" class="model-btn">💤 girl4.vrm</button>
               <button id="open-local-vrm-btn" class="model-btn">${tr.character.selectFile}</button>
             </div>
             <div id="loading-status" class="status-box" style="margin-top: 4px;">
@@ -281,6 +283,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <label class="section-label">${tr.character.lipSyncTitle}</label>
             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
               <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
+              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/girl4_ref.wav')}">🎙️ 💤 ${lang === 'en' ? 'Downer (Sleepy)' : 'ダウナー (眠いし)'}</button>
               <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.wav')}">🎙️ 1. ${lang === 'en' ? 'Stalker?' : 'ストーカー？'}</button>
               <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.wav')}">🎙️ 2. ${lang === 'en' ? 'Kidding' : '冗談だ'}</button>
               <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.wav')}">🎙️ 3. ${lang === 'en' ? 'What are you doing?' : '何してるの？'}</button>
@@ -415,6 +418,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #ddd6fe; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.trioDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.scenario.haremTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-harem-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playHarem}</button>
+              <button id="scenario-harem-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fbcfe8; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.haremDesc}
             </div>
           </div>
 
@@ -977,6 +991,25 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-trio-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive 4-Person Dialogue Scenario (Harem / True Love Trial) Play/Stop
+    document.getElementById('scenario-harem-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        scenarioController.scenarioEngine.play(getHaremConversationScenario(getLanguage()));
+        showToast(t().toasts.haremStarted);
+      }
+    });
+
+    document.getElementById('scenario-harem-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);
