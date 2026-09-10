@@ -26,6 +26,13 @@ export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
     defaultVoiceGender: 'female',
     description: 'VRMキャラクター (girl3)',
   },
+  girl_04: {
+    id: 'girl_04',
+    name: '💤 ダウナー少女 (girl4.vrm)',
+    modelUrl: '/models/girl4.vrm',
+    defaultVoiceGender: 'female',
+    description: 'ショートカットのダウナー系VRMキャラクター (girl4)',
+  },
 };
 
 export const DEFAULT_MOTIONS: MasterDatabase['motions'] = {
@@ -237,6 +244,12 @@ export const DEFAULT_SOUNDS: MasterDatabase['sounds'] = {
     name: 'シーケンス3: 何してるの？',
     type: 'voice',
     file: '/voices/scenario_03.wav',
+  },
+  girl4_ref: {
+    id: 'girl4_ref',
+    name: 'ダウナー少女 (girl4): 眠いし',
+    type: 'voice',
+    file: '/voices/girl4_ref.wav',
   },
 };
 

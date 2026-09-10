@@ -139,6 +139,9 @@ export interface Translations {
     trioTitle: string;
     playTrio: string;
     trioDesc: string;
+    haremTitle: string;
+    playHarem: string;
+    haremDesc: string;
     behindYouTitle: string;
     playBehindYou: string;
     behindYouDesc: string;
@@ -252,6 +255,7 @@ export interface Translations {
     confessionStarted: string;
     twoGirlsStarted: string;
     trioStarted: string;
+    haremStarted: string;
     townWalkStarted: string;
     behindYouStarted: string;
     nisaStarted: string;

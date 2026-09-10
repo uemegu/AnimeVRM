@@ -38,6 +38,7 @@ export function updateScenarioPlayStateUI(
   const confessionBtn = document.getElementById('scenario-confession-btn');
   const twogirlsBtn = document.getElementById('scenario-twogirls-btn');
   const trioBtn = document.getElementById('scenario-trio-btn');
+  const haremBtn = document.getElementById('scenario-harem-btn');
   const statusBox = document.getElementById('scenario-status-box');
   const panel = document.getElementById('panel-container');
   const gearBtn = document.getElementById('settings-open-btn');
@@ -67,6 +68,13 @@ export function updateScenarioPlayStateUI(
     trioBtn.style.background = isTrioPlaying
       ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
       : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
+  }
+  if (haremBtn) {
+    const isHaremPlaying = isEnginePlaying && isMultiAvatarScenarioActive;
+    haremBtn.textContent = isHaremPlaying ? `⏹ ${tr.common.stop}` : tr.scenario.playHarem;
+    haremBtn.style.background = isHaremPlaying
+      ? 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)'
+      : 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)';
   }
   if (statusBox) {
     statusBox.style.display = isPlayerPlaying ? 'block' : 'none';
