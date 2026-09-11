@@ -5,6 +5,7 @@ async function start(page) { await page.goto(url); await expect(page.locator('#e
 test('trim from a visible source frame, shorten playback and start without the idle lead-in', async ({ page }) => {
   await start(page);
   await page.getByRole('button', { name: '歩きながら挨拶', exact: true }).click();
+  await expect(page.locator('.layer')).toHaveCount(2); // Wait for the preset's asynchronous FBX load.
   const card = page.locator('.layer').last();
   await card.getByLabel('素材のフレーム', { exact: true }).fill('45');
   await expect(page.locator('#model-state')).toContainText('45f');
