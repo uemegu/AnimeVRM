@@ -9,6 +9,7 @@ import {
 import { resolveAssetUrl } from './utils/path';
 import { AudioLipSync } from './AudioLipSync';
 import { AvatarChatController } from './ai/AvatarChatController';
+import { GeminiVadChatController } from './ai/GeminiVadChatController';
 import { WindController } from './wind/WindController';
 import { ColorHistogram } from './histogram/ColorHistogram';
 import { ViewerCore } from './scene/ViewerCore';
@@ -50,6 +51,8 @@ const audioLipSync = new AudioLipSync({
 });
 
 const avatarChatController = new AvatarChatController();
+const geminiVadChatController = new GeminiVadChatController();
+geminiVadChatController.setAudioLipSync(audioLipSync);
 
 // --------------------------------------------------
 // 2. Three.js Core Setup (ViewerCore)
@@ -68,6 +71,7 @@ const avatarManager = new AvatarManager({
   windController,
   getConfig: () => currentConfig,
   avatarChatController,
+  geminiVadChatController,
   renderer: viewerCore.renderer,
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
@@ -163,6 +167,7 @@ setupUnifiedPanel({
   inspectorManager,
   audioLipSync,
   avatarChatController,
+  geminiVadChatController,
   colorHistogram,
   avatarTransformController,
   onApplyConfig: (cfg) => {

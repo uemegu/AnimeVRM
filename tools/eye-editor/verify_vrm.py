@@ -43,12 +43,13 @@ def position_extent(document, binary, index):
     return extent
 
 
-def verify(path, expected=None, original_name='Face'):
+def verify(path, expected=None, original_name=None):
     document, binary = read_glb(path)
     expressions = document['extensions']['VRMC_vrm']['expressions']
     expressions = {**expressions.get('preset', {}), **expressions.get('custom', {})}
     nodes, meshes = document['nodes'], document['meshes']
-    if any(n.get('name') == original_name and 'mesh' in n for n in nodes):
+    if any('mesh' in n and ((original_name is not None and n.get('name') == original_name)
+                            or n.get('name', '').startswith('EyeEditor.Source.')) for n in nodes):
         raise ValueError('元の顔が書き出しに混入しています。')
     checked, moving, counts = 0, {}, {}
     for name, expression in expressions.items():
