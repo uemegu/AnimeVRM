@@ -10,6 +10,7 @@ import { showToast } from '../ui/components/Toast';
 import { updateAnimationPlayStateUI } from '../ui/helpers';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
+import { GeminiVadChatController } from '../ai/GeminiVadChatController';
 
 export function isMotionLoop(url: string): boolean {
   return url.includes('Idle') || url.includes('Walking') || url.includes('Jogging') || url.includes('Pose');
@@ -37,6 +38,7 @@ export class AvatarManager {
   private getConfig: () => AvatarConfig;
   private onAvatarLoaded?: (avatar: Avatar) => void;
   private avatarChatController?: AvatarChatController;
+  private geminiVadChatController?: GeminiVadChatController;
 
   constructor(options: {
     scene: THREE.Scene;
@@ -46,6 +48,7 @@ export class AvatarManager {
     windController: WindController;
     getConfig: () => AvatarConfig;
     avatarChatController?: AvatarChatController;
+    geminiVadChatController?: GeminiVadChatController;
     renderer?: THREE.WebGLRenderer;
     onEnterTransparent: () => void;
     onExitTransparent: () => void;
@@ -59,6 +62,7 @@ export class AvatarManager {
     this.windController = options.windController;
     this.getConfig = options.getConfig;
     this.avatarChatController = options.avatarChatController;
+    this.geminiVadChatController = options.geminiVadChatController;
     this.onAvatarLoaded = options.onAvatarLoaded;
 
     this.typographyOverlay = new TypographyOverlay();
@@ -149,6 +153,9 @@ export class AvatarManager {
       onLoaded: (avatar) => {
         if (this.avatarChatController) {
           this.avatarChatController.setAvatar(avatar);
+        }
+        if (this.geminiVadChatController) {
+          this.geminiVadChatController.setAvatar(avatar);
         }
         if (this.currentExprName !== 'neutral') {
           avatar.setExpression(this.currentExprName, 1.0);

@@ -45,6 +45,28 @@ export interface Translations {
     emptyHistory: string;
     webgpuWarning: string;
   };
+  geminiVadChat: {
+    title: string;
+    description: string;
+    apiKeyLabel: string;
+    apiKeyPlaceholder: string;
+    ttsUrlLabel: string;
+    ttsRefLabel: string;
+    ttsStepsLabel: string;
+    startVoice: string;
+    stopVoice: string;
+    statusIdle: string;
+    statusListening: string;
+    statusSpeakingUser: string;
+    statusThinking: string;
+    statusSynthesizing: string;
+    statusSpeakingAvatar: string;
+    statusError: string;
+    emptyHistory: string;
+    textPlaceholder: string;
+    send: string;
+    motionLabel: string;
+  };
   histogram: {
     title: string;
     description: string;

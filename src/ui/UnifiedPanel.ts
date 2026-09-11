@@ -19,6 +19,7 @@ import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
+import { GeminiVadChatController } from '../ai/GeminiVadChatController';
 import { ViewerCore } from '../scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
 import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
@@ -38,6 +39,7 @@ export interface UnifiedPanelContext {
   inspectorManager: InspectorManager;
   audioLipSync: AudioLipSync;
   avatarChatController: AvatarChatController;
+  geminiVadChatController?: GeminiVadChatController;
   colorHistogram: ColorHistogram;
   avatarTransformController?: AvatarTransformController;
   onApplyConfig: (cfg: AvatarConfig) => void;
@@ -55,6 +57,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     inspectorManager,
     audioLipSync,
     avatarChatController,
+    geminiVadChatController,
     colorHistogram,
     onApplyConfig,
     onResize,
@@ -567,6 +570,68 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
           </div>
 
+          <!-- AI Avatar Voice Chat (Gemini API & VAD) -->
+          <div class="aichat-container" style="margin-top: 12px; border-color: #2e435a; background: #161b22;">
+            <div class="aichat-status-card" style="background: linear-gradient(135deg, #182230 0%, #121820 100%);">
+              <div class="aichat-status-header">
+                <span class="aichat-status-title" style="color: #6ab0f8; font-weight: 600;">${tr.geminiVadChat.title}</span>
+                <span id="gemini-vad-badge" class="aichat-badge">${tr.geminiVadChat.statusIdle}</span>
+              </div>
+              <div id="gemini-vad-status-msg" class="aichat-status-detail">${tr.geminiVadChat.description}</div>
+
+              <!-- API Key input (Password, never saved to storage) -->
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
+                <label style="font-size: 11px; color: #8cb8ff; font-weight: 500;">🔑 ${tr.geminiVadChat.apiKeyLabel}:</label>
+                <div style="display: flex; gap: 4px;">
+                  <input type="password" id="gemini-api-key-input" class="aichat-input" placeholder="${tr.geminiVadChat.apiKeyPlaceholder}" style="flex: 1; font-size: 11px;" autocomplete="off" />
+                  <button id="gemini-toggle-key-visibility" class="action-btn" style="padding: 4px 8px; font-size: 11px;" title="表示切替">👁️</button>
+                </div>
+                <small style="font-size: 9px; color: #888888; line-height: 1.2;">※ APIキーはブラウザのメモリ内のみに保持され、localStorage等には保存されません。</small>
+              </div>
+
+              <!-- TTS Server URL -->
+              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
+                <label style="font-size: 11px; color: #aaaaaa;">🔊 ${tr.geminiVadChat.ttsUrlLabel}:</label>
+                <input type="text" id="gemini-tts-url-input" class="aichat-input" value="${geminiVadChatController ? geminiVadChatController.getTtsServerUrl() : '/irodori-api/tts'}" style="font-size: 11px;" />
+              </div>
+
+              <!-- TTS Ref Path & Steps -->
+              <div style="display: flex; gap: 6px; margin-top: 6px;">
+                <div style="flex: 2; display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 11px; color: #aaaaaa;">📁 ${tr.geminiVadChat.ttsRefLabel}:</label>
+                  <input type="text" id="gemini-tts-ref-input" class="aichat-input" value="${geminiVadChatController ? geminiVadChatController.getTtsRefPath() : '~/git/practice/vrm-view/vrm-genshin-like/voices/001.wav'}" style="font-size: 11px;" />
+                </div>
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 11px; color: #aaaaaa;">⚡ ${tr.geminiVadChat.ttsStepsLabel}:</label>
+                  <select id="gemini-tts-steps-select" style="font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
+                    ${[4, 6, 8, 12, 16]
+                      .map(
+                        (steps) =>
+                          `<option value="${steps}" ${(geminiVadChatController ? geminiVadChatController.getTtsSteps() : 8) === steps ? 'selected' : ''}>${steps}</option>`
+                      )
+                      .join('')}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Start / Stop Voice Conversation -->
+              <div style="display: flex; gap: 6px; margin-top: 8px;">
+                <button id="gemini-vad-toggle-btn" class="aichat-init-btn" style="background: #2563eb; flex: 1;">${tr.geminiVadChat.startVoice}</button>
+              </div>
+            </div>
+
+            <!-- Messages Box -->
+            <div id="gemini-vad-messages" class="aichat-messages-box">
+              <div id="gemini-vad-empty-hint" class="aichat-empty-hint">${tr.geminiVadChat.emptyHistory}</div>
+            </div>
+
+            <!-- Manual Text Input -->
+            <div class="aichat-input-row">
+              <input type="text" id="gemini-vad-text-input" class="aichat-input" placeholder="${tr.geminiVadChat.textPlaceholder}" />
+              <button id="gemini-vad-send-btn" class="aichat-send-btn">${tr.geminiVadChat.send}</button>
+            </div>
+          </div>
+
           <!-- Config JSON Management -->
           <div class="section-box" style="margin-top: 8px;">
             <label class="section-label">⚙️ 設定JSON管理 (Config JSON)</label>
@@ -811,6 +876,183 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         handleSendMessage();
       }
     });
+
+    // --------------------------------------------------
+    // Gemini VAD & Dynamic Motion Chat Binding
+    // --------------------------------------------------
+    if (geminiVadChatController) {
+      const gBadge = document.getElementById('gemini-vad-badge');
+      const gStatusMsg = document.getElementById('gemini-vad-status-msg');
+      const gApiKeyInput = document.getElementById('gemini-api-key-input') as HTMLInputElement | null;
+      const gToggleKeyBtn = document.getElementById('gemini-toggle-key-visibility') as HTMLButtonElement | null;
+      const gTtsUrlInput = document.getElementById('gemini-tts-url-input') as HTMLInputElement | null;
+      const gTtsRefInput = document.getElementById('gemini-tts-ref-input') as HTMLInputElement | null;
+      const gTtsStepsSelect = document.getElementById('gemini-tts-steps-select') as HTMLSelectElement | null;
+      const gToggleBtn = document.getElementById('gemini-vad-toggle-btn') as HTMLButtonElement | null;
+      const gMessages = document.getElementById('gemini-vad-messages');
+      const gEmptyHint = document.getElementById('gemini-vad-empty-hint');
+      const gTextInput = document.getElementById('gemini-vad-text-input') as HTMLInputElement | null;
+      const gSendBtn = document.getElementById('gemini-vad-send-btn') as HTMLButtonElement | null;
+
+      const renderVadChatState = (state: string, statusText?: string) => {
+        if (!gBadge) return;
+        gBadge.className = `aichat-badge ${state}`;
+
+        const curTr = t().geminiVadChat;
+        const stateLabels: Record<string, string> = {
+          idle: curTr.statusIdle,
+          listening: curTr.statusListening,
+          speaking_user: curTr.statusSpeakingUser,
+          thinking: curTr.statusThinking,
+          synthesizing: curTr.statusSynthesizing,
+          speaking_avatar: curTr.statusSpeakingAvatar,
+          error: curTr.statusError,
+        };
+
+        gBadge.textContent = stateLabels[state] || state;
+        if (statusText && gStatusMsg) {
+          gStatusMsg.textContent = statusText;
+        }
+
+        if (gToggleBtn) {
+          const isActive = state !== 'idle' && state !== 'error';
+          gToggleBtn.textContent = isActive ? curTr.stopVoice : curTr.startVoice;
+          gToggleBtn.style.background = isActive ? '#dc2626' : '#2563eb';
+        }
+      };
+
+      geminiVadChatController.setEvents({
+        onStateChange: (state, statusText) => {
+          renderVadChatState(state, statusText);
+        },
+        onMessageAdded: (msg, meta) => {
+          if (gEmptyHint) gEmptyHint.style.display = 'none';
+          if (gMessages) {
+            const msgEl = document.createElement('div');
+            msgEl.className = `aichat-msg ${msg.role}`;
+
+            const textEl = document.createElement('div');
+            textEl.textContent = msg.content;
+            msgEl.appendChild(textEl);
+
+            if (meta && (meta.expression || meta.motionLayers?.length)) {
+              const metaEl = document.createElement('div');
+              metaEl.className = 'aichat-msg-meta';
+              if (meta.expression) {
+                const expTag = document.createElement('span');
+                expTag.className = 'aichat-tag';
+                expTag.textContent = `表情: ${meta.expression}`;
+                metaEl.appendChild(expTag);
+              }
+              if (meta.motionLayers && meta.motionLayers.length > 0) {
+                const motionTag = document.createElement('span');
+                motionTag.className = 'aichat-tag';
+                motionTag.title = meta.motionLayers.join(', ');
+                motionTag.textContent = `動作: ${meta.motionLayers.join(' + ')}`;
+                metaEl.appendChild(motionTag);
+              }
+              msgEl.appendChild(metaEl);
+            }
+
+            gMessages.appendChild(msgEl);
+            gMessages.scrollTop = gMessages.scrollHeight;
+          }
+        },
+        onError: (err) => {
+          const msg = typeof err === 'string' ? err : err.message;
+          if (gStatusMsg) gStatusMsg.textContent = msg;
+          renderVadChatState('error', msg);
+        },
+      });
+
+      // API Key input - in-memory only, NOT stored in localStorage!
+      gApiKeyInput?.addEventListener('input', () => {
+        if (gApiKeyInput) {
+          geminiVadChatController.setApiKey(gApiKeyInput.value);
+        }
+      });
+
+      // Visibility toggle for API Key
+      gToggleKeyBtn?.addEventListener('click', () => {
+        if (gApiKeyInput) {
+          gApiKeyInput.type = gApiKeyInput.type === 'password' ? 'text' : 'password';
+        }
+      });
+
+      // TTS URL
+      gTtsUrlInput?.addEventListener('change', () => {
+        if (gTtsUrlInput?.value) {
+          geminiVadChatController.setTtsServerUrl(gTtsUrlInput.value);
+        }
+      });
+
+      // TTS Ref Path
+      gTtsRefInput?.addEventListener('change', () => {
+        if (gTtsRefInput?.value) {
+          geminiVadChatController.setTtsRefPath(gTtsRefInput.value);
+        }
+      });
+
+      // TTS Steps
+      gTtsStepsSelect?.addEventListener('change', () => {
+        if (gTtsStepsSelect?.value) {
+          geminiVadChatController.setTtsSteps(Number(gTtsStepsSelect.value));
+        }
+      });
+
+      // Start / Stop conversation button
+      gToggleBtn?.addEventListener('click', async () => {
+        if ((audioLipSync as any).audioContext?.state === 'suspended') {
+          await (audioLipSync as any).audioContext.resume();
+        }
+
+        const currentState = geminiVadChatController.getState();
+        if (currentState === 'idle' || currentState === 'error') {
+          if (!geminiVadChatController.hasApiKey()) {
+            gApiKeyInput?.focus();
+            showToast('Gemini APIキーを入力してください');
+            return;
+          }
+          try {
+            await geminiVadChatController.startConversation();
+          } catch (err: any) {
+            showToast(err?.message || '会話の開始に失敗しました');
+          }
+        } else {
+          await geminiVadChatController.stopConversation();
+        }
+      });
+
+      // Manual text send
+      const handleSendVadText = async () => {
+        if (!gTextInput || !gTextInput.value.trim()) return;
+        if (!geminiVadChatController.hasApiKey()) {
+          gApiKeyInput?.focus();
+          showToast('Gemini APIキーを入力してください');
+          return;
+        }
+        const text = gTextInput.value.trim();
+        gTextInput.value = '';
+        if ((audioLipSync as any).audioContext?.state === 'suspended') {
+          await (audioLipSync as any).audioContext.resume();
+        }
+        try {
+          await geminiVadChatController.sendTextMessage(text);
+        } catch (err: any) {
+          showToast(err?.message || 'メッセージ送信に失敗しました');
+        }
+      };
+
+      gSendBtn?.addEventListener('click', handleSendVadText);
+      gTextInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.isComposing) {
+          e.preventDefault();
+          handleSendVadText();
+        }
+      });
+
+      renderVadChatState(geminiVadChatController.getState());
+    }
 
     document.getElementById('master-export-json-btn')?.addEventListener('click', () => {
       scenarioController.masterManager.downloadJSON('masters.json');

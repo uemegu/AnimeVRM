@@ -445,12 +445,44 @@ def expression_collections():
             for g in ext.vrm0.blend_shape_master.blend_shape_groups]
 
 
+def preserve_face_name():
+    """Keep the public face name; only the hidden baseline gets an editor name.
+
+    Capture VRM references before renaming: their getters may resolve names
+    dynamically, depending on the VRM addon version.
+    """
+    source, preview = SESSION['source'], SESSION['preview']
+    desired = preview.get('eye_editor_original_name')
+    if not desired:
+        desired = 'Face' if source.name.startswith('EyeEditor.Preview') else source.name
+    collision = bpy.data.objects.get(desired)
+    if collision is not None and collision != source and collision != preview:
+        raise ValueError(f'顔の名前「{desired}」が別のオブジェクトで使われています。')
+    old_names = {source.name, preview.name}
+    references = [getattr(bind, attr) for _, binds, attr in expression_collections()
+                  for bind in binds if getattr(bind, attr).mesh_object_name in old_names]
+    armature = source.find_armature()
+    if armature and hasattr(armature.data, 'vrm_addon_extension'):
+        ext = armature.data.vrm_addon_extension
+        if ext.spec_version == '1.0':
+            references += [a.node for a in ext.vrm1.first_person.mesh_annotations
+                           if a.node.mesh_object_name in old_names]
+    if not source.name.startswith('EyeEditor.Source.'):
+        source.name = 'EyeEditor.Source.' + desired
+    preview.name = desired
+    preview['eye_editor_original_name'] = desired
+    preview['eye_editor_source'] = source.name
+    for reference in references:
+        reference.mesh_object_name = preview.name
+
+
 def repair_expression_bindings():
     """Redirect source binds, preserving key/weight and unrelated expressions.
 
     Explicit line binds are necessary: Blender drivers are not VRM expressions.
     Repeated calls are idempotent, including reopening an edited .blend file.
     """
+    preserve_face_name()
     s = SESSION
     source, preview = s['source'], s['preview']
     replacements = {source.name: preview.name}
@@ -687,7 +719,7 @@ def update(params):
 def status():
     if not SESSION:
         return dict(connected=False)
-    return dict(connected=True, model=SESSION['source'].name,
+    return dict(connected=True, model=SESSION['preview'].name,
                 rebased=bool(SESSION['preview'].get('eye_editor_rebased')),
                 reset_params=dict(DEFAULTS, **(SESSION.get('line_baseline', {}) if SESSION.get('source_lines') else {})),
                 params=SESSION['params'], eye_vertices=[len(e['loop']) for e in SESSION['eyes']],
