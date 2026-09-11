@@ -75,6 +75,7 @@ const avatarManager = new AvatarManager({
   renderer: viewerCore.renderer,
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
+    viewerCore.hideSkyBackground();
     viewerCore.midgroundMesh.visible = false;
     viewerCore.neargroundMesh.visible = false;
     viewerCore.sunEffect.sunGroup.visible = false;

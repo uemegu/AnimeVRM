@@ -11,8 +11,8 @@ export const sources = [
   ['@hair', '髪をかきあげる', '右腕'],
   ...Object.entries(basics).map(([id, pose]) => [id, pose.label, pose.mask]),
 ];
-export const masks = ['全身', '上半身', '下半身', '右腕', '左腕', '体幹', '頭', '右手', '左手', '右手首', '左手首', '右脚', '左脚'];
-export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; balance?: boolean; }
+export const masks = ['全身', '上半身', '下半身', '右腕', '左腕', '体幹', '頭', '右手', '左手', '右手首', '左手首', '右脚', '左脚', '右肩', '左肩', '両肩'];
+export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; balance?: boolean; shoulderFollow?: number; }
 export interface Recipe { version: 1; duration: number; fps: number; layers: Layer[]; loop?: boolean; transition?: number; }
 export interface Rest { node: T.Object3D; p: T.Vector3; q: T.Quaternion; s: T.Vector3; world: T.Quaternion; parentWorld: T.Quaternion; }
 interface Source { root: T.Group; clip: T.AnimationClip; rest: Map<string, Rest>; tracks: { bone: string; property: string; sample: T.Interpolant }[]; }
@@ -22,6 +22,8 @@ const clean = (name: string) => name.replace(/^.*mixamorig\d*[:_]?/i, '');
 export function matches(name: string, mask: string) {
   const n = clean(name);
   if (mask === '全身') return true;
+  if (mask === '両肩') return /^(Right|Left)Shoulder$/.test(n);
+  if (mask === '右肩' || mask === '左肩') return n === (mask === '右肩' ? 'RightShoulder' : 'LeftShoulder');
   if (mask === '右手首' || mask === '左手首') return n === (mask === '右手首' ? 'RightHand' : 'LeftHand');
   if (mask === '右脚' || mask === '左脚') return n.startsWith(mask === '右脚' ? 'Right' : 'Left') && /UpLeg|Leg|Foot|Toe/.test(n);
   if (mask === '右手' || mask === '左手') return n.startsWith(mask === '右手' ? 'RightHand' : 'LeftHand');
@@ -84,7 +86,7 @@ export class MotionEngine {
       const length = Math.max(1 / 30, (layer.to - layer.from) / 30);
       const phase = elapsed * layer.speed;
       const local = layer.poseMode === 'hold' ? layer.to / 30 : layer.from / 30 + (layer.loop ? phase % length : Math.min(length, phase));
-      if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0, layer.balance !== false);
+      if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0, layer.balance !== false, layer.shoulderFollow ?? 1);
       else if (layer.source.startsWith('saved:')) {
         const before = ['RightArm', 'LeftArm'].map(name => this.rest.get(name)!.node.quaternion.clone());
         this.applySaved(layer.source, local, layer.mask, w);
@@ -120,7 +122,7 @@ export class MotionEngine {
       }
     }
   }
-  procedural(name: string, time: number, mask: string, weight: number, contactGap = 0, balance = true) {
+  procedural(name: string, time: number, mask: string, weight: number, contactGap = 0, balance = true, shoulderFollow = 1) {
     const amount = T.MathUtils.smoothstep(Math.min(time / .7, 1), 0, 1) * weight;
     const rotate = (bone: string, x: number, y: number, z: number) => {
       const r = this.rest.get(bone); if (r && matches(bone, mask)) r.node.quaternion.multiply(new T.Quaternion().setFromEuler(new T.Euler(x * amount, y * amount, z * amount)));
@@ -136,13 +138,18 @@ export class MotionEngine {
     }
     if (name === '@twist') { rotate('Spine', 0, .35, 0); rotate('Spine1', 0, .45, 0); }
     if (name === '@bend') { rotate('Spine', .35, 0, 0); rotate('Spine1', .45, 0, 0); }
-    if (name === '@raise') this.reach('Right', 'RightArm', new T.Vector3(-22, 52, 4), mask, amount);
-    if (name === '@hair') this.hairReach(time, mask, amount, contactGap);
+    if (name === '@raise') this.reach('Right', 'RightArm', new T.Vector3(-22, 52, 4), mask, amount, undefined, 0, shoulderFollow);
+    if (name === '@hair') this.hairReach(time, mask, amount, contactGap, shoulderFollow);
     if (!pose) return;
+    if (pose.shoulder) {
+      const p = pose.shoulder, phase = time * Math.PI;
+      for (const side of p.side ? [p.side] : ['Right', 'Left'] as const)
+        this.moveShoulder(side, p.circle ? .25 * Math.sin(phase) : p.elevation, p.circle ? .25 * (1 - Math.cos(phase)) : p.forward, mask, amount);
+    }
     if (pose.leg) this.legPose(pose.leg, mask, amount, balance);
     if (pose.wrist) { const w = pose.wrist; const phase = time * Math.PI; rotate(`${w.side}Hand`, w.circle ? .5 * Math.sin(phase) : w.x, w.y, w.circle ? .35 * Math.cos(phase) : w.z); }
     for (const rotation of pose.rotations ?? []) rotate(...rotation);
-    if (pose.reach) this.reach(pose.reach.side, pose.reach.anchor, new T.Vector3(...pose.reach.offset), mask, amount, pose.reach.contact, contactGap);
+    if (pose.reach) this.reach(pose.reach.side, pose.reach.anchor, new T.Vector3(...pose.reach.offset), mask, amount, pose.reach.contact, contactGap, shoulderFollow);
     if (pose.fingers) {
       const { side, open } = pose.fingers;
       for (const finger of ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']) for (let joint = 1; joint <= 3; joint++) {
@@ -154,11 +161,25 @@ export class MotionEngine {
       }
     }
   }
-  private hairReach(time: number, mask: string, amount: number, gap: number) {
-    const sweep = T.MathUtils.smoothstep(time, .7, 1.8);
-    this.reach('Right', 'Head', new T.Vector3(-18, 2 + sweep * 3, 9 - sweep * 8), mask, amount, 'head', gap);
+  private moveShoulder(side: 'Right' | 'Left', elevation: number, forward: number, mask: string, amount: number) {
+    const shoulder = this.rest.get(`${side}Shoulder`)?.node;
+    if (!shoulder || !matches(shoulder.name, mask) || amount <= 0) return;
+    shoulder.updateWorldMatrix(true, true);
+    const chest = this.rest.get('Spine2')!;
+    const body = chest.node.getWorldQuaternion(new T.Quaternion()).multiply(chest.world.clone().invert());
+    const sign = side === 'Right' ? -1 : 1;
+    // Anatomical directions in torso space; Mixamo bone-local axes differ by side.
+    const delta = new T.Quaternion().setFromEuler(new T.Euler(0, -sign * forward * amount, sign * elevation * amount));
+    delta.premultiply(body).multiply(body.clone().invert());
+    const parent = shoulder.parent!.getWorldQuaternion(new T.Quaternion());
+    shoulder.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
+    shoulder.updateWorldMatrix(true, true);
   }
-  private reach(side: 'Right' | 'Left', anchorName: string, offset: T.Vector3, mask: string, amount: number, contact?: 'head' | 'front' | 'hip', gap = 0) {
+  private hairReach(time: number, mask: string, amount: number, gap: number, shoulderFollow: number) {
+    const sweep = T.MathUtils.smoothstep(time, .7, 1.8);
+    this.reach('Right', 'Head', new T.Vector3(-18, 2 + sweep * 3, 9 - sweep * 8), mask, amount, 'head', gap, shoulderFollow);
+  }
+  private reach(side: 'Right' | 'Left', anchorName: string, offset: T.Vector3, mask: string, amount: number, contact?: 'head' | 'front' | 'hip', gap = 0, shoulderFollow = 1) {
     const upper = this.rest.get(`${side}Arm`)?.node, elbow = this.rest.get(`${side}ForeArm`)?.node, hand = this.rest.get(`${side}Hand`)?.node, anchor = this.rest.get(anchorName)?.node;
     if (!upper || !elbow || !hand || !anchor || !matches(upper.name, mask) || !matches(elbow.name, mask) || amount <= 0) return;
     this.rest.get('Hips')!.node.updateWorldMatrix(true, true);
@@ -166,10 +187,16 @@ export class MotionEngine {
     const chest = this.rest.get('Spine2')!;
     const body = chest.node.getWorldQuaternion(new T.Quaternion()).multiply(chest.world.clone().invert());
     const scale = upper.getWorldScale(new T.Vector3()).x;
-    const a = upper.getWorldPosition(new T.Vector3()), b = elbow.getWorldPosition(new T.Vector3()), c = hand.getWorldPosition(new T.Vector3());
     const normal = new T.Vector3(contact === 'front' ? 0 : side === 'Right' ? -1 : 1, 0, contact === 'front' ? 1 : 0);
     if (contact) offset.addScaledVector(normal, gap);
     const target = anchor.getWorldPosition(new T.Vector3()).add(offset.multiplyScalar(scale).applyQuaternion(body));
+    // Capture the hand target before moving the clavicle, including Arm-relative
+    // targets. Then solve the elbow from the new shoulder origin.
+    const relative = target.clone().sub(upper.getWorldPosition(new T.Vector3())).applyQuaternion(body.clone().invert()).divideScalar(scale);
+    const elevation = contact === 'hip' ? .18 : .1 + .25 * T.MathUtils.clamp(relative.y / 55, 0, 1);
+    const forward = contact === 'hip' ? -.06 : .18 * T.MathUtils.clamp(relative.z / 40, 0, 1);
+    this.moveShoulder(side, elevation, forward, mask, amount * shoulderFollow);
+    const a = upper.getWorldPosition(new T.Vector3()), b = elbow.getWorldPosition(new T.Vector3()), c = hand.getWorldPosition(new T.Vector3());
     const length1 = a.distanceTo(b), length2 = b.distanceTo(c);
     const direction = target.clone().sub(a).normalize();
     const distance = T.MathUtils.clamp(a.distanceTo(target), Math.abs(length1 - length2) + .01 * scale, length1 + length2 - .1 * scale);
@@ -277,14 +304,14 @@ export class MotionEngine {
 
 }
 export function newLayer(source: string, engine: MotionEngine, duration: number): Layer {
-  return { id: crypto.randomUUID(), source, mask: engine.custom.has(source) ? '全身' : (source.startsWith('@') && !basics[source]?.wrist && !basics[source]?.fingers ? '全身' : sources.find(s => s[0] === source)?.[2] ?? '全身'), weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true };
+  return { id: crypto.randomUUID(), source, mask: engine.custom.has(source) ? '全身' : (source.startsWith('@') && !basics[source]?.wrist && !basics[source]?.fingers && !basics[source]?.shoulder ? '全身' : sources.find(s => s[0] === source)?.[2] ?? '全身'), weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true };
 }
 export function validateRecipe(value: unknown, savedIds = new Set<string>()): Recipe {
   const r = value as Recipe;
   const finite = (v: number, min: number, max: number) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
   if (!r || r.version !== 1 || !finite(r.duration, .5, 60) || ![24, 30, 60].includes(r.fps) || !Array.isArray(r.layers) || r.layers.length > 32) throw new Error('レシピの形式が正しくありません');
   for (const l of r.layers) if (!(sources.some(s => s[0] === l.source) || savedIds.has(l.source)) || !masks.includes(l.mask) || !finite(l.weight, 0, 1) || !finite(l.start, 0, 60) || !finite(l.duration, .1, 60) || !finite(l.speed, .1, 3) || !finite(l.from, 0, 100000) || !finite(l.to, l.from + 1, 100001) || !finite(l.fade, 0, 5) || typeof l.loop !== 'boolean' || typeof l.enabled !== 'boolean') throw new Error('レシピの動作設定が正しくありません');
-  for (const l of r.layers) if (l.balance !== undefined && typeof l.balance !== 'boolean' || l.repeatEvery !== undefined && l.repeatEvery !== 0 && !finite(l.repeatEvery, l.duration, 60) || l.envelope !== undefined && !['flat', 'sine'].includes(l.envelope) || l.poseMode !== undefined && !['motion', 'hold'].includes(l.poseMode) || l.contactGap !== undefined && !finite(l.contactGap, -10, 20)) throw new Error('配置の繰り返し・接触設定が正しくありません');
+  for (const l of r.layers) if (l.shoulderFollow !== undefined && !finite(l.shoulderFollow, 0, 1) || l.balance !== undefined && typeof l.balance !== 'boolean' || l.repeatEvery !== undefined && l.repeatEvery !== 0 && !finite(l.repeatEvery, l.duration, 60) || l.envelope !== undefined && !['flat', 'sine'].includes(l.envelope) || l.poseMode !== undefined && !['motion', 'hold'].includes(l.poseMode) || l.contactGap !== undefined && !finite(l.contactGap, -10, 20)) throw new Error('配置の繰り返し・接触設定が正しくありません');
   if (r.loop !== undefined && typeof r.loop !== 'boolean' || r.transition !== undefined && !finite(r.transition, 0, 10)) throw new Error('ループ設定が正しくありません');
   return { version: 1, duration: r.duration, fps: r.fps, loop: r.loop ?? false, transition: r.transition ?? 1, layers: r.layers.map(l => ({ ...l, id: crypto.randomUUID() })) };
 }

@@ -16,6 +16,7 @@ import { WindParticles } from '../wind/WindParticles';
 import { RainEffect } from '../effects/rain';
 import { EffectTextManager } from '../effects/text';
 import { ColorHistogram } from '../histogram/ColorHistogram';
+import { SkyBackground } from './SkyBackground';
 import { PanoramaBackgroundController } from './PanoramaBackgroundController';
 
 export function getToneMappingMode(mode: string): THREE.ToneMapping {
@@ -125,6 +126,8 @@ export class ViewerCore {
 
   public effectTextScene: THREE.Scene;
   public sharedEffectTextManager: EffectTextManager;
+  public skyBackground: SkyBackground;
+  private backgroundRequest = 0;
   public panoramaController: PanoramaBackgroundController;
 
   public windParticles: WindParticles;
@@ -214,6 +217,7 @@ export class ViewerCore {
 
     // 3. Scene
     this.scene = new THREE.Scene();
+    this.skyBackground = new SkyBackground(this.scene);
     this.effectTextScene = new THREE.Scene();
     this.sharedEffectTextManager = new EffectTextManager(this.effectTextScene);
 
@@ -289,10 +293,13 @@ export class ViewerCore {
       domElement: this.canvas,
       onStateChange: (active) => {
         if (active) {
+          this.backgroundRequest++;
+          this.skyBackground.mesh.visible = false;
           this.floor.visible = false;
           this.midgroundMesh.visible = false;
           this.neargroundMesh.visible = false;
         } else {
+          this.updateBackgroundDisplay(initialConfig);
           this.floor.visible = initialConfig.environment.showFloor;
           this.updateMidgroundDisplay(initialConfig);
           this.updateNeargroundDisplay(initialConfig);
@@ -420,10 +427,11 @@ export class ViewerCore {
     }
 
     if (!fogEnabled || fogIntensity <= 0) {
-      const tex = this.textureLoader.load(url);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      this.backgroundTextureCache.set(cacheKey, tex);
-      return Promise.resolve(tex);
+      return this.textureLoader.loadAsync(url).then((tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        this.backgroundTextureCache.set(cacheKey, tex);
+        return tex;
+      });
     }
 
     return new Promise((resolve) => {
@@ -455,6 +463,8 @@ export class ViewerCore {
         grad.addColorStop(0.65, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 1.0).toFixed(3)})`);
         grad.addColorStop(1.0, `rgba(${r}, ${g}, ${b}, ${(fogIntensity * 0.8).toFixed(3)})`);
 
+        // Tint only the painting: transparent sky openings must stay transparent.
+        ctx.globalCompositeOperation = 'source-atop';
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -474,18 +484,37 @@ export class ViewerCore {
     });
   }
 
+  public hideSkyBackground(): void {
+    this.backgroundRequest++;
+    this.skyBackground.mesh.visible = false;
+  }
+
   public updateBackgroundDisplay(cfg: AvatarConfig): void {
     if (this.panoramaController?.isActive) return;
+    const request = ++this.backgroundRequest;
+    this.skyBackground.mesh.visible = false;
     const container = document.getElementById('viewport-container');
-    if (cfg.environment.showBackgroundImage && cfg.environment.backgroundImageUrl) {
+    const backgroundUrl = cfg.environment.backgroundImageUrl;
+    if (cfg.environment.showBackgroundImage && backgroundUrl) {
+      // Keep older saved café configurations pointing at the alpha-enabled asset.
+      const url = backgroundUrl.replace(/cafe_far\.avif(?=[?#]|$)/, 'cafe_far.png');
+      const isCafePainting = /(?:^|\/)cafe_far\.png(?:[?#]|$)/.test(url);
+      this.skyBackground.setTimeOfDay(cfg.activeScene?.timeOfDay);
+      this.skyBackground.material.uniforms.uInteriorShadowStrength.value = isCafePainting ? 0.34 : 0;
       if (container) container.style.backgroundColor = '#000000';
       this.loadAtmosphericBackground(
-        cfg.environment.backgroundImageUrl,
+        url,
         cfg.environment.farFogEnabled !== false,
         cfg.environment.farFogColor || '#ffffff',
         cfg.environment.farFogIntensity ?? 0.24
-      ).then((tex) => {
-        this.scene.background = tex;
+      ).then((texture) => {
+        if (request !== this.backgroundRequest || this.panoramaController?.isActive) return;
+        this.skyBackground.material.uniforms.uPainting.value = texture;
+        this.skyBackground.mesh.visible = true;
+        this.scene.background = null;
+      }).catch((error) => {
+        console.error('Failed to load background', error);
+        if (request === this.backgroundRequest) this.scene.background = new THREE.Color(cfg.environment.backgroundColor);
       });
     } else {
       this.scene.background = new THREE.Color(cfg.environment.backgroundColor);
@@ -539,6 +568,7 @@ export class ViewerCore {
 
   public updateBackgroundZoom(dialogueBackgroundTransform?: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null): void {
     if (this.panoramaController?.isActive) return;
+    this.skyBackground.setTransform(dialogueBackgroundTransform);
     if (!this.scene.background || !(this.scene.background instanceof THREE.Texture)) return;
     const bgTex = this.scene.background;
 
@@ -919,6 +949,8 @@ export class ViewerCore {
 
     // 3. Cinematic Pass time
     this.cinematicAnimePass.uniforms['uTime'].value = elapsed;
+
+    this.skyBackground.material.uniforms.uTime.value = elapsed;
 
     // 4. Composer render
     this.composer.render();

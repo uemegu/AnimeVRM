@@ -1312,7 +1312,7 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'indoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/cafe_far.avif'),
+      backgroundImageUrl: resolveAssetUrl('/textures/cafe_far.png'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',
@@ -1326,9 +1326,9 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       neargroundPosition: { x: 0, y: 0, z: 0 },
       neargroundScale: 1.0,
       neargroundOpacity: 1.0,
-      farFogEnabled: true,
+      farFogEnabled: false,
       farFogColor: '#808080',
-      farFogIntensity: 0.18,
+      farFogIntensity: 0.0,
     },
   },
   town: {

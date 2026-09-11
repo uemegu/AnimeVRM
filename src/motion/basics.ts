@@ -2,6 +2,7 @@ export interface BasicPose {
   label: string; mask: string;
   rotations?: [string, number, number, number][];
   reach?: { side: 'Right' | 'Left'; anchor: string; offset: [number, number, number]; contact?: 'head' | 'front' | 'hip' };
+  shoulder?: { side?: 'Right' | 'Left'; elevation: number; forward: number; circle?: boolean };
   wrist?: { side: 'Right' | 'Left'; x: number; y: number; z: number; circle?: boolean };
   leg?: { side?: 'Right' | 'Left'; offset?: [number, number, number]; squat?: number; float?: number };
   fingers?: { side: 'Right' | 'Left'; open: string[] };
@@ -53,3 +54,15 @@ for (const side of ['Right', 'Left'] as const) {
 basics['@crouch'] = { label: '両膝を曲げてしゃがむ', mask: '下半身', leg: { squat: 22 } };
 basics['@small-crouch'] = { label: '膝を軽くゆるめる', mask: '下半身', leg: { squat: 8 } };
 basics['@float'] = { label: '宙に浮かぶ', mask: '全身', leg: { float: 25 } };
+
+
+for (const side of ['Right', 'Left', 'Both'] as const) {
+  const ja = side === 'Right' ? '右肩' : side === 'Left' ? '左肩' : '両肩';
+  for (const [id, label, elevation, forward] of [
+    ['up', 'を上げる（すくめる）', .35, 0], ['down', 'を下げる', -.2, 0],
+    ['forward', 'を前に出す', 0, .3], ['back', 'を後ろに引く', 0, -.3],
+    ['circle', 'を回す', 0, 0],
+  ] as [string, string, number, number][]) basics[`@${side.toLowerCase()}-shoulder-${id}`] = {
+    label: ja + label, mask: ja, shoulder: { side: side === 'Both' ? undefined : side, elevation, forward, circle: id === 'circle' },
+  };
+}
