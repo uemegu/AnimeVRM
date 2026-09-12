@@ -347,7 +347,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     lighting: {
       castShadows: false,
       ambient: {
-        color: '#b30071',
+        color: '#776e74',
         intensity: 1,
       },
       directional: {
