@@ -8,12 +8,12 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: 'left',
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: 'right',
     },
   ],
@@ -198,12 +198,12 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: 'left',
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: 'right',
     },
   ],

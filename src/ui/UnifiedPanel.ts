@@ -7,6 +7,7 @@ import {
 } from '../Config';
 import { getLanguage, setLanguage, t, onLanguageChange, Language } from '../i18n';
 import { resolveAssetUrl } from '../utils/path';
+import vrmModels from 'virtual:vrm-models';
 import { TimeOfDayId } from '../presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
@@ -163,10 +164,13 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           <div class="section-box">
             <label class="section-label">${tr.character.modelSwitch}</label>
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="model-buttons">
-              <button data-model="${resolveAssetUrl('/models/girl.vrm')}" class="model-btn active">👧 girl.vrm</button>
-              <button data-model="${resolveAssetUrl('/models/girl2.vrm')}" class="model-btn">👱‍♀️ girl2.vrm</button>
-              <button data-model="${resolveAssetUrl('/models/girl3.vrm')}" class="model-btn">👩 girl3.vrm</button>
-              <button data-model="${resolveAssetUrl('/models/girl4.vrm')}" class="model-btn">💤 girl4.vrm</button>
+              ${vrmModels
+                .map((m) => {
+                  const modelUrl = resolveAssetUrl(m.url);
+                  const isActive = avatarManager.currentModelUrl === modelUrl;
+                  return `<button data-model="${modelUrl}" class="model-btn ${isActive ? 'active' : ''}">${m.icon} ${m.label}</button>`;
+                })
+                .join('\n              ')}
               <button id="open-local-vrm-btn" class="model-btn">${tr.character.selectFile}</button>
             </div>
             <div id="loading-status" class="status-box" style="margin-top: 4px;">

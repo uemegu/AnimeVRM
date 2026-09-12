@@ -18,7 +18,7 @@ export function isMotionLoop(url: string): boolean {
 
 export class AvatarManager {
   public avatarInstance: Avatar | null = null;
-  public currentModelUrl: string = resolveAssetUrl('/models/girl.vrm');
+  public currentModelUrl: string = resolveAssetUrl('/models/aoi/aoi-school.vrm');
   public currentMotionUrl: string = resolveAssetUrl('/animations/Idle.fbx');
   public customMotions: Array<{ name: string; url: string }> = [];
   public currentExprName: string = 'neutral';

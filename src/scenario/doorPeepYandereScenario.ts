@@ -8,7 +8,7 @@ export const DOOR_PEEP_YANDERE_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [0, -100, 0], // 初期状態は自室の外（非表示）
       rotationY: 0,
     },
@@ -382,7 +382,7 @@ export const DOOR_PEEP_YANDERE_SCENARIO_EN: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [0, -100, 0],
       rotationY: 0,
     },

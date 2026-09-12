@@ -8,13 +8,13 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [0, 0, -1.3], // 正面・目の前（アオイ）
       rotationY: 0,
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: [0, 0, 1.3], // 背後・後ろ（エミリ）
       rotationY: Math.PI,
     },
@@ -492,13 +492,13 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [0, 0, -1.0],
       rotationY: 0,
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: [0, 0, 1.0],
       rotationY: Math.PI,
     },
