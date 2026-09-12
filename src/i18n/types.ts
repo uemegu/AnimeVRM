@@ -343,6 +343,7 @@ export interface Translations {
     toggleVignette: string;
     toggleChromaticAberration: string;
     toggleSharpening: string;
+    toggleFisheye: string;
     toggleEyeGlow: string;
     eyeGlowFolder: string;
     eyeGlowEnabled: string;
@@ -472,6 +473,12 @@ export interface Translations {
     sharpenFolder: string;
     sharpenEnabled: string;
     sharpenAmount: string;
+    fisheyeFolder: string;
+    fisheyeEnabled: string;
+    fisheyeStrength: string;
+    fisheyeZoom: string;
+    fisheyeCircular: string;
+    cameraFov: string;
     windFolder: string;
     windEnabled: string;
     windSpeed: string;

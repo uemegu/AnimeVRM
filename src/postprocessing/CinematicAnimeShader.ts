@@ -54,6 +54,12 @@ export const CinematicAnimeShader = {
     // 7. Smart Sharpening (Digital anime crispness / CAS-like)
     uSharpenEnabled: { value: 1.0 },
     uSharpenAmount: { value: 0.22 },
+
+    // 8. Fisheye Lens Distortion
+    uFisheyeEnabled: { value: 0.0 },
+    uFisheyeStrength: { value: 0.5 },
+    uFisheyeZoom: { value: 1.0 },
+    uFisheyeCircular: { value: 0.0 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -104,6 +110,12 @@ export const CinematicAnimeShader = {
     uniform float uSharpenEnabled;
     uniform float uSharpenAmount;
 
+    // Fisheye Lens Distortion
+    uniform float uFisheyeEnabled;
+    uniform float uFisheyeStrength;
+    uniform float uFisheyeZoom;
+    uniform float uFisheyeCircular;
+
     varying vec2 vUv;
 
     // Relative luminance
@@ -130,6 +142,55 @@ export const CinematicAnimeShader = {
 
     void main() {
       vec2 uv = vUv;
+      float fisheyeMask = 1.0;
+
+      // ----------------------------------------------------
+      // 0. Fisheye Lens Distortion (Barrel / Curvature)
+      // ----------------------------------------------------
+      if (uFisheyeEnabled > 0.5 && uFisheyeStrength > 0.001) {
+        float aspect = uResolution.x / uResolution.y;
+        vec2 p = uv - vec2(0.5);
+        p.x *= aspect;
+
+        float r = length(p);
+
+        if (uFisheyeCircular > 0.5) {
+          // --- 円周魚眼 (Circular Fisheye: ドアスコープ / 球面レンズ風) ---
+          float circleRadius = 0.48;
+          float rn = clamp(r / circleRadius, 0.0, 1.2);
+          float distortion = 1.0 + uFisheyeStrength * (rn * rn * 0.6 + pow(rn, 4.0) * 0.4);
+          float scale = 0.85 * uFisheyeZoom;
+
+          vec2 distortedP = p * distortion * scale;
+          distortedP.x /= aspect;
+          uv = distortedP + vec2(0.5);
+
+          float edgeFade = 0.02;
+          fisheyeMask = 1.0 - smoothstep(circleRadius - edgeFade, circleRadius, r);
+        } else {
+          // --- 対角線魚眼 (Full-frame Fisheye: 広角アクションカメラ / アニメ迫力魚眼) ---
+          float maxRadius = length(vec2(0.5 * aspect, 0.5));
+          float rn = r / maxRadius;
+
+          float k1 = 0.55 * uFisheyeStrength;
+          float k2 = 0.25 * uFisheyeStrength;
+          float distortion = 1.0 + (rn * rn * k1 + pow(rn, 4.0) * k2);
+
+          // 四隅がテクスチャ内に綺麗に収まるスケール補正
+          float cornerDistortion = 1.0 + (k1 + k2);
+          float autoFit = 1.0 / cornerDistortion;
+          float totalScale = autoFit * uFisheyeZoom;
+
+          vec2 distortedP = p * distortion * totalScale;
+          distortedP.x /= aspect;
+          uv = distortedP + vec2(0.5);
+
+          if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+            fisheyeMask = 0.0;
+          }
+        }
+      }
+
       vec2 centerCoord = uv - vec2(0.5);
       float distToCenter = length(centerCoord);
 
@@ -266,7 +327,14 @@ export const CinematicAnimeShader = {
         color = clamp(sharpened, minNeighbor * 0.95, maxNeighbor * 1.05);
       }
 
-      gl_FragColor = vec4(clamp(color, 0.0, 1.0), baseColor.a);
+      // ----------------------------------------------------
+      // 8. Fisheye Vignette / Masking
+      // ----------------------------------------------------
+      if (uFisheyeEnabled > 0.5 && uFisheyeStrength > 0.001) {
+        color = mix(vec3(0.0), color, fisheyeMask);
+      }
+
+      gl_FragColor = vec4(clamp(color, 0.0, 1.0), baseColor.a * fisheyeMask);
     }
   `,
 };

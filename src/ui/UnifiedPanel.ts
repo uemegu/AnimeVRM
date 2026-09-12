@@ -359,7 +359,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
               <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
               <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
-              <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.png')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
+              <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.avif')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
               <button data-location="town" data-bg="${resolveAssetUrl('/textures/town_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.town}</button>
               <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
             </div>

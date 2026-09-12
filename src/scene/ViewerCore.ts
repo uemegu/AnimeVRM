@@ -115,6 +115,12 @@ export function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig)
   // 7. Smart Sharpening
   pass.uniforms['uSharpenEnabled'].value = (cin?.sharpening?.enabled ?? false) ? 1.0 : 0.0;
   pass.uniforms['uSharpenAmount'].value = cin?.sharpening?.amount ?? 0.22;
+
+  // 8. Fisheye Lens Distortion
+  pass.uniforms['uFisheyeEnabled'].value = (cin?.fisheye?.enabled ?? false) ? 1.0 : 0.0;
+  pass.uniforms['uFisheyeStrength'].value = cin?.fisheye?.strength ?? 0.5;
+  pass.uniforms['uFisheyeZoom'].value = cin?.fisheye?.zoom ?? 1.0;
+  pass.uniforms['uFisheyeCircular'].value = (cin?.fisheye?.circular ?? false) ? 1.0 : 0.0;
 }
 
 export class ViewerCore {
@@ -280,7 +286,7 @@ export class ViewerCore {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
     this.controls.screenSpacePanning = true;
-    this.controls.minDistance = 0.5;
+    this.controls.minDistance = 0.1;
     this.controls.maxDistance = 10;
     this.controls.maxPolarAngle = Math.PI / 2 + 0.1;
     this.camera.lookAt(this.controls.target);
@@ -496,14 +502,12 @@ export class ViewerCore {
     const container = document.getElementById('viewport-container');
     const backgroundUrl = cfg.environment.backgroundImageUrl;
     if (cfg.environment.showBackgroundImage && backgroundUrl) {
-      // Keep older saved café configurations pointing at the alpha-enabled asset.
-      const url = backgroundUrl.replace(/cafe_far\.avif(?=[?#]|$)/, 'cafe_far.png');
-      const isCafePainting = /(?:^|\/)cafe_far\.png(?:[?#]|$)/.test(url);
+      const isCafePainting = /(?:^|\/)cafe_far\.(?:avif|png)(?:[?#]|$)/.test(backgroundUrl);
       this.skyBackground.setTimeOfDay(cfg.activeScene?.timeOfDay);
       this.skyBackground.material.uniforms.uInteriorShadowStrength.value = isCafePainting ? 0.34 : 0;
       if (container) container.style.backgroundColor = '#000000';
       this.loadAtmosphericBackground(
-        url,
+        backgroundUrl,
         cfg.environment.farFogEnabled !== false,
         cfg.environment.farFogColor || '#ffffff',
         cfg.environment.farFogIntensity ?? 0.24
