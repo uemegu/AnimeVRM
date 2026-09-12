@@ -173,6 +173,9 @@ export interface Translations {
     fastMotionTitle: string;
     playFastMotion: string;
     fastMotionDesc: string;
+    doorPeepTitle: string;
+    playDoorPeep: string;
+    doorPeepDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -218,6 +221,8 @@ export interface Translations {
       oldPark: string;
       cafe: string;
       town: string;
+      apartmentDoor: string;
+      myroom: string;
       offSingleColor: string;
     };
     avatarFramingTitle: string;
@@ -280,6 +285,7 @@ export interface Translations {
     haremStarted: string;
     townWalkStarted: string;
     behindYouStarted: string;
+    doorPeepStarted: string;
     nisaStarted: string;
     fastMotionStarted: string;
     scenarioStopped: string;

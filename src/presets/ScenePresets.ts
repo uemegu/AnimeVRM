@@ -2,7 +2,7 @@ import { resolveAssetUrl } from '../utils/path';
 import type { AvatarConfig } from '../Config';
 
 export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'bright_indoor' | 'dark_indoor';
-export type LocationId = 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'none';
+export type LocationId = 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'apartment_door' | 'myroom' | 'none';
 
 export type ScenePresetId =
   | 'morning_park'
@@ -80,6 +80,12 @@ const DEFAULT_CINEMATIC_CONFIG: AvatarConfig['postProcessing']['cinematic'] = {
   sharpening: {
     enabled: false,
     amount: 0.22,
+  },
+  fisheye: {
+    enabled: false,
+    strength: 0.5,
+    zoom: 1.0,
+    circular: false,
   },
 };
 
@@ -1354,6 +1360,56 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       farFogEnabled: true,
       farFogColor: '#ffffff',
       farFogIntensity: 0.15,
+    },
+  },
+  apartment_door: {
+    id: 'apartment_door',
+    name: 'アパート前',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/apartment_door_far.avif'),
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#ffffff',
+      farFogIntensity: 0.15,
+    },
+  },
+  myroom: {
+    id: 'myroom',
+    name: '自室',
+    category: 'indoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/myroom_far.avif'),
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: false,
+      farFogColor: '#ffffff',
+      farFogIntensity: 0.0,
     },
   },
   none: {

@@ -4,6 +4,8 @@ import { ScenePresetId } from '../presets/ScenePresets';
 import { TearConfig } from '../effects/tears';
 import { FocusLinesConfig } from '../effects/FocusLinesOverlay';
 import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
+import type { CinematicFisheyeConfig } from '../Config';
+import type { YandereOptions } from '../Avatar';
 
 export interface ScenarioChoice {
   text: string;
@@ -37,9 +39,12 @@ export interface ScenarioSceneAvatarConfig {
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   motion?: string;    // Motion Master ID (e.g. 'greeting') or FBX URL
   motionSpeed?: number; // アニメーション再生速度倍率 (デフォルト 1.0, 高速アクション用)
+  motionDuration?: number; // モーションを再生する時間（秒）。経過後は nextMotion または待機モーションに自動遷移
+  nextMotion?: string;     // motionDuration 経過後に再生するモーション（デフォルト: 'Standing Idle.fbx' または Idle）
   expression?: string;
   expressionWeight?: number;
   faceTexture?: string;
+  visible?: boolean;
   position?: AvatarSlotPosition | [number, number, number];
   rotationY?: number;
   effectText?: EffectPresetName | {
@@ -66,6 +71,7 @@ export interface ScenarioSceneAvatarConfig {
   tearConfig?: Partial<TearConfig>;
   sweat?: boolean | 'fly4' | 'jito';
   motionBlur?: boolean; // 高速動作時の方向性輪郭ブラーのON/OFF
+  yandere?: boolean | Partial<YandereOptions>; // 瞳ハイライト消去・暗黒化・首傾げ
 }
 
 export type CameraZoomType =
@@ -138,6 +144,8 @@ export interface ScenarioScene {
   dreamBackground?: boolean | 'heart' | AnimeDreamBackgroundConfig; // アニメ風ハート・パステル夢心地背景エフェクト
   motionBlur?: boolean; // シーン全体で高速動作時の方向性輪郭ブラーをONにするか (デフォルトOFF)
   motionSpeed?: number; // シーン全体または発話者のモーション再生速度倍率 (デフォルト 1.0)
+  fisheye?: boolean | Partial<CinematicFisheyeConfig>; // 魚眼レンズ歪み・ドアスコープ円周魚眼
+  yandere?: boolean | Partial<YandereOptions>; // シーン発話者または単体アバターのヤンデレモード
   conditions?: string[];
   goto?: string;
   waitClick?: boolean;

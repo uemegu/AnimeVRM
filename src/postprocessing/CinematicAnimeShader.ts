@@ -157,16 +157,29 @@ export const CinematicAnimeShader = {
         if (uFisheyeCircular > 0.5) {
           // --- 円周魚眼 (Circular Fisheye: ドアスコープ / 球面レンズ風) ---
           float circleRadius = 0.48;
-          float rn = clamp(r / circleRadius, 0.0, 1.2);
-          float distortion = 1.0 + uFisheyeStrength * (rn * rn * 0.6 + pow(rn, 4.0) * 0.4);
-          float scale = 0.85 * uFisheyeZoom;
+          float rn = clamp(r / circleRadius, 0.0, 1.0);
+
+          // 樽型歪み（中心部を拡大し、周辺に向かって自然に圧縮）
+          float distortion = 1.0 + uFisheyeStrength * (rn * rn * 0.45 + pow(rn, 4.0) * 0.35);
+
+          // 円の境界 (rn = 1.0) でもテクスチャ範囲 (y: 0.5) を絶対に超えないよう自動スケール補正
+          float maxDistortion = 1.0 + uFisheyeStrength * 0.8;
+          float autoFit = 0.47 / (circleRadius * maxDistortion);
+          float scale = autoFit * uFisheyeZoom;
 
           vec2 distortedP = p * distortion * scale;
           distortedP.x /= aspect;
           uv = distortedP + vec2(0.5);
 
+          // ドアスコープの金属鏡胴（円周ブラックアウト＆ソフトエッジ）
           float edgeFade = 0.02;
           fisheyeMask = 1.0 - smoothstep(circleRadius - edgeFade, circleRadius, r);
+
+          // 境界外ピクセルが線状に引き伸ばされるのを100%防止（テクスチャ外は完全黒マスク）
+          float uvMargin = 0.002;
+          if (uv.x < uvMargin || uv.x > (1.0 - uvMargin) || uv.y < uvMargin || uv.y > (1.0 - uvMargin)) {
+            fisheyeMask = 0.0;
+          }
         } else {
           // --- 対角線魚眼 (Full-frame Fisheye: 広角アクションカメラ / アニメ迫力魚眼) ---
           float maxRadius = length(vec2(0.5 * aspect, 0.5));

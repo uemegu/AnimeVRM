@@ -16,6 +16,7 @@ import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
+import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -361,6 +362,8 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
               <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.avif')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
               <button data-location="town" data-bg="${resolveAssetUrl('/textures/town_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.town}</button>
+              <button data-location="apartment_door" data-bg="${resolveAssetUrl('/textures/apartment_door_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.apartmentDoor}</button>
+              <button data-location="myroom" data-bg="${resolveAssetUrl('/textures/myroom_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.myroom}</button>
               <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
             </div>
           </div>
@@ -476,6 +479,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #bae6fd; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.fastMotionDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #dc2626; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #f87171; font-weight: 700;">${tr.scenario.doorPeepTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-doorpeep-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playDoorPeep}</button>
+              <button id="scenario-doorpeep-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fecaca; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.doorPeepDesc}
             </div>
           </div>
 
@@ -1344,6 +1358,29 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-fastmotion-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Door Peep-hole Yandere Scenario Play/Stop
+    document.getElementById('scenario-doorpeep-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getDoorPeepYandereScenario(getLanguage());
+        scenarioController.scenarioEngine.play(scenario);
+        showToast(t().toasts.doorPeepStarted);
+      }
+    });
+
+    document.getElementById('scenario-doorpeep-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);

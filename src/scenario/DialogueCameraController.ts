@@ -249,6 +249,11 @@ export class DialogueCameraController {
       speakerAvatar = this.getAvatar();
     }
 
+    // If avatar is hidden or not visible, do not track its position (prevents camera pointing at off-screen/underground coordinates)
+    if (speakerAvatar && !speakerAvatar.getVisible()) {
+      speakerAvatar = null;
+    }
+
     const speakerWorldPos = new THREE.Vector3(0, 0, 0);
     if (speakerAvatar?.vrm?.scene) {
       speakerAvatar.vrm.scene.getWorldPosition(speakerWorldPos);
@@ -256,8 +261,8 @@ export class DialogueCameraController {
 
     // 2. Determine Shot Type
     // If scene.cameraZoom is explicitly specified, use it.
-    // Otherwise derive from scene properties: if choices or multiple speakers, use 'wide'; if speakerId exists, use 'speaker'.
-    let zoomType: CameraZoomType = scene.cameraZoom || 'speaker';
+    // Otherwise derive from scene properties: if choices, multiple speakers, or no visible speaker, use 'wide'.
+    let zoomType: CameraZoomType = scene.cameraZoom || (speakerAvatar ? 'speaker' : 'wide');
     if (!scene.cameraZoom) {
       if (scene.choices && scene.choices.length > 0) {
         zoomType = 'wide';
