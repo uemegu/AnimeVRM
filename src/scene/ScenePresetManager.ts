@@ -43,7 +43,7 @@ export class ScenePresetManager {
       if (tod === 'day') return 'day_school';
       if (tod === 'evening') return 'evening_school';
       if (tod === 'rainy') return 'rainy_school';
-    } else if (loc === 'classroom' || loc === 'cafe') {
+    } else if (loc === 'classroom' || loc === 'cafe' || loc === 'myroom') {
       if (tod === 'dark_indoor') return 'dark_indoor';
       return 'bright_indoor';
     }

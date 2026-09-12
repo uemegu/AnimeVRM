@@ -19,6 +19,8 @@ import { resolveAssetUrl } from '../utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
 import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
 import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
+import { BlackoutOverlay } from '../ui/BlackoutOverlay';
+import type { CinematicFisheyeConfig } from '../Config';
 import * as THREE from 'three';
 
 export interface ScenarioEngineOptions {
@@ -39,6 +41,7 @@ export interface ScenarioEngineOptions {
     strength?: number
   ) => void;
   onApplySceneCamera?: (scene: ScenarioScene) => void;
+  onApplyFisheye?: (fisheye?: boolean | Partial<CinematicFisheyeConfig>) => void;
   onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   onUpdateDreamBackground?: (
     config?: boolean | 'heart' | AnimeDreamBackgroundConfig,
@@ -66,6 +69,7 @@ export class ScenarioEngine {
     strength?: number
   ) => void;
   private onApplySceneCamera?: (scene: ScenarioScene) => void;
+  private onApplyFisheye?: (fisheye?: boolean | Partial<CinematicFisheyeConfig>) => void;
   private onUpdateScrollingBackground?: (config?: ScenarioScrollingBackgroundConfig) => void;
   private onUpdateDreamBackground?: (
     config?: boolean | 'heart' | AnimeDreamBackgroundConfig,
@@ -98,9 +102,14 @@ export class ScenarioEngine {
   private autoNextTimer: number | null = null;
   private pendingChoiceTimer: number | null = null;
   private pendingEffectTextTimers: number[] = [];
+  private pendingMotionTimers: number[] = [];
+  private currentBackgroundUrl: string | null = null;
   private boundVoiceEndHandler: (() => void) | null = null;
   private isAutoMode = false;
   private focusLinesOverlay: FocusLinesOverlay = new FocusLinesOverlay();
+  private blackoutOverlay: BlackoutOverlay = new BlackoutOverlay();
+  private lastLocation: string | undefined = undefined;
+  private isSceneTransitioning = false;
 
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
@@ -116,6 +125,7 @@ export class ScenarioEngine {
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.onApplyCamera = options.onApplyCamera;
     this.onApplySceneCamera = options.onApplySceneCamera;
+    this.onApplyFisheye = options.onApplyFisheye;
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
     this.onUpdateDreamBackground = options.onUpdateDreamBackground;
     this.onSwitchBackground = options.onSwitchBackground;
@@ -215,6 +225,10 @@ export class ScenarioEngine {
     this.sceneIndex = 0;
     this.flags.clear();
     this.isPlayingState = true;
+    this.currentBackgroundUrl = null;
+    this.lastLocation = undefined;
+    this.isSceneTransitioning = false;
+    this.blackoutOverlay.reset();
 
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
     allAvatars.forEach((avatar) => {
@@ -249,9 +263,13 @@ export class ScenarioEngine {
     if (!this.isPlayingState) return;
 
     this.isPlayingState = false;
+    this.lastLocation = undefined;
+    this.isSceneTransitioning = false;
+    this.blackoutOverlay.reset();
     this.clearAutoNextTimer();
     this.clearPendingChoiceTimer();
     this.clearPendingEffectTextTimers();
+    this.clearPendingMotionTimers();
     this.focusLinesOverlay.hide();
     this.activeMoveTransitions.clear();
     this.stopAudioAndVoice();
@@ -265,9 +283,13 @@ export class ScenarioEngine {
       avatar.setTearsEnabled(false);
       avatar.setMotionBlurEnabled(false);
       avatar.setMotionSpeed(1.0);
+      avatar.setYandereMode(false);
+      avatar.setVisible(true);
     });
 
+    this.onApplyFisheye?.(false);
     this.messageWindow.hide();
+    this.currentBackgroundUrl = null;
     this.onUpdateScrollingBackground?.(undefined);
     this.onUpdateDreamBackground?.(undefined);
     this.onSwitchPanoramaBackground?.(null);
@@ -282,7 +304,7 @@ export class ScenarioEngine {
   }
 
   private handleUserNext(): void {
-    if (!this.isPlayingState) return;
+    if (!this.isPlayingState || this.isSceneTransitioning) return;
     const scene = this.currentScene;
     if (!scene) return;
 
@@ -305,7 +327,7 @@ export class ScenarioEngine {
   }
 
   public next(): void {
-    if (!this.isPlayingState || !this.currentPackage) return;
+    if (!this.isPlayingState || !this.currentPackage || this.isSceneTransitioning) return;
     this.clearAutoNextTimer();
 
     const chapter = this.currentPackage.chapters[this.chapterIndex];
@@ -461,6 +483,11 @@ export class ScenarioEngine {
       });
     }
 
+    // Visibility
+    if (config.visible !== undefined) {
+      avatar.setVisible(config.visible);
+    }
+
     // Slot position / custom transform
     if (position !== undefined) {
       if (typeof position === 'string' && position in AVATAR_POSITION_PRESETS) {
@@ -513,6 +540,17 @@ export class ScenarioEngine {
         resolveAssetUrl('/animations/Idle.fbx'),
         effectiveSpeed
       );
+
+      // 指定時間（秒）経過後に次のモーションまたは待機モーションへ自動遷移
+      if (config.motionDuration !== undefined && config.motionDuration > 0) {
+        const timer = window.setTimeout(() => {
+          if (!this.isPlayingState) return;
+          const nextMotion = config.nextMotion || resolveAssetUrl('/animations/Standing Idle.fbx');
+          const resolvedNext = this.masterManager.resolveMotionUrl(nextMotion) || resolveAssetUrl(nextMotion);
+          avatar.playAnimation(resolvedNext, true, 0.5, undefined, 1.0);
+        }, config.motionDuration * 1000);
+        this.pendingMotionTimers.push(timer);
+      }
     } else if (config.motionSpeed !== undefined || this.currentScene?.motionSpeed !== undefined) {
       avatar.setMotionSpeed(effectiveSpeed);
     }
@@ -571,6 +609,16 @@ export class ScenarioEngine {
     // Fast Motion Directional Blur override per avatar
     if (config.motionBlur !== undefined) {
       avatar.setMotionBlurEnabled(config.motionBlur);
+    }
+
+    // Yandere Mode (Eye highlight suppression & head tilt)
+    if (config.yandere !== undefined) {
+      if (config.yandere === false) {
+        avatar.setYandereMode(false);
+      } else {
+        const opts = typeof config.yandere === 'object' ? config.yandere : undefined;
+        avatar.setYandereMode(true, opts);
+      }
     }
   }
 
@@ -826,7 +874,7 @@ export class ScenarioEngine {
     }
   }
 
-  private executeCurrentScene(): void {
+  private async executeCurrentScene(): Promise<void> {
     const scene = this.currentScene;
     if (!scene) {
       this.stop();
@@ -836,8 +884,33 @@ export class ScenarioEngine {
     this.clearAutoNextTimer();
     this.clearPendingChoiceTimer();
     this.clearPendingEffectTextTimers();
+    this.clearPendingMotionTimers();
     this.stopVoice();
 
+    // ロケーションが切り替わる場合、または明示的な fade_black 指定時は暗転トランジションを実行
+    const isLocationChanged =
+      this.lastLocation !== undefined &&
+      scene.location !== undefined &&
+      scene.location !== this.lastLocation;
+    const isExplicitBlackout = scene.screenTransition === 'fade_black';
+
+    if (isLocationChanged || isExplicitBlackout) {
+      this.isSceneTransitioning = true;
+      this.messageWindow.hide();
+      await this.blackoutOverlay.fadeTransition(async () => {
+        this.applySceneVisuals(scene);
+      }, 300, 100, 320);
+      this.isSceneTransitioning = false;
+      this.lastLocation = scene.location;
+      this.applySceneAudioAndDialogue(scene);
+    } else {
+      this.lastLocation = scene.location;
+      this.applySceneVisuals(scene);
+      this.applySceneAudioAndDialogue(scene);
+    }
+  }
+
+  private applySceneVisuals(scene: ScenarioScene): void {
     // 0. Single Character Model Switch (if specified & not in multi-character package)
     const isMultiCharacter = Boolean(this.currentPackage?.characters && this.currentPackage.characters.length > 0);
     const charId = scene.character || scene.avatar?.character;
@@ -853,13 +926,20 @@ export class ScenarioEngine {
     // 1. Switch Scene Preset (Lighting, Environment, PostProcessing)
     if (scene.scenePreset && this.onSwitchScenePreset) {
       this.onSwitchScenePreset(scene.scenePreset);
+      // Preset切り替えによってプリセット既定の背景（例: classroom）で上書きされるのを防ぐため、
+      // 既にシナリオ側で背景が指定されていれば再適用する
+      if (this.currentBackgroundUrl && !scene.background && !scene.panoramaBackgroundUrl && this.onSwitchBackground) {
+        this.onSwitchBackground(this.currentBackgroundUrl);
+      }
     }
 
     // 1.2 Switch Direct Background Image (Standard single background)
     const panoramaUrl = scene.panoramaBackgroundUrl || this.currentPackage?.panoramaBackgroundUrl;
     if (panoramaUrl) {
+      this.currentBackgroundUrl = null;
       this.onSwitchPanoramaBackground?.(panoramaUrl);
     } else if (scene.background && this.onSwitchBackground) {
+      this.currentBackgroundUrl = scene.background;
       this.onSwitchPanoramaBackground?.(null);
       this.onSwitchBackground(scene.background);
     }
@@ -876,17 +956,6 @@ export class ScenarioEngine {
         : undefined;
     this.onUpdateDreamBackground?.(dreamBgConfig, scene);
 
-    // 1.8 Scene specific SE or Package SE
-    const seUrl = scene.seUrl || (scene.scrollingBackground?.enabled ? '/se/walking.mp3' : undefined);
-    if (seUrl) {
-      this.startSe(seUrl, scene.seVolume ?? 0.65, scene.seLoop ?? true);
-    } else if (this.currentPackage?.se || this.currentPackage?.seUrl) {
-      const pkgSe = this.currentPackage.se || this.currentPackage.seUrl;
-      this.startSe(pkgSe, this.currentPackage.seVolume ?? 0.2, true);
-    } else {
-      this.stopSe();
-    }
-
     // 1.9 Dynamic Focus Lines Overlay (画面中央に向かう集中線)
     if (scene.focusLines) {
       const config = typeof scene.focusLines === 'object' ? scene.focusLines : undefined;
@@ -899,6 +968,24 @@ export class ScenarioEngine {
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
     for (const av of allAvatars) {
       av.setMotionBlurEnabled(!!scene.motionBlur);
+    }
+
+    // 1.96 Fisheye Lens Distortion / Door Peep Circular Mask
+    if (scene.fisheye !== undefined) {
+      this.onApplyFisheye?.(scene.fisheye);
+    }
+
+    // 1.97 Scene-level Yandere Mode override for speaker / active avatar
+    if (scene.yandere !== undefined) {
+      const avatar = this.getAvatar(scene.speakerCharacterId);
+      if (avatar) {
+        if (scene.yandere === false) {
+          avatar.setYandereMode(false);
+        } else {
+          const opts = typeof scene.yandere === 'object' ? scene.yandere : undefined;
+          avatar.setYandereMode(true, opts);
+        }
+      }
     }
 
     // 2. Avatar Control (Motion, Expression, Position, 3D Manga Effect)
@@ -936,6 +1023,23 @@ export class ScenarioEngine {
       this.messageWindow.setEyelidClosed(true);
     } else {
       this.messageWindow.setEyelidClosed(false);
+    }
+  }
+
+  private applySceneAudioAndDialogue(scene: ScenarioScene): void {
+    // 1.8 Scene specific SE or Package SE (単発再生 seLoop: false に対応)
+    const seUrl = scene.seUrl || (scene.scrollingBackground?.enabled ? '/se/walking.mp3' : undefined);
+    if (seUrl) {
+      if (scene.seLoop === false) {
+        this.playOneShotSe(seUrl, scene.seVolume ?? 0.8);
+      } else {
+        this.startSe(seUrl, scene.seVolume ?? 0.65, true);
+      }
+    } else if (this.currentPackage?.se || this.currentPackage?.seUrl) {
+      const pkgSe = this.currentPackage.se || this.currentPackage.seUrl;
+      this.startSe(pkgSe, this.currentPackage.seVolume ?? 0.2, true);
+    } else {
+      this.stopSe();
     }
 
     // 4. Voice Lip-Sync (resolve Voice Master ID or WAV path & Stereo Pan)
@@ -1054,6 +1158,17 @@ export class ScenarioEngine {
     }
   }
 
+  private playOneShotSe(seUrl: string, volume: number = 0.8): void {
+    try {
+      const resolvedUrl = resolveAssetUrl(seUrl);
+      const audio = new Audio(resolvedUrl);
+      audio.volume = Math.max(0, Math.min(1, volume));
+      audio.play().catch(() => {});
+    } catch {
+      // Audio fallback
+    }
+  }
+
   private currentSeUrl: string | null = null;
 
   private startSe(seUrl?: string, volume: number = 0.2, loop: boolean = true): void {
@@ -1113,6 +1228,13 @@ export class ScenarioEngine {
       clearTimeout(timer);
     }
     this.pendingEffectTextTimers = [];
+  }
+
+  private clearPendingMotionTimers(): void {
+    for (const timer of this.pendingMotionTimers) {
+      clearTimeout(timer);
+    }
+    this.pendingMotionTimers = [];
   }
 
   /**

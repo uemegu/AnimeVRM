@@ -241,6 +241,34 @@ export class ScenarioController {
       onSwitchScenePreset: (presetId) => {
         this.onSwitchScenePreset(presetId as ScenePresetId);
       },
+      onApplyFisheye: (fisheyeConfig) => {
+        const cfg = this.getConfig();
+        if (!cfg.postProcessing.cinematic) return;
+        if (typeof fisheyeConfig === 'boolean') {
+          if (!cfg.postProcessing.cinematic.fisheye) {
+            cfg.postProcessing.cinematic.fisheye = {
+              enabled: fisheyeConfig,
+              strength: 0.8,
+              zoom: 1.0,
+              circular: true,
+            };
+          } else {
+            cfg.postProcessing.cinematic.fisheye.enabled = fisheyeConfig;
+          }
+        } else if (fisheyeConfig) {
+          cfg.postProcessing.cinematic.fisheye = {
+            enabled: fisheyeConfig.enabled ?? true,
+            strength: fisheyeConfig.strength ?? 0.8,
+            zoom: fisheyeConfig.zoom ?? 1.0,
+            circular: fisheyeConfig.circular ?? true,
+          };
+        } else {
+          if (cfg.postProcessing.cinematic.fisheye) {
+            cfg.postProcessing.cinematic.fisheye.enabled = false;
+          }
+        }
+        this.onApplyConfig(cfg);
+      },
       onUpdateDreamBackground: (config) => {
         if (config) {
           const cfg = typeof config === 'object' ? config : undefined;
@@ -253,6 +281,11 @@ export class ScenarioController {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
+        const cfg = this.getConfig();
+        if (cfg.postProcessing.cinematic?.fisheye) {
+          cfg.postProcessing.cinematic.fisheye.enabled = false;
+          this.onApplyConfig(cfg);
+        }
         showToast('✨ シナリオが終了しました');
       },
     });

@@ -386,6 +386,19 @@ export class Avatar {
     this.loadModel();
   }
 
+  private isVisible: boolean = true;
+
+  public setVisible(visible: boolean): void {
+    this.isVisible = visible;
+    if (this.vrm?.scene) {
+      this.vrm.scene.visible = visible;
+    }
+  }
+
+  public getVisible(): boolean {
+    return this.vrm?.scene ? this.vrm.scene.visible : this.isVisible;
+  }
+
   public setPosition(x: number, y: number, z: number): void {
     this.initialPosition.set(x, y, z);
     if (this.vrm) {
@@ -427,6 +440,7 @@ export class Avatar {
         // Adjust model orientation & initial position
         vrm.scene.rotation.y = this.initialRotationY;
         vrm.scene.position.copy(this.initialPosition);
+        vrm.scene.visible = this.isVisible;
 
         // Setup shadows, depth write, Alpha-to-Coverage, and disable frustum culling (prevents SkinnedMesh face/hair clipping)
         vrm.scene.traverse((obj) => {
