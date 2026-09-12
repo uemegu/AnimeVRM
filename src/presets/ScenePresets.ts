@@ -1312,7 +1312,7 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
     category: 'indoor',
     environment: {
       showBackgroundImage: true,
-      backgroundImageUrl: resolveAssetUrl('/textures/cafe_far.png'),
+      backgroundImageUrl: resolveAssetUrl('/textures/cafe_far.avif'),
       backgroundColor: '#ffffff',
       showFloor: false,
       floorColor: '#ffffff',

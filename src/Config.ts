@@ -52,12 +52,20 @@ export interface CinematicSharpenConfig {
   amount: number;
 }
 
+export interface CinematicFisheyeConfig {
+  enabled: boolean;
+  strength: number;
+  zoom: number;
+  circular: boolean;
+}
+
 export interface CinematicPostProcessingConfig {
   diffusion: CinematicDiffusionConfig;
   filmGrain: CinematicFilmGrainConfig;
   vignette: CinematicVignetteConfig;
   chromaticAberration: CinematicChromaticAberrationConfig;
   sharpening: CinematicSharpenConfig;
+  fisheye?: CinematicFisheyeConfig;
 }
 
 export interface EyeGlowConfig {
@@ -453,6 +461,12 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       sharpening: {
         enabled: false,
         amount: 0.22,
+      },
+      fisheye: {
+        enabled: false,
+        strength: 0.5,
+        zoom: 1.0,
+        circular: false,
       },
     },
   },

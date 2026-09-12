@@ -562,6 +562,48 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     });
   shpFolder.close();
 
+  // 8. Fisheye Lens Distortion
+  if (!cin.fisheye) {
+    cin.fisheye = {
+      enabled: false,
+      strength: 0.5,
+      zoom: 1.0,
+      circular: false,
+    };
+  }
+  const fishFolder = cinFolder.addFolder(tr.gui.fisheyeFolder);
+  fishFolder
+    .add(cin.fisheye, 'enabled')
+    .name(tr.gui.fisheyeEnabled)
+    .onChange((val: boolean) => {
+      viewerCore.cinematicAnimePass.uniforms['uFisheyeEnabled'].value = val ? 1.0 : 0.0;
+    });
+  fishFolder
+    .add(cin.fisheye, 'strength', 0.0, 1.5, 0.02)
+    .name(tr.gui.fisheyeStrength)
+    .onChange((val: number) => {
+      viewerCore.cinematicAnimePass.uniforms['uFisheyeStrength'].value = val;
+    });
+  fishFolder
+    .add(cin.fisheye, 'zoom', 0.5, 2.0, 0.05)
+    .name(tr.gui.fisheyeZoom)
+    .onChange((val: number) => {
+      viewerCore.cinematicAnimePass.uniforms['uFisheyeZoom'].value = val;
+    });
+  fishFolder
+    .add(cin.fisheye, 'circular')
+    .name(tr.gui.fisheyeCircular)
+    .onChange((val: boolean) => {
+      viewerCore.cinematicAnimePass.uniforms['uFisheyeCircular'].value = val ? 1.0 : 0.0;
+    });
+  fishFolder
+    .add(viewerCore.camera, 'fov', 15, 120, 1)
+    .name(tr.gui.cameraFov)
+    .onChange(() => {
+      viewerCore.camera.updateProjectionMatrix();
+    });
+  fishFolder.close();
+
   cinFolder.close();
 
   // Color Grading
