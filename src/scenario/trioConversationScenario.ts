@@ -8,13 +8,13 @@ export const TRIO_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [-0.38, -0.1, -1.15],
       rotationY: 0.22,
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: [0.38, -0.1, -1.15],
       rotationY: -0.22,
     },
@@ -508,13 +508,13 @@ export const TRIO_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: [-0.38, 0, -1.35],
       rotationY: 0.22,
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: [0.38, 0, -1.35],
       rotationY: -0.22,
     },

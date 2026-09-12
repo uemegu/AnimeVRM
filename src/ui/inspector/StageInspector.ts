@@ -3,6 +3,7 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { WindController, WIND_PRESETS } from '../../wind/WindController';
 import { DEFAULT_RAIN_CONFIG } from '../../effects/rain';
+import { DEFAULT_CONFIG } from '../../Config';
 import { resolveAssetUrl } from '../../utils/path';
 import { showToast } from '../components/Toast';
 import { InspectorContext } from './InspectorManager';
@@ -241,7 +242,28 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
       }
     },
     resetView: () => {
-      panorama.resetView(Math.PI, 0, 60);
+      if (panorama.isActive) {
+        panorama.resetView(Math.PI, 0, 60);
+      } else {
+        ctx.viewerCore.camera.position.set(
+          DEFAULT_CONFIG.camera.position.x,
+          DEFAULT_CONFIG.camera.position.y,
+          DEFAULT_CONFIG.camera.position.z
+        );
+        ctx.viewerCore.controls.target.set(
+          DEFAULT_CONFIG.camera.target.x,
+          DEFAULT_CONFIG.camera.target.y,
+          DEFAULT_CONFIG.camera.target.z
+        );
+        ctx.viewerCore.initialControlsTarget.copy(ctx.viewerCore.controls.target);
+        ctx.viewerCore.camera.fov = DEFAULT_CONFIG.camera.fov;
+        ctx.viewerCore.camera.updateProjectionMatrix();
+        currentConfig.camera.fov = DEFAULT_CONFIG.camera.fov;
+        ctx.viewerCore.camera.lookAt(ctx.viewerCore.controls.target);
+        ctx.viewerCore.controls.update();
+        ctx.viewerCore.updateMidgroundTransform(currentConfig);
+        ctx.viewerCore.updateNeargroundTransform(currentConfig);
+      }
       updateAllInspectorsDisplay();
       showToast('🔄 視点を正面にリセットしました');
     },
@@ -254,17 +276,97 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
         showToast('✓ カメラ演出デモが完了しました');
       });
     },
-    get yawDeg() {
-      return THREE.MathUtils.radToDeg(panorama.targetYaw);
+    get yawDeg(): number {
+      if (panorama.isActive) {
+        return Math.round(THREE.MathUtils.radToDeg(panorama.targetYaw));
+      }
+      const target = ctx.viewerCore.controls.target;
+      const dx = ctx.viewerCore.camera.position.x - target.x;
+      const dz = ctx.viewerCore.camera.position.z - target.z;
+      return Math.round(THREE.MathUtils.radToDeg(Math.atan2(dx, dz)));
     },
     set yawDeg(val: number) {
-      panorama.targetYaw = THREE.MathUtils.degToRad(val);
+      if (panorama.isActive) {
+        panorama.targetYaw = THREE.MathUtils.degToRad(val);
+      } else {
+        const target = ctx.viewerCore.controls.target;
+        const dx = ctx.viewerCore.camera.position.x - target.x;
+        const dz = ctx.viewerCore.camera.position.z - target.z;
+        const distXZ = Math.hypot(dx, dz) || 2.65;
+        const rad = THREE.MathUtils.degToRad(val);
+        ctx.viewerCore.camera.position.x = target.x + distXZ * Math.sin(rad);
+        ctx.viewerCore.camera.position.z = target.z + distXZ * Math.cos(rad);
+        ctx.viewerCore.camera.lookAt(target);
+        ctx.viewerCore.controls.update();
+        ctx.viewerCore.updateMidgroundTransform(currentConfig);
+        ctx.viewerCore.updateNeargroundTransform(currentConfig);
+      }
     },
-    get pitchDeg() {
-      return THREE.MathUtils.radToDeg(panorama.targetPitch);
+    get pitchDeg(): number {
+      if (panorama.isActive) {
+        return Math.round(THREE.MathUtils.radToDeg(panorama.targetPitch));
+      }
+      const target = ctx.viewerCore.controls.target;
+      const dx = ctx.viewerCore.camera.position.x - target.x;
+      const dz = ctx.viewerCore.camera.position.z - target.z;
+      const distXZ = Math.hypot(dx, dz);
+      const dy = ctx.viewerCore.camera.position.y - target.y;
+      return Math.round(THREE.MathUtils.radToDeg(Math.atan2(dy, distXZ)));
     },
     set pitchDeg(val: number) {
-      panorama.targetPitch = THREE.MathUtils.degToRad(val);
+      if (panorama.isActive) {
+        panorama.targetPitch = THREE.MathUtils.degToRad(val);
+      } else {
+        const target = ctx.viewerCore.controls.target;
+        const dx = ctx.viewerCore.camera.position.x - target.x;
+        const dz = ctx.viewerCore.camera.position.z - target.z;
+        const dist = ctx.viewerCore.camera.position.distanceTo(target) || 2.65;
+        const currentYawRad = Math.atan2(dx, dz);
+        const rad = THREE.MathUtils.degToRad(val);
+        const distXZ = dist * Math.cos(rad);
+        ctx.viewerCore.camera.position.x = target.x + distXZ * Math.sin(currentYawRad);
+        ctx.viewerCore.camera.position.y = target.y + dist * Math.sin(rad);
+        ctx.viewerCore.camera.position.z = target.z + distXZ * Math.cos(currentYawRad);
+        ctx.viewerCore.camera.lookAt(target);
+        ctx.viewerCore.controls.update();
+        ctx.viewerCore.updateMidgroundTransform(currentConfig);
+        ctx.viewerCore.updateNeargroundTransform(currentConfig);
+      }
+    },
+    get cameraY(): number {
+      if (panorama.isActive) {
+        return panorama.cameraY;
+      }
+      return Number(ctx.viewerCore.camera.position.y.toFixed(2));
+    },
+    set cameraY(val: number) {
+      if (panorama.isActive) {
+        panorama.cameraY = val;
+      } else {
+        const diffY = val - ctx.viewerCore.camera.position.y;
+        ctx.viewerCore.camera.position.y = val;
+        ctx.viewerCore.controls.target.y += diffY;
+        ctx.viewerCore.initialControlsTarget.y += diffY;
+        ctx.viewerCore.camera.lookAt(ctx.viewerCore.controls.target);
+        ctx.viewerCore.controls.update();
+        ctx.viewerCore.updateMidgroundTransform(currentConfig);
+        ctx.viewerCore.updateNeargroundTransform(currentConfig);
+      }
+    },
+    get targetFov(): number {
+      if (panorama.isActive) {
+        return Math.round(panorama.targetFov);
+      }
+      return Math.round(ctx.viewerCore.camera.fov);
+    },
+    set targetFov(val: number) {
+      if (panorama.isActive) {
+        panorama.targetFov = val;
+      } else {
+        ctx.viewerCore.camera.fov = val;
+        ctx.viewerCore.camera.updateProjectionMatrix();
+        currentConfig.camera.fov = val;
+      }
     },
     // Avatar controls
     get avatarVisible() {
@@ -343,6 +445,8 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
     .onChange(async (val: boolean) => {
       if (val) {
         if (!panorama.isActive) {
+          panorama.cameraY = ctx.viewerCore.camera.position.y;
+          panorama.targetFov = ctx.viewerCore.camera.fov;
           await panoramaState.testClassroom();
         }
       } else {
@@ -350,6 +454,7 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
         ctx.viewerCore.updateBackgroundDisplay(currentConfig);
         ctx.viewerCore.updateMidgroundDisplay(currentConfig);
         ctx.viewerCore.updateNeargroundDisplay(currentConfig);
+        updateAllInspectorsDisplay();
         showToast('パノラマ表示をOFFにしました');
       }
     });
@@ -377,8 +482,9 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
   avatarFolder.open();
 
   panoramaFolder
-    .add(panorama, 'cameraY', 0.2, 2.5, 0.05)
-    .name(tr.gui.panoramaCameraY);
+    .add(panoramaState, 'cameraY', 0.2, 2.5, 0.05)
+    .name(tr.gui.panoramaCameraY)
+    .listen();
 
   panoramaFolder
     .add(panorama, 'sensitivity', 0.001, 0.01, 0.0005)
@@ -393,7 +499,7 @@ export function setupStageInspector(container: HTMLElement, ctx: InspectorContex
     .name(tr.gui.panoramaIdleMotion);
 
   panoramaFolder
-    .add(panorama, 'targetFov', 35, 80, 1)
+    .add(panoramaState, 'targetFov', 15, 90, 1)
     .name(tr.gui.panoramaFov)
     .listen();
 

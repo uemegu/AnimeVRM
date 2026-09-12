@@ -7,12 +7,12 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: '/models/girl.vrm',
+      character: '/models/aoi/aoi-school.vrm',
       position: 'left',
     },
     {
       id: 'girl_02',
-      character: '/models/girl2.vrm',
+      character: '/models/emili/emili.vrm',
       position: 'right',
     },
   ],
@@ -343,12 +343,12 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: '/models/girl.vrm',
+      character: '/models/aoi/aoi-school.vrm',
       position: 'left',
     },
     {
       id: 'girl_02',
-      character: '/models/girl2.vrm',
+      character: '/models/emili/emili.vrm',
       position: 'right',
     },
   ],

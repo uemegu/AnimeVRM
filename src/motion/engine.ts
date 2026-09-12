@@ -2,7 +2,14 @@ import * as T from 'three';
 import { basics } from './basics';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
+export const jointNames: Record<string, string> = { Hips: '腰', Spine: '背骨（下）', Spine1: '胸', Spine2: '胸（上）', Neck: '首', Head: '頭' };
+for (const [side, label] of [['Right', '右'], ['Left', '左']]) {
+  for (const [bone, name] of Object.entries({ Shoulder: '肩', Arm: '上腕', ForeArm: 'ひじ', Hand: '手首', UpLeg: '股関節', Leg: 'ひざ', Foot: '足首', ToeBase: 'つま先' })) jointNames[side + bone] = label + name;
+  for (const [finger, name] of Object.entries({ Thumb: '親指', Index: '人差し指', Middle: '中指', Ring: '薬指', Pinky: '小指' }))
+    for (let i = 1; i <= 3; i++) jointNames[`${side}Hand${finger}${i}`] = `${label}${name} ${i}（付け根から）`;
+}
 export const sources = [
+  ['@joint', '関節を自由に曲げる', '全身'],
   ['Standing Idle', '自然に立つ', '全身'], ['Walking', '歩く', '全身'], ['Jogging', '走る', '全身'],
   ['Standing Greeting', '手を振る', '右腕'], ['Salute', '敬礼する', '右腕'], ['Quick Formal Bow', 'お辞儀', '上半身'],
   ['Acknowledging', 'うなずく', '上半身'], ['Excited', '喜ぶ', '全身'], ['Angry', '怒る', '上半身'],
@@ -12,7 +19,7 @@ export const sources = [
   ...Object.entries(basics).map(([id, pose]) => [id, pose.label, pose.mask]),
 ];
 export const masks = ['全身', '上半身', '下半身', '右腕', '左腕', '体幹', '頭', '右手', '左手', '右手首', '左手首', '右脚', '左脚', '右肩', '左肩', '両肩'];
-export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; balance?: boolean; shoulderFollow?: number; }
+export interface Layer { id: string; source: string; mask: string; weight: number; start: number; duration: number; speed: number; from: number; to: number; fade: number; loop: boolean; enabled: boolean; repeatEvery?: number; envelope?: 'flat' | 'sine'; poseMode?: 'motion' | 'hold'; contactGap?: number; balance?: boolean; shoulderFollow?: number; joint?: string; jointX?: number; jointY?: number; jointZ?: number; jointSpace?: 'local' | 'world'; jointEase?: number; }
 export interface Recipe { version: 1; duration: number; fps: number; layers: Layer[]; loop?: boolean; transition?: number; }
 export interface Rest { node: T.Object3D; p: T.Vector3; q: T.Quaternion; s: T.Vector3; world: T.Quaternion; parentWorld: T.Quaternion; }
 interface Source { root: T.Group; clip: T.AnimationClip; rest: Map<string, Rest>; tracks: { bone: string; property: string; sample: T.Interpolant }[]; }
@@ -68,7 +75,7 @@ export class MotionEngine {
       this.grounded ||= endGrounded; this.floating ||= endFloating;
       const blend = T.MathUtils.smoothstep(time, recipe.duration, totalDuration(recipe));
       [...this.rest.values()].forEach((r, index) => { r.node.position.copy(end[index].p.lerp(r.node.position, blend)); r.node.quaternion.copy(end[index].q.slerp(r.node.quaternion, blend)); });
-    } else this.sampleContent(recipe, Math.max(0, time));
+    } else this.sampleContent(recipe, T.MathUtils.clamp(time, 0, recipe.duration));
     if (this.grounded && !this.floating && this.groundAdjustment) this.rest.get('Hips')!.node.position.y += this.groundAdjustment();
     this.rest.get('Hips')?.node.updateWorldMatrix(true, true);
   }
@@ -79,14 +86,34 @@ export class MotionEngine {
     this.applySource('Standing Idle', recipe.loop && recipe.transition === 0 ? 0 : time % this.cache.get('Standing Idle')!.clip.duration, '全身', 1);
     for (const layer of recipe.layers) {
       if (!layer.enabled || time < layer.start) continue;
-      const elapsed = layer.repeatEvery ? (time - layer.start) % layer.repeatEvery : time - layer.start;
+      const offset = time - layer.start;
+      // At the non-looping endpoint, finish the preceding repeat instead of
+      // sampling the first frame of a repeat that will never be played.
+      const cycle = layer.repeatEvery ? Math.max(0, !recipe.loop && time >= recipe.duration ? Math.ceil(offset / layer.repeatEvery) - 1 : Math.floor(offset / layer.repeatEvery)) : 0;
+      const elapsed = offset - cycle * (layer.repeatEvery ?? 0);
+      const holdsEnd = !recipe.loop && layer.start + cycle * (layer.repeatEvery ?? 0) + layer.duration >= recipe.duration - 1e-8;
       if (elapsed > layer.duration) continue;
-      const edge = layer.envelope === 'sine' ? 1 : layer.fade <= 0 ? 1 : Math.min(1, !layer.repeatEvery && recipe.loop && layer.start === 0 ? 1 : elapsed / layer.fade, !layer.repeatEvery && recipe.loop && layer.start + layer.duration >= recipe.duration ? 1 : (layer.duration - elapsed) / layer.fade);
+      const edge = layer.envelope === 'sine' ? 1 : layer.fade <= 0 ? 1 : Math.min(1, !layer.repeatEvery && recipe.loop && layer.start === 0 ? 1 : elapsed / layer.fade, (holdsEnd || !layer.repeatEvery && recipe.loop && layer.start + layer.duration >= recipe.duration) ? 1 : (layer.duration - elapsed) / layer.fade);
       const w = layer.weight * T.MathUtils.smoothstep(Math.max(0, edge), 0, 1) * (layer.envelope === 'sine' ? Math.sin(Math.PI * elapsed / layer.duration) : 1);
       const length = Math.max(1 / 30, (layer.to - layer.from) / 30);
       const phase = elapsed * layer.speed;
       const local = layer.poseMode === 'hold' ? layer.to / 30 : layer.from / 30 + (layer.loop ? phase % length : Math.min(length, phase));
-      if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0, layer.balance !== false, layer.shoulderFollow ?? 1);
+      if (layer.source === '@joint') {
+        const r = this.rest.get(layer.joint ?? 'RightForeArm');
+        if (r && matches(layer.joint ?? 'RightForeArm', layer.mask)) {
+          // Timeline-based easing also applies to older held-pose cards and every repeat.
+          const ease = Math.min(layer.jointEase ?? .7, layer.duration / 2);
+          const amount = w * (ease <= 0 ? 1 : T.MathUtils.smoothstep(elapsed, 0, ease) * (holdsEnd ? 1 : T.MathUtils.smoothstep(layer.duration - elapsed, 0, ease)));
+          const delta = new T.Quaternion().setFromEuler(new T.Euler(...[layer.jointX ?? 0, layer.jointY ?? 0, layer.jointZ ?? 0].map(v => T.MathUtils.degToRad(v)) as [number, number, number]));
+          delta.copy(new T.Quaternion().slerp(delta, amount));
+          if (layer.jointSpace === 'world') {
+            r.node.updateWorldMatrix(true, false);
+            const parent = r.node.parent?.getWorldQuaternion(new T.Quaternion()) ?? new T.Quaternion();
+            r.node.quaternion.premultiply(parent.clone().invert().multiply(delta).multiply(parent));
+          } else r.node.quaternion.multiply(delta);
+        }
+      }
+      else if (layer.source.startsWith('@')) this.procedural(layer.source, local, layer.mask, w, layer.contactGap ?? 0, layer.balance !== false, layer.shoulderFollow ?? 1);
       else if (layer.source.startsWith('saved:')) {
         const before = ['RightArm', 'LeftArm'].map(name => this.rest.get(name)!.node.quaternion.clone());
         this.applySaved(layer.source, local, layer.mask, w);
@@ -296,7 +323,7 @@ export class MotionEngine {
     const active = recipe.layers.filter(l => l.enabled && l.weight > 0);
     if (!active.length) throw new Error('保存する動作を追加してください');
     const duration = totalDuration(recipe), times = Array.from({ length: Math.ceil(duration * 30 - 1e-8) + 1 }, (_, i) => Math.min(i / 30, duration));
-    const affected = [...this.rest.entries()].filter(([bone]) => active.some(l => matches(bone, l.mask) && (!l.source.startsWith('saved:') || this.custom.get(l.source)?.tracks.some(t => t.bone === bone))));
+    const affected = [...this.rest.entries()].filter(([bone]) => active.some(l => matches(bone, l.mask) && (l.source !== '@joint' || bone === (l.joint ?? 'RightForeArm')) && (!l.source.startsWith('saved:') || this.custom.get(l.source)?.tracks.some(t => t.bone === bone))));
     const tracks = affected.map(([bone]) => ({ bone, positions: [] as number[], rotations: [] as number[] }));
     for (const time of times) { this.sample(recipe, time); affected.forEach(([, r], i) => { tracks[i].positions.push(...r.node.position.toArray().map(v => Number(v.toFixed(6)))); tracks[i].rotations.push(...r.node.quaternion.toArray().map(v => Number(v.toFixed(6)))); }); }
     return { id: `saved:${crypto.randomUUID()}`, name, duration, mask: active.every(l => l.mask === active[0].mask) ? active[0].mask : '全身', times, tracks };
@@ -304,7 +331,7 @@ export class MotionEngine {
 
 }
 export function newLayer(source: string, engine: MotionEngine, duration: number): Layer {
-  return { id: crypto.randomUUID(), source, mask: engine.custom.has(source) ? '全身' : (source.startsWith('@') && !basics[source]?.wrist && !basics[source]?.fingers && !basics[source]?.shoulder ? '全身' : sources.find(s => s[0] === source)?.[2] ?? '全身'), weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true };
+  return { id: crypto.randomUUID(), source, mask: engine.custom.has(source) ? '全身' : (source.startsWith('@') && !basics[source]?.wrist && !basics[source]?.fingers && !basics[source]?.shoulder ? '全身' : sources.find(s => s[0] === source)?.[2] ?? '全身'), weight: 1, start: 0, duration, speed: 1, from: 0, to: engine.frames(source), fade: .3, loop: !source.startsWith('@'), enabled: true, ...(source === '@joint' ? { joint: 'RightForeArm', jointX: 0, jointY: 0, jointZ: 0, jointSpace: 'local' as const, jointEase: .7, poseMode: 'hold' as const, fade: 0 } : {}) };
 }
 export function validateRecipe(value: unknown, savedIds = new Set<string>()): Recipe {
   const r = value as Recipe;
@@ -312,6 +339,7 @@ export function validateRecipe(value: unknown, savedIds = new Set<string>()): Re
   if (!r || r.version !== 1 || !finite(r.duration, .5, 60) || ![24, 30, 60].includes(r.fps) || !Array.isArray(r.layers) || r.layers.length > 32) throw new Error('レシピの形式が正しくありません');
   for (const l of r.layers) if (!(sources.some(s => s[0] === l.source) || savedIds.has(l.source)) || !masks.includes(l.mask) || !finite(l.weight, 0, 1) || !finite(l.start, 0, 60) || !finite(l.duration, .1, 60) || !finite(l.speed, .1, 3) || !finite(l.from, 0, 100000) || !finite(l.to, l.from + 1, 100001) || !finite(l.fade, 0, 5) || typeof l.loop !== 'boolean' || typeof l.enabled !== 'boolean') throw new Error('レシピの動作設定が正しくありません');
   for (const l of r.layers) if (l.shoulderFollow !== undefined && !finite(l.shoulderFollow, 0, 1) || l.balance !== undefined && typeof l.balance !== 'boolean' || l.repeatEvery !== undefined && l.repeatEvery !== 0 && !finite(l.repeatEvery, l.duration, 60) || l.envelope !== undefined && !['flat', 'sine'].includes(l.envelope) || l.poseMode !== undefined && !['motion', 'hold'].includes(l.poseMode) || l.contactGap !== undefined && !finite(l.contactGap, -10, 20)) throw new Error('配置の繰り返し・接触設定が正しくありません');
+  for (const l of r.layers) if (l.jointEase !== undefined && !finite(l.jointEase, 0, 10) || l.joint !== undefined && !Object.hasOwn(jointNames, l.joint) || [l.jointX, l.jointY, l.jointZ].some(v => v !== undefined && !finite(v, -180, 180)) || l.jointSpace !== undefined && !['local', 'world'].includes(l.jointSpace)) throw new Error('関節の設定が正しくありません');
   if (r.loop !== undefined && typeof r.loop !== 'boolean' || r.transition !== undefined && !finite(r.transition, 0, 10)) throw new Error('ループ設定が正しくありません');
   return { version: 1, duration: r.duration, fps: r.fps, loop: r.loop ?? false, transition: r.transition ?? 1, layers: r.layers.map(l => ({ ...l, id: crypto.randomUUID() })) };
 }

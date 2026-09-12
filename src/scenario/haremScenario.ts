@@ -8,17 +8,17 @@ export const HAREM_SCENARIO_JA: ScenarioPackage = {
   characters: [
     {
       id: 'girl_01',
-      character: resolveAssetUrl('/models/girl.vrm'),
+      character: resolveAssetUrl('/models/aoi/aoi-school.vrm'),
       position: 'left',
     },
     {
       id: 'girl_04',
-      character: resolveAssetUrl('/models/girl4.vrm'),
+      character: resolveAssetUrl('/models/shion/shion-school.vrm'),
       position: 'center',
     },
     {
       id: 'girl_02',
-      character: resolveAssetUrl('/models/girl2.vrm'),
+      character: resolveAssetUrl('/models/emili/emili.vrm'),
       position: 'right',
     },
   ],
