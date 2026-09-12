@@ -176,6 +176,9 @@ export interface Translations {
     doorPeepTitle: string;
     playDoorPeep: string;
     doorPeepDesc: string;
+    privateDateTitle: string;
+    playPrivateDate: string;
+    privateDateDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -288,6 +291,7 @@ export interface Translations {
     doorPeepStarted: string;
     nisaStarted: string;
     fastMotionStarted: string;
+    privateDateStarted: string;
     scenarioStopped: string;
     motionLoaded: string;
     motionLoadFailed: string;

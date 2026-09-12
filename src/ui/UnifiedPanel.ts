@@ -18,6 +18,7 @@ import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
+import { getPrivateDateScenario } from '../scenario/privateDateScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -494,6 +495,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #fecaca; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.doorPeepDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.scenario.privateDateTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-privatedate-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #db2777 0%, #9d174d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playPrivateDate}</button>
+              <button id="scenario-privatedate-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fbcfe8; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.privateDateDesc}
             </div>
           </div>
 
@@ -1385,6 +1397,32 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-doorpeep-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Holiday Private Date Scenario Play/Stop
+    document.getElementById('scenario-privatedate-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getPrivateDateScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'HOLIDAY PRIVATE DATE',
+        });
+        showToast(t().toasts.privateDateStarted);
+      }
+    });
+
+    document.getElementById('scenario-privatedate-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);
