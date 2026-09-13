@@ -214,6 +214,7 @@ export interface Translations {
     day: string;
     evening: string;
     rainy: string;
+    night: string;
     bright: string;
     dark: string;
     backgroundTitle: string;
@@ -221,6 +222,9 @@ export interface Translations {
       modernPark: string;
       schoolGate: string;
       classroom: string;
+      schoolRooftop: string;
+      parkWithSea: string;
+      nightFestival: string;
       oldPark: string;
       cafe: string;
       town: string;
@@ -239,10 +243,12 @@ export interface Translations {
     presetDayParkTip: string;
     presetEveningParkTip: string;
     presetRainyParkTip: string;
+    presetNightParkTip: string;
     presetMorningSchoolTip: string;
     presetDaySchoolTip: string;
     presetEveningSchoolTip: string;
     presetRainySchoolTip: string;
+    presetNightSchoolTip: string;
     presetBrightIndoorTip: string;
     presetDarkIndoorTip: string;
   };

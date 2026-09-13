@@ -1,24 +1,40 @@
 import { resolveAssetUrl } from '../utils/path';
 import type { AvatarConfig } from '../Config';
 
-export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'bright_indoor' | 'dark_indoor';
-export type LocationId = 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'apartment_door' | 'myroom' | 'none';
+export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor';
+export type LocationId =
+  | 'modern_park'
+  | 'school_gate'
+  | 'classroom'
+  | 'school_rooftop'
+  | 'park_with_sea'
+  | 'night_festival'
+  | 'old_park'
+  | 'cafe'
+  | 'town'
+  | 'apartment_door'
+  | 'myroom'
+  | 'none';
 
 export type ScenePresetId =
   | 'morning_park'
   | 'day_park'
   | 'evening_park'
   | 'rainy_park'
+  | 'night_park'
   | 'morning_school'
   | 'day_school'
   | 'evening_school'
   | 'rainy_school'
+  | 'night_school'
   | 'bright_indoor'
   | 'dark_indoor'
   | 'morning_outdoor'
   | 'day_outdoor'
   | 'evening_outdoor'
-  | 'rainy_outdoor';
+  | 'rainy_outdoor'
+  | 'night_outdoor'
+  | 'night_festival';
 
 export interface TimeOfDayPresetData {
   id: TimeOfDayId;
@@ -830,6 +846,222 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
     },
   },
 
+  // 3.6 夜 (Night) - お祭りの夜のような十分な明るさのある夜間ライティング
+  night: {
+    id: 'night',
+    name: '夜',
+    description: 'お祭りの夜のような十分な明るさと華やかさのある夜間ライティング',
+    materials: {
+      body: {
+        color: '#fff6f0',
+        shadowHueShift: 0.02,
+        shadowLightnessFactor: 0.16,
+        shadowBoundaryTint: 0.2,
+        shadingToonyFactor: 1,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: true,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#ffffff',
+        parametricRimFresnelPowerFactor: 5,
+        parametricRimLiftFactor: 0.1,
+        rimLightingMixFactor: 0.1,
+        outlineWidthFactor: 0.0016,
+      },
+      hair: {
+        color: '#ffffff',
+        shadowHueShift: 0.03,
+        shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.1,
+        shadingToonyFactor: 1,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#ffffff',
+        parametricRimFresnelPowerFactor: 0,
+        parametricRimLiftFactor: 0.1,
+        rimLightingMixFactor: 0.2,
+        outlineWidthFactor: 0.0016,
+      },
+      cloth: {
+        color: '#ffffff',
+        shadowHueShift: 0.03,
+        shadowLightnessFactor: 0.2,
+        shadowBoundaryTint: 0.05,
+        shadingToonyFactor: 1,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: true,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#202942',
+        parametricRimFresnelPowerFactor: 4,
+        parametricRimLiftFactor: 0.02,
+        rimLightingMixFactor: 1,
+        outlineWidthFactor: 0.0016,
+      },
+    },
+    eyeGlow: {
+      enabled: true,
+      intensity: 1.25,
+    },
+    outline: {
+      enabled: true,
+      useSmoothNormal: true,
+      screenSpaceWidth: true,
+      autoLineWeight: true,
+      darknessFactor: 0.1,
+      widthFactor: 0.0016,
+      lightingMixFactor: 0,
+    },
+    environment: {
+      farFogEnabled: true,
+      farFogColor: '#ffe3cc',
+      farFogIntensity: 0.12,
+    },
+    lighting: {
+      castShadows: false,
+      ambient: {
+        color: '#ffebeb',
+        intensity: 0.5,
+      },
+      directional: {
+        color: '#ffffff',
+        intensity: 3,
+        posX: -3.5,
+        posY: 0,
+        posZ: 2,
+      },
+      rim: {
+        enabled: false,
+        color: '#8fa8db',
+        intensity: 0.22,
+        posX: 0,
+        posY: 1.5,
+        posZ: 2.5,
+      },
+      depthRim: {
+        enabled: true,
+        power: 3.8,
+        threshold: 0.15,
+        intensity: 0.75,
+      },
+      sunShafts: {
+        enabled: false,
+        followDirectionalLight: false,
+        sunPosition: {
+          x: -3.5,
+          y: 2.2,
+          z: -2,
+        },
+        exposure: 0,
+        decay: 0.86,
+        density: 0.55,
+        weight: 0.18,
+        color: '#7898d0',
+        shimmer: 0,
+      },
+      lensFlare: {
+        enabled: false,
+        sunSize: 0.8,
+        sunColor: '#8ca8db',
+        glowIntensity: 0,
+        starburstIntensity: 0,
+        anamorphicIntensity: 0,
+        ghostIntensity: 0,
+        haloIntensity: 0,
+      },
+    },
+    postProcessing: {
+      toneMappingMode: 'None',
+      toneMappingExposure: 1,
+      antialiasing: {
+        msaaSamples: 4,
+        smaa: true,
+      },
+      bloom: {
+        enabled: true,
+        strength: 0.1,
+        radius: 0.26,
+        threshold: 0.75,
+      },
+      colorGrading: {
+        enabled: true,
+        shadowTint: '#1c1c30',
+        highlightTint: '#324867',
+        strength: 0.9,
+        contrast: 0.37,
+        gamma: 0.78,
+      },
+      saturation: 0.26,
+      brightness: 0,
+      contrast: 0,
+      cinematic: {
+        diffusion: {
+          enabled: true,
+          strength: 0.2,
+          radius: 1.5,
+        },
+        filmGrain: {
+          enabled: false,
+          strength: 0.05,
+          speed: 0.8,
+        },
+        vignette: {
+          enabled: true,
+          offset: 1.15,
+          darkness: 0.14,
+          color: '#0d111d',
+        },
+        chromaticAberration: {
+          enabled: true,
+          offset: 0.002,
+        },
+        sharpening: {
+          enabled: false,
+          amount: 0.22,
+        },
+        fisheye: {
+          enabled: false,
+          strength: 0.5,
+          zoom: 1,
+          circular: false,
+        },
+      },
+    },
+    wind: {
+      enabled: false,
+      speed: 0.1,
+      direction: 45,
+      elevation: 5,
+      turbulence: 0.15,
+      gustFrequency: 0.2,
+      gustStrength: 0.15,
+      particles: {
+        enabled: false,
+        count: 160,
+        size: 0.035,
+        color: '#ffd5e5',
+        opacity: 0.85,
+        speedFactor: 1,
+      },
+    },
+    rain: {
+      enabled: false,
+      count: 600,
+      speed: 9.5,
+      length: 0.14,
+      angle: 2,
+      color: '#cce2ff',
+      opacity: 0.45,
+      splashEnabled: false,
+      splashCount: 110,
+    },
+  },
+
   // 4. 室内・明 (Bright Indoor) - 元のパラメータ
   bright_indoor: {
     id: 'bright_indoor',
@@ -1287,6 +1519,81 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       farFogIntensity: 0.0,
     },
   },
+  school_rooftop: {
+    id: 'school_rooftop',
+    name: '屋上',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/school-rooftop-far.avif'),
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#ffffff',
+      farFogIntensity: 0.15,
+    },
+  },
+  park_with_sea: {
+    id: 'park_with_sea',
+    name: '海の見える公園',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/park-with-sea-far.avif'),
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#ffffff',
+      farFogIntensity: 0.2,
+    },
+  },
+  night_festival: {
+    id: 'night_festival',
+    name: '夏祭り',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/night-festival-far.avif'),
+      backgroundColor: '#111122',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#1a1829',
+      farFogIntensity: 0.25,
+    },
+  },
   old_park: {
     id: 'old_park',
     name: '旧公園',
@@ -1470,6 +1777,10 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
   day_outdoor: buildScenePreset('day_outdoor', 'day', 'modern_park'),
   evening_outdoor: buildScenePreset('evening_outdoor', 'evening', 'modern_park'),
   rainy_outdoor: buildScenePreset('rainy_outdoor', 'rainy', 'modern_park'),
+  night_park: buildScenePreset('night_park', 'night', 'modern_park'),
+  night_school: buildScenePreset('night_school', 'night', 'school_gate'),
+  night_outdoor: buildScenePreset('night_outdoor', 'night', 'modern_park'),
+  night_festival: buildScenePreset('night_festival', 'night', 'night_festival'),
 };
 
 export function getScenePreset(presetId: ScenePresetId | string): ScenePresetData {

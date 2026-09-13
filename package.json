@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "convert:textures": "bash convert_textures.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

@@ -1,0 +1,27 @@
+{
+  "poses": {
+    "rest_static": {
+      "triangle_overlaps": 0,
+      "bounds": []
+    },
+    "standing": {
+      "triangle_overlaps": 0,
+      "bounds": []
+    },
+    "left_step": {
+      "triangle_overlaps": 0,
+      "bounds": []
+    },
+    "right_step": {
+      "triangle_overlaps": 0,
+      "bounds": []
+    },
+    "walking": {
+      "triangle_overlaps": 0,
+      "bounds": []
+    }
+  },
+  "unnormalized_skirt_vertices": 0,
+  "missing_deform_bones": [],
+  "native_mtoon": true
+}

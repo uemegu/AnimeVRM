@@ -248,15 +248,19 @@ def main():
             out_str = item.get("output") or item.get("output_wav") or f"output_{i:03d}.wav"
             out_path = Path(out_str).resolve()
             
-            item_ref = item.get("ref_wav", ref_wav)
+            item_ref = item.get("ref_wav") or item.get("ref") or ref_wav
             if item_ref:
                 item_ref = str(Path(item_ref).resolve())
+                if not os.path.isfile(item_ref):
+                    print(f"[Error] Reference audio file not found: {item_ref}", file=sys.stderr)
+                    sys.exit(1)
             
             item_caption = item.get("caption", args.caption)
-            item_no_ref = item.get("no_ref", args.no_ref or (item_ref is None and item_caption is not None))
+            item_no_ref = item.get("no_ref", False if item_ref else (args.no_ref or (item_caption is not None)))
 
             caption_info = f" [Caption: {item_caption}]" if item_caption else ""
-            print(f"[{i}/{len(items)}] Synthesizing: {text}{caption_info}")
+            ref_info = f" [Ref: {Path(item_ref).name}]" if item_ref else " [No Ref]"
+            print(f"[{i}/{len(items)}] Synthesizing: {text}{ref_info}{caption_info}")
             synthesize_line(runtime, text, item_ref, item_caption, item_no_ref, out_path, args)
 
         print(f"[Irodori-TTS] All {len(items)} lines synthesized successfully!")
