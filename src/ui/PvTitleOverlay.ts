@@ -124,21 +124,37 @@ export class PvTitleOverlay {
           align-items: center;
           gap: 10px;
         }
+        /* --- シネマティック文字縁取り ＆ 輪郭強化 --- */
+        .pv-main-catchphrase {
+          -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.9);
+          paint-order: stroke fill;
+        }
+        .pv-sub-catchphrase {
+          -webkit-text-stroke: 0.6px rgba(0, 0, 0, 0.85);
+          paint-order: stroke fill;
+        }
+
         .pv-l-horiz-right {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           text-align: right;
-          padding-right: 48px;
-          padding-bottom: 10px;
+          padding: 10px 48px 12px 24px;
+          background: radial-gradient(ellipse closest-side at 80% 50%, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.22) 65%, transparent 100%);
+          backdrop-filter: blur(2.5px);
+          -webkit-backdrop-filter: blur(2.5px);
+          border-radius: 20px;
         }
         .pv-l-horiz-left {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
           text-align: left;
-          padding-left: 48px;
-          padding-bottom: 10px;
+          padding: 10px 24px 12px 48px;
+          background: radial-gradient(ellipse closest-side at 20% 50%, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.22) 65%, transparent 100%);
+          backdrop-filter: blur(2.5px);
+          -webkit-backdrop-filter: blur(2.5px);
+          border-radius: 20px;
         }
         .pv-smash-container {
           position: absolute;
@@ -176,6 +192,9 @@ export class PvTitleOverlay {
           justify-content: center;
           text-align: center;
           pointer-events: none;
+          background: radial-gradient(ellipse 75% 55% at 50% 50%, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.25) 65%, transparent 100%);
+          backdrop-filter: blur(2.5px);
+          -webkit-backdrop-filter: blur(2.5px);
         }
         .pv-bottom-glow-container {
           position: absolute;
@@ -412,7 +431,7 @@ export class PvTitleOverlay {
           <!-- 背景の巨大ゴースト英字（プロポーショナル・幾何学サンセリフ） -->
           <div class="pv-ghost-text" style="animation: pvGhostSlide 9s linear infinite;">
             <span class="pv-font-sans-proportional" style="
-              font-size: clamp(60px, 12vw, 120px);
+              font-size: clamp(70px, 14vw, 150px);
               font-weight: 900;
               color: #ffffff;
               letter-spacing: 0.25em;
@@ -431,7 +450,7 @@ export class PvTitleOverlay {
             animation: pvSmashImpact 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
           ">
             <div class="pv-font-mincho pv-main-catchphrase" style="
-              font-size: clamp(26px, 4.2vw, 54px);
+              font-size: clamp(34px, 5.8vw, 76px);
               font-weight: 800;
               color: ${t.mainText};
               white-space: nowrap;
@@ -441,8 +460,8 @@ export class PvTitleOverlay {
             </div>
             ${config.subText ? `
               <div class="pv-font-cinzel pv-sub-catchphrase" style="
-                margin-top: 10px;
-                font-size: clamp(12px, 1.4vw, 16px);
+                margin-top: 12px;
+                font-size: clamp(14px, 1.8vw, 22px);
                 font-weight: 700;
                 letter-spacing: 0.38em;
                 text-transform: uppercase;
@@ -560,7 +579,7 @@ export class PvTitleOverlay {
       case 'sunset':
         return {
           mainText: '#fffbeb',
-          textShadow: 'drop-shadow(0 2px 12px rgba(0,0,0,0.95)) drop-shadow(0 0 30px rgba(245,158,11,0.5))',
+          textShadow: '0 0 4px #000000, 0 0 10px #000000, 0 2px 14px rgba(0,0,0,0.95), 0 0 30px rgba(245,158,11,0.5)',
           accentColor: '#f43f5e',
           enColor: '#fef3c7',
           lineColor: 'rgba(245, 158, 11, 0.8)',
@@ -568,7 +587,7 @@ export class PvTitleOverlay {
       case 'night':
         return {
           mainText: '#ffffff',
-          textShadow: 'drop-shadow(0 2px 12px rgba(0,0,0,0.98)) drop-shadow(0 0 24px rgba(168,85,247,0.65))',
+          textShadow: '0 0 4px #000000, 0 0 10px #000000, 0 2px 14px rgba(0,0,0,0.98), 0 0 24px rgba(168,85,247,0.65)',
           accentColor: '#e11d48',
           enColor: '#f3e8ff',
           lineColor: 'rgba(168, 85, 247, 0.8)',
@@ -577,7 +596,7 @@ export class PvTitleOverlay {
       default:
         return {
           mainText: '#ffffff',
-          textShadow: 'drop-shadow(0 2px 10px rgba(0,0,0,0.95)) drop-shadow(0 0 25px rgba(56,189,248,0.45))',
+          textShadow: '0 0 4px #000000, 0 0 10px #000000, 0 2px 12px rgba(0,0,0,0.95), 0 0 25px rgba(56,189,248,0.45)',
           accentColor: '#38bdf8',
           enColor: '#e0f2fe',
           lineColor: 'rgba(56, 189, 248, 0.8)',

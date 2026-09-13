@@ -251,7 +251,7 @@ export class ScenarioEngine {
     // Start BGM & SE if configured (resolve IDs via MasterDataManager)
     const bgmPath = this.masterManager.resolveSoundUrl(scenarioPackage.bgm || scenarioPackage.bgmUrl);
     const sePath = this.masterManager.resolveSoundUrl(scenarioPackage.se || scenarioPackage.seUrl);
-    this.startBgm(bgmPath || undefined, scenarioPackage.bgmVolume);
+    this.startBgm(bgmPath || undefined, scenarioPackage.bgmVolume, scenarioPackage.bgmLoop ?? true);
     this.startSe(sePath || undefined, scenarioPackage.seVolume);
 
     this.messageWindow.setAutoMode(this.isAutoMode);
@@ -1148,15 +1148,15 @@ export class ScenarioEngine {
     }
   }
 
-  private startBgm(bgmUrl?: string, volume: number = 0.4): void {
+  private startBgm(bgmUrl?: string, volume: number = 0.4, loop: boolean = true): void {
     if (!bgmUrl) return;
     try {
       if (!this.bgmAudio) {
         this.bgmAudio = new Audio(resolveAssetUrl(bgmUrl));
-        this.bgmAudio.loop = true;
       } else {
         this.bgmAudio.src = resolveAssetUrl(bgmUrl);
       }
+      this.bgmAudio.loop = loop;
       this.bgmAudio.volume = volume;
       this.bgmAudio.play().catch(() => {
         // User interaction might be required

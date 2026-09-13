@@ -167,6 +167,7 @@ export interface ScenarioPackage {
   bgm?: string;       // Sound Master ID (e.g. 'bgm_main')
   bgmUrl?: string;    // Direct BGM URL (Backward compatibility)
   bgmVolume?: number;
+  bgmLoop?: boolean;  // BGMのループ再生フラグ (デフォルト true。PVなどの単曲完結は false)
   se?: string;        // Sound Master ID (e.g. 'se_cicada')
   seUrl?: string;     // Direct SE URL (Backward compatibility)
   seVolume?: number;
