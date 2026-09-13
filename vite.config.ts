@@ -98,7 +98,13 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.onnx'],
   build: {
-    rollupOptions: { input: { viewer: 'index.html', motion: 'motion.html' } },
+    rollupOptions: {
+      input: {
+        viewer: 'index.html',
+        motion: 'motion.html',
+        lipsync: 'lipsync.html',
+      },
+    },
     outDir: 'docs',
     emptyOutDir: true,
   },

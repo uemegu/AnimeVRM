@@ -375,6 +375,7 @@ export const en: Translations = {
     shadowBoundaryTint: 'Shadow Boundary Tint',
     toonyFactor: 'Toon Shading Factor',
     shadingShift: 'Shading Border Shift',
+    faceShadingShift: 'Face Shading Border Shift',
     giFactor: 'GI Equalization',
     rimEnabled: 'Rim Light Enabled',
     rimColor: 'Rim Color',

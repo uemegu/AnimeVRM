@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LipSync Analyzer — リップシンク性能検証</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Kiwi+Maru:wght@400;500&family=Montserrat:wght@300;400;600;700;800;900&family=Shippori+Mincho:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet" />
+  <script type="module" crossorigin src="/AnimeVRM/assets/lipsync-3UiB3fBo.js"></script>
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/three-vrm.module-IInsvTLK.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-fx1t14tz.js">
+  <link rel="stylesheet" crossorigin href="/AnimeVRM/assets/lipsync-WFGkLsQy.css">
+</head>
+
+<body>
+  <div id="lipsync-layout">
+    <!-- 3D Canvas Viewport -->
+    <main id="viewport-wrapper">
+      <div id="viewport-container">
+        <canvas id="app"></canvas>
+      </div>
+      <!-- Floating HUD: Active Phoneme & Formants -->
+      <div id="active-phoneme-hud" class="hud-box">
+        <div class="hud-label">DETECTED PHONEME</div>
+        <div id="hud-phoneme-char" class="hud-char">-</div>
+        <div id="hud-phoneme-tag" class="hud-tag">SILENCE</div>
+        <div class="hud-formants">
+          <span>F1: <strong id="hud-f1">0</strong> Hz</span>
+          <span>F2: <strong id="hud-f2">0</strong> Hz</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Control & Monitoring Panel -->
+    <aside id="dashboard-panel">
+      <header class="panel-header">
+        <div class="brand">
+          <a href="/AnimeVRM/" class="back-link" title="メインビューアに戻る">← 戻る</a>
+          <h2>LipSync Analyzer</h2>
+        </div>
+        <div class="sub-caption">リアルタイム・リップシンク性能検証</div>
+      </header>
+
+      <div class="panel-scroll">
+        <!-- 1. Voice Profile & Model Selection -->
+        <section class="panel-card">
+          <div class="card-title">
+            <span class="icon">🚻</span>
+            <span>性別プロファイル & アバター</span>
+          </div>
+          <div class="gender-toggle-group">
+            <button id="btn-gender-female" class="gender-btn active" data-gender="female">
+              <span class="symbol">🚺</span> 女性 (Female)
+            </button>
+            <button id="btn-gender-male" class="gender-btn" data-gender="male">
+              <span class="symbol">🚹</span> 男性 (Male)
+            </button>
+          </div>
+          <div class="control-row">
+            <label for="select-model">アバターモデル</label>
+            <select id="select-model">
+              <option value="/models/aoi/aoi-school.vrm" selected>👧 アオイ [制服] (aoi-school.vrm)</option>
+              <option value="/models/aoi/aoi-private.vrm">👧 アオイ [私服] (aoi-private.vrm)</option>
+              <option value="/models/emili/emili.vrm">👱‍♀️ エミリ (emili.vrm)</option>
+              <option value="/models/emili/emili-private.vrm">👱‍♀️ エミリ [私服] (emili-private.vrm)</option>
+              <option value="/models/shion/shion-school.vrm">💤 シオン [制服] (shion-school.vrm)</option>
+              <option value="/models/shion/shion-private.vrm">💤 シオン [私服] (shion-private.vrm)</option>
+            </select>
+          </div>
+          <div class="control-row file-row">
+            <label for="input-vrm-file" class="file-label-btn">📂 任意のVRMを読み込む</label>
+            <input type="file" id="input-vrm-file" accept=".vrm" hidden />
+            <span id="vrm-file-name" class="file-hint">未選択</span>
+          </div>
+        </section>
+
+        <!-- 2. Audio Input Source -->
+        <section class="panel-card">
+          <div class="card-title">
+            <span class="icon">🎙</span>
+            <span>音声入力ソース</span>
+          </div>
+
+          <div class="input-tabs">
+            <button id="tab-btn-sample" class="tab-btn active">🎵 サンプル音声</button>
+            <button id="tab-btn-mic" class="tab-btn">🎤 マイク入力</button>
+            <button id="tab-btn-file" class="tab-btn">📁 自作音声</button>
+          </div>
+
+          <!-- Tab 1: Sample Audio -->
+          <div id="tab-content-sample" class="tab-content active">
+            <div class="control-row">
+              <label for="select-audio-track">サンプル選択</label>
+              <select id="select-audio-track">
+                <!-- Will be populated dynamically based on selected gender -->
+              </select>
+            </div>
+
+            <div class="audio-transport">
+              <button id="btn-play" class="transport-btn play-btn" title="再生/一時停止">▶ 再生</button>
+              <button id="btn-stop" class="transport-btn" title="停止">⏹ 停止</button>
+              <label class="checkbox-label">
+                <input type="checkbox" id="check-loop" checked /> ループ
+              </label>
+            </div>
+
+            <div class="seek-row">
+              <span id="audio-current-time" class="time-text">0:00</span>
+              <input type="range" id="audio-seek-slider" min="0" max="100" value="0" step="0.1" />
+              <span id="audio-total-time" class="time-text">0:00</span>
+            </div>
+          </div>
+
+          <!-- Tab 2: Microphone -->
+          <div id="tab-content-mic" class="tab-content">
+            <p class="section-desc">
+              ブラウザのマイクからリアルタイムに音声を解析します（スピーカーへのフィードバック音は遮断されます）。
+            </p>
+            <div class="mic-controls">
+              <button id="btn-mic-toggle" class="mic-toggle-btn">
+                <span class="mic-icon">🎤</span> <span id="mic-btn-text">マイク入力を開始</span>
+              </button>
+              <div class="mic-level-wrapper">
+                <div class="level-label">マイク音量 (RMS)</div>
+                <div class="level-bar-bg">
+                  <div id="mic-level-fill" class="level-bar-fill"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-row" style="margin-top: 6px;">
+              <label for="slider-mic-gain" style="display: flex; justify-content: space-between;">
+                <span>マイク感度</span>
+                <span id="val-mic-gain">2.5x</span>
+              </label>
+              <input type="range" id="slider-mic-gain" min="0.5" max="6.0" step="0.1" value="2.5" />
+            </div>
+
+            <div class="control-row" style="margin-top: 4px;">
+              <label for="slider-mic-hold" style="display: flex; justify-content: space-between;">
+                <span>口の保持時間</span>
+                <span id="val-mic-hold">200ms</span>
+              </label>
+              <input type="range" id="slider-mic-hold" min="50" max="400" step="25" value="200" />
+            </div>
+          </div>
+
+          <!-- Tab 3: Local Audio File -->
+          <div id="tab-content-file" class="tab-content">
+            <div class="control-row file-row">
+              <label for="input-audio-file" class="file-label-btn">🎵 音声ファイルを選択 (WAV / MP3)</label>
+              <input type="file" id="input-audio-file" accept="audio/*" hidden />
+              <span id="audio-file-name" class="file-hint">未選択</span>
+            </div>
+            <div class="audio-transport" id="file-transport" style="display: none;">
+              <button id="btn-file-play" class="transport-btn play-btn">▶ 再生</button>
+              <button id="btn-file-stop" class="transport-btn">⏹ 停止</button>
+              <label class="checkbox-label">
+                <input type="checkbox" id="check-file-loop" checked /> ループ
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Performance & Latency Monitor -->
+        <section class="panel-card highlight-card">
+          <div class="card-title">
+            <span class="icon">⚡</span>
+            <span>一音判定レイテンシ & 統計</span>
+            <button id="btn-reset-stats" class="sub-btn" title="処理時間履歴をリセット">🔄 履歴クリア</button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">現在処理時間</div>
+              <div class="stat-value"><span id="stat-current">0.00</span> <small>ms</small></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">平均 (Avg)</div>
+              <div class="stat-value"><span id="stat-avg">0.00</span> <small>ms</small></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">最小 (Min)</div>
+              <div class="stat-value"><span id="stat-min">0.00</span> <small>ms</small></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">最大 (Max)</div>
+              <div class="stat-value"><span id="stat-max">0.00</span> <small>ms</small></div>
+            </div>
+          </div>
+          <div class="stat-count-row">
+            <span>判定試行回数: <strong id="stat-count">0</strong> 回</span>
+            <span>RMS強度: <strong id="stat-rms">0.000</strong></span>
+          </div>
+
+          <!-- Vowel Distance Meters -->
+          <div class="vowel-meters">
+            <div class="vowel-meter-head">母音距離スコア (値が小さいほど合致)</div>
+            <div class="vowel-row" data-phoneme="aa">
+              <span class="vowel-label">あ (aa)</span>
+              <div class="vowel-bar-bg"><div class="vowel-bar-fill" id="bar-aa"></div></div>
+              <span class="vowel-val" id="val-aa">-</span>
+            </div>
+            <div class="vowel-row" data-phoneme="ih">
+              <span class="vowel-label">い (ih)</span>
+              <div class="vowel-bar-bg"><div class="vowel-bar-fill" id="bar-ih"></div></div>
+              <span class="vowel-val" id="val-ih">-</span>
+            </div>
+            <div class="vowel-row" data-phoneme="ou">
+              <span class="vowel-label">う (ou)</span>
+              <div class="vowel-bar-bg"><div class="vowel-bar-fill" id="bar-ou"></div></div>
+              <span class="vowel-val" id="val-ou">-</span>
+            </div>
+            <div class="vowel-row" data-phoneme="ee">
+              <span class="vowel-label">え (ee)</span>
+              <div class="vowel-bar-bg"><div class="vowel-bar-fill" id="bar-ee"></div></div>
+              <span class="vowel-val" id="val-ee">-</span>
+            </div>
+            <div class="vowel-row" data-phoneme="oh">
+              <span class="vowel-label">お (oh)</span>
+              <div class="vowel-bar-bg"><div class="vowel-bar-fill" id="bar-oh"></div></div>
+              <span class="vowel-val" id="val-oh">-</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Camera Controls -->
+        <section class="panel-card">
+          <div class="card-title">
+            <span class="icon">📷</span>
+            <span>カメラ画角・視点</span>
+          </div>
+          <div class="camera-preset-group">
+            <button id="cam-preset-mouth" class="cam-btn active" title="口元をアップで映す">
+              👄 口元アップ
+            </button>
+            <button id="cam-preset-face" class="cam-btn" title="顔全体">
+              😊 顔全体
+            </button>
+            <button id="cam-preset-bust" class="cam-btn" title="バストアップ">
+              👤 バストアップ
+            </button>
+            <button id="cam-reset" class="cam-btn secondary" title="カメラリセット">
+              🔄 リセット
+            </button>
+          </div>
+          <div class="camera-hint">
+            ✦ マウス左ドラッグで回転 · ホイールでズーム · 右ドラッグで移動
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+
+</body>
+
+</html>

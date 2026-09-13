@@ -469,10 +469,20 @@ export function applyToonShader(
         }
 
         // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows)
-        if (typeof params.shadingShiftFactor === 'number') {
-          const shift = matKind === 'face' ? Math.max(params.shadingShiftFactor, 0.65) : params.shadingShiftFactor;
-          material.shadingShiftFactor = shift;
-          if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
+        if (typeof params.shadingShiftFactor === 'number' || typeof params.faceShadingShiftFactor === 'number') {
+          let shift: number | undefined;
+          if (matKind === 'face') {
+            shift = typeof params.faceShadingShiftFactor === 'number'
+              ? params.faceShadingShiftFactor
+              : (typeof params.shadingShiftFactor === 'number' ? Math.max(params.shadingShiftFactor, 0.65) : undefined);
+          } else if (typeof params.shadingShiftFactor === 'number') {
+            shift = params.shadingShiftFactor;
+          }
+
+          if (typeof shift === 'number') {
+            material.shadingShiftFactor = shift;
+            if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
+          }
         }
 
         // GI Equalization

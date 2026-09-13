@@ -375,6 +375,7 @@ export interface Translations {
     shadowBoundaryTint: string;
     toonyFactor: string;
     shadingShift: string;
+    faceShadingShift: string;
     giFactor: string;
     rimEnabled: string;
     rimColor: string;
