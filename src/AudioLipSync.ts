@@ -11,104 +11,53 @@ interface FormantTargets {
   weightF2: number;
 }
 
-// Japanese vowel formant targets in Hz (Female/Anime Voice & Male Voice)
-// F1 (Mouth Openness / Jaw height), F2 (Tongue frontness / Lip rounding)
-const VOWEL_TARGETS: Record<'female' | 'male', Record<Phoneme, FormantTargets>> = {
+// Empirically measured and verified MFCC vowel targets (MFCC[1..12], ignoring MFCC[0] energy)
+const MFCC_TARGETS: Record<'female' | 'male', Record<Phoneme, number[]>> = {
   female: {
-    aa: { f1: 950, f2: 1550, weightF1: 1.0, weightF2: 0.85 }, // あ: 口を大きく開く (High F1, Mid F2)
-    ih: { f1: 340, f2: 2950, weightF1: 1.1, weightF2: 1.0 },  // い: 閉口・前舌 (Low F1, High F2)
-    ou: { f1: 380, f2: 1100, weightF1: 1.1, weightF2: 0.95 }, // う: 閉口・後舌円唇 (Low F1, Low F2)
-    ee: { f1: 580, f2: 2350, weightF1: 1.0, weightF2: 1.0 },  // え: 半開・前舌 (Mid F1, High-Mid F2)
-    oh: { f1: 540, f2: 950, weightF1: 1.0, weightF2: 0.95 },  // お: 半開・後舌円唇 (Mid F1, Low F2)
+    aa: [40.1, -17.3, -26.1, -25.5, -25.8, -0.4, 31.0, 14.0, -19.7, -16.3, 1.9, -0.8],
+    ih: [29.0, -9.1, 33.6, 30.0, -19.4, -25.7, -13.7, -21.1, -20.7, -22.1, -25.5, -8.8],
+    ou: [53.9, 28.5, 12.6, -13.5, -10.0, -5.5, -16.7, -26.4, -29.3, -22.5, -9.9, 6.4],
+    ee: [31.4, -30.1, -8.7, -1.4, -19.5, -31.1, -6.6, -4.2, -7.6, -1.7, 1.7, -0.9],
+    oh: [42.2, -2.0, -20.1, -29.6, -31.4, -11.9, 12.9, 5.5, -13.1, -10.1, 2.9, 5.5],
   },
   male: {
-    aa: { f1: 780, f2: 1300, weightF1: 1.0, weightF2: 0.85 },
-    ih: { f1: 280, f2: 2400, weightF1: 1.1, weightF2: 1.0 },
-    ou: { f1: 320, f2: 950, weightF1: 1.1, weightF2: 0.95 },
-    ee: { f1: 480, f2: 1950, weightF1: 1.0, weightF2: 1.0 },
-    oh: { f1: 460, f2: 850, weightF1: 1.0, weightF2: 0.95 },
+    aa: [81.9, 28.8, 1.1, -5.1, -14.3, -18.9, -0.2, 25.2, 25.2, 4.9, -5.5, 0.7],
+    ih: [46.6, 1.3, 4.5, 40.4, 47.0, 11.1, -18.3, -10.1, 8.5, 7.1, -7.1, -13.6],
+    ou: [56.4, 32.2, 20.4, 23.6, 27.6, 21.1, 7.3, -5.1, -12.4, -13.6, -8.9, -3.4],
+    ee: [55.8, 11.6, 14.8, 32.4, 39.6, 16.4, -14.8, -13.8, -8.0, -7.8, 3.6, 4.4],
+    oh: [68.5, 36.1, 19.7, 3.8, -17.3, -30.5, -27.2, -8.5, 5.5, 0.5, -4.5, 2.5],
   },
 };
 
-/**
- * Smoothed spectral envelope analysis to accurately locate F1 and F2 formant resonance peaks
- */
-function findFormantPeaks(
-  spectrum: ArrayLike<number>,
-  sampleRate: number,
-  bufferSize: number,
-  gender: 'female' | 'male' = 'female'
-): { f1: number; f2: number } {
-  const binWidth = sampleRate / bufferSize;
-  const numBins = spectrum.length;
+// Acoustic vowel formant search ranges per phoneme for guided resonance tracking
+const FORMANT_SEARCH_RANGES: Record<'female' | 'male', Record<Phoneme, { f1: [number, number]; f2: [number, number] }>> = {
+  female: {
+    aa: { f1: [750, 1200], f2: [1300, 1750] },
+    ih: { f1: [260, 450],  f2: [2500, 3600] },
+    ou: { f1: [280, 500],  f2: [900, 1600] },
+    ee: { f1: [400, 680],  f2: [2000, 2900] },
+    oh: { f1: [450, 750],  f2: [900, 1500] },
+  },
+  male: {
+    aa: { f1: [600, 950],  f2: [1050, 1550] },
+    ih: { f1: [200, 380],  f2: [2000, 3000] },
+    ou: { f1: [220, 420],  f2: [750, 1300] },
+    ee: { f1: [350, 580],  f2: [1700, 2500] },
+    oh: { f1: [380, 620],  f2: [750, 1250] },
+  },
+};
 
-  // Smoothing window (~180 Hz) to eliminate pitch harmonics and extract vocal tract envelope
-  const smoothRadius = Math.max(2, Math.round(180 / (2 * binWidth)));
-  const smoothed = new Float32Array(numBins);
-
-  for (let i = 0; i < numBins; i++) {
-    let sum = 0;
-    let count = 0;
-    for (let w = -smoothRadius; w <= smoothRadius; w++) {
-      const idx = i + w;
-      if (idx >= 0 && idx < numBins) {
-        sum += spectrum[idx];
-        count++;
-      }
-    }
-    smoothed[i] = sum / (count || 1);
-  }
-
-  const isFemale = gender === 'female';
-  const f1MinHz = isFemale ? 260 : 200;
-  const f1MaxHz = isFemale ? 1250 : 1050;
-  const f2MinHz = isFemale ? 800 : 700;
-  const f2MaxHz = isFemale ? 3800 : 3400;
-
-  const f1MinBin = Math.round(f1MinHz / binWidth);
-  const f1MaxBin = Math.round(f1MaxHz / binWidth);
-
-  let f1PeakIdx = -1;
-  let f1MaxVal = -1;
-
-  for (let i = f1MinBin; i <= f1MaxBin; i++) {
-    if (smoothed[i] > f1MaxVal) {
-      if (
-        (i === f1MinBin || smoothed[i] >= smoothed[i - 1]) &&
-        (i === f1MaxBin || smoothed[i] >= smoothed[i + 1])
-      ) {
-        f1MaxVal = smoothed[i];
-        f1PeakIdx = i;
-      }
-    }
-  }
-
-  // F2 peak search above F1 peak + separation margin
-  const f2MinBin = Math.max(
-    f1PeakIdx + Math.round(200 / binWidth),
-    Math.round(f2MinHz / binWidth)
-  );
-  const f2MaxBin = Math.round(f2MaxHz / binWidth);
-
-  let f2PeakIdx = -1;
-  let f2MaxVal = -1;
-
-  for (let i = f2MinBin; i <= f2MaxBin; i++) {
-    if (smoothed[i] > f2MaxVal) {
-      if (
-        (i === f2MinBin || smoothed[i] >= smoothed[i - 1]) &&
-        (i === f2MaxBin || smoothed[i] >= smoothed[i + 1])
-      ) {
-        f2MaxVal = smoothed[i];
-        f2PeakIdx = i;
-      }
-    }
-  }
-
-  const f1 = f1PeakIdx > 0 ? f1PeakIdx * binWidth : isFemale ? 550 : 450;
-  const f2 = f2PeakIdx > 0 ? f2PeakIdx * binWidth : isFemale ? 1600 : 1400;
-
-  return { f1, f2 };
+export interface LipSyncStats {
+  processingTimeMs: number;
+  minTimeMs: number;
+  maxTimeMs: number;
+  avgTimeMs: number;
+  count: number;
+  rms: number;
+  f1: number;
+  f2: number;
+  distances: Record<Phoneme, number>;
+  phoneme: Phoneme | 'nn';
 }
 
 export interface AudioLipSyncEvents {
@@ -117,6 +66,7 @@ export interface AudioLipSyncEvents {
   onTimeUpdate?: (currentTime: number, duration: number) => void;
   onEnded?: () => void;
   onError?: (error: Error) => void;
+  onStatsUpdate?: (stats: LipSyncStats) => void;
 }
 
 export class AudioLipSync {
@@ -125,10 +75,37 @@ export class AudioLipSync {
   public currentPhoneme: Phoneme | 'nn' | undefined = undefined;
   public currentRms: number = 0;
   public isPlaying: boolean = false;
-  public rmsThreshold: number = 0.01;
+  public isMicrophoneActive: boolean = false;
+  public rmsThreshold: number = 0.008; // Attack threshold for voicing detection
+  public rmsReleaseThreshold: number = 0.003; // Release threshold to prevent dropouts
+  public holdFrames: number = 12; // ~200ms at 60fps hangover time
+  public micGainValue: number = 2.5; // Microphone boost gain
   public audioDelay: number = 0.05; // Default delay compensation (50ms)
   public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
+
+  private minTimeMs: number = Infinity;
+  private maxTimeMs: number = 0;
+  private totalTimeMs: number = 0;
+  private sampleCount: number = 0;
+  private micStream: MediaStream | null = null;
+  private micSourceNode: MediaStreamAudioSourceNode | null = null;
+  private micGainNode: GainNode | null = null;
+  private smoothedRms: number = 0;
+  private silenceHoldCounter: number = 0;
+  private isVoicing: boolean = false;
+  private lastStats: LipSyncStats = {
+    processingTimeMs: 0,
+    minTimeMs: 0,
+    maxTimeMs: 0,
+    avgTimeMs: 0,
+    count: 0,
+    rms: 0,
+    f1: 0,
+    f2: 0,
+    distances: { aa: 0, ee: 0, ih: 0, oh: 0, ou: 0 },
+    phoneme: 'nn',
+  };
 
   private analyzerNode: AnalyserNode | null = null;
   private analysisBuffer: Float32Array<ArrayBuffer> | null = null;
@@ -201,6 +178,24 @@ export class AudioLipSync {
   }
 
   /**
+   * Set microphone input boost gain (multiplier, e.g. 1.0 - 6.0)
+   */
+  public setMicGain(gain: number): void {
+    this.micGainValue = Math.max(0.2, Math.min(10.0, gain));
+    if (this.micGainNode && this.audioContext) {
+      this.micGainNode.gain.setValueAtTime(this.micGainValue, this.audioContext.currentTime);
+    }
+  }
+
+  /**
+   * Set silence hangover time in milliseconds (duration to hold vowel open across pitch valleys)
+   */
+  public setHoldTime(ms: number): void {
+    // Convert ms to approx frames at 60fps (1 frame ~ 16.6ms)
+    this.holdFrames = Math.max(1, Math.round(ms / 16.6));
+  }
+
+  /**
    * Set delay compensation (in seconds) for audio output.
    * Delays speaker playback so visual lip-sync processing and morphing aligns accurately with speech.
    */
@@ -234,9 +229,8 @@ export class AudioLipSync {
       this.pannerNode.pan.setValueAtTime(this.currentPan, this.audioContext.currentTime);
     }
 
-    // Playback Route: source -> analyser -> delay -> gain -> (panner) -> speakers
-    this.sourceNode.connect(this.analyzerNode);
-    this.analyzerNode.connect(this.delayNode);
+    // Playback Route (Audio file to speakers): source -> delay -> gain -> (panner) -> destination
+    this.sourceNode.connect(this.delayNode);
     this.delayNode.connect(this.gainNode);
     if (this.pannerNode) {
       this.gainNode.connect(this.pannerNode);
@@ -245,12 +239,150 @@ export class AudioLipSync {
       this.gainNode.connect(this.audioContext.destination);
     }
 
+    // Analysis Route (AnalyserNode connects only as a sink, NEVER to speakers):
+    // Playback: sourceNode -> analyzerNode
+    // Mic:      micSourceNode -> micGainNode -> analyzerNode
+    this.sourceNode.connect(this.analyzerNode);
+
     // Meyda's streaming analyzer uses the deprecated ScriptProcessorNode.
     // Read the current signal with AnalyserNode and use Meyda's synchronous
     // feature extraction instead, keeping analysis off the audio render path.
     Meyda.bufferSize = this.analyzerNode.fftSize;
     Meyda.sampleRate = this.audioContext.sampleRate;
     this.scheduleAnalysis();
+  }
+
+  public getStats(): LipSyncStats {
+    return { ...this.lastStats, distances: { ...this.lastStats.distances } };
+  }
+
+  public resetStats(): void {
+    this.minTimeMs = Infinity;
+    this.maxTimeMs = 0;
+    this.totalTimeMs = 0;
+    this.sampleCount = 0;
+    this.lastStats = {
+      processingTimeMs: 0,
+      minTimeMs: 0,
+      maxTimeMs: 0,
+      avgTimeMs: 0,
+      count: 0,
+      rms: 0,
+      f1: 0,
+      f2: 0,
+      distances: { aa: 0, ee: 0, ih: 0, oh: 0, ou: 0 },
+      phoneme: 'nn',
+    };
+    this.events.onStatsUpdate?.(this.getStats());
+  }
+
+  private updateStats(
+    processingTimeMs: number,
+    rms: number,
+    phoneme: Phoneme | 'nn',
+    f1: number,
+    f2: number,
+    distances: Record<Phoneme, number>
+  ): void {
+    this.sampleCount++;
+    this.totalTimeMs += processingTimeMs;
+    if (processingTimeMs < this.minTimeMs) this.minTimeMs = processingTimeMs;
+    if (processingTimeMs > this.maxTimeMs) this.maxTimeMs = processingTimeMs;
+    const avgTimeMs = this.totalTimeMs / this.sampleCount;
+
+    this.lastStats = {
+      processingTimeMs,
+      minTimeMs: this.minTimeMs === Infinity ? 0 : this.minTimeMs,
+      maxTimeMs: this.maxTimeMs,
+      avgTimeMs,
+      count: this.sampleCount,
+      rms,
+      f1,
+      f2,
+      distances,
+      phoneme,
+    };
+
+    if (this.events.onStatsUpdate) {
+      this.events.onStatsUpdate(this.lastStats);
+    }
+  }
+
+  public async startMicrophone(): Promise<void> {
+    this.initAudioContext();
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+    if (this.isPlaying && !this.isMicrophoneActive) {
+      this.audioElement.pause();
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('getUserMedia is not supported in this browser environment');
+    }
+
+    this.micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: true,
+      },
+    });
+
+    if (this.audioContext && this.analyzerNode) {
+      this.micSourceNode = this.audioContext.createMediaStreamSource(this.micStream);
+      this.micGainNode = this.audioContext.createGain();
+      this.micGainNode.gain.setValueAtTime(this.micGainValue, this.audioContext.currentTime);
+
+      // Connect: micSource -> micGain -> analyzer.
+      // Never connect to destination to avoid acoustic speaker feedback.
+      this.micSourceNode.connect(this.micGainNode);
+      this.micGainNode.connect(this.analyzerNode);
+    }
+
+    this.silenceHoldCounter = 0;
+    this.smoothedRms = 0;
+    this.isVoicing = false;
+    this.isMicrophoneActive = true;
+    this.isPlaying = true;
+    if (this.events.onPlayStateChange) {
+      this.events.onPlayStateChange(true);
+    }
+  }
+
+  public stopMicrophone(): void {
+    if (this.micSourceNode) {
+      try {
+        if (this.micGainNode) {
+          this.micSourceNode.disconnect(this.micGainNode);
+          this.micGainNode.disconnect();
+        } else if (this.analyzerNode) {
+          this.micSourceNode.disconnect(this.analyzerNode);
+        }
+      } catch {
+        // ignore
+      }
+      this.micSourceNode = null;
+      this.micGainNode = null;
+    }
+
+    if (this.micStream) {
+      this.micStream.getTracks().forEach((t) => t.stop());
+      this.micStream = null;
+    }
+
+    this.isMicrophoneActive = false;
+    this.silenceHoldCounter = 0;
+    this.smoothedRms = 0;
+    this.isVoicing = false;
+    if (this.audioElement.paused) {
+      this.isPlaying = false;
+      this.currentPhoneme = 'nn';
+      this.events.onPhonemeChange?.('nn');
+      if (this.events.onPlayStateChange) {
+        this.events.onPlayStateChange(false);
+      }
+    }
   }
 
   private scheduleAnalysis(): void {
@@ -266,72 +398,170 @@ export class AudioLipSync {
   private analyzeCurrentFrame(): void {
     if (!this.isPlaying || !this.analyzerNode || !this.analysisBuffer) return;
 
+    const t0 = performance.now();
     this.analyzerNode.getFloatTimeDomainData(this.analysisBuffer);
     const features = Meyda.extract(
       ['mfcc', 'rms', 'powerSpectrum'],
       this.analysisBuffer
     );
-    const rms = features?.rms ?? 0;
-    this.currentRms = rms;
+    const rawRms = features?.rms ?? 0;
+    // Exponential moving average for RMS to prevent dropouts during pitch wave valleys
+    this.smoothedRms = this.smoothedRms * 0.6 + rawRms * 0.4;
+    const effectiveRms = Math.max(rawRms, this.smoothedRms);
+    this.currentRms = effectiveRms;
 
-    // If audio level is too quiet (silence/noise floor), close mouth.
-    if (rms < this.rmsThreshold) {
+    // Hysteresis & hold-time state machine for voice activity
+    if (this.isVoicing) {
+      if (effectiveRms < this.rmsReleaseThreshold) {
+        if (this.silenceHoldCounter > 0) {
+          this.silenceHoldCounter--;
+        } else {
+          this.isVoicing = false;
+        }
+      } else {
+        this.silenceHoldCounter = this.holdFrames;
+      }
+    } else {
+      if (effectiveRms >= this.rmsThreshold) {
+        this.isVoicing = true;
+        this.silenceHoldCounter = this.holdFrames;
+      }
+    }
+
+    // If not voicing (silence floor and hangover expired), close mouth.
+    if (!this.isVoicing) {
       if (this.currentPhoneme !== 'nn') {
         this.currentPhoneme = 'nn';
         this.events.onPhonemeChange?.('nn');
       }
+      const t1 = performance.now();
+      this.updateStats(t1 - t0, effectiveRms, 'nn', 0, 0, { aa: 99, ee: 99, ih: 99, oh: 99, ou: 99 });
       return;
     }
 
+    // In hangover period when instantaneous energy dropped significantly, hold previous phoneme
     const spectrum = features?.powerSpectrum;
-    if (spectrum && spectrum.length > 0) {
-      const phoneme = this.guessPhoneme(features.mfcc, spectrum);
+    if (spectrum && spectrum.length > 0 && rawRms >= this.rmsReleaseThreshold) {
+      const { phoneme, f1, f2, distances } = this.guessPhonemeDetailed(features.mfcc, spectrum);
       if (this.currentPhoneme !== phoneme) {
         this.currentPhoneme = phoneme;
         this.events.onPhonemeChange?.(phoneme);
       }
+      const t1 = performance.now();
+      this.updateStats(t1 - t0, effectiveRms, phoneme, f1, f2, distances);
+    } else {
+      // Hold previous vowel during brief energy dips within hangover
+      const t1 = performance.now();
+      this.updateStats(
+        t1 - t0,
+        effectiveRms,
+        this.currentPhoneme || 'nn',
+        this.lastStats.f1,
+        this.lastStats.f2,
+        this.lastStats.distances
+      );
     }
   }
 
   /**
-   * High-accuracy Japanese phoneme classifier combining spectral formant peak tracking
-   * (F1 mouth opening, F2 tongue frontness/rounding) with log-frequency distance modeling.
+   * High-accuracy Japanese phoneme classifier combining empirical MFCC distance modeling
+   * with guided spectral resonance formant (F1/F2) tracking.
    */
-  public guessPhoneme(_mfcc?: number[], powerSpectrum?: ArrayLike<number>): Phoneme | 'nn' {
+  public guessPhonemeDetailed(
+    mfcc?: number[],
+    powerSpectrum?: ArrayLike<number>
+  ): { phoneme: Phoneme | 'nn'; f1: number; f2: number; distances: Record<Phoneme, number> } {
+    const defaultDistances: Record<Phoneme, number> = {
+      aa: 99,
+      ee: 99,
+      ih: 99,
+      oh: 99,
+      ou: 99,
+    };
+
     if (!powerSpectrum || powerSpectrum.length === 0 || !this.audioContext) {
-      return 'nn';
+      return { phoneme: 'nn', f1: 0, f2: 0, distances: defaultDistances };
     }
 
-    const bufferSize = this.analyzerNode ? this.analyzerNode.fftSize : 1024;
-    const { f1, f2 } = findFormantPeaks(
-      powerSpectrum,
-      this.audioContext.sampleRate,
-      bufferSize,
-      this.voiceGender
-    );
-
-    const targets = VOWEL_TARGETS[this.voiceGender] || VOWEL_TARGETS.female;
+    const targets = MFCC_TARGETS[this.voiceGender] || MFCC_TARGETS.female;
     let bestPhoneme: Phoneme | 'nn' = 'nn';
     let minDist = Infinity;
+    const distances: Record<Phoneme, number> = { ...defaultDistances };
 
-    for (const p of PHONEMES) {
-      const target = targets[p];
-      const dF1 = Math.log(f1 / target.f1) * target.weightF1;
-      const dF2 = Math.log(f2 / target.f2) * target.weightF2;
-      let dist = Math.sqrt(dF1 * dF1 + dF2 * dF2);
+    if (mfcc && mfcc.length >= 13) {
+      // Primary classifier: MFCC 1..12 distance (volume-invariant, timbre/vowel envelope matching)
+      for (const p of PHONEMES) {
+        const targetVec = targets[p];
+        let sumSq = 0;
+        for (let j = 0; j < 12; j++) {
+          const diff = (mfcc[j + 1] ?? 0) - targetVec[j];
+          sumSq += diff * diff;
+        }
+        let dist = Math.sqrt(sumSq);
 
-      // Hysteresis: prevent rapid fluttering between adjacent vowels
-      if (this.currentPhoneme === p) {
-        dist *= 0.82;
-      }
+        // Hysteresis: prevent rapid fluttering between adjacent vowels
+        if (this.currentPhoneme === p) {
+          dist *= 0.82;
+        }
 
-      if (dist < minDist) {
-        minDist = dist;
-        bestPhoneme = p;
+        // Normalize distance scale for UI meter readability (~0.1 to 1.5)
+        distances[p] = Math.round((dist / 50.0) * 100) / 100;
+
+        if (dist < minDist) {
+          minDist = dist;
+          bestPhoneme = p;
+        }
       }
     }
 
-    return bestPhoneme;
+    // Secondary: Extract accurate F1 and F2 formants from spectrum guided by predicted vowel range
+    const bufferSize = this.analyzerNode ? this.analyzerNode.fftSize : 1024;
+    const binWidth = this.audioContext.sampleRate / bufferSize;
+    const numBins = powerSpectrum.length;
+
+    // Smooth envelope with ~360Hz window to eliminate pitch harmonics
+    const smoothRadius = Math.max(3, Math.round(360 / (2 * binWidth)));
+    const smoothed = new Float32Array(numBins);
+    for (let i = 0; i < numBins; i++) {
+      let sum = 0, count = 0;
+      for (let w = -smoothRadius; w <= smoothRadius; w++) {
+        const idx = i + w;
+        if (idx >= 0 && idx < numBins) {
+          sum += powerSpectrum[idx];
+          count++;
+        }
+      }
+      smoothed[i] = sum / (count || 1);
+    }
+
+    const ranges = FORMANT_SEARCH_RANGES[this.voiceGender] || FORMANT_SEARCH_RANGES.female;
+    const activeRange = bestPhoneme !== 'nn' ? ranges[bestPhoneme] : ranges.aa;
+
+    const findPeakInHz = (minHz: number, maxHz: number): number => {
+      const minB = Math.round(minHz / binWidth);
+      const maxB = Math.round(maxHz / binWidth);
+      let bestBin = minB;
+      let maxVal = -1;
+      for (let b = minB; b <= maxB; b++) {
+        if (smoothed[b] > maxVal) {
+          maxVal = smoothed[b];
+          bestBin = b;
+        }
+      }
+      return Math.round(bestBin * binWidth);
+    };
+
+    const f1 = findPeakInHz(activeRange.f1[0], activeRange.f1[1]);
+    const f2 = findPeakInHz(activeRange.f2[0], activeRange.f2[1]);
+
+    return { phoneme: bestPhoneme, f1, f2, distances };
+  }
+
+  /**
+   * Backwards-compatible phoneme classifier
+   */
+  public guessPhoneme(mfcc?: number[], powerSpectrum?: ArrayLike<number>): Phoneme | 'nn' {
+    return this.guessPhonemeDetailed(mfcc, powerSpectrum).phoneme;
   }
 
   /**
@@ -413,6 +643,9 @@ export class AudioLipSync {
    * Stop audio and reset to beginning
    */
   public stop(): void {
+    if (this.isMicrophoneActive) {
+      this.stopMicrophone();
+    }
     this.audioElement.pause();
     this.audioElement.currentTime = 0;
     this.isPlaying = false;
@@ -449,6 +682,7 @@ export class AudioLipSync {
    */
   public dispose(): void {
     this.stop();
+    this.stopMicrophone();
     if (this.analysisFrameId !== null) {
       cancelAnimationFrame(this.analysisFrameId);
       this.analysisFrameId = null;

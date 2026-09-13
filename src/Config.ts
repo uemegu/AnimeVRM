@@ -12,6 +12,7 @@ export interface MaterialStyleParams {
   shadowBoundaryTint: number;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
+  faceShadingShiftFactor?: number;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;
@@ -274,6 +275,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowBoundaryTint: 0.35,
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
+      faceShadingShiftFactor: 0.65,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
       emissiveIntensity: 0.0,

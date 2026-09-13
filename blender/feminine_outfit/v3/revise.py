@@ -55,7 +55,14 @@ for m,v in states:m.show_viewport=v
 misses=[]
 def fit(a,z,clear=.0018):
  center=Vector((0,-.043,z));u=Vector((cos(a),sin(a),0));hit,n,idx,d=tree.ray_cast(center+u*.4,-u,.5)
- if hit is None:
+ if hit is None or (hit-center).dot(u)<.025:
+  # The original shirt has split UV seams. Sample either side instead of
+  # accidentally fitting to the opposite wall through a seam opening.
+  radii=[]
+  for da in [-.035,-.015,.015,.035]:
+   v=Vector((cos(a+da),sin(a+da),0));h,_,_,_=tree.ray_cast(center+v*.4,-v,.5)
+   if h is not None and (h-center).dot(v)>.025:radii.append((h-center).dot(v))
+  if radii:return center+u*(sum(radii)/len(radii)+clear)
   misses.append((a,z));return Vector((.098*cos(a),-.043+.079*sin(a),z))+u*clear
  return hit+u*clear
 
@@ -98,7 +105,7 @@ def surface(p):
 for sign,side in [(1,'L'),(-1,'R')]:
  ns=60;nr=8;vs=[];out=[];inset=[]
  for i in range(ns+1):
-  a=interp(inner,i/ns);b=interp(outer,i/ns);a.x*=sign;b.x*=sign
+  a=interp(inner,i/ns);b=a.lerp(interp(outer,i/ns),.78);a.x*=sign;b.x*=sign
   for j in range(nr+1):
    p=a.lerp(b,j/nr);p.z+=.0015*sin(pi*j/nr);vs.append(tuple(surface(p)))
   out.append(tuple(surface(b.copy())+Vector((0,-.0007,.0003))));inset.append(tuple(surface(a.lerp(b,.89))+Vector((0,-.0009,.0004))))
@@ -106,6 +113,10 @@ for sign,side in [(1,'L'),(-1,'R')]:
  if sign<0:fs=[tuple(reversed(f)) for f in fs]
  o=mesh('V3 Folded collar '+side,vs,fs,ivory);bind(o,'J_Bip_C_UpperChest');m=o.modifiers.new('Collar thickness','SOLIDIFY');m.thickness=.0012;m.offset=0
  edge('V3 Pink collar edge '+side,out,.00065,pink,'J_Bip_C_UpperChest');edge('V3 Pink collar second line '+side,inset,.0004,pink,'J_Bip_C_UpperChest')
+
+for o in bpy.data.collections['Feminine • reference detail revision'].objects:
+ if o.type=='MESH' and any(n in o.name for n in ['Ribbon_Loop','Ribbon_Tail','Ribbon_Knot']):
+  for v in o.data.vertices:v.co.y-=.012
 
 # Bake restrained cloth contrast into native MToon albedo textures.
 scene.render.engine='CYCLES';scene.cycles.samples=1;scene.cycles.use_denoising=False

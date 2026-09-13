@@ -348,6 +348,7 @@ function debugPositions() {
 (window as any).avatarManager = avatarManager;
 (window as any).viewerCore = viewerCore;
 (window as any).scenePresetManager = scenePresetManager;
+(window as any).currentConfig = currentConfig;
 
 console.info(
   '%c💡 [Debug] コンソールで debugPositions() または debugPose() を実行すると、アバター・前景・カメラの現在位置を出力＆コピーできます。',

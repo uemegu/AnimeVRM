@@ -375,6 +375,7 @@ export const ja: Translations = {
     shadowBoundaryTint: '影境界の血色感 (Boundary Tint)',
     toonyFactor: 'トゥーン度 (Toony)',
     shadingShift: '明暗境界シフト (Shift)',
+    faceShadingShift: '顔の明暗境界シフト (Face Shift)',
     giFactor: '環境光均一化 (GI)',
     rimEnabled: 'リムライト有効 (Rim ON)',
     rimColor: 'リムライト色 (Rim Color)',

@@ -39,6 +39,12 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     folder.add(params, 'shadowBoundaryTint', 0.0, 1.0, 0.02).name(tr.gui.shadowBoundaryTint).onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name(tr.gui.shadingShift).onChange(update);
+    if (kind === 'body') {
+      if (params.faceShadingShiftFactor === undefined) {
+        params.faceShadingShiftFactor = 0.65;
+      }
+      folder.add(params as any, 'faceShadingShiftFactor', -1, 1, 0.01).name(tr.gui.faceShadingShift).onChange(update);
+    }
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name(tr.gui.giFactor).onChange(update);
 
     folder.add(params, 'rimEnabled').name(tr.gui.rimEnabled).onChange(update);
