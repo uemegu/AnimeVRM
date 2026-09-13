@@ -25,3 +25,8 @@ dist-ssr
 /samples
 /scratch
 /scripts
+/blender
+/output
+/renders
+/tests
+/test-results
