@@ -1,0 +1,26 @@
+{
+  "baked": [
+    {
+      "object": "V2_Knit_Bodice",
+      "image": "/Users/ueda/git/practice/vrm-view/vrm-genshin-like/blender/feminine_outfit/v2/Knit_Bodice_Albedo.png",
+      "mtoon": true
+    },
+    {
+      "object": "V2_Puffed_Sleeve_L",
+      "image": "/Users/ueda/git/practice/vrm-view/vrm-genshin-like/blender/feminine_outfit/v2/Puffed_Sleeve_L_Albedo.png",
+      "mtoon": true
+    },
+    {
+      "object": "V2_Puffed_Sleeve_R",
+      "image": "/Users/ueda/git/practice/vrm-view/vrm-genshin-like/blender/feminine_outfit/v2/Puffed_Sleeve_R_Albedo.png",
+      "mtoon": true
+    },
+    {
+      "object": "V2_Draped_Flare_Skirt",
+      "image": "/Users/ueda/git/practice/vrm-view/vrm-genshin-like/blender/feminine_outfit/v2/Draped_Flare_Skirt_Albedo.png",
+      "mtoon": true
+    }
+  ],
+  "other_materials_converted": 15,
+  "non_mtoon_outfit_materials": []
+}

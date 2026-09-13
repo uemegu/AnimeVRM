@@ -43,14 +43,18 @@ export class ScenePresetManager {
       if (tod === 'day') return 'day_school';
       if (tod === 'evening') return 'evening_school';
       if (tod === 'rainy') return 'rainy_school';
+      if (tod === 'night') return 'night_school';
     } else if (loc === 'classroom' || loc === 'cafe' || loc === 'myroom') {
       if (tod === 'dark_indoor') return 'dark_indoor';
       return 'bright_indoor';
+    } else if (loc === 'night_festival') {
+      if (tod === 'night') return 'night_festival';
     }
     if (tod === 'morning') return 'morning_park';
     if (tod === 'day') return 'day_park';
     if (tod === 'evening') return 'evening_park';
     if (tod === 'rainy') return 'rainy_park';
+    if (tod === 'night') return 'night_park';
     if (tod === 'dark_indoor') return 'dark_indoor';
     if (tod === 'bright_indoor') return 'bright_indoor';
     return 'day_park';
@@ -151,6 +155,8 @@ export class ScenePresetManager {
       ? 'evening'
       : presetId.startsWith('rainy')
       ? 'rainy'
+      : presetId.startsWith('night')
+      ? 'night'
       : presetId === 'bright_indoor'
       ? 'bright_indoor'
       : presetId === 'dark_indoor'
@@ -159,6 +165,8 @@ export class ScenePresetManager {
 
     const loc = (presetId.includes('school')
       ? 'school_gate'
+      : presetId === 'night_festival'
+      ? 'night_festival'
       : presetId === 'bright_indoor'
       ? 'cafe'
       : presetId.includes('indoor')

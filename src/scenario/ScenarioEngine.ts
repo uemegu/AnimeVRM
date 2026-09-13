@@ -255,7 +255,11 @@ export class ScenarioEngine {
     this.startSe(sePath || undefined, scenarioPackage.seVolume);
 
     this.messageWindow.setAutoMode(this.isAutoMode);
-    this.messageWindow.show();
+    if (scenarioPackage.hideMessageWindow) {
+      this.messageWindow.hide();
+    } else {
+      this.messageWindow.show();
+    }
     this.executeCurrentScene();
   }
 
@@ -889,6 +893,8 @@ export class ScenarioEngine {
 
     // ロケーションが切り替わる場合、または明示的な fade_black 指定時は暗転トランジションを実行
     const isLocationChanged =
+      scene.screenTransition !== 'none' &&
+      !this.currentPackage?.hideMessageWindow &&
       this.lastLocation !== undefined &&
       scene.location !== undefined &&
       scene.location !== this.lastLocation;
@@ -1066,6 +1072,9 @@ export class ScenarioEngine {
       this.messageWindow.setLocation(scene.location);
     }
     this.messageWindow.setText(scene.text, scene.speaker ?? '');
+    if (this.currentPackage?.hideMessageWindow) {
+      this.messageWindow.hide();
+    }
 
     // 6. Reset and display choices with attention delay if present
     this.messageWindow.hideChoices();
@@ -1073,6 +1082,12 @@ export class ScenarioEngine {
       this.showChoicesWithAttention(scene.choices, (choice) => {
         this.selectChoice(choice);
       });
+    } else if (!voiceKey && (this.isAutoMode || scene.autoNextSec !== undefined || this.currentPackage?.hideMessageWindow)) {
+      const delaySec = scene.autoNextSec ?? 3.0;
+      this.clearAutoNextTimer();
+      this.autoNextTimer = window.setTimeout(() => {
+        this.next();
+      }, delaySec * 1000);
     }
 
     this.onSceneChange?.(scene, this.getState());
@@ -1094,7 +1109,7 @@ export class ScenarioEngine {
     }
 
     // Normal dialogue line
-    if (this.isAutoMode || scene.autoNextSec) {
+    if (this.isAutoMode || scene.autoNextSec !== undefined) {
       const delaySec = scene.autoNextSec ?? 0.8;
       this.clearAutoNextTimer();
       this.autoNextTimer = window.setTimeout(() => {

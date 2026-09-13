@@ -28,12 +28,14 @@ import {
 } from '../ui/helpers';
 import { AvatarManager } from '../avatar/AvatarManager';
 import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
+import { PvTitleOverlay } from '../ui/PvTitleOverlay';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
   public scrollingBackgroundManager: ScrollingBackgroundManager;
   public dreamBackground: AnimeDreamBackground;
   public interludeOverlay: InterludeOverlay;
+  public pvTitleOverlay: PvTitleOverlay;
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
   public masterManager: MasterDataManager;
@@ -86,6 +88,7 @@ export class ScenarioController {
     this.dreamBackground = new AnimeDreamBackground(this.scene, this.camera);
 
     this.interludeOverlay = new InterludeOverlay();
+    this.pvTitleOverlay = new PvTitleOverlay();
 
     this.dialogueCameraController = new DialogueCameraController({
       camera: this.camera,
@@ -167,11 +170,95 @@ export class ScenarioController {
         if (!this.scenarioEngine.isPlaying) {
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
+          this.pvTitleOverlay.hide();
         }
         this.syncPlayStateUI();
       },
       onSceneChange: (scene, state) => {
         updateScenarioDebugUI(scene, state);
+        if (scene.id.startsWith('pv_cut')) {
+          if (scene.id === 'pv_cut9_climax') {
+            this.pvTitleOverlay.showKawaiiTitleLogo();
+          } else {
+            this.pvTitleOverlay.hideKawaiiTitleLogo();
+            const pvSubtitles: Record<string, any> = {
+              pv_cut1: {
+                layout: 'step-cascade',
+                theme: 'day',
+                lines: [
+                  { text: 'もしも、', en: 'IF EVER' },
+                  { text: '世界が今日', en: 'THE WORLD ENDS' },
+                  { text: '終わるなら。', en: 'RIGHT TODAY' },
+                ],
+              },
+              pv_cut2: {
+                layout: 'l-shape',
+                side: 'right',
+                theme: 'day',
+                titleText: '名前を呼ぶことも、できなかった。',
+                verticalEn: 'AFTERNOON CLASSROOM',
+                subText: 'SCENE 02 ／ FIVE SECONDS CONFESSION',
+              },
+              pv_cut3: {
+                layout: 'l-shape',
+                side: 'left',
+                theme: 'day',
+                titleText: '「友達」のままじゃ、終われない。',
+                verticalEn: 'TEASING HEART',
+                subText: 'WE CANNOT JUST STAY FRIENDS',
+              },
+              pv_cut4: {
+                layout: 'l-shape',
+                side: 'left',
+                theme: 'day',
+                titleText: '素直になれない、距離がもどかしい。',
+                verticalEn: 'SILENT DISTANCE',
+                subText: 'THIS DISTANCE HURTS',
+              },
+              pv_cut5: {
+                layout: 'l-shape',
+                side: 'right',
+                theme: 'sunset',
+                titleText: '残された時間は、あと少し――',
+                verticalEn: 'SUMMER BREEZE',
+                subText: 'OUR TIME IS RUNNING OUT',
+              },
+              pv_cut6: {
+                layout: 'ghost-smash',
+                theme: 'day',
+                ghostText: 'FALL IN LOVE',
+                titleText: 'この夏、君に<span style="color:#f43f5e; -webkit-text-stroke: 1.5px #ffffff;">恋</span>をした。',
+                subText: '✦ THIS SUMMER, I FELL IN LOVE WITH YOU ✦',
+              },
+              pv_cut7: {
+                layout: 'l-shape',
+                side: 'left',
+                theme: 'sunset',
+                titleText: '夕暮れが、本音を暴いていく。',
+                verticalEn: 'CRIMSON TWILIGHT',
+                subText: 'TWILIGHT REVEALS TRUE FEELINGS',
+              },
+              pv_cut8: {
+                layout: 'bottom-glow',
+                theme: 'night',
+                titleText: '伝えたい想いは、ひとつだけ。',
+                subText: 'ONLY ONE FEELING TO CONFESS',
+              },
+              pv_cut9_intro: {
+                layout: 'cinema-push',
+                theme: 'sunset',
+                titleText: 'たった<span style="color:#f43f5e; -webkit-text-stroke: 1.5px #ffffff; font-weight: 900;">５秒</span>の勇気で、世界は変わる。',
+                subText: '✦ A FIVE-SECOND MIRACLE ✦',
+              },
+            };
+            const cfg = pvSubtitles[scene.id];
+            if (cfg) {
+              this.pvTitleOverlay.updateSubtitle(cfg);
+            }
+          }
+        } else {
+          this.pvTitleOverlay.hide();
+        }
       },
       onApplySceneCamera: (scene) => {
         this.dialogueCameraController.applyScene(scene);
@@ -281,6 +368,7 @@ export class ScenarioController {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
+        this.pvTitleOverlay.hide();
         const cfg = this.getConfig();
         if (cfg.postProcessing.cinematic?.fisheye) {
           cfg.postProcessing.cinematic.fisheye.enabled = false;

@@ -170,6 +170,7 @@ export interface ScenarioPackage {
   se?: string;        // Sound Master ID (e.g. 'se_cicada')
   seUrl?: string;     // Direct SE URL (Backward compatibility)
   seVolume?: number;
+  hideMessageWindow?: boolean; // PV等の演出用に標準メッセージウィンドウを非表示にする
   chapters: ScenarioChapter[];
 }
 

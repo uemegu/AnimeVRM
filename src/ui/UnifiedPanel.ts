@@ -19,6 +19,7 @@ import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
 import { getPrivateDateScenario } from '../scenario/privateDateScenario';
+import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -339,11 +340,12 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <div style="display: flex; flex-direction: column; gap: 6px;">
               <div>
                 <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">屋外 (Outdoor)</span>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;">
                   <button data-timeofday="morning" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'morning' ? 'active' : ''}" title="${tr.scenes.presetMorningParkTip}">${tr.scenes.morning}</button>
                   <button data-timeofday="day" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'day' ? 'active' : ''}" title="${tr.scenes.presetDayParkTip}">${tr.scenes.day}</button>
                   <button data-timeofday="evening" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'evening' ? 'active' : ''}" title="${tr.scenes.presetEveningParkTip}">${tr.scenes.evening}</button>
                   <button data-timeofday="rainy" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'rainy' ? 'active' : ''}" title="${tr.scenes.presetRainyParkTip}">${tr.scenes.rainy}</button>
+                  <button data-timeofday="night" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'night' ? 'active' : ''}" title="${tr.scenes.presetNightParkTip}">${tr.scenes.night}</button>
                 </div>
               </div>
               <div>
@@ -362,8 +364,11 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">背景（場所）のみを切り替えます。時間帯パラメータは維持されます。</p>
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
               <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.avif')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.avif')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
+              <button data-location="park_with_sea" data-bg="${resolveAssetUrl('/textures/park-with-sea-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.parkWithSea}</button>
               <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
               <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>
+              <button data-location="school_rooftop" data-bg="${resolveAssetUrl('/textures/school-rooftop-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolRooftop}</button>
+              <button data-location="night_festival" data-bg="${resolveAssetUrl('/textures/night-festival-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.nightFestival}</button>
               <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
               <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.avif')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
               <button data-location="town" data-bg="${resolveAssetUrl('/textures/town_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.town}</button>
@@ -399,6 +404,21 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           </div>
 
           <!-- Scenarios -->
+          <!-- ★ SPECIAL: PV「5秒の告白」 -->
+          <div class="section-box" style="background: linear-gradient(135deg, rgba(35, 18, 42, 0.95) 0%, rgba(20, 24, 48, 0.95) 100%); border: 2px solid #ec4899; border-left: 5px solid #ff1493; padding: 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label" style="color: #ff69b4; font-weight: 800; font-size: 13px; margin-bottom: 0;">🎬 【PV】5秒の告白 〜5 Seconds Confession〜</label>
+              <span style="font-size: 10px; padding: 2px 7px; background: linear-gradient(135deg, #ff1493, #a855f7); color: #ffffff; border-radius: 999px; font-weight: 800; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(255, 20, 147, 0.4);">NEW PV</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <button id="scenario-pv-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ff1493 0%, #ec4899 50%, #8b5cf6 100%); font-weight: 800; box-shadow: 0 4px 14px rgba(255, 20, 147, 0.4); font-size: 13px; padding: 8px 10px; letter-spacing: 0.04em;">▶ PV「5秒の告白」を再生 (65秒)</button>
+              <button id="scenario-pv-stop-btn" class="action-btn" style="min-width: 60px; font-weight: 700;">停止</button>
+            </div>
+            <div style="font-size: 11px; color: #ffd1dc; line-height: 1.45; margin-top: 6px;">
+              BGM「thema_music.mp3」完全同期！32秒サビ、56秒フレーズ、1:00クライマックス「大好きだよ！」＆Kawaiiタイトルロゴ演出。
+            </div>
+          </div>
+
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #ec4899; padding: 8px; border-radius: 4px;">
             <label class="section-label" style="color: #f472b6; font-weight: 700;">${tr.scenario.confessionTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -1428,6 +1448,33 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       showToast(t().toasts.scenarioStopped);
     });
 
+    // 5 Seconds Confession PV Scenario Play/Stop
+    document.getElementById('scenario-pv-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getFiveSecondsConfessionPvScenario();
+        await scenarioController.playWithInterlude(scenario, {
+          title: '5秒の告白',
+          subtitle: '5 SECONDS CONFESSION - OFFICIAL PV -',
+        });
+        showToast('🎬 PV「5秒の告白」を再生します');
+      }
+    });
+
+    document.getElementById('scenario-pv-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      scenarioController.pvTitleOverlay.hide();
+      showToast(t().toasts.scenarioStopped);
+    });
+
     // Background Buttons
     const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
     bgButtons.forEach((btn) => {
@@ -1445,6 +1492,10 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           } else {
             currentConfig.activeScene.location = loc;
           }
+          currentConfig.activeScene.presetId = scenePresetManager.getScenePresetIdFromState(
+            scenePresetManager.getActiveTimeOfDay(),
+            loc
+          );
         }
         if (bg === 'none') {
           currentConfig.environment.showBackgroundImage = false;

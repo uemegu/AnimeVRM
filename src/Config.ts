@@ -251,7 +251,7 @@ export interface AvatarConfig {
   lipSync: LipSyncConfig;
   activeScene?: {
     presetId?: string;
-    timeOfDay?: 'morning' | 'day' | 'evening' | 'bright_indoor' | 'dark_indoor' | string;
+    timeOfDay?: 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | string;
     location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'apartment_door' | 'myroom' | 'none' | 'outdoor' | 'indoor' | string;
   };
   wind: WindConfig;
