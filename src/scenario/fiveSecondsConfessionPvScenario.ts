@@ -24,6 +24,7 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
   title: '【PV】5秒の告白 〜5 Seconds Confession〜',
   bgmUrl: resolveAssetUrl('/bgm/thema_music.mp3'),
   bgmVolume: 0.45,
+  bgmLoop: false,
   hideMessageWindow: true,
   characters: [
     // 制服グループ (Cut 1, Cut 2, Cut 4)
@@ -75,8 +76,8 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
         // ============================================================
         {
           id: 'pv_cut1',
-          speaker: 'アオイ',
-          speakerCharacterId: 'girl_01_school',
+          speaker: 'ナレーション',
+          lipSyncCharacterId: null, // ナレーションのため、誰のリップシンクとも同期しない
           dialogueTarget: 'player',
           location: '屋上・青空の下',
           screenTransition: 'none',
@@ -199,7 +200,6 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
               motion: resolveAssetUrl('/animations/Idle.fbx'),
               expression: 'relaxed',
               expressionWeight: 0.85,
-              effectText: 'doki',
               lookAtTarget: 'player',
             },
             girl_04_private: { visible: false },
@@ -270,7 +270,7 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
           cameraTransitionDuration: 0.55,
           cameraPreset: 'orbitLeftHalf',
           cameraStrength: 0.7,
-          autoNextSec: 2.16, // 32.0秒サビ開始にジャストフィット
+          autoNextSec: 1.16, // サビ入りを1.0秒早めて音ハメ
           avatars: {
             girl_01_school: { visible: false },
             girl_02_school: { visible: false },
@@ -324,7 +324,6 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
               motion: resolveAssetUrl('/animations/Excited.fbx'),
               expression: 'relaxed',
               expressionWeight: 0.9,
-              effectText: 'kirakira',
               lookAtTarget: 'player',
             },
             girl_04_private: { visible: false },
@@ -377,7 +376,8 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
         // ============================================================
         {
           id: 'pv_cut8',
-          speaker: '3人',
+          speaker: 'ナレーション',
+          lipSyncCharacterId: null, // ナレーションのためリップシンク無効
           dialogueTarget: 'player',
           location: '夜の夏祭り・花火の空',
           screenTransition: 'none',
@@ -512,17 +512,15 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
               expression: 'relaxed',
               expressionWeight: 1.0,
-              effectText: 'kirakira',
               lookAtTarget: 'player',
             },
             girl_02_private: {
               visible: true,
               position: [0.34, -0.05, -1.15],
               rotationY: -0.15,
-              motion: resolveAssetUrl('/animations/Excited.fbx'),
+              motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
               expression: 'relaxed',
               expressionWeight: 1.0,
-              effectText: 'yatta',
               lookAtTarget: 'player',
             },
             girl_04_private: {
@@ -532,7 +530,6 @@ export const FIVE_SECONDS_CONFESSION_PV_SCENARIO: ScenarioPackage = {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
               expression: 'relaxed',
               expressionWeight: 1.0,
-              effectText: 'doki',
               lookAtTarget: 'player',
             },
           },
