@@ -13,7 +13,7 @@ void main(){vec2 q=p;float hw=1.0-smoothstep(600.0,1050.0,p.y);vec2 pivot=vec2(7
  q.x+=hairL*bell(p,vec2(335.0,545.0),vec2(100.0,140.0));
  q.x+=hairR*bell(p,vec2(827.0,452.0),vec2(52.0,115.0));
  q.x+=ribbon*bell(p,vec2(570.0,930.0),vec2(53.0,125.0));
- uv=(p-crop.xy)/crop.zw;sourcePoint=p;gl_Position=vec4((q.x/${W}.0*2.0-1.0)*0.94,(1.0-q.y/${H}.0*2.0)*0.94,0,1);}`;
+ uv=(p-crop.xy)/crop.zw;sourcePoint=p;gl_Position=vec4((q.x/${W}.0*2.0-1.0)*0.98,(1.0-q.y/${H}.0*2.0)*1.04-0.08,0,1);}`;
 const frag=`precision highp float;uniform sampler2D tex;uniform float opacity,iris,blush,wet,mouthMode,eyeStage,eyeClosure;uniform float mouthWeights[10];uniform vec2 gaze;uniform vec4 crop;varying vec2 uv;varying vec2 sourcePoint;
 float spot(vec2 center,vec2 size){vec2 d=(sourcePoint-center)/size;return exp(-dot(d,d)*2.0);}
 void main(){if(uv.x<0.0||uv.y<0.0||uv.x>1.0||uv.y>1.0)discard;

@@ -20,6 +20,7 @@ import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
 import { getPrivateDateScenario } from '../scenario/privateDateScenario';
 import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
+import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -419,6 +420,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 11px; color: #ffd1dc; line-height: 1.45; margin-top: 6px;">
               BGM「thema_music.mp3」完全同期！32秒サビ、56秒フレーズ、1:00クライマックス「大好きだよ！」＆Kawaiiタイトルロゴ演出。
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #10b981; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #34d399; font-weight: 700;">${tr.scenario.rooftopNapTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-rooftop-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playRooftopNap}</button>
+              <button id="scenario-rooftop-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #a7f3d0; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.rooftopNapDesc}
             </div>
           </div>
 
@@ -1232,6 +1244,25 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     document.getElementById('scenario-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioPlayer.stop();
+    });
+
+    // Interactive Rooftop Nap Scenario Play/Stop
+    document.getElementById('scenario-rooftop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        scenarioController.scenarioEngine.play(getRooftopNapScenario(getLanguage()));
+        showToast(t().toasts.rooftopNapStarted);
+      }
+    });
+
+    document.getElementById('scenario-rooftop-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
     });
 
     // Interactive Confession Scenario Play/Stop
