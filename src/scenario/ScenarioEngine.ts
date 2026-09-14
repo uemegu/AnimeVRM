@@ -533,10 +533,17 @@ export class ScenarioEngine {
       const resolvedMotion = this.masterManager.resolveMotionUrl(motion) || resolveAssetUrl(motion);
       const motionLower = resolvedMotion.toLowerCase();
       const isLoop =
-        motionLower.includes('idle') ||
-        motionLower.includes('walking') ||
-        motionLower.includes('jogging') ||
-        motionLower.includes('standing pose');
+        config.motionLoop !== undefined
+          ? config.motionLoop
+          : (
+              motionLower.includes('idle') ||
+              motionLower.includes('walking') ||
+              motionLower.includes('jogging') ||
+              motionLower.includes('standing pose') ||
+              motionLower.includes('chin_rest') ||
+              motionLower.includes('sitting') ||
+              motionLower.includes('sit')
+            );
       avatar.playAnimation(
         resolvedMotion,
         isLoop,
