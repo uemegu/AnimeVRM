@@ -1217,5 +1217,127 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
 
   yandereFolder.close();
 
+  // 11. Blush & Watery Eyes Folder (頬赤らめ・うるうる瞳状態)
+  const blushFolder = visualGui.addFolder('🌸 頬赤らめ・うるうる瞳 (Blush & Watery Eyes)');
+  const blushState = {
+    enabled: false,
+    wateryEyes: true,
+    intensity: 1.0,
+    waveSpeed: 2.8,
+    waveScale: 14.0,
+    meniscusIntensity: 1.2,
+    sparkleIntensity: 1.1,
+    waterColor: '#c2f0ff',
+    sparkleColor: '#ffffff',
+    applyBlushDoki: () => {
+      const av = getAvatar();
+      if (!av) return;
+      blushState.enabled = true;
+      avatarManager.setBlushMode(true, {
+        wateryEyes: blushState.wateryEyes,
+        wateryEyeConfig: {
+          intensity: blushState.intensity,
+          waveSpeed: blushState.waveSpeed,
+          waveScale: blushState.waveScale,
+          meniscusIntensity: blushState.meniscusIntensity,
+          sparkleIntensity: blushState.sparkleIntensity,
+          waterColor: blushState.waterColor,
+          sparkleColor: blushState.sparkleColor,
+        },
+      });
+      av.showEffectText({
+        text: '……恥ずかしいよっ///',
+        stylePreset: 'doki',
+        anchor: 'head',
+        duration: 3.5,
+        scale: 1.1,
+      });
+      showToast('🌸 「……恥ずかしいよっ///」');
+      blushFolder.controllersRecursive().forEach((c) => c.updateDisplay());
+    },
+  };
+
+  const updateBlush = () => {
+    const av = getAvatar();
+    if (!av) return;
+    avatarManager.setBlushMode(blushState.enabled, {
+      wateryEyes: blushState.wateryEyes,
+      wateryEyeConfig: {
+        intensity: blushState.intensity,
+        waveSpeed: blushState.waveSpeed,
+        waveScale: blushState.waveScale,
+        meniscusIntensity: blushState.meniscusIntensity,
+        sparkleIntensity: blushState.sparkleIntensity,
+        waterColor: blushState.waterColor,
+        sparkleColor: blushState.sparkleColor,
+      },
+    });
+    if (blushState.enabled) {
+      showToast('🌸 頬赤らめ（ウルウル瞳）モードを発動しました');
+    } else {
+      showToast('✨ 通常状態に戻りました');
+    }
+  };
+
+  blushFolder
+    .add(blushState, 'enabled')
+    .name('赤らめモード ON/OFF')
+    .listen()
+    .onChange((val: boolean) => {
+      blushState.enabled = val;
+      updateBlush();
+    });
+
+  blushFolder
+    .add(blushState, 'wateryEyes')
+    .name('目をウルウルさせる')
+    .onChange(updateBlush);
+
+  blushFolder
+    .add(blushState, 'intensity', 0.0, 2.5, 0.05)
+    .name('ウルウル全体強度')
+    .onChange(() => {
+      const av = getAvatar();
+      av?.wateryEyeEffect?.updateConfig({ intensity: blushState.intensity });
+    });
+
+  blushFolder
+    .add(blushState, 'waveSpeed', 0.5, 6.0, 0.1)
+    .name('水膜ゆらめき速度')
+    .onChange(() => {
+      const av = getAvatar();
+      av?.wateryEyeEffect?.updateConfig({ waveSpeed: blushState.waveSpeed });
+    });
+
+  blushFolder
+    .add(blushState, 'meniscusIntensity', 0.0, 3.0, 0.1)
+    .name('下まぶた涙だまり強度')
+    .onChange(() => {
+      const av = getAvatar();
+      av?.wateryEyeEffect?.updateConfig({ meniscusIntensity: blushState.meniscusIntensity });
+    });
+
+  blushFolder
+    .add(blushState, 'sparkleIntensity', 0.0, 3.0, 0.1)
+    .name('瞳のキラキラ光粒強度')
+    .onChange(() => {
+      const av = getAvatar();
+      av?.wateryEyeEffect?.updateConfig({ sparkleIntensity: blushState.sparkleIntensity });
+    });
+
+  blushFolder
+    .addColor(blushState, 'waterColor')
+    .name('潤み涙膜カラー')
+    .onChange(() => {
+      const av = getAvatar();
+      av?.wateryEyeEffect?.updateConfig({ waterColor: blushState.waterColor });
+    });
+
+  blushFolder
+    .add(blushState, 'applyBlushDoki')
+    .name('💬 「……恥ずかしいよっ///」');
+
+  blushFolder.close();
+
   visualGui.folders.forEach((folder) => folder.close());
 }

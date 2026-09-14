@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { Avatar, YandereOptions } from '../Avatar';
+import { Avatar, YandereOptions, BlushOptions } from '../Avatar';
 import { AvatarConfig } from '../Config';
+import { DEFAULT_CHARACTERS } from '../master/defaultMasters';
 import { EffectTextManager } from '../effects/text';
 import { WindController } from '../wind/WindController';
 import { TypographyOverlay } from '../animation/TypographyOverlay';
@@ -304,6 +305,37 @@ export class AvatarManager {
 
   public getYandereConfig(): Required<YandereOptions> | null {
     return this.avatarInstance?.getYandereConfig() ?? null;
+  }
+
+  public getFaceBlushTextureForModel(modelUrl?: string): string {
+    const url = modelUrl ?? this.currentModelUrl;
+    if (!url) return '/textures/girl_face_blush.png';
+    const char = Object.values(DEFAULT_CHARACTERS).find((c) => {
+      return c.modelUrl === url || resolveAssetUrl(c.modelUrl) === url;
+    });
+    return char?.faceBlushTexture ?? '/textures/girl_face_blush.png';
+  }
+
+  public setBlushMode(enabled: boolean, options?: Partial<BlushOptions>): void {
+    const opts: Partial<BlushOptions> = {
+      faceTexture: this.getFaceBlushTextureForModel(),
+      wateryEyes: true,
+      ...options,
+    };
+    if (this.avatarInstance) {
+      this.avatarInstance.setBlushMode(enabled, opts);
+    }
+    for (const av of this.scenarioAvatars.values()) {
+      av.setBlushMode(enabled, opts);
+    }
+  }
+
+  public isBlushMode(): boolean {
+    return this.avatarInstance?.isBlushMode() ?? false;
+  }
+
+  public getBlushConfig(): Required<BlushOptions> | null {
+    return this.avatarInstance?.getBlushConfig() ?? null;
   }
 }
 
