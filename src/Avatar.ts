@@ -676,6 +676,10 @@ export class Avatar {
   public setExpression(expressionName: string, weight = 1.0, duration = 0.25): void {
     if (!this.vrm?.expressionManager) return;
 
+    if (expressionName === 'normal') {
+      expressionName = 'neutral';
+    }
+
     if (expressionName !== 'yandere') {
       this.resetYandereFacialMorphs();
     }
