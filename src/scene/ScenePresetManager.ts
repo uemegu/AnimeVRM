@@ -22,11 +22,11 @@ export class ScenePresetManager {
   constructor(options: {
     config: AvatarConfig;
     onConfigChange: (cfg: AvatarConfig) => void;
-    onInspectorsUpdate: () => void;
+    onInspectorsUpdate?: () => void;
   }) {
     this.config = options.config;
     this.onConfigChange = options.onConfigChange;
-    this.onInspectorsUpdate = options.onInspectorsUpdate;
+    this.onInspectorsUpdate = options.onInspectorsUpdate ?? (() => {});
   }
 
   public getActiveTimeOfDay(): TimeOfDayId {
