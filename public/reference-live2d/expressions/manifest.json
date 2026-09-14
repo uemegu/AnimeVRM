@@ -1,0 +1,120 @@
+{
+  "mouthRegion": {
+    "x": 536,
+    "y": 484,
+    "width": 128,
+    "height": 128
+  },
+  "entries": [
+    {
+      "name": "mouth_aa",
+      "file": "expressions/mouth_aa.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ih",
+      "file": "expressions/mouth_ih.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ou",
+      "file": "expressions/mouth_ou.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ee",
+      "file": "expressions/mouth_ee.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_oh",
+      "file": "expressions/mouth_oh.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_aa_half",
+      "file": "expressions/mouth_aa_half.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ih_half",
+      "file": "expressions/mouth_ih_half.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ou_half",
+      "file": "expressions/mouth_ou_half.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_ee_half",
+      "file": "expressions/mouth_ee_half.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "mouth_oh_half",
+      "file": "expressions/mouth_oh_half.png",
+      "x": 536,
+      "y": 484,
+      "width": 128,
+      "height": 128,
+      "kind": "mouth"
+    },
+    {
+      "name": "eye_half",
+      "file": "expressions/eye_half.png",
+      "x": 401,
+      "y": 336,
+      "width": 320,
+      "height": 141,
+      "hidden": false,
+      "kind": "eye"
+    },
+    {
+      "name": "eye_open",
+      "file": "expressions/eye_open.png",
+      "x": 401,
+      "y": 336,
+      "width": 320,
+      "height": 141,
+      "hidden": false,
+      "kind": "eye"
+    }
+  ]
+}
