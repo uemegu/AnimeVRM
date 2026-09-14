@@ -574,8 +574,14 @@ export class ScenarioEngine {
     // Dynamic Face Texture (e.g. Blush / Red cheeks)
     if (faceTexture) {
       avatar.setFaceTexture(faceTexture);
+      if (faceTexture.toLowerCase().includes('blush')) {
+        avatar.setBlushMode(true);
+      }
     } else {
       avatar.resetFaceTexture();
+      if (avatar.isBlushMode()) {
+        avatar.setBlushMode(false);
+      }
     }
 
     // 3D Manga Emotion Effect Text (カメラワーク後に発火するようディレイを適用)

@@ -148,6 +148,9 @@ export interface Translations {
     phonemeClosed: string;
   };
   scenario: {
+    rooftopNapTitle: string;
+    playRooftopNap: string;
+    rooftopNapDesc: string;
     confessionTitle: string;
     playConfession: string;
     stopScenario: string;
@@ -288,6 +291,7 @@ export interface Translations {
     scenarioJsonFailed: string;
     animStarted: string;
     animStopped: string;
+    rooftopNapStarted: string;
     confessionStarted: string;
     twoGirlsStarted: string;
     trioStarted: string;

@@ -17,6 +17,7 @@ import { ScenePresetManager } from './scene/ScenePresetManager';
 import { AvatarManager } from './avatar/AvatarManager';
 import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
+import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { InspectorManager } from './ui/inspector/InspectorManager';
 import { setupUnifiedPanel } from './ui/UnifiedPanel';
 import {
@@ -105,6 +106,15 @@ const avatarTransformController = new AvatarTransformController({
   avatarManager,
 });
 (window as any).avatarTransformController = avatarTransformController;
+
+// 3.6 Live2D (2.5D Rig) Transition Manager
+const live2DTransitionManager = new Live2DTransitionManager({
+  avatarManager,
+  viewerCore,
+  audioLipSync,
+  config: currentConfig.live2d,
+});
+(window as any).live2DTransitionManager = live2DTransitionManager;
 
 const inspectorManager = new InspectorManager();
 
@@ -256,6 +266,16 @@ function tick(timestamp?: number): void {
   const vrmMeshes = avatarManager.getVrmMeshes();
   viewerCore.render(delta, elapsed, currentConfig, vrmMeshes);
 
+  // Update Live2D Close-up Cut-in (Scene override & distance check)
+  if (currentScene?.live2d !== undefined) {
+    const live2dOpt = currentScene.live2d;
+    const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
+    live2DTransitionManager.setSceneOverride(isExplicit);
+  } else {
+    live2DTransitionManager.setSceneOverride(null);
+  }
+  live2DTransitionManager.update(delta);
+
   viewerCore.stats.end();
   requestAnimationFrame(tick);
 }
@@ -347,6 +367,7 @@ function debugPositions() {
 (window as any).scenarioController = scenarioController;
 (window as any).avatarManager = avatarManager;
 (window as any).viewerCore = viewerCore;
+(window as any).live2DTransitionManager = live2DTransitionManager;
 (window as any).scenePresetManager = scenePresetManager;
 (window as any).currentConfig = currentConfig;
 

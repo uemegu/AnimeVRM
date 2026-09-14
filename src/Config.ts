@@ -2,8 +2,9 @@ import { resolveAssetUrl } from './utils/path';
 import type { ShortAnimationConfig } from './animation/types';
 import { type RainConfig, DEFAULT_RAIN_CONFIG } from './effects/rain';
 import { type FastMotionConfig, DEFAULT_FAST_MOTION_CONFIG } from './effects/motion';
+import { type Live2DConfig, DEFAULT_LIVE2D_CONFIG } from './live2d/types';
 
-export type { RainConfig, FastMotionConfig };
+export type { RainConfig, FastMotionConfig, Live2DConfig };
 
 export interface MaterialStyleParams {
   color: string;
@@ -259,6 +260,7 @@ export interface AvatarConfig {
   rain: RainConfig;
   shortAnimation: ShortAnimationConfig;
   fastMotion?: FastMotionConfig;
+  live2d?: Live2DConfig;
 }
 
 export const DEFAULT_CONFIG: AvatarConfig = {
@@ -626,6 +628,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   rain: { ...DEFAULT_RAIN_CONFIG },
   fastMotion: { ...DEFAULT_FAST_MOTION_CONFIG },
+  live2d: { ...DEFAULT_LIVE2D_CONFIG },
 };
 
 export function cloneConfig(cfg: AvatarConfig): AvatarConfig {

@@ -138,8 +138,9 @@ export interface ScenarioScene {
   cameraZoom?: CameraZoomType;
   cameraDistance?: number; // Distance multiplier (e.g. 0.6 for close, 1.5 for far)
   cameraTransitionDuration?: number; // Transition duration in seconds (default 0.7s)
-  cameraTransitionEasing?: CameraTransitionEasing;
+  cameraTransitionEasing?: CameraTransitionEasing; // Transition easing (gyuin / smooth / cut)
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
+  live2d?: boolean | { enabled?: boolean; basePath?: string; triggerDistance?: number }; // Live2D近接カットイン表示の有効化/画像パス指定
   cameraPosition?: [number, number, number]; // Direct camera position override (e.g. over-the-shoulder)
   choices?: ScenarioChoice[];
   choiceDelaySec?: number; // 選択肢表示前のディレイ秒数（アバターの視線移動をしっかり見せるための待ち時間、デフォルト 1.0s）

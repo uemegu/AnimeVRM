@@ -148,6 +148,9 @@ export const ja: Translations = {
     phonemeClosed: '閉',
   },
   scenario: {
+    rooftopNapTitle: '🏫 屋上の昼寝と覗き込みハプニング (Live2D 2.5D Rig連動)',
+    playRooftopNap: '🏫 屋上シナリオ再生 (Live2D連動)',
+    rooftopNapDesc: '※屋上で昼寝中、遠くから歩いて近づいてきたアオイがしゃがみ込み覗き込んできます。超至近距離でLive2Dモードにシームレス突入！赤面＆激怒ハプニング。',
     confessionTitle: '🌸 告白イベントシナリオ (話者ズーム・分岐・漫符・音声)',
     playConfession: '🌸 告白シナリオ再生',
     stopScenario: '■ 停止',
@@ -288,6 +291,7 @@ export const ja: Translations = {
     scenarioJsonFailed: '❌ シナリオJSONの読み込みに失敗しました',
     animStarted: '🎬 ショートアニメーションを再生します',
     animStopped: '⏹ アニメーションを停止しました',
+    rooftopNapStarted: '🏫 屋上の昼寝と覗き込みハプニングシナリオを開始しました',
     confessionStarted: '🌸 告白イベントシナリオを開始しました',
     twoGirlsStarted: '👥 2人会話シナリオを開始しました',
     trioStarted: '💬 3人会話シナリオを開始しました',
