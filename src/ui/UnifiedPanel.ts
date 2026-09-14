@@ -212,9 +212,12 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
           <!-- Expressions -->
           <div class="section-box">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
               <label class="section-label">${tr.character.expression}</label>
-              <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
+              <div style="display: flex; gap: 4px;">
+                <button id="blush-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2b1122; border: 1px solid #f43f5e; color: #fbcfe8; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">😳 頬赤らめ</button>
+                <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
+              </div>
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;" id="expression-buttons">
               <button data-expr="neutral" class="expr-btn active">${tr.character.expressions.neutral}</button>
@@ -1637,6 +1640,31 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
     // Expression Buttons
     const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+
+    // Blush Mode Toggle Button (頬赤らめ & ウルウル瞳)
+    const blushToggleBtn = document.getElementById('blush-toggle-btn') as HTMLButtonElement | null;
+    const updateBlushButtonUI = (isActive: boolean) => {
+      if (!blushToggleBtn) return;
+      blushToggleBtn.style.background = isActive ? '#be185d' : '#2b1122';
+      blushToggleBtn.style.borderColor = isActive ? '#f472b6' : '#f43f5e';
+      blushToggleBtn.style.color = isActive ? '#ffffff' : '#fbcfe8';
+      blushToggleBtn.textContent = isActive ? '😳 照れ赤らめ中 (解除)' : '😳 頬赤らめ';
+    };
+
+    blushToggleBtn?.addEventListener('click', () => {
+      const isBlush = avatarManager.isBlushMode();
+      const nextState = !isBlush;
+      avatarManager.setBlushMode(nextState);
+      updateBlushButtonUI(nextState);
+      if (nextState) {
+        // ヤンデレが解除されるためUI更新
+        updateYandereButtonUI(false);
+        showToast('🌸 頬赤らめ（ウルウル瞳）モードを発動しました');
+      } else {
+        showToast('✨ 通常状態に戻りました');
+      }
+    });
+
     // Yandere Mode Toggle Button
     const yandereToggleBtn = document.getElementById('yandere-toggle-btn') as HTMLButtonElement | null;
     const updateYandereButtonUI = (isActive: boolean) => {
@@ -1653,6 +1681,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       avatarManager.setYandereMode(nextState);
       updateYandereButtonUI(nextState);
       if (nextState) {
+        updateBlushButtonUI(false);
         exprButtons.forEach((b) => b.classList.remove('active'));
         showToast('🖤 ヤンデレ闇落ち状態を発動しました');
       } else {
@@ -1669,6 +1698,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (av) {
         avatarManager.setYandereMode(true);
         updateYandereButtonUI(true);
+        updateBlushButtonUI(false);
         exprButtons.forEach((b) => b.classList.remove('active'));
         av.showEffectText({
           text: '……ずっと一緒だよ？',

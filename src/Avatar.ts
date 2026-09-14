@@ -15,6 +15,15 @@ import { EffectTextManager, ShowEffectTextOptions, EffectTextInstance } from './
 import { TearEffect, TearConfig } from './effects/tears';
 import { SweatEffect, SweatConfig } from './effects/sweat';
 import { FastMotionEffect, FastMotionConfig } from './effects/motion';
+import { WateryEyeEffect, WateryEyeConfig } from './effects/eye';
+
+export interface BlushOptions {
+  enabled?: boolean;
+  faceTexture?: string | null;
+  wateryEyes?: boolean;
+  wateryEyeConfig?: Partial<WateryEyeConfig>;
+  applyExpression?: boolean;
+}
 
 export interface YandereOptions {
   enabled?: boolean;
@@ -252,10 +261,32 @@ export class Avatar {
   public tearEffect: TearEffect | null = null;
   public sweatEffect: SweatEffect | null = null;
   public fastMotionEffect: FastMotionEffect | null = null;
+  public wateryEyeEffect: WateryEyeEffect | null = null;
   public renderer: THREE.WebGLRenderer | null = null;
 
   public initialPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
   public initialRotationY: number = 0;
+
+  private isBlushActive = false;
+  private blushConfig: Required<BlushOptions> = {
+    enabled: false,
+    faceTexture: null,
+    wateryEyes: true,
+    wateryEyeConfig: {},
+    applyExpression: false,
+  };
+  private originalHighlightMaterials: Array<{
+    material: any;
+    originalOffset: THREE.Vector2;
+    originalRotation: number;
+    originalEmissive: THREE.Color;
+    originalEmissiveIntensity: number;
+  }> = [];
+  private originalIrisMaterials: Array<{
+    material: any;
+    originalEmissive: THREE.Color;
+    originalEmissiveIntensity: number;
+  }> = [];
 
   private options: AvatarOptions;
   private ownsEffectTextManager = false;
@@ -533,6 +564,9 @@ export class Avatar {
 
         // Initialize sweat effect
         this.sweatEffect = new SweatEffect(vrm, { enabled: false });
+
+        // Initialize watery eye effect (blush & moist eyes)
+        this.wateryEyeEffect = new WateryEyeEffect(vrm, { enabled: false });
 
         // Initialize fast motion effect (arms & legs anime motion effects)
         this.fastMotionEffect = new FastMotionEffect(vrm, this.scene, this.options.config?.fastMotion);
@@ -1400,6 +1434,63 @@ export class Avatar {
     // Update sweat mark effect
     this.sweatEffect?.update(delta);
 
+    // Update watery eyes effect (blush & moist eye shimmering)
+    const blinkVal = this.vrm?.expressionManager?.getValue('blink') ?? 0.0;
+    const isClosed = this.isEyesClosed();
+    const blinkWeight = Math.max(blinkVal, isClosed ? 1.0 : 0.0);
+    this.wateryEyeEffect?.update(delta, elapsed, blinkWeight);
+
+    // Dynamic animation for Eye Highlights and Iris when blush/watery eyes is active
+    if (this.isBlushActive || (this.wateryEyeEffect && this.wateryEyeEffect.config.enabled)) {
+      const wobbleX = Math.sin(elapsed * 4.2) * 0.012 + Math.cos(elapsed * 2.7) * 0.006;
+      const wobbleY = Math.cos(elapsed * 3.6) * 0.012 + Math.sin(elapsed * 5.1) * 0.005;
+      const rot = Math.sin(elapsed * 2.2) * 0.035;
+      const pulseIntensity = 1.35 + 0.45 * Math.sin(elapsed * 3.8) + 0.2 * Math.sin(elapsed * 7.1);
+
+      for (const item of this.originalHighlightMaterials) {
+        const mat = item.material;
+        if (mat.map) {
+          mat.map.offset.set(
+            item.originalOffset.x + wobbleX,
+            item.originalOffset.y + wobbleY
+          );
+          mat.map.rotation = item.originalRotation + rot;
+          mat.map.center.set(0.5, 0.5);
+        }
+        if (mat.emissive) {
+          mat.emissive.setRGB(0.88, 0.96, 1.0);
+          if (mat.uniforms?.emissive?.value) {
+            mat.uniforms.emissive.value.setRGB(0.88, 0.96, 1.0);
+          }
+        }
+        if (typeof mat.emissiveIntensity === 'number') {
+          mat.emissiveIntensity = pulseIntensity;
+          if (mat.uniforms?.emissiveIntensity) {
+            mat.uniforms.emissiveIntensity.value = pulseIntensity;
+          }
+        }
+        mat.needsUpdate = true;
+      }
+
+      const irisSheen = 0.16 + 0.08 * Math.sin(elapsed * 2.5);
+      for (const item of this.originalIrisMaterials) {
+        const mat = item.material;
+        if (mat.emissive) {
+          mat.emissive.setRGB(0.06, 0.16, 0.24);
+          if (mat.uniforms?.emissive?.value) {
+            mat.uniforms.emissive.value.setRGB(0.06, 0.16, 0.24);
+          }
+        }
+        if (typeof mat.emissiveIntensity === 'number') {
+          mat.emissiveIntensity = irisSheen;
+          if (mat.uniforms?.emissiveIntensity) {
+            mat.uniforms.emissiveIntensity.value = irisSheen;
+          }
+        }
+        mat.needsUpdate = true;
+      }
+    }
+
     // Update fast motion effects (speed lines, afterimages, directional outline blur)
     this.fastMotionEffect?.update(delta, elapsed, this.camera, renderer ?? this.renderer ?? this.options.renderer);
   }
@@ -1499,11 +1590,142 @@ export class Avatar {
   }
 
   /**
+   * Toggle or configure Blush (red cheeks + watery shimmering eyes) mode.
+   * Changes face texture to blush texture, enables watery shimmering eye shader and organic highlight wobble.
+   */
+  public setBlushMode(enabled: boolean, options?: Partial<BlushOptions>): void {
+    if (!this.vrm) return;
+
+    if (!enabled) {
+      if (!this.isBlushActive) return;
+      this.isBlushActive = false;
+      this.blushConfig.enabled = false;
+
+      // 1. Reset face texture
+      this.resetFaceTexture();
+
+      // 2. Disable watery eye effect
+      this.wateryEyeEffect?.setEnabled(false);
+
+      // 3. Restore highlight & iris materials
+      for (const item of this.originalHighlightMaterials) {
+        const mat = item.material;
+        if (mat.map) {
+          mat.map.offset.copy(item.originalOffset);
+          mat.map.rotation = item.originalRotation;
+        }
+        if (mat.emissive) {
+          mat.emissive.copy(item.originalEmissive);
+          if (mat.uniforms?.emissive?.value) {
+            mat.uniforms.emissive.value.copy(item.originalEmissive);
+          }
+        }
+        if (typeof mat.emissiveIntensity === 'number') {
+          mat.emissiveIntensity = item.originalEmissiveIntensity;
+          if (mat.uniforms?.emissiveIntensity) {
+            mat.uniforms.emissiveIntensity.value = item.originalEmissiveIntensity;
+          }
+        }
+        mat.needsUpdate = true;
+      }
+      this.originalHighlightMaterials = [];
+
+      for (const item of this.originalIrisMaterials) {
+        const mat = item.material;
+        if (mat.emissive) {
+          mat.emissive.copy(item.originalEmissive);
+          if (mat.uniforms?.emissive?.value) {
+            mat.uniforms.emissive.value.copy(item.originalEmissive);
+          }
+        }
+        if (typeof mat.emissiveIntensity === 'number') {
+          mat.emissiveIntensity = item.originalEmissiveIntensity;
+          if (mat.uniforms?.emissiveIntensity) {
+            mat.uniforms.emissiveIntensity.value = item.originalEmissiveIntensity;
+          }
+        }
+        mat.needsUpdate = true;
+      }
+      this.originalIrisMaterials = [];
+
+      return;
+    }
+
+    // Enable blush mode (cancels Yandere mode if active)
+    if (this.isYandereActive) {
+      this.setYandereMode(false);
+    }
+
+    this.isBlushActive = true;
+    this.blushConfig = {
+      ...this.blushConfig,
+      ...options,
+      enabled: true,
+    };
+
+    // 1. Apply blush face texture
+    const textureToApply = this.blushConfig.faceTexture ?? '/textures/girl_face_blush.png';
+    this.setFaceTexture(textureToApply);
+
+    // 2. Enable watery eye effect
+    if (this.blushConfig.wateryEyes) {
+      if (this.blushConfig.wateryEyeConfig && this.wateryEyeEffect) {
+        this.wateryEyeEffect.updateConfig(this.blushConfig.wateryEyeConfig);
+      }
+      this.wateryEyeEffect?.setEnabled(true);
+    }
+
+    // 3. Backup and register highlight & iris materials
+    if (this.originalHighlightMaterials.length === 0 || this.originalIrisMaterials.length === 0) {
+      this.vrm.scene.traverse((obj) => {
+        if (!(obj as THREE.Mesh).isMesh) return;
+        const mesh = obj as THREE.Mesh;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        materials.forEach((mat) => {
+          if (!mat) return;
+          const matName = mat.name || '';
+          if (/EyeHighlight|Highlight.*Eye/i.test(matName)) {
+            if (!this.originalHighlightMaterials.some((m) => m.material === mat)) {
+              this.originalHighlightMaterials.push({
+                material: mat,
+                originalOffset: (mat as any).map?.offset ? (mat as any).map.offset.clone() : new THREE.Vector2(0, 0),
+                originalRotation: (mat as any).map?.rotation ?? 0,
+                originalEmissive: (mat as any).emissive ? (mat as any).emissive.clone() : new THREE.Color(0, 0, 0),
+                originalEmissiveIntensity: typeof (mat as any).emissiveIntensity === 'number' ? (mat as any).emissiveIntensity : 1.0,
+              });
+            }
+          } else if (/EyeIris|Iris|瞳|虹彩/i.test(matName)) {
+            if (!this.originalIrisMaterials.some((m) => m.material === mat)) {
+              this.originalIrisMaterials.push({
+                material: mat,
+                originalEmissive: (mat as any).emissive ? (mat as any).emissive.clone() : new THREE.Color(0, 0, 0),
+                originalEmissiveIntensity: typeof (mat as any).emissiveIntensity === 'number' ? (mat as any).emissiveIntensity : 0.0,
+              });
+            }
+          }
+        });
+      });
+    }
+  }
+
+  public isBlushMode(): boolean {
+    return this.isBlushActive;
+  }
+
+  public getBlushConfig(): Required<BlushOptions> | null {
+    return this.isBlushActive ? { ...this.blushConfig } : null;
+  }
+
+  /**
    * Toggle or configure Yandere (darkness) mode.
    * Disables eye highlights, makes iris textures solid flat color, adjusts head tilt and expression.
    */
   public setYandereMode(enabled: boolean, options?: Partial<YandereOptions>): void {
     if (!this.vrm) return;
+
+    if (enabled && this.isBlushActive) {
+      this.setBlushMode(false);
+    }
 
     if (!enabled) {
       if (!this.isYandereActive) return;
@@ -1849,6 +2071,9 @@ export class Avatar {
 
     this.tearEffect?.dispose();
     this.tearEffect = null;
+
+    this.wateryEyeEffect?.dispose();
+    this.wateryEyeEffect = null;
 
     this.fastMotionEffect?.dispose();
     this.fastMotionEffect = null;
