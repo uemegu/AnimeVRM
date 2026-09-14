@@ -38,6 +38,7 @@ export interface ScenarioCharacterPlacement {
 export interface ScenarioSceneAvatarConfig {
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   motion?: string;    // Motion Master ID (e.g. 'greeting') or FBX URL
+  motionLoop?: boolean; // モーションをループ再生するか（未指定時は idle/walking/chin_rest 等から自動判定）
   motionSpeed?: number; // アニメーション再生速度倍率 (デフォルト 1.0, 高速アクション用)
   motionDuration?: number; // モーションを再生する時間（秒）。経過後は nextMotion または待機モーションに自動遷移
   nextMotion?: string;     // motionDuration 経過後に再生するモーション（デフォルト: 'Standing Idle.fbx' または Idle）
@@ -126,6 +127,8 @@ export interface ScenarioScene {
   avatars?: Record<string, ScenarioSceneAvatarConfig>; // Multi-character per-avatar action configs
   location?: string;
   background?: string;
+  backgroundZoom?: number;        // 背景テクスチャのズーム倍率オーバーライド (1.0 = 引いた等倍全体表示)
+  backgroundOffset?: { x?: number; y?: number }; // 背景テクスチャのオフセット微調整
   panoramaBackgroundUrl?: string; // 360° Equirectangular パノラマ背景URL
   usePanoramaCamera?: boolean;    // パノラマ用の固定視点カメラ（原点固定・視線回転）
   scenePreset?: ScenePresetId;

@@ -91,6 +91,8 @@ export class DialogueCameraController {
   private baseDistance = 3.0;
   private backgroundZoomScale = 1.0;
   private backgroundPanOffset = new THREE.Vector2(0, 0);
+  private customBackgroundZoom?: number;
+  private customBackgroundOffset?: { x?: number; y?: number };
 
   // Preallocated math helpers
   private _workingPosition = new THREE.Vector3();
@@ -154,6 +156,8 @@ export class DialogueCameraController {
     this.isTransitioning = false;
     this.backgroundZoomScale = 1.0;
     this.backgroundPanOffset.set(0, 0);
+    this.customBackgroundZoom = undefined;
+    this.customBackgroundOffset = undefined;
 
     this.panoramaController?.setCameraControlEnabled(true);
 
@@ -188,6 +192,8 @@ export class DialogueCameraController {
     this.sceneElapsed = 0;
     this.currentPreset = scene.cameraPreset || 'hold';
     this.currentStrength = scene.cameraStrength ?? 1.0;
+    this.customBackgroundZoom = scene.backgroundZoom;
+    this.customBackgroundOffset = scene.backgroundOffset;
 
     // 1. Determine target focus point
     const focusId =
@@ -634,7 +640,10 @@ export class DialogueCameraController {
 
     // Background zoom effect multiplier (1.0 = base wide, up to 1.65 for close up)
     const rawZoom = Math.pow(distRatio, 0.45) * Math.pow(fovRatio, 0.8);
-    this.backgroundZoomScale = Math.max(1.0, Math.min(1.65, rawZoom));
+    const calculatedZoom = Math.max(1.0, Math.min(1.65, rawZoom));
+    this.backgroundZoomScale = this.customBackgroundZoom !== undefined
+      ? this.customBackgroundZoom
+      : calculatedZoom;
 
     // Background horizontal/vertical pan parallax offset based on target shift AND camera yaw/pitch rotation
     const baseDir = new THREE.Vector3().subVectors(this.baseState.target, this.baseState.position);
@@ -649,8 +658,14 @@ export class DialogueCameraController {
     const curPitch = Math.asin(Math.max(-1, Math.min(1, curDir.y / Math.max(0.001, curDir.length()))));
     const deltaPitch = curPitch - basePitch;
 
-    const panX = (workingPose.target.x - this.baseState.target.x) * 0.15 + deltaYaw * 0.22;
-    const panY = (workingPose.target.y - this.baseState.target.y) * 0.10 + deltaPitch * 0.18;
+    let panX = (workingPose.target.x - this.baseState.target.x) * 0.15 + deltaYaw * 0.22;
+    let panY = (workingPose.target.y - this.baseState.target.y) * 0.10 + deltaPitch * 0.18;
+    if (this.customBackgroundOffset?.x !== undefined) {
+      panX += this.customBackgroundOffset.x;
+    }
+    if (this.customBackgroundOffset?.y !== undefined) {
+      panY += this.customBackgroundOffset.y;
+    }
     this.backgroundPanOffset.set(panX, panY);
   }
 
