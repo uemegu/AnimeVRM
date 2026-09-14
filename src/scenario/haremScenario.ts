@@ -485,7 +485,7 @@ export const HAREM_SCENARIO_JA: ScenarioPackage = {
               expressionWeight: 0.9,
               effectText: 'doki',
               lookAtTarget: 'player',
-              faceTexture: '/textures/face_blush.png',
+              faceTexture: '/textures/girl_face_blush.png',
             },
             girl_02: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
