@@ -88,6 +88,27 @@ function vrmModelsPlugin(): Plugin {
   };
 }
 
+function getHtmlInputs() {
+  const inputs: Record<string, string> = {
+    viewer: path.resolve(__dirname, 'index.html'),
+    motion: path.resolve(__dirname, 'motion.html'),
+    lipsync: path.resolve(__dirname, 'lipsync.html'),
+  };
+
+  const scenariosDir = path.resolve(__dirname, 'scenarios');
+  if (fs.existsSync(scenariosDir)) {
+    const files = fs.readdirSync(scenariosDir);
+    for (const file of files) {
+      if (file.endsWith('.html')) {
+        const name = `scenario_${path.basename(file, '.html')}`;
+        inputs[name] = path.resolve(scenariosDir, file);
+      }
+    }
+  }
+
+  return inputs;
+}
+
 export default defineConfig({
   plugins: [vrmModelsPlugin()],
   base: '/AnimeVRM/',
@@ -99,11 +120,7 @@ export default defineConfig({
   assetsInclude: ['**/*.onnx'],
   build: {
     rollupOptions: {
-      input: {
-        viewer: 'index.html',
-        motion: 'motion.html',
-        lipsync: 'lipsync.html',
-      },
+      input: getHtmlInputs(),
     },
     outDir: 'docs',
     emptyOutDir: true,

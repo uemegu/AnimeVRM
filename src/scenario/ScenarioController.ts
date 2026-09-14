@@ -66,6 +66,7 @@ export class ScenarioController {
     getConfig: () => AvatarConfig;
     onApplyConfig: (cfg: AvatarConfig) => void;
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
+    onFinished?: () => void;
   }) {
     this.panoramaController = options.panoramaController;
     const panoramaController = options.panoramaController;
@@ -375,6 +376,7 @@ export class ScenarioController {
           this.onApplyConfig(cfg);
         }
         showToast('✨ シナリオが終了しました');
+        options.onFinished?.();
       },
     });
   }
