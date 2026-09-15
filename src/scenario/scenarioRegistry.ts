@@ -12,6 +12,7 @@ import { getNisaScenario } from './nisaScenario';
 import { getFastMotionScenario } from './fastMotionScenario';
 import { getDoorPeepYandereScenario } from './doorPeepYandereScenario';
 import { getPrivateDateScenario } from './privateDateScenario';
+import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -128,6 +129,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '休日に私服のエミリと待ち合わせ。カフェテラスでの特別なひとときを過ごすデートシナリオ。',
     ogpImage: '/ogp/private-date.png',
     getScenario: (lang = 'ja') => getPrivateDateScenario(lang),
+  },
+  'ghost-mass': {
+    id: 'ghost-mass',
+    title: '👻 幽霊の質量（シャフト風）',
+    shortTitle: '幽霊の質量',
+    description: '単色キャラクター・白輪郭・ローポリ教室・赤緑カットイン・シャフ度を散りばめたシャフト風演出シナリオ。',
+    ogpImage: '/ogp/shaft-mode.png',
+    getScenario: () => GHOST_MASS_SCENARIO,
   },
 };
 

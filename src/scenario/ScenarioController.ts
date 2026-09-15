@@ -29,6 +29,7 @@ import {
 import { AvatarManager } from '../avatar/AvatarManager';
 import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
 import { PvTitleOverlay } from '../ui/PvTitleOverlay';
+import { ShaftModeController } from '../effects/shaft/ShaftModeController';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
@@ -50,6 +51,7 @@ export class ScenarioController {
   private onApplyConfig: (cfg: AvatarConfig) => void;
   private onSwitchScenePreset: (presetId: ScenePresetId) => void;
   private panoramaController?: PanoramaBackgroundController;
+  private shaftModeController?: ShaftModeController;
 
   private savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
   private savedCameraTargetBeforeMultiAvatar: THREE.Vector3 | null = null;
@@ -63,12 +65,14 @@ export class ScenarioController {
     sharedEffectTextManager: EffectTextManager;
     windController: WindController;
     panoramaController?: PanoramaBackgroundController;
+    shaftModeController?: ShaftModeController;
     getConfig: () => AvatarConfig;
     onApplyConfig: (cfg: AvatarConfig) => void;
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
     onFinished?: () => void;
   }) {
     this.panoramaController = options.panoramaController;
+    this.shaftModeController = options.shaftModeController;
     const panoramaController = options.panoramaController;
     this.scene = options.scene;
     this.camera = options.camera;
@@ -172,6 +176,7 @@ export class ScenarioController {
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
           this.pvTitleOverlay.hide();
+          this.shaftModeController?.setShaftMode(false);
         }
         this.syncPlayStateUI();
       },
@@ -365,11 +370,15 @@ export class ScenarioController {
           this.dreamBackground.stop();
         }
       },
+      onSwitchShaftMode: (active: boolean) => {
+        this.shaftModeController?.setShaftMode(active);
+      },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
         this.pvTitleOverlay.hide();
+        this.shaftModeController?.setShaftMode(false);
         const cfg = this.getConfig();
         if (cfg.postProcessing.cinematic?.fisheye) {
           cfg.postProcessing.cinematic.fisheye.enabled = false;

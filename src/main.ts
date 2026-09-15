@@ -18,6 +18,7 @@ import { AvatarManager } from './avatar/AvatarManager';
 import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
 import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
+import { ShaftModeController } from './effects/shaft/ShaftModeController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
 import { setupUnifiedPanel } from './ui/UnifiedPanel';
 import {
@@ -94,6 +95,7 @@ const avatarManager = new AvatarManager({
   onAvatarLoaded: () => {
     applyConfigToSceneAndRenderer(currentConfig);
     avatarTransformController?.syncInitialTransform();
+    shaftModeController?.refreshCurrentAvatar();
   },
 });
 (window as any).avatarManager = avatarManager;
@@ -115,6 +117,14 @@ const live2DTransitionManager = new Live2DTransitionManager({
   config: currentConfig.live2d,
 });
 (window as any).live2DTransitionManager = live2DTransitionManager;
+
+// 3.7 Shaft Mode Controller
+const shaftModeController = new ShaftModeController({
+  avatarManager,
+  viewerCore,
+  getConfig: () => currentConfig,
+});
+(window as any).shaftModeController = shaftModeController;
 
 const inspectorManager = new InspectorManager();
 
@@ -157,6 +167,7 @@ const scenarioController = new ScenarioController({
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
   panoramaController: viewerCore.panoramaController,
+  shaftModeController,
   getConfig: () => currentConfig,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
@@ -181,6 +192,7 @@ setupUnifiedPanel({
   geminiVadChatController,
   colorHistogram,
   avatarTransformController,
+  shaftModeController,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
   },
@@ -275,6 +287,9 @@ function tick(timestamp?: number): void {
     live2DTransitionManager.setSceneOverride(null);
   }
   live2DTransitionManager.update(delta);
+
+  // Update Shaft Mode typography overlay position
+  shaftModeController.update();
 
   viewerCore.stats.end();
   requestAnimationFrame(tick);

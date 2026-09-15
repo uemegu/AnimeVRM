@@ -73,6 +73,7 @@ export interface ScenarioSceneAvatarConfig {
   sweat?: boolean | 'fly4' | 'jito';
   motionBlur?: boolean; // 高速動作時の方向性輪郭ブラーのON/OFF
   yandere?: boolean | Partial<YandereOptions>; // 瞳ハイライト消去・暗黒化・首傾げ
+  shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
 }
 
 export type CameraZoomType =
@@ -142,6 +143,7 @@ export interface ScenarioScene {
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
   live2d?: boolean | { enabled?: boolean; basePath?: string; triggerDistance?: number }; // Live2D近接カットイン表示の有効化/画像パス指定
   cameraPosition?: [number, number, number]; // Direct camera position override (e.g. over-the-shoulder)
+  cameraFov?: number; // Direct camera FOV override
   choices?: ScenarioChoice[];
   choiceDelaySec?: number; // 選択肢表示前のディレイ秒数（アバターの視線移動をしっかり見せるための待ち時間、デフォルト 1.0s）
   focusLines?: boolean | FocusLinesConfig; // 画面中央に向かうダイナミック効果線（集中線）
@@ -150,6 +152,10 @@ export interface ScenarioScene {
   motionSpeed?: number; // シーン全体または発話者のモーション再生速度倍率 (デフォルト 1.0)
   fisheye?: boolean | Partial<CinematicFisheyeConfig>; // 魚眼レンズ歪み・ドアスコープ円周魚眼
   yandere?: boolean | Partial<YandereOptions>; // シーン発話者または単体アバターのヤンデレモード
+  shaftMode?: boolean; // シャフト演出モード (白背景・単色キャラ・太白輪郭・ローポリ教室)
+  shaftCutIn?: 'red_trouble' | 'green_closed' | 'none'; // 赤コマ・緑コマのタイポグラフィカットイン
+  shaftCutInDuration?: number; // カットイン表示秒数
+  shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
   conditions?: string[];
   goto?: string;
   waitClick?: boolean;

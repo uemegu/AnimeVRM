@@ -18,6 +18,7 @@ import { CameraPreset, CameraStartAngle } from '../animation/types';
 import { resolveAssetUrl } from '../utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
 import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
+import { ShaftCutInOverlay } from '../effects/shaft/ShaftCutInOverlay';
 import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
 import { BlackoutOverlay } from '../ui/BlackoutOverlay';
 import type { CinematicFisheyeConfig } from '../Config';
@@ -49,6 +50,7 @@ export interface ScenarioEngineOptions {
   ) => void;
   onSwitchBackground?: (bgUrl: string) => void;
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
+  onSwitchShaftMode?: (active: boolean) => void;
 }
 
 export class ScenarioEngine {
@@ -108,6 +110,8 @@ export class ScenarioEngine {
   private isAutoMode = false;
   private focusLinesOverlay: FocusLinesOverlay = new FocusLinesOverlay();
   private blackoutOverlay: BlackoutOverlay = new BlackoutOverlay();
+  private shaftCutInOverlay: ShaftCutInOverlay = new ShaftCutInOverlay();
+  private onSwitchShaftMode?: (active: boolean) => void;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
 
@@ -130,6 +134,7 @@ export class ScenarioEngine {
     this.onUpdateDreamBackground = options.onUpdateDreamBackground;
     this.onSwitchBackground = options.onSwitchBackground;
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
+    this.onSwitchShaftMode = options.onSwitchShaftMode;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -145,6 +150,29 @@ export class ScenarioEngine {
       onTypingComplete: () => {
         this.handleTypingComplete();
       },
+    });
+
+    // Global click & keyboard navigation (e.g. for headless/hideMessageWindow scenarios)
+    window.addEventListener('keydown', (e) => {
+      if (!this.isPlayingState) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        this.handleUserNext();
+      }
+    });
+
+    window.addEventListener('click', (e) => {
+      if (!this.isPlayingState) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.closest('#unified-panel') ||
+        target?.closest('.scenario-controls') ||
+        target?.closest('button')
+      ) {
+        return;
+      }
+      this.handleUserNext();
     });
   }
 
@@ -275,6 +303,7 @@ export class ScenarioEngine {
     this.clearPendingEffectTextTimers();
     this.clearPendingMotionTimers();
     this.focusLinesOverlay.hide();
+    this.shaftCutInOverlay.hide();
     this.activeMoveTransitions.clear();
     this.stopAudioAndVoice();
     this.stopBgm();
@@ -288,10 +317,12 @@ export class ScenarioEngine {
       avatar.setMotionBlurEnabled(false);
       avatar.setMotionSpeed(1.0);
       avatar.setYandereMode(false);
+      avatar.setShafudo(false);
       avatar.setVisible(true);
     });
 
     this.onApplyFisheye?.(false);
+    this.onSwitchShaftMode?.(false);
     this.messageWindow.hide();
     this.currentBackgroundUrl = null;
     this.onUpdateScrollingBackground?.(undefined);
@@ -636,6 +667,11 @@ export class ScenarioEngine {
         const opts = typeof config.yandere === 'object' ? config.yandere : undefined;
         avatar.setYandereMode(true, opts);
       }
+    }
+
+    // Shafudo (Shaft head/neck tilt pose) override per avatar
+    if (config.shafudo !== undefined) {
+      avatar.setShafudo(config.shafudo);
     }
   }
 
@@ -1007,6 +1043,26 @@ export class ScenarioEngine {
       }
     }
 
+    // 1.98 Shaft Cut-In Typography Overlay (赤コマ・緑コマ)
+    if (scene.shaftCutIn && scene.shaftCutIn !== 'none') {
+      this.shaftCutInOverlay.show(scene.shaftCutIn, scene.shaftCutInDuration);
+    } else {
+      this.shaftCutInOverlay.hide();
+    }
+
+    // 1.99 Shaft Mode (単色キャラ・太白輪郭・ローポリ教室・白背景)
+    if (scene.shaftMode !== undefined) {
+      this.onSwitchShaftMode?.(scene.shaftMode);
+    }
+
+    // 1.995 Scene-level Shafudo override for speaker / active avatar
+    if (scene.shafudo !== undefined) {
+      const avatar = this.getAvatar(scene.speakerCharacterId);
+      if (avatar) {
+        avatar.setShafudo(scene.shafudo);
+      }
+    }
+
     // 2. Avatar Control (Motion, Expression, Position, 3D Manga Effect)
     if (scene.avatars) {
       for (const [charKey, config] of Object.entries(scene.avatars)) {
@@ -1122,8 +1178,8 @@ export class ScenarioEngine {
     }
 
     // Normal dialogue line
-    if (this.isAutoMode || scene.autoNextSec !== undefined) {
-      const delaySec = scene.autoNextSec ?? 0.8;
+    if (this.isAutoMode || scene.autoNextSec !== undefined || this.currentPackage?.hideMessageWindow) {
+      const delaySec = scene.autoNextSec ?? 0.6;
       this.clearAutoNextTimer();
       this.autoNextTimer = window.setTimeout(() => {
         this.next();
