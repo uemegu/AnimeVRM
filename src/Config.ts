@@ -341,7 +341,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     enabled: true,
     startY: 2.0,
     endY: 1.0,
-    intensity: 0.16,
+    intensity: 0.1,
     shadowWeight: 1.0,
     color: '#101018',
   },

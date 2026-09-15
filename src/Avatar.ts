@@ -258,6 +258,13 @@ export class Avatar {
   public currentAction: THREE.AnimationAction | null = null;
   public currentAnimationUrl: string | null = null;
   public effectTextManager: EffectTextManager | null = null;
+
+  private isSolidColorActive = false;
+  private solidColorValue: string | number = 0xff0000;
+  private originalMeshMaterials: Map<THREE.Mesh, THREE.Material | THREE.Material[]> = new Map();
+  private solidMaterialCache: Map<string | number, THREE.MeshBasicMaterial> = new Map();
+  private shaftOutlineMeshes: THREE.Mesh[] = [];
+  private shaftOutlineMaterial: THREE.MeshBasicMaterial | null = null;
   public tearEffect: TearEffect | null = null;
   public sweatEffect: SweatEffect | null = null;
   public fastMotionEffect: FastMotionEffect | null = null;
@@ -298,6 +305,7 @@ export class Avatar {
   private expressionTransitionDuration: number = 0.25;
 
   private isYandereActive = false;
+  private isShafudoActive = false;
   private yandereConfig: Required<YandereOptions> = {
     enabled: false,
     color: '#3b080f',
@@ -1427,6 +1435,53 @@ export class Avatar {
       }
     }
 
+    // Apply Shafudo (Shaft head/neck tilt pose: arch back + look at camera + head tilt)
+    if (this.isShafudoActive) {
+      const rawHead = this.vrm.humanoid?.getRawBoneNode?.('head');
+      const rawNeck = this.vrm.humanoid?.getRawBoneNode?.('neck');
+      const rawSpine = this.vrm.humanoid?.getRawBoneNode?.('spine');
+      const rawChest =
+        this.vrm.humanoid?.getRawBoneNode?.('upperChest') ||
+        this.vrm.humanoid?.getRawBoneNode?.('chest');
+
+      // 1. 体を仰向け方向に倒す (spine, chest を後ろに反らす)
+      if (rawSpine) {
+        rawSpine.rotation.x -= 0.22;
+      }
+      if (rawChest) {
+        rawChest.rotation.x -= 0.32;
+      }
+
+      // 2. 首と頭で顔をカメラに向ける + シャフ度の首かしげロール
+      if (rawHead && rawNeck) {
+        rawNeck.rotation.x += 0.10;
+        rawNeck.rotation.y += 0.65;
+        rawNeck.rotation.z -= 0.15;
+
+        rawNeck.updateWorldMatrix(true, false);
+        const neckWorldQuat = new THREE.Quaternion();
+        rawNeck.getWorldQuaternion(neckWorldQuat);
+
+        const headWorldPos = new THREE.Vector3();
+        rawHead.getWorldPosition(headWorldPos);
+
+        const camPos = new THREE.Vector3();
+        this.camera.getWorldPosition(camPos);
+        camPos.y -= 0.05;
+
+        const lookMatrix = new THREE.Matrix4();
+        lookMatrix.lookAt(headWorldPos, camPos, new THREE.Vector3(0, 1, 0));
+        const targetWorldQuat = new THREE.Quaternion().setFromRotationMatrix(lookMatrix);
+
+        // シャフ度の首かしげロール (-0.55 rad = 約31度)
+        const rollQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.55);
+        targetWorldQuat.multiply(rollQuat);
+
+        const localQuat = neckWorldQuat.clone().invert().multiply(targetWorldQuat);
+        rawHead.quaternion.copy(localQuat);
+      }
+    }
+
     // Update toon face shader & uniforms
     this.shaderController?.update();
 
@@ -1976,6 +2031,14 @@ export class Avatar {
     return { ...this.yandereConfig };
   }
 
+  public setShafudo(enabled: boolean): void {
+    this.isShafudoActive = enabled;
+  }
+
+  public isShafudo(): boolean {
+    return this.isShafudoActive;
+  }
+
   private currentEffectKey: string | null = null;
 
   /**
@@ -2070,7 +2133,114 @@ export class Avatar {
     }
   }
 
+  private removeShaftOutlines(): void {
+    for (const outline of this.shaftOutlineMeshes) {
+      outline.removeFromParent();
+    }
+    this.shaftOutlineMeshes = [];
+    if (this.shaftOutlineMaterial) {
+      this.shaftOutlineMaterial.dispose();
+      this.shaftOutlineMaterial = null;
+    }
+  }
+
+  /**
+   * Toggle solid color (Shaft silhouette) mode with a bold white outline.
+   */
+  public setSolidColorMode(enabled: boolean, color: string | number = 0xff0000): void {
+    if (!this.vrm) return;
+
+    if (!enabled) {
+      if (!this.isSolidColorActive) return;
+      this.isSolidColorActive = false;
+      this.removeShaftOutlines();
+      for (const [mesh, origMat] of this.originalMeshMaterials) {
+        mesh.material = origMat;
+      }
+      this.originalMeshMaterials.clear();
+      return;
+    }
+
+    this.isSolidColorActive = true;
+    this.solidColorValue = color;
+    this.removeShaftOutlines();
+
+    if (this.originalMeshMaterials.size === 0) {
+      this.vrm.scene.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh && obj.name !== '__shaft_white_outline__') {
+          const mesh = obj as THREE.Mesh;
+          this.originalMeshMaterials.set(mesh, mesh.material);
+        }
+      });
+    }
+
+    let mat = this.solidMaterialCache.get(color);
+    if (!mat) {
+      mat = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(color as any),
+        toneMapped: false,
+        side: THREE.FrontSide,
+      });
+      this.solidMaterialCache.set(color, mat);
+    }
+
+    // Bold white outline material (inverted hull method)
+    if (!this.shaftOutlineMaterial) {
+      this.shaftOutlineMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        side: THREE.BackSide,
+        toneMapped: false,
+        depthWrite: true,
+      });
+      this.shaftOutlineMaterial.onBeforeCompile = (shader) => {
+        shader.uniforms.uOutlineWidth = { value: 0.007 }; // 太めの白輪郭
+        shader.vertexShader = 'uniform float uOutlineWidth;\n' + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace(
+          '#include <begin_vertex>',
+          `
+          #include <begin_vertex>
+          transformed += normal * uOutlineWidth;
+          `
+        );
+      };
+    }
+
+    for (const [mesh] of this.originalMeshMaterials) {
+      mesh.material = mat;
+
+      let outlineMesh: THREE.Mesh;
+      if ((mesh as any).isSkinnedMesh) {
+        const skinned = mesh as THREE.SkinnedMesh;
+        const oSkinned = new THREE.SkinnedMesh(skinned.geometry, this.shaftOutlineMaterial);
+        oSkinned.bind(skinned.skeleton, skinned.bindMatrix);
+        outlineMesh = oSkinned;
+      } else {
+        outlineMesh = new THREE.Mesh(mesh.geometry, this.shaftOutlineMaterial);
+      }
+      outlineMesh.name = '__shaft_white_outline__';
+      outlineMesh.renderOrder = mesh.renderOrder;
+      mesh.add(outlineMesh);
+      this.shaftOutlineMeshes.push(outlineMesh);
+    }
+  }
+
+  public getIsSolidColorActive(): boolean {
+    return this.isSolidColorActive;
+  }
+
+  public getSolidColorValue(): string | number {
+    return this.solidColorValue;
+  }
+
   public dispose(): void {
+    if (this.isSolidColorActive) {
+      this.setSolidColorMode(false);
+    }
+    this.removeShaftOutlines();
+    this.solidMaterialCache.forEach((m) => m.dispose());
+    this.solidMaterialCache.clear();
+    this.originalMeshMaterials.clear();
+
     this.sweatEffect?.dispose();
     this.sweatEffect = null;
 

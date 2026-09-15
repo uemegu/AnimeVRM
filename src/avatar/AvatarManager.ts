@@ -161,6 +161,9 @@ export class AvatarManager {
         if (this.currentExprName !== 'neutral') {
           avatar.setExpression(this.currentExprName, 1.0);
         }
+        if (this.solidColorState.enabled) {
+          avatar.setSolidColorMode(true, this.solidColorState.color);
+        }
         if (this.onAvatarLoaded) {
           this.onAvatarLoaded(avatar);
         }
@@ -336,6 +339,41 @@ export class AvatarManager {
 
   public getBlushConfig(): Required<BlushOptions> | null {
     return this.avatarInstance?.getBlushConfig() ?? null;
+  }
+
+  private solidColorState: { enabled: boolean; color: string | number } = { enabled: false, color: 0xff0000 };
+
+  public getCharacterColor(identifier?: string): string | null {
+    if (!identifier) return null;
+    const lower = identifier.toLowerCase();
+    if (lower.includes('aoi') || lower === 'girl_01') {
+      return '#f59e0b'; // 黄色系
+    } else if (lower.includes('emili') || lower === 'girl_02') {
+      return '#dc2626'; // 赤系
+    } else if (lower.includes('shion')) {
+      return '#2563eb'; // 青系
+    }
+    return null;
+  }
+
+  public setSolidColorMode(enabled: boolean, color: string | number = 0xff0000): void {
+    this.solidColorState = { enabled, color };
+    if (this.avatarInstance) {
+      const c = this.getCharacterColor(this.currentModelUrl) || color;
+      this.avatarInstance.setSolidColorMode(enabled, c);
+    }
+    for (const [charId, av] of this.scenarioAvatars.entries()) {
+      const c = this.getCharacterColor(charId) || this.getCharacterColor(this.currentModelUrl) || color;
+      av.setSolidColorMode(enabled, c);
+    }
+  }
+
+  public isSolidColorMode(): boolean {
+    return this.solidColorState.enabled;
+  }
+
+  public getSolidColorState(): { enabled: boolean; color: string | number } {
+    return { ...this.solidColorState };
   }
 }
 

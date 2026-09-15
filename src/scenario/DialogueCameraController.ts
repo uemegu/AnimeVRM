@@ -459,6 +459,9 @@ export class DialogueCameraController {
     if (scene.cameraPosition) {
       defaultCameraPos.set(scene.cameraPosition[0], scene.cameraPosition[1], scene.cameraPosition[2]);
     }
+    if (scene.cameraFov) {
+      defaultFov = scene.cameraFov;
+    }
 
     return { targetPos, defaultCameraPos, defaultFov };
   }

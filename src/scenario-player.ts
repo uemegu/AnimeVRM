@@ -11,6 +11,7 @@ import { ScenarioController } from './scenario/ScenarioController';
 import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { getScenarioMeta, SCENARIO_REGISTRY } from './scenario/scenarioRegistry';
 import { showToast } from './ui/components/Toast';
+import { ShaftModeController } from './effects/shaft/ShaftModeController';
 
 // --------------------------------------------------
 // 1. Scenario Identification
@@ -74,6 +75,12 @@ const live2DTransitionManager = new Live2DTransitionManager({
   viewerCore,
   audioLipSync,
   config: currentConfig.live2d,
+});
+
+const shaftModeController = new ShaftModeController({
+  viewerCore,
+  avatarManager,
+  getConfig: () => currentConfig,
 });
 
 function applyConfigToSceneAndRenderer(cfg: AvatarConfig): void {
@@ -456,6 +463,7 @@ const scenarioController = new ScenarioController({
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
   panoramaController: viewerCore.panoramaController,
+  shaftModeController,
   getConfig: () => currentConfig,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
@@ -558,6 +566,7 @@ function tick(timestamp?: number): void {
 
   // Update scenario engine
   scenarioController.update(delta);
+  shaftModeController.update();
 
   // Update dynamic background, midground, and nearground transforms
   const dialogueBg = scenarioController.dialogueCameraController?.isActive

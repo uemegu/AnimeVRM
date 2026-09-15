@@ -21,6 +21,7 @@ import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario'
 import { getPrivateDateScenario } from '../scenario/privateDateScenario';
 import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
 import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
+import { GHOST_MASS_SCENARIO } from '../scenario/ghostMassScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { AvatarChatController } from '../ai/AvatarChatController';
@@ -34,6 +35,7 @@ import { showToast } from './components/Toast';
 import { openImportModal } from './components/ImportExportModal';
 import { AvatarTransformController } from '../avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
+import type { ShaftModeController } from '../effects/shaft/ShaftModeController';
 
 export interface UnifiedPanelContext {
   currentConfig: AvatarConfig;
@@ -47,6 +49,7 @@ export interface UnifiedPanelContext {
   geminiVadChatController?: GeminiVadChatController;
   colorHistogram: ColorHistogram;
   avatarTransformController?: AvatarTransformController;
+  shaftModeController?: ShaftModeController;
   onApplyConfig: (cfg: AvatarConfig) => void;
   onResize: () => void;
   onTtsGpuActivityChange: (active: boolean) => void;
@@ -64,6 +67,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     avatarChatController,
     geminiVadChatController,
     colorHistogram,
+    shaftModeController,
     onApplyConfig,
     onResize,
     onTtsGpuActivityChange,
@@ -216,6 +220,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
               <label class="section-label">${tr.character.expression}</label>
               <div style="display: flex; gap: 4px;">
+                <button id="shaft-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #18181b; border: 1px solid #71717a; color: #f4f4f5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖋️ シャフト</button>
                 <button id="blush-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2b1122; border: 1px solid #f43f5e; color: #fbcfe8; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">😳 頬赤らめ</button>
                 <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
               </div>
@@ -420,6 +425,21 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 11px; color: #ffd1dc; line-height: 1.45; margin-top: 6px;">
               BGM「thema_music.mp3」完全同期！32秒サビ、56秒フレーズ、1:00クライマックス「大好きだよ！」＆Kawaiiタイトルロゴ演出。
+            </div>
+          </div>
+
+          <!-- ★ SPECIAL: 幽霊の質量（シャフト風） -->
+          <div class="section-box" style="background: linear-gradient(135deg, rgba(20, 20, 25, 0.95) 0%, rgba(30, 25, 35, 0.95) 100%); border: 2px solid #f59e0b; border-left: 5px solid #dc2626; padding: 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label" style="color: #fbbf24; font-weight: 800; font-size: 13px; margin-bottom: 0;">👻 幽霊の質量 〜シャフト風会話劇〜</label>
+              <span style="font-size: 10px; padding: 2px 7px; background: linear-gradient(135deg, #dc2626, #f59e0b); color: #ffffff; border-radius: 999px; font-weight: 800; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);">SHAFT</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <button id="scenario-ghost-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #dc2626 0%, #d97706 100%); font-weight: 800; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); font-size: 13px; padding: 8px 10px; letter-spacing: 0.04em;">▶ 「幽霊の質量」を再生</button>
+              <button id="scenario-ghost-stop-btn" class="action-btn" style="min-width: 60px; font-weight: 700;">停止</button>
+            </div>
+            <div style="font-size: 11px; color: #fef3c7; line-height: 1.45; margin-top: 6px;">
+              単色アバター・白輪郭・ローポリ教室・赤緑明朝体カットイン・シャフ度（流し目）のシャフト演出劇。
             </div>
           </div>
 
@@ -1520,6 +1540,31 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       showToast(t().toasts.scenarioStopped);
     });
 
+    // Ghost Mass (Shaft Style) Scenario Play/Stop
+    document.getElementById('scenario-ghost-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        await scenarioController.playWithInterlude(GHOST_MASS_SCENARIO, {
+          title: '幽霊の質量',
+          subtitle: 'THE MASS OF A GHOST - SHAFT STYLE -',
+        });
+        showToast('👻 「幽霊の質量」を再生します');
+      }
+    });
+
+    document.getElementById('scenario-ghost-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
     // Background Buttons
     const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
     bgButtons.forEach((btn) => {
@@ -1682,6 +1727,29 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
     // Expression Buttons
     const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+
+    // Shaft Mode Toggle Button
+    const shaftToggleBtn = document.getElementById('shaft-toggle-btn') as HTMLButtonElement | null;
+    const updateShaftButtonUI = (isActive: boolean) => {
+      if (!shaftToggleBtn) return;
+      shaftToggleBtn.style.background = isActive ? '#f4f4f5' : '#18181b';
+      shaftToggleBtn.style.borderColor = isActive ? '#ffffff' : '#71717a';
+      shaftToggleBtn.style.color = isActive ? '#000000' : '#f4f4f5';
+      shaftToggleBtn.style.boxShadow = isActive ? '0 0 10px rgba(255, 255, 255, 0.6)' : 'none';
+      shaftToggleBtn.textContent = isActive ? '🖋️ シャフト中 (解除)' : '🖋️ シャフト';
+    };
+
+    shaftToggleBtn?.addEventListener('click', () => {
+      if (!shaftModeController) return;
+      const nextState = !shaftModeController.getIsActive();
+      shaftModeController.setShaftMode(nextState);
+      updateShaftButtonUI(nextState);
+      if (nextState) {
+        showToast('🖋️ シャフト演出モードを発動しました');
+      } else {
+        showToast('✨ 通常状態に戻りました');
+      }
+    });
 
     // Blush Mode Toggle Button (頬赤らめ & ウルウル瞳)
     const blushToggleBtn = document.getElementById('blush-toggle-btn') as HTMLButtonElement | null;
