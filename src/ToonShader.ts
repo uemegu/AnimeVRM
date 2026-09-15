@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
-import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig } from './Config';
+import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig } from './Config';
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 
 export type ToonShaderOptions = {
@@ -8,6 +8,7 @@ export type ToonShaderOptions = {
   hairPattern?: RegExp;
   clothPattern?: RegExp;
   config?: AvatarConfig;
+  camera?: THREE.Camera;
   debug?: boolean;
 };
 
@@ -18,6 +19,7 @@ export type ToonShaderController = {
   updateMaterialStyle: (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => void;
   updateOutline: (params: Partial<AvatarConfig['outline']>) => void;
   updateEyeGlow: (cfg?: EyeGlowConfig) => void;
+  updateBottomGradient: (cfg?: Partial<BottomGradientConfig>) => void;
   applyFullConfig: (config: AvatarConfig) => void;
 };
 
@@ -255,6 +257,30 @@ export function applyToonShader(
 
   let activeConfig = options.config;
 
+  const bottomGradientUniforms = {
+    uBottomGradientEnabled: {
+      value: (activeConfig?.bottomGradient?.enabled ?? true) ? 1.0 : 0.0,
+    },
+    uBottomGradientStartY: {
+      value: activeConfig?.bottomGradient?.startY ?? 2.0,
+    },
+    uBottomGradientEndY: {
+      value: activeConfig?.bottomGradient?.endY ?? 1.0,
+    },
+    uBottomGradientIntensity: {
+      value: activeConfig?.bottomGradient?.intensity ?? 0.16,
+    },
+    uBottomGradientShadowWeight: {
+      value: activeConfig?.bottomGradient?.shadowWeight ?? 1.0,
+    },
+    uBottomGradientColor: {
+      value: new THREE.Color(activeConfig?.bottomGradient?.color ?? '#101018'),
+    },
+    uCameraMatrixWorld: {
+      value: options.camera ? options.camera.matrixWorld : new THREE.Matrix4(),
+    },
+  };
+
   const styledNames: Record<StyleKind, string[]> = { body: [], hair: [], cloth: [], face: [], eye: [] };
   const trackedMaterials: Array<{
     material: MToonLikeMaterial;
@@ -317,10 +343,10 @@ export function applyToonShader(
         material.userData.uAutoLineWeight = {
           value: (activeConfig?.outline?.autoLineWeight ?? true) ? 1.0 : 0.0,
         };
-        const prevOnBeforeCompile = material.onBeforeCompile;
+        const prevOutlineCompile = material.onBeforeCompile;
         material.onBeforeCompile = (shader, renderer) => {
-          if (prevOnBeforeCompile) {
-            prevOnBeforeCompile(shader, renderer);
+          if (prevOutlineCompile) {
+            prevOutlineCompile(shader, renderer);
           }
           shader.uniforms.uAutoLineWeight = material.userData.uAutoLineWeight;
           shader.vertexShader = shader.vertexShader.replace(
@@ -343,6 +369,66 @@ export function applyToonShader(
         };
         material.needsUpdate = true;
       }
+
+      // Inject Bottom Gradient (Vertical Shading / Grounding shadow) into fragment shader for ALL MToon materials
+      const prevOnBeforeCompile = material.onBeforeCompile;
+      material.onBeforeCompile = (shader, renderer) => {
+        if (prevOnBeforeCompile) {
+          prevOnBeforeCompile(shader, renderer);
+        }
+
+        shader.uniforms.uBottomGradientEnabled = bottomGradientUniforms.uBottomGradientEnabled;
+        shader.uniforms.uBottomGradientStartY = bottomGradientUniforms.uBottomGradientStartY;
+        shader.uniforms.uBottomGradientEndY = bottomGradientUniforms.uBottomGradientEndY;
+        shader.uniforms.uBottomGradientIntensity = bottomGradientUniforms.uBottomGradientIntensity;
+        shader.uniforms.uBottomGradientShadowWeight = bottomGradientUniforms.uBottomGradientShadowWeight;
+        shader.uniforms.uBottomGradientColor = bottomGradientUniforms.uBottomGradientColor;
+        shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
+
+        shader.fragmentShader = shader.fragmentShader.replace(
+          'void main() {',
+          /* glsl */ `
+          uniform float uBottomGradientEnabled;
+          uniform float uBottomGradientStartY;
+          uniform float uBottomGradientEndY;
+          uniform float uBottomGradientIntensity;
+          uniform float uBottomGradientShadowWeight;
+          uniform vec3 uBottomGradientColor;
+          uniform mat4 uCameraMatrixWorld;
+          void main() {
+          `
+        );
+
+        // Replace all occurrences of gl_FragColor = vec4( col, diffuseColor.a ); so it hits the main exit at end of shader
+        shader.fragmentShader = shader.fragmentShader.replaceAll(
+          'gl_FragColor = vec4( col, diffuseColor.a );',
+          /* glsl */ `
+          if (uBottomGradientEnabled > 0.5) {
+            vec4 mtoonWorldPos = uCameraMatrixWorld * vec4(-vViewPosition, 1.0);
+            float gradRange = max(0.001, uBottomGradientStartY - uBottomGradientEndY);
+            float gradFactor = clamp((mtoonWorldPos.y - uBottomGradientEndY) / gradRange, 0.0, 1.0);
+            float smoothGrad = smoothstep(0.0, 1.0, gradFactor);
+
+            // Base height darken factor (1.0 at endY, 0.0 at startY)
+            float heightDarken = (1.0 - smoothGrad) * uBottomGradientIntensity;
+
+            // Pixel luminance detection (0.0 = black, 1.0 = white)
+            float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
+            // Shadow mask: higher weight for already darker pixels
+            float shadowMask = 1.0 - smoothstep(0.0, 0.7, lum);
+
+            // Accentuate shadow areas when shadowWeight > 0
+            float effectiveDarken = heightDarken * mix(1.0, 1.0 + shadowMask * 1.5, uBottomGradientShadowWeight);
+            effectiveDarken = clamp(effectiveDarken, 0.0, 0.95);
+
+            // Tint and darken towards shadow color
+            col = mix(col, col * uBottomGradientColor, effectiveDarken);
+          }
+          gl_FragColor = vec4( col, diffuseColor.a );
+          `
+        );
+      };
+      material.needsUpdate = true;
 
       allMToonMaterials.push({ material, kind });
 
@@ -600,18 +686,48 @@ export function applyToonShader(
     });
   };
 
+  // Bottom Gradient controller
+  const applyBottomGradient = (cfg?: Partial<BottomGradientConfig>) => {
+    if (!cfg) return;
+    if (typeof cfg.enabled === 'boolean') {
+      bottomGradientUniforms.uBottomGradientEnabled.value = cfg.enabled ? 1.0 : 0.0;
+    }
+    if (typeof cfg.startY === 'number') {
+      bottomGradientUniforms.uBottomGradientStartY.value = cfg.startY;
+    }
+    if (typeof cfg.endY === 'number') {
+      bottomGradientUniforms.uBottomGradientEndY.value = cfg.endY;
+    }
+    if (typeof cfg.intensity === 'number') {
+      bottomGradientUniforms.uBottomGradientIntensity.value = cfg.intensity;
+    }
+    if (typeof cfg.shadowWeight === 'number') {
+      bottomGradientUniforms.uBottomGradientShadowWeight.value = cfg.shadowWeight;
+    }
+    if (cfg.color) {
+      bottomGradientUniforms.uBottomGradientColor.value.set(cfg.color);
+    }
+  };
+
   // Initial config application
   if (activeConfig) {
     applyMaterialStyle('body', activeConfig.materials.body);
     applyMaterialStyle('hair', activeConfig.materials.hair);
     applyMaterialStyle('cloth', activeConfig.materials.cloth);
     applyOutline(activeConfig.outline);
+    if (activeConfig.bottomGradient) {
+      applyBottomGradient(activeConfig.bottomGradient);
+    }
   }
 
   // Ensure eye materials are unlit & shadow-free immediately on load
   setupEyeMaterials();
 
-  const update = () => {};
+  const update = () => {
+    if (options.camera) {
+      bottomGradientUniforms.uCameraMatrixWorld.value = options.camera.matrixWorld;
+    }
+  };
 
   return {
     patched: [
@@ -631,6 +747,7 @@ export function applyToonShader(
       applyEyeGlow(cfg);
       setupEyeMaterials();
     },
+    updateBottomGradient: applyBottomGradient,
     applyFullConfig: (newConfig) => {
       activeConfig = newConfig;
       if (newConfig.materials) {
@@ -641,6 +758,9 @@ export function applyToonShader(
       applyEyeGlow(newConfig.eyeGlow);
       if (newConfig.outline) {
         applyOutline(newConfig.outline);
+      }
+      if (newConfig.bottomGradient) {
+        applyBottomGradient(newConfig.bottomGradient);
       }
       setupEyeMaterials();
     },

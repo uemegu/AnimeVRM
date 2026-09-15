@@ -75,6 +75,15 @@ export interface EyeGlowConfig {
   intensity: number;
 }
 
+export interface BottomGradientConfig {
+  enabled: boolean;
+  startY: number;
+  endY: number;
+  intensity: number;
+  shadowWeight: number;
+  color: string;
+}
+
 export interface DepthRimConfig {
   enabled: boolean;
   power: number;
@@ -174,6 +183,7 @@ export interface AvatarConfig {
     cloth: MaterialStyleParams;
   };
   eyeGlow?: EyeGlowConfig;
+  bottomGradient?: BottomGradientConfig;
   outline: {
     enabled: boolean;
     useSmoothNormal: boolean;
@@ -326,6 +336,14 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   eyeGlow: {
     enabled: true,
     intensity: 1.25,
+  },
+  bottomGradient: {
+    enabled: true,
+    startY: 2.0,
+    endY: 1.0,
+    intensity: 0.16,
+    shadowWeight: 1.0,
+    color: '#101018',
   },
   outline: {
     enabled: true,

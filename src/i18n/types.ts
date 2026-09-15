@@ -394,6 +394,13 @@ export interface Translations {
     outlineAutoWeight: string;
     outlineDarkness: string;
     outlineLightingMix: string;
+    bottomGradientFolder: string;
+    bottomGradientEnabled: string;
+    bottomGradientStartY: string;
+    bottomGradientEndY: string;
+    bottomGradientIntensity: string;
+    bottomGradientShadowWeight: string;
+    bottomGradientColor: string;
     envFolder: string;
     showBgImage: string;
     bgColor: string;
