@@ -157,6 +157,7 @@ export class ViewerCore {
 
   public stats: Stats;
   public perfBadge: HTMLDivElement;
+  public isPerformanceMonitorVisible: boolean = false;
 
   private textureLoader = new THREE.TextureLoader();
   private backgroundTextureCache = new Map<string, THREE.Texture>();
@@ -194,7 +195,7 @@ export class ViewerCore {
     this.renderer.shadowMap.enabled = initialConfig.lighting.castShadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // 2. Stats & PerfBadge
+    // 2. Stats & PerfBadge (Default OFF)
     this.stats = new Stats();
     this.stats.showPanel(0);
     this.stats.dom.id = 'stats-panel';
@@ -202,6 +203,7 @@ export class ViewerCore {
     this.stats.dom.style.top = '10px';
     this.stats.dom.style.left = '10px';
     this.stats.dom.style.zIndex = '100';
+    this.stats.dom.style.display = 'none';
     document.body.appendChild(this.stats.dom);
 
     this.perfBadge = document.createElement('div');
@@ -218,6 +220,7 @@ export class ViewerCore {
     this.perfBadge.style.borderRadius = '4px';
     this.perfBadge.style.pointerEvents = 'none';
     this.perfBadge.style.zIndex = '100';
+    this.perfBadge.style.display = 'none';
     this.perfBadge.textContent = 'Calls: 0 | Tris: 0';
     document.body.appendChild(this.perfBadge);
 
@@ -968,11 +971,22 @@ export class ViewerCore {
     }
 
     // 6. Metrics badge
-    if (this.renderer.info.render.frame % 6 === 0) {
+    if (this.isPerformanceMonitorVisible && this.renderer.info.render.frame % 6 === 0) {
       const calls = this.renderer.info.render.calls;
       const tris = this.renderer.info.render.triangles;
       const triText = tris >= 1000 ? `${(tris / 1000).toFixed(1)}k` : `${tris}`;
       this.perfBadge.textContent = `Calls: ${calls} | Tris: ${triText}`;
+    }
+  }
+
+  public setPerformanceMonitorVisible(visible: boolean): void {
+    this.isPerformanceMonitorVisible = visible;
+    const display = visible ? 'block' : 'none';
+    if (this.stats?.dom) {
+      this.stats.dom.style.display = display;
+    }
+    if (this.perfBadge) {
+      this.perfBadge.style.display = display;
     }
   }
 

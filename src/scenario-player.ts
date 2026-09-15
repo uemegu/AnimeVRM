@@ -109,24 +109,28 @@ uiRoot.innerHTML = `
       user-select: none;
     }
 
-    /* Top HUD */
+    /* Top Left HUD */
     .scenario-top-bar {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 14px 20px;
+      top: 14px;
+      left: 18px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: linear-gradient(180deg, rgba(10, 10, 16, 0.75) 0%, rgba(10, 10, 16, 0) 100%);
-      pointer-events: auto;
+      pointer-events: none;
       transition: opacity 0.3s ease;
+      z-index: 50;
     }
     .scenario-branding {
       display: flex;
       align-items: center;
       gap: 10px;
+      background: rgba(10, 10, 18, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     }
     .scenario-badge {
       background: linear-gradient(135deg, #f43f5e 0%, #a855f7 100%);
@@ -144,37 +148,10 @@ uiRoot.innerHTML = `
       font-weight: 600;
       letter-spacing: 0.02em;
       text-shadow: 0 2px 4px rgba(0,0,0,0.6);
-      max-width: 50vw;
+      max-width: 40vw;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-    .scenario-nav-buttons {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .hud-btn {
-      background: rgba(30, 30, 42, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #e2e8f0;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-    }
-    .hud-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
     }
 
     /* Start Overlay */
@@ -396,10 +373,6 @@ uiRoot.innerHTML = `
       <span class="scenario-badge">AnimeVRM</span>
       <span class="scenario-title-text">${meta?.title ?? 'Scenario'}</span>
     </div>
-    <div class="scenario-nav-buttons">
-      <button id="hud-restart-btn" class="hud-btn" title="最初から再生">↺ 最初から</button>
-      <a href="../index.html" class="hud-btn" title="通常ビューワーを開く">🏠 通常画面へ</a>
-    </div>
   </div>
 
   <!-- Start Overlay (Autoplay protection) -->
@@ -460,7 +433,6 @@ const startOverlay = document.getElementById('start-overlay')!;
 const replayOverlay = document.getElementById('replay-overlay')!;
 const startBtn = document.getElementById('start-btn')!;
 const replayBtn = document.getElementById('replay-btn')!;
-const hudRestartBtn = document.getElementById('hud-restart-btn')!;
 const otherSelect = document.getElementById('other-scenarios-select') as HTMLSelectElement;
 
 otherSelect?.addEventListener('change', (e) => {
@@ -557,11 +529,6 @@ startBtn.addEventListener('click', (e) => {
 replayBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   console.log('[ScenarioPlayer] replayBtn clicked');
-  startScenarioPlayback();
-});
-
-hudRestartBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
   startScenarioPlayback();
 });
 

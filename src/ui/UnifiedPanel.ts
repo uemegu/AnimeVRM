@@ -697,6 +697,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
           </div>
 
+          <!-- Performance Monitor Toggle -->
+          <div class="section-box" style="margin-top: 8px; background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 10px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label" style="margin-bottom: 0; font-size: 11px; color: #e2e8f0; font-weight: 600;">📊 パフォーマンスモニター (FPS / Calls / Tris)</label>
+              <input type="checkbox" id="toggle-perf-monitor" style="cursor: pointer; width: 16px; height: 16px;" ${viewerCore.isPerformanceMonitorVisible ? 'checked' : ''} />
+            </div>
+            <div style="font-size: 10px; color: #888888; margin-top: 4px; line-height: 1.4;">
+              画面左上のFPSグラフおよびDrawCalls/ポリゴン数バッジの表示を切り替えます（デフォルトOFF）。
+            </div>
+          </div>
+
           <!-- Config JSON Management -->
           <div class="section-box" style="margin-top: 8px;">
             <label class="section-label">⚙️ 設定JSON管理 (Config JSON)</label>
@@ -2030,6 +2041,14 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     volumeSlider?.addEventListener('input', () => {
       const vol = parseFloat(volumeSlider.value);
       audioLipSync.setVolume(vol);
+    });
+
+    // Performance Monitor Toggle
+    const togglePerfMonitor = document.getElementById('toggle-perf-monitor') as HTMLInputElement | null;
+    togglePerfMonitor?.addEventListener('change', (e) => {
+      const checked = (e.target as HTMLInputElement).checked;
+      viewerCore.setPerformanceMonitorVisible(checked);
+      showToast(checked ? '📊 パフォーマンスモニター ON' : '📊 パフォーマンスモニター OFF');
     });
   };
 
