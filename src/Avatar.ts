@@ -547,6 +547,7 @@ export class Avatar {
           hairPattern: /Hair|hair|髪/i,
           clothPattern: /Cloth|Tops|Bottoms|Shoes|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i,
           config: this.options.config,
+          camera: this.camera,
           debug: true,
         };
 

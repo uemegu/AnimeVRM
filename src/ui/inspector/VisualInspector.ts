@@ -113,6 +113,44 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .onChange(() => getAvatar()?.shaderController?.updateOutline(currentConfig.outline));
   outlineFolder.close();
 
+  // 2.1 Bottom Gradient Folder (Vertical Shading / Grounding shadow)
+  if (!currentConfig.bottomGradient) {
+    currentConfig.bottomGradient = {
+      enabled: true,
+      startY: 2.0,
+      endY: 1.0,
+      intensity: 0.16,
+      shadowWeight: 1.0,
+      color: '#101018',
+    };
+  }
+  const bottomGradientFolder = visualGui.addFolder(tr.gui.bottomGradientFolder);
+  bottomGradientFolder
+    .add(currentConfig.bottomGradient, 'enabled')
+    .name(tr.gui.bottomGradientEnabled)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder
+    .add(currentConfig.bottomGradient, 'startY', 0.1, 2.5, 0.05)
+    .name(tr.gui.bottomGradientStartY)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder
+    .add(currentConfig.bottomGradient, 'endY', -0.5, 2.0, 0.05)
+    .name(tr.gui.bottomGradientEndY)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder
+    .add(currentConfig.bottomGradient, 'intensity', 0, 1.0, 0.01)
+    .name(tr.gui.bottomGradientIntensity)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder
+    .add(currentConfig.bottomGradient, 'shadowWeight', 0, 1.0, 0.02)
+    .name(tr.gui.bottomGradientShadowWeight)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder
+    .addColor(currentConfig.bottomGradient, 'color')
+    .name(tr.gui.bottomGradientColor)
+    .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
+  bottomGradientFolder.close();
+
   // 3. Lighting Folder
   const lightFolder = visualGui.addFolder(tr.gui.lightFolder);
   lightFolder
