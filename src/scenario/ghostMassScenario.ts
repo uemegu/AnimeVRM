@@ -4,6 +4,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
   id: 'ghost-mass',
   title: '幽霊の質量（シャフト風）',
   hideMessageWindow: true,
+  instantCameraCut: true,
   characters: [
     {
       id: 'girl_01',
@@ -173,8 +174,8 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           speaker: '',
           text: '',
           shaftCutIn: 'red_trouble',
-          shaftCutInDuration: 3.5,
-          autoNextSec: 3.5,
+          shaftCutInDuration: 1.5,
+          autoNextSec: 1.5,
         },
         // 6. シャフトモード開始: 例えば私が幽霊になったとする。(アオイズーム)
         {
@@ -272,6 +273,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
             girl_01: {
               position: [-0.1285, 0.048, -1.3482],
               rotationY: 0.26,
+              motion: '/animations/Female Standing Pose.fbx', // 戻ってきた後は立ちポーズ
               expression: 'smile',
               expressionWeight: 0.6,
             },
@@ -288,7 +290,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           speaker: 'エミリ',
           speakerCharacterId: 'girl_02',
           shaftMode: false,
-          background: '/textures/white.png',
+          background: '/textures/school-classroom-far2.avif',
           text: '質量があるとすると、それはエネルギーを持っていると言うことね',
           voiceUrl: '/voices/shaft_09_emili.wav',
           autoNextSec: 0.8,
@@ -318,7 +320,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           speaker: 'エミリ',
           speakerCharacterId: 'girl_02',
           shaftMode: false,
-          background: '/textures/white.png',
+          background: '/textures/school-classroom-far2.avif',
           text: '地球から離れたいほどテスト結果が悪かったのね',
           voiceUrl: '/voices/shaft_10_emili.wav',
           autoNextSec: 0.8,

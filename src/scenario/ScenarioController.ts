@@ -267,6 +267,10 @@ export class ScenarioController {
         }
       },
       onApplySceneCamera: (scene) => {
+        const pkg = this.scenarioEngine.getCurrentPackage();
+        if (pkg?.instantCameraCut) {
+          this.dialogueCameraController.setInstantCutMode(true);
+        }
         this.dialogueCameraController.applyScene(scene);
       },
       onUpdateScrollingBackground: (bgConfig) => {

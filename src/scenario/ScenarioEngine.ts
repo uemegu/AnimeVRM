@@ -225,6 +225,10 @@ export class ScenarioEngine {
     return this.isPlayingState;
   }
 
+  public getCurrentPackage(): ScenarioPackage | null {
+    return this.currentPackage;
+  }
+
   public get currentScene(): ScenarioScene | null {
     if (!this.currentPackage) return null;
     const chapter = this.currentPackage.chapters[this.chapterIndex];
@@ -284,8 +288,9 @@ export class ScenarioEngine {
 
     this.messageWindow.setAutoMode(this.isAutoMode);
     if (scenarioPackage.hideMessageWindow) {
-      this.messageWindow.hide();
+      this.messageWindow.setForcedHidden(true);
     } else {
+      this.messageWindow.setForcedHidden(false);
       this.messageWindow.show();
     }
     this.executeCurrentScene();
@@ -323,6 +328,7 @@ export class ScenarioEngine {
 
     this.onApplyFisheye?.(false);
     this.onSwitchShaftMode?.(false);
+    this.messageWindow.setForcedHidden(false);
     this.messageWindow.hide();
     this.currentBackgroundUrl = null;
     this.onUpdateScrollingBackground?.(undefined);

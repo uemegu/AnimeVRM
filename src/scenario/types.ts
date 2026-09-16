@@ -182,6 +182,7 @@ export interface ScenarioPackage {
   seUrl?: string;     // Direct SE URL (Backward compatibility)
   seVolume?: number;
   hideMessageWindow?: boolean; // PV等の演出用に標準メッセージウィンドウを非表示にする
+  instantCameraCut?: boolean;  // カット切り替わり時にカメラをスムーズ補間せず一瞬でジャンプ切り替えする
   chapters: ScenarioChapter[];
 }
 
