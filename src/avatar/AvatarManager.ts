@@ -10,8 +10,7 @@ import { resolveAssetUrl } from '../utils/path';
 import { showToast } from '../ui/components/Toast';
 import { updateAnimationPlayStateUI } from '../ui/helpers';
 import { AudioLipSync } from '../AudioLipSync';
-import { AvatarChatController } from '../ai/AvatarChatController';
-import { GeminiVadChatController } from '../ai/GeminiVadChatController';
+import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
 
 export function isMotionLoop(url: string): boolean {
   return url.includes('Idle') || url.includes('Walking') || url.includes('Jogging') || url.includes('Pose');
@@ -38,8 +37,7 @@ export class AvatarManager {
   private windController: WindController;
   private getConfig: () => AvatarConfig;
   private onAvatarLoaded?: (avatar: Avatar) => void;
-  private avatarChatController?: AvatarChatController;
-  private geminiVadChatController?: GeminiVadChatController;
+  private liveChatController?: GeminiLiveChatController;
 
   constructor(options: {
     scene: THREE.Scene;
@@ -48,8 +46,7 @@ export class AvatarManager {
     sharedEffectTextManager: EffectTextManager;
     windController: WindController;
     getConfig: () => AvatarConfig;
-    avatarChatController?: AvatarChatController;
-    geminiVadChatController?: GeminiVadChatController;
+    liveChatController?: GeminiLiveChatController;
     renderer?: THREE.WebGLRenderer;
     onEnterTransparent: () => void;
     onExitTransparent: () => void;
@@ -62,8 +59,7 @@ export class AvatarManager {
     this.sharedEffectTextManager = options.sharedEffectTextManager;
     this.windController = options.windController;
     this.getConfig = options.getConfig;
-    this.avatarChatController = options.avatarChatController;
-    this.geminiVadChatController = options.geminiVadChatController;
+    this.liveChatController = options.liveChatController;
     this.onAvatarLoaded = options.onAvatarLoaded;
 
     this.typographyOverlay = new TypographyOverlay();
@@ -118,8 +114,8 @@ export class AvatarManager {
     }
   }
 
-  public setChatController(controller: AvatarChatController): void {
-    this.avatarChatController = controller;
+  public setLiveChatController(controller: GeminiLiveChatController): void {
+    this.liveChatController = controller;
   }
 
   public loadAvatarModel(modelUrl: string): void {
@@ -152,11 +148,8 @@ export class AvatarManager {
         if (el) el.textContent = `${progress.toFixed(0)}%`;
       },
       onLoaded: (avatar) => {
-        if (this.avatarChatController) {
-          this.avatarChatController.setAvatar(avatar);
-        }
-        if (this.geminiVadChatController) {
-          this.geminiVadChatController.setAvatar(avatar);
+        if (this.liveChatController) {
+          this.liveChatController.setAvatar(avatar);
         }
         if (this.currentExprName !== 'neutral') {
           avatar.setExpression(this.currentExprName, 1.0);

@@ -24,8 +24,8 @@ import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
 import { GHOST_MASS_SCENARIO } from '../scenario/ghostMassScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
-import { AvatarChatController } from '../ai/AvatarChatController';
-import { GeminiVadChatController } from '../ai/GeminiVadChatController';
+import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
+import { GEMINI_LIVE_VOICES } from '../ai/live/GeminiVoices';
 import { ViewerCore } from '../scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
 import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
@@ -45,14 +45,12 @@ export interface UnifiedPanelContext {
   scenarioController: ScenarioController;
   inspectorManager: InspectorManager;
   audioLipSync: AudioLipSync;
-  avatarChatController: AvatarChatController;
-  geminiVadChatController?: GeminiVadChatController;
+  geminiLiveChatController: GeminiLiveChatController;
   colorHistogram: ColorHistogram;
   avatarTransformController?: AvatarTransformController;
   shaftModeController?: ShaftModeController;
   onApplyConfig: (cfg: AvatarConfig) => void;
   onResize: () => void;
-  onTtsGpuActivityChange: (active: boolean) => void;
 }
 
 export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
@@ -64,13 +62,11 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     scenarioController,
     inspectorManager,
     audioLipSync,
-    avatarChatController,
-    geminiVadChatController,
+    geminiLiveChatController,
     colorHistogram,
     shaftModeController,
     onApplyConfig,
     onResize,
-    onTtsGpuActivityChange,
   } = ctx;
 
   let gearBtn = document.getElementById('settings-open-btn') as HTMLButtonElement | null;
@@ -622,98 +618,75 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
         <!-- TAB 4: AI & System -->
         <div id="tab-pane-system" class="tab-pane ${currentActiveTab === 'system' ? 'active' : ''}">
-          <!-- AI Avatar Chat -->
-          <div class="aichat-container">
-            <div class="aichat-status-card">
-              <div class="aichat-status-header">
-                <span class="aichat-status-title">${tr.aichat.title}</span>
-                <span id="ai-chat-badge" class="aichat-badge">${tr.aichat.statusUnloaded}</span>
-              </div>
-              <div id="ai-chat-status-msg" class="aichat-status-detail">${tr.aichat.description}</div>
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px;">
-                <label style="color: #aaaaaa; white-space: nowrap;">${tr.aichat.ttsSteps}:</label>
-                <select id="ai-chat-tts-steps-select" style="flex: 1; font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
-                  ${[4, 6, 8, 12, 16]
-                    .map(
-                      (steps) =>
-                        `<option value="${steps}" ${avatarChatController.getTtsNumSteps() === steps ? 'selected' : ''}>${steps}</option>`
-                    )
-                    .join('')}
-                </select>
-              </div>
-              <button id="ai-chat-init-btn" class="aichat-init-btn">${tr.aichat.prepareAi}</button>
-              <div id="ai-chat-webgpu-warn" class="aichat-warning" style="display: none;">${tr.aichat.webgpuWarning}</div>
-            </div>
-
-            <div id="ai-chat-messages" class="aichat-messages-box">
-              <div id="ai-chat-empty-hint" class="aichat-empty-hint">${tr.aichat.emptyHistory}</div>
-            </div>
-
-            <div class="aichat-input-row">
-              <input type="text" id="ai-chat-input" class="aichat-input" placeholder="${tr.aichat.inputPlaceholder}" disabled />
-              <button id="ai-chat-send-btn" class="aichat-send-btn" disabled>${tr.aichat.send}</button>
-            </div>
-          </div>
-
-          <!-- AI Avatar Voice Chat (Gemini API & VAD) -->
-          <div class="aichat-container" style="margin-top: 12px; border-color: #2e435a; background: #161b22;">
+          <!-- AI Avatar Realtime Live Chat (Gemini 3.8 Live) -->
+          <div class="aichat-container" style="border-color: #2e435a; background: #161b22;">
             <div class="aichat-status-card" style="background: linear-gradient(135deg, #182230 0%, #121820 100%);">
               <div class="aichat-status-header">
-                <span class="aichat-status-title" style="color: #6ab0f8; font-weight: 600;">${tr.geminiVadChat.title}</span>
-                <span id="gemini-vad-badge" class="aichat-badge">${tr.geminiVadChat.statusIdle}</span>
+                <span class="aichat-status-title" style="color: #6ab0f8; font-weight: 600;">${tr.geminiLiveChat.title}</span>
+                <span id="gemini-live-badge" class="aichat-badge">${tr.geminiLiveChat.statusDisconnected}</span>
               </div>
-              <div id="gemini-vad-status-msg" class="aichat-status-detail">${tr.geminiVadChat.description}</div>
+              <div id="gemini-live-status-msg" class="aichat-status-detail">${tr.geminiLiveChat.description}</div>
 
-              <!-- API Key input (Password, never saved to storage) -->
+              <!-- API Key input (Password, in-memory only, NOT saved to localStorage) -->
               <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
-                <label style="font-size: 11px; color: #8cb8ff; font-weight: 500;">🔑 ${tr.geminiVadChat.apiKeyLabel}:</label>
+                <label style="font-size: 11px; color: #8cb8ff; font-weight: 500;">🔑 ${tr.geminiLiveChat.apiKeyLabel}:</label>
                 <div style="display: flex; gap: 4px;">
-                  <input type="password" id="gemini-api-key-input" class="aichat-input" placeholder="${tr.geminiVadChat.apiKeyPlaceholder}" style="flex: 1; font-size: 11px;" autocomplete="off" />
-                  <button id="gemini-toggle-key-visibility" class="action-btn" style="padding: 4px 8px; font-size: 11px;" title="表示切替">👁️</button>
+                  <input type="password" id="gemini-live-api-key" class="aichat-input" placeholder="${tr.geminiLiveChat.apiKeyPlaceholder}" style="flex: 1; font-size: 11px;" autocomplete="off" />
+                  <button id="gemini-live-toggle-key" class="action-btn" style="padding: 4px 8px; font-size: 11px;" title="表示切替">👁️</button>
                 </div>
-                <small style="font-size: 9px; color: #888888; line-height: 1.2;">※ APIキーはブラウザのメモリ内のみに保持され、localStorage等には保存されません。</small>
+                <small style="font-size: 9px; color: #888888; line-height: 1.2;">${tr.geminiLiveChat.apiKeyNote}</small>
               </div>
 
-              <!-- TTS Server URL -->
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
-                <label style="font-size: 11px; color: #aaaaaa;">🔊 ${tr.geminiVadChat.ttsUrlLabel}:</label>
-                <input type="text" id="gemini-tts-url-input" class="aichat-input" value="${geminiVadChatController ? geminiVadChatController.getTtsServerUrl() : '/irodori-api/tts'}" style="font-size: 11px;" />
-              </div>
-
-              <!-- TTS Ref Path & Steps -->
+              <!-- Model & Voice selection -->
               <div style="display: flex; gap: 6px; margin-top: 6px;">
-                <div style="flex: 2; display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; color: #aaaaaa;">📁 ${tr.geminiVadChat.ttsRefLabel}:</label>
-                  <input type="text" id="gemini-tts-ref-input" class="aichat-input" value="${geminiVadChatController ? geminiVadChatController.getTtsRefPath() : '~/git/practice/vrm-view/vrm-genshin-like/voices/001.wav'}" style="font-size: 11px;" />
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <label style="font-size: 11px; color: #aaaaaa;">⚡ ${tr.geminiLiveChat.modelLabel}:</label>
+                  <input type="text" id="gemini-live-model-input" list="gemini-live-model-list" class="aichat-input" value="${geminiLiveChatController.getModel()}" style="font-size: 11px;" />
+                  <datalist id="gemini-live-model-list">
+                    <option value="gemini-3.8-live">gemini-3.8-live (最新・標準)</option>
+                    <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (高思考)</option>
+                    <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp (従来モデル)</option>
+                  </datalist>
                 </div>
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; color: #aaaaaa;">⚡ ${tr.geminiVadChat.ttsStepsLabel}:</label>
-                  <select id="gemini-tts-steps-select" style="font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
-                    ${[4, 6, 8, 12, 16]
-                      .map(
-                        (steps) =>
-                          `<option value="${steps}" ${(geminiVadChatController ? geminiVadChatController.getTtsSteps() : 8) === steps ? 'selected' : ''}>${steps}</option>`
-                      )
-                      .join('')}
+                  <label style="font-size: 11px; color: #aaaaaa;">🗣️ ${tr.geminiLiveChat.voiceLabel}:</label>
+                  <select id="gemini-live-voice-select" style="font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
+                    <optgroup label="♀ 女性ボイス (Female)">
+                      ${GEMINI_LIVE_VOICES.filter((v) => v.gender === 'female')
+                        .map(
+                          (v) =>
+                            `<option value="${v.name}" ${geminiLiveChatController.getVoice() === v.name ? 'selected' : ''}>${v.name} (${lang === 'ja' ? v.labelJa : v.labelEn})</option>`
+                        )
+                        .join('')}
+                    </optgroup>
+                    <optgroup label="♂ 男性ボイス (Male)">
+                      ${GEMINI_LIVE_VOICES.filter((v) => v.gender === 'male')
+                        .map(
+                          (v) =>
+                            `<option value="${v.name}" ${geminiLiveChatController.getVoice() === v.name ? 'selected' : ''}>${v.name} (${lang === 'ja' ? v.labelJa : v.labelEn})</option>`
+                        )
+                        .join('')}
+                    </optgroup>
                   </select>
                 </div>
               </div>
 
-              <!-- Start / Stop Voice Conversation -->
+              <!-- Connect & Mic buttons -->
               <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <button id="gemini-vad-toggle-btn" class="aichat-init-btn" style="background: #2563eb; flex: 1;">${tr.geminiVadChat.startVoice}</button>
+                <button id="gemini-live-connect-btn" class="aichat-init-btn" style="background: #2563eb; flex: 2;">${tr.geminiLiveChat.startChat}</button>
+                <button id="gemini-live-mic-btn" class="action-btn" style="flex: 1; font-size: 11px; padding: 6px 8px;" disabled>${tr.geminiLiveChat.micOn}</button>
               </div>
             </div>
 
             <!-- Messages Box -->
-            <div id="gemini-vad-messages" class="aichat-messages-box">
-              <div id="gemini-vad-empty-hint" class="aichat-empty-hint">${tr.geminiVadChat.emptyHistory}</div>
+            <div id="gemini-live-messages" class="aichat-messages-box">
+              <div id="gemini-live-empty-hint" class="aichat-empty-hint">${tr.geminiLiveChat.emptyHistory}</div>
             </div>
 
-            <!-- Manual Text Input -->
+            <!-- Text Input -->
             <div class="aichat-input-row">
-              <input type="text" id="gemini-vad-text-input" class="aichat-input" placeholder="${tr.geminiVadChat.textPlaceholder}" />
-              <button id="gemini-vad-send-btn" class="aichat-send-btn">${tr.geminiVadChat.send}</button>
+              <input type="text" id="gemini-live-text-input" class="aichat-input" placeholder="${tr.geminiLiveChat.textPlaceholder}" />
+              <button id="gemini-live-send-btn" class="aichat-send-btn">${tr.geminiLiveChat.send}</button>
             </div>
           </div>
 
@@ -836,319 +809,201 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     scenarioController.masterManager.subscribe(updateMasterCountLabels);
     updateMasterCountLabels();
 
-    // AI Avatar Chat Setup
-    const aiInitBtn = document.getElementById('ai-chat-init-btn') as HTMLButtonElement | null;
-    const aiSendBtn = document.getElementById('ai-chat-send-btn') as HTMLButtonElement | null;
-    const aiInput = document.getElementById('ai-chat-input') as HTMLInputElement | null;
-    const aiBadge = document.getElementById('ai-chat-badge');
-    const aiStatusMsg = document.getElementById('ai-chat-status-msg');
-    const aiMessages = document.getElementById('ai-chat-messages');
-    const aiEmptyHint = document.getElementById('ai-chat-empty-hint');
-    const aiWebgpuWarn = document.getElementById('ai-chat-webgpu-warn');
+    // --------------------------------------------------
+    // Gemini Live (Multimodal WebSocket) Chat Binding
+    // --------------------------------------------------
+    const glBadge = document.getElementById('gemini-live-badge');
+    const glStatusMsg = document.getElementById('gemini-live-status-msg');
+    const glApiKeyInput = document.getElementById('gemini-live-api-key') as HTMLInputElement | null;
+    const glToggleKeyBtn = document.getElementById('gemini-live-toggle-key') as HTMLButtonElement | null;
+    const glModelInput = document.getElementById('gemini-live-model-input') as HTMLInputElement | null;
+    const glVoiceSelect = document.getElementById('gemini-live-voice-select') as HTMLSelectElement | null;
+    const glConnectBtn = document.getElementById('gemini-live-connect-btn') as HTMLButtonElement | null;
+    const glMicBtn = document.getElementById('gemini-live-mic-btn') as HTMLButtonElement | null;
+    const glMessages = document.getElementById('gemini-live-messages');
+    const glEmptyHint = document.getElementById('gemini-live-empty-hint');
+    const glTextInput = document.getElementById('gemini-live-text-input') as HTMLInputElement | null;
+    const glSendBtn = document.getElementById('gemini-live-send-btn') as HTMLButtonElement | null;
 
-    if (!navigator.gpu && aiWebgpuWarn) {
-      aiWebgpuWarn.style.display = 'block';
-    }
+    const renderLiveState = (state: string, statusText?: string) => {
+      if (!glBadge) return;
+      glBadge.className = `aichat-badge ${state}`;
 
-    const renderChatState = (state: string, statusText?: string) => {
-      if (!aiBadge) return;
-      aiBadge.className = `aichat-badge ${state}`;
-
-      const curTr = t();
+      const curTr = t().geminiLiveChat;
       const stateLabels: Record<string, string> = {
-        unloaded: curTr.aichat.statusUnloaded,
-        loading: curTr.aichat.statusLoading,
-        ready: curTr.aichat.statusReady,
-        generating: curTr.aichat.statusGenerating,
-        synthesizing: curTr.aichat.statusSynthesizing,
-        speaking: curTr.aichat.statusSpeaking,
-        error: curTr.aichat.statusError,
+        disconnected: curTr.statusDisconnected,
+        connecting: curTr.statusConnecting,
+        connected: curTr.statusConnected,
+        listening: curTr.statusListening,
+        speaking: curTr.statusSpeaking,
+        error: curTr.statusError,
       };
 
-      aiBadge.textContent = stateLabels[state] || state;
-      if (statusText && aiStatusMsg) {
-        aiStatusMsg.textContent = statusText;
+      glBadge.textContent = stateLabels[state] || state;
+      if (statusText && glStatusMsg) {
+        glStatusMsg.textContent = statusText;
       }
 
-      if (aiInitBtn) {
-        const isReadyOrActive =
-          state === 'ready' || state === 'speaking' || state === 'generating' || state === 'synthesizing';
-        aiInitBtn.style.display = isReadyOrActive ? 'none' : 'block';
-        aiInitBtn.disabled = state === 'loading';
+      const isConnectedOrActive =
+        state === 'connected' || state === 'listening' || state === 'speaking';
+
+      if (glConnectBtn) {
+        glConnectBtn.textContent = isConnectedOrActive ? curTr.stopChat : curTr.startChat;
+        glConnectBtn.style.background = isConnectedOrActive ? '#dc2626' : '#2563eb';
+        glConnectBtn.disabled = state === 'connecting';
       }
 
-      if (aiInput && aiSendBtn) {
-        const canSend = state === 'ready';
-        aiInput.disabled = !canSend;
-        aiSendBtn.disabled = !canSend;
-        if (canSend) {
-          aiInput.focus();
-        }
+      if (glMicBtn) {
+        glMicBtn.disabled = !isConnectedOrActive;
+      }
+
+      if (glTextInput && glSendBtn) {
+        glTextInput.disabled = !isConnectedOrActive;
+        glSendBtn.disabled = !isConnectedOrActive;
       }
     };
 
-    avatarChatController.setEvents({
-      onStateChange: (state, statusText) => {
-        renderChatState(state, statusText);
-      },
-      onTtsGpuActivityChange: (active) => {
-        onTtsGpuActivityChange(active);
-      },
-      onMessageAdded: (msg, replyMeta) => {
-        if (aiEmptyHint) aiEmptyHint.style.display = 'none';
-        if (aiMessages) {
-          const msgEl = document.createElement('div');
-          msgEl.className = `aichat-msg ${msg.role}`;
+    const renderMessageItem = (msg: any) => {
+      if (glEmptyHint) glEmptyHint.style.display = 'none';
+      if (!glMessages) return;
 
-          const textEl = document.createElement('div');
-          textEl.textContent = msg.content;
-          msgEl.appendChild(textEl);
+      let msgEl = document.getElementById(`msg-${msg.id}`);
+      if (!msgEl) {
+        msgEl = document.createElement('div');
+        msgEl.id = `msg-${msg.id}`;
+        msgEl.className = `aichat-msg ${msg.role}`;
+        glMessages.appendChild(msgEl);
+      }
 
-          if (replyMeta) {
-            const metaEl = document.createElement('div');
-            metaEl.className = 'aichat-msg-meta';
-            metaEl.innerHTML = `<span class="aichat-tag">${replyMeta.expression}</span><span class="aichat-tag">${replyMeta.motion}</span>`;
-            msgEl.appendChild(metaEl);
-          }
+      msgEl.innerHTML = '';
+      const textEl = document.createElement('div');
+      textEl.textContent = msg.content || (msg.role === 'assistant' && !msg.tools?.length ? '…' : '');
+      msgEl.appendChild(textEl);
 
-          aiMessages.appendChild(msgEl);
-          aiMessages.scrollTop = aiMessages.scrollHeight;
+      if (msg.tools && msg.tools.length > 0) {
+        const metaEl = document.createElement('div');
+        metaEl.className = 'aichat-msg-meta';
+        for (const tool of msg.tools) {
+          const tag = document.createElement('span');
+          tag.className = 'aichat-tag';
+          tag.textContent = tool.detail;
+          metaEl.appendChild(tag);
         }
+        msgEl.appendChild(metaEl);
+      }
+
+      glMessages.scrollTop = glMessages.scrollHeight;
+    };
+
+    geminiLiveChatController.setEvents({
+      onStateChange: (state, statusText) => {
+        renderLiveState(state, statusText);
+      },
+      onMicStateChange: (active) => {
+        if (glMicBtn) {
+          const curTr = t().geminiLiveChat;
+          glMicBtn.textContent = active ? curTr.micOn : curTr.micMuted;
+          glMicBtn.style.background = active ? '#16a34a' : '#4b5563';
+        }
+      },
+      onMessageAdded: (msg) => {
+        renderMessageItem(msg);
+      },
+      onMessageUpdated: (msg) => {
+        renderMessageItem(msg);
       },
       onError: (err) => {
         const msg = typeof err === 'string' ? err : err.message;
-        if (aiStatusMsg) aiStatusMsg.textContent = msg;
-        renderChatState('error', msg);
+        if (glStatusMsg) glStatusMsg.textContent = msg;
+        renderLiveState('error', msg);
+        showToast(`Gemini Live エラー: ${msg}`);
       },
     });
 
-    renderChatState(avatarChatController.getState());
-
-    const existingHistory = avatarChatController.getHistory();
-    if (existingHistory.length > 0) {
-      if (aiEmptyHint) aiEmptyHint.style.display = 'none';
-      if (aiMessages) {
-        aiMessages.innerHTML = '';
-        existingHistory.forEach((msg) => {
-          const msgEl = document.createElement('div');
-          msgEl.className = `aichat-msg ${msg.role}`;
-          const textEl = document.createElement('div');
-          textEl.textContent = msg.content;
-          msgEl.appendChild(textEl);
-          aiMessages.appendChild(msgEl);
-        });
-        aiMessages.scrollTop = aiMessages.scrollHeight;
+    // API key input (In-memory only, NO localStorage!)
+    glApiKeyInput?.addEventListener('input', () => {
+      if (glApiKeyInput) {
+        geminiLiveChatController.setApiKey(glApiKeyInput.value);
       }
-    }
-
-    const aiTtsStepsSelect = document.getElementById(
-      'ai-chat-tts-steps-select'
-    ) as HTMLSelectElement | null;
-    aiTtsStepsSelect?.addEventListener('change', () => {
-      avatarChatController.setTtsNumSteps(Number(aiTtsStepsSelect.value));
     });
 
-    aiInitBtn?.addEventListener('click', async () => {
+    // Toggle key visibility
+    glToggleKeyBtn?.addEventListener('click', () => {
+      if (glApiKeyInput) {
+        glApiKeyInput.type = glApiKeyInput.type === 'password' ? 'text' : 'password';
+      }
+    });
+
+    // Model input
+    glModelInput?.addEventListener('change', () => {
+      if (glModelInput?.value) {
+        geminiLiveChatController.setModel(glModelInput.value);
+      }
+    });
+
+    // Voice select
+    glVoiceSelect?.addEventListener('change', () => {
+      if (glVoiceSelect?.value) {
+        geminiLiveChatController.setVoice(glVoiceSelect.value);
+      }
+    });
+
+    // Connect / Disconnect button
+    glConnectBtn?.addEventListener('click', async () => {
       if ((audioLipSync as any).audioContext?.state === 'suspended') {
         await (audioLipSync as any).audioContext.resume();
       }
-      await avatarChatController.initialize();
-    });
 
-    const handleSendMessage = async () => {
-      if (!aiInput || !aiInput.value.trim()) return;
-      const text = aiInput.value.trim();
-      aiInput.value = '';
-      if ((audioLipSync as any).audioContext?.state === 'suspended') {
-        await (audioLipSync as any).audioContext.resume();
-      }
-      await avatarChatController.sendMessage(text);
-    };
-
-    aiSendBtn?.addEventListener('click', handleSendMessage);
-    aiInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.isComposing) {
-        e.preventDefault();
-        handleSendMessage();
-      }
-    });
-
-    // --------------------------------------------------
-    // Gemini VAD & Dynamic Motion Chat Binding
-    // --------------------------------------------------
-    if (geminiVadChatController) {
-      const gBadge = document.getElementById('gemini-vad-badge');
-      const gStatusMsg = document.getElementById('gemini-vad-status-msg');
-      const gApiKeyInput = document.getElementById('gemini-api-key-input') as HTMLInputElement | null;
-      const gToggleKeyBtn = document.getElementById('gemini-toggle-key-visibility') as HTMLButtonElement | null;
-      const gTtsUrlInput = document.getElementById('gemini-tts-url-input') as HTMLInputElement | null;
-      const gTtsRefInput = document.getElementById('gemini-tts-ref-input') as HTMLInputElement | null;
-      const gTtsStepsSelect = document.getElementById('gemini-tts-steps-select') as HTMLSelectElement | null;
-      const gToggleBtn = document.getElementById('gemini-vad-toggle-btn') as HTMLButtonElement | null;
-      const gMessages = document.getElementById('gemini-vad-messages');
-      const gEmptyHint = document.getElementById('gemini-vad-empty-hint');
-      const gTextInput = document.getElementById('gemini-vad-text-input') as HTMLInputElement | null;
-      const gSendBtn = document.getElementById('gemini-vad-send-btn') as HTMLButtonElement | null;
-
-      const renderVadChatState = (state: string, statusText?: string) => {
-        if (!gBadge) return;
-        gBadge.className = `aichat-badge ${state}`;
-
-        const curTr = t().geminiVadChat;
-        const stateLabels: Record<string, string> = {
-          idle: curTr.statusIdle,
-          listening: curTr.statusListening,
-          speaking_user: curTr.statusSpeakingUser,
-          thinking: curTr.statusThinking,
-          synthesizing: curTr.statusSynthesizing,
-          speaking_avatar: curTr.statusSpeakingAvatar,
-          error: curTr.statusError,
-        };
-
-        gBadge.textContent = stateLabels[state] || state;
-        if (statusText && gStatusMsg) {
-          gStatusMsg.textContent = statusText;
-        }
-
-        if (gToggleBtn) {
-          const isActive = state !== 'idle' && state !== 'error';
-          gToggleBtn.textContent = isActive ? curTr.stopVoice : curTr.startVoice;
-          gToggleBtn.style.background = isActive ? '#dc2626' : '#2563eb';
-        }
-      };
-
-      geminiVadChatController.setEvents({
-        onStateChange: (state, statusText) => {
-          renderVadChatState(state, statusText);
-        },
-        onMessageAdded: (msg, meta) => {
-          if (gEmptyHint) gEmptyHint.style.display = 'none';
-          if (gMessages) {
-            const msgEl = document.createElement('div');
-            msgEl.className = `aichat-msg ${msg.role}`;
-
-            const textEl = document.createElement('div');
-            textEl.textContent = msg.content;
-            msgEl.appendChild(textEl);
-
-            if (meta && (meta.expression || meta.motionLayers?.length)) {
-              const metaEl = document.createElement('div');
-              metaEl.className = 'aichat-msg-meta';
-              if (meta.expression) {
-                const expTag = document.createElement('span');
-                expTag.className = 'aichat-tag';
-                expTag.textContent = `表情: ${meta.expression}`;
-                metaEl.appendChild(expTag);
-              }
-              if (meta.motionLayers && meta.motionLayers.length > 0) {
-                const motionTag = document.createElement('span');
-                motionTag.className = 'aichat-tag';
-                motionTag.title = meta.motionLayers.join(', ');
-                motionTag.textContent = `動作: ${meta.motionLayers.join(' + ')}`;
-                metaEl.appendChild(motionTag);
-              }
-              msgEl.appendChild(metaEl);
-            }
-
-            gMessages.appendChild(msgEl);
-            gMessages.scrollTop = gMessages.scrollHeight;
-          }
-        },
-        onError: (err) => {
-          const msg = typeof err === 'string' ? err : err.message;
-          if (gStatusMsg) gStatusMsg.textContent = msg;
-          renderVadChatState('error', msg);
-        },
-      });
-
-      // API Key input - in-memory only, NOT stored in localStorage!
-      gApiKeyInput?.addEventListener('input', () => {
-        if (gApiKeyInput) {
-          geminiVadChatController.setApiKey(gApiKeyInput.value);
-        }
-      });
-
-      // Visibility toggle for API Key
-      gToggleKeyBtn?.addEventListener('click', () => {
-        if (gApiKeyInput) {
-          gApiKeyInput.type = gApiKeyInput.type === 'password' ? 'text' : 'password';
-        }
-      });
-
-      // TTS URL
-      gTtsUrlInput?.addEventListener('change', () => {
-        if (gTtsUrlInput?.value) {
-          geminiVadChatController.setTtsServerUrl(gTtsUrlInput.value);
-        }
-      });
-
-      // TTS Ref Path
-      gTtsRefInput?.addEventListener('change', () => {
-        if (gTtsRefInput?.value) {
-          geminiVadChatController.setTtsRefPath(gTtsRefInput.value);
-        }
-      });
-
-      // TTS Steps
-      gTtsStepsSelect?.addEventListener('change', () => {
-        if (gTtsStepsSelect?.value) {
-          geminiVadChatController.setTtsSteps(Number(gTtsStepsSelect.value));
-        }
-      });
-
-      // Start / Stop conversation button
-      gToggleBtn?.addEventListener('click', async () => {
-        if ((audioLipSync as any).audioContext?.state === 'suspended') {
-          await (audioLipSync as any).audioContext.resume();
-        }
-
-        const currentState = geminiVadChatController.getState();
-        if (currentState === 'idle' || currentState === 'error') {
-          if (!geminiVadChatController.hasApiKey()) {
-            gApiKeyInput?.focus();
-            showToast('Gemini APIキーを入力してください');
-            return;
-          }
-          try {
-            await geminiVadChatController.startConversation();
-          } catch (err: any) {
-            showToast(err?.message || '会話の開始に失敗しました');
-          }
-        } else {
-          await geminiVadChatController.stopConversation();
-        }
-      });
-
-      // Manual text send
-      const handleSendVadText = async () => {
-        if (!gTextInput || !gTextInput.value.trim()) return;
-        if (!geminiVadChatController.hasApiKey()) {
-          gApiKeyInput?.focus();
+      const currentState = geminiLiveChatController.getState();
+      if (currentState === 'disconnected' || currentState === 'error') {
+        if (!geminiLiveChatController.hasApiKey()) {
+          glApiKeyInput?.focus();
           showToast('Gemini APIキーを入力してください');
           return;
         }
-        const text = gTextInput.value.trim();
-        gTextInput.value = '';
-        if ((audioLipSync as any).audioContext?.state === 'suspended') {
-          await (audioLipSync as any).audioContext.resume();
-        }
         try {
-          await geminiVadChatController.sendTextMessage(text);
+          await geminiLiveChatController.connect();
+          showToast('🎙️ Gemini Live に接続しました');
         } catch (err: any) {
-          showToast(err?.message || 'メッセージ送信に失敗しました');
+          showToast(err?.message || '接続に失敗しました');
         }
-      };
+      } else {
+        geminiLiveChatController.disconnect();
+        showToast('Gemini Live を切断しました');
+      }
+    });
 
-      gSendBtn?.addEventListener('click', handleSendVadText);
-      gTextInput?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.isComposing) {
-          e.preventDefault();
-          handleSendVadText();
-        }
-      });
+    // Mic Toggle button
+    glMicBtn?.addEventListener('click', async () => {
+      try {
+        const active = await geminiLiveChatController.toggleMicrophone();
+        showToast(active ? '🎤 マイクを有効にしました' : '🔇 マイクをミュートしました');
+      } catch (err: any) {
+        showToast(`マイク切り替え失敗: ${err.message || err}`);
+      }
+    });
 
-      renderVadChatState(geminiVadChatController.getState());
-    }
+    // Text Send
+    const handleSendLiveText = () => {
+      if (!glTextInput || !glTextInput.value.trim()) return;
+      const text = glTextInput.value.trim();
+      glTextInput.value = '';
+      try {
+        geminiLiveChatController.sendTextMessage(text);
+      } catch (err: any) {
+        showToast(err?.message || '送信に失敗しました');
+      }
+    };
+
+    glSendBtn?.addEventListener('click', handleSendLiveText);
+    glTextInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.isComposing) {
+        e.preventDefault();
+        handleSendLiveText();
+      }
+    });
+
+    renderLiveState(geminiLiveChatController.getState());
 
     document.getElementById('master-export-json-btn')?.addEventListener('click', () => {
       scenarioController.masterManager.downloadJSON('masters.json');
