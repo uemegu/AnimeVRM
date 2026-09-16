@@ -36,6 +36,7 @@ import { openImportModal } from './components/ImportExportModal';
 import { AvatarTransformController } from '../avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
 import type { ShaftModeController } from '../effects/shaft/ShaftModeController';
+import type { Live2DTransitionManager } from '../live2d/Live2DTransitionManager';
 
 export interface UnifiedPanelContext {
   currentConfig: AvatarConfig;
@@ -49,6 +50,7 @@ export interface UnifiedPanelContext {
   colorHistogram: ColorHistogram;
   avatarTransformController?: AvatarTransformController;
   shaftModeController?: ShaftModeController;
+  live2DTransitionManager?: Live2DTransitionManager;
   onApplyConfig: (cfg: AvatarConfig) => void;
   onResize: () => void;
 }
@@ -65,6 +67,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     geminiLiveChatController,
     colorHistogram,
     shaftModeController,
+    live2DTransitionManager,
     onApplyConfig,
     onResize,
   } = ctx;
@@ -215,7 +218,8 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           <div class="section-box">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
               <label class="section-label">${tr.character.expression}</label>
-              <div style="display: flex; gap: 4px;">
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                <button id="live2d-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #064e3b; border: 1px solid #10b981; color: #a7f3d0; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🎨 Live2D</button>
                 <button id="shaft-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #18181b; border: 1px solid #71717a; color: #f4f4f5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖋️ シャフト</button>
                 <button id="blush-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2b1122; border: 1px solid #f43f5e; color: #fbcfe8; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">😳 頬赤らめ</button>
                 <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
@@ -1582,6 +1586,42 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
     // Expression Buttons
     const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
+
+    // Live2D Mode Toggle Button
+    const live2dToggleBtn = document.getElementById('live2d-toggle-btn') as HTMLButtonElement | null;
+    const updateLive2DButtonUI = (isActive: boolean) => {
+      if (!live2dToggleBtn) return;
+      live2dToggleBtn.style.background = isActive ? '#059669' : '#064e3b';
+      live2dToggleBtn.style.borderColor = isActive ? '#34d399' : '#10b981';
+      live2dToggleBtn.style.color = isActive ? '#ffffff' : '#a7f3d0';
+      live2dToggleBtn.style.boxShadow = isActive ? '0 0 10px rgba(16, 185, 129, 0.6)' : 'none';
+      live2dToggleBtn.textContent = isActive ? '🎨 Live2D中 (解除)' : '🎨 Live2D';
+    };
+
+    if (live2DTransitionManager) {
+      updateLive2DButtonUI(live2DTransitionManager.mode === 'live2d');
+      live2DTransitionManager.onModeChange((mode) => {
+        updateLive2DButtonUI(mode === 'live2d');
+      });
+
+      live2dToggleBtn?.addEventListener('click', async () => {
+        if (!live2DTransitionManager) return;
+        const currentMode = live2DTransitionManager.mode;
+        if (
+          currentMode === 'transitioning_to_live2d' ||
+          currentMode === 'transitioning_to_vrm'
+        ) {
+          return;
+        }
+        const willBeLive2D = currentMode !== 'live2d';
+        await live2DTransitionManager.toggle();
+        if (willBeLive2D) {
+          showToast('🎨 Live2Dモードを発動しました');
+        } else {
+          showToast('✨ VRMモードに戻りました');
+        }
+      });
+    }
 
     // Shaft Mode Toggle Button
     const shaftToggleBtn = document.getElementById('shaft-toggle-btn') as HTMLButtonElement | null;

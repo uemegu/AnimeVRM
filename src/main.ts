@@ -188,12 +188,22 @@ setupUnifiedPanel({
   colorHistogram,
   avatarTransformController,
   shaftModeController,
+  live2DTransitionManager,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
   },
   onResize: () => {
     viewerCore.onResize();
   },
+});
+
+// Shortcut 'L' to toggle Live2D mode
+window.addEventListener('keydown', (e) => {
+  const target = e.target as HTMLElement | null;
+  const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+  if (!isInput && (e.key === 'l' || e.key === 'L')) {
+    live2DTransitionManager.toggle();
+  }
 });
 
 // Initial load
@@ -265,11 +275,19 @@ function tick(timestamp?: number): void {
   viewerCore.render(delta, elapsed, currentConfig, vrmMeshes);
 
   // Update Live2D Close-up Cut-in (Scene override & distance check)
-  if (currentScene?.live2d !== undefined) {
-    const live2dOpt = currentScene.live2d;
-    const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
-    live2DTransitionManager.setSceneOverride(isExplicit);
+  const isScenarioPlaying =
+    scenarioController.scenarioEngine.isPlaying || scenarioController.scenarioPlayer.isPlaying;
+  if (isScenarioPlaying) {
+    if (currentScene?.live2d !== undefined) {
+      const live2dOpt = currentScene.live2d;
+      const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
+      live2DTransitionManager.setSceneOverride(isExplicit);
+    } else {
+      // In scenario playback, scenes without explicit live2d are kept in VRM mode
+      live2DTransitionManager.setSceneOverride(false);
+    }
   } else {
+    // Outside scenario playback, no scene override (toggle via Live2D button)
     live2DTransitionManager.setSceneOverride(null);
   }
   live2DTransitionManager.update(delta);
