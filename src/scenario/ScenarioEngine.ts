@@ -1053,6 +1053,13 @@ export class ScenarioEngine {
     // 1.99 Shaft Mode (単色キャラ・太白輪郭・ローポリ教室・白背景)
     if (scene.shaftMode !== undefined) {
       this.onSwitchShaftMode?.(scene.shaftMode);
+
+      // シャフトモードのときはアイドルモーションもリップシンクも完全停止（静止画・切り絵演出）
+      const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
+      for (const av of allAvatars) {
+        av.setMotionFrozen(scene.shaftMode);
+        av.setLipSyncEnabled(!scene.shaftMode);
+      }
     }
 
     // 1.995 Scene-level Shafudo override for speaker / active avatar
