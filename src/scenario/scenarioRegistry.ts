@@ -135,7 +135,7 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     title: '👻 幽霊の質量（シャフト風）',
     shortTitle: '幽霊の質量',
     description: '単色キャラクター・白輪郭・ローポリ教室・赤緑カットイン・シャフ度を散りばめたシャフト風演出シナリオ。',
-    ogpImage: '/ogp/shaft-mode.png',
+    ogpImage: '/ogp/ghost-mass.png',
     getScenario: () => GHOST_MASS_SCENARIO,
   },
 };
