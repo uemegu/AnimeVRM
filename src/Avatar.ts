@@ -648,7 +648,7 @@ export class Avatar {
       }
 
       action.reset();
-      action.timeScale = timeScale;
+      action.timeScale = this.isMotionFrozen ? 0 : timeScale;
 
       if (this.currentAction && this.currentAction !== action) {
         action.crossFadeFrom(this.currentAction, crossFadeDuration, false);

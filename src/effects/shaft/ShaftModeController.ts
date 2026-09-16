@@ -16,7 +16,7 @@ export class ShaftModeController {
   private isActive = false;
   private stageGroup: THREE.Group | null = null;
   private overlayEl: HTMLElement | null = null;
-  private textEl: HTMLElement | null = null;
+  private labelElements: Map<string, HTMLElement> = new Map();
   private originalSunShafts: boolean | null = null;
   private originalLensFlare: boolean | null = null;
 
@@ -58,26 +58,33 @@ export class ShaftModeController {
       container.appendChild(overlay);
     }
     this.overlayEl = overlay;
+  }
 
-    const text = document.createElement('div');
-    text.className = 'shaft-vertical-text';
-    text.style.position = 'absolute';
-    text.style.writingMode = 'vertical-rl';
-    text.style.textOrientation = 'upright';
-    text.style.whiteSpace = 'nowrap';
-    text.style.lineHeight = '1.1';
-    text.style.fontFamily = '"Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif';
-    text.style.fontWeight = '800';
-    text.style.fontSize = 'clamp(1.6rem, 3.4vw, 2.5rem)';
-    text.style.color = '#ffffff';
-    text.style.letterSpacing = '0.22em';
-    text.style.textShadow =
-      '0 0 8px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.9)';
-    text.style.transform = 'translate(-50%, -50%) scale(1)';
-    text.style.transition = 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)';
-    text.style.display = 'inline-block';
-    overlay.appendChild(text);
-    this.textEl = text;
+  private createOrGetLabelElement(key: string, name: string): HTMLElement {
+    let el = this.labelElements.get(key);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = `shaft-vertical-text shaft-text-${key}`;
+      el.style.position = 'absolute';
+      el.style.writingMode = 'vertical-rl';
+      el.style.textOrientation = 'upright';
+      el.style.whiteSpace = 'nowrap';
+      el.style.lineHeight = '1.1';
+      el.style.fontFamily = '"Shippori Mincho", "Yu Mincho", "Hiragino Mincho ProN", serif';
+      el.style.fontWeight = '800';
+      el.style.fontSize = 'clamp(1.6rem, 3.4vw, 2.5rem)';
+      el.style.color = '#ffffff';
+      el.style.letterSpacing = '0.22em';
+      el.style.textShadow =
+        '0 0 8px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.9)';
+      el.style.transform = 'translate(-50%, -50%) scale(1)';
+      el.style.transition = 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)';
+      el.style.display = 'inline-block';
+      this.overlayEl?.appendChild(el);
+      this.labelElements.set(key, el);
+    }
+    el.textContent = name;
+    return el;
   }
 
   /**
@@ -234,16 +241,26 @@ export class ShaftModeController {
    * Emili -> Reddish (#dc2626)
    * Shion -> Bluish (#2563eb)
    */
-  public getCharacterInfo(): ShaftCharacterInfo {
-    const url = (this.avatarManager.currentModelUrl || '').toLowerCase();
-    if (url.includes('aoi')) {
+  public getCharacterInfoForAvatar(charIdOrUrl?: string): ShaftCharacterInfo {
+    const key = (charIdOrUrl || '').toLowerCase();
+    if (key.includes('aoi') || key.includes('girl_01')) {
       return { name: 'アオイ', color: '#f59e0b' }; // Amber/Gold yellow
-    } else if (url.includes('emili')) {
+    } else if (key.includes('emili') || key.includes('girl_02')) {
       return { name: 'エミリ', color: '#dc2626' }; // Crimson red
-    } else if (url.includes('shion')) {
+    } else if (key.includes('shion') || key.includes('girl_03')) {
       return { name: 'シオン', color: '#2563eb' }; // Blue
     }
     return { name: 'アバター', color: '#e11d48' };
+  }
+
+  /**
+   * Determine character identity and color scheme:
+   * Aoi -> Yellowish (#f59e0b)
+   * Emili -> Reddish (#dc2626)
+   * Shion -> Bluish (#2563eb)
+   */
+  public getCharacterInfo(): ShaftCharacterInfo {
+    return this.getCharacterInfoForAvatar(this.avatarManager.currentModelUrl);
   }
 
   /**
@@ -289,18 +306,27 @@ export class ShaftModeController {
         this.stageGroup.visible = true;
       }
 
-      // 3. Show typography overlay
-      if (this.overlayEl && this.textEl) {
-        this.textEl.textContent = charInfo.name;
+      // 3. Show typography overlay for all present avatars
+      if (this.overlayEl) {
         this.overlayEl.style.display = 'block';
-
-        // Trigger cut-in pop
-        this.textEl.style.transform = 'translate(-50%, -50%) scale(1.2)';
-        requestAnimationFrame(() => {
-          if (this.textEl) {
-            this.textEl.style.transform = 'translate(-50%, -50%) scale(1)';
+        if (this.avatarManager.isMultiAvatarScenarioActive && this.avatarManager.scenarioAvatars.size > 0) {
+          for (const [charId] of this.avatarManager.scenarioAvatars.entries()) {
+            const info = this.getCharacterInfoForAvatar(charId);
+            const el = this.createOrGetLabelElement(charId, info.name);
+            el.style.display = 'inline-block';
+            el.style.transform = 'translate(-50%, -50%) scale(1.2)';
+            requestAnimationFrame(() => {
+              el.style.transform = 'translate(-50%, -50%) scale(1)';
+            });
           }
-        });
+        } else {
+          const el = this.createOrGetLabelElement('single', charInfo.name);
+          el.style.display = 'inline-block';
+          el.style.transform = 'translate(-50%, -50%) scale(1.2)';
+          requestAnimationFrame(() => {
+            el.style.transform = 'translate(-50%, -50%) scale(1)';
+          });
+        }
       }
     } else {
       // Restore avatar
@@ -329,9 +355,12 @@ export class ShaftModeController {
         (cfg.lighting.sunShafts?.enabled || cfg.lighting.lensFlare?.enabled) ?? false;
       this.viewerCore.sunEffect.flareGroup.visible = cfg.lighting.lensFlare?.enabled ?? false;
 
-      // Hide overlay
+      // Hide overlay and all labels
       if (this.overlayEl) {
         this.overlayEl.style.display = 'none';
+      }
+      for (const el of this.labelElements.values()) {
+        el.style.display = 'none';
       }
     }
   }
@@ -347,8 +376,14 @@ export class ShaftModeController {
     if (!this.isActive) return;
     const charInfo = this.getCharacterInfo();
     this.avatarManager.setSolidColorMode(true, charInfo.color);
-    if (this.textEl) {
-      this.textEl.textContent = charInfo.name;
+
+    if (this.avatarManager.isMultiAvatarScenarioActive && this.avatarManager.scenarioAvatars.size > 0) {
+      for (const [charId] of this.avatarManager.scenarioAvatars.entries()) {
+        const info = this.getCharacterInfoForAvatar(charId);
+        this.createOrGetLabelElement(charId, info.name);
+      }
+    } else {
+      this.createOrGetLabelElement('single', charInfo.name);
     }
 
     // Ensure stage remains visible and default environmental layers remain hidden
@@ -372,10 +407,10 @@ export class ShaftModeController {
   }
 
   /**
-   * Update text position every frame to track the avatar's head/chest.
+   * Update text positions every frame to track each avatar's head/chest.
    */
   public update(): void {
-    if (!this.isActive || !this.textEl || !this.overlayEl) return;
+    if (!this.isActive || !this.overlayEl) return;
 
     // Guarantee pure white background even if an async background load resolves
     if (this.viewerCore.skyBackground.mesh.visible) {
@@ -385,43 +420,86 @@ export class ShaftModeController {
       this.viewerCore.scene.background = new THREE.Color(0xffffff);
     }
 
-    const avatar = this.avatarManager.isMultiAvatarScenarioActive
-      ? (this.avatarManager.scenarioAvatars.get('girl_01') || this.avatarManager.scenarioAvatars.values().next().value)
-      : this.avatarManager.avatarInstance;
-
-    if (!avatar?.vrm) {
-      this.textEl.style.left = '50%';
-      this.textEl.style.top = '48%';
-      return;
-    }
-
-    // Target head bone or chest
-    const headNode =
-      avatar.vrm.humanoid?.getNormalizedBoneNode('head') ||
-      avatar.vrm.humanoid?.getNormalizedBoneNode('neck');
-
-    const targetPos = new THREE.Vector3();
-    if (headNode) {
-      headNode.getWorldPosition(targetPos);
-      targetPos.y -= 0.10; // Lower towards face/neck center
-    } else {
-      targetPos.set(0, 1.25, 0);
-    }
-
     const camera = this.viewerCore.camera;
-    const projected = targetPos.clone().project(camera);
 
-    // Convert normalized device coords (-1 to +1) to screen percentage
-    const x = (projected.x * 0.5 + 0.5) * 100;
-    const y = (-projected.y * 0.5 + 0.5) * 100;
+    if (this.avatarManager.isMultiAvatarScenarioActive && this.avatarManager.scenarioAvatars.size > 0) {
+      for (const [charId, av] of this.avatarManager.scenarioAvatars.entries()) {
+        const info = this.getCharacterInfoForAvatar(charId);
+        const el = this.createOrGetLabelElement(charId, info.name);
 
-    // Check if behind camera or far offscreen
-    if (projected.z > 1.0 || projected.x < -1.05 || projected.x > 1.05) {
-      this.textEl.style.display = 'none';
+        if (!av?.vrm || !av.getVisible() || !av.vrm.scene.visible) {
+          el.style.display = 'none';
+          continue;
+        }
+
+        // Target head bone or neck
+        const headNode =
+          av.vrm.humanoid?.getNormalizedBoneNode('head') ||
+          av.vrm.humanoid?.getNormalizedBoneNode('neck');
+
+        const targetPos = new THREE.Vector3();
+        if (headNode) {
+          headNode.getWorldPosition(targetPos);
+          targetPos.y -= 0.10; // Lower towards face/neck center
+        } else {
+          av.vrm.scene.getWorldPosition(targetPos);
+          targetPos.y += 1.25;
+        }
+
+        const projected = targetPos.clone().project(camera);
+
+        // Convert normalized device coords (-1 to +1) to screen percentage
+        const x = (projected.x * 0.5 + 0.5) * 100;
+        const y = (-projected.y * 0.5 + 0.5) * 100;
+
+        // Check if behind camera or far offscreen
+        if (projected.z > 1.0 || projected.x < -1.05 || projected.x > 1.05) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = 'inline-block';
+          el.style.left = `${x.toFixed(1)}%`;
+          el.style.top = `${y.toFixed(1)}%`;
+        }
+      }
     } else {
-      this.textEl.style.display = 'inline-block';
-      this.textEl.style.left = `${x.toFixed(1)}%`;
-      this.textEl.style.top = `${y.toFixed(1)}%`;
+      const avatar = this.avatarManager.avatarInstance;
+      const charInfo = this.getCharacterInfo();
+      const el = this.createOrGetLabelElement('single', charInfo.name);
+
+      if (!avatar?.vrm || !avatar.getVisible() || !avatar.vrm.scene.visible) {
+        el.style.display = 'none';
+        return;
+      }
+
+      // Target head bone or neck
+      const headNode =
+        avatar.vrm.humanoid?.getNormalizedBoneNode('head') ||
+        avatar.vrm.humanoid?.getNormalizedBoneNode('neck');
+
+      const targetPos = new THREE.Vector3();
+      if (headNode) {
+        headNode.getWorldPosition(targetPos);
+        targetPos.y -= 0.10; // Lower towards face/neck center
+      } else {
+        avatar.vrm.scene.getWorldPosition(targetPos);
+        targetPos.y += 1.25;
+      }
+
+      const camera = this.viewerCore.camera;
+      const projected = targetPos.clone().project(camera);
+
+      // Convert normalized device coords (-1 to +1) to screen percentage
+      const x = (projected.x * 0.5 + 0.5) * 100;
+      const y = (-projected.y * 0.5 + 0.5) * 100;
+
+      // Check if behind camera or far offscreen
+      if (projected.z > 1.0 || projected.x < -1.05 || projected.x > 1.05) {
+        el.style.display = 'none';
+      } else {
+        el.style.display = 'inline-block';
+        el.style.left = `${x.toFixed(1)}%`;
+        el.style.top = `${y.toFixed(1)}%`;
+      }
     }
   }
 
@@ -432,6 +510,7 @@ export class ShaftModeController {
     if (this.overlayEl && this.overlayEl.parentNode) {
       this.overlayEl.parentNode.removeChild(this.overlayEl);
     }
+    this.labelElements.clear();
     if (this.stageGroup) {
       this.viewerCore.scene.remove(this.stageGroup);
     }

@@ -80,6 +80,7 @@ export class DialogueCameraController {
   private transitionElapsed = 0;
   private transitionEasing: CameraTransitionEasing = 'gyuin';
   private isTransitioning = false;
+  private isInstantCutMode = false;
 
   // Scene continuous motion state (for pushIn, orbit, etc.)
   private currentPreset: CameraPreset = 'hold';
@@ -146,6 +147,10 @@ export class DialogueCameraController {
     this.panoramaController?.setCameraControlEnabled(false);
   }
 
+  public setInstantCutMode(enabled: boolean): void {
+    this.isInstantCutMode = enabled;
+  }
+
   /**
    * Stop camera control session and restore original camera state.
    */
@@ -154,6 +159,7 @@ export class DialogueCameraController {
 
     this._isActive = false;
     this.isTransitioning = false;
+    this.isInstantCutMode = false;
     this.backgroundZoomScale = 1.0;
     this.backgroundPanOffset.set(0, 0);
     this.customBackgroundZoom = undefined;
@@ -215,8 +221,13 @@ export class DialogueCameraController {
     this.transitionTarget.target.copy(targetPos);
     this.transitionTarget.fov = defaultFov;
 
-    this.transitionDuration = Math.max(0.01, scene.cameraTransitionDuration ?? 0.7);
-    this.transitionEasing = scene.cameraTransitionEasing ?? 'gyuin';
+    const isCut =
+      this.isInstantCutMode ||
+      scene.cameraTransitionEasing === 'cut' ||
+      (scene.cameraTransitionDuration !== undefined && scene.cameraTransitionDuration <= 0.05);
+
+    this.transitionDuration = isCut ? 0.01 : Math.max(0.01, scene.cameraTransitionDuration ?? 0.7);
+    this.transitionEasing = isCut ? 'cut' : (scene.cameraTransitionEasing ?? 'gyuin');
     this.transitionElapsed = 0;
     this.isTransitioning = true;
 

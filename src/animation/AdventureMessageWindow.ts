@@ -1231,7 +1231,25 @@ export class AdventureMessageWindow {
     document.head.appendChild(style);
   }
 
+  private isForcedHidden = false;
+
+  public setForcedHidden(forced: boolean): void {
+    this.isForcedHidden = forced;
+    if (forced) {
+      this.hide();
+      if (this.container) {
+        this.container.classList.remove('visible');
+        this.container.style.display = 'none';
+      }
+    } else {
+      if (this.container) {
+        this.container.style.display = '';
+      }
+    }
+  }
+
   public show(): void {
+    if (this.isForcedHidden) return;
     if (this.isVisible) return;
     this.createDOM();
     this.isVisible = true;
@@ -1347,7 +1365,9 @@ export class AdventureMessageWindow {
   }
 
   public setText(text: string, speakerName: string = ''): void {
-    this.show();
+    if (!this.isForcedHidden) {
+      this.show();
+    }
     this.hideChoices();
     this.stopTyping();
     this.fullText = text;
