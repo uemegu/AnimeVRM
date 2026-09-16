@@ -14,6 +14,7 @@ function vrmModelsPlugin(): Plugin {
       aoi: '👧',
       emili: '👱‍♀️',
       shion: '💤',
+      teacher: '👩‍🏫',
     };
 
     const results: Array<{
