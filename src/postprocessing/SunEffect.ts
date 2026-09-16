@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OcclusionRaycaster } from './OcclusionRaycaster';
 import type { AvatarConfig, SunShaftsConfig, LensFlareConfig } from '../Config';
 
 /**
@@ -216,6 +217,7 @@ export class SunEffect {
   public sunVisibility: number = 1.0;
   private currentOcclusion: number = 0.0;
   private raycaster: THREE.Raycaster = new THREE.Raycaster();
+  private occlusionRaycaster = new OcclusionRaycaster();
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
@@ -411,7 +413,7 @@ export class SunEffect {
         });
       }
 
-      const intersects = this.raycaster.intersectObjects(solidMeshes, false);
+      const intersects = this.occlusionRaycaster.intersectObjects(this.raycaster, solidMeshes);
       if (intersects.length > 0) {
         // Occluded by character
         targetOcclusion = 0.7; // Keep 30% backlight rim

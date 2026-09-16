@@ -144,7 +144,7 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     title: '校門の邂逅 〜シオンと桐島先生の秘密の推し〜',
     shortTitle: '校門の邂逅',
     description: '眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？',
-    ogpImage: '/ogp/town-walk.png',
+    ogpImage: '/ogp/teacher-gate.png',
     getScenario: (lang = 'ja') => getTeacherGateScenario(lang),
   },
 };
