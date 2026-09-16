@@ -165,6 +165,9 @@ export interface Translations {
     privateDateTitle: string;
     playPrivateDate: string;
     privateDateDesc: string;
+    teacherGateTitle: string;
+    playTeacherGate: string;
+    teacherGateDesc: string;
     liveStatus: string;
     sceneId: string;
     speaker: string;
@@ -285,6 +288,7 @@ export interface Translations {
     nisaStarted: string;
     fastMotionStarted: string;
     privateDateStarted: string;
+    teacherGateStarted: string;
     scenarioStopped: string;
     motionLoaded: string;
     motionLoadFailed: string;

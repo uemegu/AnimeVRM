@@ -40,6 +40,13 @@ export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
     defaultVoiceGender: 'female',
     description: '私服スタイルのVRMキャラクター (シオン)',
   },
+  teacher: {
+    id: 'teacher',
+    name: '👩‍🏫 桐島 先生 (teacher.vrm)',
+    modelUrl: '/models/teacher/teacher.vrm',
+    defaultVoiceGender: 'female',
+    description: '凛とした佇まいの20代後半の女性教師 (桐島 先生)',
+  },
 };
 
 export const DEFAULT_MOTIONS: MasterDatabase['motions'] = {

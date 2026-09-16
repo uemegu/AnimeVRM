@@ -19,6 +19,7 @@ import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
 import { getPrivateDateScenario } from '../scenario/privateDateScenario';
+import { getTeacherGateScenario } from '../scenario/teacherGateScenario';
 import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
 import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
 import { GHOST_MASS_SCENARIO } from '../scenario/ghostMassScenario';
@@ -561,6 +562,17 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #fbcfe8; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.privateDateDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #6366f1; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #818cf8; font-weight: 700;">${tr.scenario.teacherGateTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-teachergate-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playTeacherGate}</button>
+              <button id="scenario-teachergate-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #c7d2fe; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.teacherGateDesc}
             </div>
           </div>
 
@@ -1367,6 +1379,32 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-privatedate-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Teacher Gate Encounter Scenario Play/Stop
+    document.getElementById('scenario-teachergate-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getTeacherGateScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'ENCOUNTER AT THE SCHOOL GATE',
+        });
+        showToast(t().toasts.teacherGateStarted);
+      }
+    });
+
+    document.getElementById('scenario-teachergate-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);

@@ -13,6 +13,7 @@ import { getFastMotionScenario } from './fastMotionScenario';
 import { getDoorPeepYandereScenario } from './doorPeepYandereScenario';
 import { getPrivateDateScenario } from './privateDateScenario';
 import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
+import { getTeacherGateScenario } from './teacherGateScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -137,6 +138,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '単色キャラクター・白輪郭・ローポリ教室・赤緑カットイン・シャフ度を散りばめたシャフト風演出シナリオ。',
     ogpImage: '/ogp/ghost-mass.png',
     getScenario: () => GHOST_MASS_SCENARIO,
+  },
+  'teacher-gate': {
+    id: 'teacher-gate',
+    title: '校門の邂逅 〜シオンと桐島先生の秘密の推し〜',
+    shortTitle: '校門の邂逅',
+    description: '眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？',
+    ogpImage: '/ogp/town-walk.png',
+    getScenario: (lang = 'ja') => getTeacherGateScenario(lang),
   },
 };
 
