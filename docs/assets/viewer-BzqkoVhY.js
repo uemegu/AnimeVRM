@@ -1,4 +1,4 @@
-import{a as e,c as t,l as n,o as r,r as i,s as a}from"./ToonShader-D2jyrKNb.js";import{Tt as o,V as s,kt as c}from"./three-vrm.module-DY60rwLF.js";import{A as l,B as u,C as d,D as f,E as p,F as m,I as h,L as g,M as _,N as v,O as y,P as b,R as x,S,T as C,_ as w,a as T,b as E,c as D,d as ee,f as te,g as O,h as ne,i as re,j as ie,k as ae,l as oe,m as se,n as ce,o as le,p as ue,r as k,s as A,t as de,u as fe,v as pe,w as j,x as me,y as he,z as ge}from"./ghostMassScenario-DkqUYvjJ.js";import{n as _e,t as ve}from"./fbx-MXMtnggd.js";var ye=`あなたの名前は「アオイ」です。
+import{a as e,c as t,l as n,o as r,r as i,s as a}from"./ToonShader-CDanX1fE.js";import{Tt as o,V as s,kt as c}from"./three-vrm.module-B0W6PzpQ.js";import{A as l,B as u,C as d,D as f,E as p,F as m,I as h,L as g,M as _,N as v,O as y,P as b,R as x,S,T as C,_ as w,a as T,b as E,c as D,d as ee,f as te,g as O,h as ne,i as re,j as ie,k as ae,l as oe,m as se,n as ce,o as le,p as ue,r as k,s as A,t as de,u as fe,v as pe,w as j,x as me,y as he,z as ge}from"./ghostMassScenario-Dtaoildn.js";import{n as _e,t as ve}from"./fbx-BQQtxc6H.js";var ye=`あなたの名前は「アオイ」です。
 芯のある凛とした女性キャラクターとして、ユーザーと自然な日本語で会話してください。
 
 【キャラクター設定・性格】
