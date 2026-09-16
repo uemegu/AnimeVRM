@@ -601,11 +601,19 @@ function tick(timestamp?: number): void {
   viewerCore.render(delta, elapsed, currentConfig, vrmMeshes);
 
   // Live2D Close-up Cut-in
-  if (currentScene?.live2d !== undefined) {
-    const live2dOpt = currentScene.live2d;
-    const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
-    live2DTransitionManager.setSceneOverride(isExplicit);
+  const isScenarioPlaying =
+    scenarioController.scenarioEngine.isPlaying || scenarioController.scenarioPlayer.isPlaying;
+  if (isScenarioPlaying) {
+    if (currentScene?.live2d !== undefined) {
+      const live2dOpt = currentScene.live2d;
+      const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
+      live2DTransitionManager.setSceneOverride(isExplicit);
+    } else {
+      // In scenario playback, scenes without explicit live2d are kept in VRM mode
+      live2DTransitionManager.setSceneOverride(false);
+    }
   } else {
+    // Outside scenario playback, no scene override
     live2DTransitionManager.setSceneOverride(null);
   }
   live2DTransitionManager.update(delta);
@@ -631,3 +639,8 @@ window.addEventListener(
   },
   { once: true }
 );
+
+(window as any).avatarManager = avatarManager;
+(window as any).viewerCore = viewerCore;
+(window as any).scenarioController = scenarioController;
+(window as any).live2DTransitionManager = live2DTransitionManager;

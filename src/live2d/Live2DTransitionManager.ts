@@ -18,6 +18,7 @@ export class Live2DTransitionManager {
   private config: Live2DConfig;
   private currentMode: DisplayMode = 'vrm';
   private appCanvas: HTMLCanvasElement;
+  private modeListeners: Array<(mode: DisplayMode) => void> = [];
 
   // Scene-specific overrides
   private sceneOverrideEnabled: boolean | null = null;
@@ -54,13 +55,44 @@ export class Live2DTransitionManager {
     return this.currentMode;
   }
 
+  public onModeChange(callback: (mode: DisplayMode) => void): () => void {
+    this.modeListeners.push(callback);
+    return () => {
+      this.modeListeners = this.modeListeners.filter((l) => l !== callback);
+    };
+  }
+
+  private notifyModeChange(): void {
+    for (const listener of this.modeListeners) {
+      try {
+        listener(this.currentMode);
+      } catch (e) {
+        console.error('Error in Live2D mode listener:', e);
+      }
+    }
+  }
+
+  public async toggle(): Promise<void> {
+    if (
+      this.currentMode === 'transitioning_to_live2d' ||
+      this.currentMode === 'transitioning_to_vrm'
+    ) {
+      return;
+    }
+    if (this.currentMode === 'live2d') {
+      await this.transitionToVRM();
+    } else {
+      await this.transitionToLive2D();
+    }
+  }
+
   public isTargetModel(): boolean {
     const currentModel = this.avatarManager.currentModelUrl.toLowerCase();
     return this.config.targetModelSubstrings.some((sub) => currentModel.includes(sub.toLowerCase()));
   }
 
   /**
-   * Check camera distance and trigger transition if threshold crossed.
+   * Check camera distance and trigger transition if threshold crossed (when proximityTriggerEnabled is true).
    * Called every frame in main tick loop.
    */
   public update(delta: number): void {
@@ -112,7 +144,7 @@ export class Live2DTransitionManager {
       return;
     }
 
-    // Only active during target model or explicit scene override
+    // When model changes away from target model, return to VRM
     if (!this.isTargetModel()) {
       if (this.currentMode === 'live2d') {
         this.transitionToVRM();
@@ -120,13 +152,16 @@ export class Live2DTransitionManager {
       return;
     }
 
-    const dist = this.calculateDistance();
-    if (dist < 0) return;
+    // Proximity trigger is disabled by default; only execute if explicitly enabled
+    if (this.config.proximityTriggerEnabled) {
+      const dist = this.calculateDistance();
+      if (dist < 0) return;
 
-    if (this.currentMode === 'vrm' && dist <= this.config.triggerDistance) {
-      this.transitionToLive2D();
-    } else if (this.currentMode === 'live2d' && dist >= this.config.restoreDistance) {
-      this.transitionToVRM();
+      if (this.currentMode === 'vrm' && dist <= this.config.triggerDistance) {
+        this.transitionToLive2D();
+      } else if (this.currentMode === 'live2d' && dist >= this.config.restoreDistance) {
+        this.transitionToVRM();
+      }
     }
   }
 
@@ -154,6 +189,7 @@ export class Live2DTransitionManager {
   public async transitionToLive2D(): Promise<void> {
     if (this.currentMode !== 'vrm') return;
     this.currentMode = 'transitioning_to_live2d';
+    this.notifyModeChange();
 
     const fadeOutMs = this.config.fadeOutDurationMs ?? 160;
     const holdMs = this.config.holdDurationMs ?? 50;
@@ -186,11 +222,13 @@ export class Live2DTransitionManager {
     );
 
     this.currentMode = 'live2d';
+    this.notifyModeChange();
   }
 
   public async transitionToVRM(): Promise<void> {
     if (this.currentMode !== 'live2d') return;
     this.currentMode = 'transitioning_to_vrm';
+    this.notifyModeChange();
 
     const fadeOutMs = this.config.fadeOutDurationMs ?? 160;
     const holdMs = this.config.holdDurationMs ?? 50;
@@ -217,6 +255,7 @@ export class Live2DTransitionManager {
     );
 
     this.currentMode = 'vrm';
+    this.notifyModeChange();
   }
 
   public dispose(): void {

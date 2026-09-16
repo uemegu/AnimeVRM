@@ -7,6 +7,8 @@ export interface Live2DConfig {
   manifestUrl?: string;
   /** 表情マニフェストパス（未指定時は `${basePath}expressions/manifest.json`） */
   expressionManifestUrl?: string;
+  /** カメラ接近による自動Live2D切り替えの有効/無効（デフォルト: false） */
+  proximityTriggerEnabled?: boolean;
   /** 近接切り替えトリガー距離（m）。これより近くなるとLive2Dへ切り替え（デフォルト: 1.55） */
   triggerDistance: number;
   /** 復帰トリガー距離（m）。これより離れるとVRMへ復帰（デフォルト: 1.75） */
@@ -31,6 +33,7 @@ export interface Live2DConfig {
 
 export const DEFAULT_LIVE2D_CONFIG: Live2DConfig = {
   enabled: true,
+  proximityTriggerEnabled: false,
   basePath: '/reference-live2d/',
   triggerDistance: 1.55,
   restoreDistance: 1.75,
