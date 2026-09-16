@@ -321,7 +321,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           shaftMode: false,
           background: '/textures/school-classroom-far2.avif',
-          text: '地球から離れたいほどテスト結果が悪かったのね',
+          text: 'さっきの質問に答える必要はないわ。忘れてちょうだい。',
           voiceUrl: '/voices/shaft_10_emili.wav',
           autoNextSec: 0.8,
           shafudo: false,
