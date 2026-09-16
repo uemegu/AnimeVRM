@@ -8,8 +8,7 @@ import {
 } from './Config';
 import { resolveAssetUrl } from './utils/path';
 import { AudioLipSync } from './AudioLipSync';
-import { AvatarChatController } from './ai/AvatarChatController';
-import { GeminiVadChatController } from './ai/GeminiVadChatController';
+import { GeminiLiveChatController } from './ai/live/GeminiLiveChatController';
 import { WindController } from './wind/WindController';
 import { ColorHistogram } from './histogram/ColorHistogram';
 import { ViewerCore } from './scene/ViewerCore';
@@ -32,7 +31,6 @@ import {
 // 1. Application State & Controllers
 // --------------------------------------------------
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
-let isTtsGpuExclusive = false;
 
 const windController = new WindController();
 const colorHistogram = new ColorHistogram();
@@ -52,9 +50,8 @@ const audioLipSync = new AudioLipSync({
   },
 });
 
-const avatarChatController = new AvatarChatController();
-const geminiVadChatController = new GeminiVadChatController();
-geminiVadChatController.setAudioLipSync(audioLipSync);
+const geminiLiveChatController = new GeminiLiveChatController();
+geminiLiveChatController.setAudioLipSync(audioLipSync);
 
 // --------------------------------------------------
 // 2. Three.js Core Setup (ViewerCore)
@@ -72,8 +69,7 @@ const avatarManager = new AvatarManager({
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
   getConfig: () => currentConfig,
-  avatarChatController,
-  geminiVadChatController,
+  liveChatController: geminiLiveChatController,
   renderer: viewerCore.renderer,
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
@@ -188,8 +184,7 @@ setupUnifiedPanel({
   scenarioController,
   inspectorManager,
   audioLipSync,
-  avatarChatController,
-  geminiVadChatController,
+  geminiLiveChatController,
   colorHistogram,
   avatarTransformController,
   shaftModeController,
@@ -198,10 +193,6 @@ setupUnifiedPanel({
   },
   onResize: () => {
     viewerCore.onResize();
-  },
-  onTtsGpuActivityChange: (active) => {
-    if (isTtsGpuExclusive === active) return;
-    isTtsGpuExclusive = active;
   },
 });
 
@@ -221,11 +212,6 @@ function tick(timestamp?: number): void {
   timer.update(timestamp);
   const delta = Math.min(timer.getDelta(), 0.1);
   const elapsed = timer.getElapsed();
-
-  if (isTtsGpuExclusive) {
-    requestAnimationFrame(tick);
-    return;
-  }
 
   if (scenarioController.dialogueCameraController?.isActive) {
     avatarTransformController.setEnabled(false);

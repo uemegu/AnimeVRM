@@ -1,6 +1,26 @@
 import { MotionEngine, type Recipe, type Layer } from '../../motion/engine';
 import { exportFBX } from '../../motion/fbx';
-import { GeneratedMotionRecipe } from '../gemini/GeminiApiService';
+
+export interface MotionLayerDef {
+  source: string;
+  mask?: string;
+  weight?: number;
+  start?: number;
+  duration?: number;
+  speed?: number;
+  from?: number;
+  to?: number;
+  fade?: number;
+  loop?: boolean;
+  repeatEvery?: number;
+  envelope?: 'flat' | 'sine';
+  poseMode?: 'motion' | 'hold';
+}
+
+export interface GeneratedMotionRecipe {
+  duration?: number;
+  layers?: MotionLayerDef[];
+}
 
 export class MotionRecipeService {
   private engine: MotionEngine;

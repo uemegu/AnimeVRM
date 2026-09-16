@@ -28,44 +28,27 @@ export interface Translations {
     visual: string;
     system: string;
   };
-  aichat: {
-    title: string;
-    description: string;
-    ttsSteps: string;
-    statusUnloaded: string;
-    statusLoading: string;
-    statusReady: string;
-    statusGenerating: string;
-    statusSynthesizing: string;
-    statusSpeaking: string;
-    statusError: string;
-    prepareAi: string;
-    inputPlaceholder: string;
-    send: string;
-    emptyHistory: string;
-    webgpuWarning: string;
-  };
-  geminiVadChat: {
+  geminiLiveChat: {
     title: string;
     description: string;
     apiKeyLabel: string;
     apiKeyPlaceholder: string;
-    ttsUrlLabel: string;
-    ttsRefLabel: string;
-    ttsStepsLabel: string;
-    startVoice: string;
-    stopVoice: string;
-    statusIdle: string;
+    apiKeyNote: string;
+    modelLabel: string;
+    voiceLabel: string;
+    startChat: string;
+    stopChat: string;
+    micOn: string;
+    micMuted: string;
+    statusDisconnected: string;
+    statusConnecting: string;
+    statusConnected: string;
     statusListening: string;
-    statusSpeakingUser: string;
-    statusThinking: string;
-    statusSynthesizing: string;
-    statusSpeakingAvatar: string;
+    statusSpeaking: string;
     statusError: string;
     emptyHistory: string;
     textPlaceholder: string;
     send: string;
-    motionLabel: string;
   };
   histogram: {
     title: string;

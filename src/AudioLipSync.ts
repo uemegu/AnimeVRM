@@ -117,6 +117,8 @@ export class AudioLipSync {
   private currentPan: number = 0; // -1.0 (Left) to 1.0 (Right)
   private events: AudioLipSyncEvents = {};
   private objectUrlToRevoke: string | null = null;
+  private pcmNextStartTime: number = 0;
+  private pcmActiveSources: Set<AudioBufferSourceNode> = new Set();
 
   constructor(events: AudioLipSyncEvents = {}) {
     this.events = events;
@@ -375,13 +377,101 @@ export class AudioLipSync {
     this.silenceHoldCounter = 0;
     this.smoothedRms = 0;
     this.isVoicing = false;
-    if (this.audioElement.paused) {
+    if (this.audioElement.paused && this.pcmActiveSources.size === 0) {
       this.isPlaying = false;
       this.currentPhoneme = 'nn';
       this.events.onPhonemeChange?.('nn');
       if (this.events.onPlayStateChange) {
         this.events.onPlayStateChange(false);
       }
+    }
+  }
+
+  /**
+   * Enqueue and play raw PCM audio chunk (e.g. from Gemini Live API at 24000Hz).
+   * Automatically routes audio to analyzerNode for vowel lip-sync and speakers.
+   */
+  public playPcmChunk(pcmData: Int16Array | Float32Array, sampleRate: number = 24000): void {
+    this.initAudioContext();
+    if (!this.audioContext || !this.analyzerNode || !this.delayNode) return;
+
+    if (this.audioContext.state === 'suspended') {
+      void this.audioContext.resume();
+    }
+
+    let float32: Float32Array;
+    if (pcmData instanceof Int16Array) {
+      float32 = new Float32Array(pcmData.length);
+      for (let i = 0; i < pcmData.length; i++) {
+        float32[i] = pcmData[i] / 32768.0;
+      }
+    } else {
+      float32 = pcmData;
+    }
+
+    if (float32.length === 0) return;
+
+    const audioBuffer = this.audioContext.createBuffer(1, float32.length, sampleRate);
+    audioBuffer.getChannelData(0).set(float32);
+
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+
+    // Connect to analysis (lip-sync) and playback
+    source.connect(this.analyzerNode);
+    source.connect(this.delayNode);
+
+    const now = this.audioContext.currentTime;
+    const startTime = Math.max(now, this.pcmNextStartTime);
+    source.start(startTime);
+    this.pcmNextStartTime = startTime + audioBuffer.duration;
+    this.pcmActiveSources.add(source);
+
+    if (!this.isPlaying) {
+      this.isPlaying = true;
+      this.events.onPlayStateChange?.(true);
+    }
+
+    source.onended = () => {
+      this.pcmActiveSources.delete(source);
+      source.disconnect();
+      if (
+        this.pcmActiveSources.size === 0 &&
+        this.audioContext &&
+        this.audioContext.currentTime >= this.pcmNextStartTime - 0.05
+      ) {
+        if (!this.isMicrophoneActive && this.audioElement.paused) {
+          this.isPlaying = false;
+          this.currentPhoneme = 'nn';
+          this.events.onPhonemeChange?.('nn');
+          this.events.onPlayStateChange?.(false);
+          this.events.onEnded?.();
+        }
+      }
+    };
+  }
+
+  /**
+   * Immediately cancel all playing and queued PCM audio chunks.
+   * Useful when user interrupts the avatar's speech.
+   */
+  public stopPcmStream(): void {
+    for (const source of this.pcmActiveSources) {
+      try {
+        source.stop();
+        source.disconnect();
+      } catch {
+        // ignore
+      }
+    }
+    this.pcmActiveSources.clear();
+    this.pcmNextStartTime = 0;
+
+    if (!this.isMicrophoneActive && this.audioElement.paused) {
+      this.isPlaying = false;
+      this.currentPhoneme = 'nn';
+      this.events.onPhonemeChange?.('nn');
+      this.events.onPlayStateChange?.(false);
     }
   }
 
