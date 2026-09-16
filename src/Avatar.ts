@@ -340,6 +340,8 @@ export class Avatar {
     ou: 0,
   };
   public isLipSyncActive: boolean = false;
+  private isLipSyncDisabled: boolean = false;
+  private isMotionFrozen: boolean = false;
 
   // Eye Look-At & Eye Wander state
   private eyeLookAtConfig: Omit<Required<EyeLookAtConfig>, 'targetPos' | 'targetGetter'> & {
@@ -807,6 +809,13 @@ export class Avatar {
     if (!this.vrm?.expressionManager) return;
     const manager = this.vrm.expressionManager;
 
+    if (this.isLipSyncDisabled) {
+      if (this.isLipSyncActive) {
+        this.resetLipSync();
+      }
+      return;
+    }
+
     const target: Record<Phoneme, number> = {
       aa: 0,
       ee: 0,
@@ -843,6 +852,35 @@ export class Avatar {
     if (!hasNonZero && (!phoneme || phoneme === 'nn')) {
       this.isLipSyncActive = false;
     }
+  }
+
+  public resetLipSync(): void {
+    const manager = this.vrm?.expressionManager;
+    PHONEMES.forEach((p) => {
+      this.phonemeWeights[p] = 0;
+      if (manager) {
+        manager.setValue(p, 0);
+      }
+    });
+    this.isLipSyncActive = false;
+  }
+
+  public setLipSyncEnabled(enabled: boolean): void {
+    this.isLipSyncDisabled = !enabled;
+    if (!enabled) {
+      this.resetLipSync();
+    }
+  }
+
+  public setMotionFrozen(frozen: boolean): void {
+    this.isMotionFrozen = frozen;
+    if (this.currentAction) {
+      this.currentAction.timeScale = frozen ? 0 : 1.0;
+    }
+  }
+
+  public getIsMotionFrozen(): boolean {
+    return this.isMotionFrozen;
   }
 
   public applyConfig(config: AvatarConfig): void {
@@ -1390,8 +1428,8 @@ export class Avatar {
     // Update eye look-at tracking & wandering
     this.updateEyeLookAt(delta, elapsed);
 
-    // If no FBX animation is active, apply procedural breathing
-    if (!this.currentAction) {
+    // If no FBX animation is active and motion not frozen, apply procedural breathing
+    if (!this.currentAction && !this.isMotionFrozen) {
       this.updateBreathing(elapsed);
     }
 
@@ -1444,41 +1482,26 @@ export class Avatar {
         this.vrm.humanoid?.getRawBoneNode?.('upperChest') ||
         this.vrm.humanoid?.getRawBoneNode?.('chest');
 
-      // 1. 体を仰向け方向に倒す (spine, chest を後ろに反らす)
+      // 1. 体を仰向け方向に倒す (spine, chest を後ろに反らす: -x)
+      // 体の傾き自体はもう少しあっても良いとのことなので、反りをやや深める
       if (rawSpine) {
-        rawSpine.rotation.x -= 0.22;
+        rawSpine.rotation.x -= 0.35;
       }
       if (rawChest) {
-        rawChest.rotation.x -= 0.32;
+        rawChest.rotation.x -= 0.45;
       }
 
       // 2. 首と頭で顔をカメラに向ける + シャフ度の首かしげロール
-      if (rawHead && rawNeck) {
-        rawNeck.rotation.x += 0.10;
-        rawNeck.rotation.y += 0.65;
+      // 体がカメラ側(手前)に約48度向いたことで、首の無理なねじれを大幅に緩和
+      if (rawNeck) {
+        rawNeck.rotation.y += 0.38;
+        rawNeck.rotation.x += 0.08;
         rawNeck.rotation.z -= 0.15;
-
-        rawNeck.updateWorldMatrix(true, false);
-        const neckWorldQuat = new THREE.Quaternion();
-        rawNeck.getWorldQuaternion(neckWorldQuat);
-
-        const headWorldPos = new THREE.Vector3();
-        rawHead.getWorldPosition(headWorldPos);
-
-        const camPos = new THREE.Vector3();
-        this.camera.getWorldPosition(camPos);
-        camPos.y -= 0.05;
-
-        const lookMatrix = new THREE.Matrix4();
-        lookMatrix.lookAt(headWorldPos, camPos, new THREE.Vector3(0, 1, 0));
-        const targetWorldQuat = new THREE.Quaternion().setFromRotationMatrix(lookMatrix);
-
-        // シャフ度の首かしげロール (-0.55 rad = 約31度)
-        const rollQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -0.55);
-        targetWorldQuat.multiply(rollQuat);
-
-        const localQuat = neckWorldQuat.clone().invert().multiply(targetWorldQuat);
-        rawHead.quaternion.copy(localQuat);
+      }
+      if (rawHead) {
+        rawHead.rotation.y += 0.38;
+        rawHead.rotation.x += 0.12;
+        rawHead.rotation.z -= 0.20;
       }
     }
 
