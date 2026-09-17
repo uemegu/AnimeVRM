@@ -385,6 +385,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-location="apartment_door" data-bg="${resolveAssetUrl('/textures/apartment_door_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.apartmentDoor}</button>
               <button data-location="myroom" data-bg="${resolveAssetUrl('/textures/myroom_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.myroom}</button>
               <button data-location="none" data-bg="none" class="bg-btn">${tr.scenes.backgrounds.offSingleColor}</button>
+              <button id="open-local-bg-btn" class="bg-btn" style="border-color: #38bdf8; color: #38bdf8;">${tr.scenes.backgrounds.selectFarImage}</button>
             </div>
           </div>
 
@@ -1465,6 +1466,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     // Background Buttons
     const bgButtons = document.querySelectorAll<HTMLButtonElement>('.bg-btn');
     bgButtons.forEach((btn) => {
+      if (btn.id === 'open-local-bg-btn') return;
       btn.addEventListener('click', () => {
         if (viewerCore.panoramaController.isActive) {
           viewerCore.panoramaController.deactivate();
@@ -1510,6 +1512,39 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         syncBgButtons(currentConfig.environment.showBackgroundImage, currentConfig.environment.backgroundImageUrl);
         inspectorManager.updateAllInspectorsDisplay();
       });
+    });
+
+    const openLocalBgBtn = document.getElementById('open-local-bg-btn') as HTMLButtonElement | null;
+    openLocalBgBtn?.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          if (viewerCore.panoramaController.isActive) {
+            viewerCore.panoramaController.deactivate();
+          }
+          currentConfig.environment.showBackgroundImage = true;
+          currentConfig.environment.backgroundImageUrl = blobUrl;
+          currentConfig.environment.showMidground = false;
+          currentConfig.environment.showNearground = false;
+          if (currentConfig.activeScene) {
+            currentConfig.activeScene.location = 'custom';
+            currentConfig.activeScene.presetId = undefined;
+          }
+          viewerCore.updateBackgroundDisplay(currentConfig);
+          viewerCore.updateMidgroundDisplay(currentConfig);
+          viewerCore.updateNeargroundDisplay(currentConfig);
+          openLocalBgBtn.setAttribute('data-bg', blobUrl);
+          openLocalBgBtn.title = file.name;
+          syncBgButtons(currentConfig.environment.showBackgroundImage, currentConfig.environment.backgroundImageUrl);
+          inspectorManager.updateAllInspectorsDisplay();
+          showToast(`🖼️ 遠景(far)画像を読み込みました: ${file.name}`);
+        }
+      };
+      input.click();
     });
 
     // Avatar Framing Buttons

@@ -220,6 +220,7 @@ export interface Translations {
       apartmentDoor: string;
       myroom: string;
       offSingleColor: string;
+      selectFarImage: string;
     };
     avatarFramingTitle: string;
     avatarFramingDesc: string;
@@ -389,6 +390,8 @@ export interface Translations {
     bottomGradientShadowWeight: string;
     bottomGradientColor: string;
     envFolder: string;
+    farFolder: string;
+    selectFarImage: string;
     showBgImage: string;
     bgColor: string;
     fogFolder: string;

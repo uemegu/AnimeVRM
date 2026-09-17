@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
+import { syncBgButtons } from '../helpers';
 import { InspectorContext } from './InspectorManager';
 import { DEFAULT_FAST_MOTION_CONFIG } from '../../effects/motion';
 
@@ -21,6 +22,7 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     avatarManager,
     audioLipSync,
     applyConfigToSceneAndRenderer,
+    updateAllInspectorsDisplay,
   } = ctx;
 
   const getAvatar = () => avatarManager.avatarInstance;
@@ -342,6 +344,62 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .add(currentConfig.lighting.lensFlare, 'haloIntensity', 0.0, 2.0, 0.05)
     .name(tr.gui.flareHalo);
   flareFolder.close();
+
+  // Far Background layer folder
+  const farFolder = sunFolder.addFolder(tr.gui.farFolder);
+  farFolder
+    .add(currentConfig.environment, 'showBackgroundImage')
+    .name(tr.gui.showBgImage)
+    .listen()
+    .onChange(() => {
+      viewerCore.updateBackgroundDisplay(currentConfig);
+      syncBgButtons(currentConfig.environment.showBackgroundImage, currentConfig.environment.backgroundImageUrl);
+    });
+
+  const farActions = {
+    selectImage: () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          if (viewerCore.panoramaController.isActive) {
+            viewerCore.panoramaController.deactivate();
+          }
+          currentConfig.environment.showBackgroundImage = true;
+          currentConfig.environment.backgroundImageUrl = blobUrl;
+          currentConfig.environment.showMidground = false;
+          currentConfig.environment.showNearground = false;
+          if (currentConfig.activeScene) {
+            currentConfig.activeScene.location = 'custom';
+            currentConfig.activeScene.presetId = undefined;
+          }
+          viewerCore.updateBackgroundDisplay(currentConfig);
+          viewerCore.updateMidgroundDisplay(currentConfig);
+          viewerCore.updateNeargroundDisplay(currentConfig);
+          const openLocalBgBtn = document.getElementById('open-local-bg-btn') as HTMLButtonElement | null;
+          if (openLocalBgBtn) {
+            openLocalBgBtn.setAttribute('data-bg', blobUrl);
+            openLocalBgBtn.title = file.name;
+          }
+          syncBgButtons(currentConfig.environment.showBackgroundImage, currentConfig.environment.backgroundImageUrl);
+          updateAllInspectorsDisplay();
+          showToast(`🖼️ 遠景(far)画像を読み込みました: ${file.name}`);
+        }
+      };
+      input.click();
+    },
+  };
+  farFolder.add(farActions, 'selectImage').name(tr.gui.selectFarImage);
+
+  farFolder
+    .addColor(currentConfig.environment, 'backgroundColor')
+    .name(tr.gui.bgColor)
+    .listen()
+    .onChange(() => viewerCore.updateBackgroundDisplay(currentConfig));
+  farFolder.close();
 
   // Atmosphere / Far Fog
   const fogFolder = sunFolder.addFolder(tr.gui.fogFolder);
