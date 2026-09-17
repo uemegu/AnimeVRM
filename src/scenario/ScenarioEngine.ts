@@ -51,6 +51,7 @@ export interface ScenarioEngineOptions {
   onSwitchBackground?: (bgUrl: string) => void;
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
   onSwitchShaftMode?: (active: boolean) => void;
+  onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
 }
 
 export class ScenarioEngine {
@@ -112,6 +113,7 @@ export class ScenarioEngine {
   private blackoutOverlay: BlackoutOverlay = new BlackoutOverlay();
   private shaftCutInOverlay: ShaftCutInOverlay = new ShaftCutInOverlay();
   private onSwitchShaftMode?: (active: boolean) => void;
+  private onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
 
@@ -135,6 +137,7 @@ export class ScenarioEngine {
     this.onSwitchBackground = options.onSwitchBackground;
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
     this.onSwitchShaftMode = options.onSwitchShaftMode;
+    this.onSwitchShaftSpaceStage = options.onSwitchShaftSpaceStage;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -328,6 +331,7 @@ export class ScenarioEngine {
 
     this.onApplyFisheye?.(false);
     this.onSwitchShaftMode?.(false);
+    this.onSwitchShaftSpaceStage?.(false);
     this.messageWindow.setForcedHidden(false);
     this.messageWindow.hide();
     this.currentBackgroundUrl = null;
@@ -1066,6 +1070,13 @@ export class ScenarioEngine {
         av.setMotionFrozen(scene.shaftMode);
         av.setLipSyncEnabled(!scene.shaftMode);
       }
+    }
+
+    // 1.992 Shaft Space Stage (太陽・公転する地球・宇宙に取り残されるアオイ文字)
+    if (scene.shaftSpaceStage !== undefined) {
+      this.onSwitchShaftSpaceStage?.(scene.shaftSpaceStage);
+    } else if (scene.shaftMode === false) {
+      this.onSwitchShaftSpaceStage?.(false);
     }
 
     // 1.995 Scene-level Shafudo override for speaker / active avatar

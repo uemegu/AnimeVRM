@@ -153,6 +153,7 @@ export interface ScenarioScene {
   fisheye?: boolean | Partial<CinematicFisheyeConfig>; // 魚眼レンズ歪み・ドアスコープ円周魚眼
   yandere?: boolean | Partial<YandereOptions>; // シーン発話者または単体アバターのヤンデレモード
   shaftMode?: boolean; // シャフト演出モード (白背景・単色キャラ・太白輪郭・ローポリ教室)
+  shaftSpaceStage?: 'orbit' | 'ghost_left_behind' | false; // シャフト宇宙ステージ (公転する地球と太陽 / 宇宙に取り残されるアオイ)
   shaftCutIn?: 'red_trouble' | 'green_closed' | 'none'; // 赤コマ・緑コマのタイポグラフィカットイン
   shaftCutInDuration?: number; // カットイン表示秒数
   shafudo?: boolean; // エミリ等の「シャフ度」ポーズ

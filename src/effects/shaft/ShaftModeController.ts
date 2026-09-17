@@ -20,6 +20,17 @@ export class ShaftModeController {
   private originalSunShafts: boolean | null = null;
   private originalLensFlare: boolean | null = null;
 
+  // Space Stage (シャフト宇宙ステージ: 太陽・公転する地球・取り残されるアオイ文字)
+  private currentSpaceStage: 'orbit' | 'ghost_left_behind' | false = false;
+  private spaceGroup: THREE.Group | null = null;
+  private sunMesh: THREE.Mesh | null = null;
+  private earthGroup: THREE.Group | null = null;
+  private earthMesh: THREE.Mesh | null = null;
+  private moonMesh: THREE.Mesh | null = null;
+  private aoiGhostMesh: THREE.Mesh | null = null;
+  private orbitAngle = 0;
+  private aoiGhostPos = new THREE.Vector3();
+
   private texturesToDispose: THREE.Texture[] = [];
 
   constructor(options: {
@@ -33,6 +44,7 @@ export class ShaftModeController {
 
     this.initOverlay();
     this.initStage();
+    this.initSpaceStage();
   }
 
   /**
@@ -236,6 +248,312 @@ export class ShaftModeController {
   }
 
   /**
+   * Builds the Shaft surreal space stage ("太陽", "地球", "月", 公転軌道, 宇宙空間に漂う「アオイ」文字).
+   */
+  private initSpaceStage(): void {
+    const group = new THREE.Group();
+    group.name = 'ShaftSpaceStage';
+    group.visible = false;
+
+    // Helper for circular Kanji badge texture
+    const createCircleKanjiTexture = (
+      text: string,
+      bgColor: string,
+      fgColor: string,
+      strokeColor: string,
+      size = 512,
+      subText?: string
+    ): THREE.CanvasTexture => {
+      const cvs = document.createElement('canvas');
+      cvs.width = size;
+      cvs.height = size;
+      const ctx = cvs.getContext('2d')!;
+
+      const center = size / 2;
+      const radius = size * 0.44;
+
+      // Outer thin ring
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = size * 0.02;
+      ctx.beginPath();
+      ctx.arc(center, center, radius + size * 0.03, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Main circle
+      ctx.fillStyle = bgColor;
+      ctx.beginPath();
+      ctx.arc(center, center, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Inner thin stroke
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = size * 0.015;
+      ctx.beginPath();
+      ctx.arc(center, center, radius * 0.92, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Kanji text in Mincho font
+      ctx.fillStyle = fgColor;
+      ctx.font = `bold ${Math.round(size * 0.32)}px "Shippori Mincho", "Yu Mincho", serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, center, subText ? center - size * 0.05 : center);
+
+      if (subText) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `600 ${Math.round(size * 0.08)}px "Montserrat", sans-serif`;
+        ctx.letterSpacing = '3px';
+        ctx.fillText(subText, center, center + size * 0.22);
+      }
+
+      const tex = new THREE.CanvasTexture(cvs);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      this.texturesToDispose.push(tex);
+      return tex;
+    };
+
+    // 1. Sun ("太陽")
+    const sunTex = createCircleKanjiTexture('太陽', '#dc2626', '#ffffff', '#fca5a5', 512, 'SUN');
+    const sunMat = new THREE.MeshBasicMaterial({
+      map: sunTex,
+      transparent: true,
+      toneMapped: false,
+      depthWrite: false,
+    });
+    const sunGeo = new THREE.PlaneGeometry(1.35, 1.35);
+    this.sunMesh = new THREE.Mesh(sunGeo, sunMat);
+    this.sunMesh.position.set(0, 0.4, 0);
+    group.add(this.sunMesh);
+
+    // Decorative sun rays ring
+    const sunRayGeo = new THREE.RingGeometry(0.72, 0.73, 64);
+    const sunRayMat = new THREE.MeshBasicMaterial({ color: 0xf87171, side: THREE.DoubleSide, toneMapped: false });
+    const sunRay = new THREE.Mesh(sunRayGeo, sunRayMat);
+    sunRay.position.set(0, 0.4, -0.01);
+    group.add(sunRay);
+
+    // 2. Orbit Line (Dashed ellipse on X-Z)
+    const orbitRadiusX = 2.35;
+    const orbitRadiusZ = 1.75;
+    const curvePoints: THREE.Vector3[] = [];
+    const segments = 128;
+    for (let i = 0; i <= segments; i++) {
+      const theta = (i / segments) * Math.PI * 2;
+      curvePoints.push(new THREE.Vector3(Math.cos(theta) * orbitRadiusX, 0.4, Math.sin(theta) * orbitRadiusZ));
+    }
+    const orbitGeo = new THREE.BufferGeometry().setFromPoints(curvePoints);
+    const orbitMat = new THREE.LineDashedMaterial({
+      color: 0xffffff,
+      dashSize: 0.14,
+      gapSize: 0.08,
+    });
+    const orbitLine = new THREE.Line(orbitGeo, orbitMat);
+    orbitLine.computeLineDistances();
+    group.add(orbitLine);
+
+    // 3. Earth Group & Mesh ("地球")
+    this.earthGroup = new THREE.Group();
+    const earthTex = createCircleKanjiTexture('地球', '#2563eb', '#ffffff', '#93c5fd', 512, 'EARTH');
+    const earthMat = new THREE.MeshBasicMaterial({
+      map: earthTex,
+      transparent: true,
+      toneMapped: false,
+      depthWrite: false,
+    });
+    const earthGeo = new THREE.PlaneGeometry(0.68, 0.68);
+    this.earthMesh = new THREE.Mesh(earthGeo, earthMat);
+    this.earthGroup.add(this.earthMesh);
+
+    // Moon ("月") orbiting earth
+    const moonTex = createCircleKanjiTexture('月', '#eab308', '#000000', '#fef08a', 256);
+    const moonMat = new THREE.MeshBasicMaterial({
+      map: moonTex,
+      transparent: true,
+      toneMapped: false,
+      depthWrite: false,
+    });
+    const moonGeo = new THREE.PlaneGeometry(0.30, 0.30);
+    this.moonMesh = new THREE.Mesh(moonGeo, moonMat);
+    this.moonMesh.position.set(0.52, 0, 0);
+    this.earthGroup.add(this.moonMesh);
+
+    group.add(this.earthGroup);
+
+    // 4. "アオイ" Typography Billboard (Left behind in space)
+    const aoiCvs = document.createElement('canvas');
+    aoiCvs.width = 384;
+    aoiCvs.height = 768;
+    const aoiCtx = aoiCvs.getContext('2d')!;
+
+    // Vertical text "アオイ" with bold white outline + black drop shadow
+    aoiCtx.font = 'bold 155px "Shippori Mincho", "Yu Mincho", serif';
+    aoiCtx.textAlign = 'center';
+    aoiCtx.textBaseline = 'middle';
+
+    const chars = ['ア', 'オ', 'イ'];
+    // Outer black shadow
+    aoiCtx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+    aoiCtx.shadowBlur = 18;
+    aoiCtx.lineWidth = 20;
+    aoiCtx.strokeStyle = '#000000';
+    chars.forEach((c, idx) => {
+      const y = 180 + idx * 175;
+      aoiCtx.strokeText(c, 192, y);
+    });
+
+    // White bold outline
+    aoiCtx.shadowBlur = 0;
+    aoiCtx.lineWidth = 14;
+    aoiCtx.strokeStyle = '#ffffff';
+    chars.forEach((c, idx) => {
+      const y = 180 + idx * 175;
+      aoiCtx.strokeText(c, 192, y);
+    });
+
+    // Amber fill
+    aoiCtx.fillStyle = '#f59e0b';
+    chars.forEach((c, idx) => {
+      const y = 180 + idx * 175;
+      aoiCtx.fillText(c, 192, y);
+    });
+
+    // Subtitle "AOI"
+    aoiCtx.font = '800 38px "Montserrat", sans-serif';
+    aoiCtx.strokeStyle = '#000000';
+    aoiCtx.lineWidth = 8;
+    aoiCtx.strokeText('AOI', 192, 700);
+    aoiCtx.fillStyle = '#ffffff';
+    aoiCtx.fillText('AOI', 192, 700);
+
+    const aoiTex = new THREE.CanvasTexture(aoiCvs);
+    aoiTex.colorSpace = THREE.SRGBColorSpace;
+    this.texturesToDispose.push(aoiTex);
+
+    const aoiMat = new THREE.MeshBasicMaterial({
+      map: aoiTex,
+      transparent: true,
+      toneMapped: false,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const aoiGeo = new THREE.PlaneGeometry(0.65, 1.3);
+    this.aoiGhostMesh = new THREE.Mesh(aoiGeo, aoiMat);
+    this.aoiGhostMesh.name = 'ShaftAoiGhostMesh';
+    this.aoiGhostMesh.visible = false;
+    group.add(this.aoiGhostMesh);
+
+    // 5. Shaft Minimal Cross Stars (+)
+    const starCoords = [
+      [-3.2, 2.0, -1.0],
+      [3.0, 1.8, -1.2],
+      [-2.5, -0.6, 0.8],
+      [2.8, -0.4, 1.2],
+      [-1.2, 2.5, -2.0],
+      [1.5, 2.6, -1.8],
+      [-3.5, 0.5, 0.2],
+      [3.4, 0.8, -0.3],
+      [-0.8, -0.8, 1.5],
+      [0.9, -0.9, 1.6],
+    ];
+    for (const [sx, sy, sz] of starCoords) {
+      const crossCanvas = document.createElement('canvas');
+      crossCanvas.width = 64;
+      crossCanvas.height = 64;
+      const cctx = crossCanvas.getContext('2d')!;
+      cctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      cctx.lineWidth = 4;
+      cctx.beginPath();
+      cctx.moveTo(32, 10);
+      cctx.lineTo(32, 54);
+      cctx.moveTo(10, 32);
+      cctx.lineTo(54, 32);
+      cctx.stroke();
+
+      const crossTex = new THREE.CanvasTexture(crossCanvas);
+      this.texturesToDispose.push(crossTex);
+      const crossMat = new THREE.MeshBasicMaterial({
+        map: crossTex,
+        transparent: true,
+        toneMapped: false,
+        depthWrite: false,
+      });
+      const crossMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.25, 0.25), crossMat);
+      crossMesh.position.set(sx, sy, sz);
+      group.add(crossMesh);
+    }
+
+    this.viewerCore.scene.add(group);
+    this.spaceGroup = group;
+  }
+
+  /**
+   * Switch space stage mode: 'orbit' (Sun & Earth), 'ghost_left_behind' (Aoi text stranded), or false.
+   */
+  public setSpaceStage(stage?: 'orbit' | 'ghost_left_behind' | false): void {
+    const nextStage = stage || false;
+    if (this.currentSpaceStage === nextStage) return;
+    this.currentSpaceStage = nextStage;
+
+    if (nextStage) {
+      if (this.spaceGroup) {
+        this.spaceGroup.visible = true;
+      }
+      if (this.stageGroup) {
+        this.stageGroup.visible = false;
+      }
+      if (this.overlayEl) {
+        this.overlayEl.style.display = 'none';
+      }
+
+      // Space background: pure black
+      this.viewerCore.scene.background = new THREE.Color(0x000000);
+      this.viewerCore.renderer.setClearColor(0x000000, 1.0);
+      const container = document.getElementById('viewport-container');
+      if (container) {
+        container.style.backgroundColor = '#000000';
+      }
+
+      if (nextStage === 'ghost_left_behind') {
+        if (this.aoiGhostMesh) {
+          this.aoiGhostMesh.visible = true;
+          // Fix AOI's position at the orbit where earth was passing
+          // Earth will rapidly orbit away and leave AOI behind in space!
+          this.aoiGhostPos.set(1.4, 0.7, 0.6);
+          this.aoiGhostMesh.position.copy(this.aoiGhostPos);
+          this.orbitAngle = 1.1;
+        }
+      } else {
+        if (this.aoiGhostMesh) {
+          this.aoiGhostMesh.visible = false;
+        }
+      }
+    } else {
+      if (this.spaceGroup) {
+        this.spaceGroup.visible = false;
+      }
+      if (this.aoiGhostMesh) {
+        this.aoiGhostMesh.visible = false;
+      }
+
+      // If shaftMode is still active, restore classroom stage and white background
+      if (this.isActive) {
+        if (this.stageGroup) {
+          this.stageGroup.visible = true;
+        }
+        this.viewerCore.scene.background = new THREE.Color(0xffffff);
+        this.viewerCore.renderer.setClearColor(0xffffff, 1.0);
+        const container = document.getElementById('viewport-container');
+        if (container) {
+          container.style.backgroundColor = '#ffffff';
+        }
+        if (this.overlayEl) {
+          this.overlayEl.style.display = 'block';
+        }
+      }
+    }
+  }
+
+  /**
    * Determine character identity and color scheme:
    * Aoi -> Yellowish (#f59e0b)
    * Emili -> Reddish (#dc2626)
@@ -336,6 +654,7 @@ export class ShaftModeController {
       if (this.stageGroup) {
         this.stageGroup.visible = false;
       }
+      this.setSpaceStage(false);
 
       // Restore sunShafts & lensFlare config
       const cfg = this.getConfig();
@@ -407,10 +726,65 @@ export class ShaftModeController {
   }
 
   /**
-   * Update text positions every frame to track each avatar's head/chest.
+   * Update text positions every frame to track each avatar's head/chest, or animate space stage.
    */
   public update(): void {
-    if (!this.isActive || !this.overlayEl) return;
+    if (!this.isActive) return;
+
+    // 1. Update space stage animation if active
+    if (this.currentSpaceStage && this.spaceGroup?.visible) {
+      if (
+        this.viewerCore.scene.background === null ||
+        !(this.viewerCore.scene.background as any).isColor ||
+        (this.viewerCore.scene.background as THREE.Color).getHex() !== 0x000000
+      ) {
+        this.viewerCore.scene.background = new THREE.Color(0x000000);
+      }
+
+      // Fast surreal orbit speed (shaft style rapid movement)
+      this.orbitAngle += 0.045;
+      const orbitRadiusX = 2.35;
+      const orbitRadiusZ = 1.75;
+
+      if (this.earthGroup) {
+        const ex = Math.cos(this.orbitAngle) * orbitRadiusX;
+        const ez = Math.sin(this.orbitAngle) * orbitRadiusZ;
+        this.earthGroup.position.set(ex, 0.4, ez);
+
+        // Moon orbit around Earth
+        if (this.moonMesh) {
+          const moonAngle = this.orbitAngle * 4;
+          this.moonMesh.position.set(
+            Math.cos(moonAngle) * 0.55,
+            Math.sin(moonAngle) * 0.25,
+            Math.sin(moonAngle) * 0.35
+          );
+        }
+      }
+
+      // Billboard orientation towards camera for 2D flat typography discs
+      const cam = this.viewerCore.camera;
+      if (this.sunMesh) {
+        this.sunMesh.quaternion.copy(cam.quaternion);
+      }
+      if (this.earthMesh) {
+        this.earthMesh.quaternion.copy(cam.quaternion);
+      }
+      if (this.moonMesh) {
+        this.moonMesh.quaternion.copy(cam.quaternion);
+      }
+
+      // AOI text billboard & slight floating vibration
+      if (this.currentSpaceStage === 'ghost_left_behind' && this.aoiGhostMesh?.visible) {
+        this.aoiGhostMesh.quaternion.copy(cam.quaternion);
+        const floatOffset = Math.sin(Date.now() * 0.003) * 0.04;
+        this.aoiGhostMesh.position.y = this.aoiGhostPos.y + floatOffset;
+      }
+
+      return;
+    }
+
+    if (!this.overlayEl) return;
 
     // Guarantee pure white background even if an async background load resolves
     if (this.viewerCore.skyBackground.mesh.visible) {
@@ -507,12 +881,16 @@ export class ShaftModeController {
     if (this.isActive) {
       this.setShaftMode(false);
     }
+    this.setSpaceStage(false);
     if (this.overlayEl && this.overlayEl.parentNode) {
       this.overlayEl.parentNode.removeChild(this.overlayEl);
     }
     this.labelElements.clear();
     if (this.stageGroup) {
       this.viewerCore.scene.remove(this.stageGroup);
+    }
+    if (this.spaceGroup) {
+      this.viewerCore.scene.remove(this.spaceGroup);
     }
     this.texturesToDispose.forEach((tex) => tex.dispose());
     this.texturesToDispose = [];
