@@ -69,6 +69,8 @@ export interface AudioLipSyncEvents {
   onStatsUpdate?: (stats: LipSyncStats) => void;
 }
 
+export type LipSyncEngine = 'wasm' | 'legacy';
+
 export class AudioLipSync {
   public audioContext: AudioContext | null = null;
   public audioElement: HTMLAudioElement;
@@ -83,6 +85,7 @@ export class AudioLipSync {
   public audioDelay: number = 0.05; // Default delay compensation (50ms)
   public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
+  public engineMode: LipSyncEngine = 'wasm'; // Default to modern AudioWorklet + WASM
 
   private minTimeMs: number = Infinity;
   private maxTimeMs: number = 0;
@@ -119,6 +122,11 @@ export class AudioLipSync {
   private objectUrlToRevoke: string | null = null;
   private pcmNextStartTime: number = 0;
   private pcmActiveSources: Set<AudioBufferSourceNode> = new Set();
+
+  // AudioWorklet + WASM properties
+  private workletNode: AudioWorkletNode | null = null;
+  private isWorkletReady: boolean = false;
+  private wasmBytesCache: ArrayBuffer | null = null;
 
   constructor(events: AudioLipSyncEvents = {}) {
     this.events = events;
@@ -173,10 +181,37 @@ export class AudioLipSync {
   }
 
   /**
+   * Switch between WASM (AudioWorklet) and Legacy (Main Thread + Meyda)
+   */
+  public async setEngineMode(mode: LipSyncEngine): Promise<void> {
+    if (this.engineMode === mode) return;
+    this.engineMode = mode;
+    this.resetStats();
+
+    if (mode === 'wasm') {
+      // If switching to WASM, stop legacy RAF loop if running
+      if (this.analysisFrameId !== null) {
+        cancelAnimationFrame(this.analysisFrameId);
+        this.analysisFrameId = null;
+      }
+      if (this.audioContext) {
+        await this.initAudioWorklet();
+      }
+    } else {
+      // Switching to legacy: start RAF loop if playing
+      this.workletNode?.port.postMessage({ type: 'reset' });
+      if (this.audioContext && !this.analysisFrameId && this.isPlaying) {
+        this.scheduleAnalysis();
+      }
+    }
+  }
+
+  /**
    * Set voice gender profile ('female' or 'male') for optimized vowel classification
    */
   public setVoiceGender(gender: 'female' | 'male'): void {
     this.voiceGender = gender;
+    this.workletNode?.port.postMessage({ type: 'set-gender', data: { gender } });
   }
 
   /**
@@ -195,6 +230,7 @@ export class AudioLipSync {
   public setHoldTime(ms: number): void {
     // Convert ms to approx frames at 60fps (1 frame ~ 16.6ms)
     this.holdFrames = Math.max(1, Math.round(ms / 16.6));
+    this.workletNode?.port.postMessage({ type: 'set-hold-frames', data: { frames: this.holdFrames } });
   }
 
   /**
@@ -208,10 +244,73 @@ export class AudioLipSync {
     }
   }
 
+  private async initAudioWorklet(): Promise<void> {
+    if (!this.audioContext || this.workletNode) return;
+
+    try {
+      // 1. Add AudioWorklet module
+      await this.audioContext.audioWorklet.addModule(resolveAssetUrl('/worklets/lipsync-processor.js'));
+
+      // 2. Fetch WASM binary
+      if (!this.wasmBytesCache) {
+        const resp = await fetch(resolveAssetUrl('/wasm/lipsync.wasm'));
+        this.wasmBytesCache = await resp.arrayBuffer();
+      }
+
+      // 3. Create Worklet Node
+      this.workletNode = new AudioWorkletNode(this.audioContext, 'lipsync-processor');
+
+      this.workletNode.port.onmessage = (event) => {
+        const { type, data, error } = event.data;
+        if (type === 'wasm-ready') {
+          this.isWorkletReady = true;
+          this.workletNode?.port.postMessage({ type: 'set-gender', data: { gender: this.voiceGender } });
+          this.workletNode?.port.postMessage({ type: 'set-rms-threshold', data: { threshold: this.rmsThreshold } });
+          this.workletNode?.port.postMessage({ type: 'set-hold-frames', data: { frames: this.holdFrames } });
+        } else if (type === 'wasm-error') {
+          console.error('LipSync WASM error in AudioWorklet:', error);
+        } else if (type === 'analysis-result') {
+          if (this.engineMode !== 'wasm') return; // ignore if user switched to legacy
+
+          const { phoneme, rms, f1, f2, distances, processingTimeMs } = data;
+          this.currentRms = rms;
+
+          if (this.currentPhoneme !== phoneme) {
+            this.currentPhoneme = phoneme;
+            this.events.onPhonemeChange?.(phoneme);
+          }
+
+          this.updateStats(processingTimeMs, rms, phoneme, f1, f2, distances);
+        }
+      };
+
+      // 4. Send WASM bytes to processor
+      this.workletNode.port.postMessage({
+        type: 'init-wasm',
+        data: {
+          wasmBytes: this.wasmBytesCache,
+          sampleRate: this.audioContext.sampleRate,
+        },
+      });
+
+      // 5. Connect source nodes to worklet
+      if (this.sourceNode) {
+        this.sourceNode.connect(this.workletNode);
+      }
+      if (this.micGainNode) {
+        this.micGainNode.connect(this.workletNode);
+      }
+    } catch (err) {
+      console.warn('Failed to initialize AudioWorklet lipsync, falling back to legacy:', err);
+      this.engineMode = 'legacy';
+      this.scheduleAnalysis();
+    }
+  }
+
   /**
    * AudioContext and non-deprecated Web Audio analysis lazy initialization.
    */
-  private initAudioContext(): void {
+  public initAudioContext(): void {
     if (this.audioContext) return;
 
     const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -245,6 +344,11 @@ export class AudioLipSync {
     // Playback: sourceNode -> analyzerNode
     // Mic:      micSourceNode -> micGainNode -> analyzerNode
     this.sourceNode.connect(this.analyzerNode);
+
+    // If WASM engine is requested, load AudioWorklet
+    if (this.engineMode === 'wasm') {
+      void this.initAudioWorklet();
+    }
 
     // Meyda's streaming analyzer uses the deprecated ScriptProcessorNode.
     // Read the current signal with AnalyserNode and use Meyda's synchronous
@@ -336,10 +440,13 @@ export class AudioLipSync {
       this.micGainNode = this.audioContext.createGain();
       this.micGainNode.gain.setValueAtTime(this.micGainValue, this.audioContext.currentTime);
 
-      // Connect: micSource -> micGain -> analyzer.
+      // Connect: micSource -> micGain -> analyzer & worklet.
       // Never connect to destination to avoid acoustic speaker feedback.
       this.micSourceNode.connect(this.micGainNode);
       this.micGainNode.connect(this.analyzerNode);
+      if (this.workletNode) {
+        this.micGainNode.connect(this.workletNode);
+      }
     }
 
     this.silenceHoldCounter = 0;
@@ -373,6 +480,7 @@ export class AudioLipSync {
       this.micStream = null;
     }
 
+    this.workletNode?.port.postMessage({ type: 'reset' });
     this.isMicrophoneActive = false;
     this.silenceHoldCounter = 0;
     this.smoothedRms = 0;
@@ -419,6 +527,9 @@ export class AudioLipSync {
 
     // Connect to analysis (lip-sync) and playback
     source.connect(this.analyzerNode);
+    if (this.workletNode) {
+      source.connect(this.workletNode);
+    }
     source.connect(this.delayNode);
 
     const now = this.audioContext.currentTime;
@@ -486,6 +597,7 @@ export class AudioLipSync {
   }
 
   private analyzeCurrentFrame(): void {
+    if (this.engineMode === 'wasm') return; // Handled by AudioWorkletProcessor
     if (!this.isPlaying || !this.analyzerNode || !this.analysisBuffer) return;
 
     const t0 = performance.now();
@@ -780,6 +892,9 @@ export class AudioLipSync {
     this.analysisBuffer = null;
     this.analyzerNode?.disconnect();
     this.analyzerNode = null;
+    this.workletNode?.disconnect();
+    this.workletNode = null;
+    this.isWorkletReady = false;
 
     if (this.objectUrlToRevoke) {
       URL.revokeObjectURL(this.objectUrlToRevoke);

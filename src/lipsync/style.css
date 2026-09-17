@@ -292,6 +292,83 @@ html, body {
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
 }
 
+/* Engine Toggle & Card */
+.panel-card.engine-card {
+  border-color: rgba(0, 240, 255, 0.4);
+  background: linear-gradient(180deg, rgba(16, 32, 48, 0.8) 0%, rgba(26, 32, 44, 0.6) 100%);
+}
+
+.badge {
+  font-size: 10px;
+  font-family: var(--font-code);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge.wasm-badge {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+}
+
+.badge.legacy-badge {
+  background: rgba(255, 180, 0, 0.15);
+  color: #ffb400;
+  border: 1px solid rgba(255, 180, 0, 0.4);
+}
+
+.engine-toggle-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.engine-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.engine-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+}
+
+.engine-btn.active[data-engine="wasm"] {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(0, 240, 255, 0.05));
+  border-color: var(--accent-cyan);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+}
+
+.engine-btn.active[data-engine="legacy"] {
+  background: linear-gradient(135deg, rgba(255, 180, 0, 0.25), rgba(255, 180, 0, 0.05));
+  border-color: #ffb400;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(255, 180, 0, 0.4);
+}
+
+.engine-desc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
 /* Form Controls */
 .control-row {
   display: flex;

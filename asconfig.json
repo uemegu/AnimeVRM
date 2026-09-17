@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "release": {
+      "outFile": "public/wasm/lipsync.wasm",
+      "textFile": "public/wasm/lipsync.wat",
+      "optimizeLevel": 3,
+      "shrinkLevel": 2,
+      "converge": true,
+      "noAssert": true,
+      "runtime": "stub",
+      "initialMemory": 2
+    }
+  }
+}

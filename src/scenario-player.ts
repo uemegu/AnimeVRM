@@ -494,7 +494,8 @@ async function startScenarioPlayback() {
       return;
     }
 
-  // Audio Context Resume
+  // Audio Context Resume & Worklet Init
+  audioLipSync.initAudioContext();
   if (audioLipSync.audioContext?.state === 'suspended') {
     try {
       await audioLipSync.audioContext.resume();
@@ -644,3 +645,4 @@ window.addEventListener(
 (window as any).viewerCore = viewerCore;
 (window as any).scenarioController = scenarioController;
 (window as any).live2DTransitionManager = live2DTransitionManager;
+(window as any).audioLipSync = audioLipSync;

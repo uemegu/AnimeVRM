@@ -79,6 +79,11 @@ const hudTag = $<HTMLDivElement>('hud-phoneme-tag');
 const hudF1 = $<HTMLElement>('hud-f1');
 const hudF2 = $<HTMLElement>('hud-f2');
 
+const btnEngineWasm = $<HTMLButtonElement>('btn-engine-wasm');
+const btnEngineLegacy = $<HTMLButtonElement>('btn-engine-legacy');
+const engineBadge = $<HTMLSpanElement>('engine-badge');
+const engineDesc = $<HTMLDivElement>('engine-desc');
+
 const btnGenderFemale = $<HTMLButtonElement>('btn-gender-female');
 const btnGenderMale = $<HTMLButtonElement>('btn-gender-male');
 const selectModel = $<HTMLSelectElement>('select-model');
@@ -404,6 +409,27 @@ function updateStatsUI(stats: LipSyncStats) {
 }
 
 // --- Event Handlers ---
+
+// Engine toggle (A/B Testing: WASM vs Legacy)
+btnEngineWasm.addEventListener('click', async () => {
+  if (audioLipSync.engineMode === 'wasm') return;
+  btnEngineWasm.classList.add('active');
+  btnEngineLegacy.classList.remove('active');
+  engineBadge.textContent = 'WASM (AudioWorklet)';
+  engineBadge.className = 'badge wasm-badge';
+  engineDesc.textContent = 'AudioWorkletスレッド上で極小WASMが並列動作。メインスレッド負荷ゼロで低遅延判定。';
+  await audioLipSync.setEngineMode('wasm');
+});
+
+btnEngineLegacy.addEventListener('click', async () => {
+  if (audioLipSync.engineMode === 'legacy') return;
+  btnEngineLegacy.classList.add('active');
+  btnEngineWasm.classList.remove('active');
+  engineBadge.textContent = 'Legacy (Meyda)';
+  engineBadge.className = 'badge legacy-badge';
+  engineDesc.textContent = 'メインスレッド上で毎フレーム Meyda.extract(FFT/MFCC) を同期実行。従来の実装方式。';
+  await audioLipSync.setEngineMode('legacy');
+});
 
 // Gender toggle
 btnGenderFemale.addEventListener('click', () => {

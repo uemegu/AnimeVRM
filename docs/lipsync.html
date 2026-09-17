@@ -10,10 +10,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Kiwi+Maru:wght@400;500&family=Montserrat:wght@300;400;600;700;800;900&family=Shippori+Mincho:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet" />
-  <script type="module" crossorigin src="/AnimeVRM/assets/lipsync-BoewGRkU.js"></script>
+  <script type="module" crossorigin src="/AnimeVRM/assets/lipsync-rCAtr6q2.js"></script>
   <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/three-vrm.module-D5ZqICjY.js">
-  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-B3vC3lIx.js">
-  <link rel="stylesheet" crossorigin href="/AnimeVRM/assets/lipsync-WFGkLsQy.css">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-DQjHCCz-.js">
+  <link rel="stylesheet" crossorigin href="/AnimeVRM/assets/lipsync-awWVNDwS.css">
 </head>
 
 <body>
@@ -46,6 +46,26 @@
       </header>
 
       <div class="panel-scroll">
+        <!-- 0. LipSync Engine Selection (A/B Testing) -->
+        <section class="panel-card engine-card">
+          <div class="card-title">
+            <span class="icon">⚙️</span>
+            <span>解析エンジン (A/B 比較)</span>
+            <span id="engine-badge" class="badge wasm-badge">WASM (AudioWorklet)</span>
+          </div>
+          <div class="engine-toggle-group">
+            <button id="btn-engine-wasm" class="engine-btn active" data-engine="wasm">
+              <span class="symbol">🚀</span> WASM (Worklet)
+            </button>
+            <button id="btn-engine-legacy" class="engine-btn" data-engine="legacy">
+              <span class="symbol">🐢</span> 従来 (Meyda/Main)
+            </button>
+          </div>
+          <div class="engine-desc" id="engine-desc">
+            AudioWorkletスレッド上で極小WASMが並列動作。メインスレッド負荷ゼロで低遅延判定。
+          </div>
+        </section>
+
         <!-- 1. Voice Profile & Model Selection -->
         <section class="panel-card">
           <div class="card-title">

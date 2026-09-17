@@ -40,6 +40,7 @@ export class ScenarioController {
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
   public masterManager: MasterDataManager;
+  public audioLipSync: AudioLipSync;
 
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -83,6 +84,7 @@ export class ScenarioController {
     this.getConfig = options.getConfig;
     this.onApplyConfig = options.onApplyConfig;
     this.onSwitchScenePreset = options.onSwitchScenePreset;
+    this.audioLipSync = options.audioLipSync;
     this.masterManager = new MasterDataManager();
 
     this.scrollingBackgroundManager = new ScrollingBackgroundManager({
