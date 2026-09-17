@@ -28,7 +28,6 @@ const SAMPLE_TRACKS: AudioTrackOption[] = [
   { label: '👧 アオイ決め台詞: 「大好き！」 (pv_cut9_daisuki)', url: '/voices/pv_cut9_daisuki.wav', gender: 'female' },
   { label: '👱‍♀️ エミリ会話: 「カフェに寄っていこうよ」 (chat_cafe_1)', url: '/voices/chat_cafe_1.wav', gender: 'female' },
   { label: '💤 シオン解説: 「投資信託とは…」 (nisa_01)', url: '/voices/nisa_01.wav', gender: 'female' },
-  { label: '✨ アニメ声リファレンス (anime.wav)', url: '/voices/anime.wav', gender: 'female' },
 
   // Irodori-TTS Male Samples
   { label: '🌟 [Irodori-TTS] あーいーうーえーおー (男性)', url: '/voices/lipsync_vowels_male.wav', gender: 'male', isVowels: true },
@@ -37,8 +36,6 @@ const SAMPLE_TRACKS: AudioTrackOption[] = [
   { label: '🌟 [Irodori-TTS] うーーーーー (男性)', url: '/voices/lipsync_male_u.wav', gender: 'male' },
   { label: '🌟 [Irodori-TTS] えーーーーー (男性)', url: '/voices/lipsync_male_e.wav', gender: 'male' },
   { label: '🌟 [Irodori-TTS] おーーーーー (男性)', url: '/voices/lipsync_male_o.wav', gender: 'male' },
-  // Male Reference Sample
-  { label: '🎙 アラタコ音声リファレンス (aratako.wav)', url: '/voices/aratako.wav', gender: 'male' },
 ];
 
 const PHONEME_LABEL_MAP: Record<string, { char: string; name: string }> = {
