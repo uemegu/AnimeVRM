@@ -389,6 +389,7 @@ function debugPositions() {
 (window as any).live2DTransitionManager = live2DTransitionManager;
 (window as any).scenePresetManager = scenePresetManager;
 (window as any).currentConfig = currentConfig;
+(window as any).audioLipSync = audioLipSync;
 
 console.info(
   '%c💡 [Debug] コンソールで debugPositions() または debugPose() を実行すると、アバター・前景・カメラの現在位置を出力＆コピーできます。',
