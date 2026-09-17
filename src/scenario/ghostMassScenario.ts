@@ -58,8 +58,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           text: '…………',
           autoNextSec: 1.8,
           cameraZoom: 'speaker',
-          cameraPreset: 'pushIn',
-          cameraStrength: 0.4,
+          cameraPreset: 'hold',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -85,8 +84,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           voiceUrl: '/voices/shaft_01_aoi.wav',
           autoNextSec: 0.6,
           cameraZoom: 'speaker',
-          cameraPreset: 'pushIn',
-          cameraStrength: 0.4,
+          cameraPreset: 'hold',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -132,8 +130,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           voiceUrl: '/voices/shaft_03_aoi.wav',
           autoNextSec: 0.6,
           cameraZoom: 'speaker',
-          cameraPreset: 'pushIn',
-          cameraStrength: 0.6,
+          cameraPreset: 'hold',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -145,7 +142,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
             },
           },
         },
-        // 4. アオイズーム (引きをやめてズーム): 私たちは地球の重力に縛られることによって今この場にいるわけだけど、幽霊はどうなんだろう？
+        // 4. アオイズーム: 私たちは地球の重力に縛られることによって今この場にいるわけだけど、幽霊はどうなんだろう？
         {
           id: 'ghost_4',
           speaker: 'アオイ',
@@ -154,8 +151,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           voiceUrl: '/voices/shaft_04_aoi.wav',
           autoNextSec: 0.6,
           cameraZoom: 'speaker',
-          cameraPreset: 'pushIn',
-          cameraStrength: 0.5,
+          cameraPreset: 'hold',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
