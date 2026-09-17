@@ -177,6 +177,7 @@ export class ScenarioController {
           this.scrollingBackgroundManager.hide();
           this.pvTitleOverlay.hide();
           this.shaftModeController?.setShaftMode(false);
+          this.shaftModeController?.setSpaceStage(false);
         }
         this.syncPlayStateUI();
       },
@@ -377,12 +378,16 @@ export class ScenarioController {
       onSwitchShaftMode: (active: boolean) => {
         this.shaftModeController?.setShaftMode(active);
       },
+      onSwitchShaftSpaceStage: (stage) => {
+        this.shaftModeController?.setSpaceStage(stage);
+      },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
         this.pvTitleOverlay.hide();
         this.shaftModeController?.setShaftMode(false);
+        this.shaftModeController?.setSpaceStage(false);
         const cfg = this.getConfig();
         if (cfg.postProcessing.cinematic?.fisheye) {
           cfg.postProcessing.cinematic.fisheye.enabled = false;

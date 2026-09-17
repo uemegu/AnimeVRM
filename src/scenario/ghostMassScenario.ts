@@ -205,44 +205,71 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
             },
           },
         },
-        // 7. シャフトモード: 地球は宇宙空間を常に高速で動いてるけど地球の重力によって、私たちは地球と一緒に動いている。
+        // 7-A. シャフト宇宙ステージ: 地球は宇宙空間を常に高速で動いてるけど (太陽と公転する地球)
         {
-          id: 'ghost_7_shaft_earth',
+          id: 'ghost_7a_shaft_space_orbit',
           speaker: 'アオイ',
           speakerCharacterId: 'girl_01',
           shaftMode: true,
-          text: '地球は宇宙空間を常に高速で動いてるけど地球の重力によって、私たちは地球と一緒に動いている。',
-          voiceUrl: '/voices/shaft_06_aoi.wav',
+          shaftSpaceStage: 'orbit',
+          text: '地球は宇宙空間を常に高速で動いてるけど',
+          voiceUrl: '/voices/shaft_06a_aoi.wav',
+          autoNextSec: 0.6,
+          cameraPosition: [0, 2.3, 5.0],
+          cameraTarget: [0, 0.4, 0],
+          cameraFov: 38,
+          avatars: {
+            girl_01: {
+              visible: false,
+            },
+            girl_02: {
+              visible: false,
+            },
+          },
+        },
+        // 7-B. シャフトモード: 地球の重力によって、私たちは地球と一緒に動いている。 (教室モード)
+        {
+          id: 'ghost_7b_shaft_earth_gravity',
+          speaker: 'アオイ',
+          speakerCharacterId: 'girl_01',
+          shaftMode: true,
+          shaftSpaceStage: false,
+          text: '地球の重力によって、私たちは地球と一緒に動いている。',
+          voiceUrl: '/voices/shaft_06b_aoi.wav',
           autoNextSec: 0.6,
           cameraPosition: [0, 1.1, 2.65],
           cameraTarget: [0, 1.15, 0],
           cameraFov: 30,
           avatars: {
             girl_01: {
+              visible: true,
               position: [-0.1285, 0.048, -1.3482],
               rotationY: 0.26,
             },
             girl_02: {
+              visible: true,
               position: [0.85, 0.048, -1.3482],
               rotationY: -0.26,
               motion: '/animations/Standing Idle.fbx',
             },
           },
         },
-        // 8. シャフトモード: もし幽霊に質量がないとしたら、重力に縛られないわけだから、地球に置いて行かれて宇宙空間に放り出されちゃうんじゃないかって。 (アオイズライドアウト)
+        // 8-A. シャフトモード: もし幽霊に質量がないとしたら、重力に縛られないわけだから、 (アオイズライドアウト)
         {
-          id: 'ghost_8_shaft_slideout',
+          id: 'ghost_8a_shaft_mass_free',
           speaker: 'アオイ',
           speakerCharacterId: 'girl_01',
           shaftMode: true,
-          text: 'もし幽霊に質量がないとしたら、重力に縛られないわけだから、地球に置いて行かれて宇宙空間に放り出されちゃうんじゃないかって。',
-          voiceUrl: '/voices/shaft_07_aoi.wav',
+          shaftSpaceStage: false,
+          text: 'もし幽霊に質量がないとしたら、重力に縛られないわけだから、',
+          voiceUrl: '/voices/shaft_07a_aoi.wav',
           autoNextSec: 0.6,
           cameraPosition: [0, 1.15, 3.2],
           cameraTarget: [0, 1.15, 0],
           cameraFov: 32,
           avatars: {
             girl_01: {
+              visible: true,
               position: [-0.1285, 0.048, -1.3482],
               rotationY: 0.26,
               moveTo: {
@@ -251,9 +278,32 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
               },
             },
             girl_02: {
+              visible: true,
               position: [0.85, 0.048, -1.3482],
               rotationY: -0.26,
               motion: '/animations/Standing Idle.fbx',
+            },
+          },
+        },
+        // 8-B. シャフト宇宙ステージ: 地球に置いて行かれて宇宙空間に放り出されちゃうんじゃないかって。 (地球公転 & 宇宙に置き去りの「アオイ」文字)
+        {
+          id: 'ghost_8b_shaft_left_behind',
+          speaker: 'アオイ',
+          speakerCharacterId: 'girl_01',
+          shaftMode: true,
+          shaftSpaceStage: 'ghost_left_behind',
+          text: '地球に置いて行かれて宇宙空間に放り出されちゃうんじゃないかって。',
+          voiceUrl: '/voices/shaft_07b_aoi.wav',
+          autoNextSec: 0.6,
+          cameraPosition: [0, 2.3, 5.0],
+          cameraTarget: [0, 0.4, 0],
+          cameraFov: 38,
+          avatars: {
+            girl_01: {
+              visible: false,
+            },
+            girl_02: {
+              visible: false,
             },
           },
         },
@@ -263,6 +313,7 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           speaker: 'アオイ',
           speakerCharacterId: 'girl_01',
           shaftMode: true,
+          shaftSpaceStage: false,
           text: '質量があるなら、地球と一緒に動けるから、この部屋にいられる。',
           voiceUrl: '/voices/shaft_08_aoi.wav',
           autoNextSec: 0.6,
@@ -271,13 +322,15 @@ export const GHOST_MASS_SCENARIO: ScenarioPackage = {
           cameraFov: 30,
           avatars: {
             girl_01: {
+              visible: true,
               position: [-0.1285, 0.048, -1.3482],
               rotationY: 0.26,
-              motion: '/animations/Female Standing Pose.fbx', // 戻ってきた後は立ちポーズ
-              expression: 'smile',
-              expressionWeight: 0.6,
+              motion: '/animations/Standing Idle.fbx', // 戻ってきた後は立ちポーズ
+              expression: 'happy',
+              expressionWeight: 1.0,
             },
             girl_02: {
+              visible: true,
               position: [0.85, 0.048, -1.3482],
               rotationY: -0.26,
               motion: '/animations/Standing Idle.fbx',
