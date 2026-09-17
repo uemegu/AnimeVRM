@@ -445,7 +445,9 @@ export class ViewerCore {
 
     return new Promise((resolve) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      if (!url.startsWith('blob:') && !url.startsWith('data:')) {
+        img.crossOrigin = 'anonymous';
+      }
       img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
@@ -535,7 +537,9 @@ export class ViewerCore {
     }
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      if (!url.startsWith('blob:') && !url.startsWith('data:')) {
+        img.crossOrigin = 'anonymous';
+      }
       img.onload = () => {
         const cvs = document.createElement('canvas');
         cvs.width = img.width;
