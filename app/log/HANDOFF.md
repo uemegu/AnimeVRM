@@ -28,8 +28,7 @@
     - `StageManager.ts` & `StageView.tsx`: Three.js / VRM / 多層背景描画基盤、全自動リサイズ追従
   - `app/Task.md` の「5. 保存・再開（セーブ / ロード）」完了
     - `SaveService.ts`: localStorage へのセーブ・ロード、当日朝スナップショット管理、破損時フォールバック
-  - `app/Task.md` の「6. UI・画面フロー」タイトル画面・メイン画面完了
-    - `TitleScreen.tsx`: 参考デザインを踏襲した、斜めスリット3分割（葵・エミリ・紫苑）のビジュアル、シンプルメニュー（はじめから、つづきから、言語）、セーブデータ連携
+    - `TitleScreen.tsx`: 参考デザインを踏襲した、斜めスリット3分割（葵・エミリ・紫苑）のビジュアル（上下余白36px、全キャラ等幅38%、平行隙間0.64%）、シンプルメニュー（はじめから、つづきから、言語）、セーブデータ連携
     - `GameHeader.tsx`, `ActionSelectModal.tsx`, `NightRoomView.tsx`, `EndingView.tsx`, `StageView.tsx`
   - `app/Task.md` の「7. 動作検証・結合テスト」完了
     - Vitest 単体・結合テスト全25件 PASS（約0.2秒）
