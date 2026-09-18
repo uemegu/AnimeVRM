@@ -1,0 +1,271 @@
+/* ==========================================================================
+   GameHeader Styles (Floating HUD Header)
+   背景なし・絵文字なし・ロケーション・AUTO統合のミニマルHUD
+   ========================================================================== */
+
+.game-header {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  right: 16px;
+  height: 44px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  z-index: 100;
+  pointer-events: none; /* 下の3D画面への操作を遮らない */
+  user-select: none;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+}
+
+/* 左側: 日付・時間帯・ロケーション情報 */
+.header-day-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+/* 日付バッジ (斜めカット・立体シャドウ) */
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-family: 'Montserrat', 'Impact', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  transform: skewX(-8deg);
+  box-shadow: 3px 3px 0px #0b1d47;
+  transition: transform 0.18s ease;
+}
+
+.day-badge:hover {
+  transform: skewX(-8deg) scale(1.04);
+}
+
+.day-badge-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transform: skewX(8deg);
+}
+
+.day-badge-text {
+  letter-spacing: 0.04em;
+}
+
+.day-badge-weekday {
+  font-size: 0.8rem;
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+/* 時間帯フェーズバッジ */
+.phase-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transform: skewX(-8deg);
+  border: 2px solid #ffffff;
+  box-shadow: 3px 3px 0px #0b1d47;
+  transition: all 0.2s ease;
+}
+
+.phase-badge-inner {
+  display: inline-flex;
+  align-items: center;
+  transform: skewX(8deg);
+}
+
+/* 時間帯ごとのカラーパレット */
+.phase-morning {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+  color: #ffffff;
+}
+
+.phase-morning_action {
+  background: linear-gradient(135deg, #0369a1 0%, #06b6d4 100%);
+  color: #ffffff;
+}
+
+.phase-lunch_action {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  color: #ffffff;
+}
+
+.phase-afterschool_action {
+  background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+  color: #ffffff;
+}
+
+.phase-night {
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  color: #ffffff;
+}
+
+/* ロケーションバッジ (時間帯の隣に配置・絵文字なし) */
+.header-location-badge {
+  display: inline-flex;
+  align-items: center;
+  background: #0f172a;
+  color: #38bdf8;
+  border: 2px solid #38bdf8;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transform: skewX(-8deg);
+  box-shadow: 3px 3px 0px #0b1d47;
+  transition: all 0.2s ease;
+}
+
+.header-location-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transform: skewX(8deg);
+}
+
+.header-location-tag {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.header-location-name {
+  color: #ffffff;
+}
+
+/* 右側: コントロール (AUTO / 言語切替) */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+/* AUTO ボタン */
+.header-auto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  color: #94a3b8;
+  padding: 5px 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.header-auto-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.header-auto-btn.active {
+  background: #0284c7;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+}
+
+.header-auto-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+/* 言語切替ボタン (タイトル画面調) */
+.header-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  color: #e2e8f0;
+  padding: 5px 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.header-lang-btn:hover {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.header-lang-btn:active {
+  transform: translateY(1px);
+}
+
+.header-lang-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 680px) {
+  .game-header {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+
+  .header-day-info {
+    gap: 6px;
+  }
+
+  .day-badge {
+    padding: 3px 8px;
+    font-size: 0.82rem;
+  }
+
+  .phase-badge {
+    padding: 3px 8px;
+    font-size: 0.78rem;
+  }
+
+  .header-location-badge {
+    padding: 3px 8px;
+    font-size: 0.78rem;
+  }
+
+  .header-auto-btn,
+  .header-lang-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}

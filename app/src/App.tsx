@@ -17,6 +17,8 @@ import { TimeOfDayId } from './types/visual';
 import { CHARACTERS } from './data/characters';
 import { AudioLipSync } from './services/audio/AudioLipSync';
 import { SoundManager } from './services/audio/SoundManager';
+import { ConfirmModal } from './components/Common/ConfirmModal';
+
 
 export const App: React.FC = () => {
   const [lang, setLang] = useState<SupportedLanguage>('ja');
@@ -347,52 +349,158 @@ export const App: React.FC = () => {
     [gameState, startScenario]
   );
 
+  // 自作ダイアログ（YES/NO または OK モーダル）
+  const [dialogConfig, setDialogConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string | null;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }>({
+    isOpen: false,
+    message: '',
+    onConfirm: () => {},
+  });
+
+  const showNotice = useCallback(
+
+    (message: string, title?: string) => {
+      setDialogConfig({
+        isOpen: true,
+        title,
+        message,
+        confirmText: 'OK',
+        cancelText: null,
+        onConfirm: () => {
+          setDialogConfig((prev) => ({ ...prev, isOpen: false }));
+        },
+      });
+    },
+    []
+  );
+
+  const showConfirm = useCallback(
+    (
+      message: string,
+      onConfirmAction: () => void,
+      title?: string,
+      confirmText = 'YES',
+      cancelText = 'NO'
+    ) => {
+      setDialogConfig({
+        isOpen: true,
+        title,
+        message,
+        confirmText,
+        cancelText,
+        onConfirm: () => {
+          setDialogConfig((prev) => ({ ...prev, isOpen: false }));
+          onConfirmAction();
+        },
+        onCancel: () => {
+          setDialogConfig((prev) => ({ ...prev, isOpen: false }));
+        },
+      });
+    },
+    []
+  );
+
   // 自室コマンド: セーブ
   const handleSave = useCallback(() => {
-    const success = saveService.saveGame(gameState);
-    if (success) {
-      setHasSaveData(true);
-      alert(lang === 'ja' ? 'セーブしました！' : 'Game Saved successfully!');
-    } else {
-      alert(lang === 'ja' ? 'セーブに失敗しました。' : 'Failed to save game.');
-    }
-  }, [saveService, gameState, lang]);
+    showConfirm(
+      lang === 'ja'
+        ? '現在の進行状況をセーブしますか？'
+        : 'Do you want to save your current progress?',
+      () => {
+        const success = saveService.saveGame(gameState);
+        if (success) {
+          setHasSaveData(true);
+          showNotice(
+            lang === 'ja' ? 'セーブしました。' : 'Game Saved successfully.',
+            lang === 'ja' ? 'セーブ完了' : 'Save Completed'
+          );
+        } else {
+          showNotice(
+            lang === 'ja' ? 'セーブに失敗しました。' : 'Failed to save game.',
+            lang === 'ja' ? 'エラー' : 'Error'
+          );
+        }
+      },
+      lang === 'ja' ? 'セーブ' : 'Save Game',
+      lang === 'ja' ? 'はい' : 'YES',
+      lang === 'ja' ? 'いいえ' : 'NO'
+    );
+  }, [saveService, gameState, lang, showConfirm, showNotice]);
 
   // 自室コマンド: ロード
   const handleLoad = useCallback(() => {
-    const loaded = saveService.loadGame();
-    if (!loaded) {
-      alert(lang === 'ja' ? 'セーブデータが見つかりません。' : 'No save data found.');
-      return;
-    }
-    setGameState(loaded.gameState);
-    setIsGameEnded(false);
-    setIsSelectingLocation(false);
+    showConfirm(
+      lang === 'ja'
+        ? 'セーブデータをロードしますか？\n（現在の進行状況は破棄されます）'
+        : 'Do you want to load save data?\n(Current progress will be lost)',
+      () => {
+        const loaded = saveService.loadGame();
+        if (!loaded) {
+          showNotice(
+            lang === 'ja'
+              ? 'セーブデータが見つかりません。'
+              : 'No save data found.',
+            lang === 'ja' ? 'お知らせ' : 'Notice'
+          );
+          return;
+        }
+        setGameState(loaded.gameState);
+        setIsGameEnded(false);
+        setIsSelectingLocation(false);
 
-    if (loaded.gameState.phase === 'night') {
-      setActiveScenario(null);
-    } else if (loaded.gameState.phase === 'morning') {
-      const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
-      startScenario(morningScenario, loaded.gameState);
-    } else {
-      setIsSelectingLocation(true);
-      setActiveScenario(null);
-    }
-    alert(lang === 'ja' ? 'ロードしました！' : 'Game Loaded successfully!');
-  }, [saveService, lang, startScenario]);
+        if (loaded.gameState.phase === 'night') {
+          setActiveScenario(null);
+        } else if (loaded.gameState.phase === 'morning') {
+          const morningScenario =
+            ScheduleManager.getMorningScenario(loaded.gameState);
+          startScenario(morningScenario, loaded.gameState);
+        } else {
+          setIsSelectingLocation(true);
+          setActiveScenario(null);
+        }
+
+        showNotice(
+          lang === 'ja' ? 'ロードしました。' : 'Game Loaded successfully.',
+          lang === 'ja' ? 'ロード完了' : 'Load Completed'
+        );
+      },
+      lang === 'ja' ? 'ロード' : 'Load Game',
+      lang === 'ja' ? 'はい' : 'YES',
+      lang === 'ja' ? 'いいえ' : 'NO'
+    );
+  }, [saveService, lang, startScenario, showConfirm, showNotice]);
 
   // 自室コマンド: 1日をやり直す
   const handleRollbackDay = useCallback(() => {
-    const rolledBack = ScheduleManager.rollbackToday(gameState);
-    const morningScenario = ScheduleManager.getMorningScenario(rolledBack);
-    startScenario(morningScenario, rolledBack);
-    setIsSelectingLocation(false);
-    alert(
+    showConfirm(
       lang === 'ja'
-        ? `第${rolledBack.day}日の朝に戻りました。`
-        : `Restarted from Day ${rolledBack.day} Morning.`
+        ? 'この1日の朝に戻ってやり直しますか？\n（本日の進行内容はリセットされます）'
+        : 'Restart from this morning?\n(Today\'s progress will be reset)',
+      () => {
+        const rolledBack = ScheduleManager.rollbackToday(gameState);
+        const morningScenario = ScheduleManager.getMorningScenario(rolledBack);
+        startScenario(morningScenario, rolledBack);
+        setIsSelectingLocation(false);
+        showNotice(
+          lang === 'ja'
+            ? `第${rolledBack.day}日の朝に戻りました。`
+            : `Restarted from Day ${rolledBack.day} Morning.`,
+          lang === 'ja' ? '1日のやり直し' : 'Day Restarted'
+        );
+      },
+      lang === 'ja' ? 'やり直し' : 'Restart Day',
+      lang === 'ja' ? 'はい' : 'YES',
+      lang === 'ja' ? 'いいえ' : 'NO'
     );
-  }, [gameState, lang, startScenario]);
+  }, [gameState, lang, startScenario, showConfirm, showNotice]);
+
 
   // 自室コマンド: 就寝
   const handleSleep = useCallback(() => {
@@ -473,6 +581,9 @@ export const App: React.FC = () => {
           <GameHeader
             day={gameState.day}
             phase={gameState.phase}
+            locationName={activeLocationName}
+            isAuto={isAuto}
+            onToggleAuto={() => setIsAuto((prev) => !prev)}
             lang={lang}
             onToggleLanguage={handleToggleLanguage}
           />
@@ -531,9 +642,6 @@ export const App: React.FC = () => {
               <DialogueBox
                 speaker={currentScene.speaker}
                 text={currentScene.text}
-                locationName={activeLocationName}
-                isAuto={isAuto}
-                onToggleAuto={setIsAuto}
                 onTypingComplete={handleTypingComplete}
                 onClick={handleDialogueClick}
               />
@@ -547,6 +655,18 @@ export const App: React.FC = () => {
               onRestart={handleReturnToTitle}
             />
           )}
+
+          {/* 自作 YES/NO ダイアログ */}
+          <ConfirmModal
+            isOpen={dialogConfig.isOpen}
+            title={dialogConfig.title}
+            message={dialogConfig.message}
+            confirmText={dialogConfig.confirmText}
+            cancelText={dialogConfig.cancelText}
+            onConfirm={dialogConfig.onConfirm}
+            onCancel={dialogConfig.onCancel}
+          />
+
         </>
       )}
     </div>

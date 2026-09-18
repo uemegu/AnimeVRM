@@ -4,9 +4,6 @@ import './DialogueBox.css';
 export interface DialogueBoxProps {
   speaker?: string;
   text: string;
-  locationName?: string;
-  isAuto?: boolean;
-  onToggleAuto?: (isAuto: boolean) => void;
   onTypingComplete?: () => void;
   onClick: () => void;
 }
@@ -14,12 +11,10 @@ export interface DialogueBoxProps {
 export const DialogueBox: React.FC<DialogueBoxProps> = ({
   speaker,
   text,
-  locationName,
-  isAuto = false,
-  onToggleAuto,
   onTypingComplete,
   onClick,
 }) => {
+
   const [displayedLength, setDisplayedLength] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
@@ -91,16 +86,8 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
     [isTyping, text.length, onClick, onTypingComplete]
   );
 
-  // AUTOボタン切り替え
-  const handleAutoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onToggleAuto?.(!isAuto);
-    },
-    [isAuto, onToggleAuto]
-  );
-
   const displayedText = text.slice(0, displayedLength);
+
 
   // 「」などのカギ括弧のスタイリング
   const renderFormattedText = (raw: string) => {
@@ -127,27 +114,7 @@ export const DialogueBox: React.FC<DialogueBoxProps> = ({
 
   return (
     <>
-      {/* ロケーションバッジ (左上) */}
-      {locationName && (
-        <div className={`adv-location-badge ${isVisible ? 'visible' : ''}`}>
-          <span>📍</span>
-          <span>{locationName}</span>
-        </div>
-      )}
 
-      {/* AUTOボタン (右上) */}
-      {onToggleAuto && (
-        <div className={`adv-top-controls ${isVisible ? 'visible' : ''}`}>
-          <button
-            type="button"
-            className={`adv-auto-btn ${isAuto ? 'active' : ''}`}
-            onClick={handleAutoClick}
-          >
-            <span className="adv-auto-icon">▶</span>
-            <span>AUTO</span>
-          </button>
-        </div>
-      )}
 
       {/* メッセージウィンドウ (下部) */}
       <div

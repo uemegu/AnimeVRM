@@ -79,12 +79,19 @@ async function run() {
     // 教室シナリオの会話を進めて選択肢を表示させる
     console.log('Advancing classroom conversation to choices...');
     let choiceFound = false;
+    let capturedSpeaker = false;
     for (let i = 0; i < 20; i++) {
       if (await page.$('.adv-choices-backdrop.visible')) {
         choiceFound = true;
         break;
       }
       if (await page.$('.adv-message-container')) {
+        if (!capturedSpeaker && (await page.$('.adv-speaker-name'))) {
+          await page.waitForTimeout(600);
+          await page.screenshot({ path: path.join(appDir, 'scripts', 'screenshot_dialogue_speaker.png') });
+          console.log('Saved screenshot_dialogue_speaker.png');
+          capturedSpeaker = true;
+        }
         await page.click('.adv-message-container');
         await page.waitForTimeout(100);
         await page.click('.adv-message-container');

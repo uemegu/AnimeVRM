@@ -15,9 +15,11 @@
   - `app/Task.md` の「1. プロジェクト基盤・環境構築」完了
   - `app/Task.md` の「2. ゲームループ・スケジュール管理（28日間サイクル）」完了
     - `ScheduleManager.ts`: 28日間サイクル、朝/午前/昼/放課後/夜フェーズ遷移、場所事前情報・キャラ配置、日中強制割り込みイベント、好感度別エンディング判定、1日やり直し完全復元
-  - `app/Task.md` の「3. シナリオ・会話システム」Headlessエンジン・バリデータ・UI完了
+  - `app/Task.md` の「3. シナリオ・会話システム」Headlessエンジン・バリデータ・ルート準拠UI完了
     - 画面非依存 `ScenarioEngine.ts`, `ScenarioValidator.ts`
-    - `DialogueBox.tsx`, `ChoiceBox.tsx`, 各種シナリオ（朝、行動場所、強制イベント、エンディング）
+    - `DialogueBox.tsx`, `DialogueBox.css`: ルート（`AdventureMessageWindow.ts`）完全準拠のシネマティックグラデーションフェード、Kiwi Maruフォント、◆付き話者名、タイピングアニメーション、カギ括弧ハイライト、バウンス次へ矢印、ロケーションバッジ、AUTOモード（Aキー対応）
+    - `ChoiceBox.tsx`, `ChoiceBox.css`: ルート完全準拠のペルソナ風スタイリッシュ選択肢UI（VFXスピードライン・レーザービーム、Make Your Choice!! スラムインタイトル、左側主人公カットイン立ち絵、白背景スキューカード、飛び出す番号バッジ、吹き出し矢印、Thinking Time 10秒カウントダウン、SE連動）
+    - 各種シナリオ（朝、行動場所、強制イベント、エンディング）
   - `app/Task.md` の「4. 3D・ビジュアル描画（Three.js / VRM / 背景）」完了
     - 時間帯（ライト・ポストプロセス・フォグ・MToon・空色）とロケーション（多層背景）の直交・完全分離設計（`morning_school` 等の合体プリセット完全排除）
     - `SkyBackground.ts`: プロシージャル青空・流れる雲・太陽ハロー・アルファカット背景画像合成
@@ -28,11 +30,17 @@
     - `StageManager.ts` & `StageView.tsx`: Three.js / VRM / 多層背景描画基盤、全自動リサイズ追従
   - `app/Task.md` の「5. 保存・再開（セーブ / ロード）」完了
     - `SaveService.ts`: localStorage へのセーブ・ロード、当日朝スナップショット管理、破損時フォールバック
-    - `TitleScreen.tsx`: 参考デザインを踏襲した、斜めスリット3分割（葵・エミリ・紫苑）のビジュアル（上下余白36px、全キャラ等幅38%、平行隙間0.64%）、シンプルメニュー（はじめから、つづきから、言語）、セーブデータ連携
-    - `GameHeader.tsx`, `ActionSelectModal.tsx`, `NightRoomView.tsx`, `EndingView.tsx`, `StageView.tsx`
+  - `app/Task.md` の「6. UI・画面フロー・基本操作」進行（主要UI全面刷新・洗練完了）
+    - `TitleScreen.tsx`: 斜めスリット3分割ビジュアル、上品な淡いベージュトーン（#f2ece1）、ミニマルメニュー
+    - `DialogueBox.tsx`, `ChoiceBox.tsx`: ルートアプリ準拠のシネマティックメッセージウィンドウ・ペルソナ風スタイリッシュ選択肢UI（スピードライン・光線・ナンバリングバッジ・カウントダウン・カットイン）
+    - `GameHeader.tsx`: 背景透過フローティングHUD、絵文字完全撤廃、日付・時間帯バッジ、ロケーションバッジ統合（時間帯の隣）、AUTOボタン統合（言語切替の隣）、中央ロゴ撤廃
+    - `ActionSelectModal.tsx`: 「DESTINATION」リボン、選択肢画面同調ナンバリング立体バッジ（01〜06）、絵文字完全撤廃（INFOタグ）、選択肢画面と同一SE連携（表示/ホバー/決定）
+    - `NightRoomView.tsx`: 「NIGHT PHASE」リボン、絵文字完全撤廃、ヒロイン別カラー好感度プログレスバー＆メーター、就寝ゴールドボタン、斜めカットコマンドボタン群
+    - `ConfirmModal.tsx`: 自作YES/NOダイアログ（白背景、立体シャドウ、背景色/ボーダーなし・ホバー演出ボタン、選択肢画面SE連動）。`window.alert` を全面廃止
+
   - `app/Task.md` の「7. 動作検証・結合テスト」完了
     - Vitest 単体・結合テスト全25件 PASS（約0.2秒）
-    - Playwright による実ブラウザ自動E2E検証（タイトル画面・言語切替・ゲーム開始遷移・1日サイクル全巡回、空・雲・サンシャフト・待機モーション・表情クロスフェード・背景切り替え実機描画）成功
+    - Playwright による実ブラウザ自動E2E検証（タイトル画面・ゲーム開始・朝会話・行動選択・選択肢・昼夜巡回・自室セーブ/ロード/就寝）全巡回実機描画成功
   - `app/Task.md` の「8. オーディオ・ボイス・リップシンク」完了
     - Web Audio API + AudioWorklet + WebAssembly による高精度母音解析（`AudioLipSync.ts`）
     - BGM・SE再生および音量管理（`SoundManager.ts`）
@@ -40,6 +48,7 @@
     - シーン定義（`bgmUrl`, `seUrl`, `voiceUrl`）連動再生および実ブラウザPlaywright検証完了
 
 ---
+
 
 ## 決定済みの基本ゲーム進行
 - **全体期間**: 28日間（月曜開始・4週間） / 28日目にエンディング

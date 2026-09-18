@@ -1,0 +1,121 @@
+/* ==========================================================================
+   ConfirmModal Styles (Custom YES/NO Dialog)
+   白背景、場所選択カード同等のbox-shadow、枠なし・背景なしボタン
+   ========================================================================== */
+
+.confirm-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 20px;
+  animation: confirm-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes confirm-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* カードコンテナ (場所選択カード同等の立体カット) */
+.confirm-modal-card {
+  position: relative;
+  background: #ffffff;
+  border: 2.5px solid #0f172a;
+  border-radius: 10px;
+  box-shadow: 6px 6px 0px #0b1d47;
+  transform: skewX(-4deg);
+  padding: 26px 30px;
+  max-width: 440px;
+  width: 100%;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  user-select: none;
+  animation: confirm-pop-in 0.25s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
+}
+
+@keyframes confirm-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px) skewX(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) skewX(-4deg);
+  }
+}
+
+/* 内部コンテンツ (skew歪み補正) */
+.confirm-modal-inner {
+  transform: skewX(4deg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.confirm-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+}
+
+.confirm-modal-message {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  white-space: pre-wrap;
+}
+
+/* ボタンエリア (YES/NO) */
+.confirm-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* YES/NO ボタン: 背景色なし・ボーダーなしでマウスオーバーだけ */
+.confirm-modal-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 18px;
+  font-family: 'Montserrat', 'Kiwi Maru', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  border-radius: 4px;
+}
+
+/* マウスオーバー時の演出 */
+.confirm-modal-btn:hover {
+  color: #0284c7;
+  transform: scale(1.08);
+}
+
+.confirm-modal-btn:active {
+  transform: scale(0.98);
+}
+
+/* YES / 肯定アクションボタンの強調 */
+.confirm-modal-btn.confirm {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.confirm-modal-btn.confirm:hover {
+  color: #0284c7;
+  transform: scale(1.1);
+}
