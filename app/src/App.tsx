@@ -12,6 +12,7 @@ import { ActionSelectModal } from './components/ActionSelect/ActionSelectModal';
 import { NightRoomView } from './components/Room/NightRoomView';
 import { EndingView } from './components/Ending/EndingView';
 import { StageView } from './components/Stage/StageView';
+import { TitleScreen } from './components/Title/TitleScreen';
 import { TimeOfDayId } from './types/visual';
 import { CHARACTERS } from './data/characters';
 import { AudioLipSync } from './services/audio/AudioLipSync';
@@ -23,16 +24,18 @@ export const App: React.FC = () => {
   const soundManager = useMemo(() => new SoundManager(), []);
   const audioLipSync = useMemo(() => new AudioLipSync(), []);
 
+  // タイトル画面表示フラグ
+  const [isTitleScreen, setIsTitleScreen] = useState(true);
+  // セーブデータ存在フラグ
+  const [hasSaveData, setHasSaveData] = useState(() => saveService.hasSaveData());
+
   // ゲーム全体の状態
   const [gameState, setGameState] = useState<GameState>(() => {
     return ScheduleManager.createInitialState();
   });
 
   // 現在再生中のシナリオパッケージ
-  const [activeScenario, setActiveScenario] = useState<ScenarioPackage | null>(() => {
-    const initial = ScheduleManager.createInitialState();
-    return ScheduleManager.getMorningScenario(initial);
-  });
+  const [activeScenario, setActiveScenario] = useState<ScenarioPackage | null>(null);
 
   // シナリオエンジン
   const [engine, setEngine] = useState<ScenarioEngine | null>(null);
@@ -65,8 +68,14 @@ export const App: React.FC = () => {
   const isFinished = engine ? engine.isFinished() : true;
   const isWaitingChoice = engine ? engine.isWaitingForChoice() : false;
 
-  // 0. シーン進行に応じたオーディオ連動（BGM / SE / ボイス・リップシンク）
+  // 0. タイトル画面またはシーン進行に応じたオーディオ連動
   useEffect(() => {
+    if (isTitleScreen) {
+      audioLipSync.stop();
+      soundManager.playBgm('/bgm/thema_music.mp3');
+      return;
+    }
+
     if (!currentScene) {
       audioLipSync.stop();
       return;
@@ -89,7 +98,7 @@ export const App: React.FC = () => {
     } else {
       audioLipSync.stop();
     }
-  }, [currentScene?.id, currentScene?.voiceUrl, currentScene?.bgmUrl, currentScene?.seUrl]);
+  }, [isTitleScreen, currentScene?.id, currentScene?.voiceUrl, currentScene?.bgmUrl, currentScene?.seUrl]);
 
   // コンポーネント破棄時のオーディオリソース解放
   useEffect(() => {
@@ -282,6 +291,7 @@ export const App: React.FC = () => {
   const handleSave = useCallback(() => {
     const success = saveService.saveGame(gameState);
     if (success) {
+      setHasSaveData(true);
       alert(lang === 'ja' ? 'セーブしました！' : 'Game Saved successfully!');
     } else {
       alert(lang === 'ja' ? 'セーブに失敗しました。' : 'Failed to save game.');
@@ -341,14 +351,46 @@ export const App: React.FC = () => {
     startScenario(morningScenario, nextState);
   }, [gameState, saveService, startScenario]);
 
-  // ゲーム最初からリスタート
-  const handleRestartGame = useCallback(() => {
+  // タイトル画面: はじめから (New Game)
+  const handleStartGame = useCallback(() => {
     const initial = ScheduleManager.createInitialState();
+    saveService.saveDayStartBackup(initial.dayStartSnapshot!);
+    setGameState(initial);
     setIsGameEnded(false);
     setIsSelectingLocation(false);
+    setIsTitleScreen(false);
     const morningScenario = ScheduleManager.getMorningScenario(initial);
     startScenario(morningScenario, initial);
-  }, [startScenario]);
+  }, [saveService, startScenario]);
+
+  // タイトル画面: つづきから (Continue)
+  const handleContinueGame = useCallback(() => {
+    const loaded = saveService.loadGame();
+    if (!loaded) return;
+    setGameState(loaded.gameState);
+    setIsGameEnded(false);
+    setIsSelectingLocation(false);
+    setIsTitleScreen(false);
+
+    if (loaded.gameState.phase === 'night') {
+      setActiveScenario(null);
+    } else if (loaded.gameState.phase === 'morning') {
+      const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
+      startScenario(morningScenario, loaded.gameState);
+    } else {
+      setIsSelectingLocation(true);
+      setActiveScenario(null);
+    }
+  }, [saveService, startScenario]);
+
+  // タイトル画面へ戻る（エンディング後など）
+  const handleReturnToTitle = useCallback(() => {
+    setIsTitleScreen(true);
+    setIsGameEnded(false);
+    setActiveScenario(null);
+    setIsSelectingLocation(false);
+    setHasSaveData(saveService.hasSaveData());
+  }, [saveService]);
 
   // 場所候補一覧
   const locationOptions = useMemo(() => {
@@ -357,79 +399,91 @@ export const App: React.FC = () => {
 
   return (
     <div className="game-container">
-      {/* 上部ヘッダー */}
-      <GameHeader
-        day={gameState.day}
-        phase={gameState.phase}
-        lang={lang}
-        onToggleLanguage={handleToggleLanguage}
-      />
-
-      {/* メインステージ（3D/背景描画領域） */}
-      <main className="stage-area">
-        {/* Three.js / VRM / 多層背景ステージ */}
-        <StageView
-          timeOfDay={activeTimeOfDay}
-          locationId={activeLocationId}
-          characterId={activeCharId}
-          characterModelUrl={activeModelUrl}
-          expression={activeExpression}
-          audioLipSync={audioLipSync}
+      {isTitleScreen ? (
+        <TitleScreen
+          hasSaveData={hasSaveData}
+          lang={lang}
+          onStartGame={handleStartGame}
+          onContinueGame={handleContinueGame}
+          onToggleLanguage={handleToggleLanguage}
         />
-
-        {/* 夜の自室コマンドUI（夜フェーズでオーバーレイ表示） */}
-        {gameState.phase === 'night' && !isGameEnded && (
-          <NightRoomView
+      ) : (
+        <>
+          {/* 上部ヘッダー */}
+          <GameHeader
             day={gameState.day}
-            affinities={gameState.affinities}
+            phase={gameState.phase}
             lang={lang}
-            onSave={handleSave}
-            onLoad={handleLoad}
-            onRollbackDay={handleRollbackDay}
-            onSleep={handleSleep}
+            onToggleLanguage={handleToggleLanguage}
           />
-        )}
-      </main>
 
-      {/* 行動場所選択モーダル */}
-      {isSelectingLocation && (
-        <ActionSelectModal
-          options={locationOptions}
-          lang={lang}
-          onSelectLocation={handleSelectLocation}
-        />
-      )}
+          {/* メインステージ（3D/背景描画領域） */}
+          <main className="stage-area">
+            {/* Three.js / VRM / 多層背景ステージ */}
+            <StageView
+              timeOfDay={activeTimeOfDay}
+              locationId={activeLocationId}
+              characterId={activeCharId}
+              characterModelUrl={activeModelUrl}
+              expression={activeExpression}
+              audioLipSync={audioLipSync}
+            />
 
-      {/* 選択肢ボタン群 */}
-      {currentScene?.choices && (
-        <ChoiceBox
-          choices={currentScene.choices.map((c) => ({
-            text: resolveLocalizedText(c.text, lang),
-            goto: c.goto,
-          }))}
-          onSelect={handleChoiceClick}
-        />
-      )}
+            {/* 夜の自室コマンドUI（夜フェーズでオーバーレイ表示） */}
+            {gameState.phase === 'night' && !isGameEnded && (
+              <NightRoomView
+                day={gameState.day}
+                affinities={gameState.affinities}
+                lang={lang}
+                onSave={handleSave}
+                onLoad={handleLoad}
+                onRollbackDay={handleRollbackDay}
+                onSleep={handleSleep}
+              />
+            )}
+          </main>
 
-      {/* 会話ウィンドウ */}
-      {currentScene &&
-        !currentScene.choices &&
-        !isFinished &&
-        !isSelectingLocation && (
-          <DialogueBox
-            speaker={currentScene.speaker}
-            text={currentScene.text}
-            onClick={handleDialogueClick}
-          />
-        )}
+          {/* 行動場所選択モーダル */}
+          {isSelectingLocation && (
+            <ActionSelectModal
+              options={locationOptions}
+              lang={lang}
+              onSelectLocation={handleSelectLocation}
+            />
+          )}
 
-      {/* 28日完走エンディング画面（エンディングシナリオ終了時など） */}
-      {isGameEnded && isFinished && (
-        <EndingView
-          affinities={gameState.affinities}
-          lang={lang}
-          onRestart={handleRestartGame}
-        />
+          {/* 選択肢ボタン群 */}
+          {currentScene?.choices && (
+            <ChoiceBox
+              choices={currentScene.choices.map((c) => ({
+                text: resolveLocalizedText(c.text, lang),
+                goto: c.goto,
+              }))}
+              onSelect={handleChoiceClick}
+            />
+          )}
+
+          {/* 会話ウィンドウ */}
+          {currentScene &&
+            !currentScene.choices &&
+            !isFinished &&
+            !isSelectingLocation && (
+              <DialogueBox
+                speaker={currentScene.speaker}
+                text={currentScene.text}
+                onClick={handleDialogueClick}
+              />
+            )}
+
+          {/* 28日完走エンディング画面（エンディングシナリオ終了時など） */}
+          {isGameEnded && isFinished && (
+            <EndingView
+              affinities={gameState.affinities}
+              lang={lang}
+              onRestart={handleReturnToTitle}
+            />
+          )}
+        </>
       )}
     </div>
   );
