@@ -1,0 +1,414 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #121216;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #181920;
+}
+
+/* ヘッダー: 日付・時間帯情報 */
+.game-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: rgba(10, 12, 18, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-day-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.day-badge {
+  background: #3b82f6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.phase-badge {
+  background: #10b981;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+/* メインステージ（3D/背景描画領域） */
+.stage-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e2030 0%, #0f1016 100%);
+  overflow: hidden;
+}
+
+.stage-placeholder {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* 会話ウィンドウ */
+.dialogue-window {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 48px);
+  max-width: 860px;
+  min-height: 130px;
+  background: rgba(15, 18, 25, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-sizing: border-box;
+  cursor: pointer;
+  z-index: 200;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.speaker-name {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #60a5fa;
+  margin-bottom: 8px;
+}
+
+.dialogue-text {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #f3f4f6;
+}
+
+.dialogue-prompt {
+  text-align: right;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 6px;
+}
+
+/* 選択肢オーバーレイ */
+.choices-container {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 300;
+}
+
+.choice-button {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f8fafc;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 14px 20px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.choice-button:hover {
+  background: #2563eb;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* 行動選択モーダル / オーバーレイ */
+.action-select-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 18, 0.7);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  padding: 24px;
+}
+
+.action-select-card {
+  background: rgba(20, 24, 33, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 720px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.action-select-title {
+  margin: 0 0 6px 0;
+  font-size: 1.35rem;
+  color: #f8fafc;
+}
+
+.action-select-subtitle {
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.location-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.location-item-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.location-item-card:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.location-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.location-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.character-hints {
+  display: flex;
+  gap: 6px;
+}
+
+.character-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.location-desc {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.location-hint-box {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 自室・夜フェーズメニュー */
+.room-menu-card {
+  background: rgba(20, 24, 33, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 28px;
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.affinity-status-panel {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+.affinity-panel-title {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.affinity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.affinity-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.affinity-name {
+  font-weight: 500;
+}
+
+.affinity-val {
+  font-weight: bold;
+  color: #e2e8f0;
+}
+
+.room-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.room-menu-button {
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #334155;
+  color: white;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.room-menu-button:hover {
+  background: #475569;
+}
+
+.room-menu-button.primary {
+  background: #3b82f6;
+}
+.room-menu-button.primary:hover {
+  background: #2563eb;
+}
+.room-menu-button.success {
+  background: #10b981;
+}
+.room-menu-button.success:hover {
+  background: #059669;
+}
+.room-menu-button.warning {
+  background: #f59e0b;
+}
+.room-menu-button.warning:hover {
+  background: #d97706;
+}
+
+/* エンディング画面 */
+.ending-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 18, 0.9);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  padding: 24px;
+}
+
+.ending-card {
+  background: rgba(20, 24, 33, 0.95);
+  border: 1px solid #38bdf8;
+  border-radius: 16px;
+  padding: 36px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 16px 48px rgba(56, 189, 248, 0.2);
+}
+
+.ending-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #38bdf8;
+}
+
+.ending-subtitle {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.ending-results {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+}
+
+.ending-results h3 {
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+  color: #94a3b8;
+}

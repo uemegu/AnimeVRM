@@ -1,0 +1,70 @@
+# HANDOFF 引き継ぎメモ
+
+## 概要
+将来的な別リポジトリへの移行を前提としたギャルゲーWebアプリ（`app/` ディレクトリ）の開発引き継ぎメモです。
+作業セッション終了時、または重要マイルストーン完了時に常に最新情報へ更新してください。
+
+---
+
+## 現在の実装状況・ステータス
+- **基本仕様・機能要件策定**:
+  - `app/FEATURES.md`: 基本ゲーム進行（28日間サイクル・行動ターン・夜の自室等）および必須・オプション機能一覧を定義済み。
+  - `app/TECH_STACK.md`: TypeScript, React, Three.js, @pixiv/three-vrm, Vite などの基本技術スタックおよびディレクトリ構造を定義済み。
+  - `app/Task.md`: 最小限プレイアブル構成の全開発タスクをMarkdownチェックボックス形式で定義済み。
+- **実装ステータス**:
+  - `app/Task.md` の「1. プロジェクト基盤・環境構築」完了
+  - `app/Task.md` の「2. ゲームループ・スケジュール管理（28日間サイクル）」完了
+    - `ScheduleManager.ts`: 28日間サイクル、朝/午前/昼/放課後/夜フェーズ遷移、場所事前情報・キャラ配置、日中強制割り込みイベント、好感度別エンディング判定、1日やり直し完全復元
+  - `app/Task.md` の「3. シナリオ・会話システム」Headlessエンジン・バリデータ・UI完了
+    - 画面非依存 `ScenarioEngine.ts`, `ScenarioValidator.ts`
+    - `DialogueBox.tsx`, `ChoiceBox.tsx`, 各種シナリオ（朝、行動場所、強制イベント、エンディング）
+  - `app/Task.md` の「4. 3D・ビジュアル描画（Three.js / VRM / 背景）」完了
+    - 時間帯（ライト・ポストプロセス・フォグ・MToon・空色）とロケーション（多層背景）の直交・完全分離設計（`morning_school` 等の合体プリセット完全排除）
+    - `SkyBackground.ts`: プロシージャル青空・流れる雲・太陽ハロー・アルファカット背景画像合成
+    - ポストプロセス完全パイプライン: `RenderPass` ➔ `UnrealBloomPass` ➔ `GodRaysPass` ➔ `CinematicAnimeShader` ➔ `SMAAPass` ➔ `OutputPass`
+    - `SunEffect.ts` & `OcclusionRaycaster.ts`: 太陽フレア、レンズゴースト、アバター遮蔽オクルージョン判定
+    - `ToonShader.ts` & `SmoothNormalHelper.ts`: 影の色相シフト（青紫・茜色）、顔影補正、繊細アウトライン、リムライト
+    - `Avatar.ts`: `loadMixamoAnimation` リターゲティングによる待機モーション常時ループ、表情クロスフェード補間（duration = 0.25s）、自動まばたき
+    - `StageManager.ts` & `StageView.tsx`: Three.js / VRM / 多層背景描画基盤、全自動リサイズ追従
+  - `app/Task.md` の「5. 保存・再開（セーブ / ロード）」完了
+    - `SaveService.ts`: localStorage へのセーブ・ロード、当日朝スナップショット管理、破損時フォールバック
+  - `app/Task.md` の「6. UI・画面フロー」メイン画面完了
+    - `GameHeader.tsx`, `ActionSelectModal.tsx`, `NightRoomView.tsx`, `EndingView.tsx`, `StageView.tsx`
+  - `app/Task.md` の「7. 動作検証・結合テスト」完了
+    - Vitest 単体・結合テスト全25件 PASS（約0.2秒）
+    - Playwright による実ブラウザ自動E2E検証（1日サイクル全巡回、空・雲・サンシャフト・待機モーション・表情クロスフェード・背景切り替え実機描画）成功
+  - `app/Task.md` の「8. オーディオ・ボイス・リップシンク」完了
+    - Web Audio API + AudioWorklet + WebAssembly による高精度母音解析（`AudioLipSync.ts`）
+    - BGM・SE再生および音量管理（`SoundManager.ts`）
+    - VRM ExpressionManager への母音開閉モーフウェイト適用（`Avatar.ts` / `StageManager.ts`）
+    - シーン定義（`bgmUrl`, `seUrl`, `voiceUrl`）連動再生および実ブラウザPlaywright検証完了
+
+---
+
+## 決定済みの基本ゲーム進行
+- **全体期間**: 28日間（月曜開始・4週間） / 28日目にエンディング
+- **1日の流れ**:
+  - 朝: 登校中などの固定朝イベント（1回）
+  - 午前: 行動ターン（固定選択肢から場所選択、事前情報あり）
+  - 昼: 行動ターン（固定選択肢から場所選択、事前情報あり）
+  - 放課後: 行動ターン（固定選択肢から場所選択、事前情報あり）
+  - 夜: 自室（セーブ / ロード / 1日をやり直す / 就寝）
+- **例外イベント**: 未遭遇キャラとの出会い救済など、日中に稀に発生する強制イベント
+
+---
+
+## 直近のNext Action（タスクリスト）
+※詳細は `app/Task.md` を参照
+1. [ ] `app/Task.md` の「6. UI・画面フロー・基本操作」の残り項目
+   - タイトル画面（「はじめから」「つづきから（セーブデータ存在時のみ活性）」）の実装
+   - アセットローディング表示（3Dモデル・画像読み込み中のインジケータ表示）
+   - 基本操作・操作ヘルプ案内
+2. [ ] シナリオコンテンツ・キャライベントのさらなる拡充（紫苑・エミリの個別イベント）
+
+---
+
+## 設計上の留意事項・制約
+- **他リポジトリ移行前提**: ルートの既存ファイルへの直接依存は作らず、`app/` 配下で完結する疎結合な設計を徹底する。
+- **シナリオ単体テスト容易性 (Headless Engine)**: 画面（React/Three.js/DOM）とシナリオ進行ステートマシンを完全分離し、Vitest等で画面なしに分岐・フラグ・到達性を単体テスト可能にする。
+- **多言語（i18n）データの統合設計**: 言語別にシナリオ定義全体を複製・二重管理せず、1つのシナリオインスタンス内で `text: { ja, en }` や辞書キー参照を持たせる統合構造とする。
+- **作業ログ義務**: app開発作業時は `app/log/YYYY-MM-DD.md` に作業ログを記録し、本ファイル `app/log/HANDOFF.md` を最新状態に保つこと。
