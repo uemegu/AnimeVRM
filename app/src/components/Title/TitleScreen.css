@@ -1,0 +1,348 @@
+/* ==========================================================================
+   Title Screen Styles (5秒で告白 / Confession in 5 Seconds)
+   ========================================================================== */
+
+.title-screen-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  /* 画面全体で統一された均一な淡いベージュ */
+  background-color: #f7f5ee;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  user-select: none;
+  z-index: 100;
+}
+
+/* --------------------------------------------------------------------------
+   Left Panel: Title & Menu
+   -------------------------------------------------------------------------- */
+.title-left-panel {
+  flex: 0 0 380px;
+  max-width: 40%;
+  min-width: 310px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4.5rem 3.5rem;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 20;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* 左パネル→画像パネルへのグラデーションオーバーレイ
+   左側はベージュ不透明（テキスト読みやすく）、右側は透明に
+   → 1枚目のキャラ画像がうっすら透けて見える */
+.title-left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 130%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #f7f5ee 0%,
+    rgba(247, 245, 238, 0.97) 30%,
+    rgba(247, 245, 238, 0.88) 55%,
+    rgba(247, 245, 238, 0.45) 80%,
+    rgba(247, 245, 238, 0.0) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.title-logo-area,
+.title-menu-list,
+.title-footer {
+  pointer-events: auto;
+}
+
+/* Title Logo Area */
+.title-logo-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: visible;
+}
+
+.title-logo-main {
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Playfair Display', serif;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0.05em;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 14px rgba(37, 99, 235, 0.12);
+  margin: 0;
+  padding-bottom: 4px;
+  white-space: nowrap;
+}
+
+.title-logo-sub {
+  font-family: 'Playfair Display', 'Cinzel', 'Georgia', serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin: 0;
+  padding-left: 2px;
+}
+
+/* Menu List */
+.title-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  margin: auto 0;
+}
+
+.title-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.5rem 0.6rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #334155;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  font-size: 1.22rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+  text-align: left;
+  outline: none;
+}
+
+.title-menu-btn:hover:not(:disabled) {
+  background: rgba(43, 61, 91, 0.05);
+  color: #1e3a8a;
+  transform: translateX(6px);
+}
+
+.title-menu-btn:active:not(:disabled) {
+  transform: translateX(3px);
+}
+
+.title-menu-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.title-menu-icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b5998;
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.title-menu-btn:hover:not(:disabled) .title-menu-icon {
+  transform: scale(1.1);
+  color: #1e3a8a;
+}
+
+.title-menu-text {
+  flex: 1;
+}
+
+/* Footer / Copyright */
+.title-footer {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   Right Panel: Character Slits
+   
+   方式: clip-path parallelogram + absolute positioning overlap
+   
+   各カードは clip-path: polygon() で平行四辺形に切り抜かれる。
+   bounding box 同士はオーバーラップ（不可視領域が重なる）させ、
+   可視領域の間には薄い隙間（背景色のライン）が残る。
+   
+   clip-path: polygon(0 0, 82% 0, 100% 100%, 18% 100%)
+   → 左辺: (0,0)→(18%,100%) = ＼型の斜め線
+   → 右辺: (82%,0)→(100%,100%) = ＼型の斜め線（平行）
+   → 可視幅 = カード幅の 82% (上端・下端ともに同じ)
+   
+   可視隙間 = left2 - (left1 + width * 82%)
+   例: 35% - (0% + 42% * 82%) = 35% - 34.44% ≈ 0.56% ≈ 6px
+   -------------------------------------------------------------------------- */
+.title-right-panel {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  overflow: visible; /* 親コンテナの overflow:hidden でクリップ */
+}
+
+.title-slits-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 1枚目のカードが左パネル裏にわずかに見えるよう左に拡張 */
+  left: -60px;
+  right: -60px;
+}
+
+.title-slit-card {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  cursor: pointer;
+  /* 平行四辺形クリッピング（／方向・右上がり）:
+     上辺の左端が18%右へ、下辺の右端が18%左へ
+     → 全辺が ／ 方向の平行な斜め線 */
+  clip-path: polygon(18% 0, 100% 0, 82% 100%, 0% 100%);
+  transition: filter 0.4s ease;
+}
+
+/* --- カード配置 ---
+   width: 42% — 各カードの bounding box 幅
+   left の間隔: ~35% — bounding box がオーバーラップし、
+   可視領域間には ~0.56% (≈6px) の薄い隙間が残る
+
+   ／方向 clip-path での可視隙間:
+   gap = left2 - (left1 + w * 0.82)
+   例: 35% - (0% + 42%×82%) = 35% - 34.44% ≈ 0.56%  */
+.title-slit-card[data-character="aoi"] {
+  left: 0;
+  width: 42%;
+  z-index: 3;
+}
+
+.title-slit-card[data-character="emili"] {
+  left: 35%;
+  width: 42%;
+  z-index: 2;
+}
+
+/* 3枚目: 右辺の斜めが画面内に見えるよう clip-path 右側を追加カット
+   右辺 (74%,0)→(56%,100%): 同じ18%オフセットで角度統一
+   右辺が画面端を y≈15% で横切り、下85%は斜め線が見える */
+.title-slit-card[data-character="shion"] {
+  left: 70%;
+  width: 42%;
+  z-index: 1;
+  clip-path: polygon(18% 0, 74% 0, 56% 100%, 0% 100%);
+}
+
+.title-slit-card:hover {
+  z-index: 5;
+  filter: brightness(1.04);
+}
+
+/* カード内ラッパー */
+.title-slit-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 画像: clip-path 方式なので skew 変換は不要
+   素直に object-fit: cover で配置 */
+.title-slit-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.4s ease;
+  filter: brightness(0.99) saturate(1.02);
+}
+
+.title-slit-card:hover .title-slit-img {
+  transform: scale(1.04);
+  filter: brightness(1.03) saturate(1.06);
+}
+
+/* 微かな光沢オーバーレイ */
+.title-slit-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 40%,
+    rgba(0, 0, 0, 0.03) 100%
+  );
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 860px) {
+  .title-screen-container {
+    flex-direction: column;
+  }
+
+  .title-left-panel {
+    flex: none;
+    max-width: 100%;
+    width: 100%;
+    height: 45%;
+    padding: 2rem;
+  }
+
+  .title-left-panel::before {
+    width: 100%;
+    background: linear-gradient(
+      180deg,
+      #f7f5ee 0%,
+      rgba(247, 245, 238, 0.95) 50%,
+      rgba(247, 245, 238, 0.4) 90%,
+      rgba(247, 245, 238, 0.0) 100%
+    );
+  }
+
+  .title-logo-main {
+    font-size: 2.3rem;
+  }
+
+  .title-menu-list {
+    flex-direction: row;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .title-menu-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+  }
+
+  .title-right-panel {
+    height: 55%;
+  }
+
+  .title-slits-container {
+    left: -30px;
+    right: -30px;
+  }
+
+  .title-slit-card {
+    clip-path: polygon(0 0, 86% 0, 100% 100%, 14% 100%);
+  }
+}
