@@ -11,7 +11,7 @@
   overflow: hidden;
   display: flex;
   /* 画面全体で統一された均一な淡いベージュ */
-  background-color: #f7f5ee;
+  background-color: #f2ece1;
   font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   user-select: none;
   z-index: 100;
@@ -48,11 +48,11 @@
   height: 100%;
   background: linear-gradient(
     90deg,
-    #f7f5ee 0%,
-    rgba(247, 245, 238, 0.97) 30%,
-    rgba(247, 245, 238, 0.88) 55%,
-    rgba(247, 245, 238, 0.45) 80%,
-    rgba(247, 245, 238, 0.0) 100%
+    #f2ece1 0%,
+    rgba(242, 236, 225, 0.97) 30%,
+    rgba(242, 236, 225, 0.88) 55%,
+    rgba(242, 236, 225, 0.45) 80%,
+    rgba(242, 236, 225, 0.0) 100%
   );
   pointer-events: none;
   z-index: -1;
@@ -263,16 +263,19 @@
   object-fit: cover;
   object-position: center 15%;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.4s ease;
-  filter: brightness(0.99) saturate(1.02);
+              filter 0.4s ease,
+              opacity 0.4s ease;
+  filter: brightness(1.02) saturate(0.82) contrast(0.94);
+  opacity: 0.92;
 }
 
 .title-slit-card:hover .title-slit-img {
   transform: scale(1.04);
-  filter: brightness(1.03) saturate(1.06);
+  filter: brightness(1.01) saturate(1.0) contrast(1.0);
+  opacity: 1;
 }
 
-/* 微かな光沢オーバーレイ */
+/* 淡い空気感を演出する微かなヴェールオーバーレイ */
 .title-slit-shine {
   position: absolute;
   top: 0;
@@ -281,11 +284,16 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    transparent 40%,
-    rgba(0, 0, 0, 0.03) 100%
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(242, 236, 225, 0.08) 50%,
+    rgba(242, 236, 225, 0.12) 100%
   );
   pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.title-slit-card:hover .title-slit-shine {
+  opacity: 0.4;
 }
 
 /* --------------------------------------------------------------------------
@@ -308,10 +316,10 @@
     width: 100%;
     background: linear-gradient(
       180deg,
-      #f7f5ee 0%,
-      rgba(247, 245, 238, 0.95) 50%,
-      rgba(247, 245, 238, 0.4) 90%,
-      rgba(247, 245, 238, 0.0) 100%
+      #f2ece1 0%,
+      rgba(242, 236, 225, 0.95) 50%,
+      rgba(242, 236, 225, 0.4) 90%,
+      rgba(242, 236, 225, 0.0) 100%
     );
   }
 
