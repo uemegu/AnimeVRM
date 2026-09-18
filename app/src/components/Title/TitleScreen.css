@@ -225,24 +225,20 @@
    例: 35% - (0% + 42%×82%) = 35% - 34.44% ≈ 0.56%  */
 .title-slit-card[data-character="aoi"] {
   left: 0;
-  width: 42%;
+  width: 38%;
   z-index: 3;
 }
 
 .title-slit-card[data-character="emili"] {
-  left: 35%;
-  width: 42%;
+  left: 31.8%;
+  width: 38%;
   z-index: 2;
 }
 
-/* 3枚目: 右辺の斜めが画面内に見えるよう clip-path 右側を追加カット
-   右辺 (74%,0)→(56%,100%): 同じ18%オフセットで角度統一
-   右辺が画面端を y≈15% で横切り、下85%は斜め線が見える */
 .title-slit-card[data-character="shion"] {
-  left: 70%;
-  width: 42%;
+  left: 63.6%;
+  width: 38%;
   z-index: 1;
-  clip-path: polygon(18% 0, 74% 0, 56% 100%, 0% 100%);
 }
 
 .title-slit-card:hover {
