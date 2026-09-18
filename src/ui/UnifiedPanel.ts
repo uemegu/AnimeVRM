@@ -2093,7 +2093,8 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
   });
 
   renderUI();
-  setPanelOpen(true);
+  const isMobile = window.innerWidth <= 768 || window.innerHeight > window.innerWidth;
+  setPanelOpen(!isMobile);
 
   onLanguageChange(() => {
     renderUI();
