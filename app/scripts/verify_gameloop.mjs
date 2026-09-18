@@ -29,7 +29,15 @@ async function run() {
 
   try {
     console.log('Navigating to http://127.0.0.1:5188/ ...');
+    page.on('console', (msg) => console.log(`[browser ${msg.type()}] ${msg.text()}`));
+    page.on('pageerror', (err) => console.error(`[browser error] ${err.message}`));
     await page.goto('http://127.0.0.1:5188/');
+
+    await page.waitForSelector('.title-screen-container, .game-header');
+    if (await page.$('.title-screen-container')) {
+      console.log('Title screen detected. Clicking "はじめから"...');
+      await page.click('[data-testid="btn-start"]');
+    }
 
     // 1. ヘッダーと朝会話の確認
     await page.waitForSelector('.game-header');
@@ -56,7 +64,7 @@ async function run() {
     console.log(`Found ${locationCards.length} location cards`);
 
     // スクリーンショット保存
-    const screenshotPath = '/Users/ueda/.gemini/antigravity/brain/e1b236a0-3772-4f8d-9db9-72f421bce90a/action_select_verified.png';
+    const screenshotPath = '/Users/ueda/.gemini/antigravity/brain/00ef25e6-cca4-45e2-80f8-d9153e55d618/action_select_verified.png';
     await page.screenshot({ path: screenshotPath });
     console.log('Screenshot saved to:', screenshotPath);
 
@@ -131,7 +139,7 @@ async function run() {
       // 夜の自室画面が表示されていることを確認
       await page.waitForSelector('.room-menu-card');
       console.log('Night Room view is visible!');
-      const nightScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/e1b236a0-3772-4f8d-9db9-72f421bce90a/night_room_verified.png';
+      const nightScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/00ef25e6-cca4-45e2-80f8-d9153e55d618/night_room_verified.png';
       await page.screenshot({ path: nightScreenshotPath });
       console.log('Night room screenshot saved to:', nightScreenshotPath);
     }

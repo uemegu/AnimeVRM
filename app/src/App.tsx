@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, ActionLocationId } from './types/game';
 import { SupportedLanguage, ScenarioPackage, resolveLocalizedText } from './types/scenario';
 import { ScenarioEngine, ScenarioResolvedScene } from './services/scenario/ScenarioEngine';
@@ -47,6 +47,9 @@ export const App: React.FC = () => {
 
   // 28日目完走エンディングフラグ
   const [isGameEnded, setIsGameEnded] = useState(false);
+
+  // AUTO進行フラグ
+  const [isAuto, setIsAuto] = useState(false);
 
   // activeScenario が変わったときに engine を再初期化
   useEffect(() => {
@@ -140,6 +143,22 @@ export const App: React.FC = () => {
     if (activeScenario?.id.includes('meet_emili')) return 'courtyard';
     return 'classroom';
   }, [gameState.phase, selectedLocationId, activeScenario]);
+
+  // ロケーション表示名
+  const activeLocationName: string = useMemo(() => {
+    const locNames: Record<string, { ja: string; en: string }> = {
+      myroom: { ja: '自室', en: 'My Room' },
+      school_gate: { ja: '正門前', en: 'School Gate' },
+      classroom: { ja: '教室', en: 'Classroom' },
+      courtyard: { ja: '中庭', en: 'Courtyard' },
+      corridor: { ja: '廊下', en: 'Corridor' },
+      rooftop: { ja: '屋上', en: 'Rooftop' },
+      library: { ja: '図書室', en: 'Library' },
+      sports_ground: { ja: '運動場', en: 'Sports Ground' },
+      cafeteria: { ja: '購買・学食', en: 'Cafeteria' },
+    };
+    return locNames[activeLocationId] ? locNames[activeLocationId][lang] : activeLocationId;
+  }, [activeLocationId, lang]);
 
   // 3. 表示キャラクター・モデル・表情の決定
   const { activeCharId, activeModelUrl, activeExpression } = useMemo(() => {
@@ -260,6 +279,47 @@ export const App: React.FC = () => {
       }
     }
   }, [engine, isWaitingChoice, isFinished, gameState, activeScenario, proceedToActionPhase]);
+
+  // AUTOモード自動送りタイマー参照
+  const autoTimerRef = useRef<number | null>(null);
+
+  const clearAutoTimer = useCallback(() => {
+    if (autoTimerRef.current !== null) {
+      window.clearTimeout(autoTimerRef.current);
+      autoTimerRef.current = null;
+    }
+  }, []);
+
+  // タイピング完了ハンドラ（AUTOモード時の自動進行）
+  const handleTypingComplete = useCallback(() => {
+    clearAutoTimer();
+    if (isAuto && !isWaitingChoice && !isFinished) {
+      // ボイスがある場合は少し余裕を持たせ、ない場合は2秒で自動送り
+      const delayMs = currentScene?.voiceUrl ? 2500 : 2000;
+      autoTimerRef.current = window.setTimeout(() => {
+        handleDialogueClick();
+      }, delayMs);
+    }
+  }, [isAuto, isWaitingChoice, isFinished, currentScene?.voiceUrl, handleDialogueClick, clearAutoTimer]);
+
+  // シーン変更時・手動操作時にAUTOタイマーをクリア
+  useEffect(() => {
+    clearAutoTimer();
+  }, [currentScene?.id, clearAutoTimer]);
+
+  // キーボードショートカット (AキーでAUTOトグル)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'a' || e.key === 'A') {
+        if (!isWaitingChoice && !isSelectingLocation) {
+          setIsAuto((prev) => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isWaitingChoice, isSelectingLocation]);
 
   // 選択肢の選択
   const handleChoiceClick = useCallback(
@@ -428,20 +488,20 @@ export const App: React.FC = () => {
               expression={activeExpression}
               audioLipSync={audioLipSync}
             />
-
-            {/* 夜の自室コマンドUI（夜フェーズでオーバーレイ表示） */}
-            {gameState.phase === 'night' && !isGameEnded && (
-              <NightRoomView
-                day={gameState.day}
-                affinities={gameState.affinities}
-                lang={lang}
-                onSave={handleSave}
-                onLoad={handleLoad}
-                onRollbackDay={handleRollbackDay}
-                onSleep={handleSleep}
-              />
-            )}
           </main>
+
+          {/* 夜の自室コマンドUI（夜フェーズでオーバーレイ表示） */}
+          {gameState.phase === 'night' && !isGameEnded && (
+            <NightRoomView
+              day={gameState.day}
+              affinities={gameState.affinities}
+              lang={lang}
+              onSave={handleSave}
+              onLoad={handleLoad}
+              onRollbackDay={handleRollbackDay}
+              onSleep={handleSleep}
+            />
+          )}
 
           {/* 行動場所選択モーダル */}
           {isSelectingLocation && (
@@ -471,6 +531,10 @@ export const App: React.FC = () => {
               <DialogueBox
                 speaker={currentScene.speaker}
                 text={currentScene.text}
+                locationName={activeLocationName}
+                isAuto={isAuto}
+                onToggleAuto={setIsAuto}
+                onTypingComplete={handleTypingComplete}
                 onClick={handleDialogueClick}
               />
             )}

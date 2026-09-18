@@ -22,7 +22,8 @@ export const NightRoomView: React.FC<NightRoomViewProps> = ({
   onSleep,
 }) => {
   return (
-    <div className="room-menu-card">
+    <div className="room-overlay">
+      <div className="room-menu-card">
       <div className="room-card-header">
         <h3 style={{ margin: 0, fontSize: '1.4rem' }}>
           🌙 {lang === 'ja' ? `自室（第${day}日 夜）` : `My Room (Day ${day} Night)`}
@@ -71,5 +72,6 @@ export const NightRoomView: React.FC<NightRoomViewProps> = ({
         </button>
       </div>
     </div>
+  </div>
   );
 };
