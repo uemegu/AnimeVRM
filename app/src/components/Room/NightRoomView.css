@@ -1,0 +1,296 @@
+/* ==========================================================================
+   NightRoomView Styles
+   夜の自室ダッシュボード（タイトル画面・選択肢画面と統一されたデザイン）
+   ========================================================================== */
+
+.room-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(15, 23, 42, 0.68) 0%, rgba(10, 14, 26, 0.85) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  padding: 24px;
+  animation: room-fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes room-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* メインメニューカード */
+.room-menu-card {
+  position: relative;
+  background: #fdfbf7;
+  border: 3.5px solid #0f172a;
+  border-radius: 14px;
+  padding: 30px 32px 32px 32px;
+  width: 460px;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 9px 9px 0px #0b1d47, 0 20px 40px rgba(0, 0, 0, 0.5);
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  transform-origin: center center;
+  animation: room-pop-in 0.32s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
+  z-index: 10;
+}
+
+@keyframes room-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ヘッダーエリア */
+.room-card-header {
+  position: relative;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 14px;
+}
+
+.room-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #4338ca;
+  color: #ffffff;
+  border: 2.5px solid #0f172a;
+  box-shadow: 2.5px 2.5px 0px #0f172a;
+  font-family: 'Montserrat', 'Impact', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  transform: skewX(-8deg);
+  margin-bottom: 8px;
+}
+
+.room-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.room-subtitle {
+  margin: 6px 0 0 0;
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+/* 好感度ステータスパネル */
+.affinity-status-panel {
+  background: #f1f5f9;
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  padding: 14px 18px;
+  box-shadow: 3px 3px 0px rgba(15, 23, 42, 0.15);
+}
+
+.affinity-panel-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.02em;
+}
+
+.affinity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.affinity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.affinity-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.affinity-name {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.affinity-val {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.85rem;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  padding: 1px 8px;
+  border-radius: 4px;
+}
+
+/* 好感度プログレスバー */
+.affinity-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+
+.affinity-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* コマンドボタン群 */
+.room-button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+/* コマンドボタンスタイル (ChoiceBox同等の立体カット) */
+.room-menu-button {
+  position: relative;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  border: 2.5px solid #0f172a;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 4px 4px 0px #0b1d47;
+  transform: skewX(-4deg);
+  transition: transform 0.18s cubic-bezier(0.18, 1.25, 0.32, 1.15),
+              box-shadow 0.18s ease,
+              background-color 0.18s ease,
+              border-color 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  user-select: none;
+}
+
+.room-btn-inner {
+  transform: skewX(4deg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.room-btn-icon {
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-btn-text {
+  flex: 1;
+  text-align: left;
+}
+
+/* ボタンホバーエフェクト */
+.room-menu-button:hover {
+  background: #ffffff;
+  border-color: #0284c7;
+  color: #0284c7;
+  transform: translate(-3px, -2px) skewX(-4deg) scale(1.02);
+  box-shadow: 6px 6px 0px #0284c7;
+}
+
+.room-menu-button:active {
+  transform: translate(-1px, 0) skewX(-4deg);
+  box-shadow: 3px 3px 0px #0b1d47;
+}
+
+/* 就寝ボタン (最重要アクション: ゴージャスなアンバー・ゴールド系) */
+.room-menu-button.success {
+  background: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+  color: #0f172a;
+  border-color: #0f172a;
+  box-shadow: 5px 5px 0px #0b1d47;
+}
+
+.room-menu-button.success:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #fde047 100%);
+  border-color: #0f172a;
+  color: #000000;
+  transform: translate(-4px, -3px) skewX(-4deg) scale(1.03);
+  box-shadow: 8px 8px 0px #0b1d47;
+}
+
+/* 巻き戻しボタン (警告色アクセント) */
+.room-menu-button.warning {
+  background: #fff7ed;
+  border-color: #ea580c;
+  color: #9a3412;
+}
+
+.room-menu-button.warning:hover {
+  background: #ffedd5;
+  border-color: #c2410c;
+  color: #7c2d12;
+  box-shadow: 6px 6px 0px #9a3412;
+}
+
+/* セーブボタン (ロイヤルブルー) */
+.room-menu-button.primary {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1e40af;
+}
+
+.room-menu-button.primary:hover {
+  background: #dbeafe;
+  border-color: #1d4ed8;
+  color: #1e3a8a;
+  box-shadow: 6px 6px 0px #1e40af;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+  .room-menu-card {
+    padding: 22px 18px;
+    gap: 16px;
+  }
+
+  .room-title {
+    font-size: 1.3rem;
+  }
+
+  .room-menu-button {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+}
