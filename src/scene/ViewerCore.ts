@@ -39,7 +39,17 @@ export function getToneMappingMode(mode: string): THREE.ToneMapping {
   }
 }
 
-export function getViewportSize(): { width: number; height: number } {
+export interface ViewportSizeInfo {
+  width: number;
+  height: number;
+  containerWidth: number;
+  containerHeight: number;
+  isPortrait: boolean;
+  isLandscapeMobile: boolean;
+  messageHeight: number;
+}
+
+export function getViewportSize(): ViewportSizeInfo {
   const wrapper = document.getElementById('viewport-wrapper');
   let availableWidth = window.innerWidth;
   let availableHeight = window.innerHeight;
@@ -52,6 +62,27 @@ export function getViewportSize(): { width: number; height: number } {
     }
   }
 
+  const isPortrait = availableHeight > availableWidth;
+  const isLandscapeMobile = !isPortrait && availableHeight <= 520;
+
+  if (isPortrait) {
+    // 縦向き（Portrait）: メッセージウィンドウをキャンバス下方に配置するため高さを分離
+    const messageHeight = Math.min(210, Math.max(140, Math.floor(availableHeight * 0.24)));
+    const canvasWidth = Math.floor(availableWidth);
+    const canvasHeight = Math.max(100, Math.floor(availableHeight - messageHeight));
+
+    return {
+      width: canvasWidth,
+      height: canvasHeight,
+      containerWidth: canvasWidth,
+      containerHeight: Math.floor(availableHeight),
+      isPortrait: true,
+      isLandscapeMobile: false,
+      messageHeight,
+    };
+  }
+
+  // 横向き（Landscape）および デスクトップ: キャンバスを縦方向（16:9）にFitさせる
   const targetAspect = 16 / 9;
   const areaAspect = availableWidth / availableHeight;
 
@@ -59,16 +90,24 @@ export function getViewportSize(): { width: number; height: number } {
   let height: number;
 
   if (areaAspect > targetAspect) {
-    // Window/Wrapper is wider than 16:9 -> Fit to height (pillarboxing)
+    // 横に広い -> 縦方向（高さ）にFit（左右ピラーボックス）
     height = Math.floor(availableHeight);
     width = Math.floor(height * targetAspect);
   } else {
-    // Window/Wrapper is taller than 16:9 -> Fit to width (letterboxing)
+    // 縦に広い -> 横幅にFit
     width = Math.floor(availableWidth);
     height = Math.floor(width / targetAspect);
   }
 
-  return { width, height };
+  return {
+    width,
+    height,
+    containerWidth: width,
+    containerHeight: height,
+    isPortrait: false,
+    isLandscapeMobile,
+    messageHeight: 0,
+  };
 }
 
 export function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig): void {
@@ -823,16 +862,37 @@ export class ViewerCore {
   }
 
   public onResize(): void {
-    const { width, height } = getViewportSize();
+    const viewport = getViewportSize();
+    const { width, height, containerWidth, containerHeight, isPortrait, isLandscapeMobile, messageHeight } = viewport;
     const pr = Math.min(window.devicePixelRatio, 2);
+
+    document.body.classList.toggle('is-portrait', isPortrait);
+    document.body.classList.toggle('is-landscape-mobile', isLandscapeMobile);
+    document.documentElement.style.setProperty('--adv-msg-height', `${messageHeight}px`);
 
     const container = document.getElementById('viewport-container');
     if (container) {
-      container.style.width = `${width}px`;
-      container.style.height = `${height}px`;
+      container.style.width = `${containerWidth}px`;
+      container.style.height = `${containerHeight}px`;
+      if (isPortrait) {
+        container.style.aspectRatio = 'unset';
+      } else {
+        container.style.aspectRatio = '16 / 9';
+      }
     }
 
-    this.camera.aspect = 16 / 9;
+    const appEl = document.getElementById('app');
+    if (appEl) {
+      if (isPortrait) {
+        appEl.style.setProperty('height', `${height}px`, 'important');
+        appEl.style.setProperty('max-height', `${height}px`, 'important');
+      } else {
+        appEl.style.height = '';
+        appEl.style.maxHeight = '';
+      }
+    }
+
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height, true);

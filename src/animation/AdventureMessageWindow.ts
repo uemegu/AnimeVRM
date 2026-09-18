@@ -1227,6 +1227,456 @@ export class AdventureMessageWindow {
       .adv-eyelid-overlay.closed .adv-eyelid-bottom {
         transform: translateY(0%);
       }
+
+      /* ================================================== */
+      /* Responsive: Mobile Portrait (縦向き)               */
+      /* ================================================== */
+      body.is-portrait .adv-message-container,
+      .is-portrait .adv-message-container {
+        height: var(--adv-msg-height, 175px) !important;
+        max-height: var(--adv-msg-height, 175px) !important;
+        box-sizing: border-box !important;
+        padding: 14px 18px 12px !important;
+        bottom: 0 !important;
+        transform: none !important;
+        background: linear-gradient(to bottom, rgba(5, 9, 20, 0.94) 0%, rgba(3, 7, 18, 0.98) 100%) !important;
+        border-top: 1px solid rgba(56, 189, 248, 0.3) !important;
+        box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.75) !important;
+      }
+
+      body.is-portrait .adv-message-body,
+      .is-portrait .adv-message-body {
+        font-size: clamp(13px, 3.8vw, 15.5px) !important;
+        line-height: 1.55 !important;
+        letter-spacing: 0.02em !important;
+        padding-bottom: 2px !important;
+      }
+
+      body.is-portrait .adv-speaker-name,
+      .is-portrait .adv-speaker-name {
+        font-size: 0.88em !important;
+        margin-bottom: 3px !important;
+      }
+
+      body.is-portrait .adv-top-controls,
+      .is-portrait .adv-top-controls {
+        top: 12px !important;
+        right: 12px !important;
+        gap: 6px !important;
+      }
+
+      body.is-portrait .adv-auto-btn,
+      body.is-portrait .adv-stop-btn,
+      .is-portrait .adv-auto-btn,
+      .is-portrait .adv-stop-btn {
+        font-size: 11.5px !important;
+        padding: 4px 10px !important;
+      }
+
+      body.is-portrait .adv-location-badge,
+      .is-portrait .adv-location-badge {
+        top: 12px !important;
+        left: 12px !important;
+        font-size: 11.5px !important;
+        padding: 4px 10px !important;
+      }
+
+      body.is-portrait .adv-cutin-char,
+      .is-portrait .adv-cutin-char {
+        display: none !important;
+      }
+
+      body.is-portrait .adv-right-stage,
+      .is-portrait .adv-right-stage {
+        display: none !important;
+      }
+
+      body.is-portrait .adv-persona-title-container,
+      .is-portrait .adv-persona-title-container {
+        top: 6% !important;
+        transform: translateX(-50%) scale(0.82) skewX(-8deg) !important;
+        padding: 6px 12px !important;
+      }
+
+      body.is-portrait .adv-thinking-widget,
+      .is-portrait .adv-thinking-widget {
+        right: auto !important;
+        left: 50% !important;
+        bottom: 18px !important;
+        transform: translateX(-50%) !important;
+        width: auto !important;
+        height: auto !important;
+        animation: none !important;
+      }
+
+      body.is-portrait .adv-tt-spin-ring,
+      body.is-portrait .adv-tt-spin-ring-inner,
+      body.is-portrait .adv-thinking-circle-badge,
+      .is-portrait .adv-tt-spin-ring,
+      .is-portrait .adv-tt-spin-ring-inner,
+      .is-portrait .adv-thinking-circle-badge {
+        display: none !important;
+      }
+
+      body.is-portrait .adv-countdown-container,
+      .is-portrait .adv-countdown-container {
+        position: relative !important;
+        top: 0 !important;
+        right: 0 !important;
+        transform: none !important;
+        align-items: center !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+      }
+
+      body.is-portrait .adv-countdown-ribbon,
+      .is-portrait .adv-countdown-ribbon {
+        margin-bottom: 0 !important;
+        margin-right: 0 !important;
+        font-size: 11px !important;
+        padding: 3px 8px !important;
+      }
+
+      body.is-portrait .adv-countdown-box,
+      .is-portrait .adv-countdown-box {
+        min-width: 62px !important;
+        padding: 2px 10px !important;
+        box-shadow: 4px 4px 0px #000000 !important;
+      }
+
+      body.is-portrait .adv-countdown-digits,
+      .is-portrait .adv-countdown-digits {
+        font-size: 30px !important;
+      }
+
+      body.is-portrait .adv-choices-container,
+      .is-portrait .adv-choices-container {
+        top: 48% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: calc(100% - 28px) !important;
+        max-width: 440px !important;
+        min-width: 0 !important;
+        gap: 10px !important;
+        max-height: 58vh !important;
+        overflow-y: auto !important;
+        padding: 6px 4px !important;
+        box-sizing: border-box !important;
+      }
+
+      body.is-portrait .adv-choice-btn,
+      .is-portrait .adv-choice-btn {
+        padding: 12px 16px 12px 46px !important;
+        font-size: clamp(13px, 3.8vw, 15px) !important;
+        border-width: 2.5px !important;
+        box-shadow: 5px 5px 0px #0b1d47 !important;
+      }
+
+      body.is-portrait .adv-choice-badge,
+      .is-portrait .adv-choice-badge {
+        font-size: 20px !important;
+        left: -14px !important;
+        top: -10px !important;
+        padding: 2px 8px !important;
+        border-width: 2.5px !important;
+      }
+
+      @media (orientation: portrait) {
+        .adv-message-container {
+          height: var(--adv-msg-height, 175px) !important;
+          max-height: var(--adv-msg-height, 175px) !important;
+          box-sizing: border-box !important;
+          padding: 14px 18px 12px !important;
+          bottom: 0 !important;
+          transform: none !important;
+          background: linear-gradient(to bottom, rgba(5, 9, 20, 0.94) 0%, rgba(3, 7, 18, 0.98) 100%) !important;
+          border-top: 1px solid rgba(56, 189, 248, 0.3) !important;
+          box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.75) !important;
+        }
+
+        .adv-message-body {
+          font-size: clamp(13px, 3.8vw, 15.5px) !important;
+          line-height: 1.55 !important;
+          letter-spacing: 0.02em !important;
+          padding-bottom: 2px !important;
+        }
+
+        .adv-speaker-name {
+          font-size: 0.88em !important;
+          margin-bottom: 3px !important;
+        }
+
+        .adv-top-controls {
+          top: 12px !important;
+          right: 12px !important;
+          gap: 6px !important;
+        }
+
+        .adv-auto-btn,
+        .adv-stop-btn {
+          font-size: 11.5px !important;
+          padding: 4px 10px !important;
+        }
+
+        .adv-location-badge {
+          top: 12px !important;
+          left: 12px !important;
+          font-size: 11.5px !important;
+          padding: 4px 10px !important;
+        }
+
+        /* Choices in Portrait: 左イラスト非表示、右側カウントダウンは画面下部に移動、全選択肢表示 */
+        .adv-cutin-char {
+          display: none !important;
+        }
+
+        .adv-right-stage {
+          display: none !important;
+        }
+
+        .adv-persona-title-container {
+          top: 6% !important;
+          transform: translateX(-50%) scale(0.82) skewX(-8deg) !important;
+          padding: 6px 12px !important;
+        }
+
+        .adv-thinking-widget {
+          right: auto !important;
+          left: 50% !important;
+          bottom: 18px !important;
+          transform: translateX(-50%) !important;
+          width: auto !important;
+          height: auto !important;
+          animation: none !important;
+        }
+
+        .adv-tt-spin-ring,
+        .adv-tt-spin-ring-inner,
+        .adv-thinking-circle-badge {
+          display: none !important;
+        }
+
+        .adv-countdown-container {
+          position: relative !important;
+          top: 0 !important;
+          right: 0 !important;
+          transform: none !important;
+          align-items: center !important;
+          flex-direction: row !important;
+          gap: 8px !important;
+        }
+
+        .adv-countdown-ribbon {
+          margin-bottom: 0 !important;
+          margin-right: 0 !important;
+          font-size: 11px !important;
+          padding: 3px 8px !important;
+        }
+
+        .adv-countdown-box {
+          min-width: 62px !important;
+          padding: 2px 10px !important;
+          box-shadow: 4px 4px 0px #000000 !important;
+        }
+
+        .adv-countdown-digits {
+          font-size: 30px !important;
+        }
+
+        .adv-choices-container {
+          top: 48% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          width: calc(100% - 28px) !important;
+          max-width: 440px !important;
+          min-width: 0 !important;
+          gap: 10px !important;
+          max-height: 58vh !important;
+          overflow-y: auto !important;
+          padding: 6px 4px !important;
+          box-sizing: border-box !important;
+        }
+
+        .adv-choice-btn {
+          padding: 12px 16px 12px 46px !important;
+          font-size: clamp(13px, 3.8vw, 15px) !important;
+          border-width: 2.5px !important;
+          box-shadow: 5px 5px 0px #0b1d47 !important;
+        }
+
+        .adv-choice-badge {
+          font-size: 20px !important;
+          left: -14px !important;
+          top: -10px !important;
+          padding: 2px 8px !important;
+          border-width: 2.5px !important;
+        }
+      }
+
+      /* ================================================== */
+      /* Responsive: Mobile Landscape (横向き)             */
+      /* ================================================== */
+      body.is-landscape-mobile .adv-message-container,
+      .is-landscape-mobile .adv-message-container {
+        display: none !important;
+      }
+
+      body.is-landscape-mobile .adv-top-controls,
+      .is-landscape-mobile .adv-top-controls {
+        top: 10px !important;
+        right: 10px !important;
+        gap: 6px !important;
+      }
+
+      body.is-landscape-mobile .adv-auto-btn,
+      body.is-landscape-mobile .adv-stop-btn,
+      .is-landscape-mobile .adv-auto-btn,
+      .is-landscape-mobile .adv-stop-btn {
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+      }
+
+      body.is-landscape-mobile .adv-location-badge,
+      .is-landscape-mobile .adv-location-badge {
+        top: 10px !important;
+        left: 10px !important;
+        font-size: 11px !important;
+        padding: 4px 8px !important;
+      }
+
+      body.is-landscape-mobile .adv-cutin-char,
+      .is-landscape-mobile .adv-cutin-char {
+        display: none !important;
+      }
+
+      body.is-landscape-mobile .adv-right-stage,
+      .is-landscape-mobile .adv-right-stage {
+        display: none !important;
+      }
+
+      body.is-landscape-mobile .adv-persona-title-container,
+      .is-landscape-mobile .adv-persona-title-container {
+        top: 3% !important;
+        transform: translateX(-50%) scale(0.68) skewX(-8deg) !important;
+        padding: 4px 10px !important;
+      }
+
+      body.is-landscape-mobile .adv-thinking-widget,
+      .is-landscape-mobile .adv-thinking-widget {
+        right: 12px !important;
+        bottom: 10px !important;
+        transform: scale(0.6) !important;
+        transform-origin: bottom right !important;
+      }
+
+      body.is-landscape-mobile .adv-choices-container,
+      .is-landscape-mobile .adv-choices-container {
+        top: 52% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: min(560px, 88%) !important;
+        max-width: 560px !important;
+        min-width: 0 !important;
+        gap: 7px !important;
+        max-height: 84vh !important;
+        overflow-y: auto !important;
+        padding: 4px 6px !important;
+        box-sizing: border-box !important;
+      }
+
+      body.is-landscape-mobile .adv-choice-btn,
+      .is-landscape-mobile .adv-choice-btn {
+        padding: 8px 14px 8px 40px !important;
+        font-size: 13px !important;
+        border-width: 2.5px !important;
+        box-shadow: 4px 4px 0px #0b1d47 !important;
+      }
+
+      body.is-landscape-mobile .adv-choice-badge,
+      .is-landscape-mobile .adv-choice-badge {
+        font-size: 17px !important;
+        left: -12px !important;
+        top: -8px !important;
+        padding: 1px 7px !important;
+        border-width: 2px !important;
+      }
+
+      @media (orientation: landscape) and (max-height: 520px) {
+        /* 横向きスマホではメッセージウィンドウを非表示 */
+        .adv-message-container {
+          display: none !important;
+        }
+
+        .adv-top-controls {
+          top: 10px !important;
+          right: 10px !important;
+          gap: 6px !important;
+        }
+
+        .adv-auto-btn,
+        .adv-stop-btn {
+          font-size: 11px !important;
+          padding: 4px 8px !important;
+        }
+
+        .adv-location-badge {
+          top: 10px !important;
+          left: 10px !important;
+          font-size: 11px !important;
+          padding: 4px 8px !important;
+        }
+
+        /* Choices in Landscape: 全選択肢をコンパクトに収める */
+        .adv-cutin-char {
+          display: none !important;
+        }
+
+        .adv-right-stage {
+          display: none !important;
+        }
+
+        .adv-persona-title-container {
+          top: 3% !important;
+          transform: translateX(-50%) scale(0.68) skewX(-8deg) !important;
+          padding: 4px 10px !important;
+        }
+
+        .adv-thinking-widget {
+          right: 12px !important;
+          bottom: 10px !important;
+          transform: scale(0.6) !important;
+          transform-origin: bottom right !important;
+        }
+
+        .adv-choices-container {
+          top: 52% !important;
+          left: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          width: min(560px, 88%) !important;
+          max-width: 560px !important;
+          min-width: 0 !important;
+          gap: 7px !important;
+          max-height: 84vh !important;
+          overflow-y: auto !important;
+          padding: 4px 6px !important;
+          box-sizing: border-box !important;
+        }
+
+        .adv-choice-btn {
+          padding: 8px 14px 8px 40px !important;
+          font-size: 13px !important;
+          border-width: 2.5px !important;
+          box-shadow: 4px 4px 0px #0b1d47 !important;
+        }
+
+        .adv-choice-badge {
+          font-size: 17px !important;
+          left: -12px !important;
+          top: -8px !important;
+          padding: 1px 7px !important;
+          border-width: 2px !important;
+        }
+      }
     `;
     document.head.appendChild(style);
   }
