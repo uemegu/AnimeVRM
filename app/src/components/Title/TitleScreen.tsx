@@ -86,7 +86,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               </svg>
             </span>
             <span className="title-menu-text">
-              {lang === 'ja' ? 'Language (日本語 / EN)' : '言語 (日本語 / EN)'}
+              {lang === 'ja' ? 'Language' : '言語'}
             </span>
           </button>
         </nav>
