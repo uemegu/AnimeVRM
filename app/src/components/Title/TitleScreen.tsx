@@ -26,7 +26,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             {lang === 'ja' ? '5秒で告白' : '5 Seconds to Confess'}
           </h1>
           <p className="title-logo-sub">
-            {lang === 'ja' ? 'Confession in 5 Seconds' : 'ゴビョウ デ コクハク'}
+            {lang === 'ja' ? (
+              <>
+                Confession in<br />5 Seconds
+              </>
+            ) : (
+              'ゴビョウ デ コクハク'
+            )}
           </p>
         </header>
 
