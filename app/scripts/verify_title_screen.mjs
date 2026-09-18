@@ -93,9 +93,9 @@ async function run() {
     const headerPhase = await page.textContent('.phase-badge');
     console.log(`[Game Started Successfully! Header]: ${headerDay} | ${headerPhase}`);
 
-    await page.waitForSelector('.dialogue-window', { timeout: 10000 });
-    const dialogueText = await page.textContent('.dialogue-text');
-    console.log(`[Day 1 Morning Dialogue]: Text="${dialogueText}"`);
+    await page.waitForSelector('.adv-message-container', { timeout: 10000 });
+    const dialogueText = await page.textContent('.adv-message-body');
+    console.log(`[Day 1 Morning Dialogue]: Text="${dialogueText?.trim()}"`);
 
     // ゲーム開始後のスクリーンショット保存
     const screenshotGamePath = path.resolve(__dirname, 'game_started_day1.png');

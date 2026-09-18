@@ -14,8 +14,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0;
-  z-index: 100;
-  pointer-events: none; /* 下の3D画面への操作を遮らない */
+  z-index: 300;
+  pointer-events: none; /* 下の画面への操作を遮らない */
   user-select: none;
   font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
 }
