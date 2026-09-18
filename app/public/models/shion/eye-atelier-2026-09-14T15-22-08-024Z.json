@@ -1,0 +1,26 @@
+{
+  "format": "eye-atelier-settings",
+  "version": 1,
+  "parameters": {
+    "flatness": 0.13,
+    "length": 0.57,
+    "thickness": 0.69,
+    "corner_ratio": 0.2,
+    "corner_angle": 0,
+    "jaw_roundness": 0,
+    "face_slim": 0,
+    "upper_peak": 0.67,
+    "eye_x": -0.18,
+    "eye_z": 0,
+    "eye_width": 1,
+    "eye_height": 1.07,
+    "iris_x": 0.23,
+    "iris_z": 0,
+    "iris_width": 1,
+    "iris_height": 1,
+    "brow_x": 0,
+    "brow_z": 0,
+    "brow_peak": 0,
+    "brow_curve": 0
+  }
+}
