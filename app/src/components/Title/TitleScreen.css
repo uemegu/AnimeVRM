@@ -196,8 +196,8 @@
 
 .title-slits-container {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 36px;
+  bottom: 36px;
   /* 1枚目のカードが左パネル裏にわずかに見えるよう左に拡張 */
   left: -60px;
   right: -60px;
@@ -338,6 +338,8 @@
   }
 
   .title-slits-container {
+    top: 16px;
+    bottom: 16px;
     left: -30px;
     right: -30px;
   }
