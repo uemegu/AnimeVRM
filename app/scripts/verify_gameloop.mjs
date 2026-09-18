@@ -54,21 +54,47 @@ async function run() {
       if (await page.$('.action-select-overlay')) break;
     }
 
-    // 3. 場所選択モーダルの確認
-    await page.waitForSelector('.action-select-overlay');
+    // 3. 場所選択（学校俯瞰マップ＋サイドバー）の確認
+    await page.waitForSelector('.action-map-area');
+    await page.waitForSelector('.action-sidebar');
+    const locationPins = await page.$$('.action-map-pin');
     const locationCards = await page.$$('.location-item-card');
-    console.log(`Found ${locationCards.length} location cards`);
+    console.log(`Found ${locationPins.length} map pins and ${locationCards.length} sidebar location cards`);
 
-    // スクリーンショット保存
-    const actionScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/03de8385-7d3f-4074-9319-342389782c1d/action_select_verified.png';
-    await page.screenshot({ path: actionScreenshotPath });
-    console.log('Screenshot saved to:', actionScreenshotPath);
+    // キャラクターインジケーター（バッジ）の存在確認
+    const charBadges = await page.$$('.pin-char-badge');
+    console.log(`Found ${charBadges.length} character encounter badges on map`);
 
-    // 4. 「教室」をクリックして移動
+    // サイドバーのカードにホバーしてピンとカードがハイライトされることを確認
     const classroomCard = await page.$('.location-item-card:has-text("教室")');
     if (classroomCard) {
+      await classroomCard.hover();
+      await page.waitForTimeout(200);
+      const highlightedPins = await page.$$('.action-map-pin.highlighted');
+      console.log(`Highlighted pins on hover: ${highlightedPins.length}`);
+    }
+
+    // マップ＆サイドバーのスクリーンショット保存
+    const actionScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/03de8385-7d3f-4074-9319-342389782c1d/action_map_verified.png';
+    await page.screenshot({ path: actionScreenshotPath });
+    console.log('Action Map & Sidebar screenshot saved to:', actionScreenshotPath);
+
+    // 4. 「教室」をクリックして YES/NO 確認ダイアログを表示
+    if (classroomCard) {
       await classroomCard.click();
-      console.log('Clicked classroom card');
+      console.log('Clicked classroom card, waiting for ConfirmModal...');
+      await page.waitForSelector('.confirm-modal-card');
+      const modalText = await page.textContent('.confirm-modal-message');
+      console.log('ConfirmModal displayed message:', modalText);
+
+      // 確認ダイアログ表示状態のスクリーンショット保存
+      const confirmActionScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/03de8385-7d3f-4074-9319-342389782c1d/action_confirm_dialog_verified.png';
+      await page.screenshot({ path: confirmActionScreenshotPath });
+      console.log('Action Confirm Modal screenshot saved to:', confirmActionScreenshotPath);
+
+      // 「はい」をクリックして移動確定
+      await page.click('.confirm-modal-btn.confirm');
+      console.log('Confirmed destination (YES clicked)');
       await page.waitForTimeout(300);
 
       // 会話ウィンドウ出現
@@ -85,7 +111,6 @@ async function run() {
       const choices = await page.$$eval('.choice-button, .adv-choice-btn', (btns) => btns.map((b) => b.textContent));
       console.log('Choices displayed:', choices);
 
-
       const choiceScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/03de8385-7d3f-4074-9319-342389782c1d/choice_verified.png';
       await page.screenshot({ path: choiceScreenshotPath });
       console.log('Choice screenshot saved to:', choiceScreenshotPath);
@@ -99,12 +124,15 @@ async function run() {
       while (await page.locator('.adv-message-container, .dialogue-window').isVisible()) {
         await page.click('.adv-message-container, .dialogue-window');
         await page.waitForTimeout(150);
-        if (await page.locator('.action-select-overlay').isVisible()) break;
+        if (await page.locator('.action-map-area').isVisible()) break;
       }
 
-      // 昼行動: 図書室を選択
-      console.log('Selecting Library in lunch action...');
-      await page.click('.location-item-card:has-text("図書室")');
+      // 昼行動: 図書室を選択（マップピン直接クリックをテスト）
+      console.log('Selecting Library in lunch action via map pin...');
+      await page.waitForSelector('.action-map-pin:has-text("図書室")');
+      await page.click('.action-map-pin:has-text("図書室")');
+      await page.waitForSelector('.confirm-modal-card');
+      await page.click('.confirm-modal-btn.confirm');
       await page.waitForTimeout(300);
 
       // 図書室の会話を進める
@@ -115,12 +143,15 @@ async function run() {
           await page.click('.choice-button:first-child, .adv-choice-btn:first-child');
           await page.waitForTimeout(200);
         }
-        if (await page.locator('.action-select-overlay').isVisible()) break;
+        if (await page.locator('.action-map-area').isVisible()) break;
       }
 
-      // 放課後行動: 屋上を選択
-      console.log('Selecting Rooftop in afterschool action...');
+      // 放課後行動: 屋上を選択（サイドバーカードクリックをテスト）
+      console.log('Selecting Rooftop in afterschool action via sidebar card...');
+      await page.waitForSelector('.location-item-card:has-text("屋上")');
       await page.click('.location-item-card:has-text("屋上")');
+      await page.waitForSelector('.confirm-modal-card');
+      await page.click('.confirm-modal-btn.confirm');
       await page.waitForTimeout(300);
 
       // 屋上の会話を進める

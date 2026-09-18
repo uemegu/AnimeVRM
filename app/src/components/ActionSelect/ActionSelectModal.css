@@ -1,266 +1,312 @@
 /* ==========================================================================
    ActionSelectModal Styles
-   選択肢画面・タイトル画面の世界観と調和したスタイリッシュな行動選択画面
+   学校俯瞰マップ ＆ 右側サイドバー連動の行動選択画面
    ========================================================================== */
 
 .action-select-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 23, 42, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #f8fafc;
   display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 250;
-  padding: 24px;
   overflow: hidden;
-  animation: modal-fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  user-select: none;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  animation: action-map-fade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes modal-fade-in {
+@keyframes action-map-fade {
   0% { opacity: 0; }
   100% { opacity: 1; }
 }
 
-/* 背景を彩るスタイリッシュな斜めアクセント光線（選択肢画面と共通の意匠） */
-.action-select-overlay::before {
-  content: '';
-  position: absolute;
-  top: 15%;
-  left: -20%;
-  width: 140%;
-  height: 6px;
-  background: linear-gradient(90deg, transparent, #38bdf8, #ffffff, #38bdf8, transparent);
-  transform: rotate(-12deg);
-  opacity: 0.45;
-  pointer-events: none;
-  box-shadow: 0 0 16px #38bdf8;
-}
-
-.action-select-overlay::after {
-  content: '';
-  position: absolute;
-  bottom: 18%;
-  left: -20%;
-  width: 140%;
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #facc15, #ffffff, #facc15, transparent);
-  transform: rotate(-12deg);
-  opacity: 0.35;
-  pointer-events: none;
-  box-shadow: 0 0 14px #facc15;
-}
-
-/* モーダルカードメインコンテナ */
-.action-select-card {
+/* --------------------------------------------------------------------------
+   Left / Center: School Aerial Map Area
+   -------------------------------------------------------------------------- */
+.action-map-area {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
   position: relative;
-  background: #fdfbf7;
-  border: 3.5px solid #0f172a;
-  border-radius: 14px;
-  padding: 32px 36px 36px 36px;
-  max-width: 820px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  padding: 68px 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+/* マップの1672:941アスペクト比完全維持ラッパー（絶対に見切れず全体を表示） */
+.action-map-wrapper {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1672 / 941;
+  width: auto;
+  height: auto;
+  margin: auto;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.action-map-img {
   width: 100%;
-  max-height: 88vh;
-  overflow-y: auto;
-  box-shadow: 10px 10px 0px #0b1d47, 0 20px 45px rgba(0, 0, 0, 0.45);
-  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  transform-origin: center center;
-  animation: modal-pop-in 0.32s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
-  z-index: 10;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+  pointer-events: none;
 }
 
-@keyframes modal-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.92) translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* 上部ヘッダーバナー */
-.action-select-header {
-  position: relative;
-  margin-bottom: 24px;
-  padding-bottom: 14px;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-/* ペルソナ調の英字リボンタグ */
-.action-select-ribbon {
+/* マップ上の各ロケーションピン（インタラクティブラベル） */
+.action-map-pin {
+  position: absolute;
+  transform: translate(-50%, -50%) skewX(-6deg);
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.2s cubic-bezier(0.18, 1.25, 0.32, 1.15),
+              box-shadow 0.2s ease,
+              border-color 0.2s ease,
+              background-color 0.2s ease;
+  outline: none;
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  border-radius: 6px;
+  padding: 4px 12px;
+  box-shadow: 3px 3px 0px #0b1d47;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #0284c7;
-  color: #ffffff;
-  border: 2.5px solid #0f172a;
-  box-shadow: 3px 3px 0px #0f172a;
-  font-family: 'Montserrat', 'Impact', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 4px;
-  transform: skewX(-8deg);
-  margin-bottom: 8px;
 }
 
-.action-select-title {
-  margin: 0 0 6px 0;
-  font-size: 1.65rem;
+.action-map-pin-inner {
+  transform: skewX(6deg);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-map-pin-name {
+  font-size: 0.88rem;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ホバー時およびサイドバー連動ハイライト */
+.action-map-pin:hover,
+.action-map-pin.highlighted {
+  z-index: 30;
+  background: #ffffff;
+  border-color: #0284c7;
+  color: #0284c7;
+  transform: translate(-50%, -60%) skewX(-6deg) scale(1.12);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.7), 4px 4px 0px #0284c7;
+}
+
+.action-map-pin:hover .action-map-pin-name,
+.action-map-pin.highlighted .action-map-pin-name {
+  color: #0284c7;
+}
+
+/* ピン右上のキャラクター遭遇インジケーター */
+.pin-char-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #0f172a;
+  box-shadow: 1.5px 1.5px 0px #0f172a;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 900;
+  color: #ffffff;
+  z-index: 5;
+  transform: skewX(6deg);
+  animation: badge-pulse 1.8s infinite ease-in-out;
 }
 
-.action-select-subtitle {
-  margin: 0;
-  font-size: 0.92rem;
-  color: #64748b;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
+@keyframes badge-pulse {
+  0%, 100% { transform: skewX(6deg) scale(1); }
+  50% { transform: skewX(6deg) scale(1.15); }
 }
 
-/* ロケーショングリッド */
-.location-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 22px;
+/* キャラクター別カラー（ユーザー指定） */
+.pin-char-aoi {
+  background: #facc15; /* 黄色丸: あおい */
+  color: #0f172a;
 }
 
-/* ロケーション選択カード (ChoiceBoxの選択肢ボタンと同一系統の立体カット) */
-.location-item-card {
-  position: relative;
+.pin-char-emili {
+  background: #ef4444; /* 赤丸: エミリ */
+}
+
+.pin-char-shion {
+  background: #3b82f6; /* 青丸: しおん */
+}
+
+.pin-char-unknown {
   background: #ffffff;
-  border: 2.5px solid #0f172a;
-  border-radius: 10px;
-  padding: 20px 20px 18px 24px;
-  cursor: pointer;
-  transform: skewX(-4deg);
-  box-shadow: 5px 5px 0px #0b1d47;
-  transition: transform 0.2s cubic-bezier(0.18, 1.25, 0.32, 1.15),
-              box-shadow 0.18s ease,
-              border-color 0.18s ease,
-              background-color 0.18s ease;
+  color: #0f172a;
+  border-color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   Right: Sidebar (White Theme Baseline)
+   -------------------------------------------------------------------------- */
+.action-sidebar {
+  width: 380px;
+  max-width: 38%;
+  min-width: 320px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-left: 2px solid #e2e8f0;
+  box-shadow: -6px 0 25px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+  box-sizing: border-box;
+}
+
+/* サイドバーヘッダー */
+.action-sidebar-header {
+  padding: 68px 24px 16px 24px;
+  border-bottom: 2px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.action-sidebar-title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0284c7;
+  letter-spacing: 0.04em;
+}
+
+/* サイドバー内のカードリスト（通常時は収まり、画面に収まらない場合はスクロール可能） */
+.action-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 20px 22px 30px 22px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  user-select: none;
-  animation: card-item-slam 0.35s cubic-bezier(0.12, 1.2, 0.28, 1.15) both;
+  box-sizing: border-box;
 }
 
-@keyframes card-item-slam {
-  0% {
-    opacity: 0;
-    transform: translate(25px, 10px) skewX(-4deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) skewX(-4deg);
-  }
+/* スクロールバーの白基調スリムデザイン */
+.action-sidebar-list::-webkit-scrollbar {
+  width: 6px;
 }
 
-/* ナンバリングバッジ (選択肢画面と同調) */
-.location-number-badge {
-  position: absolute;
-  left: -14px;
-  top: -12px;
-  background: #0284c7;
-  color: #ffffff;
-  border: 2.5px solid #0f172a;
-  box-shadow: 2.5px 2.5px 0px #0f172a;
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 4px;
-  transform: rotate(-6deg);
-  letter-spacing: 0.04em;
-  z-index: 5;
-  transition: transform 0.2s cubic-bezier(0.18, 1.25, 0.32, 1.15),
-              background 0.18s ease,
-              color 0.18s ease;
+.action-sidebar-list::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* ホバー時のダイナミック変化 */
-.location-item-card:hover {
+.action-sidebar-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.action-sidebar-list::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 行動選択カード (サイドバー内配置: 白基調・固定高さ 86px) */
+.location-item-card {
+  position: relative;
+  height: 86px;
+  box-sizing: border-box;
   background: #ffffff;
-  border-color: #0284c7;
-  transform: translate(-4px, -3px) skewX(-4deg) scale(1.02);
-  box-shadow: 8px 8px 0px #0284c7;
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transform: skewX(-4deg);
+  box-shadow: 4px 4px 0px #0b1d47;
+  transition: transform 0.16s cubic-bezier(0.18, 1.25, 0.32, 1.15),
+              box-shadow 0.16s ease,
+              border-color 0.16s ease,
+              background-color 0.16s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  user-select: none;
+  flex-shrink: 0;
 }
 
-.location-item-card:hover .location-number-badge {
-  background: #facc15;
-  color: #0f172a;
-  transform: rotate(-2deg) scale(1.1);
-  box-shadow: 3px 3px 0px #0f172a;
+/* ホバー時およびマップピン連動ハイライト */
+.location-item-card:hover,
+.location-item-card.highlighted {
+  background: #eff6ff;
+  border-color: #0284c7;
+  transform: translate(-3px, -2px) skewX(-4deg) scale(1.02);
+  box-shadow: 6px 6px 0px #0284c7;
 }
 
 .location-item-card:active {
-  transform: translate(-2px, 0) skewX(-4deg);
-  box-shadow: 4px 4px 0px #0b1d47;
+  transform: translate(-1px, 0) skewX(-4deg);
+  box-shadow: 2px 2px 0px #0b1d47;
 }
 
-/* カード内部コンテンツ（skew歪みを補正） */
+/* カード内部コンテンツ */
 .location-card-content {
   transform: skewX(4deg);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
 }
 
-/* ロケーションカードヘッダー */
-.location-item-header {
+.location-item-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.location-name-area {
-  display: flex;
-  align-items: center;
+  width: 100%;
   gap: 8px;
 }
 
-.location-icon {
-  font-size: 1.25rem;
-}
-
 .location-name {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.18rem;
+  font-weight: 800;
   color: #0f172a;
   letter-spacing: 0.03em;
-  transition: color 0.18s ease;
+  transition: color 0.16s ease;
 }
 
-.location-item-card:hover .location-name {
+.location-item-card:hover .location-name,
+.location-item-card.highlighted .location-name {
   color: #0284c7;
 }
 
-/* キャラクター遭遇ヒントバッジ */
+/* キャラクター遭遇ヒントバッジ (サイドバー内) */
 .character-hints {
   display: flex;
+  align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
 .character-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 800;
   padding: 3px 10px;
   border-radius: 9999px;
   color: #ffffff;
@@ -276,63 +322,79 @@
   border-radius: 50%;
 }
 
-/* ロケーション説明文 */
-.location-desc {
-  font-size: 0.88rem;
-  color: #475569;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-}
-
-/* 周囲の様子 / ヒントボックス */
+/* INFO ヒント表示: 2行分の高さを固定確保し、上下中央揃え */
 .location-hint-box {
-  background: #f8fafc;
-  border: 1.5px dashed #cbd5e1;
-  border-left: 3.5px solid #f59e0b;
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 0.82rem;
-  color: #78350f;
   display: flex;
   align-items: center;
   gap: 8px;
-  line-height: 1.4;
-  margin-top: 2px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-left: 3px solid #0284c7;
+  border-radius: 4px;
+  padding: 3px 8px;
+  min-height: 36px;
+  max-height: 36px;
+  box-sizing: border-box;
+}
+
+.location-hint-box.placeholder {
+  visibility: hidden;
 }
 
 .hint-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.68rem;
+  font-weight: 900;
   letter-spacing: 0.08em;
-  background: #f59e0b;
+  background: #0284c7;
   color: #ffffff;
-  padding: 1px 6px;
+  padding: 2px 5px;
   border-radius: 3px;
   flex-shrink: 0;
+  align-self: center;
 }
 
+.hint-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  flex: 1;
+  align-self: center;
+}
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .action-select-card {
-    padding: 22px 20px;
+/* レスポンシブ対応 (画面幅が狭い場合) */
+@media (max-width: 860px) {
+  .action-select-overlay {
+    flex-direction: column;
   }
 
-  .location-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .action-map-area {
+    height: 55%;
+    width: 100%;
   }
 
-  .action-select-title {
-    font-size: 1.35rem;
+  .action-sidebar {
+    width: 100%;
+    max-width: 100%;
+    height: 45%;
+    border-left: none;
+    border-top: 2.5px solid rgba(56, 189, 248, 0.4);
   }
 
-  .location-item-card {
-    padding: 16px 14px 14px 18px;
+  .action-sidebar-header {
+    padding: 14px 16px 8px 16px;
   }
 
-  .location-name {
-    font-size: 1.1rem;
+  .action-sidebar-list {
+    padding: 10px 14px;
   }
 }
