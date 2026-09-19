@@ -80,13 +80,13 @@ export class ScheduleManager {
       if (locId === 'sports_ground' || (locId === 'classroom' && gameState.phase === 'morning_action')) {
         hintCharacterIds = ['aoi'];
         hintText = {
-          ja: '葵の元気な声が聞こえてくる。',
+          ja: 'アオイの元気な声が聞こえてくる。',
           en: 'Aoi can be heard energetically nearby.',
         };
       } else if (locId === 'library') {
         hintCharacterIds = ['shion'];
         hintText = {
-          ja: '静かに本を読む紫苑の姿が見える。',
+          ja: '静かに本を読むシオンの姿が見える。',
           en: 'Shion is seen quietly reading a book.',
         };
       } else if (locId === 'rooftop') {
@@ -120,7 +120,7 @@ export class ScheduleManager {
    * 未遭遇のキャラ救済イベント等を判定
    */
   public static checkForcedInterruption(gameState: GameState): ScenarioPackage | null {
-    // 既に会っていない紫苑の救済: Day 2以降、午前行動開始時
+    // 既に会っていないシオンの救済: Day 2以降、午前行動開始時
     if (gameState.day >= 2 && !gameState.flags.met_shion && gameState.phase === 'morning_action') {
       return FORCED_SCENARIO_MEET_SHION;
     }

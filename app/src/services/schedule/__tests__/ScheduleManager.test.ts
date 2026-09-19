@@ -29,7 +29,7 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const libraryOpt = options.find((opt) => opt.id === 'library');
     expect(libraryOpt).toBeDefined();
     expect(libraryOpt?.hintCharacterIds).toContain('shion');
-    expect(libraryOpt?.hintText?.ja).toContain('紫苑');
+    expect(libraryOpt?.hintText?.ja).toContain('シオン');
   });
 
   it('未遭遇キャラ救済（強制割り込みイベント）が正しく判定されること', () => {
@@ -37,7 +37,7 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const day1State = ScheduleManager.createInitialState();
     expect(ScheduleManager.checkForcedInterruption(day1State)).toBeNull();
 
-    // Day 2 morning_action で紫苑未遭遇: 強制遭遇イベント発生
+    // Day 2 morning_action でシオン未遭遇: 強制遭遇イベント発生
     const day2State: GameState = {
       ...day1State,
       day: 2,

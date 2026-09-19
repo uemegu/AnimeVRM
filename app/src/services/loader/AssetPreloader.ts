@@ -26,14 +26,14 @@ export const INITIAL_PRELOAD_ITEMS: PreloadItem[] = [
   {
     id: 'aoi_school',
     url: '/models/aoi/aoi-school.vrm',
-    label: { ja: '葵（制服モデル）', en: 'Aoi (School)' },
+    label: { ja: 'アオイ（制服モデル）', en: 'Aoi (School)' },
     sizeBytes: 18_319_628,
     type: 'vrm',
   },
   {
     id: 'aoi_private',
     url: '/models/aoi/aoi-private.vrm',
-    label: { ja: '葵（私服モデル）', en: 'Aoi (Private)' },
+    label: { ja: 'アオイ（私服モデル）', en: 'Aoi (Private)' },
     sizeBytes: 22_489_724,
     type: 'vrm',
   },
@@ -54,14 +54,14 @@ export const INITIAL_PRELOAD_ITEMS: PreloadItem[] = [
   {
     id: 'shion_school',
     url: '/models/shion/shion-school.vrm',
-    label: { ja: '紫苑（制服モデル）', en: 'Shion (School)' },
+    label: { ja: 'シオン（制服モデル）', en: 'Shion (School)' },
     sizeBytes: 14_760_624,
     type: 'vrm',
   },
   {
     id: 'shion_private',
     url: '/models/shion/shion-private.vrm',
-    label: { ja: '紫苑（私服モデル）', en: 'Shion (Private)' },
+    label: { ja: 'シオン（私服モデル）', en: 'Shion (Private)' },
     sizeBytes: 15_141_160,
     type: 'vrm',
   },

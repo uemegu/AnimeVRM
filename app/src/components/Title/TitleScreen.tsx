@@ -105,7 +105,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
       {/* 右パネル: 3キャラの斜めスリット表示（文字なし・画像のみ） */}
       <section className="title-right-panel" aria-label="Character visual preview">
         <div className="title-slits-container">
-          {/* 葵 (Aoi) */}
+          {/* アオイ (Aoi) */}
           <div className="title-slit-card" data-character="aoi">
             <div className="title-slit-inner">
               <img
@@ -131,7 +131,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             </div>
           </div>
 
-          {/* 紫苑 (Shion) */}
+          {/* シオン (Shion) */}
           <div className="title-slit-card" data-character="shion">
             <div className="title-slit-inner">
               <img

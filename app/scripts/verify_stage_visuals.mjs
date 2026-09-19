@@ -54,7 +54,7 @@ async function run() {
     await page.screenshot({ path: morningScreenshotPath });
     console.log(`Saved morning stage screenshot to: ${morningScreenshotPath}`);
 
-    // 2. 会話を1回進めて葵の笑顔を確認
+    // 2. 会話を1回進めてアオイの笑顔を確認
     await page.click('.dialogue-window');
     await page.waitForTimeout(1000);
     const smileScreenshotPath = '/Users/ueda/.gemini/antigravity/brain/fd37ce74-3f84-4849-ae4b-6d351fd16d77/stage_morning_smile.png';
