@@ -24,12 +24,18 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   onOpenLicense,
 }) => {
   return (
-    <div className="title-screen-container">
+    <div className="title-screen-container" lang={lang}>
+      <div className="title-petals" aria-hidden="true">
+        <span /><span /><span /><span /><span />
+      </div>
       {/* 左パネル: タイトルロゴ ＆ メニュー */}
       <section className="title-left-panel">
         <header className="title-logo-area">
-          <h1 className="title-logo-main">
-            {lang === 'ja' ? '5秒で告白' : '5 Seconds to Confess'}
+          <h1 className="title-logo-main" aria-label={lang === 'ja' ? '5秒で告白' : '5 Seconds to Confess'}>
+            <span className="title-logo-number" aria-hidden="true">5</span>
+            <span className="title-logo-words" aria-hidden="true">
+              {lang === 'ja' ? <>秒<span className="title-logo-particle">で</span>告白</> : <>Seconds<span className="title-logo-english-line">to Confess</span></>}
+            </span>
           </h1>
           <p className="title-logo-sub">
             {lang === 'ja' ? (
@@ -42,19 +48,17 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           </p>
         </header>
 
-        <nav className="title-menu-list">
+        <nav className="title-menu-list" aria-label={lang === 'ja' ? 'タイトルメニュー' : 'Title menu'}>
           {/* はじめから */}
           <button
             type="button"
-            className="title-menu-btn"
+            className="title-menu-btn title-menu-start"
             onClick={onStartGame}
             data-testid="btn-start"
           >
             <span className="title-menu-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                <path d="M6 6h10" />
-                <path d="M6 10h10" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 3.5 21 12 6 20.5Z" />
               </svg>
             </span>
             <span className="title-menu-text">
@@ -90,15 +94,13 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               className={`title-menu-btn ${isMuted ? 'muted' : ''}`}
               onClick={onToggleMute}
               data-testid="btn-mute"
+              aria-pressed={isMuted}
             >
               <span className="title-menu-icon" aria-hidden="true">
                 {isMuted ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
-                    <line x1="12" y1="19" x2="12" y2="23" />
-                    <line x1="8" y1="23" x2="16" y2="23" />
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="m17 9 6 6m0-6-6 6" />
                   </svg>
                 ) : (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -169,15 +171,15 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         </footer>
       </section>
 
-      {/* 右パネル: 3キャラの斜めスリット表示（文字なし・画像のみ） */}
-      <section className="title-right-panel" aria-label="Character visual preview">
+      {/* 既存の画像を、傾きが平行な3枚の写真パネルに切り抜く。 */}
+      <section className="title-right-panel" aria-label={lang === 'ja' ? '3人のヒロイン' : 'The three heroines'}>
         <div className="title-slits-container">
           {/* アオイ (Aoi) */}
           <div className="title-slit-card" data-character="aoi">
             <div className="title-slit-inner">
               <img
-                src="/assets/title/char_aoi.avif"
-                alt=""
+                src="/assets/title/char_shion.avif"
+                alt={lang === 'ja' ? 'シオン' : 'Shion'}
                 className="title-slit-img"
                 loading="eager"
               />
@@ -190,7 +192,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             <div className="title-slit-inner">
               <img
                 src="/assets/title/char_emili.avif"
-                alt=""
+                alt={lang === 'ja' ? 'エミリ' : 'Emili'}
                 className="title-slit-img"
                 loading="eager"
               />
@@ -202,8 +204,8 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           <div className="title-slit-card" data-character="shion">
             <div className="title-slit-inner">
               <img
-                src="/assets/title/char_shion.avif"
-                alt=""
+                src="/assets/title/char_aoi.avif"
+                alt={lang === 'ja' ? 'アオイ' : 'Aoi'}
                 className="title-slit-img"
                 loading="eager"
               />
@@ -212,6 +214,24 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           </div>
         </div>
       </section>
+
+      <div className="title-handwritten" aria-hidden="true">
+        <span>5 Seconds</span>
+        <span>to a New Story</span>
+      </div>
+
+      <aside className="title-editorial-copy">
+        <p className="title-tagline">
+          {lang === 'ja' ? (
+            <><span>いつもの景色が</span><span>少しだけ、特別になる。</span></>
+          ) : (
+            <><span>The familiar everyday.</span><span>A little more extraordinary.</span></>
+          )}
+        </p>
+        <p className="title-closing-copy" lang="en">
+          Same<br />everyday.<br />A different<br />tomorrow.
+        </p>
+      </aside>
     </div>
   );
 };
