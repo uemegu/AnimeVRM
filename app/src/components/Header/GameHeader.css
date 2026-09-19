@@ -32,18 +32,19 @@
 .day-badge {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  justify-content: center;
+  height: 32px;
+  box-sizing: border-box;
+  background: #0f172a;
   color: #ffffff;
   border: 2px solid #ffffff;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 0 12px;
   font-family: 'Montserrat', 'Impact', sans-serif;
   font-size: 0.9rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   transform: skewX(-8deg);
-  box-shadow: 3px 3px 0px #0b1d47;
-  transition: transform 0.18s ease;
 }
 
 .day-badge:hover {
@@ -71,15 +72,16 @@
 .phase-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  height: 32px;
+  box-sizing: border-box;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 0 12px;
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   transform: skewX(-8deg);
   border: 2px solid #ffffff;
-  box-shadow: 3px 3px 0px #0b1d47;
-  transition: all 0.2s ease;
 }
 
 .phase-badge-inner {
@@ -118,16 +120,18 @@
 .header-location-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  height: 32px;
+  box-sizing: border-box;
   background: #0f172a;
   color: #38bdf8;
   border: 2px solid #38bdf8;
   border-radius: 4px;
-  padding: 4px 12px;
+  padding: 0 12px;
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   transform: skewX(-8deg);
-  box-shadow: 3px 3px 0px #0b1d47;
   transition: all 0.2s ease;
 }
 
@@ -151,38 +155,82 @@
   color: #ffffff;
 }
 
-/* 右側: コントロール (AUTO / 言語切替) */
+/* 右側: コントロール (LOG / AUTO / MUTE / LANG / INFO) */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   pointer-events: auto;
 }
 
-/* AUTO ボタン */
-.header-auto-btn {
+/* 右側ボタン共通ベーススタイル（高さ・横幅・フォント・配置の完全統一） */
+.header-actions button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  height: 32px;
+  width: 80px;
+  min-width: 80px;
+  max-width: 80px;
+  box-sizing: border-box;
+  padding: 0 6px;
   background: rgba(15, 23, 42, 0.82);
   border: 1.5px solid rgba(255, 255, 255, 0.25);
   border-radius: 6px;
-  color: #94a3b8;
-  padding: 5px 12px;
+  color: #e2e8f0;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  line-height: 1;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  user-select: none;
 }
 
-.header-auto-btn:hover {
+.header-actions button:hover {
   background: rgba(30, 41, 59, 0.95);
   border-color: #38bdf8;
-  color: #ffffff;
+  color: #38bdf8;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.header-actions button:active {
+  transform: translateY(1px);
+}
+
+/* アイコン共通ラッパー */
+.header-action-icon,
+.header-auto-icon,
+.header-lang-icon,
+.header-license-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ミュートボタン消音中スタイル */
+.header-mute-btn.muted {
+  background: rgba(239, 68, 68, 0.85);
+  border-color: #f87171;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.header-mute-btn.muted:hover {
+  background: rgba(220, 38, 38, 0.95);
+  border-color: #fca5a5;
+  color: #ffffff;
+}
+
+/* AUTOボタン active スタイル */
+.header-auto-btn {
+  color: #94a3b8;
 }
 
 .header-auto-btn.active {
@@ -192,81 +240,10 @@
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
 }
 
-.header-auto-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-}
-
-/* 言語切替ボタン (タイトル画面調) */
-.header-lang-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  border-radius: 6px;
-  color: #e2e8f0;
-  padding: 5px 12px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.header-lang-btn:hover {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
-}
-
-.header-lang-btn:active {
-  transform: translateY(1px);
-}
-
-.header-lang-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ライセンス・クレジットボタン */
-.header-license-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1.5px solid rgba(255, 255, 255, 0.25);
-  border-radius: 6px;
-  color: #e2e8f0;
-  padding: 5px 9px;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-}
-
-.header-license-btn:hover {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: #38bdf8;
-  color: #38bdf8;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
-}
-
-.header-license-btn:active {
-  transform: translateY(1px);
-}
-
-.header-license-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.header-auto-btn.active:hover {
+  background: #0369a1;
+  border-color: #7dd3fc;
+  color: #ffffff;
 }
 
 /* レスポンシブ対応 */

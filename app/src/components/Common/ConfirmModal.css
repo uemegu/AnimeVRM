@@ -4,7 +4,7 @@
    ========================================================================== */
 
 .confirm-modal-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(8px);
@@ -12,7 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 500;
+  z-index: 10000;
   padding: 20px;
   animation: confirm-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

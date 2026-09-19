@@ -90,6 +90,40 @@ describe('SoundManager', () => {
       globalThis.Audio = originalAudio;
     }
   });
+
+  it('ミュート機能の切り替えが正しく反映されること', () => {
+    class MockAudio {
+      public src: string = '';
+      public volume: number = 1.0;
+      public loop: boolean = false;
+      public muted: boolean = false;
+      play = async () => {};
+      pause = () => {};
+    }
+    const originalAudio = globalThis.Audio;
+    // @ts-expect-error mock audio
+    globalThis.Audio = MockAudio;
+
+    try {
+      const sm = new SoundManager();
+      expect(sm.getIsMuted()).toBe(false);
+
+      sm.playBgm('main_theme');
+      expect(sm.getBgmAudio()?.muted).toBe(false);
+
+      sm.setMuted(true);
+      expect(sm.getIsMuted()).toBe(true);
+      expect(sm.getBgmAudio()?.muted).toBe(true);
+
+      sm.setMuted(false);
+      expect(sm.getIsMuted()).toBe(false);
+      expect(sm.getBgmAudio()?.muted).toBe(false);
+
+      sm.dispose();
+    } finally {
+      globalThis.Audio = originalAudio;
+    }
+  });
 });
 
 describe('AudioLipSync', () => {

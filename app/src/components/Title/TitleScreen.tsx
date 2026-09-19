@@ -5,6 +5,8 @@ import './TitleScreen.css';
 export interface TitleScreenProps {
   hasSaveData: boolean;
   lang: SupportedLanguage;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
   onStartGame: () => void;
   onContinueGame: () => void;
   onToggleLanguage: () => void;
@@ -14,6 +16,8 @@ export interface TitleScreenProps {
 export const TitleScreen: React.FC<TitleScreenProps> = ({
   hasSaveData,
   lang,
+  isMuted = false,
+  onToggleMute,
   onStartGame,
   onContinueGame,
   onToggleLanguage,
@@ -78,6 +82,38 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               {lang === 'ja' ? 'つづきから' : 'Continue'}
             </span>
           </button>
+
+          {/* サウンド ミュート/解除 */}
+          {onToggleMute && (
+            <button
+              type="button"
+              className={`title-menu-btn ${isMuted ? 'muted' : ''}`}
+              onClick={onToggleMute}
+              data-testid="btn-mute"
+            >
+              <span className="title-menu-icon" aria-hidden="true">
+                {isMuted ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                    <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                    <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+                    <line x1="12" y1="19" x2="12" y2="23" />
+                    <line x1="8" y1="23" x2="16" y2="23" />
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                )}
+              </span>
+              <span className="title-menu-text">
+                {isMuted
+                  ? lang === 'ja' ? 'サウンド: 消音中' : 'Sound: Muted'
+                  : lang === 'ja' ? 'サウンド: ON' : 'Sound: ON'}
+              </span>
+            </button>
+          )}
 
           {/* 言語切替 */}
           <button

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-19T12:55:19.632Z",
+  "generatedAt": "2026-09-19T14:06:47.596Z",
   "itemCount": 14,
-  "totalBytes": 172629221,
-  "totalMb": 164.6,
+  "totalBytes": 176297845,
+  "totalMb": 168.1,
   "items": [
     {
       "id": "aoi_school",
@@ -41,7 +41,7 @@
         "ja": "アオイ（制服・リュック付き）",
         "en": "Aoi (School with Bag)"
       },
-      "sizeBytes": 15551924,
+      "sizeBytes": 19220548,
       "type": "vrm"
     },
     {

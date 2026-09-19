@@ -40,6 +40,7 @@ export class AudioLipSync {
   public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
   public engineMode: LipSyncEngine = 'wasm';
+  public isMuted: boolean = false;
 
   private minTimeMs: number = Infinity;
   private maxTimeMs: number = 0;
@@ -135,6 +136,16 @@ export class AudioLipSync {
   }
 
   /**
+   * ミュート状態の設定（音声出力のみ消音し、リップシンク解析は維持）
+   */
+  public setMuted(muted: boolean): void {
+    this.isMuted = muted;
+    if (this.gainNode && this.audioContext) {
+      this.gainNode.gain.setValueAtTime(muted ? 0 : 1, this.audioContext.currentTime);
+    }
+  }
+
+  /**
    * Lazy initialization of Web Audio API graph and AudioWorklet
    */
   public initAudioContext(): void {
@@ -152,6 +163,7 @@ export class AudioLipSync {
     this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
 
     this.gainNode = this.audioContext.createGain();
+    this.gainNode.gain.setValueAtTime(this.isMuted ? 0 : 1, this.audioContext.currentTime);
 
     // Playback Route: source -> delay -> gain -> destination
     this.sourceNode.connect(this.delayNode);
