@@ -18,6 +18,7 @@ import { CHARACTERS } from './data/characters';
 import { AudioLipSync } from './services/audio/AudioLipSync';
 import { SoundManager } from './services/audio/SoundManager';
 import { ConfirmModal } from './components/Common/ConfirmModal';
+import { LicenseModal } from './components/License/LicenseModal';
 import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/InterludeOverlay';
 import { LoadingScreen } from './components/Loading/LoadingScreen';
 import { AssetPreloader } from './services/loader/AssetPreloader';
@@ -35,6 +36,8 @@ export const App: React.FC = () => {
   const [isTitleScreen, setIsTitleScreen] = useState(true);
   // セーブデータ存在フラグ
   const [hasSaveData, setHasSaveData] = useState(() => saveService.hasSaveData());
+  // ライセンス・クレジットモーダル表示フラグ
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
 
   // ゲーム全体の状態
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -720,6 +723,7 @@ export const App: React.FC = () => {
           onStartGame={handleStartGame}
           onContinueGame={handleContinueGame}
           onToggleLanguage={handleToggleLanguage}
+          onOpenLicense={() => setIsLicenseModalOpen(true)}
         />
       ) : (
         <>
@@ -732,6 +736,7 @@ export const App: React.FC = () => {
             onToggleAuto={() => setIsAuto((prev) => !prev)}
             lang={lang}
             onToggleLanguage={handleToggleLanguage}
+            onOpenLicense={() => setIsLicenseModalOpen(true)}
           />
 
           {/* メインステージ（3D/背景描画領域） */}
@@ -817,6 +822,13 @@ export const App: React.FC = () => {
 
         </>
       )}
+
+      {/* ライセンス・クレジットモーダル（タイトル・ゲーム中共通） */}
+      <LicenseModal
+        isOpen={isLicenseModalOpen}
+        lang={lang}
+        onClose={() => setIsLicenseModalOpen(false)}
+      />
 
       {/* 最前面 幕間スライストランジション（4スライス＆5秒で告白タイトル） */}
       <InterludeOverlay ref={interludeRef} lang={lang} />

@@ -1,0 +1,67 @@
+[
+  {
+    "category": "bgm",
+    "name": {
+      "ja": "BGM楽曲",
+      "en": "Background Music"
+    },
+    "provider": "Lyria3.5",
+    "description": {
+      "ja": "メインテーマ、日常・会話BGM、夜の自室BGM、バッドエンドBGM",
+      "en": "Main theme, daily conversations, night room, and bad ending music"
+    },
+    "licenseNote": {
+      "ja": "Lyria3.5 AI生成音楽モデルにより制作",
+      "en": "Generated via Lyria3.5 AI music model"
+    }
+  },
+  {
+    "category": "se",
+    "name": {
+      "ja": "効果音 (SE)",
+      "en": "Sound Effects (SE)"
+    },
+    "provider": "効果音ラボ",
+    "url": "https://soundeffect-lab.info/",
+    "description": {
+      "ja": "会話送り、選択肢決定、UI操作音、演出効果音",
+      "en": "Dialogue advance, choice selection, UI sounds, and scene effects"
+    },
+    "licenseNote": {
+      "ja": "効果音ラボ 利用規約に準拠して使用",
+      "en": "Used in accordance with Sound Effect Lab Terms of Service"
+    }
+  },
+  {
+    "category": "voice",
+    "name": {
+      "ja": "キャラクターボイス・音声合成",
+      "en": "Character Voice & Speech Synthesis"
+    },
+    "provider": "Irodori-TTS",
+    "description": {
+      "ja": "各登場ヒロイン（アオイ・シオン・エミリ）の会話音声・リップシンク連動",
+      "en": "Dialogue voice acting and lip-sync for all heroines (Aoi, Shion, Emili)"
+    },
+    "licenseNote": {
+      "ja": "Irodori-TTS 日本語音声合成・ボイスデザイン技術により生成",
+      "en": "Generated using Irodori-TTS Japanese speech synthesis and voice design"
+    }
+  },
+  {
+    "category": "background",
+    "name": {
+      "ja": "背景グラフィック・美術",
+      "en": "Background Graphics & Art"
+    },
+    "provider": "ChatGPT Images 2.5",
+    "description": {
+      "ja": "通学路、学校（校門・屋上・図書室・中庭・体育館）、カフェ、公園、自室等の背景画像",
+      "en": "School routes, school areas, cafe, park, and player room background art"
+    },
+    "licenseNote": {
+      "ja": "ChatGPT Images 2.5 により生成されたイラスト背景",
+      "en": "Illustrated backgrounds generated with ChatGPT Images 2.5"
+    }
+  }
+]

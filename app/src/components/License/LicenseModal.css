@@ -1,0 +1,457 @@
+/* ==========================================================================
+   LicenseModal Styles
+   Anime-styled Dialog (White background, solid border/shadow, skewed cards)
+   No Emojis allowed. Uses SVG icons & clean typography.
+   ========================================================================== */
+
+.license-modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 600;
+  padding: 24px;
+  animation: license-fade-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes license-fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* メインカードコンテナ */
+.license-modal-card {
+  position: relative;
+  background: #ffffff;
+  border: 2.5px solid #0f172a;
+  border-radius: 12px;
+  box-shadow: 8px 8px 0px #0b1d47;
+  transform: skewX(-4deg);
+  width: 100%;
+  max-width: 780px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  overflow: hidden;
+  animation: license-pop-in 0.25s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
+}
+
+@keyframes license-pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(16px) skewX(-4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) skewX(-4deg);
+  }
+}
+
+/* 内部コンテンツ (skew歪み補正) */
+.license-modal-inner {
+  transform: skewX(4deg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 85vh;
+  padding: 24px 30px;
+  box-sizing: border-box;
+}
+
+/* ヘッダー */
+.license-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.license-modal-title-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.license-modal-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.04em;
+  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', serif;
+}
+
+.license-modal-subtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0284c7;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.license-modal-close-btn {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 6px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+
+.license-modal-close-btn:hover {
+  color: #0f172a;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: scale(1.08);
+}
+
+/* タブバー */
+.license-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1.5px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.license-tab-btn {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.18s ease;
+  font-family: 'Montserrat', 'Kiwi Maru', sans-serif;
+}
+
+.license-tab-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.license-tab-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0369a1;
+  box-shadow: 2px 2px 0px #0b1d47;
+}
+
+/* 検索エリア */
+.license-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+
+.license-search-icon {
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.license-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: #0f172a;
+  width: 100%;
+}
+
+.license-search-input::placeholder {
+  color: #94a3b8;
+}
+
+/* スクロールコンテンツ領域 */
+.license-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* スクロールバー装飾 */
+.license-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.license-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+.license-modal-body::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 3px;
+}
+.license-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* アセットカード */
+.license-asset-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-left: 5px solid #0284c7;
+  border-radius: 6px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.license-asset-card:hover {
+  transform: translateX(3px);
+  box-shadow: 2px 3px 0px #e2e8f0;
+}
+
+.license-asset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.license-asset-category {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.license-asset-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.license-asset-provider {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.license-asset-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #0284c7;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.license-asset-link:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.license-asset-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.license-asset-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border-left: 2px solid #cbd5e1;
+}
+
+/* ライブラリカード */
+.license-lib-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color 0.15s ease;
+}
+
+.license-lib-card:hover {
+  border-color: #94a3b8;
+}
+
+.license-lib-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.license-lib-title-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.license-lib-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.license-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.license-badge.badge-ver {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.license-badge.badge-type {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.license-lib-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.license-repo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+
+.license-repo-link:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+.license-toggle-btn {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.license-toggle-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.license-text-container {
+  margin-top: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 10px 12px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.license-text-content {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #334155;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* フッター */
+.license-modal-footer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.license-footer-note {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.license-close-action-btn {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: 'Montserrat', 'Kiwi Maru', sans-serif;
+}
+
+.license-close-action-btn:hover {
+  background: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 2px 2px 0px #0b1d47;
+}
+
+.license-close-action-btn:active {
+  transform: translateY(0);
+}
