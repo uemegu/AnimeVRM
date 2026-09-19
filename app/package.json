@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "generate:licenses": "node scripts/generate-licenses.js",
+    "generate:preload-manifest": "node scripts/generate-preload-manifest.js",
+    "build": "npm run generate:licenses && npm run generate:preload-manifest && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

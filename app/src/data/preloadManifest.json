@@ -1,0 +1,148 @@
+{
+  "generatedAt": "2026-09-19T12:55:19.632Z",
+  "itemCount": 14,
+  "totalBytes": 172629221,
+  "totalMb": 164.6,
+  "items": [
+    {
+      "id": "aoi_school",
+      "url": "/models/aoi/aoi-school.vrm",
+      "label": {
+        "ja": "アオイ（制服モデル）",
+        "en": "Aoi (School)"
+      },
+      "sizeBytes": 18319628,
+      "type": "vrm"
+    },
+    {
+      "id": "emili_school",
+      "url": "/models/emili/emili.vrm",
+      "label": {
+        "ja": "エミリ（制服モデル）",
+        "en": "Emili (School)"
+      },
+      "sizeBytes": 17182712,
+      "type": "vrm"
+    },
+    {
+      "id": "shion_school",
+      "url": "/models/shion/shion-school.vrm",
+      "label": {
+        "ja": "シオン（制服モデル）",
+        "en": "Shion (School)"
+      },
+      "sizeBytes": 14305108,
+      "type": "vrm"
+    },
+    {
+      "id": "aoi_school_bag",
+      "url": "/models/aoi/aoi-school-with-bag.vrm",
+      "label": {
+        "ja": "アオイ（制服・リュック付き）",
+        "en": "Aoi (School with Bag)"
+      },
+      "sizeBytes": 15551924,
+      "type": "vrm"
+    },
+    {
+      "id": "emili_school_bag",
+      "url": "/models/emili/emili-school-with-bag.vrm",
+      "label": {
+        "ja": "エミリ（制服・リュック付き）",
+        "en": "Emili (School with Bag)"
+      },
+      "sizeBytes": 18332268,
+      "type": "vrm"
+    },
+    {
+      "id": "shion_school_bag",
+      "url": "/models/shion/shion-school-with-bag.vrm",
+      "label": {
+        "ja": "シオン（制服・リュック付き）",
+        "en": "Shion (School with Bag)"
+      },
+      "sizeBytes": 15130088,
+      "type": "vrm"
+    },
+    {
+      "id": "aoi_private",
+      "url": "/models/aoi/aoi-private.vrm",
+      "label": {
+        "ja": "アオイ（私服モデル）",
+        "en": "Aoi (Private)"
+      },
+      "sizeBytes": 22489724,
+      "type": "vrm"
+    },
+    {
+      "id": "emili_private",
+      "url": "/models/emili/emili-private.vrm",
+      "label": {
+        "ja": "エミリ（私服モデル）",
+        "en": "Emili (Private)"
+      },
+      "sizeBytes": 17528012,
+      "type": "vrm"
+    },
+    {
+      "id": "shion_private",
+      "url": "/models/shion/shion-private.vrm",
+      "label": {
+        "ja": "シオン（私服モデル）",
+        "en": "Shion (Private)"
+      },
+      "sizeBytes": 14684944,
+      "type": "vrm"
+    },
+    {
+      "id": "teacher",
+      "url": "/models/teacher/teacher.vrm",
+      "label": {
+        "ja": "先生モデル",
+        "en": "Teacher"
+      },
+      "sizeBytes": 14706628,
+      "type": "vrm"
+    },
+    {
+      "id": "bgm_main_theme",
+      "url": "/bgm/thema_music.mp3",
+      "label": {
+        "ja": "メインテーマ曲",
+        "en": "Main Theme"
+      },
+      "sizeBytes": 1575302,
+      "type": "audio"
+    },
+    {
+      "id": "bgm_main_bgm",
+      "url": "/bgm/main_bgm.mp3",
+      "label": {
+        "ja": "メインBGM",
+        "en": "Main BGM"
+      },
+      "sizeBytes": 2810372,
+      "type": "audio"
+    },
+    {
+      "id": "wasm_lipsync",
+      "url": "/wasm/lipsync.wasm",
+      "label": {
+        "ja": "リップシンク解析モジュール",
+        "en": "LipSync WASM"
+      },
+      "sizeBytes": 6774,
+      "type": "wasm"
+    },
+    {
+      "id": "worklet_lipsync",
+      "url": "/worklets/lipsync-processor.js",
+      "label": {
+        "ja": "オーディオプロセッサ",
+        "en": "Audio Worklet"
+      },
+      "sizeBytes": 5737,
+      "type": "binary"
+    }
+  ]
+}

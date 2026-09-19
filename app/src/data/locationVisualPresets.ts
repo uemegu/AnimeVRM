@@ -36,13 +36,7 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     isIndoor: false,
     layers: {
       background: {
-        url: '/textures/modern-park-far.avif',
-      },
-      midground: {
-        url: '/textures/modern-park-mid.avif',
-        position: { x: 0, y: 1.35, z: -0.25 },
-        scale: 1.15,
-        opacity: 1.0,
+        url: '/textures/school-courtyard-far.avif',
       },
     },
   },
@@ -66,7 +60,7 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     isIndoor: true,
     layers: {
       background: {
-        url: '/textures/school-classroom-far2.avif',
+        url: '/textures/school-library-far.avif',
       },
     },
   },
@@ -90,13 +84,7 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     isIndoor: true,
     layers: {
       background: {
-        url: '/textures/cafe_far.avif',
-      },
-      nearground: {
-        url: '/textures/cafe_near.avif',
-        position: { x: 0, y: 0.8, z: 0.6 },
-        scale: 1.0,
-        opacity: 1.0,
+        url: '/textures/school-cafeteria-far.avif',
       },
     },
   },

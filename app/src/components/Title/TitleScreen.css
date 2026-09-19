@@ -163,12 +163,48 @@
   flex: 1;
 }
 
-/* Footer / Copyright */
+/* Footer / Copyright & Sub-menu */
 .title-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   font-size: 0.78rem;
   color: #94a3b8;
   letter-spacing: 0.05em;
   font-family: 'Segoe UI', sans-serif;
+}
+
+.title-sub-menu {
+  display: flex;
+  align-items: center;
+}
+
+.title-sub-menu-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  margin-left: -8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.18s ease;
+  letter-spacing: 0.03em;
+  font-family: 'Montserrat', 'Kiwi Maru', sans-serif;
+}
+
+.title-sub-menu-btn:hover {
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  transform: translateX(2px);
+}
+
+.title-copyright {
+  user-select: none;
 }
 
 /* --------------------------------------------------------------------------
