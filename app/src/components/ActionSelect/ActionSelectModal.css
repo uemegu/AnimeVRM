@@ -13,6 +13,7 @@
   user-select: none;
   font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   animation: action-map-fade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: background-color 0.3s ease;
 }
 
 @keyframes action-map-fade {
@@ -35,6 +36,42 @@
   background: #f1f5f9;
   padding: 68px 20px 20px 20px;
   box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+/* メインコンテンツ背景の流線型・曲線アクセント模様 */
+.action-map-bg-curve {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 時間帯別メインコンテンツ背景色変動 */
+/* 午前: 今の色 */
+.action-select-overlay.phase-morning_action {
+  background: #f8fafc;
+}
+.action-select-overlay.phase-morning_action .action-map-area {
+  background: #f1f5f9;
+}
+
+/* 昼: 少し黄色の色味を増す（控えめで淡いアイボリー） */
+.action-select-overlay.phase-lunch_action {
+  background: #fdfcf7;
+}
+.action-select-overlay.phase-lunch_action .action-map-area {
+  background: #fefce8;
+}
+
+/* 夕方: 薄いオレンジ */
+.action-select-overlay.phase-afterschool_action {
+  background: #fff7ed;
+}
+.action-select-overlay.phase-afterschool_action .action-map-area {
+  background: #ffedd5;
 }
 
 /* マップの1672:941アスペクト比完全維持ラッパー（絶対に見切れず全体を表示） */
@@ -46,6 +83,14 @@
   width: auto;
   height: auto;
   margin: auto;
+  z-index: 10;
+}
+
+/* マップ本体クリップコンテナ（影と角丸を維持） */
+.action-map-clip {
+  position: relative;
+  width: 100%;
+  height: 100%;
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
   border-radius: 8px;
   overflow: hidden;
@@ -57,6 +102,157 @@
   object-fit: fill;
   display: block;
   pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   フォーカス時INFO帯表示（地図下側・ヒロイン画像下揃え・地図左端揃えロングバナー）
+   -------------------------------------------------------------------------- */
+.action-focus-info-banner {
+  position: absolute;
+  left: 18px;
+  right: 268px;
+  bottom: -28px;
+  height: 54px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 3.5px solid #0f172a;
+  border-radius: 12px;
+  box-shadow: 7px 7px 0px #0b1d47;
+  transform: skewX(-6deg);
+  z-index: 34;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  animation: info-banner-in 0.22s cubic-bezier(0.18, 1.25, 0.32, 1.15) forwards;
+}
+
+@keyframes info-banner-in {
+  0% {
+    opacity: 0;
+    transform: skewX(-6deg) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: skewX(-6deg) translateY(0);
+  }
+}
+
+.action-focus-info-banner-inner {
+  transform: skewX(6deg);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+}
+
+.focus-info-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.focus-info-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   フォーカス時ヒロインポップアップ（地図右下にはみ出す変形四角形）
+   -------------------------------------------------------------------------- */
+.action-focus-heroine-box {
+  position: absolute;
+  right: 24px;
+  bottom: -28px;
+  width: 220px;
+  height: 220px;
+  border-radius: 14px;
+  border: 3.5px solid #0f172a;
+  box-shadow: 7px 7px 0px #0b1d47;
+  transform: skewX(-6deg);
+  z-index: 35;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: heroine-popup-in 0.22s cubic-bezier(0.18, 1.25, 0.32, 1.15) forwards;
+  pointer-events: none;
+}
+
+@keyframes heroine-popup-in {
+  0% {
+    opacity: 0;
+    transform: skewX(-6deg) scale(0.8) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: skewX(-6deg) scale(1) translateY(0);
+  }
+}
+
+/* キャラクター別パステル背景色 */
+/* アオイ: 淡い黄色 */
+.action-focus-heroine-box.heroine-bg-aoi {
+  background: #fef9c3;
+}
+
+/* エミリ: 淡い赤 */
+.action-focus-heroine-box.heroine-bg-emili {
+  background: #fee2e2;
+}
+
+/* シオン: 淡い青 */
+.action-focus-heroine-box.heroine-bg-shion {
+  background: #dbeafe;
+}
+
+/* 不特定（？）：濃いグレー */
+.action-focus-heroine-box.heroine-bg-unknown {
+  background: #334155;
+}
+
+/* プレビューヒロイン画像 */
+.heroine-preview-img {
+  width: 112%;
+  height: 112%;
+  object-fit: contain;
+  object-position: center bottom;
+  transform: skewX(6deg) translateY(6px);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
+}
+
+/* シオン画像スケール補正: アスペクト比・頭部シルエット差を補正し、葵・エミリと顔サイズを統一 */
+.action-focus-heroine-box.heroine-bg-shion .heroine-preview-img {
+  transform: skewX(6deg) translateY(6px) scale(1.08);
+}
+
+/* 「？」表示 */
+.heroine-preview-unknown {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 5.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  transform: skewX(6deg);
+  user-select: none;
+  line-height: 1;
+  text-shadow: 3px 3px 0px #0f172a;
 }
 
 /* マップ上の各ロケーションピン（インタラクティブラベル） */

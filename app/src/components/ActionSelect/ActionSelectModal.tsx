@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ActionLocationId, ActionLocationOption } from '../../types/game';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { ActionLocationId, ActionLocationOption, DayPhase } from '../../types/game';
 import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
 import { ConfirmModal } from '../Common/ConfirmModal';
@@ -9,6 +9,8 @@ interface ActionSelectModalProps {
   options: ActionLocationOption[];
   lang: SupportedLanguage;
   onSelectLocation: (locationId: ActionLocationId) => void;
+  phase?: DayPhase;
+  affinities?: Record<string, number>;
 }
 
 // 学校俯瞰マップ上のロケーション座標（画像に対するパーセンテージ）
@@ -25,6 +27,8 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   options,
   lang,
   onSelectLocation,
+  phase = 'morning_action',
+  affinities = {},
 }) => {
   // ホバー状態の連動（カード ⇔ マップピン）
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -78,64 +82,160 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     setPendingOption(null);
   };
 
+  // ホバー中のロケーション対象
+  const hoveredOption = useMemo(
+    () => options.find((opt) => opt.id === hoveredId),
+    [options, hoveredId]
+  );
+
+  // ホバー中ロケーションのINFO文字列
+  const hoveredHintText = useMemo(() => {
+    if (!hoveredOption?.hintText) return null;
+    return hoveredOption.hintText[lang] || hoveredOption.hintText.ja || null;
+  }, [hoveredOption, lang]);
+
+  // フォーカス時のヒロインポップアップ情報（感情判定・パステル背景色・「？」対応）
+  const focusHeroineInfo = useMemo(() => {
+    if (!hoveredOption) return null;
+
+    const charIds = hoveredOption.hintCharacterIds || [];
+    if (charIds.length > 0) {
+      const charId = charIds[0];
+      const affinityVal = affinities[charId] || 0;
+
+      // 感情状態の判定: 5以上でgood、0未満でbad、それ以外はnormal
+      let emotion: 'normal' | 'good' | 'bad' = 'normal';
+      if (affinityVal >= 5) {
+        emotion = 'good';
+      } else if (affinityVal < 0) {
+        emotion = 'bad';
+      } else {
+        emotion = 'normal';
+      }
+
+      return {
+        type: 'character' as const,
+        charId,
+        emotion,
+        imgUrl: `/assets/characters/${charId}_${emotion}.avif`,
+        bgClass: `heroine-bg-${charId}`,
+      };
+    } else if (hoveredOption.hintText) {
+      // 誰かいそうだが不特定（？）
+      return {
+        type: 'unknown' as const,
+        bgClass: 'heroine-bg-unknown',
+      };
+    }
+
+    // 誰も出会わない選択肢の場合は非表示
+    return null;
+  }, [hoveredOption, affinities]);
+
   return (
-    <div className="action-select-overlay">
+    <div className={`action-select-overlay phase-${phase}`}>
       {/* 左側 / 中央: 学校俯瞰マップ表示エリア */}
       <div className="action-map-area">
-        <div className="action-map-wrapper">
-          <img
-            src="/assets/backgrounds/school_aerial.avif"
-            alt="School Aerial View"
-            className="action-map-img"
+        {/* 背景の流線型・曲線アクセント模様 (#A3B9EA) */}
+        <svg
+          className="action-map-bg-curve"
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M 0,0 L 300,0 C 220,280 430,680 530,1000 L 0,1000 Z"
+            fill="#cbd9f4"
           />
+        </svg>
 
-          {/* マップ上の各ロケーションピン（インタラクティブラベル） */}
-          {options.map((opt) => {
-            const coord = LOCATION_COORDINATES[opt.id];
-            if (!coord) return null;
+        <div className="action-map-wrapper">
+          <div className="action-map-clip">
+            <img
+              src="/assets/backgrounds/school_aerial.avif"
+              alt="School Aerial View"
+              className="action-map-img"
+            />
 
-            const locName = opt.name[lang] || opt.name.ja;
-            const isHighlighted = hoveredId === opt.id;
+            {/* マップ上の各ロケーションピン（インタラクティブラベル） */}
+            {options.map((opt) => {
+              const coord = LOCATION_COORDINATES[opt.id];
+              if (!coord) return null;
 
-            // 会える人物インジケーター（特定: 黄(あおい)・赤(エミリ)・青(しおん)、不特定: ?）
-            const charIds = opt.hintCharacterIds || [];
-            let charBadgeClass = '';
-            let charBadgeText = '';
+              const locName = opt.name[lang] || opt.name.ja;
+              const isHighlighted = hoveredId === opt.id;
 
-            if (charIds.includes('aoi')) {
-              charBadgeClass = 'pin-char-aoi'; // 黄色丸: あおい
-            } else if (charIds.includes('emili')) {
-              charBadgeClass = 'pin-char-emili'; // 赤丸: エミリ
-            } else if (charIds.includes('shion')) {
-              charBadgeClass = 'pin-char-shion'; // 青丸: しおん
-            } else if (opt.hintText) {
-              charBadgeClass = 'pin-char-unknown'; // 誰かいそう: ?
-              charBadgeText = '?';
-            }
+              // 会える人物インジケーター（特定: 黄(あおい)・赤(エミリ)・青(しおん)、不特定: ?）
+              const charIds = opt.hintCharacterIds || [];
+              let charBadgeClass = '';
+              let charBadgeText = '';
 
-            return (
-              <div
-                key={`pin_${opt.id}`}
-                className={`action-map-pin ${isHighlighted ? 'highlighted' : ''}`}
-                style={{ left: coord.left, top: coord.top }}
-                onMouseEnter={() => handleMouseEnter(opt.id)}
-                onMouseLeave={handleMouseLeave}
-                onClick={() => handleClickLocation(opt)}
-                title={locName}
-              >
-                {/* キャラクター遭遇インジケーター */}
-                {charBadgeClass && (
-                  <span className={`pin-char-badge ${charBadgeClass}`}>
-                    {charBadgeText}
-                  </span>
-                )}
+              if (charIds.includes('aoi')) {
+                charBadgeClass = 'pin-char-aoi'; // 黄色丸: あおい
+              } else if (charIds.includes('emili')) {
+                charBadgeClass = 'pin-char-emili'; // 赤丸: エミリ
+              } else if (charIds.includes('shion')) {
+                charBadgeClass = 'pin-char-shion'; // 青丸: しおん
+              } else if (opt.hintText) {
+                charBadgeClass = 'pin-char-unknown'; // 誰かいそう: ?
+                charBadgeText = '?';
+              }
 
-                <div className="action-map-pin-inner">
-                  <span className="action-map-pin-name">{locName}</span>
+              return (
+                <div
+                  key={`pin_${opt.id}`}
+                  className={`action-map-pin ${isHighlighted ? 'highlighted' : ''}`}
+                  style={{ left: coord.left, top: coord.top }}
+                  onMouseEnter={() => handleMouseEnter(opt.id)}
+                  onMouseLeave={handleMouseLeave}
+                  onClick={() => handleClickLocation(opt)}
+                  title={locName}
+                >
+                  {/* キャラクター遭遇インジケーター */}
+                  {charBadgeClass && (
+                    <span className={`pin-char-badge ${charBadgeClass}`}>
+                      {charBadgeText}
+                    </span>
+                  )}
+
+                  <div className="action-map-pin-inner">
+                    <span className="action-map-pin-name">{locName}</span>
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+
+          {/* ロケーションフォーカス時のINFO帯表示（地図下側・ヒロイン画像左側） */}
+          {focusHeroineInfo && hoveredHintText && (
+            <div
+              key={`focus_info_${hoveredId}`}
+              className="action-focus-info-banner"
+            >
+              <div className="action-focus-info-banner-inner">
+                <span className="focus-info-label">INFO</span>
+                <span className="focus-info-text">{hoveredHintText}</span>
               </div>
-            );
-          })}
+            </div>
+          )}
+
+          {/* ロケーションフォーカス時のヒロイン画像ポップアップ（地図右下はみ出し表示） */}
+          {focusHeroineInfo && (
+            <div
+              key={`focus_${hoveredId}`}
+              className={`action-focus-heroine-box ${focusHeroineInfo.bgClass}`}
+            >
+              {focusHeroineInfo.type === 'character' ? (
+                <img
+                  src={focusHeroineInfo.imgUrl}
+                  alt={focusHeroineInfo.charId}
+                  className="heroine-preview-img"
+                />
+              ) : (
+                <span className="heroine-preview-unknown">?</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
