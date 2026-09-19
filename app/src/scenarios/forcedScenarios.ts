@@ -1,9 +1,9 @@
 import { ScenarioPackage } from '../types/scenario';
 
-/** 強制イベント: 廊下で紫苑とぶつかる（未遭遇救済） */
+/** 強制イベント: 廊下でシオンとぶつかる（未遭遇救済） */
 export const FORCED_SCENARIO_MEET_SHION: ScenarioPackage = {
   id: 'forced_meet_shion',
-  title: { ja: '偶然の出会い: 廊下の紫苑', en: 'Fateful Encounter: Shion in the Corridor' },
+  title: { ja: '偶然の出会い: 廊下のシオン', en: 'Fateful Encounter: Shion in the Corridor' },
   characters: [{ id: 'shion', modelUrl: '/models/shion/shion.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -16,7 +16,7 @@ export const FORCED_SCENARIO_MEET_SHION: ScenarioPackage = {
     },
     {
       id: 's2',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: 'きゃっ……！ あ、危ないところでした……。',
@@ -36,10 +36,10 @@ export const FORCED_SCENARIO_MEET_SHION: ScenarioPackage = {
     },
     {
       id: 's4',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
-        ja: 'ありがとうございます。私は図書委員の紫苑と申します。助かりました。',
+        ja: 'ありがとうございます。私は図書委員のシオンと申します。助かりました。',
         en: 'Thank you very much. I am Shion from the library committee. You truly saved me.',
       },
       avatars: {

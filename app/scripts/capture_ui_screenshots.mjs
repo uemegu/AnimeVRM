@@ -38,7 +38,7 @@ async function run() {
     await page.waitForSelector('.action-select-overlay');
     console.log('Morning action select reached.');
 
-    // 1. 教室（葵: 淡い黄色）ホバー
+    // 1. 教室（アオイ: 淡い黄色）ホバー
     console.log('Hovering Classroom (Aoi)...');
     await page.hover('.location-item-card:has-text("教室")');
     await page.waitForSelector('.action-focus-heroine-box');
@@ -53,7 +53,7 @@ async function run() {
     await page.screenshot({ path: `${artifactDir}/heroine_focus_emili.png` });
     console.log('Saved heroine_focus_emili.png');
 
-    // 3. 図書室（紫苑: 淡い青）ホバー
+    // 3. 図書室（シオン: 淡い青）ホバー
     console.log('Hovering Library (Shion)...');
     await page.hover('.location-item-card:has-text("図書室")');
     await page.waitForTimeout(300);

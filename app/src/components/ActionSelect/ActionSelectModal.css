@@ -251,7 +251,7 @@
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
 }
 
-/* シオン画像スケール補正: アスペクト比・頭部シルエット差を補正し、葵・エミリと顔サイズを統一 */
+/* シオン画像スケール補正: アスペクト比・頭部シルエット差を補正し、アオイ・エミリと顔サイズを統一 */
 .action-focus-heroine-box.heroine-bg-shion .heroine-preview-img {
   transform: skewX(6deg) translateY(6px) scale(1.08);
 }

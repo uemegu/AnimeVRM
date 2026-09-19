@@ -1,14 +1,14 @@
 import { ScenarioPackage } from '../types/scenario';
 
-/** 教室イベント: 葵との雑談 */
+/** 教室イベント: アオイとの雑談 */
 export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
   id: 'action_classroom_aoi',
-  title: { ja: '教室: 葵とノートの貸し借り', en: 'Classroom: Borrowing notes with Aoi' },
+  title: { ja: '教室: アオイとノートの貸し借り', en: 'Classroom: Borrowing notes with Aoi' },
   characters: [{ id: 'aoi', modelUrl: '/models/aoi/aoi.vrm', initialPosition: 'center' }],
   scenes: [
     {
       id: 's1',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'あ、ちょうどよかった！前の授業のノート、ちょっと見せてもらえないかな？',
@@ -37,7 +37,7 @@ export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
     },
     {
       id: 's_accept',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'わあ、助かる！いつも丁寧にとっててすごいよね。後でお礼にジュースおごるね！',
@@ -50,7 +50,7 @@ export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
     },
     {
       id: 's_humble',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'ふふ、大丈夫！読める読める！貸してくれてありがとね。',
@@ -65,24 +65,24 @@ export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
       id: 's_end',
       speaker: '',
       text: {
-        ja: '葵と和やかに言葉を交わし、楽しい休み時間を過ごした。',
+        ja: 'アオイと和やかに言葉を交わし、楽しい休み時間を過ごした。',
         en: 'We shared a pleasant conversation and enjoyed our break together.',
       },
     },
   ],
 };
 
-/** 図書室イベント: 紫苑との出会い / 読書 */
+/** 図書室イベント: シオンとの出会い / 読書 */
 export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
   id: 'action_library_shion',
-  title: { ja: '図書室: 紫苑と静かな時間', en: 'Library: Quiet time with Shion' },
+  title: { ja: '図書室: シオンと静かな時間', en: 'Library: Quiet time with Shion' },
   characters: [{ id: 'shion', modelUrl: '/models/shion/shion.vrm', initialPosition: 'center' }],
   scenes: [
     {
       id: 's1',
       speaker: '',
       text: {
-        ja: '静かな図書室の奥、窓際の席で紫苑が分厚い本を読んでいた。',
+        ja: '静かな図書室の奥、窓際の席でシオンが分厚い本を読んでいた。',
         en: 'In the quiet corner of the library by the window, Shion is immersed in a thick book.',
       },
       avatars: {
@@ -91,7 +91,7 @@ export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
     },
     {
       id: 's2',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: '……あ。こんにちは。あなたも本を探しに来たのですか？',
@@ -106,7 +106,7 @@ export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
       text: '', // 選択肢シーンはtext空文字（ルール遵守）
       choices: [
         {
-          text: { ja: '紫苑のおすすめの本を教えてほしい', en: "I'd like you to recommend a book." },
+          text: { ja: 'シオンのおすすめの本を教えてほしい', en: "I'd like you to recommend a book." },
           goto: 's_recommend',
           setFlags: { asked_shion_book: true },
           addAffinity: { shion: 5 },
@@ -120,7 +120,7 @@ export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
     },
     {
       id: 's_recommend',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: '私のおすすめ……ですか？それなら、この短編集が読みやすくて素敵ですよ。',
@@ -133,7 +133,7 @@ export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
     },
     {
       id: 's_quiet',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: '……ふふ、お気遣いありがとうございます。どうぞ、こちらへ。',

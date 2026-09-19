@@ -2,14 +2,14 @@ import { ScenarioPackage } from '../types/scenario';
 
 export const ENDING_SCENARIO_AOI: ScenarioPackage = {
   id: 'ending_aoi',
-  title: { ja: 'エンディング: 葵との約束', en: 'Ending: Promise with Aoi' },
+  title: { ja: 'エンディング: アオイとの約束', en: 'Ending: Promise with Aoi' },
   characters: [{ id: 'aoi', modelUrl: '/models/aoi/aoi.vrm', initialPosition: 'center' }],
   scenes: [
     {
       id: 's1',
       speaker: '',
       text: {
-        ja: '28日間の月日が流れ、夕暮れのグラウンドに葵の姿があった。',
+        ja: '28日間の月日が流れ、夕暮れのグラウンドにアオイの姿があった。',
         en: 'Twenty-eight days have passed. Aoi stands on the school ground bathed in sunset.',
       },
       avatars: {
@@ -18,7 +18,7 @@ export const ENDING_SCENARIO_AOI: ScenarioPackage = {
     },
     {
       id: 's2',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'この1ヶ月、ずっと一緒にいてくれて本当に嬉しかったよ。',
@@ -30,7 +30,7 @@ export const ENDING_SCENARIO_AOI: ScenarioPackage = {
     },
     {
       id: 's3',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'これからも、ずっと隣で走ってくれるよね？……約束だよ！',
@@ -44,7 +44,7 @@ export const ENDING_SCENARIO_AOI: ScenarioPackage = {
       id: 's4',
       speaker: '',
       text: {
-        ja: '夕焼け空の下、葵と指切りを交わした。二人の未来へ続く物語の幕開けだった。',
+        ja: '夕焼け空の下、アオイと指切りを交わした。二人の未来へ続く物語の幕開けだった。',
         en: 'Under the sunset sky, we made a pinky promise. A new chapter of our story begins.',
       },
     },
@@ -53,14 +53,14 @@ export const ENDING_SCENARIO_AOI: ScenarioPackage = {
 
 export const ENDING_SCENARIO_SHION: ScenarioPackage = {
   id: 'ending_shion',
-  title: { ja: 'エンディング: 紫苑と紡ぐ物語', en: 'Ending: Story woven with Shion' },
+  title: { ja: 'エンディング: シオンと紡ぐ物語', en: 'Ending: Story woven with Shion' },
   characters: [{ id: 'shion', modelUrl: '/models/shion/shion.vrm', initialPosition: 'center' }],
   scenes: [
     {
       id: 's1',
       speaker: '',
       text: {
-        ja: '放課後の図書室。夕暮れの光が窓から差し込み、紫苑が静かに微笑んでいた。',
+        ja: '放課後の図書室。夕暮れの光が窓から差し込み、シオンが静かに微笑んでいた。',
         en: 'In the after-school library. Sunset sunlight poured through the window as Shion smiled softly.',
       },
       avatars: {
@@ -69,7 +69,7 @@ export const ENDING_SCENARIO_SHION: ScenarioPackage = {
     },
     {
       id: 's2',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: 'あなたと過ごした日々は、私が読んできたどんな物語よりも温かい時間でした。',
@@ -81,7 +81,7 @@ export const ENDING_SCENARIO_SHION: ScenarioPackage = {
     },
     {
       id: 's3',
-      speaker: { ja: '紫苑', en: 'Shion' },
+      speaker: { ja: 'シオン', en: 'Shion' },
       speakerCharacterId: 'shion',
       text: {
         ja: '次の物語のページも……あなたと一緒にめくってもいいですか？',
@@ -95,7 +95,7 @@ export const ENDING_SCENARIO_SHION: ScenarioPackage = {
       id: 's4',
       speaker: '',
       text: {
-        ja: '本を閉じた紫苑と静かに手を重ね合わせた。',
+        ja: '本を閉じたシオンと静かに手を重ね合わせた。',
         en: 'As Shion closed her book, our hands gently intertwined.',
       },
     },

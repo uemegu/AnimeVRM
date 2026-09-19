@@ -19,7 +19,7 @@ export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
     },
     {
       id: 'scene_2',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: 'おーい！おはよう！やっぱりここであったね。',
@@ -32,7 +32,7 @@ export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
     },
     {
       id: 'scene_3',
-      speaker: { ja: '葵', en: 'Aoi' },
+      speaker: { ja: 'アオイ', en: 'Aoi' },
       speakerCharacterId: 'aoi',
       text: {
         ja: '今日から2年生だよ！放課後も部活あるから、時間があったらグラウンド見に来てね！',
@@ -48,7 +48,7 @@ export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
       id: 'scene_4',
       speaker: '',
       text: {
-        ja: '葵と笑顔を交わしながら校門をくぐった。今日も良い1日になりそうだ。',
+        ja: 'アオイと笑顔を交わしながら校門をくぐった。今日も良い1日になりそうだ。',
         en: 'We walked through the school gate together, smiling. Today feels like the start of something great.',
       },
     },

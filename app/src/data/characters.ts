@@ -11,7 +11,7 @@ export interface CharacterMaster {
 export const CHARACTERS: Record<string, CharacterMaster> = {
   aoi: {
     id: 'aoi',
-    name: { ja: '葵（あおい）', en: 'Aoi' },
+    name: { ja: 'アオイ', en: 'Aoi' },
     shortDescription: {
       ja: '元気で明るい幼馴染。陸上部所属でいつもグラウンドを走っている。',
       en: 'A cheerful childhood friend. Belongs to the track club and is always seen running.',
@@ -21,7 +21,7 @@ export const CHARACTERS: Record<string, CharacterMaster> = {
   },
   shion: {
     id: 'shion',
-    name: { ja: '紫苑（しおん）', en: 'Shion' },
+    name: { ja: 'シオン', en: 'Shion' },
     shortDescription: {
       ja: '物静かで読書好きな図書委員。放課後は図書室や教室で静かに過ごしている。',
       en: 'A quiet, book-loving library committee member. Often spends after-school hours in the library.',

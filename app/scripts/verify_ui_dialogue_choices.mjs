@@ -71,7 +71,7 @@ async function run() {
     console.log('Waiting for action select overlay...');
     await page.waitForSelector('.action-select-overlay');
 
-    // 教室（葵がいる場所）を選択して選択肢シーンへ突入
+    // 教室（アオイがいる場所）を選択して選択肢シーンへ突入
     console.log('Selecting first location card (Classroom)...');
     await page.click('.location-item-card:nth-child(1)');
     await page.waitForTimeout(1000);
