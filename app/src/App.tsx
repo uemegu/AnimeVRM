@@ -620,6 +620,8 @@ export const App: React.FC = () => {
               options={locationOptions}
               lang={lang}
               onSelectLocation={handleSelectLocation}
+              phase={gameState.phase}
+              affinities={gameState.affinities}
             />
           )}
 
