@@ -835,6 +835,7 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
       '🟣 ワナワナ (wanawana)': 'wanawana',
       '🔴 イライラ (iraira)': 'iraira',
       '💖 ドキドキ (doki)': 'doki',
+      '😏 ニマニマ (nima)': 'nima',
       '🔵 ガーン (gaan)': 'gaan',
       '⚪ しーん (shiin)': 'shiin',
       '✨ キラキラ (kirakira)': 'kirakira',

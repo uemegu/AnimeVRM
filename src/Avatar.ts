@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
+import { VRM, VRMLoaderPlugin, VRMUtils, VRMExpression, VRMExpressionMorphTargetBind } from '@pixiv/three-vrm';
 import {
   applyToonShader,
   ToonShaderController,
@@ -472,6 +472,9 @@ export class Avatar {
         // VRM 0.0 rotation fix if needed
         VRMUtils.rotateVRM0(vrm);
 
+        // Register custom expressions (e.g. nima)
+        this.setupCustomExpressions(vrm);
+
         // 1. Flatten eye orbit normals to prevent crease/step shadows at inner eye corners
         //flattenEyeOrbitNormals(vrm.scene);
 
@@ -679,8 +682,94 @@ export class Avatar {
   }
 
   /**
+   * Register custom expressions (e.g. nima) to VRMExpressionManager
+   */
+  private setupCustomExpressions(vrm: VRM): void {
+    if (!vrm.expressionManager) return;
+
+    const customDefinitions = [
+      {
+        name: 'nima',
+        isBinary: false,
+        overrideBlink: 'none' as const,
+        overrideLookAt: 'none' as const,
+        overrideMouth: 'none' as const,
+        morphTargetBinds: [
+          {
+            mesh: 'Face',
+            shapeKey: 'Fcl_BRW_Sorrow',
+            weight: 1.0,
+          },
+          {
+            mesh: 'Face',
+            shapeKey: 'Fcl_MTH_Fun',
+            weight: 1.0,
+          },
+        ],
+      },
+    ];
+
+    for (const def of customDefinitions) {
+      if (vrm.expressionManager.getExpression(def.name)) {
+        continue;
+      }
+
+      const expr = new VRMExpression(def.name);
+      expr.isBinary = def.isBinary;
+      expr.overrideBlink = def.overrideBlink;
+      expr.overrideLookAt = def.overrideLookAt;
+      expr.overrideMouth = def.overrideMouth;
+
+      for (const bindDef of def.morphTargetBinds) {
+        const candidateMeshes: { mesh: THREE.Mesh; index: number }[] = [];
+        vrm.scene.traverse((obj) => {
+          if ((obj as THREE.Mesh).isMesh) {
+            const mesh = obj as THREE.Mesh;
+            const dict = mesh.morphTargetDictionary;
+            if (dict && dict[bindDef.shapeKey] !== undefined) {
+              candidateMeshes.push({ mesh, index: dict[bindDef.shapeKey] });
+            }
+          }
+        });
+
+        if (candidateMeshes.length === 0) continue;
+
+        let targetMeshes = candidateMeshes;
+        if (bindDef.mesh) {
+          const named = candidateMeshes.filter((m) =>
+            m.mesh.name.toLowerCase().includes(bindDef.mesh.toLowerCase())
+          );
+          if (named.length > 0) {
+            targetMeshes = named;
+          }
+        }
+
+        const indexMap = new Map<number, THREE.Mesh[]>();
+        for (const { mesh, index } of targetMeshes) {
+          if (!indexMap.has(index)) {
+            indexMap.set(index, []);
+          }
+          indexMap.get(index)!.push(mesh);
+        }
+
+        for (const [index, primitives] of indexMap.entries()) {
+          const bind = new VRMExpressionMorphTargetBind({
+            primitives,
+            index,
+            weight: bindDef.weight,
+          });
+          expr.addBind(bind);
+        }
+      }
+
+      vrm.scene.add(expr);
+      vrm.expressionManager.registerExpression(expr);
+    }
+  }
+
+  /**
    * Set facial expression with smooth crossfade interpolation.
-   * @param expressionName Preset name ('happy', 'angry', 'sad', 'surprised', 'relaxed', 'neutral') or custom morph name
+   * @param expressionName Preset name ('happy', 'angry', 'sad', 'surprised', 'relaxed', 'nima', 'neutral') or custom morph name
    * @param weight Target intensity weight (default: 1.0)
    * @param duration Transition duration in seconds for smooth interpolation (default: 0.25s, 0 for instant)
    */
@@ -699,7 +788,7 @@ export class Avatar {
     this.expressionTransitionDuration = Math.max(0, duration);
 
     const manager = this.vrm.expressionManager;
-    const emotionPresets = ['happy', 'angry', 'sad', 'surprised', 'relaxed'];
+    const emotionPresets = ['happy', 'angry', 'sad', 'surprised', 'relaxed', 'nima'];
 
     // Ensure preset emotions are registered in the weight maps
     emotionPresets.forEach((name) => {
@@ -1978,7 +2067,7 @@ export class Avatar {
     if (this.yandereConfig.applyExpression) {
       if (this.vrm.expressionManager) {
         const mgr = this.vrm.expressionManager;
-        ['happy', 'angry', 'sad', 'surprised', 'relaxed', 'neutral', 'aa', 'ih', 'ou', 'ee', 'oh', 'blink'].forEach((name) => {
+        ['happy', 'angry', 'sad', 'surprised', 'relaxed', 'nima', 'neutral', 'aa', 'ih', 'ou', 'ee', 'oh', 'blink'].forEach((name) => {
           mgr.setValue(name, 0.0);
         });
       }
