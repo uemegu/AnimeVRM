@@ -8,6 +8,7 @@ const DEFAULT_PRESET_TEXTS: Record<string, string> = {
   wanawana: 'ワナワナ',
   iraira: 'イライラ',
   doki: 'ドキドキ',
+  nima: 'ニマニマ',
   gaan: 'ガーン',
   shiin: 'シーン',
   kirakira: 'キラキラ',

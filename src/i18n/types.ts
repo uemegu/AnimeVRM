@@ -104,6 +104,7 @@ export interface Translations {
       sad: string;
       surprised: string;
       relaxed: string;
+      nima: string;
       aa: string;
       ee: string;
       oh: string;
@@ -119,6 +120,7 @@ export interface Translations {
       kirakira: string;
       shiin: string;
       doki: string;
+      nima: string;
       biku: string;
       yatta: string;
       zoku: string;

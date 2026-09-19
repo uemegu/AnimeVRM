@@ -123,6 +123,44 @@ export const EFFECT_TEXT_PRESETS: Record<EffectPresetName, EffectTextPreset> = {
     },
   },
 
+  nima: {
+    name: 'nima',
+    spawnMode: 'stream',
+    style: {
+      fontFamily: '"Mochiy Pop One", "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN", "Meiryo", "Arial Black", sans-serif',
+      fontWeight: '900',
+      textColor: ['#fef08a', '#ea580c'],
+      gradientDirection: 'vertical',
+      strokeColor: '#ffffff',
+      strokeWidth: 14,
+      outerStrokeColor: '#7c2d12',
+      outerStrokeWidth: 8,
+      shadowColor: 'rgba(124, 45, 18, 0.8)',
+      shadowOffset: { x: 5, y: 6 },
+      shadowBlur: 0,
+      charJitter: {
+        rotationRange: 0.12,
+        offsetYRange: 6,
+        scaleRange: 0.08,
+      },
+      slant: 4,
+    },
+    animations: ['pop', 'pulse', 'rise', 'fadeOut'],
+    defaultDuration: Infinity,
+    defaultScale: 0.38,
+    defaultOffset: { x: 0, y: -0.06, z: 0.04 }, // 低め（胸・肩の横）から湧き上がり開始
+    riseSpeed: 0.18,
+    streamConfig: {
+      phrase: 'ニマ',
+      count: Infinity,
+      interval: 0.46,
+      spreadX: 0.24,
+      riseSpeed: 0.18,
+      particleDuration: 2.1,
+      particleScale: 0.38,
+    },
+  },
+
   gaan: {
     name: 'gaan',
     spawnMode: 'single',

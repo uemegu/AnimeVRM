@@ -233,6 +233,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-expr="sad" class="expr-btn">${tr.character.expressions.sad}</button>
               <button data-expr="surprised" class="expr-btn">${tr.character.expressions.surprised}</button>
               <button data-expr="relaxed" class="expr-btn">${tr.character.expressions.relaxed}</button>
+              <button data-expr="nima" class="expr-btn">${tr.character.expressions.nima}</button>
               <button data-expr="aa" class="expr-btn">${tr.character.expressions.aa}</button>
               <button data-expr="ee" class="expr-btn">${tr.character.expressions.ee}</button>
               <button data-expr="oh" class="expr-btn">${tr.character.expressions.oh}</button>
@@ -277,11 +278,12 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button class="effect-text-btn" data-preset="kirakira" data-text="キラキラ" data-expr="happy" style="border-color: #ca8a04; color: #fde047;">${tr.character.presets.kirakira}</button>
               <button class="effect-text-btn" data-preset="shiin" data-text="しーん" data-expr="neutral" style="border-color: #475569; color: #cbd5e1;">${tr.character.presets.shiin}</button>
               <button class="effect-text-btn" data-preset="doki" data-text="ドキドキ" data-expr="happy" style="border-color: #e11d48; color: #fda4af;">${tr.character.presets.doki}</button>
+              <button class="effect-text-btn" data-preset="nima" data-text="ニマニマ" data-expr="nima" style="border-color: #ea580c; color: #fdba74;">${tr.character.presets.nima}</button>
               <button class="effect-text-btn" data-preset="biku" data-text="ビクッ！" data-expr="surprised" style="border-color: #ca8a04; color: #fde047;">${tr.character.presets.biku}</button>
               <button class="effect-text-btn" data-preset="kirakira" data-text="やったー！" data-expr="happy" style="border-color: #16a34a; color: #86efac;">${tr.character.presets.yatta}</button>
               <button id="quick-yandere-effect-btn" class="effect-text-btn" style="border-color: #991b1b; color: #f87171; font-weight: 700;">🖤 ずっと一緒…</button>
               <button id="quick-sweat-btn" class="effect-text-btn" data-expr="surprised" style="border-color: #0284c7; color: #7dd3fc; font-weight: 700;">${tr.character.presets.sweat}</button>
-              <button id="quick-jito-btn" class="effect-text-btn" data-expr="relaxed" style="border-color: #0f766e; color: #99f6e4; font-weight: 700; grid-column: span 2;">${tr.character.presets.jito}</button>
+              <button id="quick-jito-btn" class="effect-text-btn" data-expr="relaxed" style="border-color: #0f766e; color: #99f6e4; font-weight: 700;">${tr.character.presets.jito}</button>
             </div>
             <div style="display: flex; gap: 4px; margin-top: 6px;">
               <input type="text" id="quick-custom-effect-text" placeholder="${tr.character.customTextPlaceholder}" style="flex: 1; min-width: 0; padding: 4px 6px; font-size: 11px; border: 1px solid #3d3d3d; background: #1c1c1c; color: #e0e0e0; border-radius: 4px; outline: none;">
@@ -292,6 +294,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
                 <option value="gaan">${tr.character.presets.gaan}</option>
                 <option value="shiin">${tr.character.presets.shiin}</option>
                 <option value="doki">${tr.character.presets.doki}</option>
+                <option value="nima">${tr.character.presets.nima}</option>
                 <option value="biku">${tr.character.presets.biku}</option>
               </select>
               <button id="quick-custom-effect-btn" class="action-btn primary" style="padding: 4px 8px; font-size: 11px; background: #db2777; border-color: #be185d;">${tr.character.show}</button>
