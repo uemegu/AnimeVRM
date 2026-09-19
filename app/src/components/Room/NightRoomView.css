@@ -6,7 +6,7 @@
 .room-overlay {
   position: absolute;
   inset: 0;
-  background: #0b1120;
+  background: #1a1a1a;
   display: flex;
   z-index: 250;
   overflow: hidden;
@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #070b14;
+  background: #1a1a1a;
   padding: 68px 20px 20px 20px;
   box-sizing: border-box;
 }
@@ -46,10 +46,10 @@
   width: auto;
   height: auto;
   margin: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid #1e293b;
+  border: 2px solid #334155;
 }
 
 .room-main-img {
@@ -61,7 +61,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Right: Room Sidebar (White Theme Baseline)
+   Right: Room Sidebar (ActionSelectModal と完全一致の白基調テーマ)
    -------------------------------------------------------------------------- */
 .room-sidebar {
   width: 380px;
@@ -104,7 +104,7 @@
   line-height: 1.45;
 }
 
-/* サイドバーコンテンツ（好感度＋ボタン） */
+/* サイドバーコンテンツ */
 .room-sidebar-content {
   flex: 1;
   overflow-y: auto;
@@ -113,7 +113,7 @@
   padding: 20px 22px 30px 22px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   box-sizing: border-box;
 }
 
@@ -136,25 +136,45 @@
 }
 
 /* --------------------------------------------------------------------------
-   Affinity Status Panel
+   Affinity Status Panel (ロケーションカード群と調和する変形・立体シャドウ)
    -------------------------------------------------------------------------- */
 .affinity-status-panel {
-  background: #f8fafc;
+  background: #ffffff;
   border: 2px solid #0f172a;
   border-radius: 8px;
   padding: 12px 16px;
-  box-shadow: 3px 3px 0px #0b1d47;
+  box-shadow: 4px 4px 0px #0b1d47;
+  transform: skewX(-4deg);
+  flex-shrink: 0;
+}
+
+.affinity-panel-inner {
+  transform: skewX(4deg);
 }
 
 .affinity-panel-title {
-  font-size: 0.84rem;
+  font-size: 0.86rem;
   font-weight: 800;
-  color: #0284c7;
+  color: #0f172a;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   letter-spacing: 0.02em;
+}
+
+.affinity-panel-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: #0284c7;
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .affinity-list {
@@ -185,17 +205,16 @@
   font-family: 'Montserrat', sans-serif;
   font-weight: 800;
   color: #0f172a;
-  font-size: 0.8rem;
-  background: #ffffff;
+  font-size: 0.78rem;
+  background: #f8fafc;
   border: 1.5px solid #cbd5e1;
   padding: 0px 6px;
   border-radius: 4px;
 }
 
-/* 好感度プログレスバー */
 .affinity-bar-track {
   width: 100%;
-  height: 7px;
+  height: 6px;
   background: #e2e8f0;
   border-radius: 9999px;
   overflow: hidden;
@@ -209,136 +228,163 @@
 }
 
 /* --------------------------------------------------------------------------
-   Room Button Group
+   Room Menu Cards List (ActionSelectModalの location-item-card と完全同一スタイル)
    -------------------------------------------------------------------------- */
-.room-button-group {
+.room-card-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-/* コマンドボタンスタイル (ChoiceBox同等の立体カット) */
-.room-menu-button {
+.room-menu-card {
   position: relative;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', sans-serif;
-  font-size: 0.94rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  border: 2px solid #0f172a;
+  min-height: 84px;
+  box-sizing: border-box;
   background: #ffffff;
-  color: #0f172a;
-  box-shadow: 3px 3px 0px #0b1d47;
+  border: 2px solid #0f172a;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
   transform: skewX(-4deg);
+  box-shadow: 4px 4px 0px #0b1d47;
   transition: transform 0.16s cubic-bezier(0.18, 1.25, 0.32, 1.15),
               box-shadow 0.16s ease,
-              background-color 0.16s ease,
-              border-color 0.16s ease;
+              border-color 0.16s ease,
+              background-color 0.16s ease;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  flex-direction: column;
+  justify-content: space-between;
   user-select: none;
+  flex-shrink: 0;
+  outline: none;
 }
 
-.room-btn-inner {
-  transform: skewX(4deg);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-
-.room-btn-text {
-  flex: 1;
-  text-align: left;
-}
-
-/* ボタンホバーエフェクト */
-.room-menu-button:hover {
+/* ホバー時の演出（ロケーション選択カードと完全統一） */
+.room-menu-card:hover,
+.room-menu-card:focus-visible {
   background: #eff6ff;
   border-color: #0284c7;
-  color: #0284c7;
-  transform: translate(-2px, -2px) skewX(-4deg) scale(1.02);
-  box-shadow: 5px 5px 0px #0284c7;
+  transform: translate(-3px, -2px) skewX(-4deg) scale(1.02);
+  box-shadow: 6px 6px 0px #0284c7;
 }
 
-.room-menu-button:active {
+.room-menu-card:active {
   transform: translate(-1px, 0) skewX(-4deg);
   box-shadow: 2px 2px 0px #0b1d47;
 }
 
-/* 就寝ボタン (最重要アクション: ゴージャスなアンバー・ゴールド系) */
-.room-menu-button.success {
-  background: linear-gradient(135deg, #f59e0b 0%, #facc15 100%);
+/* 就寝カード（最重要アクションの演出） */
+.room-menu-card.card-sleep {
+  background: #ffffff;
+  border-color: #0f172a;
+}
+
+.room-menu-card.card-sleep:hover,
+.room-menu-card.card-sleep:focus-visible {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  box-shadow: 6px 6px 0px #16a34a;
+}
+
+/* カード内部コンテンツ */
+.room-card-inner {
+  transform: skewX(4deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  gap: 6px;
+}
+
+.room-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.room-card-title {
+  font-size: 0.98rem;
+  font-weight: 800;
   color: #0f172a;
-  border-color: #0f172a;
-  box-shadow: 3.5px 3.5px 0px #0b1d47;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
 }
 
-.room-menu-button.success:hover {
-  background: linear-gradient(135deg, #fbbf24 0%, #fde047 100%);
-  border-color: #0f172a;
-  color: #000000;
-  transform: translate(-3px, -2px) skewX(-4deg) scale(1.02);
-  box-shadow: 6px 6px 0px #0b1d47;
+.room-menu-card:hover .room-card-title {
+  color: #0284c7;
 }
 
-/* 巻き戻しボタン (警告色アクセント) */
-.room-menu-button.warning {
-  background: #fff7ed;
-  border-color: #ea580c;
-  color: #9a3412;
+.room-menu-card.card-sleep:hover .room-card-title {
+  color: #15803d;
 }
 
-.room-menu-button.warning:hover {
-  background: #ffedd5;
-  border-color: #c2410c;
-  color: #7c2d12;
-  box-shadow: 5px 5px 0px #9a3412;
+/* 右側アクションバッジ */
+.room-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1.3;
 }
 
-/* セーブボタン (ロイヤルブルー) */
-.room-menu-button.primary {
-  background: #eff6ff;
-  border-color: #2563eb;
-  color: #1e40af;
+.badge-sleep {
+  background: #16a34a;
+  color: #ffffff;
 }
 
-.room-menu-button.primary:hover {
-  background: #dbeafe;
-  border-color: #1d4ed8;
-  color: #1e3a8a;
-  box-shadow: 5px 5px 0px #1e40af;
+.badge-save {
+  background: #0284c7;
+  color: #ffffff;
 }
 
-/* --------------------------------------------------------------------------
-   Responsive (Max width 860px)
-   -------------------------------------------------------------------------- */
-@media (max-width: 860px) {
-  .room-overlay {
-    flex-direction: column;
-  }
+.badge-load {
+  background: #64748b;
+  color: #ffffff;
+}
 
-  .room-main-area {
-    height: 50%;
-    width: 100%;
-  }
+.badge-rollback {
+  background: #d97706;
+  color: #ffffff;
+}
 
-  .room-sidebar {
-    width: 100%;
-    max-width: 100%;
-    height: 50%;
-    border-left: none;
-    border-top: 2.5px solid rgba(56, 189, 248, 0.4);
-  }
+/* サブヒント・説明文ボックス (ActionSelectModal の location-hint-box と完全一致) */
+.room-hint-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #f8fafc;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  min-height: 24px;
+  box-sizing: border-box;
+}
 
-  .room-sidebar-header {
-    padding: 14px 16px 8px 16px;
-  }
+.room-hint-label {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  background: #e2e8f0;
+  color: #475569;
+  padding: 1px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
 
-  .room-sidebar-content {
-    padding: 10px 14px;
-  }
+.room-hint-text {
+  font-size: 0.76rem;
+  color: #475569;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

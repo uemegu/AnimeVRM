@@ -98,8 +98,11 @@
 - [ ] **基本操作・操作案内**:
   - [ ] 初回または画面隅での基本操作ヘルプ表示
   - [x] マウス・タッチ操作のレスポンシブ対応
-- [ ] **ローディング表示**:
-  - [ ] 3Dモデル・画像素材読み込み中のインジケータ表示
+- [x] **ローディング表示**:
+  - [x] タイトル画面前のコアアセット一括ロード（制服・私服VRM6体、主要BGM、リップシンクWASM：約105MB）
+  - [x] 白基調案内画面とSTARTボタンによるAudioContext安全アンロック
+  - [x] リアルタイムプログレスバー・バイト数・ロード中アセット名表示
+  - [x] 幕間トランジション待機中のオンデマンドローディング（待機モーション、背景画像、ボイス）
 
 ---
 
@@ -126,11 +129,12 @@
   - [x] BGM (`public/bgm/*.mp3`)、SE (`public/se/*.mp3`)、ボイス音声 (`public/voices/*.wav`) の配置
 - [x] **オーディオサービス実装**:
   - [x] `AudioLipSync.ts`: AudioWorklet + WebAssembly によるリアルタイム母音解析（`aa`, `ee`, `ih`, `oh`, `ou`）
-  - [x] `SoundManager.ts`: BGMループ再生・クロスフェード、SEワンショット再生、マスター/BGM/SE音量制御
+  - [x] `bgmPresets.ts` & `SoundManager.ts`: BGM ID管理（`main_theme`, `main_bgm`, `night_room` 等）、URL解決、夜自室音量抑制、同一曲シームレス継続、SEワンショット再生、マスター/BGM/SE音量制御
 - [x] **アバター・ステージ連動**:
   - [x] `Avatar.ts`: VRM ExpressionManager への母音開閉モーフウェイト適用（`updateLipSync`）
   - [x] `StageManager.ts`: レンダリングループ内での `AudioLipSync` 音声解析結果とアバター口形状のリアルタイム同期
 - [x] **シナリオエンジン & App統合**:
-  - [x] シーン定義（`bgmUrl`, `seUrl`, `voiceUrl`）に応じた自動再生・切り替え
+  - [x] タイトル（`main_theme`）、プレイ中（`main_bgm`）、夜フェーズ自室（`night_room`）の自動切り替え
+  - [x] シーン定義（`bgm`, `seUrl`, `voiceUrl`）に応じた自動再生・個別優先
   - [x] ユーザーインタラクション時の安全なオーディオアンロック
 

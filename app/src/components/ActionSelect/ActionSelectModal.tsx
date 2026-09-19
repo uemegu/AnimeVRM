@@ -136,18 +136,8 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     <div className={`action-select-overlay phase-${phase}`}>
       {/* 左側 / 中央: 学校俯瞰マップ表示エリア */}
       <div className="action-map-area">
-        {/* 背景の流線型・曲線アクセント模様 (#A3B9EA) */}
-        <svg
-          className="action-map-bg-curve"
-          viewBox="0 0 1000 1000"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M 0,0 L 300,0 C 220,280 430,680 530,1000 L 0,1000 Z"
-            fill="#cbd9f4"
-          />
-        </svg>
+        {/* メインコンテンツ背景幾何学装飾（ロード画面と共通の polygon clip-path） */}
+        <div className="action-map-bg-decoration" />
 
         <div className="action-map-wrapper">
           <div className="action-map-clip">

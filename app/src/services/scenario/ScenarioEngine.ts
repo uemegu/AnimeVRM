@@ -20,6 +20,7 @@ export interface ScenarioResolvedScene {
   text: string;
   voiceUrl?: string;
   background?: string;
+  bgm?: string;
   bgmUrl?: string;
   seUrl?: string;
   avatars?: Record<string, SceneAvatarConfig>;
@@ -87,7 +88,8 @@ export class ScenarioEngine {
       text: resolveLocalizedText(raw.text, this.language),
       voiceUrl: raw.voiceUrl,
       background: raw.background,
-      bgmUrl: raw.bgmUrl,
+      bgm: raw.bgm || raw.bgmUrl,
+      bgmUrl: raw.bgmUrl || raw.bgm,
       seUrl: raw.seUrl,
       avatars: raw.avatars,
       choices: resolvedChoices.length > 0 ? resolvedChoices : undefined,

@@ -1,4 +1,5 @@
 import { resolveAssetUrl } from '../../utils/path';
+import { BgmId, resolveBgmInfo } from '../../data/bgmPresets';
 
 export interface SoundManagerOptions {
   masterVolume?: number;
@@ -9,7 +10,9 @@ export interface SoundManagerOptions {
 
 export class SoundManager {
   private bgmAudio: HTMLAudioElement | null = null;
+  private currentBgmTarget: BgmId | string | null = null;
   private currentBgmUrl: string | null = null;
+  private currentVolumeScale: number = 1.0;
   private currentSeAudio: HTMLAudioElement | null = null;
 
   public masterVolume: number = 1.0;
@@ -22,16 +25,34 @@ export class SoundManager {
     if (options.bgmVolume !== undefined) this.bgmVolume = options.bgmVolume;
     if (options.seVolume !== undefined) this.seVolume = options.seVolume;
     if (options.voiceVolume !== undefined) this.voiceVolume = options.voiceVolume;
+
+    if (typeof window !== 'undefined') {
+      (window as any).__soundManager = this;
+    }
   }
 
   /**
-   * BGM 再生（ループ再生、同曲の場合は継続）
+   * BGM 再生（BGM ID または URL による指定、同一曲の場合はシームレス継続）
+   * @param target BGM ID ('main_theme', 'main_bgm', 'night_room', etc.) または直接URL
+   * @param volumeScale 任意の音量倍率（未指定時はプリセットのデフォルト値を使用）
    */
-  public playBgm(url: string, volumeScale: number = 1.0): void {
-    const resolvedUrl = resolveAssetUrl(url);
-    if (this.currentBgmUrl === resolvedUrl && this.bgmAudio && !this.bgmAudio.paused) {
-      // 既に再生中の同一曲ならボリューム更新のみ
-      this.bgmAudio.volume = this.masterVolume * this.bgmVolume * volumeScale;
+  public playBgm(target: BgmId | string, volumeScale?: number): void {
+    const bgmInfo = resolveBgmInfo(target);
+    const resolvedUrl = resolveAssetUrl(bgmInfo.url);
+    const finalScale = volumeScale !== undefined ? volumeScale : bgmInfo.volumeScale;
+
+    this.currentVolumeScale = finalScale;
+
+    // 既に同一の曲（IDまたはURL）で bgmAudio が存在する場合
+    const isSameTarget = this.currentBgmTarget === target || this.currentBgmUrl === resolvedUrl;
+    if (isSameTarget && this.bgmAudio) {
+      this.bgmAudio.volume = Math.max(0, Math.min(1, this.masterVolume * this.bgmVolume * finalScale));
+      this.currentBgmTarget = target;
+      if (this.bgmAudio.paused) {
+        this.bgmAudio.play().catch((err) => {
+          console.warn('BGM auto-play was blocked or failed:', err);
+        });
+      }
       return;
     }
 
@@ -39,13 +60,65 @@ export class SoundManager {
       this.bgmAudio.pause();
     }
 
+    this.currentBgmTarget = target;
     this.currentBgmUrl = resolvedUrl;
     this.bgmAudio = new Audio(resolvedUrl);
     this.bgmAudio.loop = true;
-    this.bgmAudio.volume = Math.max(0, Math.min(1, this.masterVolume * this.bgmVolume * volumeScale));
+    this.bgmAudio.volume = Math.max(0, Math.min(1, this.masterVolume * this.bgmVolume * finalScale));
     this.bgmAudio.play().catch((err) => {
       console.warn('BGM auto-play was blocked or failed:', err);
     });
+  }
+
+  /**
+   * ユーザー操作時にオーディオ再生制限を解除するためのアンロック処理
+   * ユーザーインタラクションのイベントハンドラ内で呼び出す
+   */
+  public unlockAudio(): void {
+    try {
+      const silentAudio = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+      silentAudio.volume = 0;
+      silentAudio.play().then(() => {
+        silentAudio.pause();
+      }).catch(() => {});
+
+      // メインテーマ用オーディオ要素をユーザー操作コンテキスト内で事前作成・アンロック
+      if (!this.bgmAudio) {
+        const bgmInfo = resolveBgmInfo('main_theme');
+        const resolvedUrl = resolveAssetUrl(bgmInfo.url);
+        this.currentBgmTarget = 'main_theme';
+        this.currentBgmUrl = resolvedUrl;
+        this.bgmAudio = new Audio(resolvedUrl);
+        this.bgmAudio.loop = true;
+        this.bgmAudio.volume = 0;
+        this.bgmAudio.play().then(() => {
+          if (this.bgmAudio && this.currentBgmTarget === 'main_theme') {
+            this.bgmAudio.pause();
+            this.bgmAudio.currentTime = 0;
+          }
+        }).catch(() => {});
+      }
+    } catch {
+      // noop
+    }
+  }
+
+  /**
+   * 現在再生中のBGM情報を取得
+   */
+  public getCurrentBgm(): { target: BgmId | string | null; url: string | null; volumeScale: number } {
+    return {
+      target: this.currentBgmTarget,
+      url: this.currentBgmUrl,
+      volumeScale: this.currentVolumeScale,
+    };
+  }
+
+  /**
+   * 内部オーディオ要素の参照（テストや詳細プロパティ参照用）
+   */
+  public getBgmAudio(): HTMLAudioElement | null {
+    return this.bgmAudio;
   }
 
   /**
@@ -55,6 +128,8 @@ export class SoundManager {
     if (this.bgmAudio) {
       this.bgmAudio.pause();
       this.bgmAudio.currentTime = 0;
+      this.bgmAudio = null;
+      this.currentBgmTarget = null;
       this.currentBgmUrl = null;
     }
   }
