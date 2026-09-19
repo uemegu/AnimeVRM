@@ -68,9 +68,44 @@ describe('SaveService (セーブ/ロード機能検証)', () => {
   });
 
   it('データ破損時に null を返しクラッシュしないこと', () => {
-    storage.setItem('galgame_save_data', 'invalid-json-structure{{{');
-    const loaded = service.loadGame();
+    storage.setItem('galgame_save_slot_1', 'invalid-json-structure{{{');
+    const loaded = service.loadGame(1);
     expect(loaded).toBeNull();
+  });
+
+  it('複数スロット（スロット1〜3）への個別保存・ロード・一覧取得が正しく動作すること', () => {
+    // スロット1に保存
+    service.saveGame(mockGameState, 1, 'スロット1のデータ');
+
+    // スロット2に別状態を保存
+    const mockState2: GameState = {
+      ...mockGameState,
+      day: 12,
+      phase: 'lunch_action',
+    };
+    service.saveGame(mockState2, 2, 'スロット2のデータ');
+
+    expect(service.hasSaveData(1)).toBe(true);
+    expect(service.hasSaveData(2)).toBe(true);
+    expect(service.hasSaveData(3)).toBe(false);
+    expect(service.hasSaveData()).toBe(true);
+
+    const slot1Data = service.loadGame(1);
+    const slot2Data = service.loadGame(2);
+    const slot3Data = service.loadGame(3);
+
+    expect(slot1Data?.gameState.day).toBe(5);
+    expect(slot2Data?.gameState.day).toBe(12);
+    expect(slot3Data).toBeNull();
+
+    const allSlots = service.getAllSlots();
+    expect(allSlots.length).toBe(3);
+    expect(allSlots[0].slotId).toBe(1);
+    expect(allSlots[0].data?.summary.chapterTitle).toBe('スロット1のデータ');
+    expect(allSlots[1].slotId).toBe(2);
+    expect(allSlots[1].data?.summary.chapterTitle).toBe('スロット2のデータ');
+    expect(allSlots[2].slotId).toBe(3);
+    expect(allSlots[2].data).toBeNull();
   });
 
   it('当日朝のスナップショットのバックアップと復元ができること', () => {

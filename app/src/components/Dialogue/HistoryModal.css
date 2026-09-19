@@ -1,0 +1,288 @@
+.history-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.history-modal-window {
+  width: min(92vw, 720px);
+  height: 80vh;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.18),
+              0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  overflow: hidden;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ヘッダー */
+.history-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.history-title-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #0284c7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.history-title-main {
+  font-family: 'Kiwi Maru', 'Noto Sans JP', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.history-session-counter {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.history-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.history-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* セッションリスト本体（flexではなく自然なblockスクロールレイアウト） */
+.history-body-container {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(80vh - 120px);
+  padding: 20px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.history-body-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-body-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-body-container::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.history-body-container::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+/* 空状態 */
+.history-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  color: #94a3b8;
+  gap: 8px;
+}
+
+.history-empty-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* セッションブロック（中身に応じた自然な高さのブロック） */
+.history-session-block {
+  display: block;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fcfcfd;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+}
+
+.history-session-block:last-child {
+  margin-bottom: 0;
+}
+
+.history-session-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.history-session-title-tag {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.history-session-location-tag {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+/* ログ行一覧 */
+.history-logs-list {
+  display: block;
+  padding: 16px 20px;
+}
+
+.history-log-row {
+  display: block;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.history-log-row:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.history-log-speaker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.history-speaker-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+}
+
+/* プレイヤーが選択した選択肢の行スタイル（上下に十分な余白を確保） */
+.history-log-row-choice {
+  background: linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(240, 249, 255, 0.5) 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 16px 0 22px 0;
+  border-bottom: none !important;
+}
+
+/* 選択肢の直後に続くログ行（キャラ名）との余白を明示的に確保 */
+.history-log-row-choice + .history-log-row {
+  margin-top: 22px;
+}
+
+.history-choice-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);
+}
+
+.history-choice-text {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.history-voice-play-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.history-voice-play-btn:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.history-log-text {
+  margin: 0;
+  font-family: 'Kiwi Maru', 'Noto Sans JP', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1e293b;
+  white-space: pre-wrap;
+}
+
+/* フッター */
+.history-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+  font-size: 0.8rem;
+  color: #64748b;
+}

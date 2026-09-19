@@ -15,6 +15,8 @@ export class SoundManager {
   private currentVolumeScale: number = 1.0;
   private currentSeAudio: HTMLAudioElement | null = null;
 
+  private isMuted: boolean = false;
+
   public masterVolume: number = 1.0;
   public bgmVolume: number = 0.4;
   public seVolume: number = 0.6;
@@ -29,6 +31,23 @@ export class SoundManager {
     if (typeof window !== 'undefined') {
       (window as any).__soundManager = this;
     }
+  }
+
+  /**
+   * ミュート状態の設定
+   */
+  public setMuted(muted: boolean): void {
+    this.isMuted = muted;
+    if (this.bgmAudio) {
+      this.bgmAudio.muted = muted;
+    }
+    if (this.currentSeAudio) {
+      this.currentSeAudio.muted = muted;
+    }
+  }
+
+  public getIsMuted(): boolean {
+    return this.isMuted;
   }
 
   /**
@@ -47,6 +66,7 @@ export class SoundManager {
     const isSameTarget = this.currentBgmTarget === target || this.currentBgmUrl === resolvedUrl;
     if (isSameTarget && this.bgmAudio) {
       this.bgmAudio.volume = Math.max(0, Math.min(1, this.masterVolume * this.bgmVolume * finalScale));
+      this.bgmAudio.muted = this.isMuted;
       this.currentBgmTarget = target;
       if (this.bgmAudio.paused) {
         this.bgmAudio.play().catch((err) => {
@@ -65,6 +85,7 @@ export class SoundManager {
     this.bgmAudio = new Audio(resolvedUrl);
     this.bgmAudio.loop = true;
     this.bgmAudio.volume = Math.max(0, Math.min(1, this.masterVolume * this.bgmVolume * finalScale));
+    this.bgmAudio.muted = this.isMuted;
     this.bgmAudio.play().catch((err) => {
       console.warn('BGM auto-play was blocked or failed:', err);
     });
@@ -138,9 +159,11 @@ export class SoundManager {
    * SE（効果音）単発再生
    */
   public playSe(url: string, volumeScale: number = 1.0): void {
+    if (this.isMuted) return;
     try {
       const resolvedUrl = resolveAssetUrl(url);
       const audio = new Audio(resolvedUrl);
+      audio.muted = this.isMuted;
       audio.volume = Math.max(0, Math.min(1, this.masterVolume * this.seVolume * volumeScale));
       audio.play().catch(() => {});
       this.currentSeAudio = audio;

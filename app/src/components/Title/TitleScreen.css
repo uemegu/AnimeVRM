@@ -137,6 +137,16 @@
   transform: translateX(3px);
 }
 
+.title-menu-btn.muted {
+  color: #e11d48;
+}
+
+.title-menu-btn.muted .title-menu-icon {
+  background: #ffe4e6;
+  border-color: #fecdd3;
+  color: #e11d48;
+}
+
 .title-menu-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;

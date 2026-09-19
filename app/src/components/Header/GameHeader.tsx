@@ -11,6 +11,9 @@ interface GameHeaderProps {
   onToggleAuto?: () => void;
   lang: SupportedLanguage;
   onToggleLanguage: () => void;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
+  onOpenHistory?: () => void;
   onOpenLicense?: () => void;
 }
 
@@ -24,23 +27,23 @@ const PHASE_LABELS: Record<
     className: 'phase-morning',
   },
   morning_action: {
-    ja: '午前（行動）',
+    ja: '午前',
     en: 'Morning Action',
     className: 'phase-morning_action',
   },
   lunch_action: {
-    ja: '昼休み（行動）',
+    ja: '昼休み',
     en: 'Lunch Action',
     className: 'phase-lunch_action',
   },
   afterschool_action: {
-    ja: '放課後（行動）',
+    ja: '放課後',
     en: 'Afterschool',
     className: 'phase-afterschool_action',
   },
   night: {
-    ja: '夜（自室）',
-    en: 'Night (My Room)',
+    ja: '夜',
+    en: 'Night',
     className: 'phase-night',
   },
 };
@@ -53,6 +56,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   onToggleAuto,
   lang,
   onToggleLanguage,
+  isMuted = false,
+  onToggleMute,
+  onOpenHistory,
   onOpenLicense,
 }) => {
   const dayOfWeek = getDayOfWeek(day);
@@ -87,19 +93,70 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         )}
       </div>
 
-      {/* 右側: AUTOボタン ＆ 言語切替 ＆ ライセンス */}
+      {/* 右側: 履歴 ＆ AUTO ＆ ミュート ＆ 言語切替 ＆ ライセンス */}
       <div className="header-actions">
+        {onOpenHistory && (
+          <button
+            type="button"
+            className="header-action-btn header-history-btn"
+            onClick={onOpenHistory}
+            aria-label="Open dialogue history"
+            title={lang === 'ja' ? '会話履歴 (L)' : 'Dialogue History (L)'}
+          >
+            <span className="header-action-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+              </svg>
+            </span>
+            <span>LOG</span>
+          </button>
+        )}
+
         {onToggleAuto && (
           <button
             type="button"
             className={`header-auto-btn ${isAuto ? 'active' : ''}`}
             onClick={onToggleAuto}
             aria-label="Toggle auto mode"
+            title={lang === 'ja' ? '自動送り (A)' : 'Auto Advance (A)'}
           >
             <span className="header-auto-icon" aria-hidden="true">
               ▶
             </span>
             <span>AUTO</span>
+          </button>
+        )}
+
+        {onToggleMute && (
+          <button
+            type="button"
+            className={`header-action-btn header-mute-btn ${isMuted ? 'muted' : ''}`}
+            onClick={onToggleMute}
+            aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
+            title={
+              isMuted
+                ? lang === 'ja' ? '音声を再生 (M)' : 'Unmute Sound (M)'
+                : lang === 'ja' ? '音声を消音 (M)' : 'Mute Sound (M)'
+            }
+          >
+            <span className="header-action-icon" aria-hidden="true">
+              {isMuted ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
+                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
+                  <line x1="12" y1="19" x2="12" y2="23" />
+                  <line x1="8" y1="23" x2="16" y2="23" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+              )}
+            </span>
+            <span>{isMuted ? 'MUTED' : 'MUTE'}</span>
           </button>
         )}
 
@@ -153,6 +210,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 <line x1="16" y1="17" x2="8" y2="17" />
               </svg>
             </span>
+            <span>INFO</span>
           </button>
         )}
       </div>

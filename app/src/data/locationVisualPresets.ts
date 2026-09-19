@@ -72,7 +72,7 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     isIndoor: false,
     layers: {
       background: {
-        url: '/textures/park-background.avif',
+        url: '/textures/school-ground-far.avif',
       },
     },
   },

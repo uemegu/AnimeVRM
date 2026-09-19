@@ -19,6 +19,9 @@ import { AudioLipSync } from './services/audio/AudioLipSync';
 import { SoundManager } from './services/audio/SoundManager';
 import { ConfirmModal } from './components/Common/ConfirmModal';
 import { LicenseModal } from './components/License/LicenseModal';
+import { SaveLoadModal } from './components/SaveLoad/SaveLoadModal';
+import { HistoryModal } from './components/Dialogue/HistoryModal';
+import { DialogueSession, MAX_HISTORY_SESSIONS } from './types/history';
 import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/InterludeOverlay';
 import { LoadingScreen } from './components/Loading/LoadingScreen';
 import { AssetPreloader } from './services/loader/AssetPreloader';
@@ -38,6 +41,34 @@ export const App: React.FC = () => {
   const [hasSaveData, setHasSaveData] = useState(() => saveService.hasSaveData());
   // ライセンス・クレジットモーダル表示フラグ
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+
+  // サウンドミュート状態（localStorage連動）
+  const [isMuted, setIsMuted] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('galgame_audio_muted') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // セーブ/ロード 複数スロットモーダル状態
+  const [saveLoadModalState, setSaveLoadModalState] = useState<{
+    isOpen: boolean;
+    mode: 'save' | 'load';
+  }>({
+    isOpen: false,
+    mode: 'save',
+  });
+
+  // 会話履歴（バックログ）状態
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historySessions, setHistorySessions] = useState<DialogueSession[]>([]);
+
+  // ミュート状態をオーディオサービスに同期
+  useEffect(() => {
+    soundManager.setMuted(isMuted);
+    audioLipSync.setMuted(isMuted);
+  }, [isMuted, soundManager, audioLipSync]);
 
   // ゲーム全体の状態
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -235,6 +266,95 @@ export const App: React.FC = () => {
     }
   }, [lang, engine]);
 
+  // サウンド ミュート/アンミュート切り替え
+  const handleToggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('galgame_audio_muted', String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  // ボイス再聴取（履歴モーダル等から）
+  const handlePlayVoice = useCallback(
+    (voiceUrl: string) => {
+      if (isMuted) return;
+      audioLipSync.loadAudioUrl(voiceUrl, '');
+      audioLipSync.play().catch(() => {});
+    },
+    [audioLipSync, isMuted]
+  );
+
+  // 会話履歴（直近3セッション）の自動記録
+  useEffect(() => {
+    if (!activeScenario || !currentScene || isTitleScreen || isInitialLoading) return;
+    if (!currentScene.text || currentScene.text.trim() === '') return;
+
+    const sessionId = `${gameState.day}_${gameState.phase}_${activeScenario.id}`;
+
+    setHistorySessions((prev) => {
+      let sessions = prev.map((s) => ({ ...s, logs: [...s.logs] }));
+      let currentSession = sessions.find((s) => s.id === sessionId);
+
+      if (!currentSession) {
+        // 新しいセッションを作成
+        const phaseNames: Record<string, { ja: string; en: string }> = {
+          morning: { ja: '朝（登校）', en: 'Morning' },
+          morning_action: { ja: '午前', en: 'Morning Action' },
+          lunch_action: { ja: '昼休み', en: 'Lunch Action' },
+          afterschool_action: { ja: '放課後', en: 'Afterschool' },
+          night: { ja: '夜', en: 'Night' },
+        };
+        const pName = phaseNames[gameState.phase] ? phaseNames[gameState.phase][lang] : gameState.phase;
+        const sessionTitle = `Day ${gameState.day} ${pName}`;
+
+        currentSession = {
+          id: sessionId,
+          day: gameState.day,
+          phase: gameState.phase,
+          title: sessionTitle,
+          locationName: activeLocationName,
+          logs: [],
+        };
+        sessions.push(currentSession);
+        if (sessions.length > MAX_HISTORY_SESSIONS) {
+          sessions = sessions.slice(-MAX_HISTORY_SESSIONS);
+        }
+      }
+
+      // 重複チェック（直前と同一の台詞・話者なら追加しない）
+      const lastLog = currentSession.logs[currentSession.logs.length - 1];
+      const isDuplicate = lastLog && lastLog.text === currentScene.text && lastLog.speaker === currentScene.speaker;
+
+      if (!isDuplicate) {
+        const newLog = {
+          id: `${sessionId}_${currentScene.id}_${Date.now()}`,
+          speaker: currentScene.speaker,
+          text: currentScene.text,
+          voiceUrl: currentScene.voiceUrl,
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        currentSession.logs.push(newLog);
+      }
+
+      return [...sessions];
+    });
+  }, [
+    activeScenario?.id,
+    currentScene?.id,
+    currentScene?.text,
+    currentScene?.speaker,
+    currentScene?.voiceUrl,
+    gameState.day,
+    gameState.phase,
+    activeLocationName,
+    lang,
+    isTitleScreen,
+    isInitialLoading,
+  ]);
+
   // 初回ロード開始時のオーディオアンロック処理（ユーザー操作によるAudioContext解除）
   const handleStartPreload = useCallback(() => {
     soundManager.unlockAudio();
@@ -400,24 +520,81 @@ export const App: React.FC = () => {
     clearAutoTimer();
   }, [currentScene?.id, clearAutoTimer]);
 
-  // キーボードショートカット (AキーでAUTOトグル)
+  // キーボードショートカット (AキーでAUTOトグル, Mキーでミュート, L/Hキーで履歴モーダル)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === 'a' || e.key === 'A') {
-        if (!isWaitingChoice && !isSelectingLocation) {
+        if (!isWaitingChoice && !isSelectingLocation && !isTitleScreen) {
           setIsAuto((prev) => !prev);
+        }
+      } else if (e.key === 'm' || e.key === 'M') {
+        handleToggleMute();
+      } else if (e.key === 'l' || e.key === 'L' || e.key === 'h' || e.key === 'H') {
+        if (!isTitleScreen) {
+          setIsHistoryModalOpen((prev) => !prev);
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isWaitingChoice, isSelectingLocation]);
+  }, [isWaitingChoice, isSelectingLocation, isTitleScreen, handleToggleMute]);
 
   // 選択肢の選択
   const handleChoiceClick = useCallback(
     (index: number) => {
       if (!engine) return;
+
+      // 選択した選択肢を会話履歴に記録
+      if (currentScene?.choices && currentScene.choices[index]) {
+        const chosen = currentScene.choices[index];
+        const chosenText = resolveLocalizedText(chosen.text, lang);
+        const sessionId = activeScenario
+          ? `${gameState.day}_${gameState.phase}_${activeScenario.id}`
+          : `${gameState.day}_${gameState.phase}`;
+
+        setHistorySessions((prev) => {
+          const sessions = prev.map((s) => ({ ...s, logs: [...s.logs] }));
+          let currentSession = sessions.find((s) => s.id === sessionId);
+          if (!currentSession) {
+            const phaseNames: Record<string, { ja: string; en: string }> = {
+              morning: { ja: '朝（登校）', en: 'Morning' },
+              morning_action: { ja: '午前', en: 'Morning Action' },
+              lunch_action: { ja: '昼休み', en: 'Lunch Action' },
+              afterschool_action: { ja: '放課後', en: 'Afterschool' },
+              night: { ja: '夜', en: 'Night' },
+            };
+            const pName = phaseNames[gameState.phase] ? phaseNames[gameState.phase][lang] : gameState.phase;
+            currentSession = {
+              id: sessionId,
+              day: gameState.day,
+              phase: gameState.phase,
+              title: `Day ${gameState.day} ${pName}`,
+              locationName: activeLocationName,
+              logs: [],
+            };
+            sessions.push(currentSession);
+          }
+
+          // 重複チェック: 直前のログが同一の選択肢なら追加しない（React StrictModeや多重クリック防止）
+          const lastLog = currentSession.logs[currentSession.logs.length - 1];
+          if (!lastLog || lastLog.text !== chosenText || !lastLog.isChoice) {
+            currentSession.logs.push({
+              id: `${sessionId}_choice_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+              speaker: lang === 'ja' ? '選択' : 'Choice',
+              text: chosenText,
+              timestamp: new Date().toLocaleTimeString(),
+              isChoice: true,
+            });
+          }
+
+          if (sessions.length > MAX_HISTORY_SESSIONS) {
+            return sessions.slice(-MAX_HISTORY_SESSIONS);
+          }
+          return sessions;
+        });
+      }
+
       engine.choose(index);
       setGameState((prev) => ({
         ...prev,
@@ -426,7 +603,7 @@ export const App: React.FC = () => {
       }));
       setTick((t) => t + 1);
     },
-    [engine]
+    [engine, currentScene, activeScenario, gameState, activeLocationName, lang]
   );
 
   // 場所を選択したとき（行動エピソード開始）
@@ -507,75 +684,105 @@ export const App: React.FC = () => {
     []
   );
 
-  // 自室コマンド: セーブ
-  const handleSave = useCallback(() => {
-    showConfirm(
-      lang === 'ja'
-        ? '現在の進行状況をセーブしますか？\n（※ご使用のブラウザの保存領域に記録するため、ブラウザ履歴クリア等の操作で消える可能性があります）'
-        : 'Do you want to save your current progress?\n(Note: Saved to browser storage. Clearing browser history or cache may erase saved data.)',
-      () => {
-        const success = saveService.saveGame(gameState);
-        if (success) {
-          setHasSaveData(true);
+  // スロット選択モーダルでのスロット決定
+  const handleSelectSlot = useCallback(
+    (slotId: number) => {
+      if (saveLoadModalState.mode === 'save') {
+        showConfirm(
+          lang === 'ja'
+            ? `スロット ${slotId} に現在の進行状況をセーブしますか？\n（※既存のデータがある場合は上書きされます）`
+            : `Save current progress to Slot ${slotId}?\n(Existing data in this slot will be overwritten)`,
+          () => {
+            const success = saveService.saveGame(gameState, slotId);
+            if (success) {
+              setHasSaveData(true);
+              setSaveLoadModalState((prev) => ({ ...prev, isOpen: false }));
+              showNotice(
+                lang === 'ja' ? `スロット ${slotId} にセーブしました。` : `Saved successfully to Slot ${slotId}.`,
+                lang === 'ja' ? 'セーブ完了' : 'Save Completed'
+              );
+            } else {
+              showNotice(
+                lang === 'ja' ? 'セーブに失敗しました。' : 'Failed to save game.',
+                lang === 'ja' ? 'エラー' : 'Error'
+              );
+            }
+          },
+          lang === 'ja' ? `スロット ${slotId} にセーブ` : `Save to Slot ${slotId}`,
+          lang === 'ja' ? 'はい' : 'YES',
+          lang === 'ja' ? 'いいえ' : 'NO'
+        );
+      } else {
+        // ロードモード
+        const slotData = saveService.loadGame(slotId);
+        if (!slotData) {
           showNotice(
-            lang === 'ja' ? 'セーブしました。' : 'Game Saved successfully.',
-            lang === 'ja' ? 'セーブ完了' : 'Save Completed'
-          );
-        } else {
-          showNotice(
-            lang === 'ja' ? 'セーブに失敗しました。' : 'Failed to save game.',
-            lang === 'ja' ? 'エラー' : 'Error'
-          );
-        }
-      },
-      lang === 'ja' ? 'セーブ' : 'Save Game',
-      lang === 'ja' ? 'はい' : 'YES',
-      lang === 'ja' ? 'いいえ' : 'NO'
-    );
-  }, [saveService, gameState, lang, showConfirm, showNotice]);
-
-  // 自室コマンド: ロード
-  const handleLoad = useCallback(() => {
-    showConfirm(
-      lang === 'ja'
-        ? 'セーブデータをロードしますか？\n（現在の進行状況は破棄されます）'
-        : 'Do you want to load save data?\n(Current progress will be lost)',
-      () => {
-        const loaded = saveService.loadGame();
-        if (!loaded) {
-          showNotice(
-            lang === 'ja'
-              ? 'セーブデータが見つかりません。'
-              : 'No save data found.',
+            lang === 'ja' ? '指定されたスロットにセーブデータがありません。' : 'No save data found in this slot.',
             lang === 'ja' ? 'お知らせ' : 'Notice'
           );
           return;
         }
-        setGameState(loaded.gameState);
-        setIsGameEnded(false);
-        setIsSelectingLocation(false);
 
-        if (loaded.gameState.phase === 'night') {
-          setActiveScenario(null);
-        } else if (loaded.gameState.phase === 'morning') {
-          const morningScenario =
-            ScheduleManager.getMorningScenario(loaded.gameState);
-          startScenario(morningScenario, loaded.gameState);
-        } else {
-          setIsSelectingLocation(true);
-          setActiveScenario(null);
-        }
+        showConfirm(
+          lang === 'ja'
+            ? `スロット ${slotId}（Day ${slotData.gameState.day}）をロードしますか？\n（※現在の進行状況は破棄されます）`
+            : `Load Slot ${slotId} (Day ${slotData.gameState.day})?\n(Current progress will be lost)`,
+          () => {
+            setSaveLoadModalState((prev) => ({ ...prev, isOpen: false }));
 
-        showNotice(
-          lang === 'ja' ? 'ロードしました。' : 'Game Loaded successfully.',
-          lang === 'ja' ? 'ロード完了' : 'Load Completed'
+            const run = async () => {
+              if (slotData.gameState.phase === 'night') {
+                await preloadInterludeResources('myroom', null);
+              } else if (slotData.gameState.phase === 'morning') {
+                const morningScenario = ScheduleManager.getMorningScenario(slotData.gameState);
+                await preloadInterludeResources('school_gate', morningScenario);
+              }
+
+              setGameState(slotData.gameState);
+              setIsGameEnded(false);
+              setIsSelectingLocation(false);
+              setIsTitleScreen(false);
+
+              if (slotData.gameState.phase === 'night') {
+                setActiveScenario(null);
+              } else if (slotData.gameState.phase === 'morning') {
+                const morningScenario = ScheduleManager.getMorningScenario(slotData.gameState);
+                startScenario(morningScenario, slotData.gameState);
+              } else {
+                setIsSelectingLocation(true);
+                setActiveScenario(null);
+              }
+
+              showNotice(
+                lang === 'ja' ? `スロット ${slotId} をロードしました。` : `Slot ${slotId} Loaded successfully.`,
+                lang === 'ja' ? 'ロード完了' : 'Load Completed'
+              );
+            };
+
+            if (interludeRef.current) {
+              interludeRef.current.playTransition({ onCovered: run });
+            } else {
+              run();
+            }
+          },
+          lang === 'ja' ? `スロット ${slotId} をロード` : `Load Slot ${slotId}`,
+          lang === 'ja' ? 'はい' : 'YES',
+          lang === 'ja' ? 'いいえ' : 'NO'
         );
-      },
-      lang === 'ja' ? 'ロード' : 'Load Game',
-      lang === 'ja' ? 'はい' : 'YES',
-      lang === 'ja' ? 'いいえ' : 'NO'
-    );
-  }, [saveService, lang, startScenario, showConfirm, showNotice]);
+      }
+    },
+    [saveLoadModalState.mode, gameState, lang, saveService, showConfirm, showNotice, preloadInterludeResources, startScenario]
+  );
+
+  // 自室コマンド: セーブモーダルを開く
+  const handleSave = useCallback(() => {
+    setSaveLoadModalState({ isOpen: true, mode: 'save' });
+  }, []);
+
+  // 自室コマンド: ロードモーダルを開く
+  const handleLoad = useCallback(() => {
+    setSaveLoadModalState({ isOpen: true, mode: 'load' });
+  }, []);
 
   // 自室コマンド: 1日をやり直す
   const handleRollbackDay = useCallback(() => {
@@ -658,41 +865,10 @@ export const App: React.FC = () => {
     }
   }, [saveService, startScenario, preloadInterludeResources]);
 
-  // タイトル画面: つづきから (Continue)
+  // タイトル画面: つづきから (Continue - スロット選択モーダルを開く)
   const handleContinueGame = useCallback(() => {
-    const run = async () => {
-      const loaded = saveService.loadGame();
-      if (!loaded) return;
-
-      if (loaded.gameState.phase === 'night') {
-        await preloadInterludeResources('myroom', null);
-      } else if (loaded.gameState.phase === 'morning') {
-        const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
-        await preloadInterludeResources('school_gate', morningScenario);
-      }
-
-      setGameState(loaded.gameState);
-      setIsGameEnded(false);
-      setIsSelectingLocation(false);
-      setIsTitleScreen(false);
-
-      if (loaded.gameState.phase === 'night') {
-        setActiveScenario(null);
-      } else if (loaded.gameState.phase === 'morning') {
-        const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
-        startScenario(morningScenario, loaded.gameState);
-      } else {
-        setIsSelectingLocation(true);
-        setActiveScenario(null);
-      }
-    };
-
-    if (interludeRef.current) {
-      interludeRef.current.playTransition({ onCovered: run });
-    } else {
-      run();
-    }
-  }, [saveService, startScenario, preloadInterludeResources]);
+    setSaveLoadModalState({ isOpen: true, mode: 'load' });
+  }, []);
 
   // タイトル画面へ戻る（エンディング後など）
   const handleReturnToTitle = useCallback(() => {
@@ -708,6 +884,10 @@ export const App: React.FC = () => {
     return ScheduleManager.getActionLocationOptions(gameState);
   }, [gameState]);
 
+  const saveSlots = useMemo(() => {
+    return saveService.getAllSlots();
+  }, [saveService, saveLoadModalState.isOpen, hasSaveData]);
+
   return (
     <div className="game-container">
       {isInitialLoading ? (
@@ -720,6 +900,8 @@ export const App: React.FC = () => {
         <TitleScreen
           hasSaveData={hasSaveData}
           lang={lang}
+          isMuted={isMuted}
+          onToggleMute={handleToggleMute}
           onStartGame={handleStartGame}
           onContinueGame={handleContinueGame}
           onToggleLanguage={handleToggleLanguage}
@@ -736,6 +918,9 @@ export const App: React.FC = () => {
             onToggleAuto={() => setIsAuto((prev) => !prev)}
             lang={lang}
             onToggleLanguage={handleToggleLanguage}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+            onOpenHistory={() => setIsHistoryModalOpen(true)}
             onOpenLicense={() => setIsLicenseModalOpen(true)}
           />
 
@@ -808,20 +993,38 @@ export const App: React.FC = () => {
               onRestart={handleReturnToTitle}
             />
           )}
-
-          {/* 自作 YES/NO ダイアログ */}
-          <ConfirmModal
-            isOpen={dialogConfig.isOpen}
-            title={dialogConfig.title}
-            message={dialogConfig.message}
-            confirmText={dialogConfig.confirmText}
-            cancelText={dialogConfig.cancelText}
-            onConfirm={dialogConfig.onConfirm}
-            onCancel={dialogConfig.onCancel}
-          />
-
         </>
       )}
+
+      {/* 自作 YES/NO 確認ダイアログ（タイトル・自室共通） */}
+      <ConfirmModal
+        isOpen={dialogConfig.isOpen}
+        title={dialogConfig.title}
+        message={dialogConfig.message}
+        confirmText={dialogConfig.confirmText}
+        cancelText={dialogConfig.cancelText}
+        onConfirm={dialogConfig.onConfirm}
+        onCancel={dialogConfig.onCancel}
+      />
+
+      {/* 複数スロットセーブ/ロードモーダル */}
+      <SaveLoadModal
+        isOpen={saveLoadModalState.isOpen}
+        mode={saveLoadModalState.mode}
+        slots={saveSlots}
+        lang={lang}
+        onSelectSlot={handleSelectSlot}
+        onClose={() => setSaveLoadModalState((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* 会話履歴（バックログ）モーダル */}
+      <HistoryModal
+        isOpen={isHistoryModalOpen}
+        sessions={historySessions}
+        lang={lang}
+        onPlayVoice={handlePlayVoice}
+        onClose={() => setIsHistoryModalOpen(false)}
+      />
 
       {/* ライセンス・クレジットモーダル（タイトル・ゲーム中共通） */}
       <LicenseModal

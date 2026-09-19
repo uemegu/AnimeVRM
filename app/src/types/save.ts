@@ -26,5 +26,14 @@ export interface SaveData {
 }
 
 /** localStorage 保存キー */
-export const SAVE_STORAGE_KEY = 'galgame_save_data';
+export const SAVE_STORAGE_KEY_PREFIX = 'galgame_save_slot_';
+export const SAVE_SLOT_COUNT = 3;
 export const DAY_BACKUP_STORAGE_KEY = 'galgame_day_backup_data';
+
+export const getSaveSlotKey = (slotId: number): string => `${SAVE_STORAGE_KEY_PREFIX}${slotId}`;
+
+/** セーブスロット情報 */
+export interface SaveSlotInfo {
+  slotId: number;
+  data: SaveData | null;
+}

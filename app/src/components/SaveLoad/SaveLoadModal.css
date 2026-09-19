@@ -1,0 +1,273 @@
+.save-load-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.save-load-modal-window {
+  width: min(92vw, 680px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.18),
+              0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  overflow: hidden;
+  animation: modalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ヘッダー */
+.save-load-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.save-load-title-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.save-load-icon-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #2563eb;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.save-load-title-main {
+  font-family: 'Kiwi Maru', 'Noto Sans JP', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.save-load-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.save-load-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* スロットリスト */
+.save-load-slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  overflow-y: auto;
+  max-height: calc(88vh - 150px);
+}
+
+/* 個別スロットカード */
+.save-slot-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 16px 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.02);
+}
+
+.save-slot-card:not(.disabled):hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(59, 130, 246, 0.15);
+}
+
+.save-slot-card.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.slot-index-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  padding-right: 18px;
+  margin-right: 18px;
+  border-right: 1px solid #f1f5f9;
+}
+
+.slot-number-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.slot-number-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.slot-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.slot-content-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+
+.empty-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.empty-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.slot-info-row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.slot-day-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.slot-phase-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.slot-date-label {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-affinity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.affinity-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.affinity-name {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.affinity-val {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* フッター案内 */
+.save-load-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid #f1f5f9;
+  background: #f8fafc;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.save-load-notice {
+  margin: 0;
+}
