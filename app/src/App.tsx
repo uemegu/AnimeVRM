@@ -921,7 +921,6 @@ export const App: React.FC = () => {
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
             onOpenHistory={() => setIsHistoryModalOpen(true)}
-            onOpenLicense={() => setIsLicenseModalOpen(true)}
           />
 
           {/* メインステージ（3D/背景描画領域） */}
