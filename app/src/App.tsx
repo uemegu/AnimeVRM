@@ -18,7 +18,10 @@ import { CHARACTERS } from './data/characters';
 import { AudioLipSync } from './services/audio/AudioLipSync';
 import { SoundManager } from './services/audio/SoundManager';
 import { ConfirmModal } from './components/Common/ConfirmModal';
-
+import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/InterludeOverlay';
+import { LoadingScreen } from './components/Loading/LoadingScreen';
+import { AssetPreloader } from './services/loader/AssetPreloader';
+import { LOCATION_VISUAL_PRESETS } from './data/locationVisualPresets';
 
 export const App: React.FC = () => {
   const [lang, setLang] = useState<SupportedLanguage>('ja');
@@ -26,6 +29,8 @@ export const App: React.FC = () => {
   const soundManager = useMemo(() => new SoundManager(), []);
   const audioLipSync = useMemo(() => new AudioLipSync(), []);
 
+  // 初回アセット事前読み込み画面フラグ
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   // タイトル画面表示フラグ
   const [isTitleScreen, setIsTitleScreen] = useState(true);
   // セーブデータ存在フラグ
@@ -53,6 +58,9 @@ export const App: React.FC = () => {
   // AUTO進行フラグ
   const [isAuto, setIsAuto] = useState(false);
 
+  // 幕間スライストランジション ref
+  const interludeRef = useRef<InterludeOverlayHandle>(null);
+
   // activeScenario が変わったときに engine を再初期化
   useEffect(() => {
     if (activeScenario) {
@@ -73,22 +81,34 @@ export const App: React.FC = () => {
   const isFinished = engine ? engine.isFinished() : true;
   const isWaitingChoice = engine ? engine.isWaitingForChoice() : false;
 
-  // 0. タイトル画面またはシーン進行に応じたオーディオ連動
+  // 0. タイトル画面・進行フェーズ・シーンに応じたオーディオ連動
   useEffect(() => {
+    // 0-0. 初回アセット事前読み込み画面表示中はBGM停止
+    if (isInitialLoading) {
+      audioLipSync.stop();
+      return;
+    }
+
+    // 0-1. タイトル画面
     if (isTitleScreen) {
       audioLipSync.stop();
-      soundManager.playBgm('/bgm/thema_music.mp3');
+      soundManager.playBgm('main_theme');
       return;
+    }
+
+    // 0-2. 夜フェーズ（自室）
+    if (gameState.phase === 'night' && !isGameEnded) {
+      const sceneBgm = currentScene?.bgm || currentScene?.bgmUrl;
+      soundManager.playBgm(sceneBgm || 'night_room');
+    } else {
+      // 0-3. プレイ中通常（基本的にはメインBGM、シーン個別指定があればそれを優先）
+      const sceneBgm = currentScene?.bgm || currentScene?.bgmUrl;
+      soundManager.playBgm(sceneBgm || 'main_bgm');
     }
 
     if (!currentScene) {
       audioLipSync.stop();
       return;
-    }
-
-    // BGM再生
-    if (currentScene.bgmUrl) {
-      soundManager.playBgm(currentScene.bgmUrl);
     }
 
     // SE再生
@@ -103,7 +123,19 @@ export const App: React.FC = () => {
     } else {
       audioLipSync.stop();
     }
-  }, [isTitleScreen, currentScene?.id, currentScene?.voiceUrl, currentScene?.bgmUrl, currentScene?.seUrl]);
+  }, [
+    isInitialLoading,
+    isTitleScreen,
+    gameState.phase,
+    isGameEnded,
+    currentScene?.id,
+    currentScene?.voiceUrl,
+    currentScene?.bgm,
+    currentScene?.bgmUrl,
+    currentScene?.seUrl,
+    soundManager,
+    audioLipSync,
+  ]);
 
   // コンポーネント破棄時のオーディオリソース解放
   useEffect(() => {
@@ -200,6 +232,45 @@ export const App: React.FC = () => {
     }
   }, [lang, engine]);
 
+  // 初回ロード開始時のオーディオアンロック処理（ユーザー操作によるAudioContext解除）
+  const handleStartPreload = useCallback(() => {
+    soundManager.unlockAudio();
+    audioLipSync.initAudioContext();
+    if (audioLipSync.audioContext && audioLipSync.audioContext.state === 'suspended') {
+      audioLipSync.audioContext.resume().catch(() => {});
+    }
+  }, [soundManager, audioLipSync]);
+
+  // 初回ロード完了時
+  const handlePreloadComplete = useCallback(() => {
+    setIsInitialLoading(false);
+  }, []);
+
+  // 幕間待機中に次のシーン・ロケーションに必要なアセット（モーション・背景・ボイス等）を事前読み込み
+  const preloadInterludeResources = useCallback(
+    async (locationId?: string, scenario?: ScenarioPackage | null) => {
+      const locUrls: string[] = [];
+      if (locationId && LOCATION_VISUAL_PRESETS[locationId]) {
+        const preset = LOCATION_VISUAL_PRESETS[locationId];
+        if (preset.layers.background?.url) locUrls.push(preset.layers.background.url);
+        if (preset.layers.midground?.url) locUrls.push(preset.layers.midground.url);
+        if (preset.layers.nearground?.url) locUrls.push(preset.layers.nearground.url);
+      }
+      const voiceUrls: string[] = [];
+      if (scenario) {
+        for (const scene of Object.values(scenario.scenes)) {
+          if (scene.voiceUrl) voiceUrls.push(scene.voiceUrl);
+        }
+      }
+      await AssetPreloader.preloadInterludeAssets(
+        locUrls,
+        voiceUrls,
+        ['/animations/Standing Idle.fbx']
+      );
+    },
+    []
+  );
+
   // シナリオ開始ヘルパー
   const startScenario = useCallback((scenario: ScenarioPackage, nextGameState: GameState) => {
     setActiveScenario(scenario);
@@ -248,39 +319,56 @@ export const App: React.FC = () => {
     setTick((t) => t + 1);
 
     if (finished) {
-      // シナリオ終了後の分岐制御
-      if (gameState.phase === 'morning') {
-        // 朝イベント終了 -> 午前行動へ
-        proceedToActionPhase('morning_action', updatedState);
-      } else if (
-        gameState.phase === 'morning_action' ||
-        gameState.phase === 'lunch_action' ||
-        gameState.phase === 'afterschool_action'
-      ) {
-        // もし強制イベントだった場合、完了後に本来の場所選択を表示
-        if (
-          activeScenario?.id === 'forced_meet_shion' ||
-          activeScenario?.id === 'forced_meet_emili'
+      // エピソード終了時の幕間スライストランジション
+      const proceedAfterEpisode = async () => {
+        if (gameState.phase === 'morning') {
+          // 朝イベント終了 -> 午前行動へ
+          proceedToActionPhase('morning_action', updatedState);
+        } else if (
+          gameState.phase === 'morning_action' ||
+          gameState.phase === 'lunch_action' ||
+          gameState.phase === 'afterschool_action'
         ) {
-          setActiveScenario(null);
-          setIsSelectingLocation(true);
-        } else {
-          // 通常の行動シナリオ終了 -> 次のフェーズへ
-          const nextPhase = ScheduleManager.getNextPhase(gameState.phase);
-          if (nextPhase === 'night') {
+          // もし強制イベントだった場合、完了後に本来の場所選択を表示
+          if (
+            activeScenario?.id === 'forced_meet_shion' ||
+            activeScenario?.id === 'forced_meet_emili'
+          ) {
             setActiveScenario(null);
-            setGameState({
-              ...updatedState,
-              phase: 'night',
-              currentScenarioId: null,
-            });
+            setIsSelectingLocation(true);
           } else {
-            proceedToActionPhase(nextPhase, updatedState);
+            // 通常の行動シナリオ終了 -> 次のフェーズへ
+            const nextPhase = ScheduleManager.getNextPhase(gameState.phase);
+            if (nextPhase === 'night') {
+              await preloadInterludeResources('myroom', null);
+              setActiveScenario(null);
+              setGameState({
+                ...updatedState,
+                phase: 'night',
+                currentScenarioId: null,
+              });
+            } else {
+              proceedToActionPhase(nextPhase, updatedState);
+            }
           }
         }
+      };
+
+      if (interludeRef.current) {
+        interludeRef.current.playTransition({ onCovered: proceedAfterEpisode });
+      } else {
+        proceedAfterEpisode();
       }
     }
-  }, [engine, isWaitingChoice, isFinished, gameState, activeScenario, proceedToActionPhase]);
+  }, [
+    engine,
+    isWaitingChoice,
+    isFinished,
+    gameState,
+    activeScenario,
+    proceedToActionPhase,
+    preloadInterludeResources,
+  ]);
 
   // AUTOモード自動送りタイマー参照
   const autoTimerRef = useRef<number | null>(null);
@@ -338,15 +426,24 @@ export const App: React.FC = () => {
     [engine]
   );
 
-  // 場所を選択したとき
+  // 場所を選択したとき（行動エピソード開始）
   const handleSelectLocation = useCallback(
     (locationId: ActionLocationId) => {
-      setSelectedLocationId(locationId);
-      setIsSelectingLocation(false);
-      const scenario = ScheduleManager.getScenarioForLocation(locationId, gameState);
-      startScenario(scenario, gameState);
+      const run = async () => {
+        const scenario = ScheduleManager.getScenarioForLocation(locationId, gameState);
+        await preloadInterludeResources(locationId, scenario);
+        setSelectedLocationId(locationId);
+        setIsSelectingLocation(false);
+        startScenario(scenario, gameState);
+      };
+
+      if (interludeRef.current) {
+        interludeRef.current.playTransition({ onCovered: run });
+      } else {
+        run();
+      }
     },
-    [gameState, startScenario]
+    [gameState, startScenario, preloadInterludeResources]
   );
 
   // 自作ダイアログ（YES/NO または OK モーダル）
@@ -411,8 +508,8 @@ export const App: React.FC = () => {
   const handleSave = useCallback(() => {
     showConfirm(
       lang === 'ja'
-        ? '現在の進行状況をセーブしますか？'
-        : 'Do you want to save your current progress?',
+        ? '現在の進行状況をセーブしますか？\n（※ご使用のブラウザの保存領域に記録するため、ブラウザ履歴クリア等の操作で消える可能性があります）'
+        : 'Do you want to save your current progress?\n(Note: Saved to browser storage. Clearing browser history or cache may erase saved data.)',
       () => {
         const success = saveService.saveGame(gameState);
         if (success) {
@@ -484,72 +581,115 @@ export const App: React.FC = () => {
         ? 'この1日の朝に戻ってやり直しますか？\n（本日の進行内容はリセットされます）'
         : 'Restart from this morning?\n(Today\'s progress will be reset)',
       () => {
-        const rolledBack = ScheduleManager.rollbackToday(gameState);
-        const morningScenario = ScheduleManager.getMorningScenario(rolledBack);
-        startScenario(morningScenario, rolledBack);
-        setIsSelectingLocation(false);
-        showNotice(
-          lang === 'ja'
-            ? `第${rolledBack.day}日の朝に戻りました。`
-            : `Restarted from Day ${rolledBack.day} Morning.`,
-          lang === 'ja' ? '1日のやり直し' : 'Day Restarted'
-        );
+        const run = async () => {
+          const rolledBack = ScheduleManager.rollbackToday(gameState);
+          const morningScenario = ScheduleManager.getMorningScenario(rolledBack);
+          await preloadInterludeResources('school_gate', morningScenario);
+          startScenario(morningScenario, rolledBack);
+          setIsSelectingLocation(false);
+          showNotice(
+            lang === 'ja'
+              ? `第${rolledBack.day}日の朝に戻りました。`
+              : `Restarted from Day ${rolledBack.day} Morning.`,
+            lang === 'ja' ? '1日のやり直し' : 'Day Restarted'
+          );
+        };
+
+        if (interludeRef.current) {
+          interludeRef.current.playTransition({ onCovered: run });
+        } else {
+          run();
+        }
       },
       lang === 'ja' ? 'やり直し' : 'Restart Day',
       lang === 'ja' ? 'はい' : 'YES',
       lang === 'ja' ? 'いいえ' : 'NO'
     );
-  }, [gameState, lang, startScenario, showConfirm, showNotice]);
+  }, [gameState, lang, startScenario, showConfirm, showNotice, preloadInterludeResources]);
 
-
-  // 自室コマンド: 就寝
+  // 自室コマンド: 就寝（翌朝エピソード開始）
   const handleSleep = useCallback(() => {
-    const { nextState, isEnding } = ScheduleManager.advanceToNextDay(gameState);
-    if (isEnding) {
-      // 28日終了 -> エンディング
-      const endingScenario = ScheduleManager.getEndingScenario(gameState);
-      startScenario(endingScenario, gameState);
-      setIsGameEnded(true);
-      return;
-    }
+    const run = async () => {
+      const { nextState, isEnding } = ScheduleManager.advanceToNextDay(gameState);
+      if (isEnding) {
+        // 28日終了 -> エンディング
+        const endingScenario = ScheduleManager.getEndingScenario(gameState);
+        await preloadInterludeResources('classroom', endingScenario);
+        startScenario(endingScenario, gameState);
+        setIsGameEnded(true);
+        return;
+      }
 
-    // 翌日の朝へ
-    saveService.saveDayStartBackup(nextState.dayStartSnapshot!);
-    const morningScenario = ScheduleManager.getMorningScenario(nextState);
-    startScenario(morningScenario, nextState);
-  }, [gameState, saveService, startScenario]);
+      // 翌日の朝へ
+      saveService.saveDayStartBackup(nextState.dayStartSnapshot!);
+      const morningScenario = ScheduleManager.getMorningScenario(nextState);
+      await preloadInterludeResources('school_gate', morningScenario);
+      startScenario(morningScenario, nextState);
+    };
+
+    if (interludeRef.current) {
+      interludeRef.current.playTransition({ onCovered: run });
+    } else {
+      run();
+    }
+  }, [gameState, saveService, startScenario, preloadInterludeResources]);
 
   // タイトル画面: はじめから (New Game)
   const handleStartGame = useCallback(() => {
-    const initial = ScheduleManager.createInitialState();
-    saveService.saveDayStartBackup(initial.dayStartSnapshot!);
-    setGameState(initial);
-    setIsGameEnded(false);
-    setIsSelectingLocation(false);
-    setIsTitleScreen(false);
-    const morningScenario = ScheduleManager.getMorningScenario(initial);
-    startScenario(morningScenario, initial);
-  }, [saveService, startScenario]);
+    const run = async () => {
+      const initial = ScheduleManager.createInitialState();
+      saveService.saveDayStartBackup(initial.dayStartSnapshot!);
+      const morningScenario = ScheduleManager.getMorningScenario(initial);
+      await preloadInterludeResources('school_gate', morningScenario);
+      setGameState(initial);
+      setIsGameEnded(false);
+      setIsSelectingLocation(false);
+      setIsTitleScreen(false);
+      startScenario(morningScenario, initial);
+    };
+
+    if (interludeRef.current) {
+      interludeRef.current.playTransition({ onCovered: run });
+    } else {
+      run();
+    }
+  }, [saveService, startScenario, preloadInterludeResources]);
 
   // タイトル画面: つづきから (Continue)
   const handleContinueGame = useCallback(() => {
-    const loaded = saveService.loadGame();
-    if (!loaded) return;
-    setGameState(loaded.gameState);
-    setIsGameEnded(false);
-    setIsSelectingLocation(false);
-    setIsTitleScreen(false);
+    const run = async () => {
+      const loaded = saveService.loadGame();
+      if (!loaded) return;
 
-    if (loaded.gameState.phase === 'night') {
-      setActiveScenario(null);
-    } else if (loaded.gameState.phase === 'morning') {
-      const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
-      startScenario(morningScenario, loaded.gameState);
+      if (loaded.gameState.phase === 'night') {
+        await preloadInterludeResources('myroom', null);
+      } else if (loaded.gameState.phase === 'morning') {
+        const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
+        await preloadInterludeResources('school_gate', morningScenario);
+      }
+
+      setGameState(loaded.gameState);
+      setIsGameEnded(false);
+      setIsSelectingLocation(false);
+      setIsTitleScreen(false);
+
+      if (loaded.gameState.phase === 'night') {
+        setActiveScenario(null);
+      } else if (loaded.gameState.phase === 'morning') {
+        const morningScenario = ScheduleManager.getMorningScenario(loaded.gameState);
+        startScenario(morningScenario, loaded.gameState);
+      } else {
+        setIsSelectingLocation(true);
+        setActiveScenario(null);
+      }
+    };
+
+    if (interludeRef.current) {
+      interludeRef.current.playTransition({ onCovered: run });
     } else {
-      setIsSelectingLocation(true);
-      setActiveScenario(null);
+      run();
     }
-  }, [saveService, startScenario]);
+  }, [saveService, startScenario, preloadInterludeResources]);
 
   // タイトル画面へ戻る（エンディング後など）
   const handleReturnToTitle = useCallback(() => {
@@ -567,7 +707,13 @@ export const App: React.FC = () => {
 
   return (
     <div className="game-container">
-      {isTitleScreen ? (
+      {isInitialLoading ? (
+        <LoadingScreen
+          lang={lang}
+          onStartLoading={handleStartPreload}
+          onComplete={handlePreloadComplete}
+        />
+      ) : isTitleScreen ? (
         <TitleScreen
           hasSaveData={hasSaveData}
           lang={lang}
@@ -581,7 +727,7 @@ export const App: React.FC = () => {
           <GameHeader
             day={gameState.day}
             phase={gameState.phase}
-            locationName={activeLocationName}
+            locationName={isSelectingLocation ? undefined : activeLocationName}
             isAuto={isAuto}
             onToggleAuto={() => setIsAuto((prev) => !prev)}
             lang={lang}
@@ -671,6 +817,9 @@ export const App: React.FC = () => {
 
         </>
       )}
+
+      {/* 最前面 幕間スライストランジション（4スライス＆5秒で告白タイトル） */}
+      <InterludeOverlay ref={interludeRef} lang={lang} />
     </div>
   );
 };

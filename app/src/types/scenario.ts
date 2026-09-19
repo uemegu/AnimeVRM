@@ -52,6 +52,8 @@ export interface ScenarioChoice {
   };
 }
 
+import { BgmId } from '../data/bgmPresets';
+
 /** シーン（1セリフ / 1演出ステップ）の定義 */
 export interface ScenarioScene {
   id: string;
@@ -65,7 +67,9 @@ export interface ScenarioScene {
   voiceUrl?: string;
   /** 背景画像URLまたはプリセットキー */
   background?: string;
-  /** BGM URL */
+  /** BGM ID または URL */
+  bgm?: BgmId | string;
+  /** @deprecated BGM URL (互換性用) */
   bgmUrl?: string;
   /** 効果音 URL */
   seUrl?: string;

@@ -1,0 +1,296 @@
+/* 白（ライトテーマ）を基調とした洗練されたローディングUI */
+.loading-screen-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow: hidden;
+  font-family: 'Kiwi Maru', sans-serif;
+  user-select: none;
+}
+
+/* 背景幾何学装飾 */
+.loading-bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(135deg, #dbeafe 0%, #a3b9ea 100%);
+  clip-path: polygon(0 0, 75% 0, 45% 100%, 0 100%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* メインローディングカード */
+.loading-card {
+  position: relative;
+  width: 90%;
+  max-width: 560px;
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  box-shadow: 8px 8px 0px #0b1d47;
+  padding: 36px 40px;
+  box-sizing: border-box;
+  animation: loadingCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loadingCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ヘッダーエリア */
+.loading-header {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.loading-brand-sub {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.loading-title {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.05);
+}
+
+.loading-badge {
+  display: inline-block;
+  background: #0284c7;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 3px 12px;
+  border-radius: 2px;
+  transform: skewX(-6deg);
+  box-shadow: 2px 2px 0px #0b1d47;
+}
+
+/* 案内告知ボックス */
+.loading-notice-box {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-left: 5px solid #0284c7;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+  box-shadow: 3px 3px 0px rgba(15, 23, 42, 0.06);
+}
+
+.loading-notice-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.loading-info-icon {
+  width: 18px;
+  height: 18px;
+  color: #0284c7;
+  flex-shrink: 0;
+}
+
+.loading-notice-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.loading-notice-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #334155;
+  margin: 0 0 10px 0;
+  font-weight: 500;
+}
+
+.loading-wifi-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* スタートボタン */
+.loading-button-container {
+  display: flex;
+  justify-content: center;
+}
+
+.loading-start-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 28px;
+  background: #0284c7;
+  color: #ffffff;
+  border: 2px solid #0f172a;
+  box-shadow: 4px 4px 0px #0b1d47;
+  transform: skewX(-4deg);
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+.loading-start-btn:hover {
+  background: #0369a1;
+  transform: skewX(-4deg) translateY(-2px);
+  box-shadow: 6px 6px 0px #0b1d47;
+}
+
+.loading-start-btn:active {
+  transform: skewX(-4deg) translateY(1px);
+  box-shadow: 2px 2px 0px #0b1d47;
+}
+
+.loading-btn-sub {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  opacity: 0.85;
+  display: none;
+}
+
+.loading-btn-main {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.loading-btn-arrow {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.loading-start-btn:hover .loading-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* プログレスバー・読み込み進行中 */
+.loading-progress-content,
+.loading-completed-content {
+  padding: 12px 0;
+}
+
+.loading-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.loading-status-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.loading-percentage-text {
+  font-size: 24px;
+  font-weight: 900;
+  color: #0284c7;
+  font-variant-numeric: tabular-nums;
+}
+
+.loading-bar-track {
+  width: 100%;
+  height: 16px;
+  background: #e2e8f0;
+  border: 2px solid #0f172a;
+  box-shadow: 3px 3px 0px #0b1d47;
+  position: relative;
+  overflow: hidden;
+  transform: skewX(-6deg);
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8 0%, #0284c7 100%);
+  transition: width 0.15s ease-out;
+  position: relative;
+}
+
+/* バー内の光沢アニメーション */
+.loading-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: progressGlint 1.5s infinite;
+}
+
+@keyframes progressGlint {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.loading-size-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.loading-tip-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.loading-ready-msg {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0284c7;
+  margin-top: 16px;
+  animation: pulseReady 1s infinite alternate;
+}
+
+@keyframes pulseReady {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}

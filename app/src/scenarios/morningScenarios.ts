@@ -12,7 +12,7 @@ export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
         ja: '暖かな春の陽光が桜並木を照らす。今日から新しい学期が始まる。',
         en: 'Warm spring sunlight illuminates the cherry blossoms. A new semester starts today.',
       },
-      bgmUrl: '/bgm/thema_music.mp3',
+      bgm: 'main_bgm',
       avatars: {
         aoi: { characterId: 'aoi', position: 'center', visible: true, expression: 'neutral', expressionWeight: 1.0 },
       },

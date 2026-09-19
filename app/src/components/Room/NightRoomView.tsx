@@ -40,7 +40,7 @@ export const NightRoomView: React.FC<NightRoomViewProps> = ({
 
       {/* 右側: 夜の自室コマンド・ステータスサイドバー */}
       <aside className="room-sidebar">
-        {/* ヘッダーエリア（NIGHT PHASEラベルは削除） */}
+        {/* ヘッダーエリア */}
         <header className="room-sidebar-header">
           <h2 className="room-sidebar-title">
             {lang === 'ja'
@@ -57,99 +57,154 @@ export const NightRoomView: React.FC<NightRoomViewProps> = ({
         <div className="room-sidebar-content">
           {/* 現在の親愛度ステータス（好感度メーター付き） */}
           <div className="affinity-status-panel">
-            <div className="affinity-panel-title">
-              <span>
-                {lang === 'ja' ? 'キャラクター好感度' : 'Character Affinities'}
-              </span>
-            </div>
-            <div className="affinity-list">
-              {Object.entries(CHARACTERS).map(([charId, char]) => {
-                const val = affinities[charId] || 0;
-                const name = char.name[lang] || char.name.ja;
-                const percent = Math.min(100, Math.round((val / MAX_AFFINITY_SCALE) * 100));
+            <div className="affinity-panel-inner">
+              <div className="affinity-panel-title">
+                <span className="affinity-panel-badge">STATUS</span>
+                <span>
+                  {lang === 'ja' ? 'ヒロイン好感度' : 'Heroine Affinities'}
+                </span>
+              </div>
+              <div className="affinity-list">
+                {Object.entries(CHARACTERS).map(([charId, char]) => {
+                  const val = affinities[charId] || 0;
+                  const name = char.name[lang] || char.name.ja;
+                  const percent = Math.min(100, Math.round((val / MAX_AFFINITY_SCALE) * 100));
 
-                return (
-                  <div key={charId} className="affinity-item">
-                    <div className="affinity-item-header">
-                      <span
-                        className="affinity-name"
-                        style={{ color: char.themeColor }}
-                      >
-                        {name}
-                      </span>
-                      <span className="affinity-val">Lv. {val}</span>
+                  return (
+                    <div key={charId} className="affinity-item">
+                      <div className="affinity-item-header">
+                        <span
+                          className="affinity-name"
+                          style={{ color: char.themeColor }}
+                        >
+                          {name}
+                        </span>
+                        <span className="affinity-val">Lv. {val}</span>
+                      </div>
+                      {/* 好感度プログレスバー */}
+                      <div className="affinity-bar-track">
+                        <div
+                          className="affinity-bar-fill"
+                          style={{
+                            width: `${percent}%`,
+                            backgroundColor: char.themeColor || '#ec4899',
+                          }}
+                        />
+                      </div>
                     </div>
-                    {/* 好感度プログレスバー */}
-                    <div className="affinity-bar-track">
-                      <div
-                        className="affinity-bar-fill"
-                        style={{
-                          width: `${percent}%`,
-                          backgroundColor: char.themeColor || '#ec4899',
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* コマンドボタン群 */}
-          <div className="room-button-group">
-            {/* 就寝する（翌日へ）- 最重要アクション */}
-            <button
-              type="button"
-              className="room-menu-button success"
+          {/* コマンドカード群（ActionSelectModalと同等のUIスタイル） */}
+          <div className="room-card-list">
+            {/* 就寝する - 最重要アクション */}
+            <div
+              className="room-menu-card card-sleep"
+              role="button"
+              tabIndex={0}
               onClick={onSleep}
+              onKeyDown={(e) => e.key === 'Enter' && onSleep()}
             >
-              <div className="room-btn-inner">
-                <span className="room-btn-text">
-                  {lang === 'ja' ? '就寝する（翌日へ進む）' : 'Sleep (Next Day)'}
-                </span>
+              <div className="room-card-inner">
+                <div className="room-card-main">
+                  <span className="room-card-title">
+                    {lang === 'ja' ? '就寝する' : 'Sleep'}
+                  </span>
+                  <span className="room-badge badge-sleep">SLEEP</span>
+                </div>
+                <div className="room-hint-box">
+                  <span className="room-hint-label">INFO</span>
+                  <span className="room-hint-text">
+                    {lang === 'ja'
+                      ? '一日を終えて翌日へ進む'
+                      : 'End the day and wake up tomorrow'}
+                  </span>
+                </div>
               </div>
-            </button>
+            </div>
 
-            {/* セーブ */}
-            <button
-              type="button"
-              className="room-menu-button primary"
+            {/* ゲームをセーブする */}
+            <div
+              className="room-menu-card"
+              role="button"
+              tabIndex={0}
               onClick={onSave}
+              onKeyDown={(e) => e.key === 'Enter' && onSave()}
             >
-              <div className="room-btn-inner">
-                <span className="room-btn-text">
-                  {lang === 'ja' ? 'ゲームをセーブする' : 'Save Game'}
-                </span>
+              <div className="room-card-inner">
+                <div className="room-card-main">
+                  <span className="room-card-title">
+                    {lang === 'ja' ? 'ゲームをセーブする' : 'Save Game'}
+                  </span>
+                  <span className="room-badge badge-save">SAVE</span>
+                </div>
+                <div className="room-hint-box">
+                  <span className="room-hint-label">INFO</span>
+                  <span className="room-hint-text">
+                    {lang === 'ja'
+                      ? '現在の進行状況を保存する'
+                      : 'Save current progress'}
+                  </span>
+                </div>
               </div>
-            </button>
+            </div>
 
-            {/* ロード */}
-            <button
-              type="button"
-              className="room-menu-button"
+            {/* セーブデータをロードする */}
+            <div
+              className="room-menu-card"
+              role="button"
+              tabIndex={0}
               onClick={onLoad}
+              onKeyDown={(e) => e.key === 'Enter' && onLoad()}
             >
-              <div className="room-btn-inner">
-                <span className="room-btn-text">
-                  {lang === 'ja' ? 'セーブデータをロード' : 'Load Game'}
-                </span>
+              <div className="room-card-inner">
+                <div className="room-card-main">
+                  <span className="room-card-title">
+                    {lang === 'ja' ? 'セーブデータをロードする' : 'Load Game'}
+                  </span>
+                  <span className="room-badge badge-load">LOAD</span>
+                </div>
+                <div className="room-hint-box">
+                  <span className="room-hint-label">INFO</span>
+                  <span className="room-hint-text">
+                    {lang === 'ja'
+                      ? '保存したデータから再開する'
+                      : 'Resume from saved data'}
+                  </span>
+                </div>
               </div>
-            </button>
+            </div>
 
-            {/* やり直し */}
-            <button
-              type="button"
-              className="room-menu-button warning"
+            {/* この1日をやり直す */}
+            <div
+              className="room-menu-card card-rollback"
+              role="button"
+              tabIndex={0}
               onClick={onRollbackDay}
+              onKeyDown={(e) => e.key === 'Enter' && onRollbackDay()}
             >
-              <div className="room-btn-inner">
-                <span className="room-btn-text">
-                  {lang === 'ja'
-                    ? 'この1日をやり直す（朝へ巻き戻し）'
-                    : 'Restart This Day'}
-                </span>
+              <div className="room-card-inner">
+                <div className="room-card-main">
+                  <span className="room-card-title">
+                    {lang === 'ja'
+                      ? 'この1日をやり直す'
+                      : 'Restart Day'}
+                  </span>
+                  <span className="room-badge badge-rollback">REWIND</span>
+                </div>
+                <div className="room-hint-box">
+                  <span className="room-hint-label">INFO</span>
+                  <span className="room-hint-text">
+                    {lang === 'ja'
+                      ? '今朝の開始時点へ巻き戻す'
+                      : 'Rewind to this morning'}
+                  </span>
+                </div>
               </div>
-            </button>
+            </div>
           </div>
         </div>
       </aside>

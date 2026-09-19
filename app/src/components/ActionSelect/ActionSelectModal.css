@@ -39,39 +39,52 @@
   transition: background-color 0.3s ease;
 }
 
-/* メインコンテンツ背景の流線型・曲線アクセント模様 */
-.action-map-bg-curve {
+/* メインコンテンツ背景幾何学装飾（ロード画面と共通の polygon clip-path） */
+.action-map-bg-decoration {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: 0;
+  width: 55%;
   height: 100%;
+  background: linear-gradient(135deg, #dbeafe 0%, #a3b9ea 100%);
+  clip-path: polygon(0 0, 75% 0, 45% 100%, 0 100%);
+  opacity: 0.85;
   pointer-events: none;
   z-index: 1;
 }
 
 /* 時間帯別メインコンテンツ背景色変動 */
-/* 午前: 今の色 */
+/* 午前: クールスレート ＆ 爽やかなスカイブルー */
 .action-select-overlay.phase-morning_action {
   background: #f8fafc;
 }
 .action-select-overlay.phase-morning_action .action-map-area {
   background: #f1f5f9;
 }
+.action-select-overlay.phase-morning_action .action-map-bg-decoration {
+  background: linear-gradient(135deg, #dbeafe 0%, #a3b9ea 100%);
+}
 
-/* 昼: 少し黄色の色味を増す（控えめで淡いアイボリー） */
+/* 昼: 少し黄色の色味を増す（控えめで淡いアイボリー ＆ 日差しの淡黄色） */
 .action-select-overlay.phase-lunch_action {
   background: #fdfcf7;
 }
 .action-select-overlay.phase-lunch_action .action-map-area {
   background: #fefce8;
 }
+.action-select-overlay.phase-lunch_action .action-map-bg-decoration {
+  background: linear-gradient(135deg, #fef08a 0%, #fcd34d 100%);
+}
 
-/* 夕方: 薄いオレンジ */
+/* 夕方: 薄いオレンジ ＆ 夕暮れウォームオレンジ */
 .action-select-overlay.phase-afterschool_action {
   background: #fff7ed;
 }
 .action-select-overlay.phase-afterschool_action .action-map-area {
   background: #ffedd5;
+}
+.action-select-overlay.phase-afterschool_action .action-map-bg-decoration {
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
 }
 
 /* マップの1672:941アスペクト比完全維持ラッパー（絶対に見切れず全体を表示） */
