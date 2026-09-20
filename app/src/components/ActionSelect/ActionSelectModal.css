@@ -243,12 +243,10 @@
 
 /* プレビューヒロイン画像 */
 .heroine-preview-img {
-  width: 112%;
-  height: 112%;
+  width: 200%;
   object-fit: contain;
   object-position: center bottom;
   transform: skewX(6deg) translateY(6px);
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
 }
 
 /* シオン画像スケール補正: アスペクト比・頭部シルエット差を補正し、アオイ・エミリと顔サイズを統一 */
