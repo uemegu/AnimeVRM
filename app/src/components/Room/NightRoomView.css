@@ -140,11 +140,9 @@
    -------------------------------------------------------------------------- */
 .affinity-status-panel {
   background: #ffffff;
-  border: 2px solid #0f172a;
+  border: 1px solid #0f172a;
   border-radius: 8px;
   padding: 12px 16px;
-  box-shadow: 4px 4px 0px #0b1d47;
-  transform: skewX(-4deg);
   flex-shrink: 0;
 }
 

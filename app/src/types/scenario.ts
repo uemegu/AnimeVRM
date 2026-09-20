@@ -83,10 +83,23 @@ export interface ScenarioScene {
   setFlags?: Record<string, boolean | number | string>;
 }
 
+import { ActionLocationId, DayPhase } from './game';
+
+/** 行動ターン等における場所ヒント情報 */
+export interface ActionLocationHint {
+  locationId: ActionLocationId;
+  hintCharacterIds?: string[];
+  hintText?: LocalizedString;
+  /** 対象フェーズ（未指定の場合は該当ロケーションの全行動フェーズで有効） */
+  phases?: DayPhase[];
+}
+
 /** シナリオパッケージ（1本のイベントシナリオ） */
 export interface ScenarioPackage {
   id: string;
   title: TextContent;
+  /** 行動ターン等における場所ヒント情報（1つまたは複数） */
+  actionHints?: ActionLocationHint[];
   /** 初期登場キャラクター一覧 */
   characters?: Array<{
     id: string;
