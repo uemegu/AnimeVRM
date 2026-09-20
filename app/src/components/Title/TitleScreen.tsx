@@ -26,7 +26,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   return (
     <div className="title-screen-container" lang={lang}>
       <div className="title-petals" aria-hidden="true">
-        <span /><span /><span /><span /><span />
+        {Array.from({ length: 12 }, (_, index) => <span key={index} />)}
       </div>
       {/* 左パネル: タイトルロゴ ＆ メニュー */}
       <section className="title-left-panel">
@@ -177,12 +177,14 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* アオイ (Aoi) */}
           <div className="title-slit-card" data-character="aoi">
             <div className="title-slit-inner">
-              <img
-                src="/assets/title/char_shion.avif"
-                alt={lang === 'ja' ? 'シオン' : 'Shion'}
-                className="title-slit-img"
-                loading="eager"
-              />
+              <div className="title-slit-motion">
+                <img
+                  src="/assets/title/char_shion.avif"
+                  alt={lang === 'ja' ? 'シオン' : 'Shion'}
+                  className="title-slit-img"
+                  loading="eager"
+                />
+              </div>
               <div className="title-slit-shine" />
             </div>
           </div>
@@ -190,12 +192,14 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* エミリ (Emili) */}
           <div className="title-slit-card" data-character="emili">
             <div className="title-slit-inner">
-              <img
-                src="/assets/title/char_emili.avif"
-                alt={lang === 'ja' ? 'エミリ' : 'Emili'}
-                className="title-slit-img"
-                loading="eager"
-              />
+              <div className="title-slit-motion">
+                <img
+                  src="/assets/title/char_emili.avif"
+                  alt={lang === 'ja' ? 'エミリ' : 'Emili'}
+                  className="title-slit-img"
+                  loading="eager"
+                />
+              </div>
               <div className="title-slit-shine" />
             </div>
           </div>
@@ -203,12 +207,14 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           {/* シオン (Shion) */}
           <div className="title-slit-card" data-character="shion">
             <div className="title-slit-inner">
-              <img
-                src="/assets/title/char_aoi.avif"
-                alt={lang === 'ja' ? 'アオイ' : 'Aoi'}
-                className="title-slit-img"
-                loading="eager"
-              />
+              <div className="title-slit-motion">
+                <img
+                  src="/assets/title/char_aoi.avif"
+                  alt={lang === 'ja' ? 'アオイ' : 'Aoi'}
+                  className="title-slit-img"
+                  loading="eager"
+                />
+              </div>
               <div className="title-slit-shine" />
             </div>
           </div>
