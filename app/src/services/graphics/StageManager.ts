@@ -76,14 +76,19 @@ export class StageManager {
     this.camera.lookAt(new THREE.Vector3(0, 1.15, 0));
 
     // 3. レンダラー初期化
+    const pixelRatio = Math.min(window.devicePixelRatio, 2);
+    const initialWidth = Math.max(1, this.canvas.clientWidth || window.innerWidth);
+    const initialHeight = Math.max(1, this.canvas.clientHeight || window.innerHeight);
+
     this.renderer = new THREE.WebGLRenderer({
       canvas: this.canvas,
-      antialias: true,
+      antialias: false,
       alpha: true,
       powerPreference: 'high-performance',
+      preserveDrawingBuffer: true,
     });
-    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setSize(initialWidth, initialHeight, false);
+    this.renderer.setPixelRatio(pixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     // 4. 空と雲の描画システム (SkyBackground)
@@ -101,13 +106,26 @@ export class StageManager {
     this.sunEffect = new SunEffect(this.scene);
 
     // 7. ポストプロセス完全パイプラインの構築
-    this.composer = new EffectComposer(this.renderer);
+    const targetW = Math.floor(initialWidth * pixelRatio);
+    const targetH = Math.floor(initialHeight * pixelRatio);
+
+    const composerRenderTarget = new THREE.WebGLRenderTarget(
+      targetW,
+      targetH,
+      {
+        type: THREE.HalfFloatType,
+        format: THREE.RGBAFormat,
+        samples: 4,
+      }
+    );
+    this.composer = new EffectComposer(this.renderer, composerRenderTarget);
+    this.composer.setPixelRatio(pixelRatio);
 
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
 
     this.bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(this.canvas.clientWidth, this.canvas.clientHeight),
+      new THREE.Vector2(targetW, targetH),
       0.01,
       0.06,
       0.9
@@ -118,9 +136,11 @@ export class StageManager {
     this.composer.addPass(this.godRaysPass);
 
     this.cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
+    this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.composer.addPass(this.cinematicAnimePass);
 
     this.smaaPass = new SMAAPass();
+    this.smaaPass.setSize(targetW, targetH);
     this.composer.addPass(this.smaaPass);
 
     this.composer.addPass(new OutputPass());
@@ -382,16 +402,22 @@ export class StageManager {
   }
 
   public resize(width: number, height: number): void {
-    if (height <= 0) return;
+    if (height <= 0 || width <= 0) return;
+    const pr = Math.min(window.devicePixelRatio, 2);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(width, height, false);
+    this.renderer.setPixelRatio(pr);
+    this.composer.setPixelRatio(pr);
     this.composer.setSize(width, height);
 
-    this.bloomPass.resolution.set(width, height);
-    this.cinematicAnimePass.uniforms['uResolution'].value.set(width, height);
-    this.smaaPass.setSize(width, height);
+    const targetW = Math.floor(width * pr);
+    const targetH = Math.floor(height * pr);
+
+    this.bloomPass.resolution.set(targetW, targetH);
+    this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
+    this.smaaPass.setSize(targetW, targetH);
   }
 
   /**
@@ -469,6 +495,8 @@ export class StageManager {
     });
     this.loadedAvatars.clear();
 
+    this.composer.renderTarget1?.dispose();
+    this.composer.renderTarget2?.dispose();
     this.renderer.dispose();
   }
 }
