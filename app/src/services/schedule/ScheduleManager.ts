@@ -11,20 +11,13 @@ import {
   MORNING_SCENARIO_DEFAULT,
 } from '../../scenarios/morningScenarios';
 import {
-  ACTION_SCENARIO_CLASSROOM_AOI,
-  ACTION_SCENARIO_LIBRARY_SHION,
-  ACTION_SCENARIO_ROOFTOP_EMILI,
+  ALL_ACTION_SCENARIOS,
   ACTION_SCENARIO_GENERIC,
 } from '../../scenarios/actionScenarios';
 import {
   FORCED_SCENARIO_MEET_SHION,
   FORCED_SCENARIO_MEET_EMILI,
 } from '../../scenarios/forcedScenarios';
-import {
-  ENDING_SCENARIO_AOI,
-  ENDING_SCENARIO_SHION,
-  ENDING_SCENARIO_NORMAL,
-} from '../../scenarios/endingScenarios';
 
 export class ScheduleManager {
   /**
@@ -60,6 +53,7 @@ export class ScheduleManager {
 
   /**
    * 行動ターンにおける各場所の事前情報（滞在キャラ・ヒント文）を生成
+   * シナリオデータ（ScenarioPackage.actionHints）から情報を解決
    */
   public static getActionLocationOptions(gameState: GameState): ActionLocationOption[] {
     const locations: ActionLocationId[] = [
@@ -76,35 +70,24 @@ export class ScheduleManager {
       let hintCharacterIds: string[] = [];
       let hintText: { ja: string; en?: string } | undefined;
 
-      // 日付やフェーズに応じた配置ロジック
-      if (locId === 'sports_ground' || (locId === 'classroom' && gameState.phase === 'morning_action')) {
-        hintCharacterIds = ['aoi'];
-        hintText = {
-          ja: 'アオイの元気な声が聞こえてくる。',
-          en: 'Aoi can be heard energetically nearby.',
-        };
-      } else if (locId === 'library') {
-        hintCharacterIds = ['shion'];
-        hintText = {
-          ja: '静かに本を読むシオンの姿が見える。',
-          en: 'Shion is seen quietly reading a book.',
-        };
-      } else if (locId === 'rooftop') {
-        hintCharacterIds = ['emili'];
-        hintText = {
-          ja: '風に揺れる金髪のエミリがいるようだ。',
-          en: 'Emili seems to be enjoying the breeze here.',
-        };
-      } else if (locId === 'courtyard') {
-        hintText = {
-          ja: '生徒たちがベンチでくつろいでいる。',
-          en: 'Students are relaxing on the benches.',
-        };
-      } else if (locId === 'cafeteria') {
-        hintText = {
-          ja: '美味しそうなパンの香りが漂っている。',
-          en: 'The sweet scent of freshly baked bread fills the air.',
-        };
+      // シナリオデータ（ScenarioPackage.actionHints）から該当フェーズ・場所のヒントを取得
+      for (const scenario of ALL_ACTION_SCENARIOS) {
+        if (!scenario.actionHints) continue;
+        const matchingHint = scenario.actionHints.find((h) => {
+          if (h.locationId !== locId) return false;
+          if (h.phases && !h.phases.includes(gameState.phase)) return false;
+          return true;
+        });
+
+        if (matchingHint) {
+          if (matchingHint.hintCharacterIds) {
+            hintCharacterIds = [...matchingHint.hintCharacterIds];
+          }
+          if (matchingHint.hintText) {
+            hintText = matchingHint.hintText;
+          }
+          break;
+        }
       }
 
       return {
@@ -132,22 +115,21 @@ export class ScheduleManager {
   }
 
   /**
-   * 選択された場所に応じたシナリオを決定
+   * 選択された場所に応じたシナリオを決定（ScenarioPackage.actionHints より解決）
    */
-  public static getScenarioForLocation(locationId: ActionLocationId, _gameState: GameState): ScenarioPackage {
-    switch (locationId) {
-      case 'classroom':
-      case 'sports_ground':
-        return ACTION_SCENARIO_CLASSROOM_AOI;
-      case 'library':
-        return ACTION_SCENARIO_LIBRARY_SHION;
-      case 'rooftop':
-        return ACTION_SCENARIO_ROOFTOP_EMILI;
-      case 'courtyard':
-      case 'cafeteria':
-      default:
-        return ACTION_SCENARIO_GENERIC;
+  public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioPackage {
+    for (const scenario of ALL_ACTION_SCENARIOS) {
+      if (!scenario.actionHints) continue;
+      const matches = scenario.actionHints.some((h) => {
+        if (h.locationId !== locationId) return false;
+        if (h.phases && !h.phases.includes(gameState.phase)) return false;
+        return true;
+      });
+      if (matches) {
+        return scenario;
+      }
     }
+    return ACTION_SCENARIO_GENERIC;
   }
 
   /**
@@ -217,26 +199,5 @@ export class ScheduleManager {
     };
   }
 
-  /**
-   * エンディングシナリオを好感度に応じて決定
-   */
-  public static getEndingScenario(gameState: GameState): ScenarioPackage {
-    const aoiAffinity = gameState.affinities.aoi || 0;
-    const shionAffinity = gameState.affinities.shion || 0;
-    const emiliAffinity = gameState.affinities.emili || 0;
-
-    const maxAffinity = Math.max(aoiAffinity, shionAffinity, emiliAffinity);
-    if (maxAffinity < 10) {
-      return ENDING_SCENARIO_NORMAL;
-    }
-
-    if (maxAffinity === aoiAffinity) {
-      return ENDING_SCENARIO_AOI;
-    } else if (maxAffinity === shionAffinity) {
-      return ENDING_SCENARIO_SHION;
-    } else {
-      // エミリのエンドまたはノーマル
-      return ENDING_SCENARIO_AOI;
-    }
-  }
+  // TODO: エンディング仕様確定後に実装
 }

@@ -111,24 +111,4 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const { isEnding: finalEnding } = ScheduleManager.advanceToNextDay(nextState);
     expect(finalEnding).toBe(true);
   });
-
-  it('好感度に応じたエンディングシナリオが選択されること', () => {
-    const stateAoi: GameState = {
-      ...ScheduleManager.createInitialState(),
-      affinities: { aoi: 25, shion: 5 },
-    };
-    expect(ScheduleManager.getEndingScenario(stateAoi).id).toBe('ending_aoi');
-
-    const stateShion: GameState = {
-      ...ScheduleManager.createInitialState(),
-      affinities: { aoi: 5, shion: 30 },
-    };
-    expect(ScheduleManager.getEndingScenario(stateShion).id).toBe('ending_shion');
-
-    const stateLow: GameState = {
-      ...ScheduleManager.createInitialState(),
-      affinities: { aoi: 2, shion: 3 },
-    };
-    expect(ScheduleManager.getEndingScenario(stateLow).id).toBe('ending_normal');
-  });
 });

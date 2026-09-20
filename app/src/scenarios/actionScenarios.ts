@@ -4,6 +4,25 @@ import { ScenarioPackage } from '../types/scenario';
 export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
   id: 'action_classroom_aoi',
   title: { ja: '教室: アオイとノートの貸し借り', en: 'Classroom: Borrowing notes with Aoi' },
+  actionHints: [
+    {
+      locationId: 'classroom',
+      hintCharacterIds: ['aoi'],
+      hintText: {
+        ja: 'アオイの元気な声が聞こえてくる。',
+        en: 'Aoi can be heard energetically nearby.',
+      },
+      phases: ['morning_action'],
+    },
+    {
+      locationId: 'sports_ground',
+      hintCharacterIds: ['aoi'],
+      hintText: {
+        ja: 'アオイの元気な声が聞こえてくる。',
+        en: 'Aoi can be heard energetically nearby.',
+      },
+    },
+  ],
   characters: [{ id: 'aoi', modelUrl: '/models/aoi/aoi.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -76,6 +95,16 @@ export const ACTION_SCENARIO_CLASSROOM_AOI: ScenarioPackage = {
 export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
   id: 'action_library_shion',
   title: { ja: '図書室: シオンと静かな時間', en: 'Library: Quiet time with Shion' },
+  actionHints: [
+    {
+      locationId: 'library',
+      hintCharacterIds: ['shion'],
+      hintText: {
+        ja: '静かに本を読むシオンの姿が見える。',
+        en: 'Shion is seen quietly reading a book.',
+      },
+    },
+  ],
   characters: [{ id: 'shion', modelUrl: '/models/shion/shion.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -159,6 +188,16 @@ export const ACTION_SCENARIO_LIBRARY_SHION: ScenarioPackage = {
 export const ACTION_SCENARIO_ROOFTOP_EMILI: ScenarioPackage = {
   id: 'action_rooftop_emili',
   title: { ja: '屋上: エミリと青空', en: 'Rooftop: Blue sky with Emili' },
+  actionHints: [
+    {
+      locationId: 'rooftop',
+      hintCharacterIds: ['emili'],
+      hintText: {
+        ja: '風に揺れる金髪のエミリがいるようだ。',
+        en: 'Emili seems to be enjoying the breeze here.',
+      },
+    },
+  ],
   characters: [{ id: 'emili', modelUrl: '/models/emili/emili.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -241,6 +280,22 @@ export const ACTION_SCENARIO_ROOFTOP_EMILI: ScenarioPackage = {
 export const ACTION_SCENARIO_GENERIC: ScenarioPackage = {
   id: 'action_generic',
   title: { ja: '放課後のひと休み', en: 'Afternoon Break' },
+  actionHints: [
+    {
+      locationId: 'courtyard',
+      hintText: {
+        ja: '生徒たちがベンチでくつろいでいる。',
+        en: 'Students are relaxing on the benches.',
+      },
+    },
+    {
+      locationId: 'cafeteria',
+      hintText: {
+        ja: '美味しそうなパンの香りが漂っている。',
+        en: 'The sweet scent of freshly baked bread fills the air.',
+      },
+    },
+  ],
   scenes: [
     {
       id: 's1',
@@ -260,3 +315,11 @@ export const ACTION_SCENARIO_GENERIC: ScenarioPackage = {
     },
   ],
 };
+
+/** 全行動シナリオ一覧（場所候補・ヒント判定用） */
+export const ALL_ACTION_SCENARIOS: ScenarioPackage[] = [
+  ACTION_SCENARIO_CLASSROOM_AOI,
+  ACTION_SCENARIO_LIBRARY_SHION,
+  ACTION_SCENARIO_ROOFTOP_EMILI,
+  ACTION_SCENARIO_GENERIC,
+];

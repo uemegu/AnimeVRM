@@ -6,13 +6,6 @@ import { ScheduleManager } from './services/schedule/ScheduleManager';
 import { SaveService } from './services/save/SaveService';
 
 import { GameHeader } from './components/Header/GameHeader';
-import { DialogueBox } from './components/Dialogue/DialogueBox';
-import { ChoiceBox } from './components/Dialogue/ChoiceBox';
-import { ActionSelectModal } from './components/ActionSelect/ActionSelectModal';
-import { NightRoomView } from './components/Room/NightRoomView';
-import { EndingView } from './components/Ending/EndingView';
-import { StageView } from './components/Stage/StageView';
-import { TitleScreen } from './components/Title/TitleScreen';
 import { TimeOfDayId } from './types/visual';
 import { CHARACTERS } from './data/characters';
 import { AudioLipSync } from './services/audio/AudioLipSync';
@@ -26,6 +19,14 @@ import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/In
 import { LoadingScreen } from './components/Loading/LoadingScreen';
 import { AssetPreloader } from './services/loader/AssetPreloader';
 import { LOCATION_VISUAL_PRESETS } from './data/locationVisualPresets';
+
+import {
+  TitlePage,
+  ScenarioPage,
+  ActionSelectPage,
+  NightRoomPage,
+  EndingPage,
+} from './pages';
 
 export const App: React.FC = () => {
   const [lang, setLang] = useState<SupportedLanguage>('ja');
@@ -115,27 +116,27 @@ export const App: React.FC = () => {
   const isFinished = engine ? engine.isFinished() : true;
   const isWaitingChoice = engine ? engine.isWaitingForChoice() : false;
 
-  // 0. タイトル画面・進行フェーズ・シーンに応じたオーディオ連動
+  // タイトル画面・進行フェーズ・シーンに応じたオーディオ連動
   useEffect(() => {
-    // 0-0. 初回アセット事前読み込み画面表示中はBGM停止
+    // 初回アセット事前読み込み画面表示中はBGM停止
     if (isInitialLoading) {
       audioLipSync.stop();
       return;
     }
 
-    // 0-1. タイトル画面
+    // タイトル画面
     if (isTitleScreen) {
       audioLipSync.stop();
       soundManager.playBgm('main_theme');
       return;
     }
 
-    // 0-2. 夜フェーズ（自室）
+    // 夜フェーズ（自室）
     if (gameState.phase === 'night' && !isGameEnded) {
       const sceneBgm = currentScene?.bgm || currentScene?.bgmUrl;
       soundManager.playBgm(sceneBgm || 'night_room');
     } else {
-      // 0-3. プレイ中通常（基本的にはメインBGM、シーン個別指定があればそれを優先）
+      // プレイ中通常（基本的にはメインBGM、シーン個別指定があればそれを優先）
       const sceneBgm = currentScene?.bgm || currentScene?.bgmUrl;
       soundManager.playBgm(sceneBgm || 'main_bgm');
     }
@@ -179,7 +180,7 @@ export const App: React.FC = () => {
     };
   }, [soundManager, audioLipSync]);
 
-  // 1. 時間帯 (TimeOfDay) の決定（ライト・ポストプロセス用）
+  // 時間帯 (TimeOfDay) の決定
   const activeTimeOfDay: TimeOfDayId = useMemo(() => {
     switch (gameState.phase) {
       case 'morning':
@@ -196,7 +197,7 @@ export const App: React.FC = () => {
     }
   }, [gameState.phase]);
 
-  // 2. ロケーション (Location) の決定（多層背景用）- 時間帯と完全分離
+  // ロケーション (Location) の決定
   const activeLocationId: string = useMemo(() => {
     if (gameState.phase === 'night') return 'myroom';
     if (gameState.phase === 'morning') return 'school_gate';
@@ -228,7 +229,7 @@ export const App: React.FC = () => {
     return locNames[activeLocationId] ? locNames[activeLocationId][lang] : activeLocationId;
   }, [activeLocationId, lang]);
 
-  // 3. 表示キャラクター・モデル・表情の決定
+  // 表示キャラクター・モデル・表情の決定
   const { activeCharId, activeModelUrl, activeExpression } = useMemo(() => {
     let charId: string | null = null;
     let expression = 'neutral';
@@ -299,7 +300,6 @@ export const App: React.FC = () => {
       let currentSession = sessions.find((s) => s.id === sessionId);
 
       if (!currentSession) {
-        // 新しいセッションを作成
         const phaseNames: Record<string, { ja: string; en: string }> = {
           morning: { ja: '朝（登校）', en: 'Morning' },
           morning_action: { ja: '午前', en: 'Morning Action' },
@@ -324,7 +324,7 @@ export const App: React.FC = () => {
         }
       }
 
-      // 重複チェック（直前と同一の台詞・話者なら追加しない）
+      // 重複チェック
       const lastLog = currentSession.logs[currentSession.logs.length - 1];
       const isDuplicate = lastLog && lastLog.text === currentScene.text && lastLog.speaker === currentScene.speaker;
 
@@ -355,7 +355,7 @@ export const App: React.FC = () => {
     isInitialLoading,
   ]);
 
-  // 初回ロード開始時のオーディオアンロック処理（ユーザー操作によるAudioContext解除）
+  // 初回ロード開始時のオーディオアンロック処理
   const handleStartPreload = useCallback(() => {
     soundManager.unlockAudio();
     audioLipSync.initAudioContext();
@@ -369,7 +369,7 @@ export const App: React.FC = () => {
     setIsInitialLoading(false);
   }, []);
 
-  // 幕間待機中に次のシーン・ロケーションに必要なアセット（モーション・背景・ボイス等）を事前読み込み
+  // 幕間待機中のアセット事前読み込み
   const preloadInterludeResources = useCallback(
     async (locationId?: string, scenario?: ScenarioPackage | null) => {
       const locUrls: string[] = [];
@@ -403,7 +403,7 @@ export const App: React.FC = () => {
     });
   }, []);
 
-  // 行動ターン開始時の処理（強制イベント判定または場所選択表示）
+  // 行動ターン開始時の処理
   const proceedToActionPhase = useCallback(
     (targetPhase: GameState['phase'], state: GameState) => {
       const updatedState: GameState = {
@@ -442,7 +442,6 @@ export const App: React.FC = () => {
     setTick((t) => t + 1);
 
     if (finished) {
-      // エピソード終了時の幕間スライストランジション
       const proceedAfterEpisode = async () => {
         if (gameState.phase === 'morning') {
           // 朝イベント終了 -> 午前行動へ
@@ -452,7 +451,6 @@ export const App: React.FC = () => {
           gameState.phase === 'lunch_action' ||
           gameState.phase === 'afterschool_action'
         ) {
-          // もし強制イベントだった場合、完了後に本来の場所選択を表示
           if (
             activeScenario?.id === 'forced_meet_shion' ||
             activeScenario?.id === 'forced_meet_emili'
@@ -503,11 +501,10 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // タイピング完了ハンドラ（AUTOモード時の自動進行）
+  // タイピング完了ハンドラ
   const handleTypingComplete = useCallback(() => {
     clearAutoTimer();
     if (isAuto && !isWaitingChoice && !isFinished) {
-      // ボイスがある場合は少し余裕を持たせ、ない場合は2秒で自動送り
       const delayMs = currentScene?.voiceUrl ? 2500 : 2000;
       autoTimerRef.current = window.setTimeout(() => {
         handleDialogueClick();
@@ -515,12 +512,11 @@ export const App: React.FC = () => {
     }
   }, [isAuto, isWaitingChoice, isFinished, currentScene?.voiceUrl, handleDialogueClick, clearAutoTimer]);
 
-  // シーン変更時・手動操作時にAUTOタイマーをクリア
   useEffect(() => {
     clearAutoTimer();
   }, [currentScene?.id, clearAutoTimer]);
 
-  // キーボードショートカット (AキーでAUTOトグル, Mキーでミュート, L/Hキーで履歴モーダル)
+  // キーボードショートカット
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -545,7 +541,6 @@ export const App: React.FC = () => {
     (index: number) => {
       if (!engine) return;
 
-      // 選択した選択肢を会話履歴に記録
       if (currentScene?.choices && currentScene.choices[index]) {
         const chosen = currentScene.choices[index];
         const chosenText = resolveLocalizedText(chosen.text, lang);
@@ -576,7 +571,6 @@ export const App: React.FC = () => {
             sessions.push(currentSession);
           }
 
-          // 重複チェック: 直前のログが同一の選択肢なら追加しない（React StrictModeや多重クリック防止）
           const lastLog = currentSession.logs[currentSession.logs.length - 1];
           if (!lastLog || lastLog.text !== chosenText || !lastLog.isChoice) {
             currentSession.logs.push({
@@ -606,7 +600,7 @@ export const App: React.FC = () => {
     [engine, currentScene, activeScenario, gameState, activeLocationName, lang]
   );
 
-  // 場所を選択したとき（行動エピソード開始）
+  // 場所を選択したとき
   const handleSelectLocation = useCallback(
     (locationId: ActionLocationId) => {
       const run = async () => {
@@ -626,7 +620,7 @@ export const App: React.FC = () => {
     [gameState, startScenario, preloadInterludeResources]
   );
 
-  // 自作ダイアログ（YES/NO または OK モーダル）
+  // ダイアログ状態
   const [dialogConfig, setDialogConfig] = useState<{
     isOpen: boolean;
     title?: string;
@@ -641,22 +635,18 @@ export const App: React.FC = () => {
     onConfirm: () => {},
   });
 
-  const showNotice = useCallback(
-
-    (message: string, title?: string) => {
-      setDialogConfig({
-        isOpen: true,
-        title,
-        message,
-        confirmText: 'OK',
-        cancelText: null,
-        onConfirm: () => {
-          setDialogConfig((prev) => ({ ...prev, isOpen: false }));
-        },
-      });
-    },
-    []
-  );
+  const showNotice = useCallback((message: string, title?: string) => {
+    setDialogConfig({
+      isOpen: true,
+      title,
+      message,
+      confirmText: 'OK',
+      cancelText: null,
+      onConfirm: () => {
+        setDialogConfig((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  }, []);
 
   const showConfirm = useCallback(
     (
@@ -713,7 +703,6 @@ export const App: React.FC = () => {
           lang === 'ja' ? 'いいえ' : 'NO'
         );
       } else {
-        // ロードモード
         const slotData = saveService.loadGame(slotId);
         if (!slotData) {
           showNotice(
@@ -774,17 +763,17 @@ export const App: React.FC = () => {
     [saveLoadModalState.mode, gameState, lang, saveService, showConfirm, showNotice, preloadInterludeResources, startScenario]
   );
 
-  // 自室コマンド: セーブモーダルを開く
+  // 自室コマンド: セーブ
   const handleSave = useCallback(() => {
     setSaveLoadModalState({ isOpen: true, mode: 'save' });
   }, []);
 
-  // 自室コマンド: ロードモーダルを開く
+  // 自室コマンド: ロード
   const handleLoad = useCallback(() => {
     setSaveLoadModalState({ isOpen: true, mode: 'load' });
   }, []);
 
-  // 自室コマンド: 1日をやり直す
+  // 自室コマンド: 1日やり直し
   const handleRollbackDay = useCallback(() => {
     showConfirm(
       lang === 'ja'
@@ -817,16 +806,14 @@ export const App: React.FC = () => {
     );
   }, [gameState, lang, startScenario, showConfirm, showNotice, preloadInterludeResources]);
 
-  // 自室コマンド: 就寝（翌朝エピソード開始）
+  // 自室コマンド: 就寝
   const handleSleep = useCallback(() => {
     const run = async () => {
       const { nextState, isEnding } = ScheduleManager.advanceToNextDay(gameState);
       if (isEnding) {
-        // 28日終了 -> エンディング
-        const endingScenario = ScheduleManager.getEndingScenario(gameState);
-        await preloadInterludeResources('classroom', endingScenario);
-        startScenario(endingScenario, gameState);
+        // TODO: エンディング仕様確定後に実装
         setIsGameEnded(true);
+        setActiveScenario(null);
         return;
       }
 
@@ -844,7 +831,7 @@ export const App: React.FC = () => {
     }
   }, [gameState, saveService, startScenario, preloadInterludeResources]);
 
-  // タイトル画面: はじめから (New Game)
+  // タイトル画面: はじめから
   const handleStartGame = useCallback(() => {
     const run = async () => {
       const initial = ScheduleManager.createInitialState();
@@ -865,12 +852,12 @@ export const App: React.FC = () => {
     }
   }, [saveService, startScenario, preloadInterludeResources]);
 
-  // タイトル画面: つづきから (Continue - スロット選択モーダルを開く)
+  // タイトル画面: つづきから
   const handleContinueGame = useCallback(() => {
     setSaveLoadModalState({ isOpen: true, mode: 'load' });
   }, []);
 
-  // タイトル画面へ戻る（エンディング後など）
+  // タイトル画面へ戻る
   const handleReturnToTitle = useCallback(() => {
     setIsTitleScreen(true);
     setIsGameEnded(false);
@@ -879,7 +866,7 @@ export const App: React.FC = () => {
     setHasSaveData(saveService.hasSaveData());
   }, [saveService]);
 
-  // 場所候補一覧
+  // 場所候補一覧（ScheduleManager経由でシナリオデータから取得）
   const locationOptions = useMemo(() => {
     return ScheduleManager.getActionLocationOptions(gameState);
   }, [gameState]);
@@ -897,7 +884,7 @@ export const App: React.FC = () => {
           onComplete={handlePreloadComplete}
         />
       ) : isTitleScreen ? (
-        <TitleScreen
+        <TitlePage
           hasSaveData={hasSaveData}
           lang={lang}
           isMuted={isMuted}
@@ -906,6 +893,12 @@ export const App: React.FC = () => {
           onContinueGame={handleContinueGame}
           onToggleLanguage={handleToggleLanguage}
           onOpenLicense={() => setIsLicenseModalOpen(true)}
+        />
+      ) : isGameEnded ? (
+        <EndingPage
+          affinities={gameState.affinities}
+          lang={lang}
+          onRestart={handleReturnToTitle}
         />
       ) : (
         <>
@@ -923,22 +916,9 @@ export const App: React.FC = () => {
             onOpenHistory={() => setIsHistoryModalOpen(true)}
           />
 
-          {/* メインステージ（3D/背景描画領域） */}
-          <main className="stage-area">
-            {/* Three.js / VRM / 多層背景ステージ */}
-            <StageView
-              timeOfDay={activeTimeOfDay}
-              locationId={activeLocationId}
-              characterId={activeCharId}
-              characterModelUrl={activeModelUrl}
-              expression={activeExpression}
-              audioLipSync={audioLipSync}
-            />
-          </main>
-
-          {/* 夜の自室コマンドUI（夜フェーズでオーバーレイ表示） */}
-          {gameState.phase === 'night' && !isGameEnded && (
-            <NightRoomView
+          {/* 各ページ表示切り替え */}
+          {gameState.phase === 'night' ? (
+            <NightRoomPage
               day={gameState.day}
               affinities={gameState.affinities}
               lang={lang}
@@ -947,55 +927,35 @@ export const App: React.FC = () => {
               onRollbackDay={handleRollbackDay}
               onSleep={handleSleep}
             />
-          )}
-
-          {/* 行動場所選択モーダル */}
-          {isSelectingLocation && (
-            <ActionSelectModal
+          ) : isSelectingLocation ? (
+            <ActionSelectPage
               options={locationOptions}
               lang={lang}
               onSelectLocation={handleSelectLocation}
               phase={gameState.phase}
               affinities={gameState.affinities}
             />
-          )}
-
-          {/* 選択肢ボタン群 */}
-          {currentScene?.choices && (
-            <ChoiceBox
-              choices={currentScene.choices.map((c) => ({
-                text: resolveLocalizedText(c.text, lang),
-                goto: c.goto,
-              }))}
-              onSelect={handleChoiceClick}
-            />
-          )}
-
-          {/* 会話ウィンドウ */}
-          {currentScene &&
-            !currentScene.choices &&
-            !isFinished &&
-            !isSelectingLocation && (
-              <DialogueBox
-                speaker={currentScene.speaker}
-                text={currentScene.text}
-                onTypingComplete={handleTypingComplete}
-                onClick={handleDialogueClick}
-              />
-            )}
-
-          {/* 28日完走エンディング画面（エンディングシナリオ終了時など） */}
-          {isGameEnded && isFinished && (
-            <EndingView
-              affinities={gameState.affinities}
+          ) : (
+            <ScenarioPage
+              currentScene={currentScene}
+              isFinished={isFinished}
+              isWaitingChoice={isWaitingChoice}
               lang={lang}
-              onRestart={handleReturnToTitle}
+              activeTimeOfDay={activeTimeOfDay}
+              activeLocationId={activeLocationId}
+              activeCharId={activeCharId}
+              activeModelUrl={activeModelUrl}
+              activeExpression={activeExpression}
+              audioLipSync={audioLipSync}
+              onDialogueClick={handleDialogueClick}
+              onChoiceClick={handleChoiceClick}
+              onTypingComplete={handleTypingComplete}
             />
           )}
         </>
       )}
 
-      {/* 自作 YES/NO 確認ダイアログ（タイトル・自室共通） */}
+      {/* 確認ダイアログ */}
       <ConfirmModal
         isOpen={dialogConfig.isOpen}
         title={dialogConfig.title}
@@ -1006,7 +966,7 @@ export const App: React.FC = () => {
         onCancel={dialogConfig.onCancel}
       />
 
-      {/* 複数スロットセーブ/ロードモーダル */}
+      {/* セーブ/ロードモーダル */}
       <SaveLoadModal
         isOpen={saveLoadModalState.isOpen}
         mode={saveLoadModalState.mode}
@@ -1025,14 +985,14 @@ export const App: React.FC = () => {
         onClose={() => setIsHistoryModalOpen(false)}
       />
 
-      {/* ライセンス・クレジットモーダル（タイトル・ゲーム中共通） */}
+      {/* ライセンス・クレジットモーダル */}
       <LicenseModal
         isOpen={isLicenseModalOpen}
         lang={lang}
         onClose={() => setIsLicenseModalOpen(false)}
       />
 
-      {/* 最前面 幕間スライストランジション（4スライス＆5秒で告白タイトル） */}
+      {/* 最前面 幕間スライストランジション */}
       <InterludeOverlay ref={interludeRef} lang={lang} />
     </div>
   );
