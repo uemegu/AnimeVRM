@@ -30,10 +30,6 @@ export interface ActionLocationOption {
     ja: string;
     en?: string;
   };
-  description?: {
-    ja: string;
-    en?: string;
-  };
   /** 事前情報: 誰がいそうか（目撃ヒント・滞在キャラID一覧） */
   hintCharacterIds?: string[];
   /** 事前情報のヒント文（例: 「窓の外に運動部の姿が見える」等） */
