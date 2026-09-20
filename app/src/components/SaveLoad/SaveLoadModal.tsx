@@ -63,25 +63,10 @@ export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
         {/* ヘッダー */}
         <header className="save-load-header">
           <div className="save-load-title-area">
-            <div className="save-load-icon-badge" aria-hidden="true">
-              {isSave ? (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-              )}
-            </div>
             <h2 id="save-load-modal-title" className="save-load-title-main">
               {isSave
-                ? lang === 'ja' ? 'セーブ（進行状況の記録）' : 'Save Progress'
-                : lang === 'ja' ? 'ロード（再開データの選択）' : 'Load Progress'}
+                ? lang === 'ja' ? 'セーブ' : 'Save'
+                : lang === 'ja' ? 'ロード' : 'Load'}
             </h2>
           </div>
 
@@ -129,36 +114,43 @@ export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
                 {/* スロットコンテンツ */}
                 <div className="slot-content">
                   {hasData ? (
-                    <>
-                      <div className="slot-info-row-top">
+                    <div className="slot-data-row">
+                      <div className="slot-meta-group">
                         <span className="slot-day-tag">
                           Day {day} ({weekday})
                         </span>
                         <span className="slot-phase-tag">{phaseLabel}</span>
-                        {savedAt && (
-                          <span className="slot-date-label">{savedAt}</span>
-                        )}
                       </div>
 
                       {affinities && (
                         <div className="slot-affinity-row">
-                          <span className="affinity-item">
-                            <span className="affinity-name">{lang === 'ja' ? 'アオイ' : 'Aoi'}:</span>
-                            <span className="affinity-val">{affinities.aoi ?? 0}</span>
+                          <span
+                            className="affinity-badge badge-aoi"
+                            title={lang === 'ja' ? `アオイ: Lv.${affinities.aoi ?? 0}` : `Aoi: Lv.${affinities.aoi ?? 0}`}
+                          >
+                            Lv.{affinities.aoi ?? 0}
                           </span>
-                          <span className="affinity-item">
-                            <span className="affinity-name">{lang === 'ja' ? 'エミリ' : 'Emili'}:</span>
-                            <span className="affinity-val">{affinities.emili ?? 0}</span>
+                          <span
+                            className="affinity-badge badge-emili"
+                            title={lang === 'ja' ? `エミリ: Lv.${affinities.emili ?? 0}` : `Emili: Lv.${affinities.emili ?? 0}`}
+                          >
+                            Lv.{affinities.emili ?? 0}
                           </span>
-                          <span className="affinity-item">
-                            <span className="affinity-name">{lang === 'ja' ? 'シオン' : 'Shion'}:</span>
-                            <span className="affinity-val">{affinities.shion ?? 0}</span>
+                          <span
+                            className="affinity-badge badge-shion"
+                            title={lang === 'ja' ? `シオン: Lv.${affinities.shion ?? 0}` : `Shion: Lv.${affinities.shion ?? 0}`}
+                          >
+                            Lv.{affinities.shion ?? 0}
                           </span>
                         </div>
                       )}
-                    </>
+
+                      {savedAt && (
+                        <span className="slot-date-label">{savedAt}</span>
+                      )}
+                    </div>
                   ) : (
-                    <div className="slot-content-empty">
+                    <div className="slot-empty-row">
                       <span className="empty-title">
                         {lang === 'ja' ? '空きスロット (NO DATA)' : 'Empty Slot (NO DATA)'}
                       </span>
