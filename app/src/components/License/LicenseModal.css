@@ -30,7 +30,6 @@
   border: 2.5px solid #0f172a;
   border-radius: 12px;
   box-shadow: 8px 8px 0px #0b1d47;
-  transform: skewX(-4deg);
   width: 100%;
   max-width: 780px;
   max-height: 85vh;
@@ -38,7 +37,6 @@
   flex-direction: column;
   user-select: none;
   overflow: hidden;
-  animation: license-pop-in 0.25s cubic-bezier(0.12, 1.25, 0.28, 1.15) forwards;
 }
 
 @keyframes license-pop-in {
@@ -54,7 +52,6 @@
 
 /* 内部コンテンツ (skew歪み補正) */
 .license-modal-inner {
-  transform: skewX(4deg);
   display: flex;
   flex-direction: column;
   height: 100%;
