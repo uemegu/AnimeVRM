@@ -81,6 +81,12 @@ export interface ScenarioScene {
   choices?: ScenarioChoice[];
   /** シーン突入時のフラグ更新 */
   setFlags?: Record<string, boolean | number | string>;
+  /** 画面フラッシュ演出 ('white' 等) */
+  flashEffect?: 'white' | 'none';
+  /** AUTOモード時のシーン送り待機秒数（未指定時はボイス長またはテキスト長から自動算出） */
+  autoNextSec?: number;
+  /** 時間帯指定（'day' | 'evening' | 'night' | 'divine' 等） */
+  timeOfDay?: import('./visual').TimeOfDayId;
 }
 
 import { ActionLocationId, DayPhase } from './game';

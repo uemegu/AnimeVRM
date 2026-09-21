@@ -97,6 +97,38 @@ export interface Translations {
       stop: string;
     };
     expression: string;
+    morphTargets: {
+      title: string;
+      enable: string;
+      hint: string;
+      capture: string;
+      reset: string;
+      search: string;
+      category: string;
+      all: string;
+      brows: string;
+      eyes: string;
+      mouth: string;
+      other: string;
+      activeOnly: string;
+      count: string;
+      nonzero: string;
+      empty: string;
+      noMatches: string;
+      name: string;
+      preset: string;
+      copy: string;
+      copied: string;
+      copyFailed: string;
+    };
+    faceOverlays: {
+      title: string;
+      blush: string;
+      sweat: string;
+      anger: string;
+      hint: string;
+      loadError: string;
+    };
     expressions: {
       neutral: string;
       happy: string;

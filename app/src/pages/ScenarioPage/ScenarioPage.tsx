@@ -6,6 +6,7 @@ import { AudioLipSync } from '../../services/audio/AudioLipSync';
 import { StageView } from '../../components/Stage/StageView';
 import { DialogueBox } from '../../components/Dialogue/DialogueBox';
 import { ChoiceBox } from '../../components/Dialogue/ChoiceBox';
+import { WhiteFlashOverlay } from '../../components/Common/WhiteFlashOverlay';
 
 export interface ScenarioPageProps {
   currentScene: ScenarioResolvedScene | null;
@@ -50,6 +51,11 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           audioLipSync={audioLipSync}
         />
       </main>
+
+      {/* ホワイトフラッシュ演出 */}
+      {currentScene?.flashEffect === 'white' && (
+        <WhiteFlashOverlay triggerKey={currentScene.id} />
+      )}
 
       {/* 選択肢ボタン群 */}
       {currentScene?.choices && (

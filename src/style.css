@@ -323,7 +323,7 @@ body {
   border-color: #4772b3;
 }
 
-.expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn, .timeofday-btn, .framing-btn {
+.face-overlay-btn, .expr-btn, .motion-btn, .model-btn, .bg-btn, .scene-preset-btn, .timeofday-btn, .framing-btn {
   background: #363636;
   border: 1px solid #444444;
   border-radius: 4px;
@@ -335,18 +335,146 @@ body {
   text-align: center;
 }
 
-.expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover, .timeofday-btn:hover, .framing-btn:hover {
+.face-overlay-btn:hover, .expr-btn:hover, .motion-btn:hover, .model-btn:hover, .bg-btn:hover, .scene-preset-btn:hover, .timeofday-btn:hover, .framing-btn:hover {
   background: #464646;
   border-color: #555555;
   color: #ffffff;
 }
 
-.expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active, .timeofday-btn.active, .framing-btn.active {
+.face-overlay-btn.active, .expr-btn.active, .motion-btn.active, .model-btn.active, .bg-btn.active, .scene-preset-btn.active, .timeofday-btn.active, .framing-btn.active {
   background: #4772b3;
   color: #ffffff;
   border-color: #385d94;
   font-weight: 600;
 }
+
+.face-overlay-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #444444;
+}
+
+.face-overlay-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.face-overlay-btn {
+  box-sizing: border-box;
+  min-height: 30px;
+}
+
+.face-overlay-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.face-overlay-hint {
+  margin: 6px 0 0;
+  color: #aaaaaa;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.morph-editor {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #444444;
+  font-size: 11px;
+  color: #cccccc;
+}
+
+.morph-editor summary {
+  cursor: pointer;
+  padding: 5px 0;
+  font-weight: 600;
+}
+
+.morph-editor-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 6px;
+}
+
+.morph-editor-hint {
+  margin: 0;
+  color: #aaaaaa;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.morph-editor-enable,
+.morph-editor-filters label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.morph-editor-actions,
+.morph-editor-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.morph-editor button,
+.morph-editor input:not([type="range"]):not([type="checkbox"]),
+.morph-editor select,
+.morph-editor textarea {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #484848;
+  border-radius: 4px;
+  background: #292929;
+  color: #dedede;
+  font: inherit;
+  padding: 6px;
+}
+
+.morph-editor button {
+  min-height: 32px;
+  cursor: pointer;
+  background: #363636;
+}
+
+.morph-editor button:hover { background: #464646; }
+.morph-editor :disabled { opacity: 0.5; cursor: default; }
+.morph-editor :focus-visible { outline: 2px solid #75aaff; outline-offset: 2px; }
+.morph-editor input[type="checkbox"] { accent-color: #75aaff; }
+
+.morph-target-list {
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.morph-target-row {
+  padding: 7px 6px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.morph-target-row.has-weight { background: #283449; }
+
+.morph-target-name {
+  display: block;
+  margin-bottom: 5px;
+  overflow-wrap: anywhere;
+  font: 10px ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.morph-target-values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70px;
+  gap: 9px;
+  align-items: center;
+}
+
+.morph-target-range { width: 100%; min-width: 0; accent-color: #75aaff; }
+.morph-preset-label { margin-top: 4px; font-weight: 600; }
+.morph-editor textarea { resize: vertical; font: 10px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
 
 .effect-text-btn {
   padding: 5px 6px;

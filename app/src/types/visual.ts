@@ -3,7 +3,7 @@
  * 時間帯（ライト・ポストプロセス・マテリアル）とロケーション（背景）を直交・独立管理
  */
 
-export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'night';
+export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'night' | 'divine';
 
 export interface DirectionalLightConfig {
   color: string;

@@ -26,5 +26,11 @@ export const CHARACTERS: Record<string, CharacterMaster> = {
     defaultModelUrl: '/models/shion/shion-school.vrm',
     themeColor: '#3b82f6',
   },
+  god: {
+    id: 'god',
+    name: { ja: '女神', en: 'Goddess' },
+    defaultModelUrl: '/models/god.vrm',
+    themeColor: '#f59e0b',
+  },
 };
 

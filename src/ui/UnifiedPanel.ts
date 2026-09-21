@@ -38,6 +38,8 @@ import { AvatarTransformController } from '../avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
 import type { ShaftModeController } from '../effects/shaft/ShaftModeController';
 import type { Live2DTransitionManager } from '../live2d/Live2DTransitionManager';
+import { FACE_OVERLAY_KINDS, FaceOverlayKind } from '../effects/FaceOverlayEffect';
+import { MorphTargetPanel } from './components/MorphTargetPanel';
 
 export interface UnifiedPanelContext {
   currentConfig: AvatarConfig;
@@ -96,6 +98,20 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
   let currentActiveTab = 'character';
   let isLooping = false;
+  let morphTargetPanel: MorphTargetPanel | null = null;
+
+  const updateFaceOverlayUI = () => {
+    const state = avatarManager.getFaceOverlays();
+    for (const kind of FACE_OVERLAY_KINDS) {
+      const button = document.getElementById(`face-overlay-${kind}`) as HTMLButtonElement | null;
+      if (!button) continue;
+      button.classList.toggle('active', state[kind]);
+      button.setAttribute('aria-pressed', String(state[kind]));
+      button.disabled = !avatarManager.avatarInstance?.vrm;
+      button.textContent = `${t().character.faceOverlays[kind]} ${state[kind] ? 'ON' : 'OFF'}`;
+    }
+  };
+  window.addEventListener('avatar-face-overlays-change', updateFaceOverlayUI);
 
   let isPanelOpen = true;
   const setPanelOpen = (open: boolean) => {
@@ -130,6 +146,8 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
   };
 
   const renderUI = () => {
+    const morphPanelOpen = morphTargetPanel?.isOpen ?? false;
+    morphTargetPanel?.dispose();
     const tr = t();
     const lang = getLanguage();
     gearBtn!.title = tr.common.openSettings;
@@ -238,6 +256,14 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-expr="ee" class="expr-btn">${tr.character.expressions.ee}</button>
               <button data-expr="oh" class="expr-btn">${tr.character.expressions.oh}</button>
             </div>
+            <div class="face-overlay-section">
+              <label class="section-label">${tr.character.faceOverlays.title}</label>
+              <div class="face-overlay-buttons" role="group" aria-label="${tr.character.faceOverlays.title}">
+                ${FACE_OVERLAY_KINDS.map((kind) => `<button id="face-overlay-${kind}" class="face-overlay-btn" data-face-overlay="${kind}" aria-pressed="false">${tr.character.faceOverlays[kind]} OFF</button>`).join('')}
+              </div>
+              <p class="face-overlay-hint">${tr.character.faceOverlays.hint}</p>
+            </div>
+            <div id="morph-target-panel"></div>
           </div>
 
           <!-- Eye & Head Look-At Control -->
@@ -775,6 +801,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     `;
 
     bindEvents();
+    morphTargetPanel = new MorphTargetPanel(document.getElementById('morph-target-panel')!, avatarManager, morphPanelOpen);
   };
 
   const bindEvents = () => {
@@ -1728,6 +1755,20 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         showToast('✨ 通常状態に戻りました');
       }
     });
+
+    document.querySelectorAll<HTMLButtonElement>('[data-face-overlay]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const kind = button.dataset.faceOverlay as FaceOverlayKind;
+        try {
+          await avatarManager.setFaceOverlay(kind, !avatarManager.getFaceOverlays()[kind]);
+        } catch (error) {
+          console.error('Failed to load face overlay:', error);
+          showToast(t().character.faceOverlays.loadError);
+        }
+        updateFaceOverlayUI();
+      });
+    });
+    updateFaceOverlayUI();
 
     // Blush Mode Toggle Button (頬赤らめ & ウルウル瞳)
     const blushToggleBtn = document.getElementById('blush-toggle-btn') as HTMLButtonElement | null;

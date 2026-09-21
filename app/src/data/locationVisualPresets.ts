@@ -124,4 +124,28 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
       },
     },
   },
+
+  // 神社（実験シナリオ・イベント用）
+  shrine: {
+    id: 'shrine',
+    name: '神社',
+    isIndoor: false,
+    layers: {
+      background: {
+        url: '/textures/shrine_far.avif',
+      },
+    },
+  },
+
+  // 神界（白背景）
+  god_realm: {
+    id: 'god_realm',
+    name: '神界',
+    isIndoor: true,
+    layers: {
+      background: {
+        url: '/textures/white_far.avif',
+      },
+    },
+  },
 };
