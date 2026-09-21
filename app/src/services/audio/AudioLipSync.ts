@@ -127,6 +127,10 @@ export class AudioLipSync {
     }
   }
 
+  public setEvents(events: Partial<AudioLipSyncEvents>): void {
+    this.events = { ...this.events, ...events };
+  }
+
   /**
    * Set voice gender profile ('female' or 'male')
    */

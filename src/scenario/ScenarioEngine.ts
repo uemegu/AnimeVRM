@@ -614,9 +614,12 @@ export class ScenarioEngine {
 
     // Dynamic Face Texture (e.g. Blush / Red cheeks)
     if (faceTexture) {
-      avatar.setFaceTexture(faceTexture);
       if (faceTexture.toLowerCase().includes('blush')) {
-        avatar.setBlushMode(true);
+        avatar.resetFaceTexture();
+        avatar.setBlushMode(true, { faceTexture });
+      } else {
+        avatar.setBlushMode(false);
+        avatar.setFaceTexture(faceTexture);
       }
     } else {
       avatar.resetFaceTexture();

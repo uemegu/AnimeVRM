@@ -15,7 +15,7 @@ export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
     id: 'girl_02',
     name: '👱‍♀️ エミリ (emili.vrm)',
     modelUrl: '/models/emili/emili.vrm',
-    faceBlushTexture: '/textures/girl2_face_blush.png',
+    faceBlushTexture: '/textures/girl_face_blush.png',
     defaultVoiceGender: 'female',
     description: 'ブロンドヘアのVRMキャラクター (エミリ)',
   },

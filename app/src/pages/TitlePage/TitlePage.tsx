@@ -9,6 +9,7 @@ export interface TitlePageProps {
   onToggleMute: () => void;
   onStartGame: () => void;
   onContinueGame: () => void;
+  onStartGodExperiment?: () => void;
   onToggleLanguage: () => void;
   onOpenLicense: () => void;
 }
@@ -20,6 +21,7 @@ export const TitlePage: React.FC<TitlePageProps> = ({
   onToggleMute,
   onStartGame,
   onContinueGame,
+  onStartGodExperiment,
   onToggleLanguage,
   onOpenLicense,
 }) => {
@@ -31,6 +33,7 @@ export const TitlePage: React.FC<TitlePageProps> = ({
       onToggleMute={onToggleMute}
       onStartGame={onStartGame}
       onContinueGame={onContinueGame}
+      onStartGodExperiment={onStartGodExperiment}
       onToggleLanguage={onToggleLanguage}
       onOpenLicense={onOpenLicense}
     />

@@ -29,6 +29,9 @@ export interface ScenarioResolvedScene {
     goto: string;
     index: number;
   }>;
+  flashEffect?: 'white' | 'none';
+  timeOfDay?: import('../../types/visual').TimeOfDayId;
+  autoNextSec?: number;
 }
 
 export class ScenarioEngine {
@@ -93,6 +96,9 @@ export class ScenarioEngine {
       seUrl: raw.seUrl,
       avatars: raw.avatars,
       choices: resolvedChoices.length > 0 ? resolvedChoices : undefined,
+      flashEffect: raw.flashEffect,
+      timeOfDay: raw.timeOfDay,
+      autoNextSec: raw.autoNextSec,
     };
   }
 

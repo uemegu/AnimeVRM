@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { Avatar, YandereOptions, BlushOptions } from '../Avatar';
 import { AvatarConfig } from '../Config';
-import { DEFAULT_CHARACTERS } from '../master/defaultMasters';
 import { EffectTextManager } from '../effects/text';
 import { WindController } from '../wind/WindController';
 import { TypographyOverlay } from '../animation/TypographyOverlay';
@@ -11,6 +10,7 @@ import { showToast } from '../ui/components/Toast';
 import { updateAnimationPlayStateUI } from '../ui/helpers';
 import { AudioLipSync } from '../AudioLipSync';
 import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
+import { FACE_OVERLAY_KINDS, FACE_OVERLAY_TEXTURES, FaceOverlayKind, FaceOverlayState } from '../effects/FaceOverlayEffect';
 
 export function isMotionLoop(url: string): boolean {
   return url.includes('Idle') || url.includes('Walking') || url.includes('Jogging') || url.includes('Pose');
@@ -24,6 +24,7 @@ export class AvatarManager {
   public currentExprName: string = 'neutral';
   public scenarioAvatars: Map<string, Avatar> = new Map<string, Avatar>();
   public isMultiAvatarScenarioActive: boolean = false;
+  private faceOverlayState: FaceOverlayState = { blush: false, sweat: false, anger: false };
 
   public typographyOverlay: TypographyOverlay;
   public animationPlayer: ShortAnimationPlayer;
@@ -127,6 +128,7 @@ export class AvatarManager {
     }
 
     if (this.avatarInstance) {
+      if (this.avatarInstance.vrm) this.faceOverlayState = this.avatarInstance.getFaceOverlays();
       this.avatarInstance.dispose();
       this.avatarInstance = null;
       this.windController.resetModel();
@@ -154,12 +156,16 @@ export class AvatarManager {
         if (this.currentExprName !== 'neutral') {
           avatar.setExpression(this.currentExprName, 1.0);
         }
+        for (const kind of FACE_OVERLAY_KINDS) {
+          void avatar.setFaceOverlay(kind, this.faceOverlayState[kind]).catch(console.error);
+        }
         if (this.solidColorState.enabled) {
           avatar.setSolidColorMode(true, this.solidColorState.color);
         }
         if (this.onAvatarLoaded) {
           this.onAvatarLoaded(avatar);
         }
+        window.dispatchEvent(new CustomEvent('avatar-model-change'));
 
         const el = document.getElementById('loading-status');
         if (el) {
@@ -183,6 +189,8 @@ export class AvatarManager {
         showToast('❌ モデルの読み込みに失敗しました');
       },
     });
+    window.dispatchEvent(new CustomEvent('avatar-face-overlays-change'));
+    window.dispatchEvent(new CustomEvent('avatar-model-change'));
   }
 
   public getVrmMeshes(): THREE.Object3D[] {
@@ -303,13 +311,19 @@ export class AvatarManager {
     return this.avatarInstance?.getYandereConfig() ?? null;
   }
 
-  public getFaceBlushTextureForModel(modelUrl?: string): string {
-    const url = modelUrl ?? this.currentModelUrl;
-    if (!url) return '/textures/girl_face_blush.png';
-    const char = Object.values(DEFAULT_CHARACTERS).find((c) => {
-      return c.modelUrl === url || resolveAssetUrl(c.modelUrl) === url;
-    });
-    return char?.faceBlushTexture ?? '/textures/girl_face_blush.png';
+  public getFaceBlushTextureForModel(_modelUrl?: string): string {
+    return FACE_OVERLAY_TEXTURES.blush;
+  }
+
+  public getFaceOverlays(): FaceOverlayState {
+    return this.avatarInstance?.vrm ? this.avatarInstance.getFaceOverlays() : { ...this.faceOverlayState };
+  }
+
+  public async setFaceOverlay(kind: FaceOverlayKind, enabled: boolean): Promise<void> {
+    this.faceOverlayState[kind] = enabled;
+    const avatars = new Set(this.scenarioAvatars.values());
+    if (this.avatarInstance) avatars.add(this.avatarInstance);
+    await Promise.all([...avatars].map((avatar) => avatar.setFaceOverlay(kind, enabled)));
   }
 
   public setBlushMode(enabled: boolean, options?: Partial<BlushOptions>): void {
@@ -369,4 +383,3 @@ export class AvatarManager {
     return { ...this.solidColorState };
   }
 }
-

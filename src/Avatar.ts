@@ -16,6 +16,8 @@ import { TearEffect, TearConfig } from './effects/tears';
 import { SweatEffect, SweatConfig } from './effects/sweat';
 import { FastMotionEffect, FastMotionConfig } from './effects/motion';
 import { WateryEyeEffect, WateryEyeConfig } from './effects/eye';
+import { FaceOverlayEffect, FaceOverlayKind, FaceOverlayState, getFaceOverlayKindForTexture } from './effects/FaceOverlayEffect';
+import { MorphTargetPreview } from './avatar/MorphTargetPreview';
 
 export interface BlushOptions {
   enabled?: boolean;
@@ -269,6 +271,9 @@ export class Avatar {
   public sweatEffect: SweatEffect | null = null;
   public fastMotionEffect: FastMotionEffect | null = null;
   public wateryEyeEffect: WateryEyeEffect | null = null;
+  public morphTargetPreview: MorphTargetPreview | null = null;
+  private faceOverlayEffect: FaceOverlayEffect | null = null;
+  private legacyFaceOverlay: FaceOverlayKind | null = null;
   public renderer: THREE.WebGLRenderer | null = null;
 
   public initialPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
@@ -566,6 +571,8 @@ export class Avatar {
 
         this.shaderController = applyToonShader(vrm, this.scene, shaderOpts);
         this.shaderController.update();
+        this.faceOverlayEffect = new FaceOverlayEffect(vrm.scene);
+        this.morphTargetPreview = new MorphTargetPreview(vrm.scene);
 
         // Initialize animation mixer and play default animation if available
         this.mixer = new THREE.AnimationMixer(vrm.scene);
@@ -774,6 +781,7 @@ export class Avatar {
    * @param duration Transition duration in seconds for smooth interpolation (default: 0.25s, 0 for instant)
    */
   public setExpression(expressionName: string, weight = 1.0, duration = 0.25): void {
+    this.morphTargetPreview?.setEnabled(false);
     if (!this.vrm?.expressionManager) return;
 
     if (expressionName === 'normal') {
@@ -1489,6 +1497,7 @@ export class Avatar {
 
   public update(delta: number, elapsed: number, windCallback?: () => void, renderer?: THREE.WebGLRenderer): void {
     if (!this.vrm) return;
+    this.morphTargetPreview?.restore();
 
     // Cancel previous frame's procedural Head Look-At before animation mixer runs,
     // restoring bone transforms to their pure animation/rest state and completely preventing accumulation.
@@ -1594,6 +1603,9 @@ export class Avatar {
       }
     }
 
+    // Keep the preview stable over VRM expressions, blinking, lip sync and direct morph effects.
+    this.morphTargetPreview?.apply();
+
     // Update toon face shader & uniforms
     this.shaderController?.update();
 
@@ -1671,12 +1683,39 @@ export class Avatar {
   private loadedTextureCache: Map<string, THREE.Texture> = new Map();
   private textureLoader = new THREE.TextureLoader();
 
+  public getFaceOverlays(): FaceOverlayState {
+    return this.faceOverlayEffect?.getState() ?? { blush: false, sweat: false, anger: false };
+  }
+
+  public async setFaceOverlay(kind: FaceOverlayKind, enabled: boolean, textureUrl?: string): Promise<void> {
+    if (!this.faceOverlayEffect) return;
+    const pending = this.faceOverlayEffect.setEnabled(kind, enabled, textureUrl);
+    const notify = () => window.dispatchEvent(new CustomEvent('avatar-face-overlays-change'));
+    notify();
+    try {
+      await pending;
+    } finally {
+      notify();
+    }
+  }
+
   /**
-   * Dynamically change the face skin texture (e.g. blush / red cheeks face texture).
+   * Change a full face texture, or route the built-in transparent marks to overlay layers.
    * Passing null resets to the original face texture.
    */
   public setFaceTexture(textureUrl: string | null): void {
     if (!this.vrm) return;
+
+    if (this.legacyFaceOverlay) {
+      void this.setFaceOverlay(this.legacyFaceOverlay, false);
+      this.legacyFaceOverlay = null;
+    }
+    const overlay = textureUrl ? getFaceOverlayKindForTexture(textureUrl) : null;
+    if (overlay) {
+      this.legacyFaceOverlay = overlay;
+      void this.setFaceOverlay(overlay, true).catch(console.error);
+      return;
+    }
 
     const faceSkinMaterials: any[] = [];
     this.vrm.scene.traverse((obj) => {
@@ -1763,7 +1802,7 @@ export class Avatar {
 
   /**
    * Toggle or configure Blush (red cheeks + watery shimmering eyes) mode.
-   * Changes face texture to blush texture, enables watery shimmering eye shader and organic highlight wobble.
+   * Layers blush over the original skin, with watery eyes and organic highlight wobble.
    */
   public setBlushMode(enabled: boolean, options?: Partial<BlushOptions>): void {
     if (!this.vrm) return;
@@ -1773,8 +1812,8 @@ export class Avatar {
       this.isBlushActive = false;
       this.blushConfig.enabled = false;
 
-      // 1. Reset face texture
-      this.resetFaceTexture();
+      // 1. Remove only the blush layer; other face marks remain independent.
+      void this.setFaceOverlay('blush', false);
 
       // 2. Disable watery eye effect
       this.wateryEyeEffect?.setEnabled(false);
@@ -1835,9 +1874,11 @@ export class Avatar {
       enabled: true,
     };
 
-    // 1. Apply blush face texture
-    const textureToApply = this.blushConfig.faceTexture ?? '/textures/girl_face_blush.png';
-    this.setFaceTexture(textureToApply);
+    // 1. All bundled avatars share the transparent blush layer. Keep custom overlays supported.
+    const requestedTexture = this.blushConfig.faceTexture;
+    const customTexture = requestedTexture && !getFaceOverlayKindForTexture(requestedTexture)
+      ? requestedTexture : undefined;
+    void this.setFaceOverlay('blush', true, customTexture).catch(console.error);
 
     // 2. Enable watery eye effect
     if (this.blushConfig.wateryEyes) {
@@ -1894,6 +1935,7 @@ export class Avatar {
    */
   public setYandereMode(enabled: boolean, options?: Partial<YandereOptions>): void {
     if (!this.vrm) return;
+    if (enabled) this.morphTargetPreview?.setEnabled(false);
 
     if (enabled && this.isBlushActive) {
       this.setBlushMode(false);
@@ -2345,6 +2387,10 @@ export class Avatar {
   }
 
   public dispose(): void {
+    this.morphTargetPreview?.dispose();
+    this.morphTargetPreview = null;
+    this.faceOverlayEffect?.dispose();
+    this.faceOverlayEffect = null;
     if (this.isSolidColorActive) {
       this.setSolidColorMode(false);
     }

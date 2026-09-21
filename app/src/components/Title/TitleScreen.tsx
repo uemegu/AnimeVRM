@@ -9,6 +9,7 @@ export interface TitleScreenProps {
   onToggleMute?: () => void;
   onStartGame: () => void;
   onContinueGame: () => void;
+  onStartGodExperiment?: () => void;
   onToggleLanguage: () => void;
   onOpenLicense?: () => void;
 }
@@ -20,6 +21,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   onToggleMute,
   onStartGame,
   onContinueGame,
+  onStartGodExperiment,
   onToggleLanguage,
   onOpenLicense,
 }) => {
@@ -86,6 +88,28 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               {lang === 'ja' ? 'つづきから' : 'Continue'}
             </span>
           </button>
+
+          {/* 神社・女神実験シナリオ */}
+          {onStartGodExperiment && (
+            <button
+              type="button"
+              className="title-menu-btn"
+              onClick={() => {
+                console.log('[DEBUG] God experiment button clicked in TitleScreen!');
+                onStartGodExperiment();
+              }}
+              data-testid="btn-god-experiment"
+            >
+              <span className="title-menu-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              </span>
+              <span className="title-menu-text">
+                {lang === 'ja' ? '神社イベント実験' : 'God Experiment'}
+              </span>
+            </button>
+          )}
 
           {/* サウンド ミュート/解除 */}
           {onToggleMute && (

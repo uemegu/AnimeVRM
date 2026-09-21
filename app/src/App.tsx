@@ -19,6 +19,7 @@ import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/In
 import { LoadingScreen } from './components/Loading/LoadingScreen';
 import { AssetPreloader } from './services/loader/AssetPreloader';
 import { LOCATION_VISUAL_PRESETS } from './data/locationVisualPresets';
+import { GOD_EXPERIMENT_SCENARIO } from './scenarios/godExperiment';
 
 import {
   TitlePage,
@@ -182,6 +183,7 @@ export const App: React.FC = () => {
 
   // 時間帯 (TimeOfDay) の決定
   const activeTimeOfDay: TimeOfDayId = useMemo(() => {
+    if (currentScene?.timeOfDay) return currentScene.timeOfDay;
     switch (gameState.phase) {
       case 'morning':
         return 'morning';
@@ -195,10 +197,11 @@ export const App: React.FC = () => {
       default:
         return 'day';
     }
-  }, [gameState.phase]);
+  }, [currentScene?.timeOfDay, gameState.phase]);
 
   // ロケーション (Location) の決定
   const activeLocationId: string = useMemo(() => {
+    if (currentScene?.background) return currentScene.background;
     if (gameState.phase === 'night') return 'myroom';
     if (gameState.phase === 'morning') return 'school_gate';
     if (selectedLocationId) return selectedLocationId;
@@ -211,7 +214,7 @@ export const App: React.FC = () => {
     if (activeScenario?.id.includes('meet_shion')) return 'library';
     if (activeScenario?.id.includes('meet_emili')) return 'courtyard';
     return 'classroom';
-  }, [gameState.phase, selectedLocationId, activeScenario]);
+  }, [currentScene?.background, gameState.phase, selectedLocationId, activeScenario]);
 
   // ロケーション表示名
   const activeLocationName: string = useMemo(() => {
@@ -225,6 +228,8 @@ export const App: React.FC = () => {
       library: { ja: '図書室', en: 'Library' },
       sports_ground: { ja: '運動場', en: 'Sports Ground' },
       cafeteria: { ja: '購買・学食', en: 'Cafeteria' },
+      shrine: { ja: '神社', en: 'Shrine' },
+      god_realm: { ja: '神界', en: 'God Realm' },
     };
     return locNames[activeLocationId] ? locNames[activeLocationId][lang] : activeLocationId;
   }, [activeLocationId, lang]);
@@ -493,6 +498,29 @@ export const App: React.FC = () => {
 
   // AUTOモード自動送りタイマー参照
   const autoTimerRef = useRef<number | null>(null);
+  // 現在のシーンのタイピング完了フラグ
+  const isTypingCompletedRef = useRef<boolean>(false);
+
+  // 最新ステートの参照用Ref（非同期コールバックでのStale Closure対策）
+  const isAutoRef = useRef(isAuto);
+  useEffect(() => {
+    isAutoRef.current = isAuto;
+  }, [isAuto]);
+
+  const currentSceneRef = useRef(currentScene);
+  useEffect(() => {
+    currentSceneRef.current = currentScene;
+  }, [currentScene]);
+
+  const isWaitingChoiceRef = useRef(isWaitingChoice);
+  useEffect(() => {
+    isWaitingChoiceRef.current = isWaitingChoice;
+  }, [isWaitingChoice]);
+
+  const isFinishedRef = useRef(isFinished);
+  useEffect(() => {
+    isFinishedRef.current = isFinished;
+  }, [isFinished]);
 
   const clearAutoTimer = useCallback(() => {
     if (autoTimerRef.current !== null) {
@@ -501,20 +529,79 @@ export const App: React.FC = () => {
     }
   }, []);
 
-  // タイピング完了ハンドラ
-  const handleTypingComplete = useCallback(() => {
+  // ボイス終了ハンドラ（ルートScenarioEngine.handleVoiceEnded準拠）
+  const handleVoiceEnded = useCallback(() => {
     clearAutoTimer();
-    if (isAuto && !isWaitingChoice && !isFinished) {
-      const delayMs = currentScene?.voiceUrl ? 2500 : 2000;
+    if (isAutoRef.current && !isWaitingChoiceRef.current && !isFinishedRef.current) {
+      // ルートアプリ準拠: ボイス終了後の余韻待機（デフォルト0.6秒）
+      const scene = currentSceneRef.current;
+      const delaySec = scene?.autoNextSec ?? 0.6;
       autoTimerRef.current = window.setTimeout(() => {
         handleDialogueClick();
-      }, delayMs);
+      }, delaySec * 1000);
     }
-  }, [isAuto, isWaitingChoice, isFinished, currentScene?.voiceUrl, handleDialogueClick, clearAutoTimer]);
+  }, [handleDialogueClick, clearAutoTimer]);
 
+  // AudioLipSyncのイベント登録（ボイス終了時のAUTO送り連動）
   useEffect(() => {
+    audioLipSync.setEvents({
+      onEnded: handleVoiceEnded,
+      onError: handleVoiceEnded,
+    });
+  }, [audioLipSync, handleVoiceEnded]);
+
+  // タイピング完了ハンドラ（ルートScenarioEngine.handleTypingComplete準拠）
+  const handleTypingComplete = useCallback(() => {
+    isTypingCompletedRef.current = true;
+    clearAutoTimer();
+    if (!isAutoRef.current || isWaitingChoiceRef.current || isFinishedRef.current) return;
+
+    const scene = currentSceneRef.current;
+    const voiceKey = scene?.voiceUrl;
+    // ボイスが存在し、現在再生中の場合はボイス終了ハンドラ（handleVoiceEnded）に進行を委ねる
+    if (voiceKey && audioLipSync.isPlaying) {
+      return;
+    }
+
+    // ボイスがない場合（または再生が既に終了・失敗している場合）:
+    // ルートアプリ準拠の読書速度（1.2s + 文字数 * 0.055s、2.0s〜6.0sでクランプ、または明示的なautoNextSec）
+    const textLen = scene?.text ? scene.text.length : 0;
+    const calculatedSec = Math.max(2.0, Math.min(6.0, 1.2 + textLen * 0.055));
+    const delaySec = scene?.autoNextSec ?? (voiceKey ? 0.8 : calculatedSec);
+
+    autoTimerRef.current = window.setTimeout(() => {
+      handleDialogueClick();
+    }, delaySec * 1000);
+  }, [audioLipSync, handleDialogueClick, clearAutoTimer]);
+
+  // シーン切替時のタイマー・状態リセット
+  useEffect(() => {
+    isTypingCompletedRef.current = false;
     clearAutoTimer();
   }, [currentScene?.id, clearAutoTimer]);
+
+  // AUTOモード切替ハンドラ（ルートScenarioEngine.setAutoMode準拠）
+  const handleToggleAuto = useCallback(() => {
+    setIsAuto((prev) => {
+      const nextAuto = !prev;
+      isAutoRef.current = nextAuto;
+      clearAutoTimer();
+      if (nextAuto && !isWaitingChoiceRef.current && !isFinishedRef.current && currentSceneRef.current) {
+        const scene = currentSceneRef.current;
+        const voiceKey = scene.voiceUrl;
+        const isVoicePlaying = Boolean(voiceKey && audioLipSync.isPlaying);
+
+        // ボイス再生中でない場合、タイピングが既に完了していればAUTOタイマーを即時セット
+        if (!isVoicePlaying && isTypingCompletedRef.current) {
+          const delaySec = scene.autoNextSec ?? 0.8;
+          autoTimerRef.current = window.setTimeout(() => {
+            handleDialogueClick();
+          }, delaySec * 1000);
+        }
+      }
+      return nextAuto;
+    });
+  }, [audioLipSync, handleDialogueClick, clearAutoTimer]);
 
   // キーボードショートカット
   useEffect(() => {
@@ -522,7 +609,7 @@ export const App: React.FC = () => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === 'a' || e.key === 'A') {
         if (!isWaitingChoice && !isSelectingLocation && !isTitleScreen) {
-          setIsAuto((prev) => !prev);
+          handleToggleAuto();
         }
       } else if (e.key === 'm' || e.key === 'M') {
         handleToggleMute();
@@ -534,7 +621,7 @@ export const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isWaitingChoice, isSelectingLocation, isTitleScreen, handleToggleMute]);
+  }, [isWaitingChoice, isSelectingLocation, isTitleScreen, handleToggleAuto, handleToggleMute]);
 
   // 選択肢の選択
   const handleChoiceClick = useCallback(
@@ -852,6 +939,37 @@ export const App: React.FC = () => {
     }
   }, [saveService, startScenario, preloadInterludeResources]);
 
+  // タイトル画面: 神社・女神実験シナリオ開始
+  const handleStartGodExperiment = useCallback(() => {
+    console.log('[DEBUG] handleStartGodExperiment invoked in App.tsx!');
+    const run = async () => {
+      console.log('[DEBUG] handleStartGodExperiment onCovered start');
+      try {
+        await preloadInterludeResources('shrine', GOD_EXPERIMENT_SCENARIO);
+      } catch (err) {
+        console.warn('[DEBUG] preload failed but continuing:', err);
+      }
+      console.log('[DEBUG] handleStartGodExperiment preload done');
+      const initial = ScheduleManager.createInitialState();
+      setGameState(initial);
+      setIsGameEnded(false);
+      setIsSelectingLocation(false);
+      setIsTitleScreen(false);
+      startScenario(GOD_EXPERIMENT_SCENARIO, initial);
+      console.log('[DEBUG] handleStartGodExperiment startScenario called');
+    };
+
+    if (interludeRef.current) {
+      interludeRef.current.playTransition({
+        title: lang === 'ja' ? '女神の宣告' : 'Goddess Confession',
+        subtitle: 'GODDESS EXPERIMENT',
+        onCovered: run,
+      });
+    } else {
+      run();
+    }
+  }, [lang, preloadInterludeResources, startScenario]);
+
   // タイトル画面: つづきから
   const handleContinueGame = useCallback(() => {
     setSaveLoadModalState({ isOpen: true, mode: 'load' });
@@ -871,6 +989,7 @@ export const App: React.FC = () => {
     return ScheduleManager.getActionLocationOptions(gameState);
   }, [gameState]);
 
+  // スロット一覧の構築
   const saveSlots = useMemo(() => {
     return saveService.getAllSlots();
   }, [saveService, saveLoadModalState.isOpen, hasSaveData]);
@@ -891,6 +1010,7 @@ export const App: React.FC = () => {
           onToggleMute={handleToggleMute}
           onStartGame={handleStartGame}
           onContinueGame={handleContinueGame}
+          onStartGodExperiment={handleStartGodExperiment}
           onToggleLanguage={handleToggleLanguage}
           onOpenLicense={() => setIsLicenseModalOpen(true)}
         />
@@ -908,7 +1028,7 @@ export const App: React.FC = () => {
             phase={gameState.phase}
             locationName={isSelectingLocation ? undefined : activeLocationName}
             isAuto={isAuto}
-            onToggleAuto={() => setIsAuto((prev) => !prev)}
+            onToggleAuto={handleToggleAuto}
             lang={lang}
             onToggleLanguage={handleToggleLanguage}
             isMuted={isMuted}
