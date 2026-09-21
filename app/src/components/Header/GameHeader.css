@@ -103,24 +103,49 @@
 }
 
 .header-actions button {
-  width: 76px;
-  min-width: 76px;
-  max-width: 76px;
-  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 78px;
+  min-width: 78px;
+  max-width: 78px;
+  height: 34px;
+  padding: 0 4px;
   font-family: 'Montserrat', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.07em;
-  line-height: 1;
+  letter-spacing: 0.05em;
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.header-action-icon,
-.header-auto-icon,
-.header-lang-icon,
-.header-license-icon { display: none; }
+.header-btn-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 100%;
+}
+
+.header-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+  filter: drop-shadow(0 1px 2px rgba(15, 45, 78, 0.35));
+}
+
+.header-btn-icon svg {
+  display: block;
+}
+
+.header-btn-label {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
 
 .header-actions button:hover {
   background: linear-gradient(150deg, rgba(120, 194, 241, 0.95), rgba(32, 101, 154, 0.94));
