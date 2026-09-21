@@ -30,11 +30,13 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       {/* 左側 / 中央: 自室画像表示エリア */}
       <div className="room-main-area">
         <div className="room-image-wrapper">
-          <img
-            src="/textures/myroom-night_far.avif"
-            alt={lang === 'ja' ? '自室' : 'My Room'}
-            className="room-main-img"
-          />
+          <div className="room-image-clip">
+            <img
+              src="/textures/myroom-night_far.avif"
+              alt={lang === 'ja' ? '自室' : 'My Room'}
+              className="room-main-img"
+            />
+          </div>
         </div>
       </div>
 
@@ -42,10 +44,9 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       <aside className="room-sidebar">
         {/* ヘッダーエリア */}
         <header className="room-sidebar-header">
+          <p className="room-sidebar-eyebrow">DAY {day} / NIGHT</p>
           <h2 className="room-sidebar-title">
-            {lang === 'ja'
-              ? `自室（第${day}日 夜）`
-              : `My Room (Day ${day} Night)`}
+            {lang === 'ja' ? '自室' : 'My Room'}
           </h2>
           <p className="room-sidebar-subtitle">
             {lang === 'ja'
@@ -70,12 +71,13 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
                   const percent = Math.min(100, Math.round((val / MAX_AFFINITY_SCALE) * 100));
 
                   return (
-                    <div key={charId} className="affinity-item">
+                    <div
+                      key={charId}
+                      className="affinity-item"
+                      style={{ '--affinity-color': char.themeColor } as React.CSSProperties}
+                    >
                       <div className="affinity-item-header">
-                        <span
-                          className="affinity-name"
-                          style={{ color: char.themeColor }}
-                        >
+                        <span className="affinity-name">
                           {name}
                         </span>
                         <span className="affinity-val">Lv. {val}</span>
@@ -86,7 +88,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
                           className="affinity-bar-fill"
                           style={{
                             width: `${percent}%`,
-                            backgroundColor: char.themeColor || '#ec4899',
                           }}
                         />
                       </div>
@@ -100,106 +101,101 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
           {/* コマンドカード群 */}
           <div className="room-card-list">
             {/* 就寝する */}
-            <div
+            <button
+              type="button"
               className="room-menu-card card-sleep"
-              role="button"
-              tabIndex={0}
               onClick={onSleep}
-              onKeyDown={(e) => e.key === 'Enter' && onSleep()}
             >
-              <div className="room-card-inner">
-                <div className="room-card-main">
+              <svg className="room-sleep-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20.9 13.3A8.8 8.8 0 0 1 10.7 3.1 9 9 0 1 0 20.9 13.3Z" />
+              </svg>
+              <span className="room-card-inner">
+                <span className="room-card-main">
                   <span className="room-card-title">
                     {lang === 'ja' ? '就寝する' : 'Sleep'}
                   </span>
-                </div>
-                <div className="room-hint-box">
-                  <span className="room-hint-label">INFO</span>
+                </span>
+                <span className="room-hint-box">
                   <span className="room-hint-text">
                     {lang === 'ja'
                       ? '一日を終えて翌日へ進む'
                       : 'End the day and wake up tomorrow'}
                   </span>
-                </div>
-              </div>
-            </div>
+                </span>
+              </span>
+              <span className="room-card-arrow" aria-hidden="true">›</span>
+            </button>
 
             {/* ゲームをセーブする */}
-            <div
+            <button
+              type="button"
               className="room-menu-card"
-              role="button"
-              tabIndex={0}
               onClick={onSave}
-              onKeyDown={(e) => e.key === 'Enter' && onSave()}
             >
-              <div className="room-card-inner">
-                <div className="room-card-main">
+              <span className="room-card-inner">
+                <span className="room-card-main">
                   <span className="room-card-title">
                     {lang === 'ja' ? 'ゲームをセーブする' : 'Save Game'}
                   </span>
-                </div>
-                <div className="room-hint-box">
-                  <span className="room-hint-label">INFO</span>
+                </span>
+                <span className="room-hint-box">
                   <span className="room-hint-text">
                     {lang === 'ja'
                       ? '現在の進行状況を保存する'
                       : 'Save current progress'}
                   </span>
-                </div>
-              </div>
-            </div>
+                </span>
+              </span>
+              <span className="room-card-arrow" aria-hidden="true">›</span>
+            </button>
 
             {/* セーブデータをロードする */}
-            <div
+            <button
+              type="button"
               className="room-menu-card"
-              role="button"
-              tabIndex={0}
               onClick={onLoad}
-              onKeyDown={(e) => e.key === 'Enter' && onLoad()}
             >
-              <div className="room-card-inner">
-                <div className="room-card-main">
+              <span className="room-card-inner">
+                <span className="room-card-main">
                   <span className="room-card-title">
                     {lang === 'ja' ? 'セーブデータをロードする' : 'Load Game'}
                   </span>
-                </div>
-                <div className="room-hint-box">
-                  <span className="room-hint-label">INFO</span>
+                </span>
+                <span className="room-hint-box">
                   <span className="room-hint-text">
                     {lang === 'ja'
                       ? '保存したデータから再開する'
                       : 'Resume from saved data'}
                   </span>
-                </div>
-              </div>
-            </div>
+                </span>
+              </span>
+              <span className="room-card-arrow" aria-hidden="true">›</span>
+            </button>
 
             {/* この1日をやり直す */}
-            <div
+            <button
+              type="button"
               className="room-menu-card card-rollback"
-              role="button"
-              tabIndex={0}
               onClick={onRollbackDay}
-              onKeyDown={(e) => e.key === 'Enter' && onRollbackDay()}
             >
-              <div className="room-card-inner">
-                <div className="room-card-main">
+              <span className="room-card-inner">
+                <span className="room-card-main">
                   <span className="room-card-title">
                     {lang === 'ja'
                       ? 'この1日をやり直す'
                       : 'Restart Day'}
                   </span>
-                </div>
-                <div className="room-hint-box">
-                  <span className="room-hint-label">INFO</span>
+                </span>
+                <span className="room-hint-box">
                   <span className="room-hint-text">
                     {lang === 'ja'
                       ? '今朝の開始時点へ巻き戻す'
                       : 'Rewind to this morning'}
                   </span>
-                </div>
-              </div>
-            </div>
+                </span>
+              </span>
+              <span className="room-card-arrow" aria-hidden="true">›</span>
+            </button>
           </div>
         </div>
       </aside>

@@ -65,7 +65,7 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   const phaseInfo = PHASE_LABELS[phase];
 
   return (
-    <header className="game-header">
+    <header className="game-header" data-phase={phase}>
       {/* 左側: 日付・時間帯・ロケーション */}
       <div className="header-day-info">
         {/* 日付バッジ (絵文字なし) */}

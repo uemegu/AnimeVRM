@@ -141,6 +141,21 @@
   background: linear-gradient(150deg, rgba(238, 142, 147, 0.95), rgba(178, 64, 77, 0.95));
 }
 
+/* The night room keeps the shared HUD, with darker glass around the phase badge. */
+.game-header[data-phase='night'] .day-badge,
+.game-header[data-phase='night'] .header-location-badge,
+.game-header[data-phase='night'] .header-actions button:not(.active):not(.muted) {
+  background: linear-gradient(155deg, rgba(47, 65, 106, 0.85), rgba(13, 26, 56, 0.9));
+  border-color: rgba(186, 211, 248, 0.6);
+  box-shadow: inset 0 1px 0 rgba(213, 232, 255, 0.2), inset 0 0 0 1px rgba(149, 187, 240, 0.1), 0 3px 10px rgba(3, 9, 27, 0.3);
+}
+
+.game-header[data-phase='night'] .header-actions button:not(.active):not(.muted):hover {
+  background: linear-gradient(150deg, rgba(66, 100, 155, 0.95), rgba(27, 51, 92, 0.95));
+  border-color: #d5eeff;
+  box-shadow: inset 0 1px 0 rgba(213, 232, 255, 0.4), 0 0 12px rgba(106, 179, 244, 0.3);
+}
+
 .header-actions button:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 3px;

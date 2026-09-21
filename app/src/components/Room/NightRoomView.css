@@ -1,388 +1,388 @@
-/* ==========================================================================
-   NightRoomView Styles
-   夜の自室画面（メインコンテンツ画像 ＋ 右側白基調サイドバー）
-   ========================================================================== */
-
+/* The destination screen's beveled frame and frosted glass, in moonlit navy. */
 .room-overlay {
+  --room-accent: #9ddcff;
+  --room-rgb: 113, 178, 244;
+  --room-ink: #edf4ff;
+  --room-muted: #bacbe5;
   position: absolute;
   inset: 0;
-  background: #1a1a1a;
+  isolation: isolate;
   display: flex;
   z-index: 250;
   overflow: hidden;
+  background: #0b142b;
+  color: var(--room-ink);
+  color-scheme: dark;
   user-select: none;
   font-family: 'Kiwi Maru', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
-  animation: room-fade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: room-fade 0.25s ease-out both;
+}
+
+.room-overlay::before,
+.room-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.room-overlay::before {
+  inset: -24px;
+  background: url('/textures/myroom-night_far.avif') center / cover no-repeat;
+  filter: blur(12px) saturate(0.8);
+}
+
+.room-overlay::after {
+  background:
+    linear-gradient(180deg, rgba(13, 24, 56, 0.5), rgba(10, 20, 47, 0.2) 42%, rgba(5, 12, 32, 0.72)),
+    linear-gradient(110deg, rgba(30, 46, 92, 0.22), rgba(9, 20, 48, 0.6));
 }
 
 @keyframes room-fade {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* --------------------------------------------------------------------------
-   Left / Center: Main Room Image Area
-   -------------------------------------------------------------------------- */
+/* Preserve the full 3:2 illustration within the same eight-sided map frame. */
 .room-main-area {
   flex: 1;
   min-width: 0;
   height: 100%;
   position: relative;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a1a1a;
-  padding: 68px 20px 20px 20px;
+  padding: 76px 22px 30px;
   box-sizing: border-box;
+  container-type: size;
 }
 
-/* 自室画像の1536:1024（3:2）アスペクト比完全維持ラッパー */
 .room-image-wrapper {
+  --room-cut: 24px;
   position: relative;
-  max-width: 100%;
-  max-height: 100%;
+  width: min(100%, calc(100cqh * 1536 / 1024));
   aspect-ratio: 1536 / 1024;
-  width: auto;
-  height: auto;
-  margin: auto;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
-  border-radius: 8px;
+  z-index: 1;
+  filter: drop-shadow(0 12px 24px rgba(3, 9, 27, 0.5));
+}
+
+.room-image-wrapper::before,
+.room-image-wrapper::after,
+.room-image-clip {
+  clip-path: polygon(
+    var(--room-cut) 0, calc(100% - var(--room-cut)) 0,
+    100% var(--room-cut), 100% calc(100% - var(--room-cut)),
+    calc(100% - var(--room-cut)) 100%, var(--room-cut) 100%,
+    0 calc(100% - var(--room-cut)), 0 var(--room-cut)
+  );
+}
+
+.room-image-wrapper::before,
+.room-image-wrapper::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.room-image-wrapper::before {
+  inset: -5px;
+  z-index: -2;
+  background: linear-gradient(145deg, #dfedff, rgba(var(--room-rgb), 0.75) 42%, #e3f3ff 74%, #5579b2);
+}
+
+.room-image-wrapper::after {
+  inset: -2px;
+  z-index: -1;
+  background: #233955;
+}
+
+.room-image-clip {
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  border: 2px solid #334155;
+  background: #101a32;
 }
 
 .room-main-img {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: contain;
   display: block;
   pointer-events: none;
 }
 
-/* --------------------------------------------------------------------------
-   Right: Room Sidebar (ActionSelectModal と完全一致の白基調テーマ)
-   -------------------------------------------------------------------------- */
+/* Match the daytime sidebar's dimensions, glass layers and diagonal accents. */
 .room-sidebar {
-  width: 380px;
-  max-width: 38%;
-  min-width: 320px;
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 clamp(350px, 29.5vw, 430px);
+  min-width: 0;
   height: 100%;
-  background: rgba(255, 255, 255, 0.96);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-left: 2px solid #e2e8f0;
-  box-shadow: -6px 0 25px rgba(15, 23, 42, 0.08);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  z-index: 40;
-  box-sizing: border-box;
+  background: linear-gradient(145deg, rgba(21, 36, 72, 0.9), rgba(10, 23, 49, 0.86) 58%, rgba(35, 55, 94, 0.72));
+  border-left: 1px solid rgba(181, 211, 255, 0.5);
+  box-shadow: -6px 0 24px rgba(3, 9, 27, 0.3), inset 3px 0 0 rgba(189, 219, 255, 0.08);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  z-index: 6;
 }
 
-/* サイドバーヘッダー */
+.room-sidebar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(132deg,
+    transparent 14%, rgba(var(--room-rgb), 0.06) 14%, rgba(var(--room-rgb), 0.06) 19%, transparent 19%,
+    transparent 63%, rgba(195, 220, 255, 0.06) 63%, rgba(195, 220, 255, 0.06) 66%,
+    rgba(var(--room-rgb), 0.04) 66%, rgba(var(--room-rgb), 0.04) 72%, transparent 72%);
+}
+
 .room-sidebar-header {
-  padding: 68px 24px 16px 24px;
-  border-bottom: 2px solid #f1f5f9;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding: 76px 24px 18px;
   flex-shrink: 0;
+}
+
+.room-sidebar-eyebrow {
+  margin: 0 0 10px;
+  font: 600 0.68rem 'Montserrat', sans-serif;
+  letter-spacing: 0.2em;
+  color: var(--room-muted);
 }
 
 .room-sidebar-title {
   margin: 0;
-  font-size: 1.45rem;
-  font-weight: 800;
-  color: #0284c7;
-  letter-spacing: 0.04em;
+  font-size: clamp(1.5rem, 2.1vw, 1.9rem);
+  font-weight: 700;
+  color: var(--room-ink);
+  letter-spacing: 0.14em;
+  text-shadow: 0 0 18px rgba(var(--room-rgb), 0.28);
 }
 
 .room-sidebar-subtitle {
-  margin: 0;
-  font-size: 0.84rem;
-  color: #64748b;
-  line-height: 1.45;
+  margin: 10px 0 0;
+  font-size: 0.76rem;
+  color: var(--room-muted);
+  line-height: 1.7;
+  letter-spacing: 0.03em;
 }
 
-/* サイドバーコンテンツ */
+.room-sidebar-header::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  margin-top: 16px;
+  background: linear-gradient(90deg, var(--room-accent), rgba(var(--room-rgb), 0.15));
+  box-shadow: 0 0 8px rgba(var(--room-rgb), 0.3);
+}
+
 .room-sidebar-content {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  padding: 20px 22px 30px 22px;
+  padding: 4px 18px 28px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 20px;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--room-rgb), 0.4) transparent;
 }
 
-/* スクロールバースタイル */
-.room-sidebar-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.room-sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.room-sidebar-content::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-
-.room-sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* --------------------------------------------------------------------------
-   Affinity Status Panel (ロケーションカード群と調和する変形・立体シャドウ)
-   -------------------------------------------------------------------------- */
 .affinity-status-panel {
-  background: #ffffff;
-  border: 1px solid #0f172a;
-  border-radius: 8px;
-  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(46, 66, 108, 0.32), rgba(9, 20, 44, 0.3));
+  border: 1px solid rgba(var(--room-rgb), 0.26);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(198, 223, 255, 0.1);
   flex-shrink: 0;
 }
 
-.affinity-panel-inner {
-  transform: skewX(4deg);
-}
-
 .affinity-panel-title {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 10px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--room-ink);
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
 }
 
-.affinity-panel-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  background: #0284c7;
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 4px;
+.affinity-panel-title::before {
+  content: '';
+  width: 2px;
+  height: 12px;
+  background: var(--room-accent);
+  box-shadow: 0 0 8px rgba(var(--room-rgb), 0.5);
 }
 
-.affinity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.affinity-item {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
+.affinity-list { display: flex; flex-direction: column; gap: 12px; }
+.affinity-item { display: flex; flex-direction: column; gap: 6px; }
 
 .affinity-item-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
 }
 
 .affinity-name {
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--affinity-color) 65%, #fff);
 }
 
 .affinity-val {
   font-family: 'Montserrat', sans-serif;
-  font-weight: 800;
-  color: #0f172a;
-  font-size: 0.78rem;
-  background: #f8fafc;
-  border: 1.5px solid #cbd5e1;
-  padding: 0px 6px;
+  font-weight: 600;
+  color: var(--room-ink);
+  font-size: 0.68rem;
+  background: rgba(108, 147, 208, 0.12);
+  border: 1px solid rgba(167, 197, 243, 0.3);
+  padding: 3px 7px;
   border-radius: 4px;
 }
 
 .affinity-bar-track {
   width: 100%;
   height: 6px;
-  background: #e2e8f0;
+  background: rgba(154, 179, 220, 0.12);
   border-radius: 9999px;
   overflow: hidden;
-  border: 1px solid #cbd5e1;
+  border: 1px solid rgba(175, 204, 246, 0.2);
 }
 
 .affinity-bar-fill {
   height: 100%;
   border-radius: 9999px;
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(90deg, var(--affinity-color), color-mix(in srgb, var(--affinity-color) 70%, #fff));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--affinity-color) 55%, transparent);
+  transition: width 0.4s ease;
 }
 
-/* --------------------------------------------------------------------------
-   Room Menu Cards List (ActionSelectModalの location-item-card と完全同一スタイル)
-   -------------------------------------------------------------------------- */
-.room-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+.room-card-list { display: flex; flex-direction: column; gap: 10px; }
 
 .room-menu-card {
   position: relative;
-  min-height: 84px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 76px;
   box-sizing: border-box;
-  background: #ffffff;
-  border: 2px solid #0f172a;
-  border-radius: 8px;
-  padding: 10px 16px;
+  padding: 13px 16px;
+  border: 1px solid rgba(var(--room-rgb), 0.32);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(52, 75, 117, 0.5), rgba(18, 33, 66, 0.6));
+  box-shadow: inset 0 0 0 2px rgba(192, 217, 255, 0.04), 0 3px 8px rgba(3, 9, 27, 0.12);
+  font: inherit;
+  color: var(--room-ink);
+  text-align: left;
   cursor: pointer;
-  transform: skewX(-4deg);
-  box-shadow: 4px 4px 0px #0b1d47;
-  transition: transform 0.16s cubic-bezier(0.18, 1.25, 0.32, 1.15),
-              box-shadow 0.16s ease,
-              border-color 0.16s ease,
-              background-color 0.16s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  user-select: none;
-  flex-shrink: 0;
-  outline: none;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
-/* ホバー時の演出（ロケーション選択カードと完全統一） */
-.room-menu-card:hover,
+.room-menu-card:hover {
+  background: linear-gradient(125deg, rgba(61, 97, 149, 0.7), rgba(24, 49, 89, 0.8));
+  border-color: var(--room-accent);
+  transform: translateX(-2px);
+  box-shadow: inset 0 0 0 2px rgba(188, 222, 255, 0.1), 0 0 0 2px rgba(var(--room-rgb), 0.1), 0 5px 14px rgba(3, 9, 27, 0.25);
+}
+
 .room-menu-card:focus-visible {
-  background: #eff6ff;
-  border-color: #0284c7;
-  transform: translate(-3px, -2px) skewX(-4deg) scale(1.02);
-  box-shadow: 6px 6px 0px #0284c7;
+  outline: 2px solid var(--room-accent);
+  outline-offset: 3px;
 }
 
-.room-menu-card:active {
-  transform: translate(-1px, 0) skewX(-4deg);
-  box-shadow: 2px 2px 0px #0b1d47;
-}
+.room-menu-card:active { transform: translateY(1px); }
 
-/* 就寝カード（最重要アクションの演出） */
 .room-menu-card.card-sleep {
-  background: #ffffff;
-  border-color: #0f172a;
+  min-height: 92px;
+  border-color: rgba(143, 211, 255, 0.85);
+  background:
+    radial-gradient(ellipse at 100% 100%, rgba(55, 177, 231, 0.3), transparent 65%),
+    linear-gradient(135deg, rgba(47, 81, 142, 0.75), rgba(15, 35, 76, 0.85));
+  box-shadow: inset 0 0 0 2px rgba(192, 224, 255, 0.1), inset 0 0 16px rgba(96, 178, 255, 0.12), 0 0 16px rgba(75, 149, 235, 0.16);
 }
 
-.room-menu-card.card-sleep:hover,
-.room-menu-card.card-sleep:focus-visible {
-  background: #f0fdf4;
-  border-color: #16a34a;
-  box-shadow: 6px 6px 0px #16a34a;
+.room-menu-card.card-sleep:hover {
+  border-color: #dcf5ff;
+  box-shadow: inset 0 0 0 2px rgba(192, 224, 255, 0.2), inset 0 0 24px rgba(96, 178, 255, 0.24), 0 0 20px rgba(75, 149, 235, 0.28);
 }
 
-/* カード内部コンテンツ */
-.room-card-inner {
-  transform: skewX(4deg);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  width: 100%;
-  gap: 6px;
-}
-
-.room-card-main {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-}
-
-.room-card-title {
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: 0.03em;
-  line-height: 1.3;
-}
-
-.room-menu-card:hover .room-card-title {
-  color: #0284c7;
-}
-
-.room-menu-card.card-sleep:hover .room-card-title {
-  color: #15803d;
-}
-
-/* 右側アクションバッジ */
-.room-badge {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  padding: 2px 7px;
-  border-radius: 4px;
+.room-sleep-icon {
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
-  line-height: 1.3;
+  color: #f3faff;
+  filter: drop-shadow(0 0 8px rgba(133, 202, 255, 0.65));
 }
 
-.badge-sleep {
-  background: #16a34a;
-  color: #ffffff;
+.room-card-inner { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 7px; }
+.room-card-main { display: flex; align-items: center; }
+.room-card-title { font-size: 0.92rem; font-weight: 700; letter-spacing: 0.03em; line-height: 1.4; }
+.card-sleep .room-card-title { font-size: 1.14rem; letter-spacing: 0.12em; text-shadow: 0 0 12px rgba(var(--room-rgb), 0.5); }
+.room-card-arrow { color: var(--room-accent); font: 1.6rem sans-serif; }
+.room-hint-box { display: flex; }
+.room-hint-text { font-size: 0.7rem; color: var(--room-muted); letter-spacing: 0.02em; line-height: 1.6; overflow-wrap: anywhere; }
+
+@media (max-height: 760px) and (min-width: 861px) {
+  .room-main-area { padding-top: 70px; padding-bottom: 24px; }
+  .room-sidebar-header { padding-top: 66px; padding-bottom: 12px; }
+  .room-sidebar-eyebrow { margin-bottom: 6px; }
+  .room-sidebar-subtitle { margin-top: 6px; }
+  .room-sidebar-header::after { margin-top: 12px; }
+  .room-sidebar-content { gap: 14px; padding-bottom: 18px; }
+  .affinity-status-panel { padding: 12px 16px; }
+  .affinity-panel-title { margin-bottom: 12px; }
+  .affinity-list { gap: 8px; }
+  .room-menu-card { min-height: 66px; padding-block: 10px; }
+  .room-menu-card.card-sleep { min-height: 82px; }
 }
 
-.badge-save {
-  background: #0284c7;
-  color: #ffffff;
+@media (max-width: 1100px) and (min-width: 861px) {
+  .room-main-area { padding-inline: 16px; }
 }
 
-.badge-load {
-  background: #64748b;
-  color: #ffffff;
+/* Like the map screen, stack the image above the scrollable panel on phones. */
+@media (max-width: 860px) {
+  .room-overlay { flex-direction: column; }
+  .room-main-area { flex: 0 0 46%; width: 100%; height: 46%; padding: 70px 20px 22px; }
+  .room-image-wrapper { --room-cut: 16px; }
+  .room-sidebar { flex: 1; width: 100%; height: 54%; min-height: 0; border-left: 0; border-top: 1px solid rgba(181, 211, 255, 0.5); }
+  .room-sidebar-header { padding: 16px 20px 12px; }
+  .room-sidebar-eyebrow { margin-bottom: 6px; font-size: 0.62rem; }
+  .room-sidebar-title { font-size: 1.2rem; }
+  .room-sidebar-subtitle { margin-top: 6px; font-size: 0.7rem; }
+  .room-sidebar-header::after { display: none; }
+  .room-sidebar-content { padding: 4px 16px 20px; gap: 14px; }
 }
 
-.badge-rollback {
-  background: #d97706;
-  color: #ffffff;
+@media (max-width: 540px) {
+  .room-main-area { flex-basis: 43%; height: 43%; padding-top: 110px; }
+  .room-sidebar { height: 57%; }
 }
 
-/* サブヒント・説明文ボックス (ActionSelectModal の location-hint-box と完全一致) */
-.room-hint-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: #f8fafc;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
-  min-height: 24px;
-  box-sizing: border-box;
+@media (max-width: 860px) and (max-height: 540px) {
+  .room-overlay { flex-direction: row; }
+  .room-main-area { flex: 1; height: 100%; padding: 106px 14px 20px; }
+  .room-sidebar { flex: 0 0 300px; height: 100%; border-top: 0; border-left: 1px solid rgba(181, 211, 255, 0.5); }
+  .room-sidebar-header { padding: 106px 16px 12px; }
+  .room-sidebar-content { padding-inline: 12px; }
+  .room-menu-card { min-height: 66px; }
 }
 
-.room-hint-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.65rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  background: #e2e8f0;
-  color: #475569;
-  padding: 1px 4px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  line-height: 1.2;
-}
-
-.room-hint-text {
-  font-size: 0.76rem;
-  color: #475569;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+@media (prefers-reduced-motion: reduce) {
+  .room-overlay { animation: none; }
+  .room-menu-card,
+  .affinity-bar-fill { transition: none; }
 }
