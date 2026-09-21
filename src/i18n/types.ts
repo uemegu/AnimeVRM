@@ -208,6 +208,7 @@ export interface Translations {
     night: string;
     bright: string;
     dark: string;
+    divine: string;
     backgroundTitle: string;
     backgrounds: {
       modernPark: string;
@@ -221,6 +222,7 @@ export interface Translations {
       town: string;
       apartmentDoor: string;
       myroom: string;
+      divineRealm: string;
       offSingleColor: string;
       selectFarImage: string;
     };
@@ -243,6 +245,7 @@ export interface Translations {
     presetNightSchoolTip: string;
     presetBrightIndoorTip: string;
     presetDarkIndoorTip: string;
+    presetDivineTip: string;
   };
   render: {
     detailedParamsTitle: string;

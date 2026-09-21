@@ -513,6 +513,33 @@ export function applyToonShader(
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
     const bodyEntry = trackedMaterials.find((entry) => entry.kind === 'body');
 
+    // Deep silhouette mode handling for eyes & facial features
+    if (kind === 'body') {
+      const isSilhouetteMode = typeof params.shadingShiftFactor === 'number' && params.shadingShiftFactor <= -0.7;
+      if (isSilhouetteMode) {
+        const shadowCol = new THREE.Color(params.color || '#080a12');
+        const blackCol = new THREE.Color(0, 0, 0);
+        allMToonMaterials.forEach(({ material }) => {
+          const matName = material.name || '';
+          if (isEyeMaterial(matName) || isFaceFeatureMaterial(matName)) {
+            if (material.shadeColorFactor) material.shadeColorFactor.copy(shadowCol);
+            if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(shadowCol);
+            if (material.color) material.color.copy(shadowCol);
+            if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.copy(shadowCol);
+            material.shadingShiftFactor = -1.0;
+            if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = -1.0;
+            if (material.parametricRimColorFactor) material.parametricRimColorFactor.copy(blackCol);
+            if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.copy(blackCol);
+            if (material.outlineColorFactor) material.outlineColorFactor.copy(shadowCol);
+            if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.copy(shadowCol);
+            material.needsUpdate = true;
+          }
+        });
+      } else {
+        setupEyeMaterials();
+      }
+    }
+
     trackedMaterials
       .filter((entry) => (entry.kind === kind || (kind === 'body' && entry.kind === 'face')) && !isEyeMaterial(entry.material.name || '') && !isFaceFeatureMaterial(entry.material.name || ''))
       .forEach(({ material, kind: matKind }) => {
@@ -554,13 +581,15 @@ export function applyToonShader(
           if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = effectiveToony;
         }
 
-        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows)
+        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows, but allow deep silhouette)
         if (typeof params.shadingShiftFactor === 'number' || typeof params.faceShadingShiftFactor === 'number') {
           let shift: number | undefined;
           if (matKind === 'face') {
             shift = typeof params.faceShadingShiftFactor === 'number'
               ? params.faceShadingShiftFactor
-              : (typeof params.shadingShiftFactor === 'number' ? Math.max(params.shadingShiftFactor, 0.65) : undefined);
+              : (typeof params.shadingShiftFactor === 'number'
+                  ? (params.shadingShiftFactor <= -0.7 ? params.shadingShiftFactor : Math.max(params.shadingShiftFactor, 0.65))
+                  : undefined);
           } else if (typeof params.shadingShiftFactor === 'number') {
             shift = params.shadingShiftFactor;
           }
@@ -762,7 +791,10 @@ export function applyToonShader(
       if (newConfig.bottomGradient) {
         applyBottomGradient(newConfig.bottomGradient);
       }
-      setupEyeMaterials();
+      const isSilhouette = typeof newConfig.materials?.body?.shadingShiftFactor === 'number' && newConfig.materials.body.shadingShiftFactor <= -0.7;
+      if (!isSilhouette) {
+        setupEyeMaterials();
+      }
     },
     dispose: () => {},
   };

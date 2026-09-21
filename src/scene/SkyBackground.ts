@@ -90,14 +90,17 @@ export class SkyBackground {
   }
 
   setTimeOfDay(time?: string): void {
-    const colors = time === 'evening'
-      ? ['#748bc1', '#f9d4a5', '#fff0d4', '#b2a4c3']
-      : (time === 'dark_indoor' || time === 'night')
-        ? ['#183655', '#728b9f', '#abb9ca', '#566c8b']
-        : time === 'rainy'
-          ? ['#748c9e', '#bccbd1', '#dbe2e5', '#8a9eaf']
-          : ['#078fff', '#9ce9ff', '#fff9eb', '#9ebdd6'];
-    this.material.uniforms.uSkyGlow.value = (time === 'dark_indoor' || time === 'night') ? 0.12
+    const colors = time === 'divine'
+      ? ['#0f172a', '#3b4252', '#fed7aa', '#1e293b']
+      : time === 'evening'
+        ? ['#748bc1', '#f9d4a5', '#fff0d4', '#b2a4c3']
+        : (time === 'dark_indoor' || time === 'night')
+          ? ['#183655', '#728b9f', '#abb9ca', '#566c8b']
+          : time === 'rainy'
+            ? ['#748c9e', '#bccbd1', '#dbe2e5', '#8a9eaf']
+            : ['#078fff', '#9ce9ff', '#fff9eb', '#9ebdd6'];
+    this.material.uniforms.uSkyGlow.value = time === 'divine' ? 0.35
+      : (time === 'dark_indoor' || time === 'night') ? 0.12
       : time === 'rainy' ? 0.2 : time === 'evening' ? 0.55 : 0.85;
     ['uZenith', 'uHorizon', 'uCloudLight', 'uCloudShade'].forEach((key, i) => {
       this.material.uniforms[key].value.set(colors[i]);

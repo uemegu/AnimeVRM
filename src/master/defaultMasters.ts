@@ -47,6 +47,13 @@ export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
     defaultVoiceGender: 'female',
     description: '凛とした佇まいの20代後半の女性教師 (桐島 先生)',
   },
+  god: {
+    id: 'god',
+    name: '神様 (god.vrm)',
+    modelUrl: '/models/god.vrm',
+    defaultVoiceGender: 'female',
+    description: '後光を背負い、顔が光と影に包まれた神格キャラクター',
+  },
 };
 
 export const DEFAULT_MOTIONS: MasterDatabase['motions'] = {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ActionLocationId, ActionLocationOption, DayPhase } from '../../types/game';
 import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
+import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { ConfirmModal } from '../Common/ConfirmModal';
 import './ActionSelectModal.css';
 
@@ -30,8 +31,10 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   phase = 'morning_action',
   affinities = {},
 }) => {
-  // ホバー状態の連動（カード ⇔ マップピン）
+  // ホバー・キーボードフォーカスの連動（カード ⇔ マップピン）
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+  const activeId = hoveredId ?? focusedId;
 
   // 決定確認ダイアログ用の選択中ロケーション
   const [pendingOption, setPendingOption] = useState<ActionLocationOption | null>(null);
@@ -62,6 +65,11 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     setHoveredId(null);
   };
 
+  const handleFocusLocation = (id: string) => {
+    setFocusedId(id);
+    setHoveredId(null);
+  };
+
   // 場所クリック時: 直接決定ではなく自作YES/NOダイアログを表示
   const handleClickLocation = (opt: ActionLocationOption) => {
     playSE('/se/items_hover.mp3', 0.5);
@@ -84,8 +92,8 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
 
   // ホバー中のロケーション対象
   const hoveredOption = useMemo(
-    () => options.find((opt) => opt.id === hoveredId),
-    [options, hoveredId]
+    () => options.find((opt) => opt.id === activeId),
+    [options, activeId]
   );
 
   // ホバー中ロケーションのINFO文字列
@@ -116,6 +124,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
       return {
         type: 'character' as const,
         charId,
+        name: CHARACTERS[charId]?.name[lang] || CHARACTERS[charId]?.name.ja || charId,
         emotion,
         imgUrl: `/assets/characters/${charId}_${emotion}.avif`,
         bgClass: `heroine-bg-${charId}`,
@@ -130,20 +139,17 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
 
     // 誰も出会わない選択肢の場合は非表示
     return null;
-  }, [hoveredOption, affinities]);
+  }, [hoveredOption, affinities, lang]);
 
   return (
     <div className={`action-select-overlay phase-${phase}`}>
       {/* 左側 / 中央: 学校俯瞰マップ表示エリア */}
       <div className="action-map-area">
-        {/* メインコンテンツ背景幾何学装飾（ロード画面と共通の polygon clip-path） */}
-        <div className="action-map-bg-decoration" />
-
         <div className="action-map-wrapper">
           <div className="action-map-clip">
             <img
               src="/assets/backgrounds/school_aerial.avif"
-              alt="School Aerial View"
+              alt={lang === 'ja' ? '学校の俯瞰マップ' : 'School aerial map'}
               className="action-map-img"
             />
 
@@ -153,7 +159,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
               if (!coord) return null;
 
               const locName = opt.name[lang] || opt.name.ja;
-              const isHighlighted = hoveredId === opt.id;
+              const isHighlighted = activeId === opt.id;
 
               // 会える人物インジケーター（特定: 黄(あおい)・赤(エミリ)・青(しおん)、不特定: ?）
               const charIds = opt.hintCharacterIds || [];
@@ -172,12 +178,15 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
               }
 
               return (
-                <div
+                <button
+                  type="button"
                   key={`pin_${opt.id}`}
                   className={`action-map-pin ${isHighlighted ? 'highlighted' : ''}`}
-                  style={{ left: coord.left, top: coord.top }}
+                  style={{ left: `clamp(40px, ${coord.left}, calc(100% - 40px))`, top: coord.top }}
                   onMouseEnter={() => handleMouseEnter(opt.id)}
                   onMouseLeave={handleMouseLeave}
+                  onFocus={() => handleFocusLocation(opt.id)}
+                  onBlur={() => setFocusedId(null)}
                   onClick={() => handleClickLocation(opt)}
                   title={locName}
                 >
@@ -188,10 +197,10 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
                     </span>
                   )}
 
-                  <div className="action-map-pin-inner">
+                  <span className="action-map-pin-inner">
                     <span className="action-map-pin-name">{locName}</span>
-                  </div>
-                </div>
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -199,7 +208,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
           {/* ロケーションフォーカス時のINFO帯表示（地図下側・ヒロイン画像左側） */}
           {focusHeroineInfo && hoveredHintText && (
             <div
-              key={`focus_info_${hoveredId}`}
+              key={`focus_info_${activeId}`}
               className="action-focus-info-banner"
             >
               <div className="action-focus-info-banner-inner">
@@ -212,15 +221,18 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
           {/* ロケーションフォーカス時のヒロイン画像ポップアップ（地図右下はみ出し表示） */}
           {focusHeroineInfo && (
             <div
-              key={`focus_${hoveredId}`}
+              key={`focus_${activeId}`}
               className={`action-focus-heroine-box ${focusHeroineInfo.bgClass}`}
             >
               {focusHeroineInfo.type === 'character' ? (
-                <img
-                  src={focusHeroineInfo.imgUrl}
-                  alt={focusHeroineInfo.charId}
-                  className="heroine-preview-img"
-                />
+                <>
+                  <img
+                    src={focusHeroineInfo.imgUrl}
+                    alt={focusHeroineInfo.name}
+                    className="heroine-preview-img"
+                  />
+                  <span className="heroine-preview-name">{focusHeroineInfo.name}</span>
+                </>
               ) : (
                 <span className="heroine-preview-unknown">?</span>
               )}
@@ -235,31 +247,41 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
           <h2 className="action-sidebar-title">
             {lang === 'ja' ? '移動場所の選択' : 'Choose Destination'}
           </h2>
+          <p className="action-sidebar-description">
+            {lang === 'ja' ? '行きたい場所を選んでください。' : 'Choose where you would like to go.'}
+          </p>
         </header>
 
-        {/* サイドバー内のカードリスト（スクロールなし・コンパクト一覧） */}
+        {/* サイドバー内のカードリスト（小さい画面ではスクロール） */}
         <div className="action-sidebar-list">
           {options.map((opt) => {
             const locName = opt.name[lang] || opt.name.ja;
             const hintText = opt.hintText
               ? opt.hintText[lang] || opt.hintText.ja
               : null;
-            const isHighlighted = hoveredId === opt.id;
+            const isHighlighted = activeId === opt.id;
+            const thumbnailUrl = LOCATION_VISUAL_PRESETS[opt.id]?.layers.background?.url;
 
             return (
-              <div
+              <button
+                type="button"
                 key={opt.id}
                 className={`location-item-card ${isHighlighted ? 'highlighted' : ''}`}
                 onMouseEnter={() => handleMouseEnter(opt.id)}
                 onMouseLeave={handleMouseLeave}
+                onFocus={() => handleFocusLocation(opt.id)}
+                onBlur={() => setFocusedId(null)}
                 onClick={() => handleClickLocation(opt)}
               >
-                <div className="location-card-content">
-                  <div className="location-item-main">
+                {thumbnailUrl && (
+                  <img className="location-thumbnail" src={thumbnailUrl} alt="" />
+                )}
+                <span className="location-card-content">
+                  <span className="location-item-main">
                     <span className="location-name">{locName}</span>
 
                     {opt.hintCharacterIds && opt.hintCharacterIds.length > 0 && (
-                      <div className="character-hints">
+                      <span className="character-hints">
                         {opt.hintCharacterIds.map((charId) => {
                           const char = CHARACTERS[charId];
                           const charName = char
@@ -270,32 +292,29 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
                               key={charId}
                               className="character-badge"
                               style={{
-                                backgroundColor: char?.themeColor || '#64748b',
-                              }}
+                                '--character-color': char?.themeColor || '#64748b',
+                              } as React.CSSProperties}
                             >
-                              <span className="character-badge-dot" />
                               <span>{charName}</span>
                             </span>
                           );
                         })}
-                      </div>
+                      </span>
                     )}
-                  </div>
+                  </span>
 
-                  {/* INFO ヒントテキスト（2行固定高さ・上下中央揃え） */}
+                  {/* 場所のサムネイルに添えるヒント */}
                   {hintText ? (
-                    <div className="location-hint-box">
-                      <span className="hint-label">INFO</span>
+                    <span className="location-hint-box">
                       <span className="hint-text">{hintText}</span>
-                    </div>
+                    </span>
                   ) : (
-                    <div className="location-hint-box placeholder" aria-hidden="true">
-                      <span className="hint-label">INFO</span>
+                    <span className="location-hint-box placeholder" aria-hidden="true">
                       <span className="hint-text">-</span>
-                    </div>
+                    </span>
                   )}
-                </div>
-              </div>
+                </span>
+              </button>
             );
           })}
         </div>

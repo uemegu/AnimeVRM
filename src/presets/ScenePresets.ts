@@ -1,7 +1,7 @@
 import { resolveAssetUrl } from '../utils/path';
 import type { AvatarConfig } from '../Config';
 
-export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor';
+export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | 'divine';
 export type LocationId =
   | 'modern_park'
   | 'school_gate'
@@ -14,6 +14,7 @@ export type LocationId =
   | 'town'
   | 'apartment_door'
   | 'myroom'
+  | 'divine_realm'
   | 'none';
 
 export type ScenePresetId =
@@ -34,7 +35,8 @@ export type ScenePresetId =
   | 'evening_outdoor'
   | 'rainy_outdoor'
   | 'night_outdoor'
-  | 'night_festival';
+  | 'night_festival'
+  | 'divine_encounter';
 
 export interface TimeOfDayPresetData {
   id: TimeOfDayId;
@@ -1445,6 +1447,192 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       splashCount: 110,
     },
   },
+  // 神聖・後光 (Divine Encounter) - 逆光シルエット & 黄金リムライト & 後光薄明光線
+  divine: {
+    id: 'divine',
+    name: '神聖・後光',
+    description: '背後からの強烈な後光（薄明光線）と神々しい黄金の輪郭光。手前は深い影となり神秘的な対峙空間を作り出す',
+    materials: {
+      body: {
+        color: '#080a12',
+        shadowHueShift: 0,
+        shadowLightnessFactor: 0.04,
+        shadowBoundaryTint: 0.0,
+        shadingToonyFactor: 1.0,
+        shadingShiftFactor: -1.0,
+        faceShadingShiftFactor: -1.0,
+        giEqualizationFactor: 0.0,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: true,
+        rimColor: '#ffea9f',
+        parametricRimFresnelPowerFactor: 4.2,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 1.0,
+        outlineWidthFactor: 0.0016,
+      },
+      hair: {
+        color: '#080a12',
+        shadowHueShift: 0,
+        shadowLightnessFactor: 0.04,
+        shadowBoundaryTint: 0.0,
+        shadingToonyFactor: 1.0,
+        shadingShiftFactor: -1.0,
+        giEqualizationFactor: 0.0,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: true,
+        rimColor: '#ffea9f',
+        parametricRimFresnelPowerFactor: 4.2,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 1.0,
+        outlineWidthFactor: 0.0016,
+      },
+      cloth: {
+        color: '#080a12',
+        shadowHueShift: 0,
+        shadowLightnessFactor: 0.04,
+        shadowBoundaryTint: 0.0,
+        shadingToonyFactor: 1.0,
+        shadingShiftFactor: -1.0,
+        giEqualizationFactor: 0.0,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: true,
+        rimColor: '#ffea9f',
+        parametricRimFresnelPowerFactor: 4.2,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 1.0,
+        outlineWidthFactor: 0.0016,
+      },
+    },
+    eyeGlow: {
+      enabled: false,
+      intensity: 0.0,
+    },
+    outline: {
+      enabled: true,
+      useSmoothNormal: true,
+      screenSpaceWidth: true,
+      autoLineWeight: true,
+      darknessFactor: 0.0,
+      widthFactor: 0.001,
+      lightingMixFactor: 0,
+    },
+    lighting: {
+      castShadows: false,
+      ambient: {
+        color: '#05070d',
+        intensity: 0.02,
+      },
+      directional: {
+        color: '#fff5dc',
+        intensity: 2.0,
+        posX: 0,
+        posY: 1.75,
+        posZ: -3.0,
+      },
+      rim: {
+        enabled: true,
+        color: '#ffeab0',
+        intensity: 7.5,
+        posX: 0,
+        posY: 1.7,
+        posZ: -2.5,
+      },
+      depthRim: {
+        enabled: true,
+        power: 4.2,
+        threshold: 0.15,
+        intensity: 1.5,
+      },
+      sunShafts: {
+        enabled: true,
+        followDirectionalLight: false,
+        sunPosition: {
+          x: 0.0,
+          y: 1.58,
+          z: -2.2,
+        },
+        exposure: 0.42,
+        decay: 0.9,
+        density: 0.38,
+        weight: 0.22,
+        color: '#fff4db',
+        shimmer: 0.2,
+      },
+      lensFlare: {
+        enabled: true,
+        sunSize: 0.6,
+        sunColor: '#fff9eb',
+        glowIntensity: 0.45,
+        starburstIntensity: 0.8,
+        anamorphicIntensity: 0.5,
+        ghostIntensity: 0.1,
+        haloIntensity: 0.6,
+      },
+    },
+    postProcessing: {
+      toneMappingMode: 'None',
+      toneMappingExposure: 1.0,
+      antialiasing: {
+        msaaSamples: 4,
+        smaa: true,
+      },
+      bloom: {
+        enabled: true,
+        strength: 0.08,
+        radius: 0.08,
+        threshold: 0.6,
+      },
+      colorGrading: {
+        enabled: true,
+        shadowTint: '#0a0d18',
+        highlightTint: '#ffecc4',
+        strength: 0.4,
+        contrast: 0.25,
+        gamma: 0.9,
+      },
+      saturation: 0.1,
+      brightness: 0.0,
+      contrast: 0.1,
+      cinematic: {
+        diffusion: { enabled: true, strength: 0.25, radius: 1.8 },
+        filmGrain: { enabled: false, strength: 0.02, speed: 0.5 },
+        vignette: { enabled: true, offset: 1.2, darkness: 0.25, color: '#05070e' },
+        chromaticAberration: { enabled: true, offset: 0.0018 },
+        sharpening: { enabled: true, amount: 0.15 },
+      },
+    },
+    wind: {
+      enabled: false,
+      speed: 0.0,
+      direction: 0,
+      elevation: 0,
+      turbulence: 0.0,
+      gustFrequency: 0.0,
+      gustStrength: 0.0,
+      particles: {
+        enabled: false,
+        count: 0,
+        size: 0.0,
+        color: '#ffffff',
+        opacity: 0.0,
+        speedFactor: 0.0,
+      },
+    },
+    rain: {
+      enabled: false,
+      count: 0,
+      speed: 0,
+      length: 0,
+      angle: 0,
+      color: '#ffffff',
+      opacity: 0,
+      splashEnabled: false,
+      splashCount: 0,
+    },
+  },
 };
 
 // ====================================================
@@ -1751,6 +1939,31 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       farFogIntensity: 0.0,
     },
   },
+  divine_realm: {
+    id: 'divine_realm',
+    name: '聖域・神界',
+    category: 'outdoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/park-with-sea-far.avif'),
+      backgroundColor: '#0a0d18',
+      showFloor: false,
+      floorColor: '#0a0d18',
+      showMidground: false,
+      midgroundImageUrl: undefined,
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.15,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: true,
+      farFogColor: '#ffeec9',
+      farFogIntensity: 0.28,
+    },
+  },
 };
 
 // ====================================================
@@ -1788,6 +2001,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
   night_school: buildScenePreset('night_school', 'night', 'school_gate'),
   night_outdoor: buildScenePreset('night_outdoor', 'night', 'modern_park'),
   night_festival: buildScenePreset('night_festival', 'night', 'night_festival'),
+  divine_encounter: buildScenePreset('divine_encounter', 'divine', 'divine_realm'),
 };
 
 export function getScenePreset(presetId: ScenePresetId | string): ScenePresetData {
