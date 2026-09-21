@@ -49,6 +49,8 @@ export class ScenePresetManager {
       return 'bright_indoor';
     } else if (loc === 'night_festival') {
       if (tod === 'night') return 'night_festival';
+    } else if (loc === 'divine_realm' || tod === 'divine') {
+      return 'divine_encounter';
     }
     if (tod === 'morning') return 'morning_park';
     if (tod === 'day') return 'day_park';
@@ -110,7 +112,12 @@ export class ScenePresetManager {
   }
 
   public switchTimeOfDay(timeOfDayId: TimeOfDayId, notify = true): void {
-    const currentLoc = (this.config.activeScene?.location || 'modern_park') as LocationId;
+    let currentLoc = (this.config.activeScene?.location || 'modern_park') as LocationId;
+    if (timeOfDayId === 'divine') {
+      currentLoc = 'divine_realm';
+    } else if (currentLoc === 'divine_realm') {
+      currentLoc = 'modern_park';
+    }
     const currentPresetId = this.getScenePresetIdFromState(timeOfDayId, currentLoc);
     this.config.activeScene = {
       presetId: currentPresetId,

@@ -368,6 +368,12 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
                   <button data-timeofday="dark_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'dark_indoor' ? 'active' : ''}" title="${tr.scenes.presetDarkIndoorTip}">${tr.scenes.dark}</button>
                 </div>
               </div>
+              <div>
+                <span style="font-size: 10.5px; color: #fbbf24; font-weight: 600; display: block; margin-bottom: 3px;">特殊演出 (Special)</span>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 4px;">
+                  <button data-timeofday="divine" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'divine' ? 'active' : ''}" title="${tr.scenes.presetDivineTip}" style="border-color: #f59e0b; color: #fde68a; font-weight: 700;">${tr.scenes.divine} (逆光・後光)</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -377,6 +383,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <p style="font-size: 10px; color: #888888; margin: 2px 0 6px 0;">背景（場所）のみを切り替えます。時間帯パラメータは維持されます。</p>
             <div style="display: flex; flex-wrap: wrap; gap: 4px;" id="bg-buttons">
               <button data-location="modern_park" data-bg="${resolveAssetUrl('/textures/modern-park-far.avif')}" data-mid="${resolveAssetUrl('/textures/modern-park-mid.avif')}" class="bg-btn active">${tr.scenes.backgrounds.modernPark}</button>
+              <button data-location="divine_realm" data-bg="${resolveAssetUrl('/textures/park-with-sea-far.avif')}" class="bg-btn" style="border-color: #f59e0b; color: #fde68a;">${tr.scenes.backgrounds.divineRealm}</button>
               <button data-location="park_with_sea" data-bg="${resolveAssetUrl('/textures/park-with-sea-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.parkWithSea}</button>
               <button data-location="school_gate" data-bg="${resolveAssetUrl('/textures/school-gate-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.schoolGate}</button>
               <button data-location="classroom" data-bg="${resolveAssetUrl('/textures/school-corridor-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.classroom}</button>

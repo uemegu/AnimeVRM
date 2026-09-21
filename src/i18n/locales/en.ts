@@ -208,6 +208,7 @@ export const en: Translations = {
     night: '🏮 Night',
     bright: '💡 Indoor (Bright)',
     dark: '🌙 Indoor (Dark)',
+    divine: 'Divine / Backlight',
     backgroundTitle: '🌄 Background',
     backgrounds: {
       modernPark: '🌳 Modern Park',
@@ -221,6 +222,7 @@ export const en: Translations = {
       town: '🏙️ Town',
       apartmentDoor: '🚪 Apartment Door',
       myroom: '🛏️ My Room',
+      divineRealm: 'Divine Realm',
       offSingleColor: 'OFF (Solid Color)',
       selectFarImage: '📁 Select Image (Far)',
     },
@@ -243,6 +245,7 @@ export const en: Translations = {
     presetNightSchoolTip: 'Night school gate with ample night illumination',
     presetBrightIndoorTip: 'Bright classroom with soft daylight illumination',
     presetDarkIndoorTip: 'Night classroom with atmospheric ambient lighting',
+    presetDivineTip: 'Radiant sun shafts and brilliant golden rim light with deep silhouette',
   },
   render: {
     detailedParamsTitle: '⚙️ Fine Parameter Tuning (Toon, Material, Light, Wind)',

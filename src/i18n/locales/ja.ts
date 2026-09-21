@@ -208,6 +208,7 @@ export const ja: Translations = {
     night: '🏮 夜',
     bright: '💡 室内・明',
     dark: '🌙 室内・暗',
+    divine: '神聖・後光',
     backgroundTitle: '🌄 背景 (Background)',
     backgrounds: {
       modernPark: '🌳 近代公園',
@@ -221,6 +222,7 @@ export const ja: Translations = {
       town: '🏙️ 街',
       apartmentDoor: '🚪 アパート前',
       myroom: '🛏️ 自室',
+      divineRealm: '聖域・神界',
       offSingleColor: 'OFF (単色)',
       selectFarImage: '📁 画像を選択 (Far)',
     },
@@ -243,6 +245,7 @@ export const ja: Translations = {
     presetNightSchoolTip: '夜の校門・十分な明るさのある夜間照明',
     presetBrightIndoorTip: '教室背景・均一で明るい室内照明',
     presetDarkIndoorTip: '教室背景・薄暗い間接照明・夜光',
+    presetDivineTip: '神聖な後光（薄明光線）と黄金の輪郭光・逆光シルエット',
   },
   render: {
     detailedParamsTitle: '⚙️ 詳細パラメータ調整 (トゥーン・マテリアル・光・風)',
