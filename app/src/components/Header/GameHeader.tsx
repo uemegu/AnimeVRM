@@ -103,13 +103,18 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
             aria-label="Open dialogue history"
             title={lang === 'ja' ? '会話履歴 (L)' : 'Dialogue History (L)'}
           >
-            <span className="header-action-icon" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
-              </svg>
+            <span className="header-btn-inner">
+              <span className="header-btn-icon header-icon-log" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="15" height="15" x="4.5" y="4.5" rx="2" />
+                  <line x1="2" y1="7.5" x2="4.5" y2="7.5" />
+                  <line x1="2" y1="12" x2="4.5" y2="12" />
+                  <line x1="2" y1="16.5" x2="4.5" y2="16.5" />
+                  <line x1="9" y1="4.5" x2="9" y2="19.5" />
+                </svg>
+              </span>
+              <span className="header-btn-label">LOG</span>
             </span>
-            <span>LOG</span>
           </button>
         )}
 
@@ -121,10 +126,14 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
             aria-label="Toggle auto mode"
             title={lang === 'ja' ? '自動送り (A)' : 'Auto Advance (A)'}
           >
-            <span className="header-auto-icon" aria-hidden="true">
-              ▶
+            <span className="header-btn-inner">
+              <span className="header-btn-icon header-icon-auto" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="6 4.5 19.5 12 6 19.5" />
+                </svg>
+              </span>
+              <span className="header-btn-label">AUTO</span>
             </span>
-            <span>AUTO</span>
           </button>
         )}
 
@@ -140,23 +149,22 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 : lang === 'ja' ? '音声を消音 (M)' : 'Mute Sound (M)'
             }
           >
-            <span className="header-action-icon" aria-hidden="true">
-              {isMuted ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="1" y1="1" x2="23" y2="23" />
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
-                  <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
-                  <line x1="12" y1="19" x2="12" y2="23" />
-                  <line x1="8" y1="23" x2="16" y2="23" />
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                </svg>
-              )}
+            <span className="header-btn-inner">
+              <span className="header-btn-icon header-icon-mute" aria-hidden="true">
+                {isMuted ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="m17 9 6 6m0-6-6 6" />
+                  </svg>
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                )}
+              </span>
+              <span className="header-btn-label">{isMuted ? 'MUTED' : 'MUTE'}</span>
             </span>
-            <span>{isMuted ? 'MUTED' : 'MUTE'}</span>
           </button>
         )}
 
@@ -166,23 +174,25 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           onClick={onToggleLanguage}
           aria-label="Toggle language"
         >
-          <span className="header-lang-icon" aria-hidden="true">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
+          <span className="header-btn-inner">
+            <span className="header-btn-icon header-icon-lang" aria-hidden="true">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="8.5" />
+                <line x1="3.5" y1="12" x2="20.5" y2="12" />
+                <path d="M12 3.5a13 13 0 0 1 3.5 8.5 13 13 0 0 1-3.5 8.5 13 13 0 0 1-3.5-8.5 13 13 0 0 1 3.5-8.5z" />
+              </svg>
+            </span>
+            <span className="header-btn-label">{lang.toUpperCase()}</span>
           </span>
-          <span>{lang.toUpperCase()}</span>
         </button>
 
         {onOpenLicense && (
@@ -193,24 +203,26 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
             aria-label="Licenses & Credits"
             title={lang === 'ja' ? 'ライセンス・素材クレジット' : 'Licenses & Credits'}
           >
-            <span className="header-license-icon" aria-hidden="true">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
+            <span className="header-btn-inner">
+              <span className="header-btn-icon header-icon-license" aria-hidden="true">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                  <polyline points="14 3 14 9 20 9" />
+                  <line x1="16" y1="14" x2="8" y2="14" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </span>
+              <span className="header-btn-label">INFO</span>
             </span>
-            <span>INFO</span>
           </button>
         )}
       </div>
