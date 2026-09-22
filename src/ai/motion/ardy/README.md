@@ -2,20 +2,48 @@
 
 ルートのビューアで **Others → AIアバターリアルタイム会話 → ardy-mini で会話に合わせた動きを生成** を有効にし、「モデルを読み込む」を押します。準備完了後、Gemini APIキーを入力して接続します。「動きを試す」では、APIキーなしで英語の動作説明から生成・再生できます。
 
-Gemini は日本語の応答に `generateArdyMotion` の呼び出しを添え、英語の動作説明・秒数・指の形を指定します。英語の指示は読み上げず、会話欄に生成状況とともに表示します。ツールには生成開始を即時応答し、Web Worker の推論が終わると Core27 の回転を VRM の正規化ボーンへ変換して再生します。動きの生成には時間がかかるため、発話と開始時刻が一致する保証はありません。
+Gemini は日本語の応答の前に `generateArdyMotion({motions: [...]})` を呼び出します。各要素は英語の動作説明・秒数・指の形です。1〜6動作を配列順に生成・連続再生し、後続の生成は現在の再生と並行して進めます。指示は読み上げず、会話欄に各動作の生成・再生状況を表示します。
+
+プロンプトでは、抽象的な感情や複雑な振り付けを、頭・胴体・左右の腕などの具体的な位置と方向に分解するよう指示しています。例えば「考える」なら「右肘を曲げ、右手をゆっくり顎へ近づける。左腕は下げたまま」と記述します。複数の動きは1つの長文に詰め込まず、配列の別要素に分けます。
+
+## 発話との同期
+
+最初の動作が準備できてからツール応答を返し、最初のPCM音声と一緒に動作を開始します。音声が先に届いた場合も最大1.5秒まで待ち合わせます。生成が遅い・失敗した・ツールが呼ばれなかった場合は音声を先に進めます。音声のないツール応答は、準備後1.5秒で動作だけを開始します。
+
+音声の受信完了と再生完了を分け、AudioContextの再生キューが空になるまで発話中として扱います。受信完了時に残りの音声時間に合わせて身体モーションの時間を調整します（不自然な速度を避けるため残り時間の0.5〜2倍まで）。Finger Motionの1秒の遷移は維持します。発話が終わると残りの会話用モーションを終了し、自律動作または待機姿勢へ移ります。単語単位でのジェスチャー位置合わせは行いません。
+
+## 無言で続く自律動作
+
+Others の「話していない間も自律的に動く」は標準でONです。接続後、またはモーション終了時に、直近の会話と動作をもとに次の動きを計画します。最後の動作の再生中から次の配列を1つだけ先読みし、ardy-miniで準備します。現在の配列が終わると生成済みの次の配列へ進むため、ユーザーが話さなくても動き続けます。
+
+自律動作は同じAPIキーで **Gemini generateContentへの追加リクエスト** を使います。標準モデルは `gemini-3.5-flash-lite` で、接続前に変更できます。`systemInstruction` に「前の動作が終わるので次を投機的に計画する」と指示し、音声なしのJSONだけを受け取ります。[Live APIでは接続中にシステム指示を更新できず、clientContentは生成を割り込ませる](https://ai.google.dev/api/live)ため、会話とは別のリクエストにしています。無言の動作は会話履歴へ追加せず、Consoleの `[ardy-mini] sequence playback` で確認できます。
+
+自律動作は接続中でもOFFにできます。ユーザーの音声入力・テキスト入力・割り込み・切断・アバター交換時は、先読みと再生を中止し、古い結果を破棄します。生成エラーは間隔を空けて再試行し、3回続けて失敗すると自律動作だけをOFFにします。会話は継続できます。
 
 ## Finger Motion
 
-Gemini は `generateArdyMotion` の `fingerMotion` に、左右それぞれの手の形を YES / NO で追加します。選択肢は motion.html と同じ `index`（人差し指）、`peace`（ピース）、`thumb`（親指）、`fist`（握りこぶし）、`open`（開き手）、`three`（3本指）の6種類です。片手につき YES は最大1つ、すべて NO なら追加指定しません。
+Gemini は `generateArdyMotion` の各 `motions[]` の `fingerMotion` に、左右それぞれの手の形を YES / NO で追加します。選択肢は motion.html と同じ `index`（人差し指）、`peace`（ピース）、`thumb`（親指）、`fist`（握りこぶし）、`open`（開き手）、`three`（3本指）の6種類です。片手につき YES は最大1つ、すべて NO なら追加指定しません。
 
 ```json
 {
-  "prompt": "A person stands in place and raises their right hand beside their face.",
-  "duration": 4,
-  "fingerMotion": {
-    "right": { "index": "NO", "peace": "YES", "thumb": "NO", "fist": "NO", "open": "NO", "three": "NO" },
-    "left": { "index": "NO", "peace": "NO", "thumb": "NO", "fist": "NO", "open": "NO", "three": "NO" }
-  }
+  "motions": [
+    {
+      "prompt": "A person stands in place and raises their right forearm beside their face. Their left arm remains lowered.",
+      "duration": 4,
+      "fingerMotion": {
+        "right": { "index": "NO", "peace": "YES", "thumb": "NO", "fist": "NO", "open": "NO", "three": "NO" },
+        "left": { "index": "NO", "peace": "NO", "thumb": "NO", "fist": "NO", "open": "NO", "three": "NO" }
+      }
+    },
+    {
+      "prompt": "A person slowly lowers their right arm to their side, keeping their torso upright.",
+      "duration": 3,
+      "fingerMotion": {
+        "right": { "index": "NO", "peace": "NO", "thumb": "NO", "fist": "NO", "open": "YES", "three": "NO" },
+        "left": { "index": "NO", "peace": "NO", "thumb": "NO", "fist": "NO", "open": "NO", "three": "NO" }
+      }
+    }
+  ]
 }
 ```
 
@@ -23,7 +51,7 @@ Gemini は `generateArdyMotion` の `fingerMotion` に、左右それぞれの�
 
 ## 生成時間のデバッグ出力
 
-開発者ツールの Console で **Verbose / Debug** を有効にし、`[ardy-mini] generation timing` で絞り込んでください。生成ごとに1つのオブジェクトを出力します。
+開発者ツールの Console で **Verbose / Debug** を有効にし、`[ardy-mini] generation timing` で絞り込んでください。生成ごとに1つのオブジェクトを出力します。配列の各動作と自律動作の先読みもそれぞれ計測します。別途 `[ardy-mini] planner timing` には、次の動作の文章をGeminiが考える時間を出力します。
 
 | 項目 | 意味 |
 | --- | --- |
@@ -46,7 +74,7 @@ Gemini は `generateArdyMotion` の `fingerMotion` に、左右それぞれの�
 - HTTPS または localhost と WebGPU が必要です。CPU フォールバックはありません。
 - モデルは初回に Hugging Face から約653 MiB（shader-f16対応）または約685 MiB（FP32）を取得します。圧縮ファイルのハッシュを検証して Cache Storage に保存し、以後再利用します。キャッシュの削除はブラウザーのサイトデータ設定から行えます。
 - モーション生成は端末内で実行します。Geminiとの会話は従来どおり Gemini API を使用します。
-- 2〜8秒の動きを生成し、水平移動は固定して身振りに適用します。再生終了時は通常の待機動作に戻ります。表情・リップシンク・揺れ物は既存処理を継続します。
+- 2〜8秒の動きを生成し、水平移動は固定して身振りに適用します。配列間はクロスフェードで接続し、次が未準備または自律動作がOFFなら通常の待機動作に戻ります。表情・リップシンク・揺れ物は既存処理を継続します。
 - 新しい指示、ユーザーの割り込み、切断、アバター交換時には古い生成をキャンセルします。生成失敗は会話欄に表示し、会話を継続できます。
 - 読み込み失敗時は再試行できます。GPUメモリの解放には切断後にチェックを外してください。
 - モーション方式は接続前に選択します。チェックを外した状態では既存のFBX再生・合成ツールを使用します。
@@ -82,5 +110,5 @@ npx playwright test --config playwright.ardy.config.ts
 Automated checks cover UI opt-in, tool declarations, cancellation, stale-result
 suppression, Core27→VRM clip playback and return to idle, booting the actual
 inference worker, and transferring a complete runtime result from a fixture worker
-through the service to VRM playback. The automated suite does not download model weights or call a
+through the service to VRM playback. Additional checks cover ordered sequences, audio-clock synchronization, one-second finger transitions during retiming, bounded silent prefetch, interruption, stale planner results, and failure backoff. The automated suite does not download model weights or call a
 paid Gemini API.

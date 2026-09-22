@@ -610,11 +610,17 @@ export class Avatar {
   private boundMixerFinishedListener: ((e: any) => void) | null = null;
   private animationRequestId = 0;
   private transientClip: THREE.AnimationClip | null = null;
+  private generatedAnimationFinished: (() => void) | null = null;
 
   private ensureAnimationMixer(): THREE.AnimationMixer {
     if (!this.mixer) this.mixer = new THREE.AnimationMixer(this.vrm!.scene);
     if (!this.boundMixerFinishedListener) {
       this.boundMixerFinishedListener = (event: { action: THREE.AnimationAction }) => {
+        if (this.currentAction !== event.action) return;
+        const finished = this.generatedAnimationFinished;
+        this.generatedAnimationFinished = null;
+        finished?.();
+        // A queued clip may have started synchronously in the callback.
         if (this.returnToIdleUrl && this.currentAction === event.action) {
           const idle = this.returnToIdleUrl;
           this.returnToIdleUrl = null;
@@ -634,7 +640,7 @@ export class Avatar {
   }
 
   /** Play a generated clip directly, preserving expression and lip-sync updates. */
-  public playAnimationClip(clip: THREE.AnimationClip, crossFadeDuration = 0.35): THREE.AnimationAction | null {
+  public playAnimationClip(clip: THREE.AnimationClip, crossFadeDuration = 0.35, onFinished?: () => void): THREE.AnimationAction | null {
     if (!this.vrm) return null;
     this.animationRequestId++;
     const mixer = this.ensureAnimationMixer();
@@ -648,6 +654,7 @@ export class Avatar {
     this.currentAction = action;
     this.currentAnimationUrl = null;
     this.transientClip = clip;
+    this.generatedAnimationFinished = onFinished ?? null;
     this.returnToIdleUrl = this.options.defaultAnimationUrl || '/animations/Idle.fbx';
     return action;
   }
@@ -668,6 +675,7 @@ export class Avatar {
   ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm) return null;
     const requestId = ++this.animationRequestId;
+    this.generatedAnimationFinished = null;
 
     // If identical animation is already running, just continue playing seamlessly!
     if (this.currentAnimationUrl === url && this.currentAction && this.currentAction.isRunning()) {
@@ -723,6 +731,7 @@ export class Avatar {
   }
 
   public stopAnimation(): void {
+    this.generatedAnimationFinished = null;
     this.animationRequestId++;
     this.releaseTransientClip(0.3);
     this.returnToIdleUrl = null;

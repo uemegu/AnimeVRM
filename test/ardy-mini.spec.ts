@@ -15,6 +15,11 @@ test('Others exposes opt-in ARDY controls without downloading models', async ({ 
   await expect(page.locator('#gemini-ardy-controls')).toBeHidden();
   await enabled.check();
   await expect(page.locator('#gemini-ardy-controls')).toBeVisible();
+  await expect(page.locator('#gemini-ardy-autonomous')).toBeChecked();
+  await page.locator('#gemini-ardy-autonomous').uncheck();
+  await expect(page.locator('#gemini-ardy-planner-model')).toBeDisabled();
+  await page.locator('#gemini-ardy-autonomous').check();
+  await expect(page.locator('#gemini-ardy-planner-model')).toHaveValue('gemini-3.5-flash-lite');
   await expect(page.locator('#gemini-ardy-load')).toBeEnabled();
   await expect(page.locator('#gemini-ardy-preview')).toBeDisabled();
   await expect(page.locator('#gemini-live-connect-btn')).toBeDisabled();
@@ -49,7 +54,10 @@ test('Gemini declares the English motion tool only in ARDY mode and handles canc
   expect(ardy.systemInstruction.parts[0].text).toContain('A person');
   expect(ardy.systemInstruction.parts[0].text).toContain('音声で読み上げず');
   expect(ardy.outputAudioTranscription).toEqual({});
-  const fingerSchema = ardy.tools[0].functionDeclarations[0].parameters.properties.fingerMotion;
+  expect(ardy.inputAudioTranscription).toEqual({});
+  expect(ardy.tools[0].functionDeclarations[0].parameters.properties.motions.maxItems).toBe(6);
+  expect(ardy.systemInstruction.parts[0].text).toContain('抽象語だけで指示しない');
+  const fingerSchema = ardy.tools[0].functionDeclarations[0].parameters.properties.motions.items.properties.fingerMotion;
   expect(fingerSchema.required).toEqual(['right', 'left']);
   for (const hand of ['right', 'left']) {
     expect(Object.keys(fingerSchema.properties[hand].properties)).toEqual(['index', 'peace', 'thumb', 'fist', 'open', 'three']);
@@ -111,7 +119,7 @@ test('Core27 rotations become rig-specific VRM clips, stay in place and return t
   expect(result.returned).toEqual(['/idle.fbx']);
 });
 
-test('controller acknowledges promptly and discards results after cancellation or avatar replacement', async ({ page }) => {
+test('controller waits for the first clip and discards results after cancellation or avatar replacement', async ({ page }) => {
   await modulePage(page);
   const result = await page.evaluate(async () => {
     // @ts-expect-error Vite browser import
@@ -128,23 +136,27 @@ test('controller acknowledges promptly and discards results after cancellation o
         new Promise(resolve => jobs.push({ resolve, signal })),
     };
     const tool = (id: string) => ({ id, name: 'generateArdyMotion', args: { prompt: 'A person waves.', duration: 4 } });
-    const first = await controller.handleToolExecution(tool('first'));
+    const firstResult = controller.handleToolExecution(tool('first'));
+    await new Promise(resolve => setTimeout(resolve, 0));
     controller.currentAssistantMessage = null; // Server turnComplete, while inference is still running.
     controller.disconnect();
     jobs[0].resolve({});
     await new Promise(resolve => setTimeout(resolve, 0));
-    const second = await controller.handleToolExecution(tool('second'));
+    const first = await firstResult;
+    const secondResult = controller.handleToolExecution(tool('second'));
+    await new Promise(resolve => setTimeout(resolve, 0));
     controller.setAvatar({ ...avatar });
     jobs[1].resolve({});
     await new Promise(resolve => setTimeout(resolve, 0));
+    const second = await secondResult;
     const invalid = await controller.handleToolExecution({ ...tool('bad'), args: { prompt: '', duration: 999 } });
     return {
       first, second, invalid, played, aborted: jobs.map(job => job.signal.aborted),
       details: controller.getHistory().map((message: any) => message.tools[0].detail),
     };
   });
-  expect(result.first.status).toBe('generating');
-  expect(result.second.status).toBe('generating');
+  expect(result.first.error).toBeTruthy();
+  expect(result.second.error).toBeTruthy();
   expect(result.aborted).toEqual([true, true]);
   expect(result.played).toBe(0);
   expect(result.details.every((detail: string) => detail.includes('キャンセル'))).toBe(true);
@@ -429,7 +441,7 @@ test('controller waits for ARDY before applying Finger Motion and cancels during
         return new Promise(resolve => { finishFingers = resolve; });
       },
     };
-    const acknowledgement = await controller.handleToolExecution({
+    const acknowledgementResult = controller.handleToolExecution({
       id: 'fingers', name: 'generateArdyMotion',
       args: { prompt: 'A person raises their right hand.', fingerMotion: { right: { peace: 'YES' }, left: { open: 'NO' } } },
     });
@@ -440,9 +452,10 @@ test('controller waits for ARDY before applying Finger Motion and cancels during
     controller.disconnect();
     finishFingers([]);
     await new Promise(resolve => setTimeout(resolve, 0));
+    const acknowledgement = await acknowledgementResult;
     return { acknowledgement, beforeGeneration, beforePoseReady, played, requested, detail: controller.getHistory()[0].tools[0].detail };
   });
-  expect(result.acknowledgement.status).toBe('generating');
+  expect(result.acknowledgement.error).toBeTruthy();
   expect(result.beforeGeneration).toBe(0);
   expect(result.beforePoseReady).toBe(0);
   expect(result.requested).toEqual([{ right: 'peace' }]);

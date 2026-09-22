@@ -38,6 +38,9 @@ export interface Translations {
     voiceLabel: string;
     ardyEnabled: string;
     ardyNote: string;
+    ardyAutonomous: string;
+    ardyAutonomousNote: string;
+    ardyPlannerModel: string;
     ardyTerms: string;
     ardyLoad: string;
     ardyPreview: string;

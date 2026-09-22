@@ -6,7 +6,18 @@ import { GeminiLiveClient, ToolCallItem } from './GeminiLiveClient';
 import { AudioRecorder } from './AudioRecorder';
 import { ArdyMotionService, type ArdyMotionState } from '../motion/ardy/ArdyMotionService';
 import { createArdyAnimationClip } from '../motion/ardy/createArdyAnimationClip';
-import { FingerMotionService, parseFingerMotion, describeFingerMotion, applyFingerMotion } from '../motion/FingerMotion';
+import { FingerMotionService, describeFingerMotion, applyFingerMotion } from '../motion/FingerMotion';
+
+import { parseArdyMotionPlan, type ArdyMotionStep } from './ArdyMotionPlan';
+import { ArdyMotionSequence } from './ArdyMotionSequence';
+import { GeminiMotionPlanner, DEFAULT_MOTION_PLANNER_MODEL } from './GeminiMotionPlanner';
+
+interface MotionRequest {
+  id: string;
+  abort: AbortController;
+  sequence: ArdyMotionSequence;
+  source: 'reply' | 'autonomous' | 'preview';
+}
 
 export type GeminiLiveChatState =
   | 'disconnected'
@@ -77,7 +88,24 @@ export class GeminiLiveChatController {
   private ardyService: ArdyMotionService;
   private ardyState: ArdyMotionState = 'unloaded';
   private ardyDetail = '';
-  private ardyRequest: { id: string; abort: AbortController } | null = null;
+  private ardyRequest: MotionRequest | null = null;
+  private pendingAutonomous: MotionRequest | null = null;
+  private autonomousEnabled = true;
+  private plannerModel = DEFAULT_MOTION_PLANNER_MODEL;
+  private planner = new GeminiMotionPlanner();
+  private plannerAbort: AbortController | null = null;
+  private autonomousTimer: ReturnType<typeof setTimeout> | null = null;
+  private autonomousFailures = 0;
+  private recentMotions: string[] = [];
+  private waitingForReply = false;
+  private receivedReply = false;
+  private inputMessage: LiveChatMessage | null = null;
+  private pendingAudio: Array<{ pcm: Int16Array; rate: number }> = [];
+  private audioWaitTimer: ReturnType<typeof setTimeout> | null = null;
+  private motionStartTimer: ReturnType<typeof setTimeout> | null = null;
+  private speechTimer: ReturnType<typeof setTimeout> | null = null;
+  private speechStarted = false;
+  private serverTurnComplete = true;
   private fingerMotionService = new FingerMotionService();
 
   constructor(events: GeminiLiveChatEvents = {}) {
@@ -120,15 +148,44 @@ export class GeminiLiveChatController {
   public async previewArdyMotion(prompt: string, duration = 4): Promise<void> {
     if (this.state !== 'disconnected' && this.state !== 'error') throw new Error('会話を切断してからモーションを試してください。');
     if (!this.ardyEnabled || !this.ardyService.ready) throw new Error('ardy-mini のモデルを読み込んでください。');
-    const operation = this.startArdyMotion({ id: crypto.randomUUID(), name: 'generateArdyMotion', args: { prompt, duration } });
+    const operation = this.startArdyMotion({ id: crypto.randomUUID(), name: 'generateArdyMotion', args: { prompt, duration } }, 'preview');
     this.currentAssistantMessage = null;
     await operation;
   }
 
-  private cancelArdyMotion(): void {
+  public getAutonomousEnabled(): boolean { return this.autonomousEnabled; }
+  public getPlannerModel(): string { return this.plannerModel; }
+  public setPlannerModel(model: string): void { this.plannerModel = model.trim() || DEFAULT_MOTION_PLANNER_MODEL; }
+
+  public setAutonomousEnabled(enabled: boolean): void {
+    this.autonomousEnabled = enabled;
+    this.autonomousFailures = 0;
+    this.cancelAutonomous();
+    if (!enabled && this.ardyRequest?.source === 'autonomous') this.stopActiveMotion();
+    if (enabled) this.scheduleAutonomous();
+    this.events.onArdyStateChange?.(this.ardyState, this.ardyDetail);
+  }
+
+  private stopActiveMotion(): void {
+    if (this.motionStartTimer) clearTimeout(this.motionStartTimer);
+    this.motionStartTimer = null;
     this.ardyRequest?.abort.abort();
     this.ardyRequest = null;
     this.avatar?.stopGeneratedAnimation();
+  }
+
+  private cancelAutonomous(): void {
+    if (this.autonomousTimer) clearTimeout(this.autonomousTimer);
+    this.autonomousTimer = null;
+    this.plannerAbort?.abort();
+    this.plannerAbort = null;
+    this.pendingAutonomous?.abort.abort();
+    this.pendingAutonomous = null;
+  }
+
+  private cancelArdyMotion(): void {
+    this.cancelAutonomous();
+    this.stopActiveMotion();
   }
 
   public setAudioLipSync(audioLipSync: AudioLipSync | null): void {
@@ -204,29 +261,33 @@ export class GeminiLiveChatController {
             this.setState('connected', '接続完了 (待機中)');
             // Automatically start microphone once connected
             void this.startMicrophone().catch(() => {});
+            this.autonomousFailures = 0;
+            this.scheduleAutonomous(1500);
           },
-          onAudioData: (pcmInt16, sampleRate) => {
-            if (this.state !== 'speaking') {
-              this.setState('speaking', 'アバター発話中...');
-            }
-            this.audioLipSync?.playPcmChunk(pcmInt16, sampleRate);
-          },
+          onAudioData: (pcmInt16, sampleRate) => this.receiveAudio(pcmInt16, sampleRate),
           onTextChunk: (chunk) => {
+            this.receivedReply = true;
             this.appendAssistantText(chunk);
           },
+          onInputTranscription: (text) => this.receiveInputTranscription(text),
           onInterrupted: () => {
-            console.log('[GeminiLive] Interrupted by user');
-            this.audioLipSync?.stopPcmStream();
-            this.cancelArdyMotion();
+            this.beginUserTurn();
             this.setState(this.isMicActive ? 'listening' : 'connected', '聞き取り中...');
           },
           onTurnComplete: () => {
             this.currentAssistantMessage = null;
-            if (this.state === 'speaking') {
-              this.setState(this.isMicActive ? 'listening' : 'connected', this.isMicActive ? '待機中 (お話しください)' : '接続完了');
+            // An interrupted turn can finish while the user is still speaking.
+            if (this.receivedReply || !this.waitingForReply) {
+              this.inputMessage = null;
+              this.waitingForReply = false;
             }
+            this.serverTurnComplete = true;
+            this.fitMotionToSpeech();
+            this.checkSpeechEnd();
+            if (!this.speechStarted && !this.pendingAudio.length) this.scheduleAutonomous();
           },
           onToolCall: async (tool) => {
+            this.receivedReply = true;
             return await this.handleToolExecution(tool);
           },
           onToolCallCancelled: (ids) => {
@@ -234,6 +295,7 @@ export class GeminiLiveChatController {
           },
           onError: (err) => {
             this.cancelArdyMotion();
+            this.clearSpeech();
             console.error('[GeminiLive] Error:', err);
             this.setState('error', '通信エラーが発生しました');
             this.events.onError?.(err instanceof Error ? err : new Error(String(err)));
@@ -262,6 +324,9 @@ export class GeminiLiveChatController {
 
   private cleanupSession(): void {
     this.cancelArdyMotion();
+    this.clearSpeech();
+    this.waitingForReply = false;
+    this.inputMessage = null;
     this.stopMicrophone();
     if (this.client) {
       this.client.disconnect();
@@ -331,7 +396,7 @@ export class GeminiLiveChatController {
     if (!this.client || !this.client.connected) {
       throw new Error('Gemini Live に接続されていません');
     }
-    this.cancelArdyMotion();
+    this.beginUserTurn();
 
     // Add user message to history
     const userMsg: LiveChatMessage = {
@@ -370,12 +435,10 @@ export class GeminiLiveChatController {
 
     if (tool.name === 'generateArdyMotion') {
       if (!this.ardyEnabled || !this.ardyService.ready) return { error: 'ardy-mini is not loaded.' };
-      // Acknowledge immediately so GPU inference does not block Gemini audio.
-      // The captured message is updated on completion even after turnComplete.
       try {
-        const operation = this.startArdyMotion(tool);
-        void operation.catch(() => {}); // Failure is recorded on the motion tag.
-        return { status: 'generating', tool: tool.name };
+        // Wait only for the first clip. Gemini can then speak while later clips generate.
+        await this.startArdyMotion(tool);
+        return { status: 'ready', tool: tool.name };
       } catch (error) {
         return { error: error instanceof Error ? error.message : String(error) };
       }
@@ -440,43 +503,250 @@ export class GeminiLiveChatController {
     return { status: 'success', tool: tool.name };
   }
 
-  private startArdyMotion(tool: ToolCallItem): Promise<void> {
-    const prompt = typeof tool.args.prompt === 'string' ? tool.args.prompt.trim() : '';
-    const duration = tool.args.duration ?? 4;
-    if (!prompt || prompt.length > 512) throw new Error('Motion prompt must contain 1–512 characters.');
-    if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 2 || duration > 8) {
-      throw new Error('Motion duration must be 2–8 seconds.');
-    }
-    const fingerMotion = parseFingerMotion(tool.args.fingerMotion);
-    const fingerDetail = `Finger Motion: ${describeFingerMotion(fingerMotion)} (1s → 保持)`;
-    const avatar = this.avatar;
-    if (!avatar?.vrm) throw new Error('アバターを読み込んでください。');
+  private startArdyMotion(tool: ToolCallItem, source: 'reply' | 'preview' = 'reply'): Promise<void> {
+    const steps = parseArdyMotionPlan(tool.args);
+    if (!this.avatar?.vrm) throw new Error('アバターを読み込んでください。');
     this.cancelArdyMotion();
-    const abort = new AbortController();
-    this.ardyRequest = { id: tool.id, abort };
+    if (source === 'reply') {
+      this.waitingForReply = false;
+      // Audio may already have completed receipt while motion generation was queued.
+      if (!this.speechStarted && !this.pendingAudio.length) this.serverTurnComplete = false;
+    }
     if (!this.currentAssistantMessage) this.appendAssistantText('');
-    const message = this.currentAssistantMessage!;
-    const tag: ChatMessageTool = { name: tool.name, detail: `ardy-mini: ${prompt} (${duration}s) — 生成中 / ${fingerDetail}` };
-    (message.tools ??= []).push(tag);
-    this.events.onMessageUpdated?.(message);
-    return this.ardyService.generate(prompt, duration, abort.signal).then(async (motion) => {
-      abort.signal.throwIfAborted();
-      if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
-      const targets = await this.fingerMotionService.createTargets(fingerMotion, avatar.vrm);
-      abort.signal.throwIfAborted();
-      if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
-      const clip = createArdyAnimationClip(motion, avatar.vrm);
-      applyFingerMotion(clip, avatar.vrm, targets);
-      if (!avatar.playAnimationClip(clip)) throw new Error('Motion playback failed.');
-      tag.detail = `ardy-mini: ${prompt} (${duration}s) — 再生 / ${fingerDetail}`;
-    }).catch((error: unknown) => {
-      const cancelled = abort.signal.aborted || (error instanceof Error && error.name === 'AbortError');
-      tag.detail = `ardy-mini: ${prompt} — ${cancelled ? 'キャンセル' : `失敗: ${error instanceof Error ? error.message : String(error)}`} / ${fingerDetail}`;
-      throw error;
-    }).finally(() => {
-      // Keep the request identity after playback begins so a server cancellation stops it too.
-      this.events.onMessageUpdated?.(message);
+    const request = this.createMotionRequest(tool.id, steps, source, this.currentAssistantMessage!);
+    this.ardyRequest = request;
+    return request.sequence.prepare().then(() => {
+      request.abort.signal.throwIfAborted();
+      if (source === 'preview' || this.speechStarted) {
+        request.sequence.start();
+        this.fitMotionToSpeech();
+      } else if (this.pendingAudio.length) {
+        this.flushAudio();
+      } else {
+        // A tool-only response is still allowed to move without waiting forever for audio.
+        this.motionStartTimer = setTimeout(() => {
+          this.motionStartTimer = null;
+          if (this.ardyRequest === request && !request.abort.signal.aborted) request.sequence.start();
+        }, 1500);
+      }
     });
+  }
+
+  private createMotionRequest(id: string, steps: ArdyMotionStep[], source: MotionRequest['source'], message?: LiveChatMessage): MotionRequest {
+    const avatar = this.avatar!;
+    const abort = new AbortController();
+    const tags = steps.map((step, index) => ({
+      name: 'generateArdyMotion', detail: `ardy-mini ${index + 1}/${steps.length}: ${step.prompt} — 待機`,
+    }));
+    if (message) {
+      (message.tools ??= []).push(...tags);
+      this.events.onMessageUpdated?.(message);
+    }
+    const ensureCurrent = () => {
+      abort.signal.throwIfAborted();
+      if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
+    };
+    const request: MotionRequest = { id, abort, source, sequence: new ArdyMotionSequence(steps, abort.signal, {
+      prepare: async step => {
+        const motion = await this.ardyService.generate(step.prompt, step.duration, abort.signal);
+        ensureCurrent();
+        const targets = await this.fingerMotionService.createTargets(step.fingers, avatar.vrm!);
+        ensureCurrent();
+        const clip = createArdyAnimationClip(motion, avatar.vrm!);
+        return { clip, applyFingers: () => applyFingerMotion(clip, avatar.vrm!, targets) };
+      },
+      play: (clip, finished) => {
+        ensureCurrent();
+        return avatar.playAnimationClip(clip, 0.25, finished);
+      },
+      onStep: (index, state, error) => {
+        const step = steps[index];
+        const labels = { generating: '生成中', ready: '準備完了', playing: '再生', finished: '完了', cancelled: 'キャンセル', error: '失敗' };
+        tags[index].detail = `ardy-mini ${index + 1}/${steps.length}: ${step.prompt} (${step.duration}s) — ${labels[state]}${error ? `: ${error instanceof Error ? error.message : String(error)}` : ''} / Finger Motion: ${describeFingerMotion(step.fingers)} (1s → 保持)`;
+        if (message) this.events.onMessageUpdated?.(message);
+        if (state === 'playing') {
+          this.recentMotions = [...this.recentMotions, step.prompt].slice(-6);
+          console.debug('[ardy-mini] sequence playback', { id, source, index, prompt: step.prompt });
+        }
+      },
+      onLowWater: () => { if (source !== 'preview' && this.ardyRequest === request) this.scheduleAutonomous(); },
+      onComplete: () => {
+        if (this.ardyRequest !== request) return;
+        this.ardyRequest = null;
+        if (source !== 'preview') this.advanceAutonomous();
+      },
+      onError: error => {
+        if (this.ardyRequest === request) {
+          this.stopActiveMotion();
+          this.flushAudio();
+        }
+        if (source === 'autonomous') this.autonomousError(error);
+        else if (source !== 'preview') this.scheduleAutonomous(2000);
+      },
+    }) };
+    return request;
+  }
+
+  private beginUserTurn(): void {
+    if (this.receivedReply || !this.waitingForReply) this.inputMessage = null;
+    this.waitingForReply = true;
+    this.receivedReply = false;
+    this.cancelArdyMotion();
+    this.clearSpeech();
+    this.currentAssistantMessage = null;
+    if (this.state === 'speaking') this.setState(this.isMicActive ? 'listening' : 'connected', '聞き取り中...');
+  }
+
+  private receiveInputTranscription(text: string): void {
+    if (!this.inputMessage) {
+      this.beginUserTurn();
+      this.inputMessage = { id: crypto.randomUUID(), role: 'user', content: '', timestamp: Date.now() };
+      this.history.push(this.inputMessage);
+      this.events.onMessageAdded?.(this.inputMessage);
+    }
+    this.inputMessage.content += text;
+    this.events.onMessageUpdated?.(this.inputMessage);
+  }
+
+  private clearSpeech(): void {
+    if (this.audioWaitTimer) clearTimeout(this.audioWaitTimer);
+    if (this.speechTimer) clearTimeout(this.speechTimer);
+    this.audioWaitTimer = this.speechTimer = null;
+    this.pendingAudio = [];
+    this.speechStarted = false;
+    this.serverTurnComplete = true;
+    this.audioLipSync?.stopPcmStream();
+  }
+
+  private receiveAudio(pcm: Int16Array, rate: number): void {
+    if (!pcm.length) return;
+    this.serverTurnComplete = false;
+    this.receivedReply = true;
+    this.waitingForReply = false;
+    if (this.state !== 'speaking') this.setState('speaking', 'アバター発話中...');
+    if (!this.speechStarted) {
+      // A newly spoken response has priority over silent, speculative movement.
+      if (!this.pendingAudio.length) this.cancelAutonomous();
+      if (this.ardyRequest?.source === 'autonomous') this.stopActiveMotion();
+      this.pendingAudio.push({ pcm, rate });
+      if (!this.ardyEnabled) { this.flushAudio(); return; }
+      if (!this.audioWaitTimer) {
+        // Bound added latency if a tool is absent, slow, cancelled, or fails.
+        this.audioWaitTimer = setTimeout(() => this.flushAudio(), 1500);
+        const request = this.ardyRequest;
+        if (request?.source === 'reply') {
+          void request.sequence.ready.then(() => {
+            if (this.ardyRequest === request && !request.abort.signal.aborted) this.flushAudio();
+          }).catch(() => {});
+        }
+      }
+    } else {
+      this.audioLipSync?.playPcmChunk(pcm, rate);
+    }
+  }
+
+  private flushAudio(): void {
+    if (this.audioWaitTimer) clearTimeout(this.audioWaitTimer);
+    this.audioWaitTimer = null;
+    if (!this.pendingAudio.length) return;
+    this.speechStarted = true;
+    for (const { pcm, rate } of this.pendingAudio) this.audioLipSync?.playPcmChunk(pcm, rate);
+    this.pendingAudio = [];
+    if (this.ardyRequest?.source === 'reply') {
+      if (this.motionStartTimer) clearTimeout(this.motionStartTimer);
+      this.motionStartTimer = null;
+      this.ardyRequest.sequence.start();
+    }
+    this.fitMotionToSpeech();
+    this.checkSpeechEnd();
+  }
+
+  private fitMotionToSpeech(): void {
+    if (this.serverTurnComplete && this.speechStarted && this.ardyRequest?.source === 'reply') {
+      this.ardyRequest.sequence.fitToSpeech(this.audioLipSync?.getPcmRemainingSeconds() ?? 0);
+    }
+  }
+
+  private checkSpeechEnd(): void {
+    if (this.speechTimer) clearTimeout(this.speechTimer);
+    this.speechTimer = null;
+    if (!this.speechStarted) return;
+    if (this.serverTurnComplete && !this.pendingAudio.length && (this.audioLipSync?.getPcmRemainingSeconds() ?? 0) <= 0) {
+      this.speechStarted = false;
+      if (this.state === 'speaking') this.setState(this.isMicActive ? 'listening' : 'connected', this.isMicActive ? '待機中 (お話しください)' : '接続完了');
+      if (this.ardyRequest?.source === 'reply') this.stopActiveMotion();
+      this.advanceAutonomous();
+      return;
+    }
+    this.speechTimer = setTimeout(() => this.checkSpeechEnd(), 50);
+  }
+
+  private canMoveAutonomously(): boolean {
+    return this.autonomousEnabled && this.ardyEnabled && this.ardyService.ready && !!this.avatar?.vrm &&
+      !!this.client?.connected && this.client.setupComplete && !this.waitingForReply &&
+      !['disconnected', 'connecting', 'error'].includes(this.state);
+  }
+
+  private scheduleAutonomous(delay = 0): void {
+    if (!this.canMoveAutonomously() || this.pendingAutonomous || this.autonomousTimer) return;
+    this.autonomousTimer = setTimeout(() => {
+      this.autonomousTimer = null;
+      void this.prepareAutonomous();
+    }, delay);
+  }
+
+  private async prepareAutonomous(): Promise<void> {
+    if (!this.canMoveAutonomously() || this.plannerAbort || this.pendingAutonomous) return;
+    const abort = new AbortController();
+    this.plannerAbort = abort;
+    try {
+      const steps = await this.planner.generate(this.apiKey, this.plannerModel, {
+        conversation: this.history.filter(message => message.content).slice(-8).map(({ role, content }) => ({ role, content: content.slice(-2000) })),
+        recentMotions: this.recentMotions,
+        speaking: this.speechStarted,
+        remainingSpeechSeconds: this.audioLipSync?.getPcmRemainingSeconds() ?? 0,
+      }, abort.signal);
+      abort.signal.throwIfAborted();
+      if (!this.canMoveAutonomously()) return;
+      const request = this.createMotionRequest(crypto.randomUUID(), steps, 'autonomous');
+      this.pendingAutonomous = request;
+      await request.sequence.prepare();
+      abort.signal.throwIfAborted();
+      request.abort.signal.throwIfAborted();
+      this.autonomousFailures = 0;
+      // Only consume a speculative result after the foreground sequence finishes.
+      if (!this.ardyRequest) this.advanceAutonomous();
+    } catch (error) {
+      if (!abort.signal.aborted) this.autonomousError(error);
+    } finally {
+      if (this.plannerAbort === abort) this.plannerAbort = null;
+    }
+  }
+
+  private advanceAutonomous(): void {
+    if (!this.canMoveAutonomously() || this.ardyRequest) return;
+    const next = this.pendingAutonomous;
+    if (next && !next.abort.signal.aborted) {
+      this.pendingAutonomous = null;
+      this.ardyRequest = next;
+      next.sequence.start();
+    } else {
+      this.scheduleAutonomous();
+    }
+  }
+
+  private autonomousError(error: unknown): void {
+    this.cancelAutonomous();
+    this.autonomousFailures++;
+    console.warn('[ardy-mini] autonomous motion failed', error);
+    this.ardyDetail = `自律動作: ${error instanceof Error ? error.message : String(error)}`;
+    if (this.autonomousFailures >= 3) {
+      this.autonomousEnabled = false;
+      this.ardyDetail += ' — 3回失敗したため停止。自律動作をONにすると再試行します。';
+    } else {
+      this.scheduleAutonomous(5000 * this.autonomousFailures);
+    }
+    this.events.onArdyStateChange?.(this.ardyState, this.ardyDetail);
   }
 
   private setState(state: GeminiLiveChatState, statusText?: string): void {
