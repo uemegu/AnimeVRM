@@ -6,6 +6,7 @@ import { GeminiLiveClient, ToolCallItem } from './GeminiLiveClient';
 import { AudioRecorder } from './AudioRecorder';
 import { ArdyMotionService, type ArdyMotionState } from '../motion/ardy/ArdyMotionService';
 import { createArdyAnimationClip } from '../motion/ardy/createArdyAnimationClip';
+import { FingerMotionService, parseFingerMotion, describeFingerMotion, applyFingerMotion } from '../motion/FingerMotion';
 
 export type GeminiLiveChatState =
   | 'disconnected'
@@ -77,6 +78,7 @@ export class GeminiLiveChatController {
   private ardyState: ArdyMotionState = 'unloaded';
   private ardyDetail = '';
   private ardyRequest: { id: string; abort: AbortController } | null = null;
+  private fingerMotionService = new FingerMotionService();
 
   constructor(events: GeminiLiveChatEvents = {}) {
     this.events = events;
@@ -445,6 +447,8 @@ export class GeminiLiveChatController {
     if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 2 || duration > 8) {
       throw new Error('Motion duration must be 2–8 seconds.');
     }
+    const fingerMotion = parseFingerMotion(tool.args.fingerMotion);
+    const fingerDetail = `Finger Motion: ${describeFingerMotion(fingerMotion)} (1s → 保持)`;
     const avatar = this.avatar;
     if (!avatar?.vrm) throw new Error('アバターを読み込んでください。');
     this.cancelArdyMotion();
@@ -452,18 +456,22 @@ export class GeminiLiveChatController {
     this.ardyRequest = { id: tool.id, abort };
     if (!this.currentAssistantMessage) this.appendAssistantText('');
     const message = this.currentAssistantMessage!;
-    const tag: ChatMessageTool = { name: tool.name, detail: `ardy-mini: ${prompt} (${duration}s) — 生成中` };
+    const tag: ChatMessageTool = { name: tool.name, detail: `ardy-mini: ${prompt} (${duration}s) — 生成中 / ${fingerDetail}` };
     (message.tools ??= []).push(tag);
     this.events.onMessageUpdated?.(message);
-    return this.ardyService.generate(prompt, duration, abort.signal).then((motion) => {
+    return this.ardyService.generate(prompt, duration, abort.signal).then(async (motion) => {
+      abort.signal.throwIfAborted();
+      if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
+      const targets = await this.fingerMotionService.createTargets(fingerMotion, avatar.vrm);
       abort.signal.throwIfAborted();
       if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
       const clip = createArdyAnimationClip(motion, avatar.vrm);
+      applyFingerMotion(clip, avatar.vrm, targets);
       if (!avatar.playAnimationClip(clip)) throw new Error('Motion playback failed.');
-      tag.detail = `ardy-mini: ${prompt} (${duration}s) — 再生`;
+      tag.detail = `ardy-mini: ${prompt} (${duration}s) — 再生 / ${fingerDetail}`;
     }).catch((error: unknown) => {
       const cancelled = abort.signal.aborted || (error instanceof Error && error.name === 'AbortError');
-      tag.detail = `ardy-mini: ${prompt} — ${cancelled ? 'キャンセル' : `失敗: ${error instanceof Error ? error.message : String(error)}`}`;
+      tag.detail = `ardy-mini: ${prompt} — ${cancelled ? 'キャンセル' : `失敗: ${error instanceof Error ? error.message : String(error)}`} / ${fingerDetail}`;
       throw error;
     }).finally(() => {
       // Keep the request identity after playback begins so a server cancellation stops it too.

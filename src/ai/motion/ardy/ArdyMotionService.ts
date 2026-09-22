@@ -1,5 +1,6 @@
 import type { WorkerCommand, WorkerEvent, ProgressEvent } from './vendor/runtime/protocol';
 import type { BrowserModelManifest } from './vendor/runtime/manifest';
+import type { RuntimeTimings } from './vendor/runtime/engine';
 import { normalizeStructuredMotion, type StructuredMotionResult } from './vendor/motion-data';
 
 export const ARDY_MODEL_REVISION = '1c21362effeecec0454bfc0d818661525ae6b387';
@@ -60,6 +61,7 @@ export class ArdyMotionService {
   }
 
   public generate(prompt: string, duration: number, signal: AbortSignal): Promise<StructuredMotionResult> {
+    const queuedAt = performance.now();
     // A cancelled inference must drain before another request reaches the worker.
     const operation = this.queue.catch(() => {}).then(async () => {
       signal.throwIfAborted();
@@ -67,6 +69,14 @@ export class ArdyMotionService {
       if (!prompt.trim() || prompt.length > 512) throw new Error('Motion prompt must contain 1–512 characters.');
       if (!Number.isFinite(duration) || duration < 2 || duration > 8) throw new Error('Motion duration must be 2–8 seconds.');
       const requestId = crypto.randomUUID();
+      const startedAt = performance.now();
+      const modelVariant = this.manifest.model?.variant ?? null;
+      let receivedAt: number | undefined;
+      let runtimeTimings: RuntimeTimings | undefined;
+      let frameCount = 0;
+      let motionSeconds = 0;
+      let normalizeMs = 0;
+      let status: 'success' | 'cancelled' | 'error' = 'error';
       const cancel = () => this.worker?.postMessage({ type: 'cancel', requestId: crypto.randomUUID(), targetRequestId: requestId });
       signal.addEventListener('abort', cancel, { once: true });
       this.onState('generating', prompt);
@@ -76,10 +86,34 @@ export class ArdyMotionService {
           durationSeconds: duration, seed: crypto.randomUUID(), cfgWeight: 3.5, historyFrames: 40,
           initialTranslation: new Float32Array(3), initialHeading: 0,
         }, 180_000);
+        receivedAt = performance.now();
         signal.throwIfAborted();
         if (result.type !== 'generationComplete') throw new Error('Invalid ardy-mini generation response');
-        return normalizeStructuredMotion(result.result, { skeleton: this.manifest!.skeleton });
+        runtimeTimings = result.result.timingsMs;
+        frameCount = result.result.frameCount;
+        motionSeconds = frameCount / result.result.fps;
+        const normalizeStartedAt = performance.now();
+        const motion = normalizeStructuredMotion(result.result, { skeleton: this.manifest!.skeleton });
+        normalizeMs = performance.now() - normalizeStartedAt;
+        status = 'success';
+        return motion;
+      } catch (error) {
+        status = signal.aborted || (error instanceof Error && error.name === 'AbortError') ? 'cancelled' : 'error';
+        throw error;
       } finally {
+        const finishedAt = performance.now();
+        const round = (value: number | undefined) => value !== undefined && Number.isFinite(value) ? Math.round(value * 100) / 100 : null;
+        const inferenceMs = runtimeTimings?.total;
+        console.debug('[ardy-mini] generation timing', {
+          requestId, status, prompt, modelVariant, requestedSeconds: duration,
+          frameCount, motionSeconds: round(motionSeconds),
+          queueMs: round(startedAt - queuedAt), wallMs: round(finishedAt - queuedAt),
+          workerRoundTripMs: round((receivedAt ?? finishedAt) - startedAt), normalizeMs: round(normalizeMs),
+          inferenceMs: round(inferenceMs), textEncodeMs: round(runtimeTimings?.text),
+          denoiseMs: round(runtimeTimings?.denoising), decodeMs: round(runtimeTimings?.decoding),
+          framesPerSecond: round(inferenceMs && inferenceMs > 0 ? frameCount * 1000 / inferenceMs : undefined),
+          realTimeFactor: round(inferenceMs !== undefined && motionSeconds > 0 ? inferenceMs / (motionSeconds * 1000) : undefined),
+        });
         signal.removeEventListener('abort', cancel);
         if (this.ready) this.onState('ready');
       }
