@@ -49,6 +49,15 @@ test('Gemini declares the English motion tool only in ARDY mode and handles canc
   expect(ardy.systemInstruction.parts[0].text).toContain('A person');
   expect(ardy.systemInstruction.parts[0].text).toContain('音声で読み上げず');
   expect(ardy.outputAudioTranscription).toEqual({});
+  const fingerSchema = ardy.tools[0].functionDeclarations[0].parameters.properties.fingerMotion;
+  expect(fingerSchema.required).toEqual(['right', 'left']);
+  for (const hand of ['right', 'left']) {
+    expect(Object.keys(fingerSchema.properties[hand].properties)).toEqual(['index', 'peace', 'thumb', 'fist', 'open', 'three']);
+    for (const option of Object.values(fingerSchema.properties[hand].properties) as any[]) {
+      expect(option.enum).toEqual(['YES', 'NO']);
+    }
+  }
+  expect(ardy.systemInstruction.parts[0].text).toContain('動作終了まで保持');
   expect(result.cancelled).toEqual(['cancel-me']);
 });
 
@@ -249,6 +258,12 @@ test('transferred runtime motion arrays reach VRM playback through the service',
       constructor() { super('/AnimeVRM/test/fixtures/ardy-result.worker.ts', { type: 'module' }); }
     } as typeof Worker;
     const service = new ArdyMotionService();
+    const debug = console.debug;
+    const timings: any[] = [];
+    console.debug = (...args) => {
+      if (args[0] === '[ardy-mini] generation timing') timings.push(args[1]);
+      debug(...args);
+    };
     try {
       await service.initialize();
       const motion = await service.generate('A person waves.', 4, new AbortController().signal);
@@ -279,10 +294,11 @@ test('transferred runtime motion arrays reach VRM playback through the service',
         features, nestedFrames: nested.frameCount,
         normalizedMotion: Array.from(motion.normalizedMotion),
         positionsShape: motion.positionsShape, rotationsShape: motion.globalRotations.shape,
-        contacts: Array.from(motion.contacts), angle: hips.quaternion.x, height: hips.position.y,
+        contacts: Array.from(motion.contacts), angle: hips.quaternion.x, height: hips.position.y, timings,
       };
     } finally {
       service.dispose();
+      console.debug = debug;
       window.Worker = NativeWorker;
     }
   });
@@ -294,4 +310,143 @@ test('transferred runtime motion arrays reach VRM playback through the service',
   expect(result.height).toBeCloseTo(1);
   expect(result.features).toEqual([[5, 6], [5, 6], [5, 6]]);
   expect(result.nestedFrames).toBe(1);
+  expect(result.timings).toHaveLength(1);
+  expect(result.timings[0]).toMatchObject({
+    status: 'success', requestedSeconds: 4, frameCount: 2, inferenceMs: 1,
+    textEncodeMs: 0, denoiseMs: 1, decodeMs: 0, motionSeconds: 0.1,
+    framesPerSecond: 2000, realTimeFactor: 0.01,
+  });
+  expect(result.timings[0].wallMs).toBeGreaterThanOrEqual(result.timings[0].workerRoundTripMs);
+  expect(result.timings[0].queueMs).toBeGreaterThanOrEqual(0);
+});
+
+test('Finger Motion uses the motion.html shapes, reaches them in one second and preserves other bones', async ({ page }) => {
+  await modulePage(page);
+  const result = await page.evaluate(async () => {
+    // @ts-expect-error Vite browser import
+    const { FingerMotionService, parseFingerMotion, applyFingerMotion, FINGER_MOTION_OPTIONS } = await import('/AnimeVRM/src/ai/motion/FingerMotion.ts');
+    // @ts-expect-error Vite browser import
+    const THREE = await import('/AnimeVRM/node_modules/three/build/three.module.js');
+    const scene = new THREE.Scene();
+    const bones = new Map<string, any>();
+    for (const side of ['right', 'left']) {
+      for (const finger of ['Thumb', 'Index', 'Middle', 'Ring', 'Little']) {
+        const segments = finger === 'Thumb' ? ['Metacarpal', 'Proximal', 'Distal'] : ['Proximal', 'Intermediate', 'Distal'];
+        for (const segment of segments) {
+          const bone = new THREE.Bone(); scene.add(bone);
+          bones.set(side + finger + segment, bone);
+        }
+      }
+    }
+    const wrist = new THREE.Bone(); scene.add(wrist); bones.set('rightHand', wrist);
+    const vrm = { scene, meta: { metaVersion: '1' }, humanoid: { getNormalizedBoneNode: (name: string) => bones.get(name) ?? null } };
+    const service = new FingerMotionService();
+    const identity = new THREE.Quaternion();
+    const shapes: any[] = [];
+    for (const { id } of FINGER_MOTION_OPTIONS) {
+      const targets = await service.createTargets({ right: id, left: id }, vrm);
+      shapes.push({ id, angles: targets.map((target: any) => ({ bone: target.bone, angle: target.rotation.angleTo(identity) })) });
+    }
+    const selection = parseFingerMotion({ right: { peace: 'YES', index: 'NO' }, left: { open: 'NO' } });
+    const targets = await service.createTargets(selection, vrm);
+    const mirrored = await service.createTargets(selection, { ...vrm, meta: { metaVersion: '0' } });
+    const mirrorErrors = targets.map((target: any, i: number) => {
+      const q = target.rotation.clone(); q.x *= -1; q.z *= -1;
+      return q.angleTo(mirrored[i].rotation);
+    });
+    const ring = bones.get('rightRingProximal')!;
+    ring.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), .2);
+    const before = ring.quaternion.clone();
+    const target = targets.find((target: any) => target.bone === 'rightRingProximal')!.rotation;
+    const thumb = bones.get('rightThumbMetacarpal')!;
+    const leftIndex = bones.get('leftIndexProximal')!;
+    const wristQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), .4);
+    const leftQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), .3);
+    const clip = new THREE.AnimationClip('body', 4, [
+      new THREE.QuaternionKeyframeTrack(wrist.uuid + '.quaternion', [0, 4], [...wristQ.toArray(), ...wristQ.toArray()]),
+      new THREE.QuaternionKeyframeTrack(thumb.uuid + '.quaternion', [0, 4], [...wristQ.toArray(), ...wristQ.toArray()]),
+      new THREE.QuaternionKeyframeTrack(leftIndex.uuid + '.quaternion', [0, 4], [...leftQ.toArray(), ...leftQ.toArray()]),
+    ]);
+    applyFingerMotion(clip, vrm, targets);
+    const mixer = new THREE.AnimationMixer(scene);
+    mixer.clipAction(clip).play();
+    mixer.update(0);
+    const startError = ring.quaternion.angleTo(before);
+    mixer.update(.5);
+    const halfError = ring.quaternion.angleTo(before.clone().slerp(target, .5));
+    mixer.update(.5);
+    const oneSecondError = ring.quaternion.angleTo(target);
+    mixer.update(1);
+    const holdError = ring.quaternion.angleTo(target);
+    const conflicts: string[] = [];
+    for (const input of [{ right: { peace: 'YES', index: 'YES' } }, { right: { peace: 'MAYBE' } }]) {
+      try { parseFingerMotion(input); } catch (error) { conflicts.push((error as Error).message); }
+    }
+    const trackCount = clip.tracks.length;
+    applyFingerMotion(clip, vrm, await service.createTargets(parseFingerMotion({ right: { peace: 'NO' } }), vrm));
+    return {
+      shapes, mirrorErrors, startError, halfError, oneSecondError, holdError, conflicts,
+      wristError: wrist.quaternion.angleTo(wristQ), leftError: leftIndex.quaternion.angleTo(leftQ),
+      thumbTrackCount: clip.tracks.filter((track: any) => track.name === thumb.uuid + '.quaternion').length,
+      noSelectionUnchanged: clip.tracks.length === trackCount,
+    };
+  });
+  const openByPose: Record<string, string[]> = {
+    index: ['Index'], peace: ['Index', 'Middle'], thumb: ['Thumb'], fist: [],
+    open: ['Thumb', 'Index', 'Middle', 'Ring', 'Little'], three: ['Index', 'Middle', 'Ring'],
+  };
+  for (const shape of result.shapes) {
+    expect(shape.angles).toHaveLength(30);
+    for (const { bone, angle } of shape.angles) {
+      const open = openByPose[shape.id].some(finger => bone.includes(finger));
+      expect(angle).toBeCloseTo(open ? 0 : bone.includes('Thumb') ? .55 : 1.25, 3);
+    }
+  }
+  for (const error of [...result.mirrorErrors, result.startError, result.halfError, result.oneSecondError, result.holdError, result.wristError, result.leftError]) {
+    expect(error).toBeLessThan(.001);
+  }
+  expect(result.thumbTrackCount).toBe(1);
+  expect(result.noSelectionUnchanged).toBe(true);
+  expect(result.conflicts).toHaveLength(2);
+});
+
+test('controller waits for ARDY before applying Finger Motion and cancels during pose preparation', async ({ page }) => {
+  await modulePage(page);
+  const result = await page.evaluate(async () => {
+    // @ts-expect-error Vite browser import
+    const { GeminiLiveChatController } = await import('/AnimeVRM/src/ai/live/GeminiLiveChatController.ts');
+    const controller = new GeminiLiveChatController() as any;
+    let finishGeneration!: (motion: unknown) => void;
+    let finishFingers!: (targets: unknown[]) => void;
+    const requested: unknown[] = [];
+    let played = 0;
+    controller.setAvatar({ vrm: {}, stopGeneratedAnimation() {}, playAnimationClip() { played++; } });
+    controller.setArdyEnabled(true);
+    controller.ardyService = { ready: true, generate: () => new Promise(resolve => { finishGeneration = resolve; }) };
+    controller.fingerMotionService = {
+      createTargets: (selection: unknown) => {
+        requested.push(selection);
+        return new Promise(resolve => { finishFingers = resolve; });
+      },
+    };
+    const acknowledgement = await controller.handleToolExecution({
+      id: 'fingers', name: 'generateArdyMotion',
+      args: { prompt: 'A person raises their right hand.', fingerMotion: { right: { peace: 'YES' }, left: { open: 'NO' } } },
+    });
+    const beforeGeneration = requested.length;
+    finishGeneration({});
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const beforePoseReady = played;
+    controller.disconnect();
+    finishFingers([]);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    return { acknowledgement, beforeGeneration, beforePoseReady, played, requested, detail: controller.getHistory()[0].tools[0].detail };
+  });
+  expect(result.acknowledgement.status).toBe('generating');
+  expect(result.beforeGeneration).toBe(0);
+  expect(result.beforePoseReady).toBe(0);
+  expect(result.requested).toEqual([{ right: 'peace' }]);
+  expect(result.played).toBe(0);
+  expect(result.detail).toContain('キャンセル');
+  expect(result.detail).toContain('ピースをする=YES');
 });

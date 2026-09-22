@@ -2,6 +2,7 @@
  * Gemini Multimodal Live API WebSocket Client
  * Protocol: GenerativeService.BidiGenerateContent (WebSocket)
  */
+import { FINGER_MOTION_SCHEMA, FINGER_MOTION_OPTIONS } from '../motion/FingerMotion';
 
 export interface GeminiLiveConfig {
   apiKey: string;
@@ -56,13 +57,22 @@ const LEGACY_MOTION_PROMPT = `
 const ARDY_MOTION_PROMPT = `
 【ardy-mini による動作生成】
 各応答に、会話や感情に合った動きを説明する短い英語の文章を追加してください。
-文章は音声で読み上げず、必ず generateArdyMotion(prompt, duration) の引数として応答に含めます。
+文章は音声で読み上げず、必ず generateArdyMotion(prompt, duration, fingerMotion) の引数として応答に含めます。
 応答の最初に一度だけ呼び出し、日本語での発話はそのまま続けてください。同じ応答で再度生成しないでください。
 prompt は "A person ..." で始まる、主語・動作・身体の部位が明確な自然な英語の1〜2文です。
 挨拶例: "A person stands in place and gently waves their right hand in greeting."
 説明例: "A person stands in place and gestures gently with both hands while talking."
 基本はその場に立った自然な身振りにし、ユーザーが頼んだときに動作を変えてください。感情だけでなく身体の動きを具体的に書きます。
-duration は2〜8秒（通常4秒）。生成指示は会話欄に表示されます。生成が失敗したときも会話は続け、成功したと偽らないでください。`;
+duration は2〜8秒（通常4秒）。生成指示は会話欄に表示されます。生成が失敗したときも会話は続け、成功したと偽らないでください。
+
+【Finger Motion（指の形の指定）】
+応答には必ず fingerMotion を追加します。right（右手）とleft（左手）の各選択肢を YES または NO で指定します。
+選択肢: ${FINGER_MOTION_OPTIONS.map(({ id, label }) => `${id}=${label}`).join('、')}。
+片手につき YES は最大1つです。指定が不要な手はすべて NO にします。左右で異なる形も指定できます。
+例: ピースなら該当する手の peace だけ YES、他は NO。指を立てた説明なら index だけ YES。
+指の形は ardy-mini に生成させず、この欄で指定します。prompt は腕や身体の位置・動きを説明し、指を動かす時間軸は指定しません。
+ardy-mini の動作生成が終わって再生を始めた時点から1秒で指定の形にし、動作終了まで保持します。
+Finger Motion の指定内容も音声では読み上げません。`;
 
 export class GeminiLiveClient {
   private ws: WebSocket | null = null;
@@ -210,8 +220,9 @@ export class GeminiLiveClient {
                   properties: {
                     prompt: { type: 'STRING', description: 'One or two English sentences describing physical motion, starting with A person. Maximum 512 characters.' },
                     duration: { type: 'NUMBER', description: 'Motion length in seconds, 2–8. Default 4.' },
+                    fingerMotion: FINGER_MOTION_SCHEMA,
                   },
-                  required: ['prompt'],
+                  required: ['prompt', 'fingerMotion'],
                 },
               }] : []),
               {
