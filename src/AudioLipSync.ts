@@ -562,10 +562,13 @@ export class AudioLipSync {
     };
   }
 
-  /**
-   * Immediately cancel all playing and queued PCM audio chunks.
-   * Useful when user interrupts the avatar's speech.
-   */
+  /** Remaining audible PCM, including the lip-sync playback delay. Uses the audio clock. */
+  public getPcmRemainingSeconds(): number {
+    if (!this.audioContext || this.pcmNextStartTime === 0) return 0;
+    return Math.max(0, this.pcmNextStartTime + this.audioDelay - this.audioContext.currentTime);
+  }
+
+  /** Immediately cancel all playing and queued PCM audio chunks. */
   public stopPcmStream(): void {
     for (const source of this.pcmActiveSources) {
       try {

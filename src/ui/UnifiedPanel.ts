@@ -734,6 +734,13 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
                   <p style="font-size: 11px; color: #aaaaaa; line-height: 1.5; margin: 4px 0;">${tr.geminiLiveChat.ardyNote}
                     <a href="${ARDY_MODEL_TERMS_URL}" target="_blank" rel="noopener noreferrer" style="color: #93c5fd;">${tr.geminiLiveChat.ardyTerms}</a>
                   </p>
+                  <label style="font-size: 12px; display: flex; gap: 6px; align-items: center; margin-top: 8px;">
+                    <input type="checkbox" id="gemini-ardy-autonomous" ${geminiLiveChatController.getAutonomousEnabled() ? 'checked' : ''} />
+                    ${tr.geminiLiveChat.ardyAutonomous}
+                  </label>
+                  <p style="font-size: 11px; color: #aaaaaa; line-height: 1.5; margin: 4px 0;">${tr.geminiLiveChat.ardyAutonomousNote}</p>
+                  <label for="gemini-ardy-planner-model" style="font-size: 11px; display: block; margin: 6px 0 4px;">${tr.geminiLiveChat.ardyPlannerModel}</label>
+                  <input id="gemini-ardy-planner-model" class="aichat-input" type="text" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;" />
                   <button id="gemini-ardy-load" class="action-btn">${tr.geminiLiveChat.ardyLoad}</button>
                   <div id="gemini-ardy-status" role="status" aria-live="polite" style="font-size: 11px; margin: 6px 0; overflow-wrap: anywhere;"></div>
                   <label for="gemini-ardy-prompt" style="font-size: 11px; display: block; margin-bottom: 4px;">${tr.geminiLiveChat.ardyPrompt}</label>
@@ -902,6 +909,11 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     const ardyPreview = document.getElementById('gemini-ardy-preview') as HTMLButtonElement;
     const ardyPrompt = document.getElementById('gemini-ardy-prompt') as HTMLTextAreaElement;
     const ardyStatus = document.getElementById('gemini-ardy-status')!;
+    const ardyAutonomous = document.getElementById('gemini-ardy-autonomous') as HTMLInputElement;
+    const ardyPlannerModel = document.getElementById('gemini-ardy-planner-model') as HTMLInputElement;
+    ardyPlannerModel.value = geminiLiveChatController.getPlannerModel();
+    ardyAutonomous.addEventListener('change', () => geminiLiveChatController.setAutonomousEnabled(ardyAutonomous.checked));
+    ardyPlannerModel.addEventListener('change', () => geminiLiveChatController.setPlannerModel(ardyPlannerModel.value));
 
     const renderArdyState = () => {
       const state = geminiLiveChatController.getArdyState();
@@ -911,6 +923,8 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       ardyEnabled.checked = enabled;
       ardyEnabled.disabled = chatActive;
       ardyControls.hidden = !enabled;
+      ardyAutonomous.checked = geminiLiveChatController.getAutonomousEnabled();
+      ardyPlannerModel.disabled = chatActive || !ardyAutonomous.checked;
       ardyLoad.disabled = chatActive || ['loading', 'ready', 'generating'].includes(state);
       ardyPreview.disabled = chatActive || state !== 'ready';
       ardyPrompt.disabled = chatActive || state === 'generating';
