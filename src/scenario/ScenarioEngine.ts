@@ -12,6 +12,8 @@ import {
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
+  AvatarTransition,
+  SceneTransition,
 } from './types';
 import { ScenePresetId } from '../presets/ScenePresets';
 import { CameraPreset, CameraStartAngle } from '../animation/types';
@@ -116,6 +118,14 @@ export class ScenarioEngine {
   private onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
+
+  // Mid-dialogue transition state (voice currentTime synced)
+  private sceneElapsedTime = 0;
+  private pendingAvatarTransitions = new Map<
+    Avatar,
+    { charId: string; transitions: AvatarTransition[]; nextIndex: number }
+  >();
+  private pendingSceneTransitions: { transitions: SceneTransition[]; nextIndex: number } | null = null;
 
   constructor(options: ScenarioEngineOptions) {
     this.getAvatar = options.getAvatar;
@@ -313,6 +323,9 @@ export class ScenarioEngine {
     this.focusLinesOverlay.hide();
     this.shaftCutInOverlay.hide();
     this.activeMoveTransitions.clear();
+    this.pendingAvatarTransitions.clear();
+    this.pendingSceneTransitions = null;
+    this.sceneElapsedTime = 0;
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
@@ -485,7 +498,7 @@ export class ScenarioEngine {
     return conditions.every((cond) => this.flags.has(cond));
   }
 
-  private applyAvatarAction(avatar: Avatar, config: ScenarioSceneAvatarConfig): void {
+  private applyAvatarAction(avatar: Avatar, config: ScenarioSceneAvatarConfig, charId?: string): void {
     const {
       motion,
       expression,
@@ -594,7 +607,8 @@ export class ScenarioEngine {
       );
 
       // 指定時間（秒）経過後に次のモーションまたは待機モーションへ自動遷移
-      if (config.motionDuration !== undefined && config.motionDuration > 0) {
+      // transitions[] がある場合はそちらが優先されるため、この旧方式はスキップする
+      if (!config.transitions?.length && config.motionDuration !== undefined && config.motionDuration > 0) {
         const timer = window.setTimeout(() => {
           if (!this.isPlayingState) return;
           const nextMotion = config.nextMotion || resolveAssetUrl('/animations/Standing Idle.fbx');
@@ -685,6 +699,16 @@ export class ScenarioEngine {
     // Shafudo (Shaft head/neck tilt pose) override per avatar
     if (config.shafudo !== undefined) {
       avatar.setShafudo(config.shafudo);
+    }
+
+    // Mid-dialogue transitions timeline registration
+    if (config.transitions && config.transitions.length > 0) {
+      const sorted = [...config.transitions].sort((a, b) => a.at - b.at);
+      this.pendingAvatarTransitions.set(avatar, {
+        charId: charId || '',
+        transitions: sorted,
+        nextIndex: 0,
+      });
     }
   }
 
@@ -951,6 +975,9 @@ export class ScenarioEngine {
     this.clearPendingChoiceTimer();
     this.clearPendingEffectTextTimers();
     this.clearPendingMotionTimers();
+    this.pendingAvatarTransitions.clear();
+    this.pendingSceneTransitions = null;
+    this.sceneElapsedTime = 0;
     this.stopVoice();
 
     // ロケーションが切り替わる場合、または明示的な fade_black 指定時は暗転トランジションを実行
@@ -1095,15 +1122,21 @@ export class ScenarioEngine {
       for (const [charKey, config] of Object.entries(scene.avatars)) {
         const avatar = this.getAvatar(charKey);
         if (avatar) {
-          this.applyAvatarAction(avatar, config);
+          this.applyAvatarAction(avatar, config, charKey);
         }
       }
     } else if (scene.avatar) {
       const charKey = scene.avatar.character || scene.character || scene.speakerCharacterId;
       const avatar = this.getAvatar(charKey);
       if (avatar) {
-        this.applyAvatarAction(avatar, scene.avatar);
+        this.applyAvatarAction(avatar, scene.avatar, charKey);
       }
+    }
+
+    // 2.1 Scene-level mid-dialogue transitions (camera, background, etc.)
+    if (scene.transitions && scene.transitions.length > 0) {
+      const sorted = [...scene.transitions].sort((a, b) => a.at - b.at);
+      this.pendingSceneTransitions = { transitions: sorted, nextIndex: 0 };
     }
 
     // 2.5 Conversation Attention (LookAt target & shallow head angle)
@@ -1372,6 +1405,205 @@ export class ScenarioEngine {
 
       if (t >= 1.0) {
         this.activeMoveTransitions.delete(avatar);
+      }
+    }
+
+    // --- Mid-dialogue transitions (voice currentTime synced) ---
+    const hasPendingTransitions =
+      this.pendingAvatarTransitions.size > 0 || this.pendingSceneTransitions !== null;
+    if (hasPendingTransitions) {
+      const currentTime = this.getSceneCurrentTime(delta);
+
+      // Avatar-level transitions (expression, motion, look-at, etc.)
+      for (const [avatar, state] of this.pendingAvatarTransitions) {
+        while (state.nextIndex < state.transitions.length) {
+          const tr = state.transitions[state.nextIndex];
+          if (currentTime < tr.at) break;
+          this.applyAvatarTransition(avatar, tr, state.charId);
+          state.nextIndex++;
+        }
+        if (state.nextIndex >= state.transitions.length) {
+          this.pendingAvatarTransitions.delete(avatar);
+        }
+      }
+
+      // Scene-level transitions (camera, background, etc.)
+      if (this.pendingSceneTransitions) {
+        const st = this.pendingSceneTransitions;
+        while (st.nextIndex < st.transitions.length) {
+          const tr = st.transitions[st.nextIndex];
+          if (currentTime < tr.at) break;
+          this.applySceneTransition(tr);
+          st.nextIndex++;
+        }
+        if (st.nextIndex >= st.transitions.length) {
+          this.pendingSceneTransitions = null;
+        }
+      }
+    } else {
+      // Keep elapsed time updated even when no transitions are pending
+      // (in case transitions are registered mid-scene via dynamic updates)
+      this.sceneElapsedTime += delta;
+    }
+  }
+
+  /**
+   * Get the current time reference for mid-dialogue transitions.
+   * Uses voice audioElement.currentTime for hardware-accurate sync when voice is playing,
+   * falls back to delta-accumulated elapsed time for voiceless scenes.
+   */
+  private getSceneCurrentTime(delta: number): number {
+    const audioLipSync = this.getAudioLipSync();
+    if (audioLipSync.isPlaying && audioLipSync.audioElement.currentTime > 0) {
+      // Voice is playing: use hardware-accurate audio position
+      // Also keep sceneElapsedTime in sync for consistency
+      this.sceneElapsedTime = audioLipSync.audioElement.currentTime;
+      return audioLipSync.audioElement.currentTime;
+    }
+    // No voice: accumulate delta
+    this.sceneElapsedTime += delta;
+    return this.sceneElapsedTime;
+  }
+
+  /**
+   * Apply a single avatar transition keyframe (expression, motion, look-at, visual effects).
+   */
+  private applyAvatarTransition(avatar: Avatar, tr: AvatarTransition, charId: string): void {
+    // Expression
+    if (tr.expression !== undefined) {
+      avatar.setExpression(tr.expression, tr.expressionWeight ?? 1.0);
+    }
+
+    // Motion
+    if (tr.motion) {
+      const resolvedMotion = this.masterManager.resolveMotionUrl(tr.motion) || resolveAssetUrl(tr.motion);
+      const motionLower = resolvedMotion.toLowerCase();
+      const isLoop = tr.motionLoop ??
+        (motionLower.includes('idle') || motionLower.includes('walking') ||
+         motionLower.includes('sitting') || motionLower.includes('sit'));
+      avatar.playAnimation(resolvedMotion, isLoop, 0.5, undefined, tr.motionSpeed ?? 1.0);
+    }
+
+    // Look-at / gaze direction
+    if (tr.lookAtTarget !== undefined) {
+      this.applyCustomLookAtTarget(avatar, charId, tr.lookAtTarget, {
+        eyeWander: tr.eyeWander,
+        eyeOffset: tr.eyeOffset,
+        headOffset: tr.headOffset,
+      });
+    } else if (
+      tr.lookAtCamera !== undefined ||
+      tr.headLookAtCamera !== undefined ||
+      tr.eyeLookAtCamera !== undefined
+    ) {
+      const effectiveEyeLookAt =
+        tr.eyeLookAtCamera ?? tr.lookAtCamera ?? true;
+      avatar.setEyeLookAt({
+        mode: effectiveEyeLookAt ? 'camera' : 'forward',
+        offset: tr.eyeOffset ? { x: tr.eyeOffset[0], y: tr.eyeOffset[1] } : { x: 0, y: 0 },
+        wander: typeof tr.eyeWander === 'boolean' ? tr.eyeWander
+              : typeof tr.eyeWander === 'number' ? tr.eyeWander > 0
+              : false,
+        wanderIntensity: typeof tr.eyeWander === 'number' ? tr.eyeWander : 1.0,
+      });
+      avatar.setLookAtCamera(effectiveEyeLookAt);
+
+      const effectiveHeadLookAt = tr.headLookAtCamera ?? false;
+      avatar.setHeadLookAtCamera(effectiveHeadLookAt, {
+        offset: tr.headOffset ? { x: tr.headOffset[0], y: tr.headOffset[1] } : { x: 0, y: 0 },
+      });
+    } else if (tr.eyeWander !== undefined) {
+      // Standalone eyeWander change without other look-at overrides
+      avatar.setEyeLookAt({
+        mode: 'camera',
+        wander: typeof tr.eyeWander === 'boolean' ? tr.eyeWander : tr.eyeWander > 0,
+        wanderIntensity: typeof tr.eyeWander === 'number' ? tr.eyeWander : 1.0,
+      });
+    }
+
+    // Face texture
+    if (tr.faceTexture !== undefined) {
+      if (tr.faceTexture.toLowerCase().includes('blush')) {
+        avatar.resetFaceTexture();
+        avatar.setBlushMode(true, { faceTexture: tr.faceTexture });
+      } else if (tr.faceTexture === '') {
+        avatar.resetFaceTexture();
+        if (avatar.isBlushMode()) avatar.setBlushMode(false);
+      } else {
+        avatar.setBlushMode(false);
+        avatar.setFaceTexture(tr.faceTexture);
+      }
+    }
+
+    // Tears
+    if (tr.tears !== undefined) {
+      avatar.setTearsEnabled(tr.tears);
+    }
+
+    // Sweat
+    if (tr.sweat !== undefined) {
+      if (tr.sweat === false) {
+        avatar.setSweatEnabled(false);
+      } else {
+        const mode = typeof tr.sweat === 'string' ? tr.sweat : 'fly4';
+        avatar.showSweat({ mode, duration: 4.0 });
+      }
+    }
+
+    // 3D effect text
+    if (tr.effectText !== undefined) {
+      avatar.clearEffectText();
+      if (typeof tr.effectText === 'string') {
+        avatar.showEffectText({ stylePreset: tr.effectText });
+      } else {
+        avatar.showEffectText({
+          stylePreset: tr.effectText.preset,
+          text: tr.effectText.text,
+          duration: tr.effectText.duration,
+        });
+      }
+    }
+
+    // Visibility
+    if (tr.visible !== undefined) {
+      avatar.setVisible(tr.visible);
+    }
+  }
+
+  /**
+   * Apply a single scene-level transition keyframe (camera, background, focus lines).
+   */
+  private applySceneTransition(tr: SceneTransition): void {
+    const scene = this.currentScene;
+    if (!scene) return;
+
+    // Camera transition
+    if (tr.cameraZoom || tr.cameraDistance !== undefined || tr.cameraTarget) {
+      // Build a temporary scene-like object with overridden camera properties
+      const cameraOverride: Partial<ScenarioScene> = {
+        ...scene,
+        cameraZoom: tr.cameraZoom ?? scene.cameraZoom,
+        cameraDistance: tr.cameraDistance ?? scene.cameraDistance,
+        cameraTarget: tr.cameraTarget ?? scene.cameraTarget,
+        cameraTransitionDuration: tr.cameraTransitionDuration ?? 0.7,
+        cameraTransitionEasing: tr.cameraTransitionEasing ?? 'smooth',
+      };
+      this.onApplySceneCamera?.(cameraOverride as ScenarioScene);
+    }
+
+    // Background switch
+    if (tr.background) {
+      this.currentBackgroundUrl = tr.background;
+      this.onSwitchBackground?.(tr.background);
+    }
+
+    // Focus lines
+    if (tr.focusLines !== undefined) {
+      if (tr.focusLines) {
+        const config = typeof tr.focusLines === 'object' ? tr.focusLines : undefined;
+        this.focusLinesOverlay.show(config);
+      } else {
+        this.focusLinesOverlay.hide();
       }
     }
   }

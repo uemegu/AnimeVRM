@@ -23,6 +23,39 @@ export function resolveLocalizedText(text: TextContent | undefined, lang: Suppor
 /** キャラクター立ち位置スロット */
 export type AvatarSlotPosition = 'left' | 'right' | 'center';
 
+/** セリフ途中のアバター演出遷移キーフレーム（表情・モーション・視線等） */
+export interface AvatarTransition {
+  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
+  at: number;
+  expression?: string;
+  expressionWeight?: number;
+  motion?: string;
+  motionLoop?: boolean;
+  motionSpeed?: number;
+  lookAtCamera?: boolean;
+  headLookAtCamera?: boolean;
+  eyeLookAtCamera?: boolean;
+  lookAtTarget?: 'player' | 'speaker' | 'partner' | 'camera' | 'forward' | string;
+  eyeWander?: boolean | number;
+  eyeOffset?: [number, number];
+  headOffset?: [number, number];
+  faceTexture?: string;
+  tears?: boolean;
+  visible?: boolean;
+}
+
+/** セリフ途中のシーン全体遷移キーフレーム（カメラ・背景等） */
+export interface SceneTransition {
+  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
+  at: number;
+  cameraZoom?: string;
+  cameraDistance?: number;
+  cameraTransitionDuration?: number;
+  cameraTransitionEasing?: string;
+  cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
+  background?: string;
+}
+
 /** シーン内のアバター演出指定 */
 export interface SceneAvatarConfig {
   characterId: string;
@@ -33,6 +66,8 @@ export interface SceneAvatarConfig {
   rotationY?: number;
   lookAtTarget?: 'player' | 'camera' | 'partner' | string;
   visible?: boolean;
+  /** セリフ中の表情・モーション・視線遷移タイムライン（at 昇順で指定） */
+  transitions?: AvatarTransition[];
 }
 
 /** 選択肢定義 */
@@ -87,6 +122,8 @@ export interface ScenarioScene {
   autoNextSec?: number;
   /** 時間帯指定（'day' | 'evening' | 'night' | 'divine' 等） */
   timeOfDay?: import('./visual').TimeOfDayId;
+  /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
+  transitions?: SceneTransition[];
 }
 
 import { ActionLocationId, DayPhase } from './game';

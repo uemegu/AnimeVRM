@@ -35,13 +35,57 @@ export interface ScenarioCharacterPlacement {
   rotationY?: number;
 }
 
+/** セリフ途中のアバター演出遷移キーフレーム（表情・モーション・視線等） */
+export interface AvatarTransition {
+  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
+  at: number;
+  // 表情
+  expression?: string;
+  expressionWeight?: number;
+  // モーション
+  motion?: string;
+  motionLoop?: boolean;
+  motionSpeed?: number;
+  // 視線・顔向き
+  lookAtCamera?: boolean;
+  headLookAtCamera?: boolean;
+  eyeLookAtCamera?: boolean;
+  lookAtTarget?: 'player' | 'speaker' | 'partner' | 'camera' | 'forward' | string;
+  eyeWander?: boolean | number;
+  eyeOffset?: [number, number];
+  headOffset?: [number, number];
+  // ビジュアル
+  faceTexture?: string;
+  tears?: boolean;
+  sweat?: boolean | 'fly4' | 'jito';
+  effectText?: EffectPresetName | {
+    preset: EffectPresetName;
+    text?: string;
+    duration?: number;
+  };
+  visible?: boolean;
+}
+
+/** セリフ途中のシーン全体遷移キーフレーム（カメラ・背景等） */
+export interface SceneTransition {
+  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
+  at: number;
+  cameraZoom?: CameraZoomType;
+  cameraDistance?: number;
+  cameraTransitionDuration?: number;
+  cameraTransitionEasing?: CameraTransitionEasing;
+  cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
+  background?: string;
+  focusLines?: boolean | FocusLinesConfig;
+}
+
 export interface ScenarioSceneAvatarConfig {
   character?: string; // Character Master ID (e.g. 'girl_01') or Model URL
   motion?: string;    // Motion Master ID (e.g. 'greeting') or FBX URL
   motionLoop?: boolean; // モーションをループ再生するか（未指定時は idle/walking/chin_rest 等から自動判定）
   motionSpeed?: number; // アニメーション再生速度倍率 (デフォルト 1.0, 高速アクション用)
-  motionDuration?: number; // モーションを再生する時間（秒）。経過後は nextMotion または待機モーションに自動遷移
-  nextMotion?: string;     // motionDuration 経過後に再生するモーション（デフォルト: 'Standing Idle.fbx' または Idle）
+  motionDuration?: number; // モーションを再生する時間（秒）。経過後は nextMotion または待機モーションに自動遷移。transitions がある場合は無視される
+  nextMotion?: string;     // motionDuration 経過後に再生するモーション（デフォルト: 'Standing Idle.fbx' または Idle）。transitions がある場合は無視される
   expression?: string;
   expressionWeight?: number;
   faceTexture?: string;
@@ -74,6 +118,8 @@ export interface ScenarioSceneAvatarConfig {
   motionBlur?: boolean; // 高速動作時の方向性輪郭ブラーのON/OFF
   yandere?: boolean | Partial<YandereOptions>; // 瞳ハイライト消去・暗黒化・首傾げ
   shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
+  /** セリフ中の表情・モーション・視線遷移タイムライン（at 昇順で指定） */
+  transitions?: AvatarTransition[];
 }
 
 export type CameraZoomType =
@@ -161,6 +207,8 @@ export interface ScenarioScene {
   goto?: string;
   waitClick?: boolean;
   autoNextSec?: number;
+  /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
+  transitions?: SceneTransition[];
 }
 
 export interface ScenarioChapter {
