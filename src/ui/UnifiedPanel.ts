@@ -27,6 +27,7 @@ import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
 import { GEMINI_LIVE_VOICES } from '../ai/live/GeminiVoices';
+import { ARDY_MODEL_TERMS_URL } from '../ai/motion/ardy/ArdyMotionService';
 import { ViewerCore } from '../scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
 import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
@@ -724,6 +725,23 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
                 </div>
               </div>
 
+              <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 12px; display: flex; gap: 6px; align-items: center;">
+                  <input type="checkbox" id="gemini-ardy-enabled" ${geminiLiveChatController.getArdyEnabled() ? 'checked' : ''} />
+                  ${tr.geminiLiveChat.ardyEnabled}
+                </label>
+                <div id="gemini-ardy-controls" ${geminiLiveChatController.getArdyEnabled() ? '' : 'hidden'}>
+                  <p style="font-size: 11px; color: #aaaaaa; line-height: 1.5; margin: 4px 0;">${tr.geminiLiveChat.ardyNote}
+                    <a href="${ARDY_MODEL_TERMS_URL}" target="_blank" rel="noopener noreferrer" style="color: #93c5fd;">${tr.geminiLiveChat.ardyTerms}</a>
+                  </p>
+                  <button id="gemini-ardy-load" class="action-btn">${tr.geminiLiveChat.ardyLoad}</button>
+                  <div id="gemini-ardy-status" role="status" aria-live="polite" style="font-size: 11px; margin: 6px 0; overflow-wrap: anywhere;"></div>
+                  <label for="gemini-ardy-prompt" style="font-size: 11px; display: block; margin-bottom: 4px;">${tr.geminiLiveChat.ardyPrompt}</label>
+                  <textarea id="gemini-ardy-prompt" class="aichat-input" rows="3" maxlength="512" style="width: 100%; box-sizing: border-box; resize: vertical;">A person stands in place and gently waves their right hand in greeting.</textarea>
+                  <button id="gemini-ardy-preview" class="action-btn" style="margin-top: 6px;" disabled>${tr.geminiLiveChat.ardyPreview}</button>
+                </div>
+              </div>
+
               <!-- Connect & Mic buttons -->
               <div style="display: flex; gap: 6px; margin-top: 8px;">
                 <button id="gemini-live-connect-btn" class="aichat-init-btn" style="background: #2563eb; flex: 2;">${tr.geminiLiveChat.startChat}</button>
@@ -878,6 +896,28 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     const glEmptyHint = document.getElementById('gemini-live-empty-hint');
     const glTextInput = document.getElementById('gemini-live-text-input') as HTMLInputElement | null;
     const glSendBtn = document.getElementById('gemini-live-send-btn') as HTMLButtonElement | null;
+    const ardyEnabled = document.getElementById('gemini-ardy-enabled') as HTMLInputElement;
+    const ardyControls = document.getElementById('gemini-ardy-controls')!;
+    const ardyLoad = document.getElementById('gemini-ardy-load') as HTMLButtonElement;
+    const ardyPreview = document.getElementById('gemini-ardy-preview') as HTMLButtonElement;
+    const ardyPrompt = document.getElementById('gemini-ardy-prompt') as HTMLTextAreaElement;
+    const ardyStatus = document.getElementById('gemini-ardy-status')!;
+
+    const renderArdyState = () => {
+      const state = geminiLiveChatController.getArdyState();
+      const chatState = geminiLiveChatController.getState();
+      const chatActive = !['disconnected', 'error'].includes(chatState);
+      const enabled = geminiLiveChatController.getArdyEnabled();
+      ardyEnabled.checked = enabled;
+      ardyEnabled.disabled = chatActive;
+      ardyControls.hidden = !enabled;
+      ardyLoad.disabled = chatActive || ['loading', 'ready', 'generating'].includes(state);
+      ardyPreview.disabled = chatActive || state !== 'ready';
+      ardyPrompt.disabled = chatActive || state === 'generating';
+      const detail = geminiLiveChatController.getArdyDetail();
+      ardyStatus.textContent = `${t().geminiLiveChat.ardyStates[state]}${detail ? ` — ${detail}` : ''}`;
+      if (glConnectBtn && !chatActive) glConnectBtn.disabled = enabled && state !== 'ready';
+    };
 
     const renderLiveState = (state: string, statusText?: string) => {
       if (!glBadge) return;
@@ -915,6 +955,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         glTextInput.disabled = !isConnectedOrActive;
         glSendBtn.disabled = !isConnectedOrActive;
       }
+      renderArdyState();
     };
 
     const renderMessageItem = (msg: any) => {
@@ -950,6 +991,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     };
 
     geminiLiveChatController.setEvents({
+      onArdyStateChange: () => renderArdyState(),
       onStateChange: (state, statusText) => {
         renderLiveState(state, statusText);
       },
@@ -973,6 +1015,21 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         showToast(`Gemini Live エラー: ${msg}`);
       },
     });
+
+    ardyEnabled.addEventListener('change', () => {
+      try { geminiLiveChatController.setArdyEnabled(ardyEnabled.checked); }
+      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
+      renderArdyState();
+    });
+    ardyLoad.addEventListener('click', async () => {
+      try { await geminiLiveChatController.loadArdyModel(); }
+      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
+    });
+    ardyPreview.addEventListener('click', async () => {
+      try { await geminiLiveChatController.previewArdyMotion(ardyPrompt.value); }
+      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
+    });
+    geminiLiveChatController.getHistory().forEach(renderMessageItem);
 
     // API key input (In-memory only, NO localStorage!)
     glApiKeyInput?.addEventListener('input', () => {

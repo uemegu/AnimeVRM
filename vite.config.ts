@@ -112,6 +112,7 @@ function getHtmlInputs() {
 
 export default defineConfig({
   plugins: [vrmModelsPlugin()],
+  worker: { format: 'es' },
   base: '/AnimeVRM/',
   build: {
     rollupOptions: {
