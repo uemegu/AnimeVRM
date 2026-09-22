@@ -1,0 +1,32 @@
+[
+  {
+    "prompt": "A person raises their right hand and waves",
+    "duration": 3,
+    "output": "public/animations/ardy_wave.fbx"
+  },
+  {
+    "prompt": "A person puts hands on hips and laughs happily",
+    "duration": 4,
+    "output": "public/animations/ardy_laugh.fbx"
+  },
+  {
+    "prompt": "A person proudly places hands on hips and stands straight",
+    "duration": 3,
+    "output": "public/animations/ardy_proud.fbx"
+  },
+  {
+    "prompt": "A person raises both hands high in excitement",
+    "duration": 3,
+    "output": "public/animations/ardy_cheer.fbx"
+  },
+  {
+    "prompt": "A person places right hand on chin thoughtfully",
+    "duration": 3,
+    "output": "public/animations/ardy_thinking.fbx"
+  },
+  {
+    "prompt": "A person bows slightly with hands in front",
+    "duration": 3,
+    "output": "public/animations/ardy_bow.fbx"
+  }
+]

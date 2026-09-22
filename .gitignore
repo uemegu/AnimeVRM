@@ -24,7 +24,8 @@ dist-ssr
 *.sw?
 /samples
 /scratch
-/scripts
+/scripts/*
+!/scripts/ardy-generate.ts
 /blender
 /output
 /renders

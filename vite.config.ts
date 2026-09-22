@@ -94,6 +94,7 @@ function getHtmlInputs() {
     viewer: path.resolve(__dirname, 'index.html'),
     motion: path.resolve(__dirname, 'motion.html'),
     lipsync: path.resolve(__dirname, 'lipsync.html'),
+    cli_runner: path.resolve(__dirname, 'cli-runner.html'),
   };
 
   const scenariosDir = path.resolve(__dirname, 'scenarios');

@@ -14,6 +14,7 @@ import { getDoorPeepYandereScenario } from './doorPeepYandereScenario';
 import { getPrivateDateScenario } from './privateDateScenario';
 import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
 import { getTeacherGateScenario } from './teacherGateScenario';
+import { getSilverWeekScenario } from './silverWeekScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -146,6 +147,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？',
     ogpImage: '/ogp/teacher-gate.png',
     getScenario: (lang = 'ja') => getTeacherGateScenario(lang),
+  },
+  'silver-week': {
+    id: 'silver-week',
+    title: 'シルバーウィークの黄昏 〜アオイとエミリの帰り道〜',
+    shortTitle: 'シルバーウィークの黄昏',
+    description: '連休最終日の夕暮れ。私服のアオイとエミリが街を歩きながら、名残惜しそうに語り合うショートシナリオ。',
+    ogpImage: '/ogp/silver-week.png',
+    getScenario: (lang = 'ja') => getSilverWeekScenario(lang),
   },
 };
 
