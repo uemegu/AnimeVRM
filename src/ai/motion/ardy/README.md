@@ -99,16 +99,32 @@ repository or build. Their separate
 [model terms](https://huggingface.co/intsuc/Llama-3-ARDY-Mini-Core40-Browser/blob/1c21362effeecec0454bfc0d818661525ae6b387/MODEL_TERMS.md)
 apply. Source and dependency notices ship under `public/notices/ardy-mini/`.
 
-## Verification
+## CLI でのモーション生成 (WebGPU)
 
-```sh
-npx tsc --noEmit
-npx vite build --outDir /tmp/animevrm-ardy-build
-npx playwright test --config playwright.ardy.config.ts
+Playwright 経由で macOS 上の Google Chrome（WebGPU / Metal）を実行し、コマンドラインから直接モーション（FBX または JSON）を高速生成できます。モデルは初回のみダウンロードされ、以後は永続キャッシュから約0.5秒で高速生成されます。
+
+### 基本コマンド
+
+```bash
+# 単発生成 (FBX)
+npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -o public/animations/ardy_wave.fbx
+
+# 秒数指定 (2〜8秒)
+npm run ardy:generate -- -p "A person bows politely" -d 4 -o public/animations/ardy_bow.fbx
+
+# JSON 形式で出力
+npm run ardy:generate -- -p "A person points forward" -d 3 -o public/animations/ardy_point.json
+
+# バッチ一括生成
+npm run ardy:generate -- -b test/fixtures/ardy_batch_sample.json
 ```
 
-Automated checks cover UI opt-in, tool declarations, cancellation, stale-result
-suppression, Core27→VRM clip playback and return to idle, booting the actual
-inference worker, and transferring a complete runtime result from a fixture worker
-through the service to VRM playback. Additional checks cover ordered sequences, audio-clock synchronization, one-second finger transitions during retiming, bounded silent prefetch, interruption, stale planner results, and failure backoff. The automated suite does not download model weights or call a
-paid Gemini API.
+オプション一覧:
+- `-p, --prompt <text>`: 英語の動作プロンプト
+- `-d, --duration <sec>`: モーションの長さ（2〜8秒、デフォルト 4秒）
+- `-o, --output <path>`: 保存先パス（`.fbx` または `.json`）
+- `-f, --format <fbx|saved-motion|raw>`: 出力形式（拡張子から自動判定）
+- `-b, --batch <file>`: 一括生成用 JSON 定義ファイル
+- `--headed`: ブラウザ画面を表示（デバッグ用）
+- `--port <port>`: 開発サーバーポート（デフォルト 5173）
+

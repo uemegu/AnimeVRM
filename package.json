@@ -8,7 +8,8 @@
     "build:wasm": "asc assembly/index.ts --config asconfig.json",
     "build": "npm run build:wasm && tsc --noEmit && vite build",
     "preview": "vite preview",
-    "convert:textures": "bash convert_textures.sh"
+    "convert:textures": "bash convert_textures.sh",
+    "ardy:generate": "node scripts/ardy-generate.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
