@@ -4,6 +4,8 @@ import { resolveAssetUrl } from '../../utils/path';
 import { MotionRecipeService, GeneratedMotionRecipe } from '../motion/MotionRecipeService';
 import { GeminiLiveClient, ToolCallItem } from './GeminiLiveClient';
 import { AudioRecorder } from './AudioRecorder';
+import { ArdyMotionService, type ArdyMotionState } from '../motion/ardy/ArdyMotionService';
+import { createArdyAnimationClip } from '../motion/ardy/createArdyAnimationClip';
 
 export type GeminiLiveChatState =
   | 'disconnected'
@@ -32,6 +34,7 @@ export interface GeminiLiveChatEvents {
   onMessageUpdated?: (message: LiveChatMessage) => void;
   onError?: (error: Error | string) => void;
   onMicStateChange?: (active: boolean) => void;
+  onArdyStateChange?: (state: ArdyMotionState, detail?: string) => void;
 }
 
 export const LIVE_MOTIONS: Record<string, string> = {
@@ -69,10 +72,20 @@ export class GeminiLiveChatController {
   private currentAssistantMessage: LiveChatMessage | null = null;
   private events: GeminiLiveChatEvents;
   private isMicActive = false;
+  private ardyEnabled = false;
+  private ardyService: ArdyMotionService;
+  private ardyState: ArdyMotionState = 'unloaded';
+  private ardyDetail = '';
+  private ardyRequest: { id: string; abort: AbortController } | null = null;
 
   constructor(events: GeminiLiveChatEvents = {}) {
     this.events = events;
     this.motionService = new MotionRecipeService();
+    this.ardyService = new ArdyMotionService((state, detail) => {
+      this.ardyState = state;
+      this.ardyDetail = detail || '';
+      this.events.onArdyStateChange?.(state, detail);
+    });
   }
 
   public setEvents(events: GeminiLiveChatEvents): void {
@@ -80,7 +93,40 @@ export class GeminiLiveChatController {
   }
 
   public setAvatar(avatar: Avatar | null): void {
+    if (this.avatar !== avatar) this.cancelArdyMotion();
     this.avatar = avatar;
+  }
+
+  public getArdyEnabled(): boolean { return this.ardyEnabled; }
+  public getArdyState(): ArdyMotionState { return this.ardyState; }
+  public getArdyDetail(): string { return this.ardyDetail; }
+
+  public setArdyEnabled(enabled: boolean): void {
+    if (this.state !== 'disconnected' && this.state !== 'error') {
+      throw new Error('モーション方式を変更する前に会話を切断してください。');
+    }
+    this.ardyEnabled = enabled;
+    if (!enabled) {
+      this.cancelArdyMotion();
+      this.ardyService.dispose();
+    }
+  }
+
+  public async loadArdyModel(): Promise<void> { await this.ardyService.initialize(); }
+
+  /** Also available without a Gemini API key to test local motion generation. */
+  public async previewArdyMotion(prompt: string, duration = 4): Promise<void> {
+    if (this.state !== 'disconnected' && this.state !== 'error') throw new Error('会話を切断してからモーションを試してください。');
+    if (!this.ardyEnabled || !this.ardyService.ready) throw new Error('ardy-mini のモデルを読み込んでください。');
+    const operation = this.startArdyMotion({ id: crypto.randomUUID(), name: 'generateArdyMotion', args: { prompt, duration } });
+    this.currentAssistantMessage = null;
+    await operation;
+  }
+
+  private cancelArdyMotion(): void {
+    this.ardyRequest?.abort.abort();
+    this.ardyRequest = null;
+    this.avatar?.stopGeneratedAnimation();
   }
 
   public setAudioLipSync(audioLipSync: AudioLipSync | null): void {
@@ -133,6 +179,10 @@ export class GeminiLiveChatController {
       throw new Error('APIキーが入力されていません');
     }
 
+    if (this.ardyEnabled && !this.ardyService.ready) {
+      throw new Error('先に ardy-mini のモデルを読み込んでください。');
+    }
+
     this.setState('connecting', 'Gemini Live に接続中...');
 
     try {
@@ -141,6 +191,7 @@ export class GeminiLiveChatController {
           apiKey: this.apiKey,
           model: this.model,
           voiceName: this.voiceName,
+          ardyMotionEnabled: this.ardyEnabled,
         },
         {
           onOpen: () => {
@@ -164,6 +215,7 @@ export class GeminiLiveChatController {
           onInterrupted: () => {
             console.log('[GeminiLive] Interrupted by user');
             this.audioLipSync?.stopPcmStream();
+            this.cancelArdyMotion();
             this.setState(this.isMicActive ? 'listening' : 'connected', '聞き取り中...');
           },
           onTurnComplete: () => {
@@ -175,7 +227,11 @@ export class GeminiLiveChatController {
           onToolCall: async (tool) => {
             return await this.handleToolExecution(tool);
           },
+          onToolCallCancelled: (ids) => {
+            if (this.ardyRequest && ids.includes(this.ardyRequest.id)) this.cancelArdyMotion();
+          },
           onError: (err) => {
+            this.cancelArdyMotion();
             console.error('[GeminiLive] Error:', err);
             this.setState('error', '通信エラーが発生しました');
             this.events.onError?.(err instanceof Error ? err : new Error(String(err)));
@@ -203,6 +259,7 @@ export class GeminiLiveChatController {
   }
 
   private cleanupSession(): void {
+    this.cancelArdyMotion();
     this.stopMicrophone();
     if (this.client) {
       this.client.disconnect();
@@ -272,6 +329,7 @@ export class GeminiLiveChatController {
     if (!this.client || !this.client.connected) {
       throw new Error('Gemini Live に接続されていません');
     }
+    this.cancelArdyMotion();
 
     // Add user message to history
     const userMsg: LiveChatMessage = {
@@ -307,6 +365,22 @@ export class GeminiLiveChatController {
     console.log('[GeminiLive] Tool call received:', tool.name, tool.args);
 
     let detailStr = '';
+
+    if (tool.name === 'generateArdyMotion') {
+      if (!this.ardyEnabled || !this.ardyService.ready) return { error: 'ardy-mini is not loaded.' };
+      // Acknowledge immediately so GPU inference does not block Gemini audio.
+      // The captured message is updated on completion even after turnComplete.
+      try {
+        const operation = this.startArdyMotion(tool);
+        void operation.catch(() => {}); // Failure is recorded on the motion tag.
+        return { status: 'generating', tool: tool.name };
+      } catch (error) {
+        return { error: error instanceof Error ? error.message : String(error) };
+      }
+    }
+    if (this.ardyEnabled && ['setMotion', 'composeMotion'].includes(tool.name)) {
+      return { error: 'Use generateArdyMotion while ardy-mini is enabled.' };
+    }
 
     if (tool.name === 'setExpression') {
       const expr = String(tool.args.expression || 'neutral');
@@ -362,6 +436,39 @@ export class GeminiLiveChatController {
     }
 
     return { status: 'success', tool: tool.name };
+  }
+
+  private startArdyMotion(tool: ToolCallItem): Promise<void> {
+    const prompt = typeof tool.args.prompt === 'string' ? tool.args.prompt.trim() : '';
+    const duration = tool.args.duration ?? 4;
+    if (!prompt || prompt.length > 512) throw new Error('Motion prompt must contain 1–512 characters.');
+    if (typeof duration !== 'number' || !Number.isFinite(duration) || duration < 2 || duration > 8) {
+      throw new Error('Motion duration must be 2–8 seconds.');
+    }
+    const avatar = this.avatar;
+    if (!avatar?.vrm) throw new Error('アバターを読み込んでください。');
+    this.cancelArdyMotion();
+    const abort = new AbortController();
+    this.ardyRequest = { id: tool.id, abort };
+    if (!this.currentAssistantMessage) this.appendAssistantText('');
+    const message = this.currentAssistantMessage!;
+    const tag: ChatMessageTool = { name: tool.name, detail: `ardy-mini: ${prompt} (${duration}s) — 生成中` };
+    (message.tools ??= []).push(tag);
+    this.events.onMessageUpdated?.(message);
+    return this.ardyService.generate(prompt, duration, abort.signal).then((motion) => {
+      abort.signal.throwIfAborted();
+      if (this.avatar !== avatar || !avatar.vrm) throw new DOMException('Avatar changed', 'AbortError');
+      const clip = createArdyAnimationClip(motion, avatar.vrm);
+      if (!avatar.playAnimationClip(clip)) throw new Error('Motion playback failed.');
+      tag.detail = `ardy-mini: ${prompt} (${duration}s) — 再生`;
+    }).catch((error: unknown) => {
+      const cancelled = abort.signal.aborted || (error instanceof Error && error.name === 'AbortError');
+      tag.detail = `ardy-mini: ${prompt} — ${cancelled ? 'キャンセル' : `失敗: ${error instanceof Error ? error.message : String(error)}`}`;
+      throw error;
+    }).finally(() => {
+      // Keep the request identity after playback begins so a server cancellation stops it too.
+      this.events.onMessageUpdated?.(message);
+    });
   }
 
   private setState(state: GeminiLiveChatState, statusText?: string): void {

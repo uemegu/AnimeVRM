@@ -36,6 +36,13 @@ export interface Translations {
     apiKeyNote: string;
     modelLabel: string;
     voiceLabel: string;
+    ardyEnabled: string;
+    ardyNote: string;
+    ardyTerms: string;
+    ardyLoad: string;
+    ardyPreview: string;
+    ardyPrompt: string;
+    ardyStates: Record<'unloaded' | 'loading' | 'ready' | 'generating' | 'error', string>;
     startChat: string;
     stopChat: string;
     micOn: string;

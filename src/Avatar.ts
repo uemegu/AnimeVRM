@@ -608,6 +608,56 @@ export class Avatar {
 
   private returnToIdleUrl: string | null = null;
   private boundMixerFinishedListener: ((e: any) => void) | null = null;
+  private animationRequestId = 0;
+  private transientClip: THREE.AnimationClip | null = null;
+
+  private ensureAnimationMixer(): THREE.AnimationMixer {
+    if (!this.mixer) this.mixer = new THREE.AnimationMixer(this.vrm!.scene);
+    if (!this.boundMixerFinishedListener) {
+      this.boundMixerFinishedListener = (event: { action: THREE.AnimationAction }) => {
+        if (this.returnToIdleUrl && this.currentAction === event.action) {
+          const idle = this.returnToIdleUrl;
+          this.returnToIdleUrl = null;
+          void this.playAnimation(idle, true, 0.6);
+        }
+      };
+      this.mixer.addEventListener('finished', this.boundMixerFinishedListener);
+    }
+    return this.mixer;
+  }
+
+  private releaseTransientClip(fade: number): void {
+    const clip = this.transientClip;
+    const mixer = this.mixer;
+    this.transientClip = null;
+    if (clip && mixer) setTimeout(() => mixer.uncacheClip(clip), (fade + 0.1) * 1000);
+  }
+
+  /** Play a generated clip directly, preserving expression and lip-sync updates. */
+  public playAnimationClip(clip: THREE.AnimationClip, crossFadeDuration = 0.35): THREE.AnimationAction | null {
+    if (!this.vrm) return null;
+    this.animationRequestId++;
+    const mixer = this.ensureAnimationMixer();
+    this.releaseTransientClip(crossFadeDuration);
+    const action = mixer.clipAction(clip);
+    action.reset().setLoop(THREE.LoopOnce, 1);
+    action.clampWhenFinished = true;
+    action.timeScale = this.isMotionFrozen ? 0 : 1;
+    if (this.currentAction) action.crossFadeFrom(this.currentAction, crossFadeDuration, false);
+    action.play();
+    this.currentAction = action;
+    this.currentAnimationUrl = null;
+    this.transientClip = clip;
+    this.returnToIdleUrl = this.options.defaultAnimationUrl || '/animations/Idle.fbx';
+    return action;
+  }
+
+  public stopGeneratedAnimation(): void {
+    if (this.transientClip) {
+      this.stopAnimation();
+      void this.playAnimation(this.options.defaultAnimationUrl || '/animations/Idle.fbx');
+    }
+  }
 
   public async playAnimation(
     url: string,
@@ -617,6 +667,7 @@ export class Avatar {
     timeScale: number = 1.0
   ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm) return null;
+    const requestId = ++this.animationRequestId;
 
     // If identical animation is already running, just continue playing seamlessly!
     if (this.currentAnimationUrl === url && this.currentAction && this.currentAction.isRunning()) {
@@ -628,23 +679,14 @@ export class Avatar {
       return this.currentAction;
     }
 
-    if (!this.mixer) {
-      this.mixer = new THREE.AnimationMixer(this.vrm.scene);
-      this.boundMixerFinishedListener = (e: { action: THREE.AnimationAction }) => {
-        if (this.returnToIdleUrl && this.currentAction === e.action) {
-          const idle = this.returnToIdleUrl;
-          this.returnToIdleUrl = null;
-          this.playAnimation(idle, true, 0.6);
-        }
-      };
-      this.mixer.addEventListener('finished', this.boundMixerFinishedListener);
-    }
+    this.ensureAnimationMixer();
 
     try {
       const clip = await loadMixamoAnimation(url, this.vrm);
-      if (!this.vrm || !this.mixer) {
+      if (!this.vrm || !this.mixer || requestId !== this.animationRequestId) {
         return null;
       }
+      this.releaseTransientClip(crossFadeDuration);
       const action = this.mixer.clipAction(clip);
 
       if (loop) {
@@ -669,6 +711,7 @@ export class Avatar {
       this.currentAnimationUrl = url;
       return action;
     } catch (err) {
+      if (requestId !== this.animationRequestId) return null;
       console.error(`Failed to play animation ${url}:`, err);
       const fallbackUrl = this.options.defaultAnimationUrl || '/animations/Idle.fbx';
       if (url !== fallbackUrl) {
@@ -680,6 +723,8 @@ export class Avatar {
   }
 
   public stopAnimation(): void {
+    this.animationRequestId++;
+    this.releaseTransientClip(0.3);
     this.returnToIdleUrl = null;
     if (this.currentAction) {
       this.currentAction.fadeOut(0.3);
@@ -2387,6 +2432,8 @@ export class Avatar {
   }
 
   public dispose(): void {
+    this.animationRequestId++;
+    this.releaseTransientClip(0);
     this.morphTargetPreview?.dispose();
     this.morphTargetPreview = null;
     this.faceOverlayEffect?.dispose();
@@ -2428,6 +2475,8 @@ export class Avatar {
     this.shaderController = null;
 
     if (this.mixer) {
+      if (this.boundMixerFinishedListener) this.mixer.removeEventListener('finished', this.boundMixerFinishedListener);
+      this.boundMixerFinishedListener = null;
       this.mixer.stopAllAction();
       this.mixer = null;
     }

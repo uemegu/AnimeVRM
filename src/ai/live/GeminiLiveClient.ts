@@ -8,6 +8,7 @@ export interface GeminiLiveConfig {
   model?: string; // e.g. "gemini-3.8-live", "gemini-3.8-live-extended-thinking", "gemini-2.0-flash-exp"
   voiceName?: string; // e.g. "Aoede", "Kore", "Puck", "Charon", etc. (30 official prebuilt voices)
   systemPrompt?: string;
+  ardyMotionEnabled?: boolean;
 }
 
 export interface ToolCallItem {
@@ -22,6 +23,7 @@ export interface GeminiLiveCallbacks {
   onAudioData?: (pcmData: Int16Array, sampleRate: number) => void;
   onTextChunk?: (text: string) => void;
   onInterrupted?: () => void;
+  onToolCallCancelled?: (ids: string[]) => void;
   onTurnComplete?: () => void;
   onToolCall?: (tool: ToolCallItem) => Promise<Record<string, any> | void> | Record<string, any> | void;
   onError?: (error: Error | Event) => void;
@@ -44,9 +46,23 @@ const DEFAULT_SYSTEM_PROMPT = `あなたの名前は「アオイ」です。
 【表情とモーションのツール呼び出し】
 会話の文脈や感情の変化に合わせて、積極的にツール（関数）を呼び出してください：
 - 表情を変更したいときは setExpression(expression: "neutral"|"happy"|"angry"|"sad"|"relaxed"|"surprised") を呼び出します。
+発話と同時に自然にモーションや表情を組み合わせて表現してください。`;
+
+const LEGACY_MOTION_PROMPT = `
 - 挨拶やお辞儀、リアクションなどの動作を行いたいときは setMotion(motion: "greeting"|"bow"|"acknowledge"|"dismiss"|"salute"|"excited"|"angry"|"idle") を呼び出します。
 - より複雑な動き（例: 歩きながら挨拶する、髪をかきあげる、左右を向く等）を表現したいときは composeMotion(duration, layers) を呼び出します。
-発話と同時に自然にモーションや表情を組み合わせて表現してください。`;
+`;
+
+const ARDY_MOTION_PROMPT = `
+【ardy-mini による動作生成】
+各応答に、会話や感情に合った動きを説明する短い英語の文章を追加してください。
+文章は音声で読み上げず、必ず generateArdyMotion(prompt, duration) の引数として応答に含めます。
+応答の最初に一度だけ呼び出し、日本語での発話はそのまま続けてください。同じ応答で再度生成しないでください。
+prompt は "A person ..." で始まる、主語・動作・身体の部位が明確な自然な英語の1〜2文です。
+挨拶例: "A person stands in place and gently waves their right hand in greeting."
+説明例: "A person stands in place and gestures gently with both hands while talking."
+基本はその場に立った自然な身振りにし、ユーザーが頼んだときに動作を変えてください。感情だけでなく身体の動きを具体的に書きます。
+duration は2〜8秒（通常4秒）。生成指示は会話欄に表示されます。生成が失敗したときも会話は続け、成功したと偽らないでください。`;
 
 export class GeminiLiveClient {
   private ws: WebSocket | null = null;
@@ -163,11 +179,13 @@ export class GeminiLiveClient {
     const rawModel = (this.config.model || 'gemini-3.8-live').trim();
     const model = rawModel.startsWith('models/') ? rawModel : `models/${rawModel}`;
     const voiceName = (this.config.voiceName || 'Aoede').trim();
-    const systemPrompt = this.config.systemPrompt || DEFAULT_SYSTEM_PROMPT;
+    const systemPrompt = (this.config.systemPrompt || DEFAULT_SYSTEM_PROMPT) +
+      (this.config.ardyMotionEnabled ? ARDY_MOTION_PROMPT : LEGACY_MOTION_PROMPT);
 
     const setupPayload = {
       setup: {
         model,
+        outputAudioTranscription: {},
         generationConfig: {
           responseModalities: ['AUDIO'],
           speechConfig: {
@@ -184,6 +202,18 @@ export class GeminiLiveClient {
         tools: [
           {
             functionDeclarations: [
+              ...(this.config.ardyMotionEnabled ? [{
+                name: 'generateArdyMotion',
+                description: 'Generate and play avatar motion with ardy-mini from an English motion description. Call once at the start of each spoken response. Returns immediately while generation runs.',
+                parameters: {
+                  type: 'OBJECT',
+                  properties: {
+                    prompt: { type: 'STRING', description: 'One or two English sentences describing physical motion, starting with A person. Maximum 512 characters.' },
+                    duration: { type: 'NUMBER', description: 'Motion length in seconds, 2–8. Default 4.' },
+                  },
+                  required: ['prompt'],
+                },
+              }] : []),
               {
                 name: 'setExpression',
                 description: 'アバターの表情を変更します。感情に合わせて呼び出してください。',
@@ -255,7 +285,7 @@ export class GeminiLiveClient {
                   required: ['duration', 'layers'],
                 },
               },
-            ],
+            ].filter((tool) => !this.config.ardyMotionEnabled || !['setMotion', 'composeMotion'].includes(tool.name)),
           },
         ],
       },
@@ -265,6 +295,9 @@ export class GeminiLiveClient {
   }
 
   private async handleServerMessage(msg: any): Promise<void> {
+    if (Array.isArray(msg.toolCallCancellation?.ids)) {
+      this.callbacks.onToolCallCancelled?.(msg.toolCallCancellation.ids);
+    }
     // 1. Setup complete
     if (msg.setupComplete || msg.setupComplete !== undefined) {
       this.isSetupComplete = true;
