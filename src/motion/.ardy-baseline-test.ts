@@ -6,34 +6,12 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { MotionEngine, sources, masks, jointNames, newLayer, validateRecipe, validateSaved, totalDuration, type Recipe, type SavedMotion } from './engine';
 import { basics } from './basics';
 import { exportFBX } from './fbx';
-import { MIXAMO_VRM_BONES } from './rig';
-import { createArdySavedMotion } from './createArdySavedMotion';
-import { ArdyMotionService, ARDY_MODEL_TERMS_URL, type ArdyMotionState } from '../ai/motion/ardy/ArdyMotionService';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#motion-app')!;
 app.innerHTML = `
 <header><a class="brand" href="${import.meta.env.BASE_URL}"><span class="mark">m</span> Motion Mixer <small>動きを、重ねよう。</small></a><div class="header-actions"><button id="import">レシピを開く</button><button id="save">レシピ保存</button><button id="export" class="primary" disabled>↓ FBXを書き出す</button></div></header>
-<main><aside class="library"><div class="eyebrow">01 / MOTION LIBRARY</div><h2>動作を選ぶ</h2><p>クリックして、動きをひとつ追加。</p><input id="search" placeholder="動作を検索…" aria-label="動作を検索"><select id="category" aria-label="動作の分類"><option value="all">すべての動作</option><option value="motion">既存モーション</option><option value="basic">基本動作</option><option value="saved">自分の動作</option></select><button id="add-joint" class="library-save">＋ 関節を自由に曲げる</button><button id="add-library" class="library-save">＋ 今の合成を動作として保存</button><details id="ardy-generator" class="motion-category ardy-generator">
-  <summary>AIで動作を生成 <span>ardy-mini</span></summary>
-  <div class="ardy-content">
-    <p>英語で身体の動きを指定して、今の合成に追加します。生成した素材は「自分の動作」で再利用できます。</p>
-    <p class="ardy-requirements">WebGPUが必要です。初回は約653〜685 MiBをダウンロードし、端末内で生成します。<a href="${ARDY_MODEL_TERMS_URL}" target="_blank" rel="noopener noreferrer">モデル利用条件</a></p>
-    <div class="ardy-model-actions"><button id="ardy-load" type="button">モデルを読み込む</button><button id="ardy-unload" type="button" disabled>解放</button></div>
-    <form id="ardy-form">
-      <label for="ardy-prompt">動作の説明（英語）</label>
-      <textarea id="ardy-prompt" rows="5" maxlength="512" required>A person stands in place and slowly raises their right forearm to chest height. Their left arm stays lowered.</textarea>
-      <small>「喜ぶ」などの感情だけでなく、部位・方向・動きを具体的に。複雑な動きは短い動作に分けて生成してください。</small>
-      <label for="ardy-name">素材の名前（任意）</label><input id="ardy-name" maxlength="60" placeholder="例：右手を胸の高さに上げる">
-      <div class="ardy-options"><label>動作の長さ <span><input id="ardy-duration" type="number" min="2" max="8" step="0.5" value="4" required> 秒</span></label>
-      <label>適用部位 <select id="ardy-mask">${masks.map(mask => `<option>${mask}</option>`).join('')}</select></label></div>
-      <label for="ardy-placement">追加する位置</label><select id="ardy-placement"><option value="current">再生位置に重ねる</option><option value="end">本編の後ろに続ける</option></select>
-      <div class="ardy-generate-actions"><button id="ardy-generate" class="primary" type="submit" disabled>生成して合成</button><button id="ardy-cancel" type="button" hidden>キャンセル</button></div>
-      <small>指の形は、生成後に「右手・手首」「左手・手首」の動作を重ねて指定できます。</small>
-    </form>
-    <p id="ardy-status" role="status" aria-live="polite">モデル未読込</p>
-  </div>
-</details><div id="library"></div><div class="hint">✦ 自由にアレンジ<br>既存モーションと基本ポーズを組み合わせます。髪をかきあげる動作は近似ポーズです。</div></aside>
+<main><aside class="library"><div class="eyebrow">01 / MOTION LIBRARY</div><h2>動作を選ぶ</h2><p>クリックして、動きをひとつ追加。</p><input id="search" placeholder="動作を検索…" aria-label="動作を検索"><select id="category" aria-label="動作の分類"><option value="all">すべての動作</option><option value="motion">既存モーション</option><option value="basic">基本動作</option><option value="saved">自分の動作</option></select><button id="add-joint" class="library-save">＋ 関節を自由に曲げる</button><button id="add-library" class="library-save">＋ 今の合成を動作として保存</button><div id="library"></div><div class="hint">✦ 自由にアレンジ<br>既存モーションと基本ポーズを組み合わせます。髪をかきあげる動作は近似ポーズです。</div></aside>
 <section class="workspace"><div class="preview-pane"><div class="stage-head"><div><div class="eyebrow">LIVE PREVIEW</div><h1>小さな動作から、ひとつの表現へ。</h1></div><label class="toggle"><input id="skeleton" type="checkbox"> 骨格表示</label></div><div id="stage"><div class="stage-badge">● <span id="model-state">モデルを準備中</span></div><div class="stage-help">ドラッグで回転 · スクロールでズーム</div></div><div class="transport"><button id="play" class="play" disabled aria-label="再生">▶</button><button id="rewind" aria-label="先頭へ">↤</button><output id="time">0.00 / 6.00 s</output><input id="seek" type="range" min="0" max="6" step="0.001" value="0" aria-label="再生位置"><label>長さ <input id="duration" type="number" min="0.5" max="60" step="0.5" value="6"> 秒</label><select id="fps" aria-label="出力FPS"><option>24</option><option selected>30</option><option>60</option></select><span>fps</span></div>
 </div><div class="editor-pane"><div class="loop-settings"><label><input id="global-loop" type="checkbox"> 全体をループ</label><label>最初の姿勢につなぐ時間 <input id="transition" type="number" min="0" max="10" step="0.1" value="1"> 秒</label><output id="total-length"></output><small>本編の後ろに戻り動作を追加。FBXにも含まれます。</small></div><div class="composition"><div class="composition-head"><div><div class="eyebrow">02 / COMPOSITION</div><h2>動きを重ねる <span id="count">0</span></h2></div><div class="presets"><span>まずは試す</span><button data-preset="greet">歩きながら挨拶</button><button data-preset="bow">丁寧なお辞儀</button><button data-preset="hair">髪をかきあげる</button><button data-preset="metronome">左右に2秒ずつ</button></div></div><p class="description">下のカードほど優先。重なった部位は「強さ」でブレンドします。</p><div id="layers"></div></div></div></section></main><p id="storage-warning" role="alert" hidden></p><footer><span id="status" role="status" aria-live="polite">モーションを読み込んでいます…</span><span>Mixamo skeleton · Binary FBX 7.4 · ローカル処理</span></footer><input id="file" type="file" accept=".json" hidden><dialog id="save-dialog"><form id="save-form"><h2 id="save-title">合成を動作として保存</h2><p>保存した動作は、別の動作に重ねて再利用できます。</p><label>動作の名前<input id="motion-name" maxlength="60" required placeholder="例：挨拶しながら首を傾ける"></label><p id="save-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-save">キャンセル</button><button type="submit" class="primary">保存する</button></div></form></dialog>`;
 const $ = <E extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as E;
@@ -49,85 +27,14 @@ const status = (message: string) => { $('status').textContent = message; };
 const nameOf = (key: string) => escapeHTML(engine.custom.get(key)?.name ?? sources.find(s => s[0] === key)?.[1] ?? key);
 const persist = () => { try { localStorage.setItem('motion-mixer-v1', JSON.stringify(bundle())); $('storage-warning').hidden = true; } catch { $('storage-warning').hidden = false; $('storage-warning').textContent = '自動保存できませんでした。ブラウザの保存容量を確認するか、レシピ保存でファイルに退避してください。'; } };
 function download(data: BlobPart, name: string, type: string) { const url = URL.createObjectURL(new Blob([data], { type })); const a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 30000); }
-async function action(fn: () => Promise<void>) { if (busy || !ready) return; busy = true; renderArdyControls(); $('export').setAttribute('disabled', ''); try { await fn(); } catch (e) { status(`エラー: ${e instanceof Error ? e.message : e}`); } finally { busy = false; renderArdyControls(); $('export').removeAttribute('disabled'); } }
-let ardyState: ArdyMotionState = 'unloaded', ardyDetail = '', ardyNotice = '', ardyLoading = false;
-let ardyAbort: AbortController | null = null;
-const ardy = new ArdyMotionService((state, detail) => {
-  ardyState = state; ardyDetail = detail ?? ''; renderArdyControls();
-});
-function renderArdyControls() {
-  const stateLabels = { unloaded: 'モデル未読込', loading: 'モデル読込中', ready: '生成できます', generating: 'モーション生成中', error: 'モデルエラー' };
-  $<HTMLButtonElement>('ardy-load').disabled = ardyLoading || busy || ardy.ready;
-  $<HTMLButtonElement>('ardy-unload').disabled = ardyLoading || busy || !ardy.ready;
-  $<HTMLButtonElement>('ardy-generate').disabled = !ready || busy || ardyLoading || !ardy.ready;
-  $('ardy-cancel').hidden = !ardyAbort;
-  $<HTMLButtonElement>('ardy-cancel').disabled = ardyAbort?.signal.aborted ?? false;
-  $('ardy-form').querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea').forEach(input => input.disabled = !!ardyAbort);
-  $('ardy-status').textContent = ardyNotice || `${stateLabels[ardyState]}${ardyDetail ? ` — ${ardyDetail}` : ''}`;
-}
-$('ardy-load').onclick = async () => {
-  if (ardyLoading || busy) return;
-  ardyLoading = true; ardyNotice = ''; renderArdyControls();
-  try { await ardy.initialize(); }
-  catch (error) { ardyNotice = `読込失敗: ${error instanceof Error ? error.message : String(error)}`; }
-  finally { ardyLoading = false; renderArdyControls(); }
-};
-$('ardy-unload').onclick = () => { if (!busy && !ardyLoading) { ardyNotice = ''; ardy.dispose(); } };
-$('ardy-cancel').onclick = () => { ardyAbort?.abort(); ardyNotice = '生成をキャンセルしています…'; renderArdyControls(); };
-$('ardy-form').onsubmit = event => {
-  event.preventDefault();
-  void action(async () => {
-    ardyNotice = '';
-    const prompt = $<HTMLTextAreaElement>('ardy-prompt').value.trim();
-    const duration = Number($<HTMLInputElement>('ardy-duration').value);
-    const name = $<HTMLInputElement>('ardy-name').value.trim() || `ardy-mini: ${prompt}`.slice(0, 60);
-    const mask = $<HTMLSelectElement>('ardy-mask').value;
-    const start = $<HTMLSelectElement>('ardy-placement').value === 'end' ? recipe.duration : Math.min(time, recipe.duration);
-    const abort = new AbortController(); ardyAbort = abort;
-    const started = performance.now(); renderArdyControls();
-    try {
-      if (!ardy.ready) throw new Error('先にモデルを読み込んでください。');
-      if (!prompt || prompt.length > 512) throw new Error('英語の動作説明を1〜512文字で入力してください。');
-      if (!Number.isFinite(duration) || duration < 2 || duration > 8) throw new Error('動作の長さは2〜8秒で指定してください。');
-      if (recipe.layers.length >= 32) throw new Error('動作は32個まで追加できます。');
-      if (engine.custom.size >= 80) throw new Error('保存動作は80個までです。不要な素材を削除してください。');
-      if (start + duration > 60) throw new Error('本編は60秒までです。再生位置を手前へ移動してください。');
-      const result = await ardy.generate(prompt, duration, abort.signal);
-      abort.signal.throwIfAborted();
-      const motion = createArdySavedMotion(result, engine, name);
-      validateSaved([motion]);
-      // Existing cards can still be copied or edited while the worker is running.
-      if (recipe.layers.length >= 32) throw new Error('動作は32個まで追加できます。');
-      if (start + motion.duration > 60) throw new Error('生成結果を追加すると本編が60秒を超えます。再生位置を手前へ移動してください。');
-      engine.registerSaved(motion);
-      const layer = { ...newLayer(motion.id, engine, motion.duration), mask, start, loop: false };
-      recipe.layers.push(layer); recipe.duration = Math.max(recipe.duration, start + motion.duration);
-      selected = layer.id; solo = null; time = start; playing = true; syncPlay();
-      categoryOpen.set('自分の動作', true);
-      library(); render();
-      try { localStorage.setItem('motion-mixer-library-v1', JSON.stringify([...engine.custom.values()])); }
-      catch {
-        $('storage-warning').hidden = false;
-        $('storage-warning').textContent = '生成した動作をライブラリに自動保存できませんでした。レシピ保存でファイルに退避してください。';
-      }
-      ardyNotice = `${((performance.now() - started) / 1000).toFixed(2)}秒で生成・追加しました。カードで部位や強さを調整できます。`;
-      status(`「${motion.name}」を${start.toFixed(2)}秒の位置に追加しました。`);
-    } catch (error) {
-      if (abort.signal.aborted) { ardyNotice = '生成をキャンセルしました。'; status(ardyNotice); }
-      else { ardyNotice = `生成失敗: ${error instanceof Error ? error.message : String(error)}`; throw error; }
-    } finally { ardyAbort = null; renderArdyControls(); }
-  });
-};
-window.addEventListener('pagehide', () => { ardyAbort?.abort(); ardy.dispose(); });
-renderArdyControls();
-
+async function action(fn: () => Promise<void>) { if (busy || !ready) return; busy = true; $('export').setAttribute('disabled', ''); try { await fn(); } catch (e) { status(`エラー: ${e instanceof Error ? e.message : e}`); } finally { busy = false; $('export').removeAttribute('disabled'); } }
 function library() {
   const query = $<HTMLInputElement>('search').value.toLowerCase(), category = $<HTMLSelectElement>('category').value;
   const items = [...sources, ...[...engine.custom.values()].map(m => [m.id, m.name, m.mask])];
   const filtered = items.filter(s => `${s[0]} ${s[1]}`.toLowerCase().includes(query) && (category === 'all' || (s[0].startsWith('saved:') ? 'saved' : s[0].startsWith('@') ? 'basic' : 'motion') === category));
   const groupOf = (s: string[]) => s[0].startsWith('saved:') ? '自分の動作' : !s[0].startsWith('@') ? '全身モーション' : s[2].startsWith('右手') ? '右手・手首' : s[2].startsWith('左手') ? '左手・手首' : s[2];
   const groups = ['全身モーション', '全身', '頭', '体幹', '両肩', '右肩', '左肩', '右腕', '左腕', '右手・手首', '左手・手首', '下半身', '右脚', '左脚', '自分の動作'];
-  $('library').innerHTML = groups.map(group => { const rows = filtered.filter(s => groupOf(s) === group); if (!rows.length) return ''; return `<details class="motion-category" data-group="${group}" ${query || categoryOpen.get(group) === true ? 'open' : ''}><summary>${group}<span>${rows.length}</span></summary><div class="category-items">` + rows.map((s, index) => `<div class="library-row"><button class="motion-card" data-source="${s[0]}"><span class="motion-icon">${s[0].startsWith('saved:') ? '◇' : s[0].startsWith('@') ? '✦' : ['↟', '↗', '≈', '⌁'][index % 4]}</span><span><b>${escapeHTML(s[1])}</b><small>${s[0].startsWith('saved:') ? '自分の動作' : s[0].startsWith('@') ? '基本動作' : 'モーション'} · ${s[2]}</small></span><span class="add">＋</span></button>${s[0].startsWith('saved:') ? `<div class="saved-actions"><button data-rename="${s[0]}" aria-label="名前を変更">名前</button><button data-remove="${s[0]}" aria-label="保存動作を削除">削除</button></div>` : ''}</div>`).join('') + '</div></details>'; }).join('');
+  $('library').innerHTML = groups.map(group => { const rows = filtered.filter(s => groupOf(s) === group); if (!rows.length) return ''; return `<details class="motion-category" data-group="${group}" ${query || categoryOpen.get(group) !== false ? 'open' : ''}><summary>${group}<span>${rows.length}</span></summary><div class="category-items">` + rows.map((s, index) => `<div class="library-row"><button class="motion-card" data-source="${s[0]}"><span class="motion-icon">${s[0].startsWith('saved:') ? '◇' : s[0].startsWith('@') ? '✦' : ['↟', '↗', '≈', '⌁'][index % 4]}</span><span><b>${escapeHTML(s[1])}</b><small>${s[0].startsWith('saved:') ? '自分の動作' : s[0].startsWith('@') ? '基本動作' : 'モーション'} · ${s[2]}</small></span><span class="add">＋</span></button>${s[0].startsWith('saved:') ? `<div class="saved-actions"><button data-rename="${s[0]}" aria-label="名前を変更">名前</button><button data-remove="${s[0]}" aria-label="保存動作を削除">削除</button></div>` : ''}</div>`).join('') + '</div></details>'; }).join('');
   $('library').querySelectorAll<HTMLDetailsElement>('.motion-category').forEach(details => details.ontoggle = () => { if (!query) categoryOpen.set(details.dataset.group!, details.open); });
 }
 $('add-joint').onclick = () => void action(async () => {
@@ -328,11 +235,14 @@ const grid = new T.GridHelper(20, 40, 0xb8c3b7, 0xd6dbd2); grid.position.y = -.0
 const pad = new T.Mesh(new T.CylinderGeometry(.78, .78, .025, 80), new T.MeshStandardMaterial({ color: 0xdfe5db, roughness: 1 })); pad.position.y = -.03; scene.add(pad);
 const resize = () => { renderer.setSize(stage.clientWidth, stage.clientHeight); camera.aspect = stage.clientWidth / stage.clientHeight; camera.updateProjectionMatrix(); }; new ResizeObserver(resize).observe(stage); resize();
 let vrm: VRM | undefined, helper: T.SkeletonHelper;
+const boneMap: Record<string, string> = { Hips: 'hips', Spine: 'spine', Spine1: 'chest', Spine2: 'upperChest', Neck: 'neck', Head: 'head' };
+for (const side of ['Left', 'Right']) for (const [source, target] of Object.entries({ Shoulder: 'Shoulder', Arm: 'UpperArm', ForeArm: 'LowerArm', Hand: 'Hand', UpLeg: 'UpperLeg', Leg: 'LowerLeg', Foot: 'Foot', ToeBase: 'Toes' })) boneMap[side + source] = side.toLowerCase() + target;
+for (const side of ['Left', 'Right']) for (const finger of ['Thumb', 'Index', 'Middle', 'Ring', 'Pinky']) for (let joint = 1; joint <= 3; joint++) boneMap[`${side}Hand${finger}${joint}`] = side.toLowerCase() + (finger === 'Pinky' ? 'Little' : finger) + (finger === 'Thumb' ? ['Metacarpal', 'Proximal', 'Distal'] : ['Proximal', 'Intermediate', 'Distal'])[joint - 1];
 let hipsHeight = 1;
 function syncVRMPose() {
   if (!vrm) return;
   for (const [name, r] of engine.rest) {
-    const target = vrm.humanoid.getNormalizedBoneNode(MIXAMO_VRM_BONES[name]); if (!target) continue;
+    const target = vrm.humanoid.getNormalizedBoneNode(boneMap[name] as VRMHumanBoneName); if (!target) continue;
     target.quaternion.copy(r.node.quaternion).premultiply(r.parentWorld).multiply(r.world.clone().invert());
     if (vrm.meta.metaVersion === '0') { target.quaternion.x *= -1; target.quaternion.z *= -1; }
     if (name === 'Hips') { const ratio = hipsHeight / r.p.y, sign = vrm.meta.metaVersion === '0' ? -1 : 1; target.position.set(r.node.position.x * ratio * sign, r.node.position.y * ratio, r.node.position.z * ratio * sign); }
@@ -354,7 +264,7 @@ async function init() {
     }
   } catch { status('保存レシピを復元できなかったため、新規で開始します'); }
   if (!restored && !recipe.layers.length) { await engine.load('Walking'); recipe.layers = [newLayer('Walking', engine, 6)]; }
-  selected = recipe.layers[0]?.id ?? ''; ready = true; library(); render(); renderArdyControls(); $('play').removeAttribute('disabled'); $('export').removeAttribute('disabled'); status('動作を追加して、オリジナルのモーションを作りましょう');
+  selected = recipe.layers[0]?.id ?? ''; ready = true; library(); render(); $('play').removeAttribute('disabled'); $('export').removeAttribute('disabled'); status('動作を追加して、オリジナルのモーションを作りましょう');
   try {
     const loader = new GLTFLoader(); loader.register(parser => new VRMLoaderPlugin(parser));
     const gltf = await loader.loadAsync(`${import.meta.env.BASE_URL}models/aoi/aoi-school.vrm`); vrm = gltf.userData.vrm as VRM; VRMUtils.rotateVRM0(vrm); scene.add(vrm.scene);
