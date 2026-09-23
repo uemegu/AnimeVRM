@@ -43,6 +43,7 @@ viewerCore.controls.enabled = false;
 const avatarManager = new AvatarManager({
   scene: viewerCore.scene,
   camera: viewerCore.camera,
+  hairShadow: viewerCore.hairShadow.uniforms,
   controls: viewerCore.controls,
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,

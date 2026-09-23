@@ -97,6 +97,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
       id: scenario.characterId,
       modelUrl,
       scene,
+      camera,
     });
     avatarRef.current = avatar;
 

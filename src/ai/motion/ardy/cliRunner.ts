@@ -18,7 +18,7 @@ import { resolveAssetUrl } from '../../../utils/path';
 import { addActingDirection } from './prompt';
 import { renderMotionPreview } from './previewMotion';
 import { fitHandsToAvatar } from './fitHandsToAvatar';
-import { styleMotion, styleSavedHips, validateMotionStyle, type MotionStyle } from './styleMotion';
+import { loopSavedMotion, styleMotion, styleSavedHips, validateMotionStyle, type MotionStyle } from './styleMotion';
 
 export interface QualityGenerationOptions {
   plan: MotionQualityPlan;
@@ -50,6 +50,8 @@ export interface GenerateOptions {
   fitHands?: boolean;
   /** Leg locking and motion size; needs an avatar. */
   style?: MotionStyle;
+  /** Ease the end into the first pose so the motion repeats without a jump. */
+  loop?: boolean;
 }
 
 export interface CandidateSummary {
@@ -87,6 +89,7 @@ class ArdyCliRunner {
   private engine: MotionEngine | null = null;
   private fitHands = true;
   private style: MotionStyle = {};
+  private loop = false;
   public status: ArdyStatus = {
     state: 'unloaded',
     detail: '',
@@ -135,6 +138,7 @@ class ArdyCliRunner {
     const avatar = quality?.vrm ?? (avatarUrl ? (await this.loadAvatar(avatarUrl)).vrm : null);
     this.fitHands = options.fitHands ?? true;
     this.style = options.style ?? {};
+    this.loop = options.loop ?? false;
     validateMotionStyle(this.style);
     if ((this.style.lockLegs || (this.style.amplitude ?? 1) !== 1) && !avatar) throw new Error('--lock-legs and --amplitude need --avatar.');
     if (options.preview && !avatar) throw new Error('Previews need --avatar.');
@@ -207,6 +211,7 @@ class ArdyCliRunner {
       };
       if (polished.status === 'pass' || polished.status === 'needs-review') {
         saved = normalizedClipToMixamo(polished.clip, quality.vrm, this.engine, saved);
+        if (this.loop) saved = loopSavedMotion(saved);
       }
     }
     // Verify the exact exported FBX after importing it through the same retargeter used by gameplay.
@@ -270,9 +275,10 @@ class ArdyCliRunner {
   /** Bake a generated motion onto the editor's Mixamo rig, fitted to the avatar when one is given. */
   private bake(motion: StructuredMotionResult, name: string, avatar: VRM | null): SavedMotion {
     const source = createArdySavedMotion(motion, this.engine!, name);
-    if (!avatar) return source;
-    const saved = normalizedClipToMixamo(this.avatarClip(motion, avatar), avatar, this.engine!, source);
-    return styleSavedHips(saved, this.style, this.engine!.rest.get('Hips')!.p.y);
+    const fitted = avatar
+      ? styleSavedHips(normalizedClipToMixamo(this.avatarClip(motion, avatar), avatar, this.engine!, source), this.style, this.engine!.rest.get('Hips')!.p.y)
+      : source;
+    return this.loop ? loopSavedMotion(fitted) : fitted;
   }
 
   private exportSaved(saved: SavedMotion): ArrayBuffer {

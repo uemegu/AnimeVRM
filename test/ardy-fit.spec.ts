@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
 import { CORE27_JOINT_NAMES, CORE27_SKELETON, type StructuredMotionResult } from '../src/ai/motion/ardy/vendor/motion-data';
 import { fitHandsToAvatar, measureAvatarBody } from '../src/ai/motion/ardy/fitHandsToAvatar';
-import { styleMotion, styleSavedHips } from '../src/ai/motion/ardy/styleMotion';
+import { loopSavedMotion, styleMotion, styleSavedHips } from '../src/ai/motion/ardy/styleMotion';
 import type { SavedMotion } from '../src/motion/engine';
 
 const FRAMES = 4;
@@ -87,10 +87,10 @@ function clip(nodes: Record<string, THREE.Bone>, rotations: Record<string, THREE
 }
 
 /** A source motion that puts the palms at the given positions and keeps its joints where fitting reads them. */
-function motion(rightPalm: [number, number, number], leftPalm: [number, number, number]): StructuredMotionResult {
+function motion(rightPalm: [number, number, number], leftPalm: [number, number, number], extra: Record<string, [number, number, number]> = {}): StructuredMotionResult {
   const joints: Record<string, [number, number, number]> = {
     Hips: [0, 0.95, 0], Spine1: [0, 1.15, 0], Spine3: [0, 1.3, -0.07], Head: [0, 1.67, -0.08],
-    RightHandEnd: rightPalm, LeftHandEnd: leftPalm,
+    RightHandEnd: rightPalm, LeftHandEnd: leftPalm, ...extra,
   };
   const positions = new Float32Array(FRAMES * CORE27_JOINT_NAMES.length * 3);
   for (let frame = 0; frame < FRAMES; frame++) {
@@ -115,9 +115,9 @@ const palmOf = (nodes: Record<string, THREE.Bone>, side: 'right' | 'left') => no
 test('measures each torso region from the mesh bound to its bone, grown by the palm offset', () => {
   const { vrm } = avatar();
   const body = measureAvatarBody(vrm);
-  expect(body.hips.radii.toArray().map(value => Number(value.toFixed(3)))).toEqual([0.15, 0.1, 0.12]);
-  expect(body.chest.bone).toBe('upperChest');
-  expect(body.hips.center.length()).toBeLessThan(1e-6);
+  expect(body.regions.hips.radii.toArray().map(value => Number(value.toFixed(3)))).toEqual([0.15, 0.1, 0.12]);
+  expect(body.regions.chest.bone).toBe('upperChest');
+  expect(body.regions.hips.center.length()).toBeLessThan(1e-6);
 });
 
 test('a palm resting on the source hip is moved out of the avatar hips onto the matching surface', () => {
@@ -142,6 +142,45 @@ test('a palm resting on the source hip is moved out of the avatar hips onto the 
     expect(shoulder.distanceTo(nodes.rightLowerArm.getWorldPosition(new THREE.Vector3()))).toBeCloseTo(0.22, 5);
     // The far-away left hand is untouched.
     expect(nodes.leftUpperArm.quaternion.angleTo(new THREE.Quaternion())).toBeLessThan(1e-6);
+  }
+});
+
+test('hands meeting in front of the body keep ardy-mini\'s side-by-side placement instead of crossing', () => {
+  const { vrm, nodes } = avatar();
+  // Swing both arms forward and inward; on this narrow avatar the palms pass the midline and cross.
+  const inward = (angle: number) => Array(FRAMES).fill(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+  const source = clip(nodes, { rightUpperArm: inward(THREE.MathUtils.degToRad(110)), leftUpperArm: inward(THREE.MathUtils.degToRad(-110)) });
+  pose(vrm, source, 0);
+  expect(palmOf(nodes, 'right').x).toBeGreaterThan(palmOf(nodes, 'left').x);
+
+  // ardy-mini's palms are 8 cm apart with the right hand on the right, far from the torso.
+  const fitted = fitHandsToAvatar(source, motion([-0.04, 1.3, 0.45], [0.04, 1.3, 0.45], { RightHand: [-0.04, 1.3, 0.38], LeftHand: [0.04, 1.3, 0.38] }), vrm);
+  for (let frame = 0; frame < FRAMES; frame++) {
+    pose(vrm, fitted, frame);
+    const right = palmOf(nodes, 'right'), left = palmOf(nodes, 'left');
+    // The gap is scaled by hand size: this avatar's palm sits 0.06 m from the wrist, ardy-mini's 0.07 m.
+    expect(right.x - left.x).toBeCloseTo(-0.08 * 0.06 / 0.07, 3);
+    expect(right.x + left.x).toBeCloseTo(0, 3);
+  }
+});
+
+test('palms pressed together stay a hand\'s thickness apart instead of passing into each other', () => {
+  const { vrm, nodes } = avatar();
+  // Arms forward and slightly inward, each hand turned so its palm faces the other hand.
+  const forward = (angle: number) => Array(FRAMES).fill(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle));
+  const palmInward = Array(FRAMES).fill(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2));
+  const inward = THREE.MathUtils.degToRad(110);
+  const source = clip(nodes, {
+    rightUpperArm: forward(inward), leftUpperArm: forward(-inward), rightHand: palmInward, leftHand: palmInward,
+  });
+  // ardy-mini's palms are only 1 cm apart.
+  const fitted = fitHandsToAvatar(source, motion([-0.005, 1.3, 0.45], [0.005, 1.3, 0.45], { RightHand: [-0.005, 1.3, 0.38], LeftHand: [0.005, 1.3, 0.38] }), vrm);
+  for (let frame = 0; frame < FRAMES; frame++) {
+    pose(vrm, fitted, frame);
+    const right = palmOf(nodes, 'right'), left = palmOf(nodes, 'left');
+    // This avatar has no hand mesh, so the default 2 cm thickness applies.
+    expect(left.x - right.x).toBeCloseTo(0.02, 3);
+    expect(right.x + left.x).toBeCloseTo(0, 3);
   }
 });
 
@@ -182,6 +221,26 @@ test('amplitude scales rotations toward upright with the arms lowered', () => {
   const expected = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), (lowered + 1.2) / 2);
   expect(nodes.leftUpperArm.quaternion.angleTo(expected)).toBeLessThan(1e-5);
   expect(() => styleMotion(source, vrm, { amplitude: 2 })).toThrow(/Amplitude/);
+});
+
+test('a looping motion eases its last half second into the first pose', () => {
+  const times = Array.from({ length: 31 }, (_, frame) => frame / 30);
+  const angles = times.map(time => time * 2);
+  const saved: SavedMotion = {
+    id: 'saved:loop', name: 'loop', duration: 1, mask: '全身', times,
+    tracks: [{
+      bone: 'Hips',
+      positions: times.flatMap(time => [time, 100, 0]),
+      rotations: angles.flatMap(angle => new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle).toArray()),
+    }],
+  };
+  const looped = loopSavedMotion(saved, 0.5).tracks[0];
+  const at = (frame: number) => new THREE.Quaternion().fromArray(looped.rotations, frame * 4);
+  // Untouched before the blend, identical to the first frame at the end.
+  expect(at(10).angleTo(new THREE.Quaternion().fromArray(saved.tracks[0].rotations, 40))).toBeLessThan(1e-6);
+  expect(at(30).angleTo(at(0))).toBeLessThan(1e-6);
+  expect(looped.positions.slice(90, 93)).toEqual([0, 100, 0]);
+  expect(looped.positions[45]).toBeCloseTo(0.5, 6);
 });
 
 test('saved hips follow the style: held at the first height, or scaled around rest', () => {
