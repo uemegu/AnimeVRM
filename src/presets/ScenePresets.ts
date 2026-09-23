@@ -187,6 +187,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#f2f5ff',
       castShadows: false,
       ambient: {
         color: '#c379a8',
@@ -371,6 +372,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#f2f5ff',
       castShadows: false,
       ambient: {
         color: '#776e74',
@@ -554,6 +556,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#ffc58a',
       castShadows: false,
       ambient: {
         color: '#3e407a',
@@ -745,6 +748,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#e6ebf5',
       castShadows: false,
       ambient: {
         color: '#f5f8ff',
@@ -945,6 +949,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       farFogIntensity: 0.12,
     },
     lighting: {
+      hairRingTint: '#b8c4ff',
       castShadows: false,
       ambient: {
         color: '#ffebeb',
@@ -1166,6 +1171,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       farFogIntensity: 0.18,
     },
     lighting: {
+      hairRingTint: '#fff8ee',
       castShadows: false,
       ambient: {
         color: '#ffcbc2',
@@ -1349,6 +1355,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#c4ccff',
       castShadows: false,
       ambient: {
         color: '#ffebeb',
@@ -1544,6 +1551,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       lightingMixFactor: 0,
     },
     lighting: {
+      hairRingTint: '#ffffff',
       castShadows: false,
       ambient: {
         color: '#05070d',

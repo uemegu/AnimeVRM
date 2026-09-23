@@ -7,7 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { HairShadowRenderer } from '../shader/HairShadow';
-import { setHairRingParams } from '../shader/HairRing';
+import { setHairRingParams, setHairRingTint } from '../shader/HairRing';
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { AvatarConfig, DEFAULT_CONFIG } from '../Config';
@@ -975,6 +975,7 @@ export class ViewerCore {
     if (cfg.hairRing) {
       setHairRingParams(cfg.hairRing);
     }
+    setHairRingTint(cfg.lighting.hairRingTint);
 
     if (cfg.lighting.sunShafts) {
       this.godRaysPass.uniforms['uExposure'].value = cfg.lighting.sunShafts.enabled ? cfg.lighting.sunShafts.exposure : 0;

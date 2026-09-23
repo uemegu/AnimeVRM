@@ -3,85 +3,126 @@ import * as THREE from 'three';
 /**
  * 天使の輪（髪の帯状ハイライト）
  *
- * 頭を球とみなし、頭の中心から見た方向（ビュー空間）の上下成分が一定範囲にある所に帯を描く。
- * 髪の実際の法線は毛束ごとにばらつくので、それだけだと帯が細かい筋に割れてしまう。
- * 球の法線を主に使い、実際の法線を少し混ぜて毛束感を出す。
- * 視点が変わると輪も動き、アニメの天使の輪のように頭の丸みに沿った弧になる。
- * 色はライティング後の髪色を白に寄せて明るくした色なので、髪色・時間帯に追従する。
+ * 頭の向きを基準に、頭の中心から一定の高さにある水平な帯を描く。
+ * 頭の向きに追従するので、正面・側面・後ろのどこから見ても頭に対して水平な輪になる。
+ * （カメラ基準や頭を球とみなした角度基準にすると、前後に長い頭では側面から見て輪が斜めになる）
+ * 帯の高さはカメラの仰角で少し動き、下の縁は頭の周りの角度に沿って毛束のようにギザギザにする。
+ * 色はライティング後の髪色を時間帯ごとの色（tint）に寄せた色なので、髪色・時間帯になじむ。
  *
  * パラメータは数値だけなので全アバター・全レンダラーで共有する（HAIR_RING_UNIFORMS）。
+ * 頭の位置と向きだけはアバターごとに持つ（HairRingHeadFrame）。
  */
 
 export interface HairRingParams {
   enabled: boolean;
-  // 帯の中心（頭の中心から見た方向の y 成分。大きいほど頭頂寄り）
-  center: number;
-  // 帯の半幅
+  // 帯の中心の高さ（頭の中心からの距離 m）
+  height: number;
+  // 帯の半幅（m）
   width: number;
-  // 帯の境界のぼかし幅（小さいほどくっきり）
+  // 帯の境界のぼかし幅（m。小さいほどくっきり）
   softness: number;
-  // 左右の端のフェード開始位置（頭の中心から見た方向の |x|）
-  sideFade: number;
-  // 髪色を白に寄せる量（0 = 髪色のまま, 1 = 白）
+  // 輪を出す範囲（頭の面がカメラを向く度合い）。この値から +0.3 までで立ち上がり、
+  // カメラを向いた範囲だけの弧になる（大きいほど輪が短い）
+  facingFade: number;
+  // 髪色を tint に寄せる量（0 = 髪色のまま, 1 = tint）
   lighten: number;
   // 彩度を落とす量（0 = そのまま, 1 = グレー）
   desaturate: number;
   // 輪の濃さ
   strength: number;
-  // 実際の法線を混ぜる量（0 = 完全な球, 1 = 実際の法線のみ）。毛束感が出る
-  strandNormalMix: number;
+  // 実際の法線で帯の縁を揺らす量（m）。毛束感が出る
+  strandJitter: number;
   // 頭ボーンから頭の中心までの高さ（m）
   headCenterOffset: number;
-  // 毛束のギザギザの振れ幅（方向 y の単位）
+  // 下の縁の毛先の長さ（m）。毛先ごとに長さがばらつく
   jagAmplitude: number;
-  // 毛束のギザギザの細かさ（1m あたりの山の数）
-  jagFrequency: number;
+  // 毛先の数（頭一周あたり）
+  jagCount: number;
+  // カメラの仰角で帯を上下させる量（m）。上から見るほど輪が上がる
+  viewShift: number;
 }
 
 export const DEFAULT_HAIR_RING_PARAMS: HairRingParams = {
   enabled: true,
-  center: 0.4,
-  width: 0.05,
-  softness: 0.015,
-  sideFade: 0.55,
-  lighten: 0.35,
+  height: 0.03,
+  width: 0.006,
+  softness: 0.0015,
+  facingFade: 0.6,
+  lighten: 0.3,
   desaturate: 0.2,
-  strength: 1.0,
-  strandNormalMix: 0.4,
+  strength: 0.85,
+  strandJitter: 0.006,
   headCenterOffset: 0.08,
-  jagAmplitude: 0.05,
-  jagFrequency: 90,
+  jagAmplitude: 0.008,
+  jagCount: 48,
+  viewShift: 0.01,
 };
 
 export const HAIR_RING_UNIFORMS = {
   uHairRingEnabled: { value: DEFAULT_HAIR_RING_PARAMS.enabled ? 1 : 0 },
-  uHairRingCenter: { value: DEFAULT_HAIR_RING_PARAMS.center },
+  uHairRingHeight: { value: DEFAULT_HAIR_RING_PARAMS.height },
   uHairRingWidth: { value: DEFAULT_HAIR_RING_PARAMS.width },
   uHairRingSoftness: { value: DEFAULT_HAIR_RING_PARAMS.softness },
-  uHairRingSideFade: { value: DEFAULT_HAIR_RING_PARAMS.sideFade },
+  uHairRingFacingFade: { value: DEFAULT_HAIR_RING_PARAMS.facingFade },
+  uHairRingTint: { value: new THREE.Color('#ffffff') },
   uHairRingLighten: { value: DEFAULT_HAIR_RING_PARAMS.lighten },
   uHairRingDesaturate: { value: DEFAULT_HAIR_RING_PARAMS.desaturate },
   uHairRingStrength: { value: DEFAULT_HAIR_RING_PARAMS.strength },
-  uHairRingStrandNormalMix: { value: DEFAULT_HAIR_RING_PARAMS.strandNormalMix },
+  uHairRingStrandJitter: { value: DEFAULT_HAIR_RING_PARAMS.strandJitter },
   uHairRingHeadCenterOffset: { value: DEFAULT_HAIR_RING_PARAMS.headCenterOffset },
   uHairRingJagAmplitude: { value: DEFAULT_HAIR_RING_PARAMS.jagAmplitude },
-  uHairRingJagFrequency: { value: DEFAULT_HAIR_RING_PARAMS.jagFrequency },
+  uHairRingJagCount: { value: DEFAULT_HAIR_RING_PARAMS.jagCount },
+  uHairRingViewShift: { value: DEFAULT_HAIR_RING_PARAMS.viewShift },
 };
 
 export function setHairRingParams(params: Partial<HairRingParams>): void {
   const u = HAIR_RING_UNIFORMS;
   if (params.enabled !== undefined) u.uHairRingEnabled.value = params.enabled ? 1 : 0;
-  if (params.center !== undefined) u.uHairRingCenter.value = params.center;
+  if (params.height !== undefined) u.uHairRingHeight.value = params.height;
   if (params.width !== undefined) u.uHairRingWidth.value = params.width;
   if (params.softness !== undefined) u.uHairRingSoftness.value = params.softness;
-  if (params.sideFade !== undefined) u.uHairRingSideFade.value = params.sideFade;
+  if (params.facingFade !== undefined) u.uHairRingFacingFade.value = params.facingFade;
   if (params.lighten !== undefined) u.uHairRingLighten.value = params.lighten;
   if (params.desaturate !== undefined) u.uHairRingDesaturate.value = params.desaturate;
   if (params.strength !== undefined) u.uHairRingStrength.value = params.strength;
-  if (params.strandNormalMix !== undefined) u.uHairRingStrandNormalMix.value = params.strandNormalMix;
+  if (params.strandJitter !== undefined) u.uHairRingStrandJitter.value = params.strandJitter;
   if (params.headCenterOffset !== undefined) u.uHairRingHeadCenterOffset.value = params.headCenterOffset;
   if (params.jagAmplitude !== undefined) u.uHairRingJagAmplitude.value = params.jagAmplitude;
-  if (params.jagFrequency !== undefined) u.uHairRingJagFrequency.value = params.jagFrequency;
+  if (params.jagCount !== undefined) u.uHairRingJagCount.value = params.jagCount;
+  if (params.viewShift !== undefined) u.uHairRingViewShift.value = params.viewShift;
+}
+
+/**
+ * 輪を寄せる色（sRGB）。時間帯のライト設定（lighting.hairRingTint）から設定する。
+ * 昼は白寄り、夕方は暖色にすると、色調補正後も背景になじむ。
+ */
+export function setHairRingTint(hex: string | undefined): void {
+  HAIR_RING_UNIFORMS.uHairRingTint.value.set(hex ?? '#ffffff');
+}
+
+// アバターごとの頭の位置と向き（ワールド座標）
+export interface HairRingHeadFrame {
+  position: { value: THREE.Vector3 };
+  up: { value: THREE.Vector3 };
+  forward: { value: THREE.Vector3 };
+}
+
+export function createHairRingHeadFrame(): HairRingHeadFrame {
+  return {
+    position: { value: new THREE.Vector3() },
+    up: { value: new THREE.Vector3(0, 1, 0) },
+    forward: { value: new THREE.Vector3(0, 0, 1) },
+  };
+}
+
+const tmpQuat = new THREE.Quaternion();
+
+// 頭ボーンから位置と向きを更新する（髪メッシュの描画直前に呼ぶ）
+export function updateHairRingHeadFrame(frame: HairRingHeadFrame, head: THREE.Object3D): void {
+  head.getWorldPosition(frame.position.value);
+  head.getWorldQuaternion(tmpQuat);
+  frame.up.value.set(0, 1, 0).applyQuaternion(tmpQuat);
+  frame.forward.value.set(0, 0, 1).applyQuaternion(tmpQuat);
 }
 
 /**
@@ -92,11 +133,13 @@ export function setHairRingParams(params: Partial<HairRingParams>): void {
 export function injectHairRing(
   shader: THREE.WebGLProgramParametersWithUniforms,
   target: { value: number },
-  headBone: { value: THREE.Vector3 }
+  head: HairRingHeadFrame
 ): void {
   Object.assign(shader.uniforms, HAIR_RING_UNIFORMS);
   shader.uniforms.uHairRingTarget = target;
-  shader.uniforms.uHairRingHeadBone = headBone;
+  shader.uniforms.uHairRingHeadPosition = head.position;
+  shader.uniforms.uHairRingHeadUp = head.up;
+  shader.uniforms.uHairRingHeadForward = head.forward;
 
   // 直接光の陰影（getShading の結果）を記録し、影側では輪を消す
   shader.fragmentShader = shader.fragmentShader.replace(
@@ -113,38 +156,66 @@ export function injectHairRing(
     /* glsl */ `
     uniform float uHairRingTarget;
     uniform float uHairRingEnabled;
-    uniform float uHairRingCenter;
+    uniform float uHairRingHeight;
     uniform float uHairRingWidth;
     uniform float uHairRingSoftness;
-    uniform float uHairRingSideFade;
+    uniform float uHairRingFacingFade;
+    uniform vec3 uHairRingTint;
     uniform float uHairRingLighten;
     uniform float uHairRingDesaturate;
     uniform float uHairRingStrength;
-    uniform float uHairRingStrandNormalMix;
+    uniform float uHairRingStrandJitter;
     uniform float uHairRingHeadCenterOffset;
-    uniform vec3 uHairRingHeadBone;
     uniform float uHairRingJagAmplitude;
-    uniform float uHairRingJagFrequency;
+    uniform float uHairRingJagCount;
+    uniform float uHairRingViewShift;
+    uniform vec3 uHairRingHeadPosition;
+    uniform vec3 uHairRingHeadUp;
+    uniform vec3 uHairRingHeadForward;
+
+    float hairRingHash(float x) {
+      return fract(sin(x * 127.1) * 43758.5453);
+    }
 
     vec3 applyHairRing(vec3 col, vec3 viewNormal) {
       if (uHairRingEnabled < 0.5 || uHairRingTarget < 0.5) return col;
 
-      // 頭の中心から見た方向（ビュー空間）。実際の法線を少し混ぜて毛束感を出す
-      vec3 headCenter = uHairRingHeadBone + vec3(0.0, uHairRingHeadCenterOffset, 0.0);
-      vec3 headView = (viewMatrix * vec4(headCenter, 1.0)).xyz;
-      vec3 sphereNormal = normalize(-vViewPosition - headView);
-      vec3 n = normalize(mix(sphereNormal, normalize(viewNormal), uHairRingStrandNormalMix));
-      // 毛束に沿ったギザギザ（画面の横方向に三角波）
-      float jag = abs(fract(-vViewPosition.x * uHairRingJagFrequency) * 2.0 - 1.0) * uHairRingJagAmplitude;
-      float lower = uHairRingCenter - uHairRingWidth + jag;
-      float upper = uHairRingCenter + uHairRingWidth + jag * 0.5;
-      float band = smoothstep(lower - uHairRingSoftness, lower, n.y)
-                 * (1.0 - smoothstep(upper, upper + uHairRingSoftness, n.y));
-      float side = 1.0 - smoothstep(uHairRingSideFade, uHairRingSideFade + 0.25, abs(n.x));
-      float lit = smoothstep(0.2, 0.6, hairRingShading);
-      float ring = band * side * lit * uHairRingStrength;
+      // 頭の座標系（ビュー空間）
+      vec3 upV = normalize((viewMatrix * vec4(uHairRingHeadUp, 0.0)).xyz);
+      vec3 fwdV = normalize((viewMatrix * vec4(uHairRingHeadForward, 0.0)).xyz);
+      vec3 rightV = normalize(cross(upV, fwdV));
+      vec3 centerV = (viewMatrix * vec4(uHairRingHeadPosition + uHairRingHeadUp * uHairRingHeadCenterOffset, 1.0)).xyz;
 
-      vec3 ringCol = mix(col, vec3(1.0), uHairRingLighten);
+      vec3 viewPos = -vViewPosition;
+      vec3 rel = viewPos - centerV;
+      vec3 n = normalize(viewNormal);
+
+      // 頭に対する高さ。実際の法線で少し揺らして毛束感を出す
+      float h = dot(rel, upV) + dot(n, upV) * uHairRingStrandJitter;
+
+      // 帯の中心はカメラの仰角で少し動かす（カメラはビュー空間の原点）
+      float elevation = dot(normalize(-centerV), upV);
+      float center = uHairRingHeight + elevation * uHairRingViewShift;
+
+      // 下の縁の毛先（頭の周りの角度で区切り、毛先ごとに長さをばらつかせる。頭と一緒に回る）
+      float azimuth = atan(dot(rel, rightV), dot(rel, fwdV));
+      float t = azimuth / 6.2831853 * uHairRingJagCount;
+      float spike = 1.0 - abs(fract(t) * 2.0 - 1.0);
+      float tip = spike * mix(0.25, 1.0, hairRingHash(floor(t))) * uHairRingJagAmplitude;
+
+      float lower = center - uHairRingWidth - tip;
+      float upper = center + uHairRingWidth;
+      float band = smoothstep(lower - uHairRingSoftness, lower, h)
+                 * (1.0 - smoothstep(upper, upper + uHairRingSoftness, h));
+
+      // カメラを向いた範囲だけに出す（輪の両端は途切れる）
+      float facing = dot(normalize(rel), normalize(-viewPos));
+      float fade = smoothstep(uHairRingFacingFade, uHairRingFacingFade + 0.3, facing);
+
+      float lit = smoothstep(0.2, 0.6, hairRingShading);
+      float ring = band * fade * lit * uHairRingStrength;
+
+      vec3 ringCol = mix(col, uHairRingTint, uHairRingLighten);
       float luma = dot(ringCol, vec3(0.2126, 0.7152, 0.0722));
       ringCol = mix(ringCol, vec3(luma), uHairRingDesaturate);
       return mix(col, ringCol, clamp(ring, 0.0, 1.0));
