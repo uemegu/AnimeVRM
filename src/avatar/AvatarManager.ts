@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Avatar, YandereOptions, BlushOptions } from '../Avatar';
 import { AvatarConfig } from '../Config';
+import type { HairShadowUniforms } from '../shader/HairShadow';
 import { EffectTextManager } from '../effects/text';
 import { WindController } from '../wind/WindController';
 import { TypographyOverlay } from '../animation/TypographyOverlay';
@@ -51,11 +52,14 @@ export class AvatarManager {
     getConfig: () => AvatarConfig;
     liveChatController?: GeminiLiveChatController;
     renderer?: THREE.WebGLRenderer;
+    // 前髪の影（ViewerCore の HairShadowRenderer.uniforms）
+    hairShadow?: HairShadowUniforms;
     onEnterTransparent: () => void;
     onExitTransparent: () => void;
     onAvatarLoaded?: (avatar: Avatar) => void;
   }) {
     this.renderer = options.renderer ?? null;
+    this.hairShadow = options.hairShadow;
     this.scene = options.scene;
     this.camera = options.camera;
     this.controls = options.controls;
@@ -106,6 +110,7 @@ export class AvatarManager {
   }
 
   public renderer: THREE.WebGLRenderer | null = null;
+  public hairShadow: HairShadowUniforms | undefined;
 
   public setRenderer(renderer: THREE.WebGLRenderer): void {
     this.renderer = renderer;
@@ -147,6 +152,7 @@ export class AvatarManager {
       enableBreathing: true,
       effectTextManager: this.sharedEffectTextManager,
       renderer: this.renderer ?? undefined,
+      hairShadow: this.hairShadow,
       onProgress: (progress) => {
         const el = document.getElementById('progress-text');
         if (el) el.textContent = `${progress.toFixed(0)}%`;

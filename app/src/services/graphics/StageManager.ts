@@ -14,6 +14,7 @@ import { GodRaysShader } from './postprocessing/GodRaysShader';
 import { SunEffect } from './postprocessing/SunEffect';
 import { SkyBackground } from './scene/SkyBackground';
 import { Avatar } from './avatar/Avatar';
+import { HairShadowRenderer } from './shader/HairShadow';
 import { AudioLipSync } from '../audio/AudioLipSync';
 
 export interface StageOptions {
@@ -37,8 +38,12 @@ export class StageManager {
   private cinematicAnimePass: ShaderPass;
   private smaaPass: SMAAPass;
 
+  // 前髪の影（髪の深度マスク）
+  private hairShadow: HairShadowRenderer;
+
   // 光源・環境・空
   private directionalLight: THREE.DirectionalLight;
+  private rimLight: THREE.DirectionalLight;
   private ambientLight: THREE.AmbientLight;
   private skyBackground: SkyBackground;
   private sunEffect: SunEffect;
@@ -102,6 +107,11 @@ export class StageManager {
     this.ambientLight = new THREE.AmbientLight('#776e74', 0.8);
     this.scene.add(this.ambientLight);
 
+    // 輪郭を縁取る補助光（プリセットの lighting.rim で制御）
+    // visible を切り替えるとライト数が変わりシェーダーが再コンパイルされるため、無効時は強度0にする
+    this.rimLight = new THREE.DirectionalLight('#ffffff', 0);
+    this.scene.add(this.rimLight);
+
     // 6. 太陽・レンズフレア・オクルージョン効果 (SunEffect)
     this.sunEffect = new SunEffect(this.scene);
 
@@ -135,6 +145,10 @@ export class StageManager {
     this.godRaysPass = new ShaderPass(GodRaysShader);
     this.composer.addPass(this.godRaysPass);
 
+    // ここまでリニア空間。OutputPass で表示用の sRGB に変換する
+    this.composer.addPass(new OutputPass());
+
+    // 色調補正（明度0.5基準の影/ハイライト判定・S字カーブ）とSMAAのエッジ検出は sRGB 値を前提にする
     this.cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.composer.addPass(this.cinematicAnimePass);
@@ -143,7 +157,7 @@ export class StageManager {
     this.smaaPass.setSize(targetW, targetH);
     this.composer.addPass(this.smaaPass);
 
-    this.composer.addPass(new OutputPass());
+    this.hairShadow = new HairShadowRenderer(targetW, targetH);
 
     // 8. ローダー & 多層背景メッシュ初期化
     this.textureLoader = new THREE.TextureLoader();
@@ -210,6 +224,14 @@ export class StageManager {
     this.ambientLight.color.set(preset.lighting.ambient.color);
     this.ambientLight.intensity = preset.lighting.ambient.intensity;
 
+    // 2.5 リムライト
+    const rim = preset.lighting.rim;
+    this.rimLight.intensity = rim?.enabled ? rim.intensity : 0;
+    if (rim) {
+      this.rimLight.color.set(rim.color);
+      this.rimLight.position.set(rim.position.x, rim.position.y, rim.position.z);
+    }
+
     // 3. 空と雲 (SkyBackground)
     this.skyBackground.setTimeOfDay(todId);
 
@@ -240,8 +262,9 @@ export class StageManager {
     u.uDiffusionRadius.value = c.diffusion.radius;
 
     u.uColorGradingEnabled.value = c.colorGrading.enabled ? 1.0 : 0.0;
-    u.uShadowTint.value.set(c.colorGrading.shadowTint);
-    u.uHighlightTint.value.set(c.colorGrading.highlightTint);
+    // このパスは OutputPass の後（sRGB 空間）で動くため、色は sRGB の値のまま渡す
+    u.uShadowTint.value.set(c.colorGrading.shadowTint).convertLinearToSRGB();
+    u.uHighlightTint.value.set(c.colorGrading.highlightTint).convertLinearToSRGB();
     u.uGradingStrength.value = c.colorGrading.strength;
     u.uGradingContrast.value = c.colorGrading.contrast;
     u.uGamma.value = c.colorGrading.gamma;
@@ -253,7 +276,7 @@ export class StageManager {
     u.uVignetteEnabled.value = c.vignette.enabled ? 1.0 : 0.0;
     u.uVignetteOffset.value = c.vignette.offset;
     u.uVignetteDarkness.value = c.vignette.darkness;
-    u.uVignetteColor.value.set(c.vignette.color);
+    u.uVignetteColor.value.set(c.vignette.color).convertLinearToSRGB();
 
     u.uChromaticAberrationEnabled.value = c.chromaticAberration.enabled ? 1.0 : 0.0;
     u.uChromaticAberrationOffset.value = c.chromaticAberration.offset;
@@ -352,6 +375,8 @@ export class StageManager {
       id,
       modelUrl,
       scene: this.scene,
+      camera: this.camera,
+      hairShadow: this.hairShadow.uniforms,
     });
 
     await avatar.load(modelUrl);
@@ -418,6 +443,7 @@ export class StageManager {
     this.bloomPass.resolution.set(targetW, targetH);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.smaaPass.setSize(targetW, targetH);
+    this.hairShadow.setSize(targetW, targetH);
   }
 
   /**
@@ -473,7 +499,10 @@ export class StageManager {
       // 5. CinematicAnimeShader の時間更新
       this.cinematicAnimePass.uniforms['uTime'].value = elapsed;
 
-      // 6. ポストプロセスパイプライン経由でレンダリング
+      // 6. 前髪の影用に髪の深度を描く
+      this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
+
+      // 7. ポストプロセスパイプライン経由でレンダリング
       this.composer.render();
     };
 
@@ -497,6 +526,7 @@ export class StageManager {
 
     this.composer.renderTarget1?.dispose();
     this.composer.renderTarget2?.dispose();
+    this.hairShadow.dispose();
     this.renderer.dispose();
   }
 }

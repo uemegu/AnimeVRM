@@ -6,6 +6,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { HairShadowRenderer } from '../shader/HairShadow';
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { AvatarConfig, DEFAULT_CONFIG } from '../Config';
@@ -126,8 +127,9 @@ export function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig)
   // 3. Color Grading
   if (pp.colorGrading) {
     pass.uniforms['uColorGradingEnabled'].value = pp.colorGrading.enabled ? 1.0 : 0.0;
-    (pass.uniforms['uShadowTint'].value as THREE.Color).set(pp.colorGrading.shadowTint);
-    (pass.uniforms['uHighlightTint'].value as THREE.Color).set(pp.colorGrading.highlightTint);
+    // このパスは OutputPass の後（sRGB 空間）で動くため、色は sRGB の値のまま渡す
+    (pass.uniforms['uShadowTint'].value as THREE.Color).set(pp.colorGrading.shadowTint).convertLinearToSRGB();
+    (pass.uniforms['uHighlightTint'].value as THREE.Color).set(pp.colorGrading.highlightTint).convertLinearToSRGB();
     pass.uniforms['uGradingStrength'].value = pp.colorGrading.strength;
     pass.uniforms['uGradingContrast'].value = pp.colorGrading.contrast;
     pass.uniforms['uGamma'].value = pp.colorGrading.gamma;
@@ -143,7 +145,7 @@ export function updateCinematicPassUniforms(pass: ShaderPass, cfg: AvatarConfig)
   pass.uniforms['uVignetteOffset'].value = cin?.vignette?.offset ?? 1.1;
   pass.uniforms['uVignetteDarkness'].value = cin?.vignette?.darkness ?? 0.35;
   if (cin?.vignette?.color) {
-    (pass.uniforms['uVignetteColor'].value as THREE.Color).set(cin.vignette.color);
+    (pass.uniforms['uVignetteColor'].value as THREE.Color).set(cin.vignette.color).convertLinearToSRGB();
   }
 
   // 6. Film Grain
@@ -193,6 +195,8 @@ export class ViewerCore {
   public godRaysPass: ShaderPass;
   public cinematicAnimePass: ShaderPass;
   public smaaPass: SMAAPass;
+  // 前髪の影（髪の深度マスク）
+  public hairShadow: HairShadowRenderer;
 
   public stats: Stats;
   public perfBadge: HTMLDivElement;
@@ -437,6 +441,10 @@ export class ViewerCore {
     this.godRaysPass.uniforms['uShimmer'].value = initialConfig.lighting.sunShafts?.shimmer ?? 0.4;
     this.composer.addPass(this.godRaysPass);
 
+    // ここまでリニア空間。OutputPass で表示用の sRGB に変換する
+    this.composer.addPass(new OutputPass());
+
+    // 色調補正（明度0.5基準の影/ハイライト判定・S字カーブ）とSMAAのエッジ検出は sRGB 値を前提にする
     this.cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(
       window.innerWidth * pixelRatio,
@@ -449,7 +457,12 @@ export class ViewerCore {
     this.smaaPass.enabled = initialConfig.postProcessing.antialiasing.smaa;
     this.composer.addPass(this.smaaPass);
 
-    this.composer.addPass(new OutputPass());
+    this.hairShadow = new HairShadowRenderer(
+      Math.floor(window.innerWidth * pixelRatio),
+      Math.floor(window.innerHeight * pixelRatio),
+      initialConfig.hairShadow
+    );
+    this.hairShadow.setEnabled(initialConfig.hairShadow?.enabled ?? true);
 
     // Initial resize setup
     window.addEventListener('resize', () => this.onResize());
@@ -907,6 +920,9 @@ export class ViewerCore {
     if (this.smaaPass) {
       this.smaaPass.setSize(targetW, targetH);
     }
+    if (this.hairShadow) {
+      this.hairShadow.setSize(Math.floor(targetW), Math.floor(targetH));
+    }
   }
 
   /**
@@ -950,6 +966,11 @@ export class ViewerCore {
     this.bloomPass.threshold = cfg.postProcessing.bloom.threshold;
 
     updateCinematicPassUniforms(this.cinematicAnimePass, cfg);
+
+    if (cfg.hairShadow) {
+      this.hairShadow.setEnabled(cfg.hairShadow.enabled);
+      this.hairShadow.setParams(cfg.hairShadow);
+    }
 
     if (cfg.lighting.sunShafts) {
       this.godRaysPass.uniforms['uExposure'].value = cfg.lighting.sunShafts.enabled ? cfg.lighting.sunShafts.exposure : 0;
@@ -1023,7 +1044,8 @@ export class ViewerCore {
 
     this.skyBackground.material.uniforms.uTime.value = elapsed;
 
-    // 4. Composer render
+    // 4. 前髪の影用に髪の深度を描いてから、Composer render
+    this.hairShadow.render(this.renderer, this.scene, this.camera, this.dirLight);
     this.composer.render();
 
     // 5. Effect texts

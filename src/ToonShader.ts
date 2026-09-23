@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
 import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig } from './Config';
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
+import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
 
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
@@ -9,6 +10,8 @@ export type ToonShaderOptions = {
   clothPattern?: RegExp;
   config?: AvatarConfig;
   camera?: THREE.Camera;
+  // 前髪の影（HairShadowRenderer.uniforms）。未指定なら影は出ない
+  hairShadow?: HairShadowUniforms;
   debug?: boolean;
 };
 
@@ -256,6 +259,7 @@ export function applyToonShader(
   const clothPattern = options.clothPattern ?? DEFAULT_CLOTH_PATTERN;
 
   let activeConfig = options.config;
+  const hairShadowUniforms = options.hairShadow ?? createHairShadowUniforms();
 
   const bottomGradientUniforms = {
     uBottomGradientEnabled: {
@@ -299,6 +303,10 @@ export function applyToonShader(
     const sourceMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 
     sourceMaterials.forEach((sourceMaterial) => {
+      // 前髪の影: 髪メッシュは深度マスクに描く（マテリアル共有でも全メッシュを登録する）
+      if (sourceMaterial && classifyStyleMaterial(sourceMaterial as MToonLikeMaterial, mesh, bodyPattern, hairPattern, clothPattern) === 'hair') {
+        mesh.layers.enable(HAIR_SHADOW_LAYER);
+      }
       if (!sourceMaterial || processedMaterials.has(sourceMaterial)) return;
       processedMaterials.add(sourceMaterial);
 
@@ -308,6 +316,11 @@ export function applyToonShader(
 
       const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
+
+      // 前髪の影を受けるのは顔・目・肌
+      const hairShadowReceiver = {
+        value: !material.isOutline && (kind === 'face' || kind === 'eye' || kind === 'body') ? 1 : 0,
+      };
 
       // Preserve original VRM shade color, matcap factor & emissive properties
       if (material.shadeColorFactor) {
@@ -384,6 +397,8 @@ export function applyToonShader(
         shader.uniforms.uBottomGradientShadowWeight = bottomGradientUniforms.uBottomGradientShadowWeight;
         shader.uniforms.uBottomGradientColor = bottomGradientUniforms.uBottomGradientColor;
         shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
+
+        injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
 
         shader.fragmentShader = shader.fragmentShader.replace(
           'void main() {',

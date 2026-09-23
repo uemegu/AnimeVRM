@@ -436,6 +436,13 @@ export interface Translations {
     bottomGradientIntensity: string;
     bottomGradientShadowWeight: string;
     bottomGradientColor: string;
+    hairShadowFolder: string;
+    hairShadowEnabled: string;
+    hairShadowOffset: string;
+    hairShadowDownBias: string;
+    hairShadowStrength: string;
+    hairShadowDepthBias: string;
+    hairShadowMaxDepthDiff: string;
     envFolder: string;
     farFolder: string;
     selectFarImage: string;
