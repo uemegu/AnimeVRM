@@ -96,6 +96,7 @@ function getHtmlInputs() {
     lipsync: path.resolve(__dirname, 'lipsync.html'),
     cli_runner: path.resolve(__dirname, 'cli-runner.html'),
     quality_calibrate: path.resolve(__dirname, 'quality-calibrate.html'),
+    crowd_test: path.resolve(__dirname, 'crowd-test.html'),
   };
 
   const scenariosDir = path.resolve(__dirname, 'scenarios');
