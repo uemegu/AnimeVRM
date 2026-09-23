@@ -37,10 +37,19 @@ export const App: React.FC = () => {
   const soundManager = useMemo(() => new SoundManager(), []);
   const audioLipSync = useMemo(() => new AudioLipSync(), []);
 
+  // URLクエリパラメータによるテスト・開発用初期フェーズ指定
+  const initialPhaseParam = useMemo(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('phase');
+    } catch {
+      return null;
+    }
+  }, []);
+
   // 初回アセット事前読み込み画面フラグ
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(() => !initialPhaseParam);
   // タイトル画面表示フラグ
-  const [isTitleScreen, setIsTitleScreen] = useState(true);
+  const [isTitleScreen, setIsTitleScreen] = useState(() => !initialPhaseParam);
   // セーブデータ存在フラグ
   const [hasSaveData, setHasSaveData] = useState(() => saveService.hasSaveData());
   // ライセンス・クレジットモーダル表示フラグ
@@ -76,7 +85,12 @@ export const App: React.FC = () => {
 
   // ゲーム全体の状態
   const [gameState, setGameState] = useState<GameState>(() => {
-    return ScheduleManager.createInitialState();
+    const initial = ScheduleManager.createInitialState();
+    if (initialPhaseParam === 'night') {
+      initial.phase = 'night';
+      initial.currentScenarioId = null;
+    }
+    return initial;
   });
 
   // 現在再生中のシナリオパッケージ
@@ -1119,11 +1133,9 @@ export const App: React.FC = () => {
             isAuto={isAuto}
             onToggleAuto={handleToggleAuto}
             lang={lang}
-            onToggleLanguage={handleToggleLanguage}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
             onOpenHistory={() => setIsHistoryModalOpen(true)}
-            onOpenLicense={() => setIsLicenseModalOpen(true)}
             onShare={handleShare}
             isSharing={isSharing}
           />
@@ -1133,11 +1145,29 @@ export const App: React.FC = () => {
             <NightRoomPage
               day={gameState.day}
               affinities={gameState.affinities}
+              flags={gameState.flags}
+              scenarioHistory={gameState.scenarioHistory}
               lang={lang}
+              isMuted={isMuted}
               onSave={handleSave}
               onLoad={handleLoad}
               onRollbackDay={handleRollbackDay}
               onSleep={handleSleep}
+              onUpdateFlags={(newFlags) => {
+                setGameState((prev) => ({
+                  ...prev,
+                  flags: { ...prev.flags, ...newFlags },
+                }));
+              }}
+              onUpdateAffinity={(charId, delta) => {
+                setGameState((prev) => ({
+                  ...prev,
+                  affinities: {
+                    ...prev.affinities,
+                    [charId]: (prev.affinities[charId] || 0) + delta,
+                  },
+                }));
+              }}
             />
           ) : isSelectingLocation ? (
             <ActionSelectPage

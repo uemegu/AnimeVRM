@@ -18,6 +18,7 @@ export class AvatarTransformController {
   private domElement: HTMLElement;
   private avatarManager: AvatarManager;
   private enabled: boolean = true;
+  private walkingMode: boolean = false;
 
   // Pointer drag state
   private isPointerDown: boolean = false;
@@ -105,8 +106,16 @@ export class AvatarTransformController {
     }
   }
 
+  /** Switch the transform keys from studio placement to classroom free-roam. */
+  public setWalkingMode(enabled: boolean): void {
+    this.walkingMode = enabled;
+    this.isPointerDown = false;
+    this.keysPressed.clear();
+    this.domElement.style.cursor = enabled ? 'crosshair' : '';
+  }
+
   public syncInitialTransform(): void {
-    if (this.avatarManager.avatarInstance) {
+    if (this.avatarManager.avatarInstance || this.avatarManager.controlledScenarioAvatarId) {
       this.initialPosition.copy(this.avatarManager.getAvatarPosition());
       this.initialRotationY = this.avatarManager.getAvatarRotationY();
       this.isInitialized = true;
@@ -125,7 +134,7 @@ export class AvatarTransformController {
   }
 
   private onPointerDown(e: PointerEvent): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.walkingMode) return;
     // Don't interact with UI clicks that bubble
     if ((e.target as HTMLElement) !== this.domElement) return;
 
@@ -139,6 +148,7 @@ export class AvatarTransformController {
   }
 
   private onPointerMove(e: PointerEvent): void {
+    if (this.walkingMode) return;
     if (!this.enabled) {
       this.domElement.style.cursor = '';
       return;
@@ -175,11 +185,11 @@ export class AvatarTransformController {
   private onPointerUp(_e: PointerEvent): void {
     this.isPointerDown = false;
     this.isPanning = false;
-    this.domElement.style.cursor = 'grab';
+    this.domElement.style.cursor = this.walkingMode ? 'crosshair' : 'grab';
   }
 
   private onWheel(e: WheelEvent): void {
-    if (!this.enabled) return;
+    if (!this.enabled || this.walkingMode) return;
     e.preventDefault();
 
     this.initDefaultsIfNeeded();
@@ -210,6 +220,13 @@ export class AvatarTransformController {
     }
 
     const key = e.key.toLowerCase();
+    if (this.walkingMode) {
+      if (['w', 'a', 's', 'd', 'q', 'e'].includes(key)) {
+        this.keysPressed.add(key);
+        e.preventDefault();
+      }
+      return;
+    }
     if (
       [
         'arrowleft',
@@ -257,6 +274,41 @@ export class AvatarTransformController {
     this.initDefaultsIfNeeded();
     const currentPos = this.avatarManager.getAvatarPosition();
     let currentRot = this.avatarManager.getAvatarRotationY();
+
+    if (this.walkingMode) {
+      let forward = 0;
+      let strafe = 0;
+      let turn = 0;
+      if (this.keysPressed.has('w')) forward += 1;
+      if (this.keysPressed.has('s')) forward -= 1;
+      if (this.keysPressed.has('d')) strafe += 1;
+      if (this.keysPressed.has('a')) strafe -= 1;
+      if (this.keysPressed.has('e')) turn += 1;
+      if (this.keysPressed.has('q')) turn -= 1;
+
+      const step = this.KEY_MOVE_SPEED * 3.2 * delta;
+      const forwardX = Math.sin(currentRot);
+      const forwardZ = Math.cos(currentRot);
+      const rightX = Math.cos(currentRot);
+      const rightZ = -Math.sin(currentRot);
+      const newX = THREE.MathUtils.clamp(
+        currentPos.x + (forwardX * forward + rightX * strafe) * step,
+        -7.0,
+        7.0
+      );
+      const newZ = THREE.MathUtils.clamp(
+        currentPos.z + (forwardZ * forward + rightZ * strafe) * step,
+        -9.8,
+        9.8
+      );
+      if (forward !== 0 || strafe !== 0) {
+        this.avatarManager.setAvatarPosition(newX, currentPos.y, newZ);
+      }
+      if (turn !== 0) {
+        this.avatarManager.setAvatarRotationY(currentRot + turn * this.KEY_ROT_SPEED * delta);
+      }
+      return;
+    }
 
     let moveX = 0;
     let moveY = 0;
