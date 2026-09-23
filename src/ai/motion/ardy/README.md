@@ -124,12 +124,53 @@ npm run ardy:generate -- -b test/fixtures/ardy_batch_sample.json
 - `-d, --duration <sec>`: モーションの長さ（2〜8秒、デフォルト 4秒）
 - `-o, --output <path>`: 保存先パス（`.fbx` または `.json`）
 - `-f, --format <fbx|saved-motion|raw>`: 出力形式（拡張子から自動判定）
-- `-b, --batch <file>`: 一括生成用 JSON 定義ファイル
+- `-n, --candidates <n>`: cfgごとに試すseed数（1〜32、デフォルト1）。採点が最良の1本を出力に保存
+- `--seed <text>`: 基準seed。`-n 1` なら `.candidates.json` に記録された候補をそのまま再現
+- `--cfg <w[,w...]>`: cfgWeight（デフォルト3.5）。カンマ区切りで複数指定すると、同じseedで比較
+- `--keep <n>`: 良い順に書き出すファイル数（候補が複数ならデフォルト3）
+- `--avatar <URL>`: このVRMに合わせて焼き込む（手の位置補正・プレビュー・下半身固定・振幅に必要）
+- `--preview`: 書き出した FBX をゲームと同じ読み込み処理で再生し、正面と横からのコマ割りを `.preview.png` に保存
+- `--no-fit-hands`: `--avatar` 指定時の手の位置補正を切る（比較用）
+- `--lock-legs`: 脚・腰の回転・腰の高さを最初のフレームに固定（その場での身振り用。膝を曲げて沈むのを防ぐ）
+- `--amplitude <a>`: 動きの大きさ（0.3〜1.5、デフォルト1）。背筋を伸ばし腕を下ろした姿勢に向けて回転を縮める
+- `-b, --batch <file>`: 一括生成用 JSON 定義ファイル（各要素に `candidates` / `seed` / `cfg` / `keep` / `preview` / `lockLegs` / `amplitude` も指定可）
 - `--headed`: ブラウザ画面を表示（デバッグ用）
 - `--quality-plan <file>`: 校正済みavatar profileと一緒に使うMotionQualityPlan JSON
 - `--jev`: Jevに9つの型付き質問を1回で送り、接触プランを構成（`.env` の `JEV_API_KEY` を使用。`TYPESAFE_API_KEY` も互換対応）
 - `--acting-note <text>`: Jevとardy-mini両方へ渡す演技方針。例: `soft, graceful, restrained`
 - `--avatar <URL>` / `--contact-profile <file>`: 対象VRMとその校正profile（quality設定では必須）
 - `--port <port>`: 開発サーバーポート（省略時はViteのデフォルト5173）
+
+### アバターの体型に合わせる
+
+ardy-mini は実写の体（身長約1.8m）の動きを出力します。アニメ体型のVRMは腰の高さを1とした比率で見ると、肩幅が約4割狭く、腕と胴が約2.5割短いです。そのため関節の角度をそのまま移すと、腰や胸に当てた手が体にめり込みます。`--avatar` を指定すると、`fitHandsToAvatar.ts` が次の処理を行います。
+
+1. VRMのメッシュ（服を含む）から、胸・腹・腰の大きさを楕円体として測る
+2. ardy-mini 側で手が体に触れる位置を基準に、手のひらの位置を同じ部位の表面へ置き直す
+3. IKで腕を解き直す
+
+顔に近い手は ardy-mini の姿勢のままにします。アニメの顔は手に比べて小さいため、手のひらの中心を口に合わせると指が目を覆ってしまい、角度をそのまま移した方が自然に見えたためです。FBXは指定したVRMの体型に合わせて焼き込まれるので、体型が大きく違うモデル（例: mob/girl は aoi より肩がさらに狭い）には別に生成してください。
+
+```bash
+npm run ardy:generate -- -p "A person puts hands on hips and laughs happily" -d 4 -n 6 --lock-legs --avatar /models/aoi/aoi-school.vrm --preview -o public/animations/ardy_laugh.fbx
+```
+
+「顎に手を当てて考える」で手が顔の中央を覆うのは、変換ではなく ardy-mini の生成結果そのものです（手のひらが鼻の前に来ます）。"A person rests their chin on their right hand" の方が顎の下に手が来ます。同様に「力強い万歳」は `--amplitude` で縮めても腕が横に広がるだけで可愛くならないため、"A person claps their hands together in front of their chest excitedly" のようにプロンプトで動き自体を変えてください。
+
+### 候補から選ぶ
+
+拡散モデルはseedで当たり外れがあるため、`-n 8` などで複数生成し、`src/ai/motion/ardy/scoreMotion.ts` の採点で並べます。出力は1位、`.cand2.fbx` 以降が次点、`.candidates.json` に全候補のseed・cfg・指標を保存します。
+
+```bash
+npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -n 8 --cfg 2,3.5 -o public/animations/ardy_wave.fbx
+```
+
+採点するのは欠陥だけで、プロンプトどおりに動いているかは測りません。
+
+- 足の滑り：書き出しでは腰の水平位置を固定するため、生成時に腰が動くと接地中の足が滑ります。
+- 手の胴体へのめり込み
+- 手首の曲げすぎ
+
+他の候補の半分未満しか手が動かない候補は、指示を無視している可能性が高いため後ろに回します。ardy-miniの出力は5Hz以上の成分がほぼなくガタつかないため、ジャークは採点しません。最終的な選択は、書き出したファイルを見て決めてください。
 
 quality生成には、同じVRMを `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output public/motion-profiles/aoi-school.json` で一度校正します。profileに埋め込まれるモデルhashが違うと補正を適用しません。Jevで作った時間プランは `.review.fbx` へ保存されるので、目視後に必要なら手書きplanへ確定してください。

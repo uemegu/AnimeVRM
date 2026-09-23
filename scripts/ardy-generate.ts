@@ -16,6 +16,13 @@ interface BatchItem {
   actingNote?: string;
   avatar?: string;
   contactProfile?: string;
+  candidates?: number;
+  seed?: string;
+  cfg?: number | number[];
+  keep?: number;
+  preview?: boolean;
+  lockLegs?: boolean;
+  amplitude?: number;
 }
 
 const optionsConfig = {
@@ -28,6 +35,14 @@ const optionsConfig = {
   'acting-note': { type: 'string' as const },
   avatar: { type: 'string' as const },
   'contact-profile': { type: 'string' as const },
+  candidates: { type: 'string' as const, short: 'n' },
+  seed: { type: 'string' as const },
+  cfg: { type: 'string' as const },
+  keep: { type: 'string' as const },
+  preview: { type: 'boolean' as const, default: false },
+  'fit-hands': { type: 'boolean' as const, default: true },
+  'lock-legs': { type: 'boolean' as const, default: false },
+  amplitude: { type: 'string' as const },
   batch: { type: 'string' as const, short: 'b' },
   headed: { type: 'boolean' as const, default: false },
   port: { type: 'string' as const },
@@ -48,9 +63,17 @@ Options:
       --quality-plan <file>  JSON MotionQualityPlan (requires --avatar and --contact-profile)
       --jev                  Ask Jev multiple typed questions and compose a contact plan (requires --avatar and --contact-profile)
       --acting-note <text>   Extra acting intent supplied to Jev
-      --avatar <URL>         Target VRM URL served by the local app
+      --avatar <URL>         Target VRM URL served by the local app; the motion is baked for this avatar
       --contact-profile <file> JSON profile for that exact VRM
-  -b, --batch <file>       JSON file containing an array of generation tasks
+  -n, --candidates <n>     Seeds to try per CFG weight (1 to 32, default: 1); the best-scoring one is saved
+      --seed <text>        Base seed; with -n 1 it reproduces a candidate listed in .candidates.json
+      --cfg <w[,w...]>     CFG weight(s) (default: 3.5); a list compares weights on the same seeds
+      --keep <n>           Files to write, best first (default: 3 with several candidates, else 1)
+      --preview            Write a .preview.png contact sheet per FBX (requires --avatar)
+      --no-fit-hands       With --avatar, keep ardy-mini's arm rotations instead of refitting the palms to the avatar
+      --lock-legs          With --avatar, hold the legs and hips height at the first frame (gestures in place)
+      --amplitude <a>      With --avatar, scale the motion toward an upright arms-down pose (0.3 to 1.5, default 1)
+  -b, --batch <file>       JSON array of tasks; each may also set candidates, seed, cfg, keep, preview, lockLegs, amplitude
       --headed             Run browser in headed (visible) mode
       --port <port>        Vite dev server port (default: Vite's default, 5173)
   -h, --help               Show this help message
@@ -59,6 +82,7 @@ Examples:
   node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -o public/animations/ardy_wave.fbx
   node scripts/ardy-generate.ts -p "A person bows politely" -d 3 -o public/animations/ardy_bow.fbx
   node scripts/ardy-generate.ts -p "A person gently touches their cheek" --jev --acting-note "shy, soft, brief" --avatar /models/aoi/aoi-school.vrm --contact-profile motion-profiles/aoi.json -o public/animations/ardy_cheek.fbx
+  node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -n 8 --cfg 2,3.5,5 -o public/animations/ardy_wave.fbx
   node scripts/ardy-generate.ts --batch batch_tasks.json
 `);
 }
@@ -67,6 +91,7 @@ async function main() {
   const { values } = parseArgs({
     options: optionsConfig,
     allowPositionals: false,
+    allowNegative: true,
   });
 
   if (values.help) {
@@ -113,6 +138,20 @@ async function main() {
     process.exit(1);
   }
 
+  // Command-line sampling options also apply to batch tasks that do not set their own.
+  const cliCandidates = values.candidates === undefined ? undefined : Number(values.candidates);
+  const cliKeep = values.keep === undefined ? undefined : Number(values.keep);
+  const cliCfg = values.cfg?.split(',').map(Number);
+  for (const task of tasks) {
+    task.avatar ??= values.avatar;
+    const candidates = task.candidates ?? cliCandidates ?? 1;
+    if (!Number.isInteger(candidates) || candidates < 1 || candidates > 32) throw new RangeError(task.output + ': candidates must be an integer from 1 to 32.');
+    const cfg = task.cfg === undefined ? cliCfg : [task.cfg].flat();
+    if (cfg?.some(weight => !Number.isFinite(weight) || weight < 0 || weight > 20)) throw new RangeError(task.output + ': cfg weights must be numbers from 0 to 20.');
+    const keep = task.keep ?? cliKeep;
+    if (keep !== undefined && (!Number.isInteger(keep) || keep < 1)) throw new RangeError(task.output + ': keep must be a positive integer.');
+  }
+
   const requestedPort = values.port === undefined ? undefined : Number(values.port);
   if (requestedPort !== undefined && (!Number.isInteger(requestedPort) || requestedPort < 1 || requestedPort > 65535)) {
     throw new RangeError('--port must be an integer between 1 and 65535.');
@@ -130,10 +169,13 @@ async function main() {
     const task = tasks[i];
     const useJev = task.jev ?? values.jev;
     if (task.qualityPlan && useJev) throw new Error(task.output + ': choose either --quality-plan or --jev, not both.');
-    const qualityFields = [task.qualityPlan, task.avatar, task.contactProfile];
-    if (qualityFields.some(Boolean) && qualityFields.some(value => !value)) {
+    if ((task.qualityPlan || task.contactProfile) && !(task.qualityPlan && task.avatar && task.contactProfile) && !useJev) {
       throw new Error(task.output + ': quality requires avatar and contact-profile, plus either quality-plan or --jev.');
     }
+    if (task.avatar && (!task.avatar.startsWith('/') || task.avatar.startsWith('//'))) {
+      throw new Error(task.output + ': avatar must be a same-origin URL path such as /models/aoi/aoi-school.vrm.');
+    }
+    if ((task.preview ?? values.preview) && !task.avatar) throw new Error(task.output + ': --preview requires --avatar.');
     if (useJev && (!task.avatar || !task.contactProfile)) {
       throw new Error(task.output + ': --jev requires avatar and contact-profile.');
     }
@@ -266,6 +308,17 @@ async function main() {
         duration: task.duration ?? 4,
         format: task.format ?? (task.output.endsWith('.json') ? 'saved-motion' : 'fbx'),
         ...(quality ? { quality } : {}),
+        candidates: task.candidates ?? cliCandidates ?? 1,
+        seed: task.seed ?? values.seed,
+        cfgWeights: task.cfg === undefined ? cliCfg : [task.cfg].flat(),
+        keep: task.keep ?? cliKeep,
+        avatarUrl: task.avatar,
+        preview: task.preview ?? values.preview,
+        fitHands: values['fit-hands'],
+        style: {
+          lockLegs: task.lockLegs ?? values['lock-legs'],
+          ...(task.amplitude ?? values.amplitude) === undefined ? {} : { amplitude: Number(task.amplitude ?? values.amplitude) },
+        },
       });
 
       const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -275,7 +328,39 @@ async function main() {
       const basePath = outputPath.replace(/[.][^.]+$/, '');
       const outputDir = path.dirname(outputPath);
       if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+      const extension = path.extname(outputPath);
       const reportPath = basePath + '.quality.json';
+      const best = result.candidates[0];
+      console.log(`${taskIndex} Best: seed ${best.seed}, cfg ${best.cfgWeight}, score ${best.score.total.toFixed(2)}`);
+      if (result.candidates.length > 1) {
+        const candidatesPath = basePath + '.candidates.json';
+        const summary = {
+          prompt: task.prompt,
+          duration: task.duration ?? 4,
+          note: 'Lower score is better. Scores detect defects only; watch the kept files before choosing.',
+          candidates: result.candidates.map((candidate: any) => ({
+            ...candidate,
+            file: candidate.rank === 1 ? path.basename(outputPath)
+              : candidate.rank <= result.alternates.length + 1 ? path.basename(basePath + '.cand' + candidate.rank + extension) : null,
+          })),
+        };
+        fs.writeFileSync(candidatesPath, JSON.stringify(summary, null, 2), 'utf-8');
+        for (const candidate of result.candidates) {
+          const metrics = candidate.score.metrics;
+          console.log(`${taskIndex}   #${candidate.rank} seed ${candidate.seed} cfg ${candidate.cfgWeight} score ${candidate.score.total.toFixed(2)}`
+            + ` slide ${metrics.footSlide.toFixed(3)} penetration ${metrics.handPenetration.toFixed(2)}`
+            + ` wrist ${metrics.wristStrain.toFixed(2)} activity ${metrics.activity.toFixed(2)}${candidate.lowActivity ? ' (low activity)' : ''}`);
+        }
+        for (const alternate of result.alternates) {
+          const alternatePath = basePath + '.cand' + alternate.rank + extension;
+          fs.writeFileSync(alternatePath, result.format === 'fbx'
+            ? Buffer.from(alternate.data as string, 'base64')
+            : JSON.stringify(alternate.data, null, 2));
+          console.log(`${taskIndex} Alternate #${alternate.rank}: ${alternatePath}`);
+          if (alternate.preview) fs.writeFileSync(basePath + '.cand' + alternate.rank + '.preview.png', Buffer.from(alternate.preview, 'base64'));
+        }
+        console.log(`${taskIndex} Candidates: ${candidatesPath}`);
+      }
       if (result.qualityReport) {
         fs.writeFileSync(reportPath, JSON.stringify(result.qualityReport, null, 2), 'utf-8');
         console.log(taskIndex + ' Quality: ' + result.qualityReport.status);
@@ -292,7 +377,6 @@ async function main() {
         continue;
       }
       if (result.qualityReport?.status === 'needs-review') {
-        const extension = path.extname(outputPath);
         outputPath = extension ? outputPath.slice(0, -extension.length) + '.review' + extension : outputPath + '.review';
         console.log(taskIndex + ' Review copy: ' + outputPath);
         process.exitCode = 1;
@@ -301,6 +385,11 @@ async function main() {
         const buffer = Buffer.from(result.data as string, 'base64');
         fs.writeFileSync(outputPath, buffer);
         console.log(`${taskIndex} Saved FBX: ${outputPath} (${(buffer.length / 1024).toFixed(1)} KB)\n`);
+        if (result.preview) {
+          const previewPath = outputPath.replace(/[.][^.]+$/, '') + '.preview.png';
+          fs.writeFileSync(previewPath, Buffer.from(result.preview, 'base64'));
+          console.log(`${taskIndex} Preview: ${previewPath}`);
+        }
       } else {
         const jsonStr = JSON.stringify(result.data, null, 2);
         fs.writeFileSync(outputPath, jsonStr, 'utf-8');
