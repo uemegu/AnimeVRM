@@ -411,6 +411,7 @@ export interface Translations {
     emissiveIntensity: string;
     shadowHueShift: string;
     shadowLightness: string;
+    shadeMultiply: string;
     shadowBoundaryTint: string;
     toonyFactor: string;
     shadingShift: string;

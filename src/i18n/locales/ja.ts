@@ -411,6 +411,7 @@ export const ja: Translations = {
     emissiveIntensity: '🌟 発光強度 (Emissive / Bloom)',
     shadowHueShift: '影の色相シフト (Hue Shift)',
     shadowLightness: '影の明度比率 (Lightness)',
+    shadeMultiply: '影の乗算色 (Shade Multiply)',
     shadowBoundaryTint: '影境界の血色感 (Boundary Tint)',
     toonyFactor: 'トゥーン度 (Toony)',
     shadingShift: '明暗境界シフト (Shift)',

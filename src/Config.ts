@@ -11,6 +11,9 @@ export interface MaterialStyleParams {
   shadowHueShift: number;
   shadowLightnessFactor: number;
   shadowBoundaryTint: number;
+  // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
+  shadeMultiply?: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   faceShadingShiftFactor?: number;
@@ -296,6 +299,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
       shadowBoundaryTint: 0.35,
+      shadeMultiply: '#d49ea3',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       faceShadingShiftFactor: 0.65,
@@ -314,6 +318,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadowBoundaryTint: 0.2,
+      shadeMultiply: '#8474a4',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -331,6 +336,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadowBoundaryTint: 0.1,
+      shadeMultiply: '#b8bcd8',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -360,7 +366,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     enabled: true,
     offset: 0.006,
     downBias: 0.002,
-    strength: 0.7,
+    strength: 1.0,
     depthBias: 0.002,
     maxDepthDiff: 0.12,
   },

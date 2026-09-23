@@ -55,6 +55,7 @@ type MToonLikeMaterial = THREE.Material & {
   isMToonMaterial?: boolean;
   isOutline?: boolean;
   map?: THREE.Texture | null;
+  shadeMultiplyTexture?: THREE.Texture | null;
   color?: THREE.Color;
   uniforms?: Record<string, { value: any }>;
   shadeColorFactor?: THREE.Color;
@@ -566,13 +567,22 @@ export function applyToonShader(
 
         // Shade Color (Face uses body material as reference so skin shadow matches body perfectly)
         const referenceMaterial = (matKind === 'face' && bodyEntry) ? bodyEntry.material : material;
-        const autoShadeColor = computeAutoShadowColor(
-          referenceMaterial,
-          matKind,
-          params.shadowHueShift ?? 0.03,
-          params.shadowLightnessFactor ?? 0.2,
-          params.shadowBoundaryTint ?? 0.0
-        );
+        // 乗算色が指定されていればそれを使う（影 = 乗算色 × マテリアル自身のテクスチャ）
+        if (params.shadeMultiply && !material.shadeMultiplyTexture && material.map) {
+          // 影用テクスチャがないマテリアルは基本テクスチャで代用する（ないと影が乗算色のベタ塗りになる）
+          material.shadeMultiplyTexture = material.map;
+          material.needsUpdate = true;
+        }
+        // 基本色係数（litFactor）も掛ける。白テクスチャ × 黒係数で色を出しているマテリアルでも影色が合う
+        const autoShadeColor = params.shadeMultiply
+          ? new THREE.Color(params.shadeMultiply).multiply(originalBaseColors.get(material) ?? new THREE.Color(1, 1, 1))
+          : computeAutoShadowColor(
+              referenceMaterial,
+              matKind,
+              params.shadowHueShift ?? 0.03,
+              params.shadowLightnessFactor ?? 0.2,
+              params.shadowBoundaryTint ?? 0.0
+            );
         if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShadeColor);
         if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShadeColor);
 
