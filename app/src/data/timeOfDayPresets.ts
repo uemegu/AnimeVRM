@@ -52,12 +52,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     postProcessing: {
       bloom: {
         enabled: true,
-        strength: 0.01,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       cinematic: {
-        diffusion: { enabled: true, strength: 0.24, radius: 2.0 },
+        diffusion: { enabled: true, strength: 0.12, radius: 2.0 },
         colorGrading: {
           enabled: true,
           shadowTint: '#3d61ff',
@@ -196,12 +196,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     postProcessing: {
       bloom: {
         enabled: true,
-        strength: 0.01,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       cinematic: {
-        diffusion: { enabled: true, strength: 0.24, radius: 2.0 },
+        diffusion: { enabled: true, strength: 0.12, radius: 2.0 },
         colorGrading: {
           enabled: true,
           shadowTint: '#0b1b60',
@@ -340,12 +340,12 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     postProcessing: {
       bloom: {
         enabled: true,
-        strength: 0.01,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       cinematic: {
-        diffusion: { enabled: true, strength: 0.25, radius: 1.8 },
+        diffusion: { enabled: true, strength: 0.12, radius: 1.8 },
         colorGrading: {
           enabled: true,
           shadowTint: '#11103b',

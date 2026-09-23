@@ -77,7 +77,7 @@ export interface ScenePresetData {
 const DEFAULT_CINEMATIC_CONFIG: AvatarConfig['postProcessing']['cinematic'] = {
   diffusion: {
     enabled: true,
-    strength: 0.24,
+    strength: 0.12,
     radius: 2.0,
   },
   filmGrain: {
@@ -248,8 +248,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.01,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       colorGrading: {
@@ -435,8 +435,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.01,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       colorGrading: {
@@ -620,8 +620,8 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
       bloom: {
         enabled: true,
-        strength: 0.09,
-        radius: 0.06,
+        strength: 0.07,
+        radius: 0.7,
         threshold: 0.9,
       },
       colorGrading: {
@@ -636,7 +636,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       brightness: 0.0,
       contrast: 0.02,
       cinematic: {
-        diffusion: { enabled: true, strength: 0.35, radius: 2.2 },
+        diffusion: { enabled: true, strength: 0.12, radius: 2.2 },
         filmGrain: { enabled: false, strength: 0.04, speed: 1.0 },
         vignette: { enabled: true, offset: 1.15, darkness: 0.12, color: '#2a1435' },
         chromaticAberration: { enabled: true, offset: 0.002 },
