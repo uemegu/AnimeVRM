@@ -41,9 +41,9 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           text: '「あのね……ずっと前から、あなたに伝えたいことがあって……」',
           voiceUrl: '/voices/confess_intro_2.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_hesitant.fbx',
             expression: 'neutral',
-            expressionWeight: 0.8,
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             effectText: 'doki',
           },
@@ -63,7 +63,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'neutral',
-            expressionWeight: 0.8,
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             effectText: 'doki',
           },
@@ -103,7 +103,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           text: '「やったーっ！ え……！？ ほんとに……！？ 夢じゃないよね……！？」',
           voiceUrl: '/voices/confess_love_1.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_joy.fbx',
             expression: 'happy',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
@@ -122,7 +122,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           text: '「すっごく嬉しい……！ 私、ずっとあなたのことばかり考えてたの……っ！」',
           voiceUrl: '/voices/confess_love_2.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_heart.fbx',
             expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
@@ -144,7 +144,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           text: '「ねぇ...これって夢じゃないよね？ぎゅ〜ってしてくれる？」',
           voiceUrl: '/voices/confess_love_hug.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_hug.fbx',
             expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
@@ -366,9 +366,9 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           text: '"Um, you know... there\'s something I\'ve been meaning to tell you for a long time..."',
           voiceUrl: '/voices/confess_intro_2.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_hesitant.fbx',
             expression: 'neutral',
-            expressionWeight: 0.8,
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             effectText: 'doki',
           },
@@ -388,7 +388,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'neutral',
-            expressionWeight: 0.8,
+            expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
             effectText: 'doki',
           },
@@ -428,7 +428,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           text: '"Yay!! Wait... really!? You mean it!? This isn\'t a dream, right...!?"',
           voiceUrl: '/voices/confess_love_1.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_joy.fbx',
             expression: 'happy',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
@@ -447,7 +447,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           text: '"I\'m so happy...! I\'ve been thinking about you non-stop all this time...!"',
           voiceUrl: '/voices/confess_love_2.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_heart.fbx',
             expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',
@@ -469,7 +469,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           text: '"Hey... this isn\'t a dream, right? Will you give me a hug...?"',
           voiceUrl: '/voices/confess_love_hug.wav',
           avatar: {
-            motion: '/animations/Idle.fbx',
+            motion: '/animations/ardy_confess_hug.fbx',
             expression: 'relaxed',
             expressionWeight: 1.0,
             faceTexture: '/textures/girl_face_blush.png',

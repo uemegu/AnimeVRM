@@ -1,0 +1,71 @@
+{
+  "prompt": "A person standing in place, opening both arms gently as if asking for a warm hug, smiling softly",
+  "duration": 6,
+  "note": "Lower score is better. Scores detect defects only; watch the kept files before choosing.",
+  "candidates": [
+    {
+      "rank": 1,
+      "seed": "16f9ebbb-2",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.2918687215468706,
+        "metrics": {
+          "footSlide": 0.01459343607734353,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.33276596444205025
+        }
+      },
+      "file": "ardy_confess_hug.fbx"
+    },
+    {
+      "rank": 2,
+      "seed": "16f9ebbb-1",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.3134108952785911,
+        "metrics": {
+          "footSlide": 0.015670544763929557,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.2615275420978357
+        }
+      },
+      "file": "ardy_confess_hug.cand2.fbx"
+    },
+    {
+      "rank": 3,
+      "seed": "16f9ebbb-3",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.35492807603739807,
+        "metrics": {
+          "footSlide": 0.017746403801869905,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.3916356720808232
+        }
+      },
+      "file": "ardy_confess_hug.cand3.fbx"
+    },
+    {
+      "rank": 4,
+      "seed": "16f9ebbb-4",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.35723511996170715,
+        "metrics": {
+          "footSlide": 0.017861755998085357,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.2500246064303508
+        }
+      },
+      "file": null
+    }
+  ]
+}

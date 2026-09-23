@@ -1,0 +1,71 @@
+{
+  "prompt": "A person gently places both hands over their chest with a happy expression, standing softly in place",
+  "duration": 6,
+  "note": "Lower score is better. Scores detect defects only; watch the kept files before choosing.",
+  "candidates": [
+    {
+      "rank": 1,
+      "seed": "f018669b-1",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.39585943289221176,
+        "metrics": {
+          "footSlide": 0.01979297164461059,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.13074818723863924
+        }
+      },
+      "file": "ardy_confess_heart.fbx"
+    },
+    {
+      "rank": 2,
+      "seed": "f018669b-4",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.3968124998761109,
+        "metrics": {
+          "footSlide": 0.019840624993805546,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.21939586500157257
+        }
+      },
+      "file": "ardy_confess_heart.cand2.fbx"
+    },
+    {
+      "rank": 3,
+      "seed": "f018669b-2",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.5817958019667349,
+        "metrics": {
+          "footSlide": 0.029089790098336746,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.22609005686025702
+        }
+      },
+      "file": "ardy_confess_heart.cand3.fbx"
+    },
+    {
+      "rank": 4,
+      "seed": "f018669b-3",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.697258873718794,
+        "metrics": {
+          "footSlide": 0.0348629436859397,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.21925606362306213
+        }
+      },
+      "file": null
+    }
+  ]
+}
