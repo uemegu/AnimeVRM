@@ -15,6 +15,7 @@ import { getPrivateDateScenario } from './privateDateScenario';
 import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
 import { getTeacherGateScenario } from './teacherGateScenario';
 import { getSilverWeekScenario } from './silverWeekScenario';
+import { getGestureBattleScenario } from './gestureBattleScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -155,6 +156,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '連休最終日の夕暮れ。私服のアオイとエミリが街を歩きながら、名残惜しそうに語り合うショートシナリオ。',
     ogpImage: '/ogp/silver-week.png',
     getScenario: (lang = 'ja') => getSilverWeekScenario(lang),
+  },
+  'gesture-battle': {
+    id: 'gesture-battle',
+    title: '放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜',
+    shortTitle: '放課後ジェスチャーバトル',
+    description: 'アオイとエミリが昼の校門前で全身ジェスチャー対決！ひらめき、歓喜、おねだり、ツッコミが炸裂する多彩なモーションシナリオ。',
+    ogpImage: '/ogp/silver-week.png',
+    getScenario: (lang = 'ja') => getGestureBattleScenario(lang),
   },
 };
 
