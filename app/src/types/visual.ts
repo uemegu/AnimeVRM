@@ -62,6 +62,8 @@ export interface LightingConfig {
   ambient: AmbientLightConfig;
   rim?: RimLightConfig;
   depthRim?: DepthRimConfig;
+  // 天使の輪を寄せる色（sRGB）。時間帯の光になじませる。未指定なら白
+  hairRingTint?: string;
   sunShafts?: SunShaftsConfig;
   lensFlare?: LensFlareConfig;
 }
@@ -136,6 +138,9 @@ export interface MaterialStyleParams {
   shadowHueShift: number;
   shadowLightnessFactor: number;
   shadowBoundaryTint: number;
+  // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
+  shadeMultiply?: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   faceShadingShiftFactor?: number;

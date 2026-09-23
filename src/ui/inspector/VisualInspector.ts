@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
+import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '../../postprocessing/LightWrap';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
@@ -41,6 +43,10 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     folder.add(params, 'shadowBoundaryTint', 0.0, 1.0, 0.02).name(tr.gui.shadowBoundaryTint).onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name(tr.gui.shadingShift).onChange(update);
+    if (params.shadeMultiply === undefined) {
+      params.shadeMultiply = { body: '#d49ea3', hair: '#8474a4', cloth: '#b8bcd8' }[kind];
+    }
+    folder.addColor(params as any, 'shadeMultiply').name(tr.gui.shadeMultiply).onChange(update);
     if (kind === 'body') {
       if (params.faceShadingShiftFactor === undefined) {
         params.faceShadingShiftFactor = 0.65;
@@ -152,6 +158,70 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .name(tr.gui.bottomGradientColor)
     .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
   bottomGradientFolder.close();
+
+  // 2.2 前髪の影 (Hair Shadow)
+  if (!currentConfig.hairShadow) {
+    currentConfig.hairShadow = {
+      enabled: true,
+      offset: 0.006,
+      downBias: 0.002,
+      strength: 1.0,
+      depthBias: 0.002,
+      maxDepthDiff: 0.12,
+    };
+  }
+  const hairShadowCfg = currentConfig.hairShadow;
+  const applyHairShadow = () => {
+    viewerCore.hairShadow.setEnabled(hairShadowCfg.enabled);
+    viewerCore.hairShadow.setParams(hairShadowCfg);
+  };
+  const hairShadowFolder = visualGui.addFolder(tr.gui.hairShadowFolder);
+  hairShadowFolder.add(hairShadowCfg, 'enabled').name(tr.gui.hairShadowEnabled).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'offset', 0, 0.05, 0.001).name(tr.gui.hairShadowOffset).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'downBias', 0, 0.05, 0.001).name(tr.gui.hairShadowDownBias).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'strength', 0, 1, 0.01).name(tr.gui.hairShadowStrength).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'depthBias', 0, 0.02, 0.0005).name(tr.gui.hairShadowDepthBias).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'maxDepthDiff', 0.01, 0.5, 0.01).name(tr.gui.hairShadowMaxDepthDiff).onChange(applyHairShadow);
+  hairShadowFolder.close();
+
+  // 2.3 天使の輪 (Hair Ring)
+  if (!currentConfig.hairRing) {
+    currentConfig.hairRing = { ...DEFAULT_HAIR_RING_PARAMS };
+  }
+  const hairRingCfg = currentConfig.hairRing;
+  const applyHairRing = () => setHairRingParams(hairRingCfg);
+  const hairRingFolder = visualGui.addFolder(tr.gui.hairRingFolder);
+  hairRingFolder.add(hairRingCfg, 'enabled').name(tr.gui.hairRingEnabled).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'height', -0.1, 0.15, 0.002).name(tr.gui.hairRingHeight).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'width', 0.0, 0.05, 0.001).name(tr.gui.hairRingWidth).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'softness', 0.0, 0.02, 0.0005).name(tr.gui.hairRingSoftness).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'facingFade', 0.01, 1.0, 0.01).name(tr.gui.hairRingFacingFade).onChange(applyHairRing);
+  if (!currentConfig.lighting.hairRingTint) currentConfig.lighting.hairRingTint = '#ffffff';
+  hairRingFolder.addColor(currentConfig.lighting, 'hairRingTint').name(tr.gui.hairRingTint).onChange((v: string | undefined) => setHairRingTint(v));
+  hairRingFolder.add(hairRingCfg, 'lighten', 0.0, 1.0, 0.01).name(tr.gui.hairRingLighten).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'desaturate', 0.0, 1.0, 0.01).name(tr.gui.hairRingDesaturate).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'strength', 0.0, 1.0, 0.01).name(tr.gui.hairRingStrength).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'strandJitter', 0.0, 0.03, 0.0005).name(tr.gui.hairRingStrandJitter).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'headCenterOffset', -0.1, 0.2, 0.005).name(tr.gui.hairRingHeadCenterOffset).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'jagAmplitude', 0.0, 0.03, 0.0005).name(tr.gui.hairRingJagAmplitude).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'jagCount', 0, 120, 1).name(tr.gui.hairRingJagCount).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'viewShift', -0.05, 0.05, 0.001).name(tr.gui.hairRingViewShift).onChange(applyHairRing);
+  hairRingFolder.close();
+
+  // 2.4 ライトラップ (Light Wrap)
+  if (!currentConfig.lightWrap) {
+    currentConfig.lightWrap = { ...DEFAULT_LIGHT_WRAP_PARAMS };
+  }
+  const lightWrapCfg = currentConfig.lightWrap;
+  const applyLightWrap = () =>
+    applyLightWrapParams(viewerCore.lightWrapPass.uniforms as typeof LightWrapShader.uniforms, lightWrapCfg);
+  const lightWrapFolder = visualGui.addFolder(tr.gui.lightWrapFolder);
+  lightWrapFolder.add(lightWrapCfg, 'enabled').name(tr.gui.lightWrapEnabled).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'radius', 0.0, 0.05, 0.001).name(tr.gui.lightWrapRadius).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'strength', 0.0, 2.0, 0.01).name(tr.gui.lightWrapStrength).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'edgePower', 0.2, 5.0, 0.1).name(tr.gui.lightWrapEdgePower).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'bodyStrength', 0.0, 1.0, 0.01).name(tr.gui.lightWrapBodyStrength).onChange(applyLightWrap);
+  lightWrapFolder.close();
 
   // 3. Lighting Folder
   const lightFolder = visualGui.addFolder(tr.gui.lightFolder);

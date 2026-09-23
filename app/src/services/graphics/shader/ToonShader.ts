@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
 import { toggleSmoothNormalsInHierarchy } from './SmoothNormalHelper';
+import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './HairShadow';
+import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './HairRing';
+import { CHARACTER_LAYER } from '../postprocessing/LightWrap';
 
 export interface EyeGlowConfig {
   enabled: boolean;
@@ -34,6 +37,8 @@ export type ToonShaderOptions = {
   clothPattern?: RegExp;
   config?: ToonShaderAvatarConfig;
   camera?: THREE.Camera;
+  // 前髪の影（HairShadowRenderer.uniforms）。未指定なら影は出ない
+  hairShadow?: HairShadowUniforms;
   debug?: boolean;
 };
 
@@ -52,6 +57,7 @@ type MToonLikeMaterial = THREE.Material & {
   isMToonMaterial?: boolean;
   isOutline?: boolean;
   map?: THREE.Texture | null;
+  shadeMultiplyTexture?: THREE.Texture | null;
   color?: THREE.Color;
   uniforms?: Record<string, { value: any }>;
   shadeColorFactor?: THREE.Color;
@@ -280,6 +286,12 @@ export function applyToonShader(
   const clothPattern = options.clothPattern ?? DEFAULT_CLOTH_PATTERN;
 
   let activeConfig = options.config;
+  const hairShadowUniforms = options.hairShadow ?? createHairShadowUniforms();
+  // 天使の輪: 頭の位置と向き（髪メッシュの描画直前に更新する）
+  // 向きは軸がそろった正規化ボーンから取る（Y が上、Z が前）
+  const hairRingHeadFrame = createHairRingHeadFrame();
+  const headBoneNode = vrm.humanoid?.getNormalizedBoneNode('head') ?? null;
+  const hairRingMeshes = new Set<THREE.Mesh>();
 
   const bottomGradientUniforms = {
     uBottomGradientEnabled: {
@@ -320,9 +332,23 @@ export function applyToonShader(
 
     const mesh = object as THREE.Mesh;
     mesh.frustumCulled = false;
+    // キャラのマスク（ライトラップなど）に描く
+    mesh.layers.enable(CHARACTER_LAYER);
     const sourceMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 
     sourceMaterials.forEach((sourceMaterial) => {
+      // 前髪の影: 髪メッシュは深度マスクに描く（マテリアル共有でも全メッシュを登録する）
+      if (sourceMaterial && classifyStyleMaterial(sourceMaterial as MToonLikeMaterial, mesh, bodyPattern, hairPattern, clothPattern) === 'hair') {
+        mesh.layers.enable(HAIR_SHADOW_LAYER);
+        if (headBoneNode && !hairRingMeshes.has(mesh)) {
+          hairRingMeshes.add(mesh);
+          const prevOnBeforeRender = mesh.onBeforeRender;
+          mesh.onBeforeRender = function (...args) {
+            updateHairRingHeadFrame(hairRingHeadFrame, headBoneNode);
+            prevOnBeforeRender.apply(this, args);
+          };
+        }
+      }
       if (!sourceMaterial || processedMaterials.has(sourceMaterial)) return;
       processedMaterials.add(sourceMaterial);
 
@@ -332,6 +358,13 @@ export function applyToonShader(
 
       const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
+
+      // 前髪の影を受けるのは顔・目・肌
+      const hairShadowReceiver = {
+        value: !material.isOutline && (kind === 'face' || kind === 'eye' || kind === 'body') ? 1 : 0,
+      };
+      // 天使の輪を描くのは髪（アウトラインを除く）
+      const hairRingTarget = { value: !material.isOutline && kind === 'hair' ? 1 : 0 };
 
       // Preserve original VRM shade color, matcap factor & emissive properties
       if (material.shadeColorFactor) {
@@ -408,6 +441,9 @@ export function applyToonShader(
         shader.uniforms.uBottomGradientShadowWeight = bottomGradientUniforms.uBottomGradientShadowWeight;
         shader.uniforms.uBottomGradientColor = bottomGradientUniforms.uBottomGradientColor;
         shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
+
+        injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
+        injectHairRing(shader, hairRingTarget, hairRingHeadFrame);
 
         shader.fragmentShader = shader.fragmentShader.replace(
           'void main() {',
@@ -551,13 +587,22 @@ export function applyToonShader(
 
         // Shade Color (Face uses body material as reference so skin shadow matches body perfectly)
         const referenceMaterial = (matKind === 'face' && bodyEntry) ? bodyEntry.material : material;
-        const autoShadeColor = computeAutoShadowColor(
-          referenceMaterial,
-          matKind,
-          params.shadowHueShift ?? 0.03,
-          params.shadowLightnessFactor ?? 0.2,
-          params.shadowBoundaryTint ?? 0.0
-        );
+        // 乗算色が指定されていればそれを使う（影 = 乗算色 × マテリアル自身のテクスチャ）
+        if (params.shadeMultiply && !material.shadeMultiplyTexture && material.map) {
+          // 影用テクスチャがないマテリアルは基本テクスチャで代用する（ないと影が乗算色のベタ塗りになる）
+          material.shadeMultiplyTexture = material.map;
+          material.needsUpdate = true;
+        }
+        // 基本色係数（litFactor）も掛ける。白テクスチャ × 黒係数で色を出しているマテリアルでも影色が合う
+        const autoShadeColor = params.shadeMultiply
+          ? new THREE.Color(params.shadeMultiply).multiply(originalBaseColors.get(material) ?? new THREE.Color(1, 1, 1))
+          : computeAutoShadowColor(
+              referenceMaterial,
+              matKind,
+              params.shadowHueShift ?? 0.03,
+              params.shadowLightnessFactor ?? 0.2,
+              params.shadowBoundaryTint ?? 0.0
+            );
         if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShadeColor);
         if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShadeColor);
 

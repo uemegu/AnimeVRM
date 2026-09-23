@@ -1,0 +1,71 @@
+{
+  "prompt": "A person standing in place, happily clapping hands in front of chest excitedly and laughing with joy",
+  "duration": 5,
+  "note": "Lower score is better. Scores detect defects only; watch the kept files before choosing.",
+  "candidates": [
+    {
+      "rank": 1,
+      "seed": "416c92b4-2",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 1.3959342120255191,
+        "metrics": {
+          "footSlide": 0.06979671060127596,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.4960492923366547
+        }
+      },
+      "file": "ardy_confess_joy.fbx"
+    },
+    {
+      "rank": 2,
+      "seed": "416c92b4-3",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 2.08758728161611,
+        "metrics": {
+          "footSlide": 0.10437936408080552,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.5527941896709472
+        }
+      },
+      "file": "ardy_confess_joy.cand2.fbx"
+    },
+    {
+      "rank": 3,
+      "seed": "416c92b4-4",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 2.3054494852594596,
+        "metrics": {
+          "footSlide": 0.11527247426297299,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.5418867588944253
+        }
+      },
+      "file": "ardy_confess_joy.cand3.fbx"
+    },
+    {
+      "rank": 4,
+      "seed": "416c92b4-1",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 3.4509510742607516,
+        "metrics": {
+          "footSlide": 0.1725475537130376,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.592557097985935
+        }
+      },
+      "file": null
+    }
+  ]
+}

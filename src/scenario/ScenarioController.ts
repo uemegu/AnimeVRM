@@ -553,6 +553,7 @@ export class ScenarioController {
           enableBreathing: true,
           effectTextManager: this.sharedEffectTextManager,
           renderer: this.avatarManager.renderer ?? undefined,
+          hairShadow: this.avatarManager.hairShadow,
           onLoaded: (loadedAvatar) => {
             this.avatarManager.scenarioAvatars.set(placement.id, loadedAvatar);
             resolve();

@@ -7,7 +7,8 @@ const CELL_HEIGHT = 330;
 
 /**
  * Render an exported FBX through the game's importer as a PNG contact sheet.
- * Columns are evenly spaced times; the rows show the avatar from the front and from its right side.
+ * Columns are evenly spaced times; the rows show the avatar from the front, from its right side, and a close-up
+ * of the chest and head from the front, where hand contacts are easiest to judge.
  */
 export async function renderMotionPreview(fbx: ArrayBuffer, vrm: VRM, columns = 6): Promise<string> {
   const url = URL.createObjectURL(new Blob([fbx]));
@@ -25,7 +26,7 @@ export async function renderMotionPreview(fbx: ArrayBuffer, vrm: VRM, columns = 
   renderer.setSize(CELL_WIDTH, CELL_HEIGHT);
   const sheet = document.createElement('canvas');
   sheet.width = CELL_WIDTH * columns;
-  sheet.height = CELL_HEIGHT * 2;
+  sheet.height = CELL_HEIGHT * 3;
   const context = sheet.getContext('2d')!;
   const mixer = new THREE.AnimationMixer(vrm.scene);
   try {
@@ -38,7 +39,13 @@ export async function renderMotionPreview(fbx: ArrayBuffer, vrm: VRM, columns = 
     const center = new THREE.Vector3(0, height * 0.52, 0);
     const camera = new THREE.PerspectiveCamera(28, CELL_WIDTH / CELL_HEIGHT, 0.1, 20);
     const distance = height * 0.58 / Math.tan(THREE.MathUtils.degToRad(14));
-    const views = [new THREE.Vector3(0, 0, distance), new THREE.Vector3(-distance, 0, 0)];
+    const chest = vrm.humanoid.getNormalizedBoneNode('upperChest') ?? vrm.humanoid.getNormalizedBoneNode('chest') ?? vrm.humanoid.getNormalizedBoneNode('hips')!;
+    const closeUp = new THREE.Vector3(0, (chest.getWorldPosition(new THREE.Vector3()).y + head.y) / 2, 0);
+    const views = [
+      { center, offset: new THREE.Vector3(0, 0, distance) },
+      { center, offset: new THREE.Vector3(-distance, 0, 0) },
+      { center: closeUp, offset: new THREE.Vector3(0, 0, distance * 0.3) },
+    ];
     context.font = '14px sans-serif';
     context.fillStyle = '#333';
     for (let column = 0; column < columns; column++) {
@@ -46,9 +53,9 @@ export async function renderMotionPreview(fbx: ArrayBuffer, vrm: VRM, columns = 
       mixer.setTime(time);
       vrm.humanoid.update();
       vrm.scene.updateMatrixWorld(true);
-      views.forEach((offset, row) => {
-        camera.position.copy(center).add(offset);
-        camera.lookAt(center);
+      views.forEach(({ center: target, offset }, row) => {
+        camera.position.copy(target).add(offset);
+        camera.lookAt(target);
         renderer.render(scene, camera);
         context.drawImage(renderer.domElement, column * CELL_WIDTH, row * CELL_HEIGHT);
       });

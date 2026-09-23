@@ -3,6 +3,8 @@ import type { ShortAnimationConfig } from './animation/types';
 import { type RainConfig, DEFAULT_RAIN_CONFIG } from './effects/rain';
 import { type FastMotionConfig, DEFAULT_FAST_MOTION_CONFIG } from './effects/motion';
 import { type Live2DConfig, DEFAULT_LIVE2D_CONFIG } from './live2d/types';
+import { type HairRingParams, DEFAULT_HAIR_RING_PARAMS } from './shader/HairRing';
+import { type LightWrapParams, DEFAULT_LIGHT_WRAP_PARAMS } from './postprocessing/LightWrap';
 
 export type { RainConfig, FastMotionConfig, Live2DConfig };
 
@@ -11,6 +13,9 @@ export interface MaterialStyleParams {
   shadowHueShift: number;
   shadowLightnessFactor: number;
   shadowBoundaryTint: number;
+  // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
+  shadeMultiply?: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   faceShadingShiftFactor?: number;
@@ -82,6 +87,16 @@ export interface BottomGradientConfig {
   intensity: number;
   shadowWeight: number;
   color: string;
+}
+
+// 前髪の影（スクリーンスペース方式）。各値の意味は shader/HairShadow.ts の HairShadowParams を参照
+export interface HairShadowConfig {
+  enabled: boolean;
+  offset: number;
+  downBias: number;
+  strength: number;
+  depthBias: number;
+  maxDepthDiff: number;
 }
 
 export interface DepthRimConfig {
@@ -184,6 +199,11 @@ export interface AvatarConfig {
   };
   eyeGlow?: EyeGlowConfig;
   bottomGradient?: BottomGradientConfig;
+  hairShadow?: HairShadowConfig;
+  // 天使の輪（髪の帯状ハイライト）。各値の意味は shader/HairRing.ts を参照
+  hairRing?: HairRingParams;
+  // ライトラップ（背景の光をキャラの輪郭ににじませる）。各値の意味は postprocessing/LightWrap.ts を参照
+  lightWrap?: LightWrapParams;
   outline: {
     enabled: boolean;
     useSmoothNormal: boolean;
@@ -196,6 +216,8 @@ export interface AvatarConfig {
   environment: EnvironmentConfig;
   lighting: {
     castShadows: boolean;
+    // 天使の輪を寄せる色（sRGB）。時間帯の光になじませる。未指定なら白
+    hairRingTint?: string;
     ambient: {
       color: string;
       intensity: number;
@@ -285,6 +307,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.02,
       shadowLightnessFactor: 0.16,
       shadowBoundaryTint: 0.35,
+      shadeMultiply: '#d49ea3',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       faceShadingShiftFactor: 0.65,
@@ -303,11 +326,12 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadowBoundaryTint: 0.2,
+      shadeMultiply: '#8474a4',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
-      matcapEnabled: true,
-      emissiveIntensity: 1.5,
+      matcapEnabled: false,
+      emissiveIntensity: 0,
       rimEnabled: false,
       rimColor: '#ffffff',
       parametricRimFresnelPowerFactor: 0,
@@ -320,6 +344,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       shadowHueShift: 0.03,
       shadowLightnessFactor: 0.2,
       shadowBoundaryTint: 0.1,
+      shadeMultiply: '#b8bcd8',
       shadingToonyFactor: 1.0,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
@@ -345,6 +370,16 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     shadowWeight: 1.0,
     color: '#101018',
   },
+  hairShadow: {
+    enabled: true,
+    offset: 0.006,
+    downBias: 0.002,
+    strength: 1.0,
+    depthBias: 0.002,
+    maxDepthDiff: 0.12,
+  },
+  hairRing: { ...DEFAULT_HAIR_RING_PARAMS },
+  lightWrap: { ...DEFAULT_LIGHT_WRAP_PARAMS },
   outline: {
     enabled: true,
     useSmoothNormal: true,
@@ -384,6 +419,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   lighting: {
     castShadows: false,
+    hairRingTint: '#f2f5ff',
     ambient: {
       color: '#b30071',
       intensity: 1,
@@ -444,8 +480,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.01,
-      radius: 0.06,
+      strength: 0.07,
+      radius: 0.7,
       threshold: 0.9,
     },
     colorGrading: {
@@ -462,7 +498,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     cinematic: {
       diffusion: {
         enabled: true,
-        strength: 0.24,
+        strength: 0.12,
         radius: 2.0,
       },
       filmGrain: {

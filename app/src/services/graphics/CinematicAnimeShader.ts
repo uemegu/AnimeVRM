@@ -27,10 +27,10 @@ export const CinematicAnimeShader = {
     uDiffusionStrength: { value: 0.25 },
     uDiffusionRadius: { value: 1.8 },
 
-    // 3. Color Grading
+    // 3. Color Grading（OutputPass の後の sRGB 空間で使うため、色は sRGB の値で持つ）
     uColorGradingEnabled: { value: 1.0 },
-    uShadowTint: { value: new THREE.Color('#3d61ff') },
-    uHighlightTint: { value: new THREE.Color('#99c0ff') },
+    uShadowTint: { value: new THREE.Color('#3d61ff').convertLinearToSRGB() },
+    uHighlightTint: { value: new THREE.Color('#99c0ff').convertLinearToSRGB() },
     uGradingStrength: { value: 0.28 },
     uGradingContrast: { value: 0.31 },
     uGamma: { value: 0.84 },
@@ -44,7 +44,7 @@ export const CinematicAnimeShader = {
     uVignetteEnabled: { value: 1.0 },
     uVignetteOffset: { value: 1.15 },
     uVignetteDarkness: { value: 0.08 },
-    uVignetteColor: { value: new THREE.Color('#1a1829') },
+    uVignetteColor: { value: new THREE.Color('#1a1829').convertLinearToSRGB() },
 
     // 6. Smart Sharpening
     uSharpenEnabled: { value: 1.0 },
