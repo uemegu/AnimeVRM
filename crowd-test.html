@@ -153,14 +153,24 @@
 
     <div id="ui-panel">
       <h2>P5風 群衆モブ調整</h2>
-      <div class="subtitle">朝の校門 (School Gate Morning)</div>
+      <div id="location-subtitle" class="subtitle">廊下・教室前 (School Corridor)</div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>ロケーション</span>
+        </div>
+        <div class="btn-row">
+          <button id="loc-corridor-btn" class="action-btn active">廊下（教室）</button>
+          <button id="loc-gate-btn" class="action-btn">朝の校門</button>
+        </div>
+      </div>
 
       <div class="control-group">
         <div class="control-label">
           <span>モブ透明度 (Opacity)</span>
-          <span id="opacity-val" class="control-value">0.78</span>
+          <span id="opacity-val" class="control-value">0.60</span>
         </div>
-        <input id="opacity-slider" type="range" min="0.2" max="1.0" step="0.02" value="0.78" />
+        <input id="opacity-slider" type="range" min="0.2" max="1.0" step="0.02" value="0.60" />
       </div>
 
       <div class="control-group">

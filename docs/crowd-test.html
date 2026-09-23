@@ -142,13 +142,14 @@
         backdrop-filter: blur(6px);
       }
     </style>
-    <script type="module" crossorigin src="/AnimeVRM/assets/crowd_test-B-qorlv7.js"></script>
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/three-vrm.module-CHP-EMz8.js">
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/OrbitControls-CuQPaqKM.js">
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/path-DkSDjNaC.js">
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-CunCtO3Z.js">
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/FBXLoader-5fWQ6clL.js">
-    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/Avatar-8AvM-CBv.js">
+    <script type="module" crossorigin src="/AnimeVRM/assets/crowd_test-Cht81ASV.js"></script>
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/three-vrm.module-sRM_g8x9.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/OrbitControls-Hj21uyrP.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/path-CiUJmYr3.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-cfnnerBR.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/FBXLoader-B-MZc_Xc.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/Avatar-CIeaBRYp.js">
+    <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/SchoolGateCrowdPreset-CGphNanb.js">
   </head>
   <body>
     <div id="canvas-container">
@@ -160,14 +161,24 @@
 
     <div id="ui-panel">
       <h2>P5風 群衆モブ調整</h2>
-      <div class="subtitle">朝の校門 (School Gate Morning)</div>
+      <div id="location-subtitle" class="subtitle">廊下・教室前 (School Corridor)</div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>ロケーション</span>
+        </div>
+        <div class="btn-row">
+          <button id="loc-corridor-btn" class="action-btn active">廊下（教室）</button>
+          <button id="loc-gate-btn" class="action-btn">朝の校門</button>
+        </div>
+      </div>
 
       <div class="control-group">
         <div class="control-label">
           <span>モブ透明度 (Opacity)</span>
-          <span id="opacity-val" class="control-value">0.78</span>
+          <span id="opacity-val" class="control-value">0.60</span>
         </div>
-        <input id="opacity-slider" type="range" min="0.2" max="1.0" step="0.02" value="0.78" />
+        <input id="opacity-slider" type="range" min="0.2" max="1.0" step="0.02" value="0.60" />
       </div>
 
       <div class="control-group">

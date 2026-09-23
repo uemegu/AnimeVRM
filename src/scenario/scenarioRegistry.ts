@@ -16,6 +16,7 @@ import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
 import { getTeacherGateScenario } from './teacherGateScenario';
 import { getSilverWeekScenario } from './silverWeekScenario';
 import { getGestureBattleScenario } from './gestureBattleScenario';
+import { getCorridorConversationScenario } from './corridorConversationScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -164,6 +165,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: 'アオイとエミリが昼の校門前で全身ジェスチャー対決！ひらめき、歓喜、おねだり、ツッコミが炸裂する多彩なモーションシナリオ。',
     ogpImage: '/ogp/silver-week.png',
     getScenario: (lang = 'ja') => getGestureBattleScenario(lang),
+  },
+  'corridor-mob': {
+    id: 'corridor-mob',
+    title: '休み時間の廊下 〜賑わう教室と2人の約束〜',
+    shortTitle: '休み時間の廊下',
+    description: '賑わう学校の廊下でばったり会ったアオイとの会話。ペルソナ5風の半透明モブ生徒たちが背後で談笑する日常シーン。',
+    ogpImage: '/ogp/silver-week.png',
+    getScenario: () => getCorridorConversationScenario(),
   },
 };
 

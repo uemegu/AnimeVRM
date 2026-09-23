@@ -203,12 +203,20 @@ export interface ScenarioScene {
   shaftCutIn?: 'red_trouble' | 'green_closed' | 'none'; // 赤コマ・緑コマのタイポグラフィカットイン
   shaftCutInDuration?: number; // カットイン表示秒数
   shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
+  crowd?: boolean | ScenarioCrowdConfig; // ペルソナ5風モブ群衆演出
   conditions?: string[];
   goto?: string;
   waitClick?: boolean;
   autoNextSec?: number;
   /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
   transitions?: SceneTransition[];
+}
+
+export interface ScenarioCrowdConfig {
+  enabled?: boolean;
+  preset?: 'school_gate' | 'corridor' | string;
+  opacity?: number;
+  tone?: 'p5' | 'monotone';
 }
 
 export interface ScenarioChapter {

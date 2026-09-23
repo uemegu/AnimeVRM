@@ -54,6 +54,7 @@ export interface ScenarioEngineOptions {
   onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
   onSwitchShaftMode?: (active: boolean) => void;
   onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
+  onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
 }
 
 export class ScenarioEngine {
@@ -116,6 +117,7 @@ export class ScenarioEngine {
   private shaftCutInOverlay: ShaftCutInOverlay = new ShaftCutInOverlay();
   private onSwitchShaftMode?: (active: boolean) => void;
   private onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
+  private onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
 
@@ -148,6 +150,7 @@ export class ScenarioEngine {
     this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
     this.onSwitchShaftMode = options.onSwitchShaftMode;
     this.onSwitchShaftSpaceStage = options.onSwitchShaftSpaceStage;
+    this.onUpdateCrowd = options.onUpdateCrowd;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -329,6 +332,7 @@ export class ScenarioEngine {
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
+    this.onUpdateCrowd?.(false);
 
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
     allAvatars.forEach((avatar) => {
@@ -1058,6 +1062,9 @@ export class ScenarioEngine {
     } else {
       this.focusLinesOverlay.hide();
     }
+
+    // 1.91 Persona 5 Crowd Mobs (群衆モブ演出)
+    this.onUpdateCrowd?.(scene.crowd);
 
     // 1.95 Fast Motion Directional Blur (シーン単位でのブラーON/OFF。デフォルトOFF)
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];

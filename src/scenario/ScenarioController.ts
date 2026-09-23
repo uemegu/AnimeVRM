@@ -30,17 +30,22 @@ import { AvatarManager } from '../avatar/AvatarManager';
 import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
 import { PvTitleOverlay } from '../ui/PvTitleOverlay';
 import { ShaftModeController } from '../effects/shaft/ShaftModeController';
+import { Persona5CrowdController } from '../crowd/Persona5CrowdController';
+import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
+import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
   public scrollingBackgroundManager: ScrollingBackgroundManager;
   public dreamBackground: AnimeDreamBackground;
+  public crowdController: Persona5CrowdController;
   public interludeOverlay: InterludeOverlay;
   public pvTitleOverlay: PvTitleOverlay;
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
   public masterManager: MasterDataManager;
   public audioLipSync: AudioLipSync;
+  private currentCrowdPreset: string | null = null;
 
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -93,6 +98,7 @@ export class ScenarioController {
     });
 
     this.dreamBackground = new AnimeDreamBackground(this.scene, this.camera);
+    this.crowdController = new Persona5CrowdController(this.scene);
 
     this.interludeOverlay = new InterludeOverlay();
     this.pvTitleOverlay = new PvTitleOverlay();
@@ -383,10 +389,40 @@ export class ScenarioController {
       onSwitchShaftSpaceStage: (stage) => {
         this.shaftModeController?.setSpaceStage(stage);
       },
+      onUpdateCrowd: async (crowdConfig) => {
+        if (!crowdConfig) {
+          this.crowdController.setVisible(false);
+          return;
+        }
+        const isObj = typeof crowdConfig === 'object';
+        const enabled = isObj ? (crowdConfig.enabled ?? true) : crowdConfig;
+        if (!enabled) {
+          this.crowdController.setVisible(false);
+          return;
+        }
+
+        const presetName = isObj ? (crowdConfig.preset ?? 'corridor') : 'corridor';
+        const opacity = isObj ? (crowdConfig.opacity ?? 0.6) : 0.6;
+
+        this.crowdController.setOpacity(opacity);
+        if (this.currentCrowdPreset !== presetName) {
+          this.currentCrowdPreset = presetName;
+          this.crowdController.clear();
+          const members =
+            presetName === 'school_gate'
+              ? MORNING_SCHOOL_GATE_CROWD
+              : CORRIDOR_CROWD_PRESET;
+          for (const m of members) {
+            await this.crowdController.addMember(m);
+          }
+        }
+        this.crowdController.setVisible(true);
+      },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
+        this.crowdController.setVisible(false);
         this.pvTitleOverlay.hide();
         this.shaftModeController?.setShaftMode(false);
         this.shaftModeController?.setSpaceStage(false);
@@ -439,6 +475,7 @@ export class ScenarioController {
     if (this.dreamBackground) {
       this.dreamBackground.update(delta);
     }
+    this.crowdController.update(delta);
   }
 
   public syncPlayStateUI(): void {

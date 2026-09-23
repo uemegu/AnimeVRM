@@ -177,6 +177,7 @@ const scenarioController = new ScenarioController({
 const classroomExperienceController = new ClassroomExperienceController({
   scene: viewerCore.scene,
   camera: viewerCore.camera,
+  dirLight: viewerCore.dirLight,
   controls: viewerCore.controls,
   avatarManager,
   scenarioController,

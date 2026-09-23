@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import type { AvatarManager } from './AvatarManager';
 
-const CLASSROOM_DESK_COLUMNS = [-4.64, -2.78, -0.92, 0.92, 2.78, 4.64];
-const CLASSROOM_DESK_ROWS = [5.0, 3.32, 1.64, -0.04, -1.72, -3.40];
+const CLASSROOM_DESK_COLUMNS = [-3.045, -1.925, -0.84, 0.84, 1.925, 3.045];
+const CLASSROOM_DESK_ROWS = [3.6, 2.3904, 1.1808, -0.0288, -1.2384, -2.448];
 
 export interface AvatarTransformControllerOptions {
   domElement: HTMLElement;
@@ -355,20 +355,19 @@ export class AvatarTransformController {
   }
 
   private isClassroomWalkable(x: number, z: number): boolean {
-    // The avatar has roughly a 25 cm radius. The exported room spans
-    // x = -6.4..6.4 and z = -7.4..7.4 in Three.js coordinates.
-    if (Math.abs(x) > 6.05 || Math.abs(z) > 6.95) return false;
+    // Allow for the avatar's roughly 25 cm radius inside the 8.96 x 10.66 m room.
+    if (Math.abs(x) > 4.18 || Math.abs(z) > 5.02) return false;
 
     for (const deskX of CLASSROOM_DESK_COLUMNS) {
-      if (Math.abs(x - deskX) > 0.72) continue;
+      if (Math.abs(x - deskX) > 0.57) continue;
       for (const deskZ of CLASSROOM_DESK_ROWS) {
         // The seat extends behind the desktop toward positive z.
-        if (z > deskZ - 0.56 && z < deskZ + 1.06) return false;
+        if (z > deskZ - 0.41 && z < deskZ + 0.74) return false;
       }
     }
 
     // The teacher's desk occupies the front teaching area.
-    if (Math.abs(x) < 1.10 && z > -6.20 && z < -4.90) return false;
+    if (Math.abs(x) < 0.95 && z > -4.55 && z < -3.53) return false;
     return true;
   }
 
