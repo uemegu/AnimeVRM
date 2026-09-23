@@ -28,8 +28,12 @@ export class ClassroomExperienceController {
     maxDistance: number;
     maxPolarAngle: number;
     enablePan: boolean;
+    enableRotate: boolean;
+    enableZoom: boolean;
   } | null = null;
-  private followAnchor: THREE.Vector3 | null = null;
+  private readonly lastAoiPosition = new THREE.Vector3();
+  private followDistance = 4.0;
+  private isWalking = false;
   private gradientMap: THREE.DataTexture;
 
   constructor(options: {
@@ -51,21 +55,20 @@ export class ClassroomExperienceController {
     this.getConfig = options.getConfig;
     this.onApplyConfig = options.onApplyConfig;
 
-    // A small stepped ramp keeps the classroom's imported PBR textures but shades
-    // their surfaces in a clean cel style in the Three.js viewer.
+    // Only the classroom receives this stepped ramp; VRM materials stay intact.
     this.gradientMap = new THREE.DataTexture(
       new Uint8Array([
-        106, 115, 132, 255,
-        156, 166, 181, 255,
-        211, 219, 229, 255,
-        255, 255, 255, 255,
+        37, 55, 83, 255,
+        83, 108, 139, 255,
+        174, 190, 203, 255,
+        250, 246, 236, 255,
       ]),
       4,
       1,
       THREE.RGBAFormat
     );
-    this.gradientMap.magFilter = THREE.LinearFilter;
-    this.gradientMap.minFilter = THREE.LinearFilter;
+    this.gradientMap.magFilter = THREE.NearestFilter;
+    this.gradientMap.minFilter = THREE.NearestFilter;
     this.gradientMap.generateMipmaps = false;
     this.gradientMap.needsUpdate = true;
   }
@@ -83,10 +86,17 @@ export class ClassroomExperienceController {
     );
     this.environment = gltf.scene;
     this.environment.name = 'School classroom | 3D experience';
+    const outlinedMeshes: THREE.Mesh[] = [];
     this.environment.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
-      object.castShadow = true;
-      object.receiveShadow = true;
+      const sourceMaterials = Array.isArray(object.material) ? object.material : [object.material];
+      const isPaintedShadow = sourceMaterials.some((material) => material.name.includes('painted ') && material.name.includes('contact shadow'));
+      object.castShadow = !isPaintedShadow;
+      object.receiveShadow = !isPaintedShadow;
+      if (isPaintedShadow) object.renderOrder = 1;
+      if (sourceMaterials.some((material) => this.shouldOutline(material.name))) {
+        outlinedMeshes.push(object);
+      }
       const replaceMaterial = (material: THREE.Material) => {
         const toon = this.toonMaterial(material);
         material.dispose();
@@ -96,6 +106,7 @@ export class ClassroomExperienceController {
         ? object.material.map(replaceMaterial)
         : replaceMaterial(object.material);
     });
+    this.addClassroomOutlines(outlinedMeshes);
 
     if (this.scenarioController.scenarioEngine.isPlaying) {
       this.scenarioController.scenarioEngine.stop();
@@ -115,6 +126,8 @@ export class ClassroomExperienceController {
       maxDistance: this.controls.maxDistance,
       maxPolarAngle: this.controls.maxPolarAngle,
       enablePan: this.controls.enablePan,
+      enableRotate: this.controls.enableRotate,
+      enableZoom: this.controls.enableZoom,
     };
 
     const config = this.getConfig();
@@ -131,13 +144,13 @@ export class ClassroomExperienceController {
         {
           id: 'aoi',
           character: '/models/aoi/aoi-school.vrm',
-          position: [0, 0, 4.8],
+          position: [0, 0, 2.3],
           rotationY: Math.PI,
         },
         {
           id: 'emily',
           character: '/models/emili/emili-school-with-bag.vrm',
-          position: [1.0, 0, -3.6],
+          position: [2.4, 0, -5.8],
           rotationY: 0,
         },
       ]);
@@ -150,16 +163,22 @@ export class ClassroomExperienceController {
     this.avatarTransformController.setWalkingMode(true);
     this.avatarTransformController.syncInitialTransform();
 
-    this.camera.position.set(0, 7.2, 17.5);
-    this.controls.target.set(0, 1.08, 4.8);
+    const aoi = this.avatarManager.scenarioAvatars.get('aoi');
+    if (!aoi?.vrm) {
+      await this.stop();
+      throw new Error('Aoi was not loaded for the classroom experience.');
+    }
+    this.lastAoiPosition.copy(aoi.vrm.scene.position);
+    this.isWalking = false;
+    this.followDistance = 4.0;
     this.controls.minDistance = 3;
-    this.controls.maxDistance = 27;
+    this.controls.maxDistance = 8;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.025;
-    this.controls.enablePan = true;
+    this.controls.enablePan = false;
+    this.controls.enableRotate = false;
+    this.controls.enableZoom = true;
     this.controls.enabled = true;
-    this.controls.update();
-
-    this.followAnchor = this.controls.target.clone();
+    this.updateThirdPersonCamera(aoi.vrm.scene.position, aoi.vrm.scene.rotation.y, true);
     this.active = true;
   }
 
@@ -169,15 +188,44 @@ export class ClassroomExperienceController {
     if (!aoi?.vrm) return;
 
     const position = aoi.vrm.scene.position;
-    const nextAnchor = new THREE.Vector3(position.x, position.y + 1.08, position.z);
-    if (!this.followAnchor) {
-      this.followAnchor = nextAnchor;
-      return;
+    const isMoving = position.distanceToSquared(this.lastAoiPosition) > 1e-6;
+    if (isMoving !== this.isWalking) {
+      this.isWalking = isMoving;
+      const motion = resolveAssetUrl(isMoving ? '/animations/Walking.fbx' : '/animations/Idle.fbx');
+      void aoi.playAnimation(motion, true, 0.22);
     }
-    const delta = nextAnchor.sub(this.followAnchor);
-    this.controls.target.add(delta);
-    this.camera.position.add(delta);
-    this.followAnchor.add(delta);
+    this.lastAoiPosition.copy(position);
+    this.updateThirdPersonCamera(position, aoi.vrm.scene.rotation.y);
+  }
+
+  private updateThirdPersonCamera(
+    position: THREE.Vector3,
+    rotationY: number,
+    snap = false
+  ): void {
+    const previousOffset = this.camera.position.clone().sub(this.controls.target);
+    const currentHorizontalDistance = Math.hypot(previousOffset.x, previousOffset.z);
+    if (!snap && Number.isFinite(currentHorizontalDistance) && currentHorizontalDistance > 0.1) {
+      this.followDistance = THREE.MathUtils.clamp(currentHorizontalDistance, 2.6, 7.0);
+    }
+
+    // Aoi faces -Z at her starting rotation, so the negative forward vector is her back.
+    const behind = new THREE.Vector3(-Math.sin(rotationY), 0, -Math.cos(rotationY));
+    const cameraPosition = position.clone().addScaledVector(behind, this.followDistance);
+    cameraPosition.y += 2.35;
+    cameraPosition.x = THREE.MathUtils.clamp(cameraPosition.x, -6.0, 6.0);
+    cameraPosition.z = THREE.MathUtils.clamp(cameraPosition.z, -6.9, 6.9);
+
+    const target = position.clone();
+    target.y += 1.15;
+    if (snap) {
+      this.camera.position.copy(cameraPosition);
+      this.controls.target.copy(target);
+    } else {
+      this.camera.position.lerp(cameraPosition, 0.22);
+      this.controls.target.lerp(target, 0.28);
+    }
+    this.controls.update();
   }
 
   public async stop(): Promise<void> {
@@ -189,19 +237,23 @@ export class ClassroomExperienceController {
     if (this.environment) {
       this.scene.remove(this.environment);
       const textures = new Set<THREE.Texture>();
+      const geometries = new Set<THREE.BufferGeometry>();
+      const materials = new Set<THREE.Material>();
       this.environment.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return;
-        object.geometry.dispose();
-        const materials = Array.isArray(object.material) ? object.material : [object.material];
-        materials.forEach((material) => {
+        geometries.add(object.geometry);
+        const meshMaterials = Array.isArray(object.material) ? object.material : [object.material];
+        meshMaterials.forEach((material) => {
+          materials.add(material);
           Object.values(material).forEach((value) => {
             if (value instanceof THREE.Texture && value !== this.gradientMap) {
               textures.add(value);
             }
           });
-          material.dispose();
         });
       });
+      geometries.forEach((geometry) => geometry.dispose());
+      materials.forEach((material) => material.dispose());
       textures.forEach((texture) => texture.dispose());
       this.environment = null;
     }
@@ -212,9 +264,9 @@ export class ClassroomExperienceController {
 
     if (this.savedEnvironmentConfig) {
       Object.assign(this.getConfig().environment, this.savedEnvironmentConfig);
-      this.onApplyConfig(this.getConfig());
       this.savedEnvironmentConfig = null;
     }
+    this.onApplyConfig(this.getConfig());
     this.scene.background = this.savedSceneBackground;
     this.savedSceneBackground = null;
 
@@ -224,14 +276,39 @@ export class ClassroomExperienceController {
       this.controls.maxDistance = this.savedControls.maxDistance;
       this.controls.maxPolarAngle = this.savedControls.maxPolarAngle;
       this.controls.enablePan = this.savedControls.enablePan;
+      this.controls.enableRotate = this.savedControls.enableRotate;
+      this.controls.enableZoom = this.savedControls.enableZoom;
       this.controls.update();
       this.savedControls = null;
     }
-    this.followAnchor = null;
+    this.isWalking = false;
   }
 
-  private toonMaterial(source: THREE.Material): THREE.MeshToonMaterial {
+  private toonMaterial(source: THREE.Material): THREE.Material {
     const sourceMaterial = source as THREE.MeshStandardMaterial;
+    if (source.name.includes('painted ') && source.name.includes('contact shadow')) {
+      return new THREE.MeshBasicMaterial({
+        name: source.name,
+        color: sourceMaterial.color?.clone() ?? new THREE.Color('#344a69'),
+        transparent: true,
+        opacity: source.opacity,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        toneMapped: false,
+      });
+    }
+    const name = source.name.toLowerCase();
+    const shadowHex = name.includes('wood') || name.includes('walnut') || name.includes('beech')
+      ? '#405168'
+      : name.includes('board')
+        ? '#122b37'
+        : name.includes('steel') || name.includes('metal') || name.includes('support')
+          ? '#304a68'
+          : name.includes('floor') || name.includes('tile')
+            ? '#6984a5'
+            : '#718dab';
+    const shadowColor = new THREE.Color(shadowHex);
+    const shadowVector = `${shadowColor.r.toFixed(4)}, ${shadowColor.g.toFixed(4)}, ${shadowColor.b.toFixed(4)}`;
     const toon = new THREE.MeshToonMaterial({
       name: `${source.name || 'Classroom material'} | toon`,
       color: sourceMaterial.color?.clone() ?? new THREE.Color(0xffffff),
@@ -244,9 +321,75 @@ export class ClassroomExperienceController {
       alphaTest: source.alphaTest,
       gradientMap: this.gradientMap,
     });
-    toon.flatShading = true;
     toon.toneMapped = true;
+    if (!toon.transparent) {
+      // Suppress the shared ambient fill on the room alone. Keep the VRM's
+      // MToon shader and the viewer's scene lights exactly as they were.
+      toon.onBeforeCompile = (shader) => {
+        shader.vertexShader = shader.vertexShader
+          .replace('#include <common>', '#include <common>\nvarying vec3 vClassroomWorldPosition;')
+          .replace(
+            '#include <worldpos_vertex>',
+            '#include <worldpos_vertex>\nvClassroomWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;'
+          );
+        shader.fragmentShader = shader.fragmentShader
+          .replace('#include <common>', '#include <common>\nvarying vec3 vClassroomWorldPosition;')
+          .replace(
+            '#include <map_fragment>',
+            `#include <map_fragment>
+             float paintedVariation = sin(vClassroomWorldPosition.x * 2.1 + sin(vClassroomWorldPosition.z * 1.7))
+               * sin(vClassroomWorldPosition.y * 2.8 + vClassroomWorldPosition.x * 0.9);
+             diffuseColor.rgb *= 1.0 + paintedVariation * 0.035;`
+          )
+          .replace(
+            'vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + totalEmissiveRadiance;',
+            `vec3 classroomLight = normalize((viewMatrix * vec4(-0.38, 0.82, 0.42, 0.0)).xyz);
+             float classroomFacing = dot(normal, classroomLight);
+             vec3 classroomShade = vec3(${shadowVector});
+             vec3 classroomDark = mix(classroomShade, diffuseColor.rgb, 0.15);
+             vec3 classroomMid = mix(classroomShade, diffuseColor.rgb, 0.66);
+             vec3 outgoingLight = classroomFacing > 0.62 ? diffuseColor.rgb
+               : classroomFacing > 0.18 ? classroomMid : classroomDark;`
+          );
+      };
+      toon.customProgramCacheKey = () => `classroom-painted-toon-v2-${shadowHex}`;
+    }
     toon.needsUpdate = true;
     return toon;
+  }
+
+  private shouldOutline(materialName: string): boolean {
+    return [
+      'sunlit honey wood',
+      'warm walnut edge',
+      'classroom sliding door',
+      'beech cabinet',
+      'blank deep green board',
+      'blue grey painted steel',
+      'dark seat support',
+      'powder blue trim',
+      'slate window metal',
+    ].some((name) => materialName.includes(name));
+  }
+
+  private addClassroomOutlines(meshes: THREE.Mesh[]): void {
+    if (meshes.length === 0) return;
+    const ink = new THREE.MeshBasicMaterial({
+      color: '#2a425b',
+      side: THREE.BackSide,
+      toneMapped: false,
+    });
+    ink.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\ntransformed += normalize(normal) * 0.012;'
+      );
+    };
+    ink.customProgramCacheKey = () => 'classroom-outline-v2';
+    for (const mesh of meshes) {
+      const outline = new THREE.Mesh(mesh.geometry, ink);
+      outline.name = 'Classroom ink outline';
+      mesh.add(outline);
+    }
   }
 }

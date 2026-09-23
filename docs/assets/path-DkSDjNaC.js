@@ -1,0 +1,1 @@
+function e(e){if(!e||e.startsWith(`blob:`)||e.startsWith(`data:`)||e.startsWith(`http://`)||e.startsWith(`https://`))return e;let t=`/AnimeVRM/`,n=t.endsWith(`/`)?t:`${t}/`;return e.startsWith(n)?e:n.startsWith(`/`)&&e.startsWith(n.slice(1))?`/${e}`:`${n}${e.startsWith(`/`)?e.slice(1):e}`}export{e as t};

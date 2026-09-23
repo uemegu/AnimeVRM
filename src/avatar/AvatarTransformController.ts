@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import type { AvatarManager } from './AvatarManager';
 
+const CLASSROOM_DESK_COLUMNS = [-4.64, -2.78, -0.92, 0.92, 2.78, 4.64];
+const CLASSROOM_DESK_ROWS = [5.0, 3.32, 1.64, -0.04, -1.72, -3.40];
+
 export interface AvatarTransformControllerOptions {
   domElement: HTMLElement;
   avatarManager: AvatarManager;
@@ -291,16 +294,13 @@ export class AvatarTransformController {
       const forwardZ = Math.cos(currentRot);
       const rightX = Math.cos(currentRot);
       const rightZ = -Math.sin(currentRot);
-      const newX = THREE.MathUtils.clamp(
-        currentPos.x + (forwardX * forward + rightX * strafe) * step,
-        -7.0,
-        7.0
-      );
-      const newZ = THREE.MathUtils.clamp(
-        currentPos.z + (forwardZ * forward + rightZ * strafe) * step,
-        -9.8,
-        9.8
-      );
+      const proposedX = currentPos.x + (forwardX * forward + rightX * strafe) * step;
+      const proposedZ = currentPos.z + (forwardZ * forward + rightZ * strafe) * step;
+      // Resolve each axis separately so Aoi can slide along a desk or wall.
+      const newX = this.isClassroomWalkable(proposedX, currentPos.z)
+        ? proposedX : currentPos.x;
+      const newZ = this.isClassroomWalkable(newX, proposedZ)
+        ? proposedZ : currentPos.z;
       if (forward !== 0 || strafe !== 0) {
         this.avatarManager.setAvatarPosition(newX, currentPos.y, newZ);
       }
@@ -352,6 +352,24 @@ export class AvatarTransformController {
       const newRot = currentRot + rotY * this.KEY_ROT_SPEED * delta;
       this.avatarManager.setAvatarRotationY(newRot);
     }
+  }
+
+  private isClassroomWalkable(x: number, z: number): boolean {
+    // The avatar has roughly a 25 cm radius. The exported room spans
+    // x = -6.4..6.4 and z = -7.4..7.4 in Three.js coordinates.
+    if (Math.abs(x) > 6.05 || Math.abs(z) > 6.95) return false;
+
+    for (const deskX of CLASSROOM_DESK_COLUMNS) {
+      if (Math.abs(x - deskX) > 0.72) continue;
+      for (const deskZ of CLASSROOM_DESK_ROWS) {
+        // The seat extends behind the desktop toward positive z.
+        if (z > deskZ - 0.56 && z < deskZ + 1.06) return false;
+      }
+    }
+
+    // The teacher's desk occupies the front teaching area.
+    if (Math.abs(x) < 1.10 && z > -6.20 && z < -4.90) return false;
+    return true;
   }
 
   public resetTransform(): void {
