@@ -411,6 +411,7 @@ export const en: Translations = {
     emissiveIntensity: '🌟 Emissive Intensity (Bloom)',
     shadowHueShift: 'Shadow Hue Shift',
     shadowLightness: 'Shadow Lightness',
+    shadeMultiply: 'Shade Multiply',
     shadowBoundaryTint: 'Shadow Boundary Tint',
     toonyFactor: 'Toon Shading Factor',
     shadingShift: 'Shading Border Shift',

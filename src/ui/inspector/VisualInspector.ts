@@ -41,6 +41,10 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     folder.add(params, 'shadowBoundaryTint', 0.0, 1.0, 0.02).name(tr.gui.shadowBoundaryTint).onChange(update);
     folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name(tr.gui.shadingShift).onChange(update);
+    if (params.shadeMultiply === undefined) {
+      params.shadeMultiply = { body: '#d49ea3', hair: '#8474a4', cloth: '#b8bcd8' }[kind];
+    }
+    folder.addColor(params as any, 'shadeMultiply').name(tr.gui.shadeMultiply).onChange(update);
     if (kind === 'body') {
       if (params.faceShadingShiftFactor === undefined) {
         params.faceShadingShiftFactor = 0.65;
@@ -159,7 +163,7 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
       enabled: true,
       offset: 0.006,
       downBias: 0.002,
-      strength: 0.7,
+      strength: 1.0,
       depthBias: 0.002,
       maxDepthDiff: 0.12,
     };

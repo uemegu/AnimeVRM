@@ -136,6 +136,9 @@ export interface MaterialStyleParams {
   shadowHueShift: number;
   shadowLightnessFactor: number;
   shadowBoundaryTint: number;
+  // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
+  shadeMultiply?: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
   faceShadingShiftFactor?: number;
