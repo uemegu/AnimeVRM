@@ -6,7 +6,14 @@ import { normalizeStructuredMotion, type StructuredMotionResult } from './vendor
 export const ARDY_MODEL_REVISION = '1c21362effeecec0454bfc0d818661525ae6b387';
 export const ARDY_MODEL_BASE_URL = `https://huggingface.co/intsuc/Llama-3-ARDY-Mini-Core40-Browser/resolve/${ARDY_MODEL_REVISION}/`;
 export const ARDY_MODEL_TERMS_URL = `https://huggingface.co/intsuc/Llama-3-ARDY-Mini-Core40-Browser/blob/${ARDY_MODEL_REVISION}/MODEL_TERMS.md`;
+export const ARDY_DEFAULT_CFG_WEIGHT = 3.5;
 export type ArdyMotionState = 'unloaded' | 'loading' | 'ready' | 'generating' | 'error';
+
+export interface ArdyGenerateOptions {
+  /** Same seed and settings reproduce the same motion. Random when omitted. */
+  seed?: string;
+  cfgWeight?: number;
+}
 
 interface PendingRequest {
   resolve: (event: WorkerEvent) => void;
@@ -60,7 +67,9 @@ export class ArdyMotionService {
     }
   }
 
-  public generate(prompt: string, duration: number, signal: AbortSignal): Promise<StructuredMotionResult> {
+  public generate(prompt: string, duration: number, signal: AbortSignal, options: ArdyGenerateOptions = {}): Promise<StructuredMotionResult> {
+    const seed = options.seed ?? crypto.randomUUID();
+    const cfgWeight = options.cfgWeight ?? ARDY_DEFAULT_CFG_WEIGHT;
     const queuedAt = performance.now();
     // A cancelled inference must drain before another request reaches the worker.
     const operation = this.queue.catch(() => {}).then(async () => {
@@ -83,7 +92,7 @@ export class ArdyMotionService {
       try {
         const result = await this.request({
           type: 'generate', requestId, mode: 'replace', prompt: prompt.trim(),
-          durationSeconds: duration, seed: crypto.randomUUID(), cfgWeight: 3.5, historyFrames: 40,
+          durationSeconds: duration, seed, cfgWeight, historyFrames: 40,
           initialTranslation: new Float32Array(3), initialHeading: 0,
         }, 180_000);
         receivedAt = performance.now();
@@ -105,7 +114,7 @@ export class ArdyMotionService {
         const round = (value: number | undefined) => value !== undefined && Number.isFinite(value) ? Math.round(value * 100) / 100 : null;
         const inferenceMs = runtimeTimings?.total;
         console.debug('[ardy-mini] generation timing', {
-          requestId, status, prompt, modelVariant, requestedSeconds: duration,
+          requestId, status, prompt, seed, cfgWeight, modelVariant, requestedSeconds: duration,
           frameCount, motionSeconds: round(motionSeconds),
           queueMs: round(startedAt - queuedAt), wallMs: round(finishedAt - queuedAt),
           workerRoundTripMs: round((receivedAt ?? finishedAt) - startedAt), normalizeMs: round(normalizeMs),
