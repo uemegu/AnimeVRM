@@ -3,6 +3,7 @@ import type { VRM } from '@pixiv/three-vrm';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
 import { toggleSmoothNormalsInHierarchy } from './SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './HairShadow';
+import { injectHairRing } from './HairRing';
 
 export interface EyeGlowConfig {
   enabled: boolean;
@@ -285,6 +286,10 @@ export function applyToonShader(
 
   let activeConfig = options.config;
   const hairShadowUniforms = options.hairShadow ?? createHairShadowUniforms();
+  // 天使の輪: 頭ボーンのワールド座標（髪メッシュの描画直前に更新する）
+  const hairRingHeadBone = { value: new THREE.Vector3() };
+  const headBoneNode = vrm.humanoid?.getRawBoneNode('head') ?? null;
+  const hairRingMeshes = new Set<THREE.Mesh>();
 
   const bottomGradientUniforms = {
     uBottomGradientEnabled: {
@@ -331,6 +336,14 @@ export function applyToonShader(
       // 前髪の影: 髪メッシュは深度マスクに描く（マテリアル共有でも全メッシュを登録する）
       if (sourceMaterial && classifyStyleMaterial(sourceMaterial as MToonLikeMaterial, mesh, bodyPattern, hairPattern, clothPattern) === 'hair') {
         mesh.layers.enable(HAIR_SHADOW_LAYER);
+        if (headBoneNode && !hairRingMeshes.has(mesh)) {
+          hairRingMeshes.add(mesh);
+          const prevOnBeforeRender = mesh.onBeforeRender;
+          mesh.onBeforeRender = function (...args) {
+            headBoneNode.getWorldPosition(hairRingHeadBone.value);
+            prevOnBeforeRender.apply(this, args);
+          };
+        }
       }
       if (!sourceMaterial || processedMaterials.has(sourceMaterial)) return;
       processedMaterials.add(sourceMaterial);
@@ -346,6 +359,8 @@ export function applyToonShader(
       const hairShadowReceiver = {
         value: !material.isOutline && (kind === 'face' || kind === 'eye' || kind === 'body') ? 1 : 0,
       };
+      // 天使の輪を描くのは髪（アウトラインを除く）
+      const hairRingTarget = { value: !material.isOutline && kind === 'hair' ? 1 : 0 };
 
       // Preserve original VRM shade color, matcap factor & emissive properties
       if (material.shadeColorFactor) {
@@ -424,6 +439,7 @@ export function applyToonShader(
         shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
+        injectHairRing(shader, hairRingTarget, hairRingHeadBone);
 
         shader.fragmentShader = shader.fragmentShader.replace(
           'void main() {',
