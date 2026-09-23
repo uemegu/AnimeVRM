@@ -32,6 +32,7 @@ import { ViewerCore } from '../scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
 import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
 import { ScenarioController } from '../scenario/ScenarioController';
+import type { ClassroomExperienceController } from '../scenario/ClassroomExperienceController';
 import { InspectorManager } from './inspector/InspectorManager';
 import { showToast } from './components/Toast';
 import { openImportModal } from './components/ImportExportModal';
@@ -48,6 +49,7 @@ export interface UnifiedPanelContext {
   scenePresetManager: ScenePresetManager;
   avatarManager: AvatarManager;
   scenarioController: ScenarioController;
+  classroomExperienceController?: ClassroomExperienceController;
   inspectorManager: InspectorManager;
   audioLipSync: AudioLipSync;
   geminiLiveChatController: GeminiLiveChatController;
@@ -66,6 +68,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     scenePresetManager,
     avatarManager,
     scenarioController,
+    classroomExperienceController,
     inspectorManager,
     audioLipSync,
     geminiLiveChatController,
@@ -452,6 +455,20 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           </div>
 
           <!-- Scenarios -->
+          <div class="section-box" style="background: linear-gradient(135deg, rgba(18, 43, 57, 0.96), rgba(25, 33, 48, 0.96)); border: 2px solid #38bdf8; border-left: 5px solid #0ea5e9; padding: 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(14, 165, 233, 0.2);">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <label class="section-label" style="color: #7dd3fc; font-weight: 800; font-size: 13px; margin-bottom: 0;">🏫 3D空間体験：教室</label>
+              <span style="font-size: 10px; padding: 2px 7px; background: #075985; color: #e0f2fe; border-radius: 999px; font-weight: 800;">FREE ROAM</span>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 8px;">
+              <button id="scenario-classroom3d-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); font-weight: 800; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.28); font-size: 13px; padding: 8px 10px;">▶ 教室に入る</button>
+              <button id="scenario-classroom3d-stop-btn" class="action-btn" style="min-width: 60px; font-weight: 700;">終了</button>
+            </div>
+            <div style="font-size: 11px; color: #c7e7f5; line-height: 1.45; margin-top: 6px;">
+              アオイを操作して教室を歩けます。WASD：移動 / Q・E：向き変更 / マウスドラッグ：視点回転 / ホイール：ズーム。エミリも教室にいます。
+            </div>
+          </div>
+
           <!-- ★ SPECIAL: PV「5秒の告白」 -->
           <div class="section-box" style="background: linear-gradient(135deg, rgba(35, 18, 42, 0.95) 0%, rgba(20, 24, 48, 0.95) 100%); border: 2px solid #ec4899; border-left: 5px solid #ff1493; padding: 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);">
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -1255,6 +1272,27 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     document.getElementById('scenario-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioPlayer.stop();
+    });
+
+    document.getElementById('scenario-classroom3d-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!classroomExperienceController) return;
+      try {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        await classroomExperienceController.start();
+        showToast('🏫 教室3D体験を開始しました — WASDでアオイを操作できます');
+      } catch (error) {
+        console.error('教室3D体験を開始できませんでした:', error);
+        showToast('教室3D体験を読み込めませんでした');
+      }
+    });
+
+    document.getElementById('scenario-classroom3d-stop-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await classroomExperienceController?.stop();
+      showToast('教室3D体験を終了しました');
     });
 
     // Interactive Rooftop Nap Scenario Play/Stop

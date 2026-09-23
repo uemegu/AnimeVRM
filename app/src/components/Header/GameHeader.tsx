@@ -9,12 +9,10 @@ interface GameHeaderProps {
   locationName?: string;
   isAuto?: boolean;
   onToggleAuto?: () => void;
-  lang: SupportedLanguage;
-  onToggleLanguage: () => void;
+  lang?: SupportedLanguage;
   isMuted?: boolean;
   onToggleMute?: () => void;
   onOpenHistory?: () => void;
-  onOpenLicense?: () => void;
   onShare?: () => void;
   isSharing?: boolean;
 }
@@ -56,12 +54,10 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   locationName,
   isAuto = false,
   onToggleAuto,
-  lang,
-  onToggleLanguage,
+  lang = 'ja',
   isMuted = false,
   onToggleMute,
   onOpenHistory,
-  onOpenLicense,
   onShare,
   isSharing = false,
 }) => {
@@ -188,64 +184,6 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 )}
               </span>
               <span className="header-btn-label">{isMuted ? 'MUTED' : 'MUTE'}</span>
-            </span>
-          </button>
-        )}
-
-        <button
-          type="button"
-          className="header-lang-btn"
-          onClick={onToggleLanguage}
-          aria-label="Toggle language"
-        >
-          <span className="header-btn-inner">
-            <span className="header-btn-icon header-icon-lang" aria-hidden="true">
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="8.5" />
-                <line x1="3.5" y1="12" x2="20.5" y2="12" />
-                <path d="M12 3.5a13 13 0 0 1 3.5 8.5 13 13 0 0 1-3.5 8.5 13 13 0 0 1-3.5-8.5 13 13 0 0 1 3.5-8.5z" />
-              </svg>
-            </span>
-            <span className="header-btn-label">{lang.toUpperCase()}</span>
-          </span>
-        </button>
-
-        {onOpenLicense && (
-          <button
-            type="button"
-            className="header-license-btn"
-            onClick={onOpenLicense}
-            aria-label="Licenses & Credits"
-            title={lang === 'ja' ? 'ライセンス・素材クレジット' : 'Licenses & Credits'}
-          >
-            <span className="header-btn-inner">
-              <span className="header-btn-icon header-icon-license" aria-hidden="true">
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
-                  <polyline points="14 3 14 9 20 9" />
-                  <line x1="16" y1="14" x2="8" y2="14" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                </svg>
-              </span>
-              <span className="header-btn-label">INFO</span>
             </span>
           </button>
         )}

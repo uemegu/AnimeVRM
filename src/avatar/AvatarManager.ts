@@ -24,6 +24,8 @@ export class AvatarManager {
   public currentExprName: string = 'neutral';
   public scenarioAvatars: Map<string, Avatar> = new Map<string, Avatar>();
   public isMultiAvatarScenarioActive: boolean = false;
+  /** Scenario character (if any) that should respond to the transform controls. */
+  public controlledScenarioAvatarId: string | null = null;
   private faceOverlayState: FaceOverlayState = { blush: false, sweat: false, anger: false };
 
   public typographyOverlay: TypographyOverlay;
@@ -256,29 +258,41 @@ export class AvatarManager {
   }
 
   public setAvatarPosition(x: number, y: number, z: number): void {
-    if (this.avatarInstance) {
-      this.avatarInstance.setPosition(x, y, z);
-    }
+    this.getTransformTargetAvatar()?.setPosition(x, y, z);
   }
 
   public getAvatarPosition(): THREE.Vector3 {
-    if (this.avatarInstance?.vrm) {
-      return this.avatarInstance.vrm.scene.position;
+    const target = this.getTransformTargetAvatar();
+    if (target?.vrm) {
+      return target.vrm.scene.position;
     }
     return new THREE.Vector3(0, 0, 0);
   }
 
   public setAvatarRotationY(rad: number): void {
-    if (this.avatarInstance) {
-      this.avatarInstance.setRotationY(rad);
-    }
+    this.getTransformTargetAvatar()?.setRotationY(rad);
   }
 
   public getAvatarRotationY(): number {
-    if (this.avatarInstance?.vrm) {
-      return this.avatarInstance.vrm.scene.rotation.y;
+    const target = this.getTransformTargetAvatar();
+    if (target?.vrm) {
+      return target.vrm.scene.rotation.y;
     }
     return 0;
+  }
+
+  public setControlledScenarioAvatar(id: string | null): void {
+    this.controlledScenarioAvatarId = id;
+  }
+
+  private getTransformTargetAvatar(): Avatar | null {
+    if (
+      this.controlledScenarioAvatarId &&
+      this.scenarioAvatars.has(this.controlledScenarioAvatarId)
+    ) {
+      return this.scenarioAvatars.get(this.controlledScenarioAvatarId) ?? null;
+    }
+    return this.avatarInstance;
   }
 
   public setAvatarVisible(visible: boolean): void {

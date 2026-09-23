@@ -16,6 +16,7 @@ import { ScenePresetManager } from './scene/ScenePresetManager';
 import { AvatarManager } from './avatar/AvatarManager';
 import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
+import { ClassroomExperienceController } from './scenario/ClassroomExperienceController';
 import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { ShaftModeController } from './effects/shaft/ShaftModeController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
@@ -173,6 +174,19 @@ const scenarioController = new ScenarioController({
   },
 });
 
+const classroomExperienceController = new ClassroomExperienceController({
+  scene: viewerCore.scene,
+  camera: viewerCore.camera,
+  controls: viewerCore.controls,
+  avatarManager,
+  scenarioController,
+  avatarTransformController,
+  getConfig: () => currentConfig,
+  onApplyConfig: (cfg) => {
+    applyConfigToSceneAndRenderer(cfg);
+  },
+});
+
 // --------------------------------------------------
 // 4. Unified UI & Inspectors Setup
 // --------------------------------------------------
@@ -182,6 +196,7 @@ setupUnifiedPanel({
   scenePresetManager,
   avatarManager,
   scenarioController,
+  classroomExperienceController,
   inspectorManager,
   audioLipSync,
   geminiLiveChatController,
@@ -241,6 +256,7 @@ function tick(timestamp?: number): void {
 
   // Update scenario engine dynamic motions (e.g. moveTo position transitions)
   scenarioController.update(delta);
+  classroomExperienceController.update();
 
   // Update dynamic background, midground, and nearground transforms
   const dialogueBg = scenarioController.dialogueCameraController?.isActive
