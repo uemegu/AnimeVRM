@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createLayerDepthTarget, renderLayerDepth } from './LayerDepth';
 
 /**
  * スクリーンスペース方式の前髪の影
@@ -145,13 +146,13 @@ export class HairShadowRenderer {
 
   constructor(width: number, height: number, params: HairShadowParams = DEFAULT_HAIR_SHADOW_PARAMS) {
     this.uniforms = createHairShadowUniforms(params);
-    const depthTexture = new THREE.DepthTexture(width, height);
-    depthTexture.type = THREE.UnsignedIntType;
-    this.renderTarget = new THREE.WebGLRenderTarget(width, height, {
-      depthTexture,
-      depthBuffer: true,
-    });
+    this.renderTarget = createLayerDepthTarget(width, height);
     this.uniforms.uHairShadowEnabled.value = 1;
+  }
+
+  // 髪だけの深度（ライトラップで髪かどうかの判定にも使う）
+  public get depthTexture(): THREE.DepthTexture {
+    return this.renderTarget.depthTexture!;
   }
 
   public setSize(width: number, height: number): void {
@@ -186,32 +187,9 @@ export class HairShadowRenderer {
     u.uHairShadowProjection.value.copy(camera.projectionMatrix);
     u.uHairShadowNearFar.value.set(camera.near, camera.far);
 
-    // ライトもレイヤー判定の対象なので、ライト数が変わってシェーダーが切り替わらないよう髪レイヤーに載せる
-    scene.traverse((obj) => {
-      if ((obj as THREE.Light).isLight) obj.layers.enable(HAIR_SHADOW_LAYER);
-    });
-
     // 描画先の深度テクスチャを自分で読むとフィードバックループになるため、描画中は外す
     u.uHairShadowDepth.value = null;
-
-    const prevTarget = renderer.getRenderTarget();
-    const prevLayers = camera.layers.mask;
-    const prevBackground = scene.background;
-    // シャドウマップは本描画で更新されるので、ここでは描き直さない
-    const prevShadowAutoUpdate = renderer.shadowMap.autoUpdate;
-    renderer.shadowMap.autoUpdate = false;
-    scene.background = null;
-    camera.layers.set(HAIR_SHADOW_LAYER);
-
-    renderer.setRenderTarget(this.renderTarget);
-    renderer.clear(true, true, true);
-    renderer.render(scene, camera);
-
-    camera.layers.mask = prevLayers;
-    scene.background = prevBackground;
-    renderer.shadowMap.autoUpdate = prevShadowAutoUpdate;
-    renderer.setRenderTarget(prevTarget);
-
+    renderLayerDepth(renderer, scene, camera, HAIR_SHADOW_LAYER, this.renderTarget);
     u.uHairShadowDepth.value = this.renderTarget.depthTexture;
   }
 

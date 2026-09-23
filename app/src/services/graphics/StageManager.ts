@@ -15,6 +15,7 @@ import { SunEffect } from './postprocessing/SunEffect';
 import { SkyBackground } from './scene/SkyBackground';
 import { Avatar } from './avatar/Avatar';
 import { HairShadowRenderer } from './shader/HairShadow';
+import { CharacterMaskRenderer, LightWrapShader } from './postprocessing/LightWrap';
 import { setHairRingTint } from './shader/HairRing';
 import { AudioLipSync } from '../audio/AudioLipSync';
 
@@ -34,6 +35,7 @@ export class StageManager {
 
   // ポストプロセスパス群
   private renderPass: RenderPass;
+  private lightWrapPass: ShaderPass;
   private bloomPass: UnrealBloomPass;
   private godRaysPass: ShaderPass;
   private cinematicAnimePass: ShaderPass;
@@ -41,6 +43,8 @@ export class StageManager {
 
   // 前髪の影（髪の深度マスク）
   private hairShadow: HairShadowRenderer;
+  // キャラのマスク（ライトラップ用）
+  private characterMask: CharacterMaskRenderer;
 
   // 光源・環境・空
   private directionalLight: THREE.DirectionalLight;
@@ -135,6 +139,13 @@ export class StageManager {
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
 
+    // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
+    this.characterMask = new CharacterMaskRenderer(targetW, targetH);
+    this.lightWrapPass = new ShaderPass(LightWrapShader);
+    this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
+    this.lightWrapPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.composer.addPass(this.lightWrapPass);
+
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(targetW, targetH),
       0.01,
@@ -159,6 +170,8 @@ export class StageManager {
     this.composer.addPass(this.smaaPass);
 
     this.hairShadow = new HairShadowRenderer(targetW, targetH);
+    // ライトラップで髪かどうかを判定するため、髪の深度を渡す
+    this.lightWrapPass.uniforms['tHair'].value = this.hairShadow.depthTexture;
 
     // 8. ローダー & 多層背景メッシュ初期化
     this.textureLoader = new THREE.TextureLoader();
@@ -448,6 +461,8 @@ export class StageManager {
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.smaaPass.setSize(targetW, targetH);
     this.hairShadow.setSize(targetW, targetH);
+    this.characterMask.setSize(targetW, targetH);
+    this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
   }
 
   /**
@@ -505,6 +520,9 @@ export class StageManager {
 
       // 6. 前髪の影用に髪の深度を描く
       this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
+      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5) {
+        this.characterMask.render(this.renderer, this.scene, this.camera);
+      }
 
       // 7. ポストプロセスパイプライン経由でレンダリング
       this.composer.render();
@@ -531,6 +549,7 @@ export class StageManager {
     this.composer.renderTarget1?.dispose();
     this.composer.renderTarget2?.dispose();
     this.hairShadow.dispose();
+    this.characterMask.dispose();
     this.renderer.dispose();
   }
 }
