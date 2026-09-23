@@ -49,6 +49,8 @@ export interface GameState {
   flags: Record<string, boolean | number | string>;
   /** キャラクター別好感度/親愛度 (例: { girl_01: 15, girl_02: 5 }) */
   affinities: Record<string, number>;
+  /** シナリオ完了・選択肢選択の履歴（解放条件の判定に使用） */
+  scenarioHistory?: ScenarioHistoryEntry[];
   /** 現在再生中のシナリオID（nullの場合はメニューや選択肢画面） */
   currentScenarioId: string | null;
   /** 当日の開始時点（朝）のスナップショット（「1日をやり直す」用） */
@@ -60,6 +62,17 @@ export interface DayRollbackSnapshot {
   day: number;
   flags: Record<string, boolean | number | string>;
   affinities: Record<string, number>;
+  /** やり直し時に当日分のシナリオ履歴も巻き戻す */
+  scenarioHistory?: ScenarioHistoryEntry[];
+}
+
+/** シナリオ解放条件で参照する進行履歴 */
+export interface ScenarioHistoryEntry {
+  scenarioId: string;
+  day: number;
+  type: 'choice' | 'completed';
+  /** 選択肢ID。ID未指定の既存シナリオでは goto 先シーンIDを使用 */
+  choiceId?: string;
 }
 
 /** 曜日計算ヘルパー (1日目 = 月曜始まり) */

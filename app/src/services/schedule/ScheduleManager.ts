@@ -3,8 +3,9 @@ import {
   DayPhase,
   ActionLocationId,
   ActionLocationOption,
+  getDayOfWeek,
 } from '../../types/game';
-import { ScenarioPackage } from '../../types/scenario';
+import { ScenarioPackage, ScenarioTimeSlot } from '../../types/scenario';
 import { LOCATION_DEFINITIONS } from '../../data/locations';
 import {
   MORNING_SCENARIO_DAY_1,
@@ -32,11 +33,13 @@ export class ScheduleManager {
       phase: 'morning',
       flags: initialFlags,
       affinities: initialAffinities,
+      scenarioHistory: [],
       currentScenarioId: MORNING_SCENARIO_DAY_1.id,
       dayStartSnapshot: {
         day: initialDay,
         flags: { ...initialFlags },
         affinities: { ...initialAffinities },
+        scenarioHistory: [],
       },
     };
   }
@@ -45,10 +48,16 @@ export class ScheduleManager {
    * 朝フェーズのシナリオを取得
    */
   public static getMorningScenario(gameState: GameState): ScenarioPackage {
-    if (gameState.day === 1) {
-      return MORNING_SCENARIO_DAY_1;
-    }
-    return MORNING_SCENARIO_DEFAULT;
+    const candidates = [MORNING_SCENARIO_DAY_1, MORNING_SCENARIO_DEFAULT]
+      .map((scenario, index) => ({ scenario, index }))
+      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState))
+      .sort((a, b) => {
+        const priorityDifference =
+          this.getScenarioPriority(b.scenario, MORNING_SCENARIO_DEFAULT.id) -
+          this.getScenarioPriority(a.scenario, MORNING_SCENARIO_DEFAULT.id);
+        return priorityDifference || a.index - b.index;
+      });
+    return candidates[0]?.scenario ?? MORNING_SCENARIO_DEFAULT;
   }
 
   /**
@@ -70,24 +79,17 @@ export class ScheduleManager {
       let hintCharacterIds: string[] = [];
       let hintText: { ja: string; en?: string } | undefined;
 
-      // シナリオデータ（ScenarioPackage.actionHints）から該当フェーズ・場所のヒントを取得
-      for (const scenario of ALL_ACTION_SCENARIOS) {
-        if (!scenario.actionHints) continue;
-        const matchingHint = scenario.actionHints.find((h) => {
-          if (h.locationId !== locId) return false;
-          if (h.phases && !h.phases.includes(gameState.phase)) return false;
-          return true;
-        });
+      const selectedScenario = this.getEligibleActionScenarios(locId, gameState)[0];
+      const matchingHint = selectedScenario?.actionHints?.find((hint) => {
+        if (hint.locationId !== locId) return false;
+        return !hint.phases || hint.phases.includes(gameState.phase);
+      });
 
-        if (matchingHint) {
-          if (matchingHint.hintCharacterIds) {
-            hintCharacterIds = [...matchingHint.hintCharacterIds];
-          }
-          if (matchingHint.hintText) {
-            hintText = matchingHint.hintText;
-          }
-          break;
-        }
+      if (matchingHint?.hintCharacterIds) {
+        hintCharacterIds = [...matchingHint.hintCharacterIds];
+      }
+      if (matchingHint?.hintText) {
+        hintText = matchingHint.hintText;
       }
 
       return {
@@ -103,33 +105,111 @@ export class ScheduleManager {
    * 未遭遇のキャラ救済イベント等を判定
    */
   public static checkForcedInterruption(gameState: GameState): ScenarioPackage | null {
-    // 既に会っていないシオンの救済: Day 2以降、午前行動開始時
-    if (gameState.day >= 2 && !gameState.flags.met_shion && gameState.phase === 'morning_action') {
-      return FORCED_SCENARIO_MEET_SHION;
-    }
-    // 既に会っていないエミリの救済: Day 3以降、昼行動開始時
-    if (gameState.day >= 3 && !gameState.flags.met_emili && gameState.phase === 'lunch_action') {
-      return FORCED_SCENARIO_MEET_EMILI;
-    }
-    return null;
+    const candidates = [
+      { scenario: FORCED_SCENARIO_MEET_SHION, requiredFlag: 'met_shion' },
+      { scenario: FORCED_SCENARIO_MEET_EMILI, requiredFlag: 'met_emili' },
+    ]
+      .map((candidate, index) => ({ ...candidate, index }))
+      .filter(({ scenario, requiredFlag }) => {
+        return !gameState.flags[requiredFlag] && this.matchesScenarioAvailability(scenario, gameState);
+      })
+      .sort((a, b) => {
+        const priorityDifference = (b.scenario.priority ?? 0) - (a.scenario.priority ?? 0);
+        return priorityDifference || a.index - b.index;
+      });
+    return candidates[0]?.scenario ?? null;
   }
 
   /**
    * 選択された場所に応じたシナリオを決定（ScenarioPackage.actionHints より解決）
    */
   public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioPackage {
-    for (const scenario of ALL_ACTION_SCENARIOS) {
-      if (!scenario.actionHints) continue;
-      const matches = scenario.actionHints.some((h) => {
-        if (h.locationId !== locationId) return false;
-        if (h.phases && !h.phases.includes(gameState.phase)) return false;
-        return true;
-      });
-      if (matches) {
-        return scenario;
+    return this.getEligibleActionScenarios(locationId, gameState)[0] ?? ACTION_SCENARIO_GENERIC;
+  }
+
+  /** 条件に一致する行動シナリオを優先順位順で返す */
+  private static getEligibleActionScenarios(
+    locationId: ActionLocationId,
+    gameState: GameState
+  ): ScenarioPackage[] {
+    return ALL_ACTION_SCENARIOS
+      .map((scenario, index) => ({ scenario, index }))
+      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId))
+      .sort((a, b) => {
+        const priorityDifference =
+          this.getScenarioPriority(b.scenario, ACTION_SCENARIO_GENERIC.id) -
+          this.getScenarioPriority(a.scenario, ACTION_SCENARIO_GENERIC.id);
+        return priorityDifference || a.index - b.index;
+      })
+      .map(({ scenario }) => scenario);
+  }
+
+  private static getScenarioPriority(scenario: ScenarioPackage, fallbackScenarioId: string): number {
+    return scenario.id === fallbackScenarioId ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
+  }
+
+  /** シナリオの日付・時間帯・場所・進行履歴条件を判定 */
+  private static matchesScenarioAvailability(
+    scenario: ScenarioPackage,
+    gameState: GameState,
+    locationId?: ActionLocationId
+  ): boolean {
+    const availability = scenario.availability;
+    const dayRange = availability?.dayRange;
+    if (dayRange?.from !== undefined && gameState.day < dayRange.from) return false;
+    if (dayRange?.to !== undefined && gameState.day > dayRange.to) return false;
+
+    const locationHints = locationId
+      ? scenario.actionHints?.filter((hint) => hint.locationId === locationId) ?? []
+      : [];
+    if (availability?.locations) {
+      if (!locationId || !availability.locations.includes(locationId)) return false;
+    } else if (locationId && scenario.actionHints?.length && locationHints.length === 0) {
+      return false;
+    }
+    if (locationId && !availability?.timeSlots && locationHints.length > 0) {
+      const matchesLegacyPhase = locationHints.some(
+        (hint) => !hint.phases || hint.phases.includes(gameState.phase)
+      );
+      if (!matchesLegacyPhase) return false;
+    }
+
+    if (availability?.timeSlots) {
+      if (!availability.timeSlots.some((timeSlot) => this.matchesTimeSlot(timeSlot, gameState))) {
+        return false;
       }
     }
-    return ACTION_SCENARIO_GENERIC;
+
+    const prerequisites = availability?.after;
+    const history = gameState.scenarioHistory ?? [];
+    const matchesPrerequisite = (condition: { scenarioId: string; choiceId?: string }): boolean =>
+      history.some((entry) => {
+        if (entry.scenarioId !== condition.scenarioId) return false;
+        if (condition.choiceId !== undefined) {
+          return entry.type === 'choice' && entry.choiceId === condition.choiceId;
+        }
+        return entry.type === 'completed';
+      });
+
+    if (prerequisites?.all && !prerequisites.all.every(matchesPrerequisite)) return false;
+    if (prerequisites?.any && !prerequisites.any.some(matchesPrerequisite)) return false;
+    return true;
+  }
+
+  private static matchesTimeSlot(timeSlot: ScenarioTimeSlot, gameState: GameState): boolean {
+    switch (timeSlot) {
+      case 'morning':
+        return gameState.phase === 'morning' || gameState.phase === 'morning_action';
+      case 'afternoon':
+        return gameState.phase === 'lunch_action';
+      case 'afterschool':
+        return gameState.phase === 'afterschool_action';
+      case 'holiday': {
+        const dayOfWeek = getDayOfWeek(gameState.day);
+        return dayOfWeek === 'Sat' || dayOfWeek === 'Sun';
+      }
+    }
+    return false;
   }
 
   /**
@@ -172,6 +252,7 @@ export class ScheduleManager {
         day: nextDay,
         flags: { ...gameState.flags },
         affinities: { ...gameState.affinities },
+        scenarioHistory: [...(gameState.scenarioHistory ?? [])],
       },
     };
 
@@ -186,7 +267,12 @@ export class ScheduleManager {
    */
   public static rollbackToday(gameState: GameState): GameState {
     if (!gameState.dayStartSnapshot) {
-      return { ...gameState, phase: 'morning', currentScenarioId: null };
+      return {
+        ...gameState,
+        phase: 'morning',
+        scenarioHistory: (gameState.scenarioHistory ?? []).filter((entry) => entry.day < gameState.day),
+        currentScenarioId: null,
+      };
     }
 
     return {
@@ -195,6 +281,7 @@ export class ScheduleManager {
       phase: 'morning',
       flags: { ...gameState.dayStartSnapshot.flags },
       affinities: { ...gameState.dayStartSnapshot.affinities },
+      scenarioHistory: [...(gameState.dayStartSnapshot.scenarioHistory ?? [])],
       currentScenarioId: null,
     };
   }

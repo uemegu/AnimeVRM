@@ -16,8 +16,10 @@ import { SaveLoadModal } from './components/SaveLoad/SaveLoadModal';
 import { HistoryModal } from './components/Dialogue/HistoryModal';
 import { DialogueSession, MAX_HISTORY_SESSIONS } from './types/history';
 import { InterludeOverlay, InterludeOverlayHandle } from './components/Common/InterludeOverlay';
+import { ShareToast } from './components/Common/ShareToast';
 import { LoadingScreen } from './components/Loading/LoadingScreen';
 import { AssetPreloader } from './services/loader/AssetPreloader';
+import { ShareService } from './services/share/ShareService';
 import { LOCATION_VISUAL_PRESETS } from './data/locationVisualPresets';
 import { GOD_EXPERIMENT_SCENARIO } from './scenarios/godExperiment';
 
@@ -93,6 +95,14 @@ export const App: React.FC = () => {
 
   // AUTO進行フラグ
   const [isAuto, setIsAuto] = useState(false);
+
+  // シェア中フラグおよびトーストメッセージ
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareToastMessage, setShareToastMessage] = useState('');
+  const [shareToastAction, setShareToastAction] = useState<{
+    label: string;
+    onClick: () => void;
+  } | undefined>(undefined);
 
   // 幕間スライストランジション ref
   const interludeRef = useRef<InterludeOverlayHandle>(null);
@@ -437,11 +447,20 @@ export const App: React.FC = () => {
     const finished = engine.next();
     const updatedFlags = engine.getFlags();
     const updatedAffinities = engine.getAffinities();
+    const scenarioHistory = [...(gameState.scenarioHistory ?? [])];
+    if (finished && activeScenario) {
+      scenarioHistory.push({
+        scenarioId: activeScenario.id,
+        day: gameState.day,
+        type: 'completed',
+      });
+    }
 
     const updatedState: GameState = {
       ...gameState,
       flags: updatedFlags,
       affinities: updatedAffinities,
+      scenarioHistory,
     };
     setGameState(updatedState);
     setTick((t) => t + 1);
@@ -603,6 +622,59 @@ export const App: React.FC = () => {
     });
   }, [audioLipSync, handleDialogueClick, clearAutoTimer]);
 
+  // Xシェア実行ハンドラ
+  const handleShare = useCallback(async () => {
+    if (isSharing) return;
+    setIsSharing(true);
+    try {
+      const dialogueInfo =
+        currentScene && currentScene.text && !currentScene.choices
+          ? {
+              speaker: currentScene.speaker,
+              text: currentScene.text,
+            }
+          : undefined;
+
+      const result = await ShareService.shareToX({
+        day: gameState.day,
+        phase: gameState.phase,
+        locationName: isSelectingLocation ? undefined : activeLocationName,
+        lang,
+        dialogue: dialogueInfo,
+      });
+
+      if (result.message) {
+        setShareToastMessage(result.message);
+      }
+
+      if (result.tweetUrl) {
+        setShareToastAction({
+          label: lang === 'ja' ? '今すぐ開く' : 'Open now',
+          onClick: () => {
+            window.open(result.tweetUrl, '_blank', 'noopener,noreferrer');
+          },
+        });
+      } else {
+        setShareToastAction(undefined);
+      }
+    } catch {
+      setShareToastMessage(
+        lang === 'ja' ? 'シェア処理に失敗しました' : 'Failed to share'
+      );
+      setShareToastAction(undefined);
+    } finally {
+      setIsSharing(false);
+    }
+  }, [
+    isSharing,
+    gameState.day,
+    gameState.phase,
+    isSelectingLocation,
+    activeLocationName,
+    lang,
+    currentScene,
+  ]);
+
   // キーボードショートカット
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -617,11 +689,15 @@ export const App: React.FC = () => {
         if (!isTitleScreen) {
           setIsHistoryModalOpen((prev) => !prev);
         }
+      } else if (e.key === 's' || e.key === 'S') {
+        if (!isTitleScreen) {
+          handleShare();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isWaitingChoice, isSelectingLocation, isTitleScreen, handleToggleAuto, handleToggleMute]);
+  }, [isWaitingChoice, isSelectingLocation, isTitleScreen, handleToggleAuto, handleToggleMute, handleShare]);
 
   // 選択肢の選択
   const handleChoiceClick = useCallback(
@@ -677,11 +753,24 @@ export const App: React.FC = () => {
       }
 
       engine.choose(index);
-      setGameState((prev) => ({
-        ...prev,
-        flags: engine.getFlags(),
-        affinities: engine.getAffinities(),
-      }));
+      const choiceId = engine.getLastSelectedChoiceId();
+      setGameState((prev) => {
+        const scenarioHistory = [...(prev.scenarioHistory ?? [])];
+        if (choiceId && activeScenario) {
+          scenarioHistory.push({
+            scenarioId: activeScenario.id,
+            day: prev.day,
+            type: 'choice',
+            choiceId,
+          });
+        }
+        return {
+          ...prev,
+          flags: engine.getFlags(),
+          affinities: engine.getAffinities(),
+          scenarioHistory,
+        };
+      });
       setTick((t) => t + 1);
     },
     [engine, currentScene, activeScenario, gameState, activeLocationName, lang]
@@ -1034,6 +1123,9 @@ export const App: React.FC = () => {
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
             onOpenHistory={() => setIsHistoryModalOpen(true)}
+            onOpenLicense={() => setIsLicenseModalOpen(true)}
+            onShare={handleShare}
+            isSharing={isSharing}
           />
 
           {/* 各ページ表示切り替え */}
@@ -1114,6 +1206,16 @@ export const App: React.FC = () => {
 
       {/* 最前面 幕間スライストランジション */}
       <InterludeOverlay ref={interludeRef} lang={lang} />
+
+      {/* シェア完了・フォールバック案内トースト */}
+      <ShareToast
+        message={shareToastMessage}
+        actionButton={shareToastAction}
+        onClose={() => {
+          setShareToastMessage('');
+          setShareToastAction(undefined);
+        }}
+      />
     </div>
   );
 };

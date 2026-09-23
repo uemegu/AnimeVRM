@@ -27,6 +27,38 @@
   - 稀に日中も行動選択を挟まずに強制イベントが発生する
   - 例: 未遭遇の重要キャラクターの出会いイベントを自発的に起こさなかった場合に、シナリオ進行上強制的に出会わせるイベントなど
 
+## シナリオの発生条件
+
+`ScenarioPackage` の `availability` で発生条件を指定できます。項目を省略するとその項目では制限されません。`availability` と `actionHints` を省略したシナリオは、すべての行動場所・時間帯で候補になります。既存の `actionHints` は引き続き場所・フェーズの発生範囲とヒント表示に使われます。
+
+```ts
+{
+  id: 'aoi_followup',
+  title: 'アオイとの続きのイベント',
+  availability: {
+    after: {
+      all: [{ scenarioId: 'morning_day_1' }],
+      any: [
+        { scenarioId: 'action_classroom_aoi', choiceId: 's_accept' },
+        { scenarioId: 'action_library_shion', choiceId: 's_recommend' },
+      ],
+    },
+    timeSlots: ['afternoon', 'afterschool'],
+    dayRange: { from: 3, to: 10 },
+    locations: ['library', 'rooftop'],
+  },
+  priority: 10,
+  scenes: [],
+}
+```
+
+- `after.all` はすべての条件が必要、`after.any` はどれか1つが必要です。両方指定した場合は、両グループを満たします。
+- `choiceId` を省いた条件は指定シナリオの完了を待ちます。指定した場合はその選択肢を選んだ時点で条件を満たします。選択肢の `id` を使い、未指定の場合は `goto` のシーンIDが履歴IDになります。
+- `timeSlots` と `locations` はそれぞれ複数指定を OR として扱います。時間帯は `morning`（朝・午前）、`afternoon`（昼）、`afterschool`（放課後）、`holiday`（土日）です。
+- `availability.locations` を指定すると発生場所はそちらで判定します。未指定時は `actionHints` の場所が適用されます。同様に、`timeSlots` 未指定時は該当する `actionHints.phases` が適用されます。
+- `dayRange.from` / `to` は両端を含みます。時間帯・日付・場所・先行条件は互いに AND で評価します。
+- 条件を満たすシナリオが複数ある場合は `priority` の大きいものを選び、同じ値なら定義順を使います。
+
 ## 必須（個人開発のブラウザゲームとしての最小構成）
 
 ### ゲーム開始・終了
