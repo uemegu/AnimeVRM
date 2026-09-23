@@ -213,6 +213,8 @@ export interface AvatarConfig {
   environment: EnvironmentConfig;
   lighting: {
     castShadows: boolean;
+    // 天使の輪を寄せる色（sRGB）。時間帯の光になじませる。未指定なら白
+    hairRingTint?: string;
     ambient: {
       color: string;
       intensity: number;
@@ -413,6 +415,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   },
   lighting: {
     castShadows: false,
+    hairRingTint: '#f2f5ff',
     ambient: {
       color: '#b30071',
       intensity: 1,

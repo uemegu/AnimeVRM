@@ -15,6 +15,7 @@ import { SunEffect } from './postprocessing/SunEffect';
 import { SkyBackground } from './scene/SkyBackground';
 import { Avatar } from './avatar/Avatar';
 import { HairShadowRenderer } from './shader/HairShadow';
+import { setHairRingTint } from './shader/HairRing';
 import { AudioLipSync } from '../audio/AudioLipSync';
 
 export interface StageOptions {
@@ -223,6 +224,9 @@ export class StageManager {
     // 2. 環境光
     this.ambientLight.color.set(preset.lighting.ambient.color);
     this.ambientLight.intensity = preset.lighting.ambient.intensity;
+
+    // 2.4 天使の輪の色（時間帯の光になじませる）
+    setHairRingTint(preset.lighting.hairRingTint);
 
     // 2.5 リムライト
     const rim = preset.lighting.rim;

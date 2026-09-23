@@ -3,7 +3,7 @@ import type { VRM } from '@pixiv/three-vrm';
 import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig } from './Config';
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
-import { injectHairRing } from './shader/HairRing';
+import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './shader/HairRing';
 
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
@@ -262,9 +262,10 @@ export function applyToonShader(
 
   let activeConfig = options.config;
   const hairShadowUniforms = options.hairShadow ?? createHairShadowUniforms();
-  // 天使の輪: 頭ボーンのワールド座標（髪メッシュの描画直前に更新する）
-  const hairRingHeadBone = { value: new THREE.Vector3() };
-  const headBoneNode = vrm.humanoid?.getRawBoneNode('head') ?? null;
+  // 天使の輪: 頭の位置と向き（髪メッシュの描画直前に更新する）
+  // 向きは軸がそろった正規化ボーンから取る（Y が上、Z が前）
+  const hairRingHeadFrame = createHairRingHeadFrame();
+  const headBoneNode = vrm.humanoid?.getNormalizedBoneNode('head') ?? null;
   const hairRingMeshes = new Set<THREE.Mesh>();
 
   const bottomGradientUniforms = {
@@ -316,7 +317,7 @@ export function applyToonShader(
           hairRingMeshes.add(mesh);
           const prevOnBeforeRender = mesh.onBeforeRender;
           mesh.onBeforeRender = function (...args) {
-            headBoneNode.getWorldPosition(hairRingHeadBone.value);
+            updateHairRingHeadFrame(hairRingHeadFrame, headBoneNode);
             prevOnBeforeRender.apply(this, args);
           };
         }
@@ -415,7 +416,7 @@ export function applyToonShader(
         shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
-        injectHairRing(shader, hairRingTarget, hairRingHeadBone);
+        injectHairRing(shader, hairRingTarget, hairRingHeadFrame);
 
         shader.fragmentShader = shader.fragmentShader.replace(
           'void main() {',

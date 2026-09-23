@@ -62,6 +62,8 @@ export interface LightingConfig {
   ambient: AmbientLightConfig;
   rim?: RimLightConfig;
   depthRim?: DepthRimConfig;
+  // 天使の輪を寄せる色（sRGB）。時間帯の光になじませる。未指定なら白
+  hairRingTint?: string;
   sunShafts?: SunShaftsConfig;
   lensFlare?: LensFlareConfig;
 }

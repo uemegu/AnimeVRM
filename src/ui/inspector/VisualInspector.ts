@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams } from '../../shader/HairRing';
+import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
@@ -191,17 +191,20 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   const applyHairRing = () => setHairRingParams(hairRingCfg);
   const hairRingFolder = visualGui.addFolder(tr.gui.hairRingFolder);
   hairRingFolder.add(hairRingCfg, 'enabled').name(tr.gui.hairRingEnabled).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'center', -0.2, 1.0, 0.01).name(tr.gui.hairRingCenter).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'width', 0.0, 0.3, 0.005).name(tr.gui.hairRingWidth).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'softness', 0.0, 0.1, 0.001).name(tr.gui.hairRingSoftness).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'sideFade', 0.0, 1.0, 0.01).name(tr.gui.hairRingSideFade).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'height', -0.1, 0.15, 0.002).name(tr.gui.hairRingHeight).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'width', 0.0, 0.05, 0.001).name(tr.gui.hairRingWidth).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'softness', 0.0, 0.02, 0.0005).name(tr.gui.hairRingSoftness).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'facingFade', 0.01, 1.0, 0.01).name(tr.gui.hairRingFacingFade).onChange(applyHairRing);
+  if (!currentConfig.lighting.hairRingTint) currentConfig.lighting.hairRingTint = '#ffffff';
+  hairRingFolder.addColor(currentConfig.lighting, 'hairRingTint').name(tr.gui.hairRingTint).onChange((v: string | undefined) => setHairRingTint(v));
   hairRingFolder.add(hairRingCfg, 'lighten', 0.0, 1.0, 0.01).name(tr.gui.hairRingLighten).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'desaturate', 0.0, 1.0, 0.01).name(tr.gui.hairRingDesaturate).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'strength', 0.0, 1.0, 0.01).name(tr.gui.hairRingStrength).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'strandNormalMix', 0.0, 1.0, 0.01).name(tr.gui.hairRingStrandNormalMix).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'strandJitter', 0.0, 0.03, 0.0005).name(tr.gui.hairRingStrandJitter).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'headCenterOffset', -0.1, 0.2, 0.005).name(tr.gui.hairRingHeadCenterOffset).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'jagAmplitude', 0.0, 0.2, 0.005).name(tr.gui.hairRingJagAmplitude).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'jagFrequency', 0, 300, 5).name(tr.gui.hairRingJagFrequency).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'jagAmplitude', 0.0, 0.03, 0.0005).name(tr.gui.hairRingJagAmplitude).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'jagCount', 0, 120, 1).name(tr.gui.hairRingJagCount).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'viewShift', -0.05, 0.05, 0.001).name(tr.gui.hairRingViewShift).onChange(applyHairRing);
   hairRingFolder.close();
 
   // 3. Lighting Folder

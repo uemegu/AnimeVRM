@@ -6,6 +6,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     id: 'morning',
     name: '朝',
     lighting: {
+      hairRingTint: '#f2f5ff',
       directional: {
         color: '#ffffff',
         intensity: 3.2,
@@ -150,6 +151,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     id: 'day',
     name: '昼',
     lighting: {
+      hairRingTint: '#f2f5ff',
       directional: {
         color: '#ffffff',
         intensity: 3.2,
@@ -294,6 +296,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     id: 'evening',
     name: '夕方',
     lighting: {
+      hairRingTint: '#ffc58a',
       directional: {
         color: '#fffbf0',
         intensity: 1.8,
@@ -438,6 +441,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     id: 'night',
     name: '夜',
     lighting: {
+      hairRingTint: '#b8c4ff',
       directional: {
         color: '#8ba6ff',
         intensity: 1.2,
@@ -582,6 +586,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
     id: 'divine',
     name: '神聖・後光',
     lighting: {
+      hairRingTint: '#ffffff',
       directional: {
         color: '#fff5dc',
         intensity: 2.0,
