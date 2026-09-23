@@ -32,3 +32,4 @@ dist-ssr
 /tests
 /test-results
 .env
+/test
