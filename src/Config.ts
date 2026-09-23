@@ -469,8 +469,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     bloom: {
       enabled: true,
-      strength: 0.01,
-      radius: 0.06,
+      strength: 0.07,
+      radius: 0.7,
       threshold: 0.9,
     },
     colorGrading: {
@@ -487,7 +487,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     cinematic: {
       diffusion: {
         enabled: true,
-        strength: 0.24,
+        strength: 0.12,
         radius: 2.0,
       },
       filmGrain: {
