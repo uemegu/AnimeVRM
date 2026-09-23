@@ -7,6 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { HairShadowRenderer } from '../shader/HairShadow';
+import { CharacterMaskRenderer, LightWrapShader, applyLightWrapParams } from '../postprocessing/LightWrap';
 import { setHairRingParams, setHairRingTint } from '../shader/HairRing';
 import Stats from 'three/addons/libs/stats.module.js';
 
@@ -198,6 +199,9 @@ export class ViewerCore {
   public smaaPass: SMAAPass;
   // 前髪の影（髪の深度マスク）
   public hairShadow: HairShadowRenderer;
+  // キャラのマスクとライトラップ
+  public characterMask: CharacterMaskRenderer;
+  public lightWrapPass: ShaderPass;
 
   public stats: Stats;
   public perfBadge: HTMLDivElement;
@@ -421,6 +425,17 @@ export class ViewerCore {
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
 
+    // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
+    this.characterMask = new CharacterMaskRenderer(
+      Math.floor(window.innerWidth * pixelRatio),
+      Math.floor(window.innerHeight * pixelRatio)
+    );
+    this.lightWrapPass = new ShaderPass(LightWrapShader);
+    this.lightWrapPass.uniforms['uResolution'].value.set(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio);
+    this.lightWrapPass.uniforms['tMask'].value = this.characterMask.texture;
+    if (initialConfig.lightWrap) applyLightWrapParams(this.lightWrapPass.uniforms as typeof LightWrapShader.uniforms, initialConfig.lightWrap);
+    this.composer.addPass(this.lightWrapPass);
+
     this.bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio),
       initialConfig.postProcessing.bloom.strength,
@@ -463,6 +478,8 @@ export class ViewerCore {
       Math.floor(window.innerHeight * pixelRatio),
       initialConfig.hairShadow
     );
+    // ライトラップで髪かどうかを判定するため、髪の深度を渡す
+    this.lightWrapPass.uniforms['tHair'].value = this.hairShadow.depthTexture;
     this.hairShadow.setEnabled(initialConfig.hairShadow?.enabled ?? true);
 
     // Initial resize setup
@@ -924,6 +941,10 @@ export class ViewerCore {
     if (this.hairShadow) {
       this.hairShadow.setSize(Math.floor(targetW), Math.floor(targetH));
     }
+    if (this.characterMask) {
+      this.characterMask.setSize(Math.floor(targetW), Math.floor(targetH));
+      this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
+    }
   }
 
   /**
@@ -974,6 +995,9 @@ export class ViewerCore {
     }
     if (cfg.hairRing) {
       setHairRingParams(cfg.hairRing);
+    }
+    if (cfg.lightWrap) {
+      applyLightWrapParams(this.lightWrapPass.uniforms as typeof LightWrapShader.uniforms, cfg.lightWrap);
     }
     setHairRingTint(cfg.lighting.hairRingTint);
 
@@ -1051,6 +1075,9 @@ export class ViewerCore {
 
     // 4. 前髪の影用に髪の深度を描いてから、Composer render
     this.hairShadow.render(this.renderer, this.scene, this.camera, this.dirLight);
+    if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5) {
+      this.characterMask.render(this.renderer, this.scene, this.camera);
+    }
     this.composer.render();
 
     // 5. Effect texts

@@ -4,6 +4,7 @@ import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientCo
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
 import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './shader/HairRing';
+import { CHARACTER_LAYER } from './postprocessing/LightWrap';
 
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
@@ -307,6 +308,8 @@ export function applyToonShader(
 
     const mesh = object as THREE.Mesh;
     mesh.frustumCulled = false;
+    // キャラのマスク（ライトラップなど）に描く
+    mesh.layers.enable(CHARACTER_LAYER);
     const sourceMaterials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
 
     sourceMaterials.forEach((sourceMaterial) => {

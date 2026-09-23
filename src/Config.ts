@@ -4,6 +4,7 @@ import { type RainConfig, DEFAULT_RAIN_CONFIG } from './effects/rain';
 import { type FastMotionConfig, DEFAULT_FAST_MOTION_CONFIG } from './effects/motion';
 import { type Live2DConfig, DEFAULT_LIVE2D_CONFIG } from './live2d/types';
 import { type HairRingParams, DEFAULT_HAIR_RING_PARAMS } from './shader/HairRing';
+import { type LightWrapParams, DEFAULT_LIGHT_WRAP_PARAMS } from './postprocessing/LightWrap';
 
 export type { RainConfig, FastMotionConfig, Live2DConfig };
 
@@ -201,6 +202,8 @@ export interface AvatarConfig {
   hairShadow?: HairShadowConfig;
   // 天使の輪（髪の帯状ハイライト）。各値の意味は shader/HairRing.ts を参照
   hairRing?: HairRingParams;
+  // ライトラップ（背景の光をキャラの輪郭ににじませる）。各値の意味は postprocessing/LightWrap.ts を参照
+  lightWrap?: LightWrapParams;
   outline: {
     enabled: boolean;
     useSmoothNormal: boolean;
@@ -376,6 +379,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     maxDepthDiff: 0.12,
   },
   hairRing: { ...DEFAULT_HAIR_RING_PARAMS },
+  lightWrap: { ...DEFAULT_LIGHT_WRAP_PARAMS },
   outline: {
     enabled: true,
     useSmoothNormal: true,

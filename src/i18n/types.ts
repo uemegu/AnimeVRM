@@ -459,6 +459,12 @@ export interface Translations {
     hairRingJagAmplitude: string;
     hairRingJagCount: string;
     hairRingViewShift: string;
+    lightWrapFolder: string;
+    lightWrapEnabled: string;
+    lightWrapRadius: string;
+    lightWrapStrength: string;
+    lightWrapEdgePower: string;
+    lightWrapBodyStrength: string;
     envFolder: string;
     farFolder: string;
     selectFarImage: string;

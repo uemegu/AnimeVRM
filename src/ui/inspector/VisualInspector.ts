@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
+import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '../../postprocessing/LightWrap';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
@@ -206,6 +207,21 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   hairRingFolder.add(hairRingCfg, 'jagCount', 0, 120, 1).name(tr.gui.hairRingJagCount).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'viewShift', -0.05, 0.05, 0.001).name(tr.gui.hairRingViewShift).onChange(applyHairRing);
   hairRingFolder.close();
+
+  // 2.4 ライトラップ (Light Wrap)
+  if (!currentConfig.lightWrap) {
+    currentConfig.lightWrap = { ...DEFAULT_LIGHT_WRAP_PARAMS };
+  }
+  const lightWrapCfg = currentConfig.lightWrap;
+  const applyLightWrap = () =>
+    applyLightWrapParams(viewerCore.lightWrapPass.uniforms as typeof LightWrapShader.uniforms, lightWrapCfg);
+  const lightWrapFolder = visualGui.addFolder(tr.gui.lightWrapFolder);
+  lightWrapFolder.add(lightWrapCfg, 'enabled').name(tr.gui.lightWrapEnabled).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'radius', 0.0, 0.05, 0.001).name(tr.gui.lightWrapRadius).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'strength', 0.0, 2.0, 0.01).name(tr.gui.lightWrapStrength).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'edgePower', 0.2, 5.0, 0.1).name(tr.gui.lightWrapEdgePower).onChange(applyLightWrap);
+  lightWrapFolder.add(lightWrapCfg, 'bodyStrength', 0.0, 1.0, 0.01).name(tr.gui.lightWrapBodyStrength).onChange(applyLightWrap);
+  lightWrapFolder.close();
 
   // 3. Lighting Folder
   const lightFolder = visualGui.addFolder(tr.gui.lightFolder);
