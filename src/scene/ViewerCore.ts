@@ -7,6 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { HairShadowRenderer } from '../shader/HairShadow';
+import { setHairRingParams } from '../shader/HairRing';
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { AvatarConfig, DEFAULT_CONFIG } from '../Config';
@@ -970,6 +971,9 @@ export class ViewerCore {
     if (cfg.hairShadow) {
       this.hairShadow.setEnabled(cfg.hairShadow.enabled);
       this.hairShadow.setParams(cfg.hairShadow);
+    }
+    if (cfg.hairRing) {
+      setHairRingParams(cfg.hairRing);
     }
 
     if (cfg.lighting.sunShafts) {
