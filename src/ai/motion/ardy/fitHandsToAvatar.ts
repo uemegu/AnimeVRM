@@ -5,7 +5,8 @@ import type { StructuredMotionResult } from './vendor/motion-data';
 /**
  * ardy-mini is trained on real bodies, while anime avatars have narrow shoulders and short arms and torsos.
  * Copying joint rotations therefore moves the hands relative to the body, so hands on the hips or chest sink
- * into them. This refits the palms to the avatar's own torso, then re-solves each arm.
+ * into them, and hands meeting in front of the body pass through each other. This refits the palms to the
+ * avatar's own torso, keeps nearby hands placed relative to each other, then re-solves each arm.
  *
  * Hands at the face keep ardy-mini's pose. Mapping the palm centre onto an anime face was tried with
  * landmarks measured from the mesh, but the face is so small relative to the hand (on aoi the nose is 1.5 cm
@@ -27,7 +28,13 @@ export interface BodyRegion {
   restInverse: Quaternion;
 }
 
-export type AvatarBody = Record<TorsoRegionName, BodyRegion>;
+export interface AvatarBody {
+  regions: Record<TorsoRegionName, BodyRegion>;
+  /** Hand thickness across the palm; stacked hands are kept at least this far apart. */
+  handThickness: number;
+  /** Inverse rest-pose world rotation of each hand, to find where its palm faces. */
+  handRestInverse: { right: Quaternion; left: Quaternion };
+}
 
 /**
  * Where ardy-mini's palm centre (HandEnd) rests when a hand touches each region, in the joint's frame.
@@ -56,6 +63,18 @@ const FULL_INFLUENCE = 1.3;
 const NO_INFLUENCE = 2.3;
 /** Palms are kept this far outside torso surfaces in normalized units, so they rest on clothing. */
 const SURFACE_GAP = 1.05;
+/** Palm-to-palm distances (ardy-mini metres) over which the two hands keep their relative placement. */
+const HANDS_NEAR = 0.2;
+const HANDS_APART = 0.3;
+/** Palm-to-palm distances (ardy-mini metres) over which palms that roughly face each other turn to meet. */
+const PALMS_MEET = 0.12;
+const PALMS_APART = 0.25;
+/** The most a hand turns so the palms meet; beyond this the wrist would look broken. */
+const MAX_PALM_TURN = MathUtils.degToRad(60);
+/** A hand is this many palm offsets long, which decides whether two hands overlap. */
+const HAND_LENGTHS_PER_PALM_OFFSET = 2.5;
+/** In the normalized rest pose palms face down. */
+const REST_PALM_NORMAL = new Vector3(0, -1, 0);
 /** ardy-mini's HandEnd sits about three quarters of the way from the wrist to the knuckles. */
 const PALM_FRACTION = 0.75;
 
@@ -64,12 +83,12 @@ const SIDES = [
   { source: 'Left', upper: 'leftUpperArm', lower: 'leftLowerArm', hand: 'leftHand', knuckle: 'leftMiddleProximal' },
 ] as const;
 
-/** Measure the avatar's chest, waist and hips from the skinned mesh in its rest pose. */
+/** Measure the avatar's chest, waist, hips and hands from the skinned mesh in its rest pose. */
 export function measureAvatarBody(vrm: VRM): AvatarBody {
   vrm.humanoid.resetNormalizedPose();
   vrm.humanoid.update();
   vrm.scene.updateMatrixWorld(true);
-  const regions = {} as AvatarBody;
+  const regions = {} as AvatarBody['regions'];
   for (const name of Object.keys(TARGET_BONES) as TorsoRegionName[]) {
     const bone = TARGET_BONES[name].find(candidate => vrm.humanoid.getNormalizedBoneNode(candidate));
     if (!bone) throw new Error(`Avatar fitting needs a ${TARGET_BONES[name].join(' or ')} bone.`);
@@ -82,7 +101,18 @@ export function measureAvatarBody(vrm: VRM): AvatarBody {
       restInverse: normalized.getWorldQuaternion(new Quaternion()).invert(),
     };
   }
-  return regions;
+  const hand = (name: 'rightHand' | 'leftHand') => vrm.humanoid.getNormalizedBoneNode(name)?.getWorldQuaternion(new Quaternion()).invert() ?? new Quaternion();
+  return { regions, handThickness: measureHandThickness(vrm), handRestInverse: { right: hand('rightHand'), left: hand('leftHand') } };
+}
+
+/** Thickness of the palm from the vertices bound to the hands; palms face down in the rest pose. */
+function measureHandThickness(vrm: VRM): number {
+  const thickness = (['rightHand', 'leftHand'] as const).map(name => {
+    const bone = vrm.humanoid.getRawBoneNode(name);
+    const heights = bone ? collectSkinnedPoints(vrm, bone).map(point => point.y).sort((a, b) => a - b) : [];
+    return heights.length >= 20 ? heights[Math.ceil(heights.length * 0.97) - 1] - heights[Math.floor(heights.length * 0.03)] : NaN;
+  }).filter(Number.isFinite);
+  return thickness.length ? Math.max(0.012, Math.min(...thickness)) : 0.02;
 }
 
 function bounds(points: Vector3[], bone: string): { low: Vector3; high: Vector3 } {
@@ -122,8 +152,10 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
   if (!body) {
     measured.set(vrm, body = measureAvatarBody(vrm));
     const round = (point: Vector3) => point.toArray().map(value => Number(value.toFixed(3)));
-    console.info('[ardy-mini] avatar fit', JSON.stringify(Object.fromEntries(Object.entries(body).map(([name, region]) =>
-      [name, { bone: region.bone, center: round(region.center), radii: round(region.radii) }]))));
+    console.info('[ardy-mini] avatar fit', JSON.stringify({
+      ...Object.fromEntries(Object.entries(body.regions).map(([name, region]) => [name, { bone: region.bone, center: round(region.center), radii: round(region.radii) }])),
+      handThickness: Number(body.handThickness.toFixed(3)),
+    }));
   }
   const fitted = clip.clone();
   const tracks = fitted.tracks
@@ -162,7 +194,7 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
   const node = (name: VRMHumanBoneName) => vrm.humanoid.getNormalizedBoneNode(name);
   const worldPosition = (object: Object3D) => object.getWorldPosition(new Vector3());
   const armTracks = new Map(tracks.filter(({ property }) => property === 'quaternion').map(entry => [entry.node, entry.track]));
-  const regionNames = Object.keys(body) as TorsoRegionName[];
+  const regionNames = Object.keys(body.regions) as TorsoRegionName[];
   const head = SOURCE_REGIONS.head;
 
   for (let frame = 0; frame < frames; frame++) {
@@ -173,7 +205,7 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
     vrm.scene.updateMatrixWorld(true);
     // Each region's frame follows its own skeleton's pose.
     const regions = regionNames.map(name => {
-      const region = body[name];
+      const region = body.regions[name];
       const bone = node(region.bone)!;
       const rotation = bone.getWorldQuaternion(new Quaternion()).multiply(region.restInverse);
       const source = SOURCE_REGIONS[name];
@@ -186,9 +218,9 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
       };
     });
 
-    for (const arm of SIDES) {
+    const arms = SIDES.flatMap(arm => {
       const upper = node(arm.upper), lower = node(arm.lower), hand = node(arm.hand);
-      if (!upper || !lower || !hand) continue;
+      if (!upper || !lower || !hand) return [];
       const knuckle = node(arm.knuckle);
       const wrist = worldPosition(hand);
       const palm = knuckle ? wrist.clone().lerp(worldPosition(knuckle), PALM_FRACTION) : wrist.clone();
@@ -210,8 +242,32 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
         pull.addScaledVector(target.applyQuaternion(region.rotation).add(region.targetOrigin).sub(palm), weight);
         total += weight;
       }
-      if (total <= 0) continue;
       const goal = palm.clone().addScaledVector(pull, 1 / Math.max(1, total));
+      const handWorld = hand.getWorldQuaternion(new Quaternion());
+      return [{
+        upper, lower, hand, wrist, palm, sourcePalm, sourceWrist: sourcePoint(frame, `${arm.source}Hand`), goal,
+        copiedWorld: handWorld.clone(), handWorld, restInverse: body.handRestInverse[arm.source === 'Right' ? 'right' : 'left'],
+      }];
+    });
+
+    // Narrow shoulders make hands that meet in front of the body overshoot and pass through each other,
+    // so hands close together keep ardy-mini's placement relative to each other, sized to the avatar's hands.
+    const [right, left] = arms;
+    if (right && left) {
+      const sourceGap = right.sourcePalm.clone().sub(left.sourcePalm);
+      const together = 1 - MathUtils.smoothstep(sourceGap.length(), HANDS_NEAR, HANDS_APART);
+      const sourceHand = right.sourcePalm.distanceTo(right.sourceWrist) + left.sourcePalm.distanceTo(left.sourceWrist);
+      const targetHand = right.palm.distanceTo(right.wrist) + left.palm.distanceTo(left.wrist);
+      if (together > 0 && sourceHand > 1e-4 && targetHand > 1e-4) {
+        const chest = regions.find(region => region.name === 'chest')!;
+        const gap = sourceGap.applyQuaternion(chest.sourceInverse).applyQuaternion(chest.rotation).multiplyScalar(targetHand / sourceHand / 2);
+        const middle = right.goal.clone().add(left.goal).multiplyScalar(0.5);
+        right.goal.lerp(middle.clone().add(gap), together);
+        left.goal.lerp(middle.sub(gap), together);
+      }
+    }
+
+    for (const { goal } of arms) {
       for (const region of regions) {
         const inside = goal.clone().sub(region.targetOrigin).applyQuaternion(region.inverse).sub(region.targetCenter).divide(region.targetRadii);
         const distance = inside.length();
@@ -219,18 +275,87 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
         goal.copy(inside.multiplyScalar(SURFACE_GAP / distance).multiply(region.targetRadii).add(region.targetCenter)
           .applyQuaternion(region.rotation).add(region.targetOrigin));
       }
-      if (goal.distanceToSquared(palm) < 1e-8) continue;
+    }
+    if (right && left) separateHands(right, left, body.handThickness, regions.find(region => region.name === 'chest')!.rotation);
 
-      const handWorld = hand.getWorldQuaternion(new Quaternion());
-      reachWithArm(upper, lower, hand, goal.sub(palm).add(wrist));
+    if (right && left) meetPalms(right, left, right.sourcePalm.distanceTo(left.sourcePalm));
+
+    for (const { upper, lower, hand, wrist, palm, goal, copiedWorld, handWorld } of arms) {
+      if (goal.distanceToSquared(palm) < 1e-8 && handWorld.angleTo(copiedWorld) < 1e-6) continue;
+      // Turning the hand swings the palm around the wrist, so the wrist goes where the turned palm lands on its goal.
+      const palmOffset = palm.clone().sub(wrist).applyQuaternion(handWorld.clone().multiply(copiedWorld.clone().invert()));
+      reachWithArm(upper, lower, hand, goal.clone().sub(palmOffset));
       const parentWorld = hand.parent!.getWorldQuaternion(new Quaternion());
       hand.quaternion.copy(parentWorld.invert().multiply(handWorld)).normalize();
+      hand.updateMatrixWorld(true);
+    }
+    for (const { upper, lower, hand } of arms) {
       for (const bone of [upper, lower, hand]) armTracks.get(bone)?.values.set(bone.quaternion.toArray(), frame * 4);
     }
   }
   vrm.humanoid.resetNormalizedPose();
   vrm.scene.updateMatrixWorld(true);
   return fitted;
+}
+
+interface ArmGoal {
+  wrist: Vector3;
+  palm: Vector3;
+  goal: Vector3;
+  /** The hand's world rotation to solve for; starts as the copied one. */
+  handWorld: Quaternion;
+  restInverse: Quaternion;
+}
+
+function palmNormal(arm: ArmGoal): Vector3 {
+  return REST_PALM_NORMAL.clone().applyQuaternion(arm.handWorld.clone().multiply(arm.restInverse));
+}
+
+/**
+ * Overlapping hands are pushed a hand's thickness apart along the direction their palms face: forward from the
+ * body for hands stacked on the chest, sideways for palms pressed together. Stacked hands move only the outer one.
+ */
+function separateHands(right: ArmGoal, left: ArmGoal, thickness: number, bodyRotation: Quaternion): void {
+  const rightNormal = palmNormal(right), leftNormal = palmNormal(left);
+  const across = rightNormal.clone().add(rightNormal.dot(leftNormal) < 0 ? leftNormal.clone().negate() : leftNormal);
+  if (across.lengthSq() < 1e-8) return;
+  across.normalize();
+  const offset = right.goal.clone().sub(left.goal);
+  const depth = offset.dot(across);
+  const beside = offset.clone().addScaledVector(across, -depth).length();
+  const span = HAND_LENGTHS_PER_PALM_OFFSET * (right.palm.distanceTo(right.wrist) + left.palm.distanceTo(left.wrist)) / 2;
+  const overlap = 1 - MathUtils.smoothstep(beside, span * 0.5, span);
+  const missing = (thickness - Math.abs(depth)) * overlap;
+  if (missing <= 0) return;
+  const forward = new Vector3(0, 0, 1).applyQuaternion(bodyRotation);
+  if (Math.abs(across.dot(forward)) > 0.7) {
+    // Stacked on the body: the hand further forward rests on the other.
+    const outer = right.goal.dot(forward) >= left.goal.dot(forward) ? right : left;
+    outer.goal.addScaledVector(across, across.dot(forward) >= 0 ? missing : -missing);
+  } else {
+    // Pressed together: both move apart, keeping the right hand on its side.
+    const push = across.multiplyScalar(depth < 0 ? -missing / 2 : missing / 2);
+    right.goal.add(push);
+    left.goal.sub(push);
+  }
+}
+
+/** Palms that roughly face each other at close range turn the rest of the way, bending the wrists as a clap does. */
+function meetPalms(right: ArmGoal, left: ArmGoal, sourceGap: number): void {
+  const closeness = 1 - MathUtils.smoothstep(sourceGap, PALMS_MEET, PALMS_APART);
+  if (closeness <= 0) return;
+  for (const [self, other] of [[right, left], [left, right]] as const) {
+    const toOther = other.goal.clone().sub(self.goal);
+    if (toOther.lengthSq() < 1e-8) continue;
+    toOther.normalize();
+    const normal = palmNormal(self);
+    const facing = MathUtils.smoothstep(normal.dot(toOther), 0.2, 0.6);
+    if (facing <= 0) continue;
+    const turn = new Quaternion().setFromUnitVectors(normal, toOther);
+    const angle = 2 * Math.acos(Math.min(1, Math.abs(turn.w)));
+    const amount = closeness * facing * Math.min(1, angle > 0 ? MAX_PALM_TURN / angle : 1);
+    self.handWorld.premultiply(new Quaternion().slerp(turn, amount)).normalize();
+  }
 }
 
 /** Two-bone IK that keeps the elbow on the side it already bends toward. */

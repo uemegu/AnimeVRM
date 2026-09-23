@@ -1,0 +1,71 @@
+{
+  "prompt": "A person standing in place nervously, holding hands in front of chest and fidgeting shyly",
+  "duration": 5,
+  "note": "Lower score is better. Scores detect defects only; watch the kept files before choosing.",
+  "candidates": [
+    {
+      "rank": 1,
+      "seed": "0770e4f2-2",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.3696064614135678,
+        "metrics": {
+          "footSlide": 0.01848032307067839,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.03952494293011969
+        }
+      },
+      "file": "ardy_confess_hesitant.fbx"
+    },
+    {
+      "rank": 2,
+      "seed": "0770e4f2-3",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.507432528225159,
+        "metrics": {
+          "footSlide": 0.025371626411257953,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.056803004727338346
+        }
+      },
+      "file": "ardy_confess_hesitant.cand2.fbx"
+    },
+    {
+      "rank": 3,
+      "seed": "0770e4f2-4",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.5308136420686933,
+        "metrics": {
+          "footSlide": 0.026540682103434667,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.0698305993373724
+        }
+      },
+      "file": "ardy_confess_hesitant.cand3.fbx"
+    },
+    {
+      "rank": 4,
+      "seed": "0770e4f2-1",
+      "cfgWeight": 3.5,
+      "lowActivity": false,
+      "score": {
+        "total": 0.6887499426883316,
+        "metrics": {
+          "footSlide": 0.03443749713441658,
+          "handPenetration": 0,
+          "wristStrain": 0,
+          "activity": 0.08971746566803014
+        }
+      },
+      "file": null
+    }
+  ]
+}

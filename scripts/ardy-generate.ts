@@ -23,6 +23,7 @@ interface BatchItem {
   preview?: boolean;
   lockLegs?: boolean;
   amplitude?: number;
+  loop?: boolean;
 }
 
 const optionsConfig = {
@@ -42,6 +43,7 @@ const optionsConfig = {
   preview: { type: 'boolean' as const, default: false },
   'fit-hands': { type: 'boolean' as const, default: true },
   'lock-legs': { type: 'boolean' as const, default: false },
+  loop: { type: 'boolean' as const, default: false },
   amplitude: { type: 'string' as const },
   batch: { type: 'string' as const, short: 'b' },
   headed: { type: 'boolean' as const, default: false },
@@ -73,7 +75,8 @@ Options:
       --no-fit-hands       With --avatar, keep ardy-mini's arm rotations instead of refitting the palms to the avatar
       --lock-legs          With --avatar, hold the legs and hips height at the first frame (gestures in place)
       --amplitude <a>      With --avatar, scale the motion toward an upright arms-down pose (0.3 to 1.5, default 1)
-  -b, --batch <file>       JSON array of tasks; each may also set candidates, seed, cfg, keep, preview, lockLegs, amplitude
+      --loop               Ease the last 0.5 s into the first pose, for motions played on repeat
+  -b, --batch <file>       JSON array of tasks; each may also set candidates, seed, cfg, keep, preview, lockLegs, amplitude, loop
       --headed             Run browser in headed (visible) mode
       --port <port>        Vite dev server port (default: Vite's default, 5173)
   -h, --help               Show this help message
@@ -315,6 +318,7 @@ async function main() {
         avatarUrl: task.avatar,
         preview: task.preview ?? values.preview,
         fitHands: values['fit-hands'],
+        loop: task.loop ?? values.loop,
         style: {
           lockLegs: task.lockLegs ?? values['lock-legs'],
           ...(task.amplitude ?? values.amplitude) === undefined ? {} : { amplitude: Number(task.amplitude ?? values.amplitude) },
