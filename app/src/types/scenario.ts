@@ -72,6 +72,8 @@ export interface SceneAvatarConfig {
 
 /** 選択肢定義 */
 export interface ScenarioChoice {
+  /** 履歴条件から参照するID（未指定時は goto 先シーンIDを使用） */
+  id?: string;
   /** 選択肢文言（多言語対応） */
   text: TextContent;
   /** 分岐先シーンID（goto） */
@@ -128,6 +130,34 @@ export interface ScenarioScene {
 
 import { ActionLocationId, DayPhase } from './game';
 
+/** シナリオの発生時間帯。複数指定した場合は OR 条件 */
+export type ScenarioTimeSlot = 'morning' | 'afternoon' | 'afterschool' | 'holiday';
+
+/** 先行シナリオ、またはそこで選択された選択肢の条件 */
+export interface ScenarioPrerequisite {
+  scenarioId: string;
+  /** 指定時はその選択肢を選んでいること、未指定時はシナリオ完了を要求 */
+  choiceId?: string;
+}
+
+/** all 内は AND、any 内は OR。両方指定した場合はグループ同士も AND */
+export interface ScenarioPrerequisites {
+  all?: ScenarioPrerequisite[];
+  any?: ScenarioPrerequisite[];
+}
+
+/** シナリオのスケジュール・解放条件 */
+export interface ScenarioAvailability {
+  /** 先行シナリオ条件。未指定なら履歴による制限なし */
+  after?: ScenarioPrerequisites;
+  /** 発生時間帯。指定値のいずれかに一致すれば有効 */
+  timeSlots?: ScenarioTimeSlot[];
+  /** 発生日の両端を含む範囲。未指定なら上下限なし */
+  dayRange?: { from?: number; to?: number };
+  /** 発生場所。複数指定した場合は OR 条件 */
+  locations?: ActionLocationId[];
+}
+
 /** 行動ターン等における場所ヒント情報 */
 export interface ActionLocationHint {
   locationId: ActionLocationId;
@@ -141,6 +171,10 @@ export interface ActionLocationHint {
 export interface ScenarioPackage {
   id: string;
   title: TextContent;
+  /** 未指定項目は制限なし。従来の actionHints があればその場所・フェーズ制約は別途適用 */
+  availability?: ScenarioAvailability;
+  /** 条件が重なる候補内で大きいものを優先（同値なら定義順） */
+  priority?: number;
   /** 行動ターン等における場所ヒント情報（1つまたは複数） */
   actionHints?: ActionLocationHint[];
   /** 初期登場キャラクター一覧 */

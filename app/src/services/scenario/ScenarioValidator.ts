@@ -20,6 +20,39 @@ export interface ValidationResult {
 export function validateScenario(scenario: ScenarioPackage): ValidationResult {
   const issues: ValidationIssue[] = [];
   const sceneIds = new Set<string>();
+  const choiceIds = new Set<string>();
+
+  const dayRange = scenario.availability?.dayRange;
+  if (
+    dayRange?.from !== undefined &&
+    (!Number.isInteger(dayRange.from) || dayRange.from < 1)
+  ) {
+    issues.push({
+      type: 'error',
+      message: '発生期間の開始日は1以上の整数で指定してください。',
+    });
+  }
+  if (
+    dayRange?.to !== undefined &&
+    (!Number.isInteger(dayRange.to) || dayRange.to < 1)
+  ) {
+    issues.push({
+      type: 'error',
+      message: '発生期間の終了日は1以上の整数で指定してください。',
+    });
+  }
+  if (dayRange?.from !== undefined && dayRange?.to !== undefined && dayRange.from > dayRange.to) {
+    issues.push({
+      type: 'error',
+      message: '発生期間の開始日は終了日以前にしてください。',
+    });
+  }
+  if (scenario.priority !== undefined && !Number.isFinite(scenario.priority)) {
+    issues.push({
+      type: 'error',
+      message: '優先順位は有限の数値で指定してください。',
+    });
+  }
 
   // 1. シーンIDの一意性チェック
   for (const scene of scenario.scenes) {
@@ -55,6 +88,16 @@ export function validateScenario(scenario: ScenarioPackage): ValidationResult {
       }
 
       for (const choice of scene.choices) {
+        const choiceId = choice.id || choice.goto;
+        if (choiceIds.has(choiceId)) {
+          issues.push({
+            type: 'error',
+            sceneId: scene.id,
+            message: `選択肢IDが重複しています: "${choiceId}"`,
+          });
+        }
+        choiceIds.add(choiceId);
+
         if (!sceneIds.has(choice.goto)) {
           issues.push({
             type: 'error',

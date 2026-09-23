@@ -3,6 +3,8 @@ import { ScenarioPackage } from '../types/scenario';
 export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
   id: 'morning_day_1',
   title: { ja: '第1日 朝: 新学期の始まり', en: 'Day 1 Morning: Start of the Semester' },
+  availability: { dayRange: { from: 1, to: 1 } },
+  priority: 1,
   characters: [{ id: 'aoi', modelUrl: '/models/aoi/aoi.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -58,6 +60,7 @@ export const MORNING_SCENARIO_DAY_1: ScenarioPackage = {
 export const MORNING_SCENARIO_DEFAULT: ScenarioPackage = {
   id: 'morning_default',
   title: { ja: '朝の登校', en: 'Morning Walk to School' },
+  priority: 0,
   scenes: [
     {
       id: 'scene_1',

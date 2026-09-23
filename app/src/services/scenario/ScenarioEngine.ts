@@ -41,6 +41,7 @@ export class ScenarioEngine {
   private affinities: Record<string, number> = {};
   private language: SupportedLanguage = 'ja';
   private finished: boolean = false;
+  private lastSelectedChoiceId: string | null = null;
 
   constructor(
     scenarioPackage: ScenarioPackage,
@@ -175,6 +176,7 @@ export class ScenarioEngine {
     }
 
     const selected = available[choiceIndex];
+    this.lastSelectedChoiceId = selected.id || selected.goto;
 
     // フラグ更新
     if (selected.setFlags) {
@@ -223,5 +225,10 @@ export class ScenarioEngine {
 
   public getSceneIndex(): number {
     return this.sceneIndex;
+  }
+
+  /** 最後に選択された選択肢ID（ID未指定の場合はgoto先シーンID） */
+  public getLastSelectedChoiceId(): string | null {
+    return this.lastSelectedChoiceId;
   }
 }

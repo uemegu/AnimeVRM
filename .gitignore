@@ -31,3 +31,4 @@ dist-ssr
 /renders
 /tests
 /test-results
+.env

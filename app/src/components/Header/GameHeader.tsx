@@ -15,6 +15,8 @@ interface GameHeaderProps {
   onToggleMute?: () => void;
   onOpenHistory?: () => void;
   onOpenLicense?: () => void;
+  onShare?: () => void;
+  isSharing?: boolean;
 }
 
 const PHASE_LABELS: Record<
@@ -60,6 +62,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   onToggleMute,
   onOpenHistory,
   onOpenLicense,
+  onShare,
+  isSharing = false,
 }) => {
   const dayOfWeek = getDayOfWeek(day);
   const phaseInfo = PHASE_LABELS[phase];
@@ -133,6 +137,26 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
                 </svg>
               </span>
               <span className="header-btn-label">AUTO</span>
+            </span>
+          </button>
+        )}
+
+        {onShare && (
+          <button
+            type="button"
+            className={`header-action-btn header-share-btn ${isSharing ? 'loading' : ''}`}
+            onClick={onShare}
+            disabled={isSharing}
+            aria-label="Share to X"
+            title={lang === 'ja' ? 'Xにシェア (S)' : 'Share to X (S)'}
+          >
+            <span className="header-btn-inner">
+              <span className="header-btn-icon header-icon-share" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </span>
+              <span className="header-btn-label">SHARE</span>
             </span>
           </button>
         )}

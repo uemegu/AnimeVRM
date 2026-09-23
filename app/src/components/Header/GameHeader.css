@@ -166,6 +166,15 @@
   background: linear-gradient(150deg, rgba(238, 142, 147, 0.95), rgba(178, 64, 77, 0.95));
 }
 
+.header-actions .header-share-btn.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.header-actions .header-share-btn:disabled {
+  pointer-events: none;
+}
+
 /* The night room keeps the shared HUD, with darker glass around the phase badge. */
 .game-header[data-phase='night'] .day-badge,
 .game-header[data-phase='night'] .header-location-badge,

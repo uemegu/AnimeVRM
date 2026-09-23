@@ -4,6 +4,7 @@ import { ScenarioPackage } from '../types/scenario';
 export const FORCED_SCENARIO_MEET_SHION: ScenarioPackage = {
   id: 'forced_meet_shion',
   title: { ja: '偶然の出会い: 廊下のシオン', en: 'Fateful Encounter: Shion in the Corridor' },
+  availability: { dayRange: { from: 2 }, timeSlots: ['morning'] },
   characters: [{ id: 'shion', modelUrl: '/models/shion/shion.vrm', initialPosition: 'center' }],
   scenes: [
     {
@@ -54,6 +55,7 @@ export const FORCED_SCENARIO_MEET_SHION: ScenarioPackage = {
 export const FORCED_SCENARIO_MEET_EMILI: ScenarioPackage = {
   id: 'forced_meet_emili',
   title: { ja: '偶然の出会い: 迷子のエミリ', en: 'Fateful Encounter: Lost Emili' },
+  availability: { dayRange: { from: 3 }, timeSlots: ['afternoon'] },
   characters: [{ id: 'emili', modelUrl: '/models/emili/emili.vrm', initialPosition: 'center' }],
   scenes: [
     {
