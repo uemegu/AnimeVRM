@@ -1277,6 +1277,9 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     document.getElementById('scenario-classroom3d-btn')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (!classroomExperienceController) return;
+      const button = e.currentTarget as HTMLButtonElement;
+      button.disabled = true;
+      button.textContent = '教室を準備中…';
       try {
         if (viewerCore.panoramaController.isActive) {
           viewerCore.panoramaController.deactivate();
@@ -1286,6 +1289,9 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       } catch (error) {
         console.error('教室3D体験を開始できませんでした:', error);
         showToast('教室3D体験を読み込めませんでした');
+      } finally {
+        button.disabled = false;
+        button.textContent = '▶ 教室に入る';
       }
     });
 
@@ -1294,6 +1300,26 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       await classroomExperienceController?.stop();
       showToast('教室3D体験を終了しました');
     });
+
+    document.addEventListener(
+      'click',
+      (event) => {
+        if (!classroomExperienceController?.isActive || !(event.target instanceof Element)) return;
+        const scenarioButton = event.target.closest<HTMLButtonElement>('button[id^="scenario-"]');
+        if (!scenarioButton || scenarioButton.id.startsWith('scenario-classroom3d-')) return;
+
+        // Tear down the free-roam avatars and room before another Stage scenario starts.
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        scenarioButton.disabled = true;
+        void classroomExperienceController.stop().finally(() => {
+          scenarioButton.disabled = false;
+          scenarioButton.click();
+        });
+      },
+      true
+    );
 
     // Interactive Rooftop Nap Scenario Play/Stop
     document.getElementById('scenario-rooftop-btn')?.addEventListener('click', (e) => {

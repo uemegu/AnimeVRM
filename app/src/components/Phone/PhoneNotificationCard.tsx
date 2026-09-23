@@ -88,22 +88,11 @@ export const PhoneNotificationCard: React.FC<PhoneNotificationCardProps> = ({
             alt={charName}
             className="phone-notif-avatar-img"
           />
-          <div className="phone-notif-call-badge" aria-hidden="true">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20 15.5c-1.2 0-2.4-.2-3.6-.6-.3-.1-.7 0-1 .2l-2.2 2.2c-2.8-1.4-5.1-3.8-6.6-6.6l2.2-2.2c.3-.3.4-.7.2-1-.4-1.1-.6-2.3-.6-3.5 0-.6-.4-1-1-1H4c-.6 0-1 .4-1 1 0 9.4 7.6 17 17 17 .6 0 1-.4 1-1v-3.5c0-.6-.4-1-1-1z" />
-            </svg>
-          </div>
         </div>
 
         <div className="phone-notif-body">
           <div className="phone-notif-header">
             <span className="phone-notif-name">{charName}</span>
-            <span className="phone-notif-icon-tag" aria-hidden="true">
-              {/* ビデオ通話アイコン */}
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z" />
-              </svg>
-            </span>
           </div>
           <div className="phone-notif-call-label">
             <span>{lang === 'ja' ? '着信中...' : 'Incoming Call...'}</span>
