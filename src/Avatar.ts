@@ -8,6 +8,7 @@ import {
   ToonShaderOptions,
 } from './ToonShader';
 import { applySmoothNormalsToHierarchy, flattenEyeOrbitNormals } from './shader/SmoothNormalHelper';
+import type { HairShadowUniforms } from './shader/HairShadow';
 import type { AvatarConfig } from './Config';
 import { PHONEMES, Phoneme } from './AudioLipSync';
 import { resolveAssetUrl } from './utils/path';
@@ -74,6 +75,8 @@ export interface AvatarOptions {
   enableBreathing?: boolean;
   effectTextManager?: EffectTextManager;
   renderer?: THREE.WebGLRenderer;
+  // 前髪の影（ViewerCore の HairShadowRenderer から受け取る）
+  hairShadow?: HairShadowUniforms;
   onProgress?: (progress: number) => void;
   onLoaded?: (avatar: Avatar) => void;
   onError?: (error: unknown) => void;
@@ -413,6 +416,7 @@ export class Avatar {
       eyeWander: options.eyeWander ?? false,
       enableBreathing: options.enableBreathing ?? true,
       effectTextManager: options.effectTextManager,
+      hairShadow: options.hairShadow,
       onProgress: options.onProgress ?? (() => {}),
       onLoaded: options.onLoaded ?? (() => {}),
       onError: options.onError ?? ((err) => console.error(err)),
@@ -573,6 +577,7 @@ export class Avatar {
           clothPattern: /Cloth|Tops|Bottoms|Shoes|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|服|靴/i,
           config: this.options.config,
           camera: this.camera,
+          hairShadow: this.options.hairShadow,
           debug: true,
         };
 

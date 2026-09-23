@@ -153,6 +153,31 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .onChange(() => getAvatar()?.shaderController?.updateBottomGradient(currentConfig.bottomGradient));
   bottomGradientFolder.close();
 
+  // 2.2 前髪の影 (Hair Shadow)
+  if (!currentConfig.hairShadow) {
+    currentConfig.hairShadow = {
+      enabled: true,
+      offset: 0.006,
+      downBias: 0.002,
+      strength: 0.7,
+      depthBias: 0.002,
+      maxDepthDiff: 0.12,
+    };
+  }
+  const hairShadowCfg = currentConfig.hairShadow;
+  const applyHairShadow = () => {
+    viewerCore.hairShadow.setEnabled(hairShadowCfg.enabled);
+    viewerCore.hairShadow.setParams(hairShadowCfg);
+  };
+  const hairShadowFolder = visualGui.addFolder(tr.gui.hairShadowFolder);
+  hairShadowFolder.add(hairShadowCfg, 'enabled').name(tr.gui.hairShadowEnabled).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'offset', 0, 0.05, 0.001).name(tr.gui.hairShadowOffset).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'downBias', 0, 0.05, 0.001).name(tr.gui.hairShadowDownBias).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'strength', 0, 1, 0.01).name(tr.gui.hairShadowStrength).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'depthBias', 0, 0.02, 0.0005).name(tr.gui.hairShadowDepthBias).onChange(applyHairShadow);
+  hairShadowFolder.add(hairShadowCfg, 'maxDepthDiff', 0.01, 0.5, 0.01).name(tr.gui.hairShadowMaxDepthDiff).onChange(applyHairShadow);
+  hairShadowFolder.close();
+
   // 3. Lighting Folder
   const lightFolder = visualGui.addFolder(tr.gui.lightFolder);
   lightFolder

@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
 import { applyToonShader, ToonShaderController } from '../shader/ToonShader';
+import { HairShadowUniforms } from '../shader/HairShadow';
 import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
 
@@ -140,6 +141,10 @@ export interface AvatarOptions {
   id: string;
   modelUrl: string;
   scene: THREE.Scene;
+  // ToonShader の足元グラデーションをワールド座標で計算するために使用
+  camera?: THREE.Camera;
+  // 前髪の影（StageManager の HairShadowRenderer から受け取る）
+  hairShadow?: HairShadowUniforms;
   defaultAnimationUrl?: string;
   initialPosition?: THREE.Vector3;
 }
@@ -148,6 +153,8 @@ export class Avatar {
   public id: string;
   public vrm: VRM | null = null;
   public scene: THREE.Scene;
+  private camera: THREE.Camera | undefined;
+  private hairShadow: HairShadowUniforms | undefined;
   public mixer: THREE.AnimationMixer | null = null;
   public shaderController: ToonShaderController | null = null;
 
@@ -198,6 +205,8 @@ export class Avatar {
   constructor(options: AvatarOptions) {
     this.id = options.id;
     this.scene = options.scene;
+    this.camera = options.camera;
+    this.hairShadow = options.hairShadow;
   }
 
   public async load(modelUrl: string, defaultAnimationUrl = '/animations/Standing Idle.fbx'): Promise<VRM> {
@@ -231,7 +240,10 @@ export class Avatar {
           });
 
           // 3. ToonShader適用（アニメ調マテリアルパッチ）
-          this.shaderController = applyToonShader(vrm, this.scene, {});
+          this.shaderController = applyToonShader(vrm, this.scene, {
+            camera: this.camera,
+            hairShadow: this.hairShadow,
+          });
 
           // 4. アニメーションミキサー初期化
           this.mixer = new THREE.AnimationMixer(vrm.scene);

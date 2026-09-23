@@ -84,6 +84,16 @@ export interface BottomGradientConfig {
   color: string;
 }
 
+// 前髪の影（スクリーンスペース方式）。各値の意味は shader/HairShadow.ts の HairShadowParams を参照
+export interface HairShadowConfig {
+  enabled: boolean;
+  offset: number;
+  downBias: number;
+  strength: number;
+  depthBias: number;
+  maxDepthDiff: number;
+}
+
 export interface DepthRimConfig {
   enabled: boolean;
   power: number;
@@ -184,6 +194,7 @@ export interface AvatarConfig {
   };
   eyeGlow?: EyeGlowConfig;
   bottomGradient?: BottomGradientConfig;
+  hairShadow?: HairShadowConfig;
   outline: {
     enabled: boolean;
     useSmoothNormal: boolean;
@@ -344,6 +355,14 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     intensity: 0.1,
     shadowWeight: 1.0,
     color: '#101018',
+  },
+  hairShadow: {
+    enabled: true,
+    offset: 0.006,
+    downBias: 0.002,
+    strength: 0.7,
+    depthBias: 0.002,
+    maxDepthDiff: 0.12,
   },
   outline: {
     enabled: true,
