@@ -14,13 +14,16 @@ import struct
 from pathlib import Path
 
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 
 ROOT = Path(bpy.data.filepath).parent
 TEXTURES = ROOT / "textures"
 W, L, H = 12.8, 14.8, 4.2
 XW, YW = W / 2, L / 2
+ROOM_SCALE = (0.70, 0.72, 0.85)
+DESK_COLUMNS = (-4.35, -2.75, -1.20, 1.20, 2.75, 4.35)
+DESK_ROWS = (-5.0, -3.32, -1.64, 0.04, 1.72, 3.40)
 scene = bpy.context.scene
 
 # Remove the previous classroom before creating fresh materials, keeping the
@@ -109,9 +112,11 @@ M = {
     "book_green": material("green textbook", "8aa997"),
     "curtain": material("linen curtains", "e5e9da"),
     "hall_floor": material("corridor blue stone", "9daebc"),
-    "shadow_soft": material("painted soft contact shadow", "344a69", alpha=0.14),
-    "shadow_core": material("painted dark contact shadow", "263b59", alpha=0.22),
 }
+DESK_TOP_MATERIALS = tuple(
+    material(f"varnished desk top {i + 1}", "d6a06d", "desk-wood-cel.png", roughness=roughness)
+    for i, roughness in enumerate((0.25, 0.38, 0.52, 0.68))
+)
 
 
 def link_new(obj, name):
@@ -179,29 +184,6 @@ def wall_image(name, y, x, z, width, height, mat, uv=(0, 0, 1, 1)):
     return obj
 
 
-def shadow_ellipse(name, x, y, z, radius_x, radius_y, mat):
-    vertices = [
-        (x + radius_x * math.cos(2 * math.pi * i / 16),
-         y + radius_y * math.sin(2 * math.pi * i / 16), z)
-        for i in range(16)
-    ]
-    mesh = bpy.data.meshes.new(name)
-    mesh.from_pydata(vertices, [], [tuple(range(16))])
-    mesh.update()
-    obj = bpy.data.objects.new(name, mesh)
-    COLLECTION.objects.link(obj)
-    obj.data.materials.append(mat)
-    obj["classroom_export"] = True
-    return obj
-
-
-def contact_shadow(name, x, y, radius_x, radius_y):
-    shadow_ellipse(name + " / soft edge", x + 0.07, y - 0.08, 0.006,
-                   radius_x, radius_y, M["shadow_soft"])
-    shadow_ellipse(name + " / core", x + 0.04, y - 0.04, 0.010,
-                   radius_x * 0.72, radius_y * 0.72, M["shadow_core"])
-
-
 def look_at(obj, target):
     obj.rotation_euler = (Vector(target) - obj.location).to_track_quat('-Z', 'Y').to_euler()
 
@@ -209,7 +191,8 @@ def look_at(obj, target):
 def desk(x, y, row, col):
     prefix = f"Desk {row + 1:02d}-{col + 1:02d}"
     # The chair is behind the desk; the class faces the front wall at +Y.
-    box(prefix + " / tabletop", (x, y, 0.735), (0.91, 0.62, 0.055), M["wood"], 0.035)
+    top_material = DESK_TOP_MATERIALS[(row * 3 + col * 5) % len(DESK_TOP_MATERIALS)]
+    box(prefix + " / tabletop", (x, y, 0.735), (0.91, 0.62, 0.055), top_material, 0.035)
     box(prefix + " / dark rim", (x, y, 0.701), (0.92, 0.63, 0.035), M["wood_dark"], 0.015)
     for dx in (-0.37, 0.37):
         for dy in (-0.235, 0.235):
@@ -227,7 +210,6 @@ def desk(x, y, row, col):
     box(prefix + " / chair back", (x, seat_y - 0.22, 0.685), (0.66, 0.05, 0.35), M["wood"], 0.04)
     for dx in (-0.27, 0.27):
         box(prefix + " / back rail", (x + dx, seat_y - 0.20, 0.69), (0.027, 0.035, 0.45), M["metal"])
-    contact_shadow(prefix, x, y - 0.24, 0.54, 0.54)
     # A few objects on desks make the room feel used without obstructing play.
     if (row, col) in {(0, 1), (1, 4), (2, 2), (3, 0), (4, 5), (5, 3)}:
         book_mat = [M["book_blue"], M["book_red"], M["book_green"]][(row + col) % 3]
@@ -379,26 +361,25 @@ def build_hallway_glimpse():
 def build_front():
     # Keep the front board blank, wide, and unmistakably the teaching wall.
     board_y = YW - 0.105
-    box("Blank blackboard backing", (0, board_y, 2.37), (8.30, 0.095, 1.88), M["dark_trim"], 0.015)
+    box("Blank blackboard backing", (0, board_y, 2.37), (6.60, 0.095, 1.88), M["dark_trim"], 0.015)
     box("Blank chalkboard textured surface", (0, board_y - 0.06, 2.37),
-        (8.03, 0.022, 1.63), M["board"])
-    for x in (-4.14, 4.14):
+        (6.38, 0.022, 1.63), M["board"])
+    for x in (-3.29, 3.29):
         box("Blackboard silver side frame", (x, board_y - 0.08, 2.37),
             (0.06, 0.10, 1.94), M["trim"])
     for z in (1.43, 3.31):
         box("Blackboard silver top bottom frame", (0, board_y - 0.08, z),
-            (8.32, 0.10, 0.055), M["trim"])
+            (6.62, 0.10, 0.055), M["trim"])
     box("Blackboard chalk rail", (0, board_y - 0.2, 1.41),
-        (8.5, 0.23, 0.06), M["metal"], 0.008)
+        (6.75, 0.23, 0.06), M["metal"], 0.008)
     for x in (-2.8, -2.65, 1.9):
         box("Unused white chalk", (x, board_y - 0.25, 1.47),
             (0.09, 0.014, 0.025), M["paper"], 0.005)
-    box("Teacher desk top", (0, 5.55, 0.86), (1.65, 0.78, 0.075), M["wood"], 0.032)
-    box("Teacher desk front panel", (0, 5.85, 0.46), (1.52, 0.04, 0.68), M["wood_light"])
+    box("Teacher desk top", (0, 5.55, 0.86), (1.95, 0.78, 0.075), DESK_TOP_MATERIALS[1], 0.032)
+    box("Teacher desk front panel", (0, 5.85, 0.46), (1.78, 0.04, 0.68), M["wood_light"])
     for x in (-0.7, 0.7):
         for y in (5.23, 5.88):
             box("Teacher desk leg", (x, y, 0.41), (0.06, 0.06, 0.76), M["metal"])
-    contact_shadow("Teacher desk", 0, 5.55, 0.80, 0.44)
     # Simple analogue clock with no labels or text.
     cylinder("Front wall clock rim", (3.67, YW - 0.12, 3.75), 0.29, 0.09,
              M["metal"], 32, math.pi / 2)
@@ -486,14 +467,14 @@ def configure_lighting():
     world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.42
     scene.world = world
     for name, location, energy, size, color, target in (
-        ("Broad classroom color key", (-2.0, 0.0, 7.2), 950, 12.0, "d7e5f5", (0, 0, 0)),
+        ("Classroom ceiling key", (-1.5, 0.2, 3.20), 760, 5.0, "d7e5f5", (0, 0, 0)),
     ):
         data = bpy.data.lights.new(name, 'AREA')
         data.energy = energy
         data.shape = 'DISK'
         data.size = size
         data.color = rgba(color)[:3]
-        data.use_shadow = False
+        data.use_shadow = True
         obj = bpy.data.objects.new(name, data)
         CAMERAS.objects.link(obj)
         obj.location = location
@@ -503,7 +484,7 @@ def configure_lighting():
 def configure_preview_toon_materials():
     """Keep Eevee cel materials in the .blend and PBR fallbacks for GLB export."""
     fallback_outputs = []
-    for mat in M.values():
+    for mat in (*M.values(), *DESK_TOP_MATERIALS):
         nodes = mat.node_tree.nodes
         pbr_output = next(n for n in nodes if n.type == 'OUTPUT_MATERIAL')
         fallback_outputs.append(pbr_output)
@@ -580,7 +561,7 @@ def patch_mtoon_extension(path):
         document['extensionsUsed'].append('VRMC_materials_mtoon')
     for mat in document.get('materials', []):
         name = mat['name'].lower()
-        if any(part in name for part in ('wood', 'walnut', 'beech')):
+        if any(part in name for part in ('wood', 'walnut', 'beech', 'varnished desk top')):
             shade = [0.20, 0.31, 0.43]
         elif 'board' in name:
             shade = [0.07, 0.17, 0.22]
@@ -591,7 +572,7 @@ def patch_mtoon_extension(path):
         else:
             shade = [0.44, 0.55, 0.67]
         outlined = any(part in name for part in (
-            'sunlit honey wood', 'warm walnut edge', 'classroom sliding door',
+            'sunlit honey wood', 'warm walnut edge', 'varnished desk top', 'classroom sliding door',
             'beech cabinet', 'blank deep green board',
             'blue grey painted steel', 'dark seat support',
             'powder blue trim', 'slate window metal',
@@ -603,7 +584,7 @@ def patch_mtoon_extension(path):
             'shadingToonyFactor': 0.95,
             'giEqualizationFactor': 0.9,
             'outlineWidthMode': 'worldCoordinates' if outlined else 'none',
-            'outlineWidthFactor': 0.012 if outlined else 0.0,
+            'outlineWidthFactor': 0.0035 if outlined else 0.0,
             'outlineColorFactor': [0.14, 0.23, 0.33],
             'outlineLightingMixFactor': 0.0,
         }
@@ -620,9 +601,24 @@ build_corridor_wall()
 build_hallway_glimpse()
 build_front()
 build_rear()
-for row, y in enumerate((-5.0, -3.32, -1.64, 0.04, 1.72, 3.40)):
-    for col, x in enumerate((-4.64, -2.78, -0.92, 0.92, 2.78, 4.64)):
+for row, y in enumerate(DESK_ROWS):
+    for col, x in enumerate(DESK_COLUMNS):
         desk(x, y, row, col)
+
+# Reduce the room footprint without making the student furniture child-sized.
+# Mesh space is transformed so each editable piece retains its own origin.
+bpy.context.view_layer.update()
+for obj in COLLECTION.objects:
+    if obj.type != 'MESH':
+        continue
+    world = obj.matrix_world.copy()
+    sx, sy, sz = ROOM_SCALE
+    if obj.name.startswith(('Desk ', 'Teacher desk ')):
+        sz = 1.0
+    scale = Matrix.Diagonal((sx, sy, sz, 1.0))
+    obj.data.transform(scale @ world)
+    obj.matrix_world = Matrix.Identity(4)
+    obj.data.update()
 configure_lighting()
 fallback_outputs = configure_preview_toon_materials()
 
@@ -638,11 +634,11 @@ scene.render.image_settings.color_mode = 'RGBA'
 bpy.context.preferences.filepaths.save_version = 0
 bpy.ops.file.pack_all()
 
-configure_preview('Classroom | view toward blank blackboard', (0.05, -6.65, 1.79),
-                  (0.0, 2.3, 1.62), 'preview-classroom.png')
+configure_preview('Classroom | view toward blank blackboard', (0.05, -4.75, 1.65),
+                  (0.0, 1.7, 1.60), 'preview-classroom.png')
 front_camera = scene.camera
-configure_preview('Classroom | view toward rear display', (0.10, 6.35, 1.80),
-                  (0.0, -2.5, 1.62), 'preview-classroom-rear.png')
+configure_preview('Classroom | view toward rear display', (0.10, 4.52, 1.65),
+                  (0.0, -1.8, 1.60), 'preview-classroom-rear.png')
 scene.camera = front_camera
 bpy.ops.wm.save_as_mainfile(filepath=str(ROOT / 'school-environments.blend'))
 
@@ -659,7 +655,7 @@ for obj in COLLECTION.objects:
         obj.select_set(True)
 bpy.context.view_layer.objects.active = next(o for o in COLLECTION.objects if o.type == 'MESH')
 bpy.ops.object.convert(target='MESH')
-for mat in M.values():
+for mat in (*M.values(), *DESK_TOP_MATERIALS):
     group = [o for o in COLLECTION.objects if o.type == 'MESH' and o.data.materials and o.data.materials[0] == mat]
     if len(group) < 2:
         continue

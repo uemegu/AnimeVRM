@@ -5,12 +5,12 @@ export default defineConfig({
   testMatch: ['crowd-mob.spec.ts'],
   timeout: 60000,
   use: {
-    baseURL: 'http://127.0.0.1:4173/AnimeVRM/',
+    baseURL: 'http://127.0.0.1:4175/AnimeVRM/',
     viewport: { width: 1280, height: 720 },
   },
   webServer: {
-    command: 'npx vite preview --outDir docs --host 127.0.0.1 --port 4173',
-    url: 'http://127.0.0.1:4173/AnimeVRM/crowd-test.html',
+    command: 'npx vite preview --outDir docs --host 127.0.0.1 --port 4175',
+    url: 'http://127.0.0.1:4175/AnimeVRM/crowd-test.html',
     reuseExistingServer: false,
     timeout: 30000,
   },
