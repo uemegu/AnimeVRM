@@ -126,5 +126,10 @@ npm run ardy:generate -- -b test/fixtures/ardy_batch_sample.json
 - `-f, --format <fbx|saved-motion|raw>`: 出力形式（拡張子から自動判定）
 - `-b, --batch <file>`: 一括生成用 JSON 定義ファイル
 - `--headed`: ブラウザ画面を表示（デバッグ用）
-- `--port <port>`: 開発サーバーポート（デフォルト 5173）
+- `--quality-plan <file>`: 校正済みavatar profileと一緒に使うMotionQualityPlan JSON
+- `--jev`: Jevに9つの型付き質問を1回で送り、接触プランを構成（`.env` の `JEV_API_KEY` を使用。`TYPESAFE_API_KEY` も互換対応）
+- `--acting-note <text>`: Jevとardy-mini両方へ渡す演技方針。例: `soft, graceful, restrained`
+- `--avatar <URL>` / `--contact-profile <file>`: 対象VRMとその校正profile（quality設定では必須）
+- `--port <port>`: 開発サーバーポート（省略時はViteのデフォルト5173）
 
+quality生成には、同じVRMを `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output public/motion-profiles/aoi-school.json` で一度校正します。profileに埋め込まれるモデルhashが違うと補正を適用しません。Jevで作った時間プランは `.review.fbx` へ保存されるので、目視後に必要なら手書きplanへ確定してください。

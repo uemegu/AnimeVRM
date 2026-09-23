@@ -251,6 +251,13 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   return result;
 }
 
+/** Release a transient FBX clip cache entry after CLI round-trip verification. */
+export function releaseMixamoAnimation(url: string, vrm: VRM): void {
+  const resolvedUrl = resolveAssetUrl(url);
+  animationClipCache.delete(`${resolvedUrl}:${vrm.scene.uuid}`);
+  animationAssetCache.delete(resolvedUrl);
+}
+
 export class Avatar {
   public vrm: VRM | null = null;
   public scene: THREE.Scene;
