@@ -12,15 +12,11 @@ export type { RainConfig, FastMotionConfig, Live2DConfig };
 
 export interface MaterialStyleParams {
   color: string;
-  shadowHueShift: number;
-  shadowLightnessFactor: number;
-  shadowBoundaryTint: number;
   // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
-  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
-  shadeMultiply?: string;
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる
+  shadeMultiply: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
-  faceShadingShiftFactor?: number;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;
@@ -99,13 +95,6 @@ export interface HairShadowConfig {
   strength: number;
   depthBias: number;
   maxDepthDiff: number;
-}
-
-export interface DepthRimConfig {
-  enabled: boolean;
-  power: number;
-  threshold: number;
-  intensity: number;
 }
 
 export interface SunShaftsConfig {
@@ -241,7 +230,6 @@ export interface AvatarConfig {
       posY: number;
       posZ: number;
     };
-    depthRim: DepthRimConfig;
     sunShafts: SunShaftsConfig;
     lensFlare: LensFlareConfig;
   };
@@ -310,13 +298,9 @@ export const DEFAULT_CONFIG: AvatarConfig = {
   materials: {
     body: {
       color: '#ffffff',
-      shadowHueShift: 0.02,
-      shadowLightnessFactor: 0.16,
-      shadowBoundaryTint: 0.35,
       shadeMultiply: '#d49ea3',
-      shadingToonyFactor: 1.0,
+      shadingToonyFactor: 0.9895,
       shadingShiftFactor: -0.05,
-      faceShadingShiftFactor: 0.65,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
       emissiveIntensity: 0.0,
@@ -329,11 +313,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     hair: {
       color: '#ffffff',
-      shadowHueShift: 0.03,
-      shadowLightnessFactor: 0.2,
-      shadowBoundaryTint: 0.2,
       shadeMultiply: '#8474a4',
-      shadingToonyFactor: 1.0,
+      shadingToonyFactor: 0.994,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       matcapEnabled: false,
@@ -347,11 +328,8 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
     cloth: {
       color: '#ffffff',
-      shadowHueShift: 0.03,
-      shadowLightnessFactor: 0.2,
-      shadowBoundaryTint: 0.1,
       shadeMultiply: '#b8bcd8',
-      shadingToonyFactor: 1.0,
+      shadingToonyFactor: 0.997,
       shadingShiftFactor: -0.05,
       giEqualizationFactor: 0.9,
       matcapEnabled: true,
@@ -445,12 +423,6 @@ export const DEFAULT_CONFIG: AvatarConfig = {
       posX: 0,
       posY: 1.5,
       posZ: 2.5,
-    },
-    depthRim: {
-      enabled: true,
-      power: 4.0,
-      threshold: 0.15,
-      intensity: 0.8,
     },
     sunShafts: {
       enabled: true,

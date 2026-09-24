@@ -24,13 +24,6 @@ export interface RimLightConfig {
   position: { x: number; y: number; z: number };
 }
 
-export interface DepthRimConfig {
-  enabled: boolean;
-  power: number;
-  threshold: number;
-  intensity: number;
-}
-
 export interface SunShaftsConfig {
   enabled: boolean;
   followDirectionalLight: boolean;
@@ -62,7 +55,6 @@ export interface LightingConfig {
   directional: DirectionalLightConfig;
   ambient: AmbientLightConfig;
   rim?: RimLightConfig;
-  depthRim?: DepthRimConfig;
   // 天使の輪を寄せる色（sRGB）。時間帯の光になじませる。未指定なら白
   hairRingTint?: string;
   sunShafts?: SunShaftsConfig;
@@ -138,15 +130,11 @@ export interface FogConfig {
 
 export interface MaterialStyleParams {
   color: string;
-  shadowHueShift: number;
-  shadowLightnessFactor: number;
-  shadowBoundaryTint: number;
   // 影の乗算色（sRGB）。MToon の影は「この色 × マテリアル自身のテクスチャ」になるので、
-  // アバターごとに服や髪の色が違ってもその色を暗くした影になる。未指定なら自動計算
-  shadeMultiply?: string;
+  // アバターごとに服や髪の色が違ってもその色を暗くした影になる
+  shadeMultiply: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
-  faceShadingShiftFactor?: number;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;

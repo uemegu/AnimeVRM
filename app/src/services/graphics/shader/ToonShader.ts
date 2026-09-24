@@ -166,59 +166,6 @@ function getDarkenedOutlineColor(material: MToonLikeMaterial, darknessFactor = 0
   return result;
 }
 
-/**
- * Computes an anime-style automatic shadow color (Auto HSV Shadow)
- * - Skin/Face: Shifts towards warm pink/peach (subsurface blood scattering)
- * - Cloth/Hair: Shifts towards cool blue/purple anime tone with boosted saturation
- */
-function computeAutoShadowColor(
-  material: MToonLikeMaterial,
-  kind: StyleKind | 'other',
-  hueShiftAmount = 0.03,
-  lightnessFactor = 0.2,
-  boundaryTint = 0.0
-): THREE.Color {
-  const base = new THREE.Color();
-  if (material.map) {
-    base.copy(getTextureAverageColor(material.map));
-    if (material.color) {
-      base.multiply(material.color);
-    }
-  } else if (material.color) {
-    base.copy(material.color);
-  } else if (material.userData.originalShadeColor) {
-    base.copy(material.userData.originalShadeColor);
-  } else {
-    base.set('#cccccc');
-  }
-
-  const hsl = { h: 0, s: 0, l: 0 };
-  base.getHSL(hsl);
-
-  const isSkin = kind === 'body' || kind === 'face';
-
-  if (isSkin) {
-    // Warm blood scatter for anime skin with Hue Shift and boundary tint
-    // Boundary tint warms hue towards vibrant coral-peach (0.97 - 0.02)
-    const tintHueOffset = boundaryTint * -0.04;
-    const targetHue = (0.98 + hueShiftAmount + tintHueOffset + 1.0) % 1.0;
-    const h = (hsl.h * 0.15 + targetHue * 0.85 + 1.0) % 1.0;
-    const s = Math.min(Math.max(hsl.s * (1.6 + boundaryTint * 0.5), 0.38), 0.95);
-    const l = Math.max(hsl.l * (lightnessFactor + boundaryTint * 0.04), 0.02);
-    const res = new THREE.Color();
-    res.setHSL(h, s, l);
-    return res;
-  } else {
-    // Anime shadow hue shift (cool or warm based on slider)
-    const h = (hsl.h + hueShiftAmount + 1.0) % 1.0;
-    const s = Math.min(hsl.s * (1.25 + boundaryTint * 0.3), 1.0);
-    const l = Math.max(hsl.l * lightnessFactor, 0.02);
-    const res = new THREE.Color();
-    res.setHSL(h, s, l);
-    return res;
-  }
-}
-
 function regexTest(regex: RegExp, value: string): boolean {
   regex.lastIndex = 0;
   return regex.test(value);
@@ -589,7 +536,6 @@ export function applyToonShader(
 
   // Apply material params directly to MToon parameters
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
-    const bodyEntry = trackedMaterials.find((entry) => entry.kind === 'body');
 
     trackedMaterials
       .filter((entry) => (entry.kind === kind || (kind === 'body' && entry.kind === 'face')) && !isEyeMaterial(entry.material.name || '') && !isFaceFeatureMaterial(entry.material.name || ''))
@@ -603,26 +549,18 @@ export function applyToonShader(
           if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.copy(tintedColor);
         }
 
-        // Shade Color (Face uses body material as reference so skin shadow matches body perfectly)
-        const referenceMaterial = (matKind === 'face' && bodyEntry) ? bodyEntry.material : material;
-        // 乗算色が指定されていればそれを使う（影 = 乗算色 × マテリアル自身のテクスチャ）
+        // 影色 = 乗算色 × マテリアル自身のテクスチャ
         if (params.shadeMultiply && !material.shadeMultiplyTexture && material.map) {
           // 影用テクスチャがないマテリアルは基本テクスチャで代用する（ないと影が乗算色のベタ塗りになる）
           material.shadeMultiplyTexture = material.map;
           material.needsUpdate = true;
         }
-        // 基本色係数（litFactor）も掛ける。白テクスチャ × 黒係数で色を出しているマテリアルでも影色が合う
-        const autoShadeColor = params.shadeMultiply
-          ? new THREE.Color(params.shadeMultiply).multiply(originalBaseColors.get(material) ?? new THREE.Color(1, 1, 1))
-          : computeAutoShadowColor(
-              referenceMaterial,
-              matKind,
-              params.shadowHueShift ?? 0.03,
-              params.shadowLightnessFactor ?? 0.2,
-              params.shadowBoundaryTint ?? 0.0
-            );
-        if (material.shadeColorFactor) material.shadeColorFactor.copy(autoShadeColor);
-        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(autoShadeColor);
+        if (params.shadeMultiply) {
+          // 基本色係数（litFactor）も掛ける。白テクスチャ × 黒係数で色を出しているマテリアルでも影色が合う
+          const shadeColor = new THREE.Color(params.shadeMultiply).multiply(originalBaseColors.get(material) ?? new THREE.Color(1, 1, 1));
+          if (material.shadeColorFactor) material.shadeColorFactor.copy(shadeColor);
+          if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(shadeColor);
+        }
 
         // Rim Color & Depth-based Rim suppression on face
         if (params.rimEnabled !== undefined || params.rimColor !== undefined) {
@@ -633,29 +571,21 @@ export function applyToonShader(
           if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.set(effectiveColor);
         }
 
-        // Shading Toony Factor (mildly soften edge if boundary tint is active to show warm SSS gradient)
+        // Shading Toony Factor
         if (typeof params.shadingToonyFactor === 'number') {
-          const boundarySoftening = (params.shadowBoundaryTint ?? 0) * 0.03;
-          const effectiveToony = Math.max(0.0, params.shadingToonyFactor - boundarySoftening);
-          material.shadingToonyFactor = effectiveToony;
-          if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = effectiveToony;
+          material.shadingToonyFactor = params.shadingToonyFactor;
+          if (material.uniforms?.shadingToonyFactor) material.uniforms.shadingToonyFactor.value = params.shadingToonyFactor;
         }
 
-        // Shading Shift Factor (Face protection: positive shift prevents cheek cuts & inner eye crease shadows)
-        if (typeof params.shadingShiftFactor === 'number' || typeof params.faceShadingShiftFactor === 'number') {
-          let shift: number | undefined;
-          if (matKind === 'face') {
-            shift = typeof params.faceShadingShiftFactor === 'number'
-              ? params.faceShadingShiftFactor
-              : (typeof params.shadingShiftFactor === 'number' ? Math.max(params.shadingShiftFactor, 0.65) : undefined);
-          } else if (typeof params.shadingShiftFactor === 'number') {
-            shift = params.shadingShiftFactor;
-          }
-
-          if (typeof shift === 'number') {
-            material.shadingShiftFactor = shift;
-            if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
-          }
+        // Shading Shift Factor
+        // 顔は通常 SDF 陰影（FaceSdf.ts）が明暗を決めるのでこの値は効かない。
+        // SDF が作れなかったとき用に、頬やまぶたに影が割れないよう正の値に寄せる（シルエット表現は除く）
+        if (typeof params.shadingShiftFactor === 'number') {
+          const shift = matKind === 'face' && params.shadingShiftFactor > -0.7
+            ? Math.max(params.shadingShiftFactor, 0.65)
+            : params.shadingShiftFactor;
+          material.shadingShiftFactor = shift;
+          if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
         }
 
         // GI Equalization
