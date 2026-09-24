@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ActionLocationId, ActionLocationOption, DayPhase } from '../../types/game';
-import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { ConfirmModal } from '../Common/ConfirmModal';
 import { soundManager } from '../../services/audio/SoundManager';
 import './ActionSelectModal.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface ActionSelectModalProps {
   options: ActionLocationOption[];
-  lang: SupportedLanguage;
   onSelectLocation: (locationId: ActionLocationId) => void;
   phase?: DayPhase;
   affinities?: Record<string, number>;
@@ -37,11 +36,11 @@ const HOLIDAY_LOCATION_COORDINATES: Record<string, { left: string; top: string }
 
 export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   options,
-  lang,
   onSelectLocation,
   phase = 'morning_action',
   affinities = {},
 }) => {
+  const { lang } = useLanguage();
   const isHolidayMap = phase === 'holiday_action';
   const locationCoordinates = isHolidayMap ? HOLIDAY_LOCATION_COORDINATES : LOCATION_COORDINATES;
 
@@ -55,13 +54,13 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
 
   // マウント時に表示SE再生
   useEffect(() => {
-    soundManager.playSe('/se/items_shown.mp3', 0.6);
+    soundManager.playUiSe('shown');
   }, []);
 
   // ホバー音
   const handleMouseEnter = (id: string) => {
     setHoveredId(id);
-    soundManager.playSe('/se/items_hover.mp3', 0.45);
+    soundManager.playUiSe('hover');
   };
 
   const handleMouseLeave = () => {
@@ -75,7 +74,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
 
   // 場所クリック時: 直接決定ではなく自作YES/NOダイアログを表示
   const handleClickLocation = (opt: ActionLocationOption) => {
-    soundManager.playSe('/se/items_hover.mp3', 0.5);
+    soundManager.playUiSe('hover');
     setPendingOption(opt);
   };
 
@@ -84,7 +83,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     if (!pendingOption) return;
     const targetId = pendingOption.id;
     setPendingOption(null);
-    soundManager.playSe('/se/items_chose.mp3', 0.65);
+    soundManager.playUiSe('select');
     onSelectLocation(targetId);
   };
 

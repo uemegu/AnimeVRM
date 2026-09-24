@@ -1,0 +1,144 @@
+{
+  "id": "action_rooftop_emili",
+  "title": {
+    "ja": "屋上: エミリと青空",
+    "en": "Rooftop: Blue sky with Emili"
+  },
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "風に揺れる金髪のエミリがいるようだ。",
+        "en": "Emili seems to be enjoying the breeze here."
+      }
+    }
+  ],
+  "characters": [
+    {
+      "id": "emili",
+      "modelUrl": "/models/emili/emili.vrm",
+      "initialPosition": "center"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "",
+      "text": {
+        "ja": "屋上のフェンスに寄りかかり、金髪を風になびかせるエミリの姿があった。",
+        "en": "Leaning against the rooftop railing, Emili stood with her golden hair fluttering in the breeze."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "あら、ごきげんよう。日本の学校の屋上って、本当に開放的で素敵ね。",
+        "en": "Oh, good day. Rooftops in Japanese schools are wonderfully open and refreshing."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s_choice",
+      "text": "",
+      "choices": [
+        {
+          "text": {
+            "ja": "風が気持ちいいね、学校にはもう慣れた？",
+            "en": "The breeze feels great. Have you gotten used to school?"
+          },
+          "goto": "s_friendly",
+          "addAffinity": {
+            "emili": 5
+          }
+        },
+        {
+          "text": {
+            "ja": "お弁当一緒に食べる？",
+            "en": "Would you like to eat lunch together?"
+          },
+          "goto": "s_lunch",
+          "addAffinity": {
+            "emili": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_friendly",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "ええ、みんな親切でとても楽しいわ。あなたとこうして話せるのも嬉しいこと。",
+        "en": "Yes, everyone is so kind and fun. Talking with you like this brings me joy too."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_lunch",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "嬉しいお誘いね！私のシェフが作ったサンドイッチ、ぜひ召し上がって！",
+        "en": "What a lovely invitation! You must try the sandwiches prepared by my chef!"
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_end",
+      "speaker": "",
+      "text": {
+        "ja": "澄み渡る青空の下、エミリと楽しいひとときを分かち合った。",
+        "en": "Under the clear blue sky, we shared a delightful moment together."
+      }
+    }
+  ]
+}

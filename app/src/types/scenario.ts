@@ -100,7 +100,7 @@ export interface ScenarioScene {
   speakerCharacterId?: string;
   /** セリフ・地の文本文 */
   text: TextContent;
-  /** 日本語ボイス音声URL（※英語ボイスは作らない方針のため単一URLで管理） */
+  /** 日本語ボイス音声URL（※英語ボイスは作らない方針のため単一URLで管理）。'/' で始まらない場合はシナリオディレクトリからの相対パス */
   voiceUrl?: string;
   /** 背景画像URLまたはプリセットキー */
   background?: string;
@@ -156,6 +156,10 @@ export interface ScenarioAvailability {
   dayRange?: { from?: number; to?: number };
   /** 発生場所。複数指定した場合は OR 条件 */
   locations?: ActionLocationId[];
+  /** 指定フラグがすべて立っていれば発生する */
+  requireFlags?: string[];
+  /** 指定フラグのいずれかが立っていれば発生しない（出会いイベントの重複防止等） */
+  unlessFlags?: string[];
 }
 
 /** 行動ターン等における場所ヒント情報 */
@@ -167,16 +171,50 @@ export interface ActionLocationHint {
   phases?: DayPhase[];
 }
 
-/** シナリオパッケージ（1本のイベントシナリオ） */
-export interface ScenarioPackage {
+/** シナリオの種類（public/scenarios/<category>/ のディレクトリ名）。call / mail は夜の電話・メール */
+export type ScenarioCategory =
+  | 'morning'
+  | 'action'
+  | 'holiday'
+  | 'forced'
+  | 'ending'
+  | 'special'
+  | 'call'
+  | 'mail';
+
+/**
+ * シナリオのメタ情報（発生判定・場所ヒントに使う部分）。
+ * 起動時に scenarioIndex.json から同期的に参照でき、本文（シーン）は再生時に遅延ロードする。
+ */
+export interface ScenarioMeta {
   id: string;
   title: TextContent;
+  /** 舞台となる場所。場所選択を経ずに始まるシナリオ（強制イベント等）の背景に使う */
+  location?: string;
+  /** 条件に合うシナリオが他にないときだけ選ばれる汎用シナリオ */
+  fallback?: boolean;
   /** 未指定項目は制限なし。従来の actionHints があればその場所・フェーズ制約は別途適用 */
   availability?: ScenarioAvailability;
   /** 条件が重なる候補内で大きいものを優先（同値なら定義順） */
   priority?: number;
   /** 行動ターン等における場所ヒント情報（1つまたは複数） */
   actionHints?: ActionLocationHint[];
+}
+
+/** scenarioIndex.json の1件（メタ情報＋所在） */
+export interface ScenarioIndexEntry extends ScenarioMeta {
+  category: ScenarioCategory;
+  /** 電話・メールの相手 */
+  characterId?: import('./communication').HeroineId;
+  /** メール通知カード用のプレビューと受信時刻 */
+  previewText?: LocalizedString;
+  time?: string;
+  /** シナリオディレクトリのURL（末尾スラッシュ付き）。相対指定のボイス等はここを基準に解決する */
+  baseUrl: string;
+}
+
+/** シナリオパッケージ（1本のイベントシナリオ。scenario.json の中身） */
+export interface ScenarioPackage extends ScenarioMeta {
   /** 初期登場キャラクター一覧 */
   characters?: Array<{
     id: string;

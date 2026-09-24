@@ -1,0 +1,102 @@
+{
+  "id": "aoi_day1_call",
+  "characterId": "aoi",
+  "title": {
+    "ja": "夜の通話",
+    "en": "Night Call"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 1
+    }
+  },
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "text": {
+        "ja": "もしもし？ 夜遅くに急にかけてごめんね……。今日、放課後に少し話せて嬉しかったから、なんだか声が聞きたくなっちゃって。",
+        "en": "Hello? Sorry for calling so late... I was just so happy we talked after school today that I wanted to hear your voice."
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "step_1_choice"
+    },
+    "step_1_choice": {
+      "id": "step_1_choice",
+      "speaker": {
+        "ja": "",
+        "en": ""
+      },
+      "text": {
+        "ja": "",
+        "en": ""
+      },
+      "choices": [
+        {
+          "id": "aoi_call_choice_1",
+          "text": {
+            "ja": "俺も話せて嬉しかったよ",
+            "en": "I was really happy to talk with you too."
+          },
+          "goto": "step_happy",
+          "setFlags": {
+            "night_call_aoi_happy": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "aoi_call_choice_2",
+          "text": {
+            "ja": "急にどうしたの？ 何かあった？",
+            "en": "Is everything okay? What happened?"
+          },
+          "goto": "step_shy",
+          "setFlags": {
+            "night_call_aoi_shy": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    "step_happy": {
+      "id": "step_happy",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "text": {
+        "ja": "ふふ、よかった……！ そう言ってもらえると安心するな。じゃあ、夜も遅いし今日はもう休んでね。明日学校で会えるの、楽しみにしてるよ。おやすみ！",
+        "en": "Fufu, I'm so glad...! Hearing you say that puts me at ease. Well, it's late so get some rest. Looking forward to seeing you at school tomorrow. Good night!"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": null
+    },
+    "step_shy": {
+      "id": "step_shy",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "text": {
+        "ja": "う、ううん、何でもないの！ ちょっと気になっちゃっただけ……変なこと言ってごめんね。明日また教室で話そうね。おやすみなさい！",
+        "en": "N-No, nothing's wrong! I was just wondering... sorry for the weird call. Let's chat in class tomorrow. Good night!"
+      },
+      "expression": "surprised",
+      "expressionWeight": 1,
+      "nextStepId": null
+    }
+  }
+}

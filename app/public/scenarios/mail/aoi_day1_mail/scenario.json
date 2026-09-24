@@ -1,0 +1,77 @@
+{
+  "id": "aoi_day1_mail",
+  "characterId": "aoi",
+  "title": {
+    "ja": "アオイからのメール",
+    "en": "Mail from Aoi"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 3
+    }
+  },
+  "previewText": {
+    "ja": "……少しだけ、話せるかな？",
+    "en": "...Can we talk for a moment?"
+  },
+  "time": "23:42",
+  "messages": [
+    {
+      "id": "msg_1",
+      "sender": "heroine",
+      "text": {
+        "ja": "今日もお疲れさま！",
+        "en": "Thanks for today!"
+      },
+      "time": "23:40"
+    },
+    {
+      "id": "msg_2",
+      "sender": "heroine",
+      "text": {
+        "ja": "……少しだけ、話せるかな？ 明日の小テストの範囲、ノート見せてもらってもいいかな？",
+        "en": "...Can we talk for a moment? Could I look at your notes for tomorrow’s quiz?"
+      },
+      "time": "23:42"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "reply_notes",
+      "text": {
+        "ja": "もちろん！ 明日の朝一番で見せるよ",
+        "en": "Of course! I’ll show you first thing in the morning."
+      },
+      "reactionText": {
+        "ja": "ありがとう！ すごく助かるよ〜！ 明日楽しみにしてるね！",
+        "en": "Thank you! You saved me! Looking forward to tomorrow!"
+      },
+      "reactionTime": "23:43",
+      "setFlags": {
+        "night_mail_aoi_notes_ok": true
+      },
+      "addAffinity": {
+        "aoi": 1
+      }
+    },
+    {
+      "id": "reply_study",
+      "text": {
+        "ja": "俺も不安だから明日の朝一緒に勉強しよう",
+        "en": "I’m worried too, so let’s study together tomorrow morning."
+      },
+      "reactionText": {
+        "ja": "えっ、本当！？ すごく心強いよ！ 明日一緒に頑張ろうね！",
+        "en": "Really?! That’s so reassuring! Let’s do our best tomorrow!"
+      },
+      "reactionTime": "23:43",
+      "setFlags": {
+        "night_mail_aoi_study_together": true
+      },
+      "addAffinity": {
+        "aoi": 2
+      }
+    }
+  ]
+}

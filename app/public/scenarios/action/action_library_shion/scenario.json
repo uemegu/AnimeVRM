@@ -1,0 +1,147 @@
+{
+  "id": "action_library_shion",
+  "title": {
+    "ja": "図書室: シオンと静かな時間",
+    "en": "Library: Quiet time with Shion"
+  },
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "静かに本を読むシオンの姿が見える。",
+        "en": "Shion is seen quietly reading a book."
+      }
+    }
+  ],
+  "characters": [
+    {
+      "id": "shion",
+      "modelUrl": "/models/shion/shion.vrm",
+      "initialPosition": "center"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "",
+      "text": {
+        "ja": "静かな図書室の奥、窓際の席でシオンが分厚い本を読んでいた。",
+        "en": "In the quiet corner of the library by the window, Shion is immersed in a thick book."
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "……あ。こんにちは。あなたも本を探しに来たのですか？",
+        "en": "...Ah. Hello. Did you come looking for a book as well?"
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s_choice",
+      "text": "",
+      "choices": [
+        {
+          "text": {
+            "ja": "シオンのおすすめの本を教えてほしい",
+            "en": "I'd like you to recommend a book."
+          },
+          "goto": "s_recommend",
+          "setFlags": {
+            "asked_shion_book": true
+          },
+          "addAffinity": {
+            "shion": 5
+          }
+        },
+        {
+          "text": {
+            "ja": "邪魔しないように隣で静かに本を読むよ",
+            "en": "I'll read quietly next to you so I don't disturb you."
+          },
+          "goto": "s_quiet",
+          "addAffinity": {
+            "shion": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_recommend",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "私のおすすめ……ですか？それなら、この短編集が読みやすくて素敵ですよ。",
+        "en": "My recommendation...? In that case, this short story collection is wonderfully written."
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_quiet",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "……ふふ、お気遣いありがとうございます。どうぞ、こちらへ。",
+        "en": "...Fufu, thank you for being considerate. Please, have a seat."
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_end",
+      "speaker": "",
+      "text": {
+        "ja": "本のページをめくる心地よい音とともに、穏やかな時間が流れた。",
+        "en": "Peaceful time passed accompanied by the gentle sound of turning pages."
+      }
+    }
+  ]
+}

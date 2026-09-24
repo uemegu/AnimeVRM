@@ -166,4 +166,33 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
       expect(ScheduleManager.checkForcedInterruption(holidayState({ day: 13 }))).toBeNull();
     });
   });
+
+  describe('夜の電話・メール', () => {
+    const night = (day: number, history: GameState['scenarioHistory'] = []): GameState => ({
+      ...ScheduleManager.createInitialState(),
+      day,
+      phase: 'night',
+      scenarioHistory: history,
+    });
+    const summary = (state: GameState) =>
+      ScheduleManager.getNightCommunications(state).map((c) => `${c.characterId}:${c.id}${c.done ? '(done)' : ''}`);
+
+    it('条件を満たすものが1人1件ずつ、優先度の高いものから届くこと', () => {
+      expect(summary(night(1))).toEqual(['aoi:aoi_day1_call', 'emili:emili_day1_mail', 'shion:shion_day1_mail']);
+    });
+
+    it('今夜応答したら、同じ人からは他の電話・メールが届かないこと', () => {
+      const state = night(1, [{ scenarioId: 'aoi_day1_call', day: 1, type: 'completed' }]);
+      expect(summary(state)[0]).toBe('aoi:aoi_day1_call(done)');
+    });
+
+    it('前の夜に終えたものは届かず、次の候補が届くこと', () => {
+      const state = night(2, [{ scenarioId: 'aoi_day1_call', day: 1, type: 'completed' }]);
+      expect(summary(state)[0]).toBe('aoi:aoi_day1_mail');
+    });
+
+    it('期間外のものは届かないこと', () => {
+      expect(summary(night(4))).toEqual([]);
+    });
+  });
 });

@@ -1,0 +1,80 @@
+{
+  "id": "holiday_amusement_emili",
+  "title": {
+    "ja": "遊園地: エミリと観覧車",
+    "en": "Amusement Park: The Ferris wheel with Emili"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ]
+  },
+  "priority": 1,
+  "actionHints": [
+    {
+      "locationId": "amusement_park",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "エミリとの約束の場所だ。",
+        "en": "This is where I promised to meet Emili."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "やっと来た！まずはジェットコースターからよ。怖いなんて言わせないんだから！",
+        "en": "Finally! Roller coaster first. I won't let you say you're scared!"
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "……最後は観覧車。ここからだと、街全部が見えるのね。今日は、その、楽しかった。",
+        "en": "...The Ferris wheel to finish. You can see the whole town from up here. Today was, um, fun."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "setFlags": {
+        "date_amusement_emili": true
+      }
+    },
+    {
+      "id": "s_end",
+      "speaker": "",
+      "text": {
+        "ja": "夕方まで遊び尽くして、エミリと並んで帰り道を歩いた。",
+        "en": "We played until evening, then walked home side by side."
+      }
+    }
+  ]
+}

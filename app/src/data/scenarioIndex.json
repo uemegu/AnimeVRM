@@ -1,0 +1,439 @@
+[
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_day_1/",
+    "id": "morning_day_1",
+    "title": {
+      "ja": "第1日 朝: 新学期の始まり",
+      "en": "Day 1 Morning: Start of the Semester"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 1,
+        "to": 1
+      }
+    },
+    "priority": 1
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_default/",
+    "id": "morning_default",
+    "title": {
+      "ja": "朝の登校",
+      "en": "Morning Walk to School"
+    },
+    "location": "school_gate",
+    "fallback": true,
+    "priority": 0
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/action_classroom_aoi/",
+    "id": "action_classroom_aoi",
+    "title": {
+      "ja": "教室: アオイとノートの貸し借り",
+      "en": "Classroom: Borrowing notes with Aoi"
+    },
+    "actionHints": [
+      {
+        "locationId": "classroom",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "アオイの元気な声が聞こえてくる。",
+          "en": "Aoi can be heard energetically nearby."
+        },
+        "phases": [
+          "morning_action"
+        ]
+      },
+      {
+        "locationId": "sports_ground",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "アオイの元気な声が聞こえてくる。",
+          "en": "Aoi can be heard energetically nearby."
+        }
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/action_generic/",
+    "id": "action_generic",
+    "title": {
+      "ja": "放課後のひと休み",
+      "en": "Afternoon Break"
+    },
+    "fallback": true,
+    "actionHints": [
+      {
+        "locationId": "courtyard",
+        "hintText": {
+          "ja": "生徒たちがベンチでくつろいでいる。",
+          "en": "Students are relaxing on the benches."
+        }
+      },
+      {
+        "locationId": "cafeteria",
+        "hintText": {
+          "ja": "美味しそうなパンの香りが漂っている。",
+          "en": "The sweet scent of freshly baked bread fills the air."
+        }
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/action_library_shion/",
+    "id": "action_library_shion",
+    "title": {
+      "ja": "図書室: シオンと静かな時間",
+      "en": "Library: Quiet time with Shion"
+    },
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintCharacterIds": [
+          "shion"
+        ],
+        "hintText": {
+          "ja": "静かに本を読むシオンの姿が見える。",
+          "en": "Shion is seen quietly reading a book."
+        }
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/action_rooftop_emili/",
+    "id": "action_rooftop_emili",
+    "title": {
+      "ja": "屋上: エミリと青空",
+      "en": "Rooftop: Blue sky with Emili"
+    },
+    "actionHints": [
+      {
+        "locationId": "rooftop",
+        "hintCharacterIds": [
+          "emili"
+        ],
+        "hintText": {
+          "ja": "風に揺れる金髪のエミリがいるようだ。",
+          "en": "Emili seems to be enjoying the breeze here."
+        }
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_amusement_emili/",
+    "id": "holiday_amusement_emili",
+    "title": {
+      "ja": "遊園地: エミリと観覧車",
+      "en": "Amusement Park: The Ferris wheel with Emili"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    },
+    "priority": 1,
+    "actionHints": [
+      {
+        "locationId": "amusement_park",
+        "hintCharacterIds": [
+          "emili"
+        ],
+        "hintText": {
+          "ja": "エミリとの約束の場所だ。",
+          "en": "This is where I promised to meet Emili."
+        }
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_aquarium_aoi/",
+    "id": "holiday_aquarium_aoi",
+    "title": {
+      "ja": "水族館: アオイとイルカショー",
+      "en": "Aquarium: The dolphin show with Aoi"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    },
+    "priority": 1,
+    "actionHints": [
+      {
+        "locationId": "aquarium",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "アオイとの約束の場所だ。",
+          "en": "This is where I promised to meet Aoi."
+        }
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_cinema_shion/",
+    "id": "holiday_cinema_shion",
+    "title": {
+      "ja": "映画館: シオンと同じ映画",
+      "en": "Cinema: The same movie as Shion"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    },
+    "actionHints": [
+      {
+        "locationId": "cinema",
+        "hintCharacterIds": [
+          "shion"
+        ],
+        "hintText": {
+          "ja": "ロビーで上映時間を確かめている人影がある。",
+          "en": "Someone in the lobby is checking the showtimes."
+        }
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_generic/",
+    "id": "holiday_generic",
+    "title": {
+      "ja": "休日のひと休み",
+      "en": "A Quiet Holiday"
+    },
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    }
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_park_aoi/",
+    "id": "holiday_park_aoi",
+    "title": {
+      "ja": "公園: アオイと休日の散歩",
+      "en": "Park: A holiday walk with Aoi"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    },
+    "actionHints": [
+      {
+        "locationId": "park",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "噴水のそばで、聞き覚えのある明るい声がする。",
+          "en": "A familiar cheerful voice can be heard by the fountain."
+        }
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/holiday_shopping_emili/",
+    "id": "holiday_shopping_emili",
+    "title": {
+      "ja": "商店街: エミリと福引き",
+      "en": "Shopping Street: A lottery with Emili"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ]
+    },
+    "actionHints": [
+      {
+        "locationId": "shopping_street",
+        "hintCharacterIds": [
+          "emili"
+        ],
+        "hintText": {
+          "ja": "福引き所の前に、見覚えのある赤い髪が見える。",
+          "en": "A familiar head of red hair is by the lottery stand."
+        }
+      }
+    ]
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/forced_meet_emili/",
+    "id": "forced_meet_emili",
+    "title": {
+      "ja": "偶然の出会い: 迷子のエミリ",
+      "en": "Fateful Encounter: Lost Emili"
+    },
+    "location": "courtyard",
+    "availability": {
+      "dayRange": {
+        "from": 3
+      },
+      "timeSlots": [
+        "afternoon"
+      ],
+      "unlessFlags": [
+        "met_emili"
+      ]
+    }
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/forced_meet_shion/",
+    "id": "forced_meet_shion",
+    "title": {
+      "ja": "偶然の出会い: 廊下のシオン",
+      "en": "Fateful Encounter: Shion in the Corridor"
+    },
+    "location": "library",
+    "availability": {
+      "dayRange": {
+        "from": 2
+      },
+      "timeSlots": [
+        "morning"
+      ],
+      "unlessFlags": [
+        "met_shion"
+      ]
+    }
+  },
+  {
+    "category": "ending",
+    "baseUrl": "/scenarios/ending/ending_aoi/",
+    "id": "ending_aoi",
+    "title": {
+      "ja": "エンディング: アオイとの約束",
+      "en": "Ending: Promise with Aoi"
+    }
+  },
+  {
+    "category": "ending",
+    "baseUrl": "/scenarios/ending/ending_normal/",
+    "id": "ending_normal",
+    "title": {
+      "ja": "エンディング: 充実した28日間",
+      "en": "Ending: A Month Well Spent"
+    }
+  },
+  {
+    "category": "ending",
+    "baseUrl": "/scenarios/ending/ending_shion/",
+    "id": "ending_shion",
+    "title": {
+      "ja": "エンディング: シオンと紡ぐ物語",
+      "en": "Ending: Story woven with Shion"
+    }
+  },
+  {
+    "category": "special",
+    "baseUrl": "/scenarios/special/god_prologue_experiment/",
+    "id": "god_prologue_experiment",
+    "title": {
+      "ja": "【実験】神社と女神の宣告",
+      "en": "Experiment: Goddess at the Shrine"
+    },
+    "location": "shrine"
+  },
+  {
+    "category": "call",
+    "baseUrl": "/scenarios/call/aoi_day1_call/",
+    "id": "aoi_day1_call",
+    "title": {
+      "ja": "夜の通話",
+      "en": "Night Call"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 1,
+        "to": 1
+      }
+    },
+    "priority": 1,
+    "characterId": "aoi"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/aoi_day1_mail/",
+    "id": "aoi_day1_mail",
+    "title": {
+      "ja": "アオイからのメール",
+      "en": "Mail from Aoi"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 1,
+        "to": 3
+      }
+    },
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "……少しだけ、話せるかな？",
+      "en": "...Can we talk for a moment?"
+    },
+    "time": "23:42"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/emili_day1_mail/",
+    "id": "emili_day1_mail",
+    "title": {
+      "ja": "エミリからのメール",
+      "en": "Mail from Emili"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 1,
+        "to": 3
+      }
+    },
+    "characterId": "emili",
+    "previewText": {
+      "ja": "明日の購買パン争奪戦、協力要請！",
+      "en": "Help needed for tomorrow’s bakery rush!"
+    },
+    "time": "22:15"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/shion_day1_mail/",
+    "id": "shion_day1_mail",
+    "title": {
+      "ja": "シオンからのメール",
+      "en": "Mail from Shion"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 1,
+        "to": 3
+      }
+    },
+    "characterId": "shion",
+    "previewText": {
+      "ja": "……図書室のあの本について",
+      "en": "...Regarding that book in the library"
+    },
+    "time": "21:50"
+  }
+]

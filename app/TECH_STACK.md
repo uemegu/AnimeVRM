@@ -20,9 +20,13 @@
 ```text
 app/
 ├── public/
-│   └── assets/
-│       ├── models/
-│       └── backgrounds/
+│   ├── assets/
+│   │   ├── models/
+│   │   └── backgrounds/
+│   └── scenarios/
+│       └── <category>/<id>/
+│           ├── scenario.json
+│           └── *.wav
 └── src/
     ├── pages/
     ├── components/
@@ -30,9 +34,11 @@ app/
     │   ├── dialogue/
     │   └── stage/
     ├── services/
+    ├── hooks/
+    ├── contexts/
+    ├── data/
     ├── utils/
     ├── types/
-    ├── scenarios/
     └── styles/
 ```
 
@@ -41,6 +47,7 @@ app/
 | ディレクトリ | 役割 |
 | --- | --- |
 | public/assets/ | VRMモデル・背景などの静的素材 |
+| public/scenarios/ | シナリオ本文（`scenario.json`）とそのボイス。1シナリオ1ディレクトリで、再生直前に遅延ロードする |
 | src/pages/ | ページ単位のレイアウト、画面状態の管理、部品とサービスの接続 |
 | src/components/controls/ | ボタン、選択肢、セーブ操作などの操作部品 |
 | src/components/dialogue/ | 台詞・話者名などの会話表示部品 |
@@ -48,7 +55,9 @@ app/
 | src/services/ | シナリオ進行・分岐判定、保存・復元、素材読み込み、Three.js・VRMの描画管理 |
 | src/utils/ | 文字列・数値・パスなどを扱う、画面やゲーム状態に依存しない補助関数 |
 | src/types/ | シナリオ・進行状態・保存データなど、複数箇所で共有する型 |
-| src/scenarios/ | 台詞・選択肢・分岐・表示指示などのシナリオデータ |
+| src/hooks/ | シナリオ再生・会話履歴・確認ダイアログなど、画面の状態と操作をまとめたReactフック |
+| src/contexts/ | 表示言語など、アプリ全体で共有する状態（propsで中継しない） |
+| src/data/ | キャラ・場所・BGM/SEプリセットなどのマスターデータと、生成物（`scenarioIndex.json` 等） |
 | src/styles/ | 共通スタイルと各画面・部品のスタイル |
 
 ## 分割の方針

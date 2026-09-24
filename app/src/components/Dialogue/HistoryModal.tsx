@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { DialogueSession } from '../../types/history';
-import { SupportedLanguage } from '../../types/scenario';
 import './HistoryModal.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface HistoryModalProps {
   isOpen: boolean;
   sessions: DialogueSession[];
-  lang: SupportedLanguage;
   onPlayVoice?: (voiceUrl: string) => void;
   onClose: () => void;
 }
@@ -14,10 +13,10 @@ export interface HistoryModalProps {
 export const HistoryModal: React.FC<HistoryModalProps> = ({
   isOpen,
   sessions,
-  lang,
   onPlayVoice,
   onClose,
 }) => {
+  const { lang } = useLanguage();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // 開いた時に一番下（最新発話）へ自動スクロール

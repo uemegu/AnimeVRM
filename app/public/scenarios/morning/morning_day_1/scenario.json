@@ -1,0 +1,97 @@
+{
+  "id": "morning_day_1",
+  "title": {
+    "ja": "第1日 朝: 新学期の始まり",
+    "en": "Day 1 Morning: Start of the Semester"
+  },
+  "location": "school_gate",
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 1
+    }
+  },
+  "priority": 1,
+  "characters": [
+    {
+      "id": "aoi",
+      "modelUrl": "/models/aoi/aoi.vrm",
+      "initialPosition": "center"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene_1",
+      "speaker": "",
+      "text": {
+        "ja": "暖かな春の陽光が桜並木を照らす。今日から新しい学期が始まる。",
+        "en": "Warm spring sunlight illuminates the cherry blossoms. A new semester starts today."
+      },
+      "bgm": "main_bgm",
+      "avatars": {
+        "aoi": {
+          "characterId": "aoi",
+          "position": "center",
+          "visible": true,
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "scene_2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "おーい！おはよう！やっぱりここであったね。",
+        "en": "Heeey! Good morning! I knew I would run into you here."
+      },
+      "voiceUrl": "001.wav",
+      "avatars": {
+        "aoi": {
+          "characterId": "aoi",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "scene_3",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "今日から2年生だよ！放課後も部活あるから、時間があったらグラウンド見に来てね！",
+        "en": "We're 2nd years now! I have track club after school, come check it out if you have time!"
+      },
+      "voiceUrl": "chat_intro_1.wav",
+      "avatars": {
+        "aoi": {
+          "characterId": "aoi",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "setFlags": {
+        "met_aoi": true
+      }
+    },
+    {
+      "id": "scene_4",
+      "speaker": "",
+      "text": {
+        "ja": "アオイと笑顔を交わしながら校門をくぐった。今日も良い1日になりそうだ。",
+        "en": "We walked through the school gate together, smiling. Today feels like the start of something great."
+      }
+    }
+  ]
+}

@@ -20,38 +20,23 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
   // マウント時にフェードイン & 表示SE
   useEffect(() => {
     const animId = requestAnimationFrame(() => setIsVisible(true));
-    soundManager.playSe('/se/items_shown.mp3', 0.6);
+    soundManager.playUiSe('shown');
 
     return () => cancelAnimationFrame(animId);
   }, []);
 
-  // カウントダウンタイマー (10秒)
+  // タイムアウト時の自動選択は最新の onSelect を呼ぶ（再描画で関数が変わってもタイマーを巻き戻さない）
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+  const choicesKey = choices.map((choice) => `${choice.goto}:${choice.text}`).join('|');
+
+  // カウントダウンタイマー (10秒)。選択肢が変わったときだけ最初から数え直す
   useEffect(() => {
     setCountdown(10);
     setIsUrgent(false);
 
     timerRef.current = window.setInterval(() => {
-      setCountdown((prev) => {
-        const next = prev - 1;
-        setIsTick(true);
-        setTimeout(() => setIsTick(false), 220);
-
-        if (next <= 3) {
-          setIsUrgent(true);
-        }
-
-        if (next <= 0) {
-          if (timerRef.current !== null) {
-            clearInterval(timerRef.current);
-            timerRef.current = null;
-          }
-          // タイムアウトで自動的に1番目の選択肢を選択
-          soundManager.playSe('/se/items_chose.mp3', 0.65);
-          onSelect(0);
-          return 0;
-        }
-        return next;
-      });
+      setCountdown((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     return () => {
@@ -60,7 +45,25 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
         timerRef.current = null;
       }
     };
-  }, [choices, onSelect]);
+  }, [choicesKey]);
+
+  // 1秒ごとの演出と、0秒になったら1番目の選択肢を自動選択
+  useEffect(() => {
+    if (countdown >= 10) return;
+    setIsTick(true);
+    const tickTimer = window.setTimeout(() => setIsTick(false), 220);
+    if (countdown <= 3) setIsUrgent(true);
+
+    if (countdown === 0) {
+      if (timerRef.current !== null) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      soundManager.playUiSe('select');
+      onSelectRef.current(0);
+    }
+    return () => window.clearTimeout(tickTimer);
+  }, [countdown]);
 
   // 選択肢クリックハンドラ
   const handleSelect = (idx: number, e: React.MouseEvent) => {
@@ -69,13 +72,13 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    soundManager.playSe('/se/items_chose.mp3', 0.65);
+    soundManager.playUiSe('select');
     onSelect(idx);
   };
 
   // ホバー音
   const handleMouseEnter = () => {
-    soundManager.playSe('/se/items_hover.mp3', 0.45);
+    soundManager.playUiSe('hover');
   };
 
   // 吹き出し矢印SVGの計算

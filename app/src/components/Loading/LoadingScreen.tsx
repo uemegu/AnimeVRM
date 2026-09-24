@@ -1,19 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { AssetPreloader, PreloadProgress } from '../../services/loader/AssetPreloader';
-import { SupportedLanguage } from '../../types/scenario';
 import './LoadingScreen.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface LoadingScreenProps {
-  lang: SupportedLanguage;
   onStartLoading?: () => void; // ユーザーがSTARTを押した時（AudioContextアンロック等）
   onComplete: () => void;      // ロード完了時
 }
 
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({
-  lang,
   onStartLoading,
   onComplete,
 }) => {
+  const { lang } = useLanguage();
   const [phase, setPhase] = useState<'prompt' | 'loading' | 'completed'>('prompt');
   const [progress, setProgress] = useState<PreloadProgress>({
     loadedBytes: 0,

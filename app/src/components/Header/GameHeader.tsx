@@ -1,7 +1,10 @@
 import React from 'react';
 import { DayPhase, getDayOfWeek } from '../../types/game';
-import { SupportedLanguage } from '../../types/scenario';
+import { PHASE_NAMES } from '../../data/phases';
+import { soundManager } from '../../services/audio/SoundManager';
+import { useSoundMuted } from '../../hooks/useSoundMuted';
 import './GameHeader.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface GameHeaderProps {
   day: number;
@@ -9,49 +12,10 @@ interface GameHeaderProps {
   locationName?: string;
   isAuto?: boolean;
   onToggleAuto?: () => void;
-  lang?: SupportedLanguage;
-  isMuted?: boolean;
-  onToggleMute?: () => void;
   onOpenHistory?: () => void;
   onShare?: () => void;
   isSharing?: boolean;
 }
-
-const PHASE_LABELS: Record<
-  DayPhase,
-  { ja: string; en: string; className: string }
-> = {
-  morning: {
-    ja: '朝（登校）',
-    en: 'Morning',
-    className: 'phase-morning',
-  },
-  morning_action: {
-    ja: '午前',
-    en: 'Morning Action',
-    className: 'phase-morning_action',
-  },
-  lunch_action: {
-    ja: '昼休み',
-    en: 'Lunch Action',
-    className: 'phase-lunch_action',
-  },
-  afterschool_action: {
-    ja: '放課後',
-    en: 'Afterschool',
-    className: 'phase-afterschool_action',
-  },
-  holiday_action: {
-    ja: '休日',
-    en: 'Holiday',
-    className: 'phase-holiday_action',
-  },
-  night: {
-    ja: '夜',
-    en: 'Night',
-    className: 'phase-night',
-  },
-};
 
 export const GameHeader: React.FC<GameHeaderProps> = ({
   day,
@@ -59,15 +23,13 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   locationName,
   isAuto = false,
   onToggleAuto,
-  lang = 'ja',
-  isMuted = false,
-  onToggleMute,
   onOpenHistory,
   onShare,
   isSharing = false,
 }) => {
+  const { lang } = useLanguage();
+  const isMuted = useSoundMuted();
   const dayOfWeek = getDayOfWeek(day);
-  const phaseInfo = PHASE_LABELS[phase];
 
   return (
     <header className="game-header" data-phase={phase}>
@@ -82,9 +44,9 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         </div>
 
         {/* 時間帯フェーズバッジ (絵文字なし) */}
-        <div className={`phase-badge ${phaseInfo.className}`}>
+        <div className={`phase-badge phase-${phase}`}>
           <span className="phase-badge-inner">
-            <span className="phase-badge-text">{phaseInfo[lang]}</span>
+            <span className="phase-badge-text">{PHASE_NAMES[phase][lang]}</span>
           </span>
         </div>
 
@@ -162,36 +124,34 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           </button>
         )}
 
-        {onToggleMute && (
-          <button
-            type="button"
-            className={`header-action-btn header-mute-btn ${isMuted ? 'muted' : ''}`}
-            onClick={onToggleMute}
-            aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
-            title={
-              isMuted
-                ? lang === 'ja' ? '音声を再生 (M)' : 'Unmute Sound (M)'
-                : lang === 'ja' ? '音声を消音 (M)' : 'Mute Sound (M)'
-            }
-          >
-            <span className="header-btn-inner">
-              <span className="header-btn-icon header-icon-mute" aria-hidden="true">
-                {isMuted ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="m17 9 6 6m0-6-6 6" />
-                  </svg>
-                ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                  </svg>
-                )}
-              </span>
-              <span className="header-btn-label">{isMuted ? 'MUTED' : 'MUTE'}</span>
+        <button
+          type="button"
+          className={`header-action-btn header-mute-btn ${isMuted ? 'muted' : ''}`}
+          onClick={soundManager.toggleMuted}
+          aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
+          title={
+            isMuted
+              ? lang === 'ja' ? '音声を再生 (M)' : 'Unmute Sound (M)'
+              : lang === 'ja' ? '音声を消音 (M)' : 'Mute Sound (M)'
+          }
+        >
+          <span className="header-btn-inner">
+            <span className="header-btn-icon header-icon-mute" aria-hidden="true">
+              {isMuted ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="m17 9 6 6m0-6-6 6" />
+                </svg>
+              ) : (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+              )}
             </span>
-          </button>
-        )}
+            <span className="header-btn-label">{isMuted ? 'MUTED' : 'MUTE'}</span>
+          </span>
+        </button>
       </div>
     </header>
   );

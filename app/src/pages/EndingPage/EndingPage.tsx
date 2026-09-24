@@ -1,18 +1,17 @@
 import React from 'react';
-import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface EndingPageProps {
   affinities: Record<string, number>;
-  lang: SupportedLanguage;
   onRestart: () => void;
 }
 
 export const EndingPage: React.FC<EndingPageProps> = ({
   affinities,
-  lang,
   onRestart,
 }) => {
+  const { lang } = useLanguage();
   return (
     <div className="ending-overlay">
       <div className="ending-card">

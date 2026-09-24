@@ -1,29 +1,26 @@
-import React, { useState, useMemo } from 'react';
-import { SupportedLanguage } from '../../types/scenario';
+import React, { useState, useMemo, useEffect } from 'react';
 import { CHARACTERS } from '../../data/characters';
-import { HeroineId, CallScenario, MailScenario } from '../../types/communication';
-import {
-  CALL_SCENARIOS,
-  MAIL_SCENARIOS,
-  getHeroineCommunicationStatuses,
-} from '../../data/communicationData';
+import { CallScenario, CommunicationResult, MailScenario, NightCommunication } from '../../types/communication';
+import { scenarioRepository } from '../../services/scenario/ScenarioRepository';
 import { PhoneNotificationCard } from '../../components/Phone/PhoneNotificationCard';
 import { PhoneCallModal } from '../../components/Phone/PhoneCallModal';
 import { PhoneMailModal } from '../../components/Phone/PhoneMailModal';
 import '../../components/Room/NightRoomView.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface NightRoomPageProps {
   day: number;
   affinities: Record<string, number>;
-  flags?: Record<string, boolean | number | string>;
-  scenarioHistory?: Array<{ scenarioId: string; day: number; type: 'choice' | 'completed'; choiceId?: string }>;
-  lang: SupportedLanguage;
+  /** 今夜届く電話・メール（ScheduleManager.getNightCommunications） */
+  communications: NightCommunication[];
   onSave: () => void;
   onLoad: () => void;
   onRollbackDay: () => void;
   onSleep: () => void;
-  onUpdateFlags?: (flags: Record<string, boolean | number | string>) => void;
-  onUpdateAffinity?: (charId: string, delta: number) => void;
+  /** 電話に出終えた・着信を拒否した・メールを閉じたとき */
+  onCommunicationFinished: (result: CommunicationResult) => void;
+  /** 電話・メール本文の読み込みに失敗したとき */
+  onLoadError: (error: unknown) => void;
 }
 
 // 好感度最大値の目安（ゲージ計算用）
@@ -32,103 +29,71 @@ const MAX_AFFINITY_SCALE = 10;
 export const NightRoomPage: React.FC<NightRoomPageProps> = ({
   day,
   affinities,
-  flags = {},
-  lang,
+  communications,
   onSave,
   onLoad,
   onRollbackDay,
   onSleep,
-  onUpdateFlags,
-  onUpdateAffinity,
+  onCommunicationFinished,
+  onLoadError,
 }) => {
+  const { lang } = useLanguage();
   // モーダル管理
   const [activeCallScenario, setActiveCallScenario] = useState<CallScenario | null>(null);
   const [activeMailScenario, setActiveMailScenario] = useState<MailScenario | null>(null);
 
-  // 通知カードの非表示セット（ユーザーが×を押したもの）
-  const [dismissedNotifIds, setDismissedNotifIds] = useState<Set<string>>(new Set());
+  // 通知カードの非表示セット（ユーザーが×を押したメール）
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
 
-  // 各ヒロインの夜のコミュニケーション状態を計算
-  const heroineStatuses = useMemo(() => {
-    return getHeroineCommunicationStatuses(day, flags);
-  }, [day, flags]);
+  // 通知が出ている電話・メールの本文を先読みしておく
+  useEffect(() => {
+    for (const communication of communications) {
+      if (communication.done) continue;
+      const loading =
+        communication.kind === 'call'
+          ? scenarioRepository.loadCall(communication.id)
+          : scenarioRepository.loadMail(communication.id);
+      loading.catch(() => {});
+    }
+  }, [communications]);
 
   // モーダルが開いている間は通知カードを非表示にする
   const isModalOpen = Boolean(activeCallScenario || activeMailScenario);
 
-  // 現在アクティブな着信またはメール通知の決定
-  const activeNotificationStatus = useMemo(() => {
+  // 表示する通知（着信を優先し、次に未読メール）
+  const activeNotification = useMemo(() => {
     if (isModalOpen) return null;
+    const pending = communications.filter((c) => !c.done && !dismissedIds.has(c.id));
+    return pending.find((c) => c.kind === 'call') ?? pending.find((c) => c.kind === 'mail') ?? null;
+  }, [communications, dismissedIds, isModalOpen]);
 
-    // 1. 着信が最優先
-    for (const status of Object.values(heroineStatuses)) {
-      if (status.hasIncomingCall && !dismissedNotifIds.has(`call_${status.characterId}`)) {
-        return status;
-      }
-    }
-    // 2. 新着メール
-    for (const status of Object.values(heroineStatuses)) {
-      if (status.unreadMailCount > 0 && !dismissedNotifIds.has(`mail_${status.characterId}`)) {
-        return status;
-      }
-    }
-    return null;
-  }, [heroineStatuses, dismissedNotifIds, isModalOpen]);
-
-  // 通話開始ハンドラー
-  const handleAnswerCall = (characterId: HeroineId) => {
-    const scenario = CALL_SCENARIOS[`${characterId}_day${day}_call`] || CALL_SCENARIOS.aoi_day1_call;
-    setActiveCallScenario(scenario);
+  // 通話開始
+  const handleAnswerCall = (communication: NightCommunication) => {
+    scenarioRepository.loadCall(communication.id).then(setActiveCallScenario, onLoadError);
   };
 
-  // 着信拒否ハンドラー（×ボタン）
-  const handleRejectCall = (characterId: HeroineId) => {
-    setDismissedNotifIds((prev) => new Set(prev).add(`call_${characterId}`));
-    onUpdateFlags?.({
-      [`night_call_rejected_day${day}_${characterId}`]: true,
-    });
+  // 着信拒否（×ボタン）。拒否も「今夜の1件」として完了扱いにする
+  const handleRejectCall = (communication: NightCommunication) => {
+    onCommunicationFinished({ id: communication.id, flags: {}, affinityDelta: {}, choiceIds: ['rejected'] });
   };
 
-  // メールを開くハンドラー
-  const handleOpenMail = (characterId: HeroineId) => {
-    const scenario = MAIL_SCENARIOS[`${characterId}_day${day}_mail`] || MAIL_SCENARIOS.aoi_day1_mail;
-    setActiveMailScenario(scenario);
+  // メールを開く
+  const handleOpenMail = (communication: NightCommunication) => {
+    scenarioRepository.loadMail(communication.id).then(setActiveMailScenario, onLoadError);
   };
 
-  // メール通知閉じるハンドラー
-  const handleDismissMail = (characterId: HeroineId) => {
-    setDismissedNotifIds((prev) => new Set(prev).add(`mail_${characterId}`));
+  // メール通知を閉じる（未読のまま。今夜は再表示しない）
+  const handleDismissMail = (communication: NightCommunication) => {
+    setDismissedIds((prev) => new Set(prev).add(communication.id));
   };
 
-  // 通話終了
-  const handleCloseCallModal = (
-    flagsToUpdate?: Record<string, boolean | number | string>,
-    affinityDelta?: Record<string, number>
-  ) => {
-    if (flagsToUpdate && onUpdateFlags) {
-      onUpdateFlags(flagsToUpdate);
-    }
-    if (affinityDelta && onUpdateAffinity) {
-      for (const [charId, delta] of Object.entries(affinityDelta)) {
-        onUpdateAffinity(charId, delta);
-      }
-    }
+  const handleCloseCallModal = (result: Omit<CommunicationResult, 'id'>) => {
+    if (activeCallScenario) onCommunicationFinished({ id: activeCallScenario.id, ...result });
     setActiveCallScenario(null);
   };
 
-  // メール終了
-  const handleCloseMailModal = (
-    flagsToUpdate?: Record<string, boolean | number | string>,
-    affinityDelta?: Record<string, number>
-  ) => {
-    if (flagsToUpdate && onUpdateFlags) {
-      onUpdateFlags(flagsToUpdate);
-    }
-    if (affinityDelta && onUpdateAffinity) {
-      for (const [charId, delta] of Object.entries(affinityDelta)) {
-        onUpdateAffinity(charId, delta);
-      }
-    }
+  const handleCloseMailModal = (result: Omit<CommunicationResult, 'id'>) => {
+    if (activeMailScenario) onCommunicationFinished({ id: activeMailScenario.id, ...result });
     setActiveMailScenario(null);
   };
 
@@ -147,10 +112,10 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
         </div>
 
         {/* 画面下部: 着信または新着メール通知カード */}
-        {activeNotificationStatus && (
+        {activeNotification && (
           <PhoneNotificationCard
-            status={activeNotificationStatus}
-            lang={lang}
+            key={activeNotification.id}
+            communication={activeNotification}
             onAnswerCall={handleAnswerCall}
             onRejectCall={handleRejectCall}
             onOpenMail={handleOpenMail}
@@ -319,7 +284,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       {activeCallScenario && (
         <PhoneCallModal
           scenario={activeCallScenario}
-          lang={lang}
           onClose={handleCloseCallModal}
         />
       )}
@@ -328,8 +292,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       {activeMailScenario && (
         <PhoneMailModal
           scenario={activeMailScenario}
-          lang={lang}
-          alreadyReplied={Boolean(flags[`night_mail_replied_day${activeMailScenario.day}_${activeMailScenario.characterId}`])}
           onClose={handleCloseMailModal}
         />
       )}

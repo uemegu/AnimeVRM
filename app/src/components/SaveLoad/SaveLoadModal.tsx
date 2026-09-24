@@ -1,35 +1,26 @@
 import React from 'react';
 import { SaveSlotInfo } from '../../types/save';
-import { SupportedLanguage } from '../../types/scenario';
 import { getDayOfWeek } from '../../types/game';
 import './SaveLoadModal.css';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { PHASE_NAMES } from '../../data/phases';
 
 export interface SaveLoadModalProps {
   isOpen: boolean;
   mode: 'save' | 'load';
   slots: SaveSlotInfo[];
-  lang: SupportedLanguage;
   onSelectSlot: (slotId: number) => void;
   onClose: () => void;
 }
-
-const PHASE_NAMES: Record<string, { ja: string; en: string }> = {
-  morning: { ja: '朝（登校）', en: 'Morning' },
-  morning_action: { ja: '午前', en: 'Morning Action' },
-  lunch_action: { ja: '昼休み', en: 'Lunch Action' },
-  afterschool_action: { ja: '放課後', en: 'Afterschool' },
-  holiday_action: { ja: '休日', en: 'Holiday' },
-  night: { ja: '夜', en: 'Night' },
-};
 
 export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
   isOpen,
   mode,
   slots,
-  lang,
   onSelectSlot,
   onClose,
 }) => {
+  const { lang } = useLanguage();
   if (!isOpen) return null;
 
   const isSave = mode === 'save';
@@ -93,7 +84,7 @@ export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
             const day = slot.data?.gameState.day ?? 1;
             const weekday = getDayOfWeek(day);
             const phaseKey = slot.data?.gameState.phase ?? 'morning';
-            const phaseLabel = PHASE_NAMES[phaseKey] ? PHASE_NAMES[phaseKey][lang] : phaseKey;
+            const phaseLabel = PHASE_NAMES[phaseKey][lang];
             const savedAt = formatSavedAt(slot.data?.savedAt);
             const affinities = slot.data?.gameState.affinities;
 
