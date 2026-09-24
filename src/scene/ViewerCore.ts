@@ -10,6 +10,7 @@ import { HairShadowRenderer } from '../shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader, applyLightWrapParams } from '../postprocessing/LightWrap';
 import { ParaShader, applyParaParams } from '../postprocessing/Para';
 import { setHairRingParams, setHairRingTint } from '../shader/HairRing';
+import { setFaceSdfParams } from '../shader/FaceSdf';
 import Stats from 'three/addons/libs/stats.module.js';
 
 import { AvatarConfig, DEFAULT_CONFIG } from '../Config';
@@ -1005,6 +1006,9 @@ export class ViewerCore {
     }
     if (cfg.hairRing) {
       setHairRingParams(cfg.hairRing);
+    }
+    if (cfg.faceSdf) {
+      setFaceSdfParams(cfg.faceSdf);
     }
     if (cfg.lightWrap) {
       applyLightWrapParams(this.lightWrapPass.uniforms as typeof LightWrapShader.uniforms, cfg.lightWrap);

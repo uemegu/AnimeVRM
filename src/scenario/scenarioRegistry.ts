@@ -168,9 +168,9 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
   },
   'corridor-mob': {
     id: 'corridor-mob',
-    title: '休み時間の廊下 〜賑わう教室と2人の約束〜',
-    shortTitle: '休み時間の廊下',
-    description: '賑わう学校の廊下でばったり会ったアオイとの会話。ペルソナ5風の半透明モブ生徒たちが背後で談笑する日常シーン。',
+    title: '休み時間の教室 〜アオイとエミリ、同じ班になれたね〜',
+    shortTitle: '休み時間の教室',
+    description: '夕方の光が差す3Dの教室で、理科の実験で同じ班になったアオイとエミリが話す休み時間の会話。ペルソナ5風の半透明モブ生徒たちが背後で談笑する日常シーン。',
     ogpImage: '/ogp/silver-week.png',
     getScenario: () => getCorridorConversationScenario(),
   },

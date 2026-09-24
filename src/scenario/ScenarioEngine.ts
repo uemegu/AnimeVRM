@@ -55,6 +55,7 @@ export interface ScenarioEngineOptions {
   onSwitchShaftMode?: (active: boolean) => void;
   onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
   onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
+  onSwitchStage?: (stage?: import('./types').ScenarioStageId) => Promise<void>;
 }
 
 export class ScenarioEngine {
@@ -118,6 +119,7 @@ export class ScenarioEngine {
   private onSwitchShaftMode?: (active: boolean) => void;
   private onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
   private onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
+  private onSwitchStage?: (stage?: import('./types').ScenarioStageId) => Promise<void>;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
 
@@ -151,6 +153,7 @@ export class ScenarioEngine {
     this.onSwitchShaftMode = options.onSwitchShaftMode;
     this.onSwitchShaftSpaceStage = options.onSwitchShaftSpaceStage;
     this.onUpdateCrowd = options.onUpdateCrowd;
+    this.onSwitchStage = options.onSwitchStage;
 
     this.messageWindow = new AdventureMessageWindow({
       typingSpeedMs: 22,
@@ -286,6 +289,13 @@ export class ScenarioEngine {
     });
 
     this.onPlayStateChange?.(true);
+
+    // Build the 3D stage before placing characters in it
+    try {
+      await this.onSwitchStage?.(scenarioPackage.stage);
+    } catch (err) {
+      console.error('Failed to switch scenario stage:', err);
+    }
 
     // Setup multi-character placements if defined
     if (scenarioPackage.characters && scenarioPackage.characters.length > 0 && this.onSetupScenarioCharacters) {

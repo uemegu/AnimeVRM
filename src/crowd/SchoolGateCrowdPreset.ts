@@ -9,7 +9,7 @@ export const MORNING_SCHOOL_GATE_CROWD: CrowdMemberConfig[] = [
   // 1. Male student walking towards gate entrance (right-midground)
   {
     id: 'mob_student_walk_right',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/Walking.fbx'),
     position: [1.2, 0, -1.8],
     rotationY: -Math.PI * 0.4,
@@ -24,7 +24,7 @@ export const MORNING_SCHOOL_GATE_CROWD: CrowdMemberConfig[] = [
   // 2. Male student walking across in far background
   {
     id: 'mob_student_walk_left',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/Walking.fbx'),
     position: [-1.4, 0, -2.4],
     rotationY: Math.PI * 0.48,
@@ -39,7 +39,7 @@ export const MORNING_SCHOOL_GATE_CROWD: CrowdMemberConfig[] = [
   // 3. Student standing by the right gate pillar
   {
     id: 'mob_student_standing_right',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/Standing Idle.fbx'),
     position: [1.6, 0, -1.6],
     rotationY: -0.9,
@@ -49,7 +49,7 @@ export const MORNING_SCHOOL_GATE_CROWD: CrowdMemberConfig[] = [
   // 4. Student standing on left side talking / waiting
   {
     id: 'mob_student_standing_left',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/Standing Idle.fbx'),
     position: [-1.5, 0, -1.5],
     rotationY: 0.7,

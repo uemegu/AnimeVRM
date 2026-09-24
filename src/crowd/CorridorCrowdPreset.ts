@@ -10,7 +10,7 @@ export const CORRIDOR_CROWD_PRESET: CrowdMemberConfig[] = [
   // Pair 1: Left corridor midground (Boy talking with hand gestures, Girl listening & nodding)
   {
     id: 'mob_corridor_boy_talking',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/mob_chat_gesture.fbx'),
     position: [-1.15, 0, -1.8],
     rotationY: 0.85, // facing slightly rightwards towards girl
@@ -39,7 +39,7 @@ export const CORRIDOR_CROWD_PRESET: CrowdMemberConfig[] = [
   },
   {
     id: 'mob_corridor_boy2_listening',
-    modelUrl: resolveAssetUrl('/models/boy.vrm'),
+    modelUrl: resolveAssetUrl('/models/mob/boy.vrm'),
     motionUrl: resolveAssetUrl('/animations/mob_listen_nod.fbx'),
     position: [0.85, 0, -2.5],
     rotationY: 1.6, // facing girl2

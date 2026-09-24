@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
+import { DEFAULT_FACE_SDF_PARAMS, setFaceSdfParams } from '../../shader/FaceSdf';
 import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '../../postprocessing/LightWrap';
 import { DEFAULT_PARA_PARAMS, ParaShader, applyParaParams } from '../../postprocessing/Para';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
@@ -184,6 +185,22 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   hairShadowFolder.add(hairShadowCfg, 'depthBias', 0, 0.02, 0.0005).name(tr.gui.hairShadowDepthBias).onChange(applyHairShadow);
   hairShadowFolder.add(hairShadowCfg, 'maxDepthDiff', 0.01, 0.5, 0.01).name(tr.gui.hairShadowMaxDepthDiff).onChange(applyHairShadow);
   hairShadowFolder.close();
+
+  // 2.25 顔の SDF 陰影 (Face Shadow Map)
+  if (!currentConfig.faceSdf) {
+    currentConfig.faceSdf = { ...DEFAULT_FACE_SDF_PARAMS };
+  }
+  const faceSdfCfg = currentConfig.faceSdf;
+  const applyFaceSdf = () => setFaceSdfParams(faceSdfCfg);
+  const faceSdfFolder = visualGui.addFolder(tr.gui.faceSdfFolder);
+  faceSdfFolder.add(faceSdfCfg, 'enabled').name(tr.gui.faceSdfEnabled).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'softness', 0.0, 20.0, 0.5).name(tr.gui.faceSdfSoftness).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'noseSize', 0.0, 1.0, 0.01).name(tr.gui.faceSdfNoseSize).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'noseStart', 0.0, 90.0, 1).name(tr.gui.faceSdfNoseStart).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'skipStart', 0.0, 180.0, 1).name(tr.gui.faceSdfSkipStart).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'skipEnd', 0.0, 180.0, 1).name(tr.gui.faceSdfSkipEnd).onChange(applyFaceSdf);
+  faceSdfFolder.add(faceSdfCfg, 'skipBlend', 0.0, 30.0, 0.5).name(tr.gui.faceSdfSkipBlend).onChange(applyFaceSdf);
+  faceSdfFolder.close();
 
   // 2.3 天使の輪 (Hair Ring)
   if (!currentConfig.hairRing) {

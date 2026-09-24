@@ -4,6 +4,7 @@ import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
 import { toggleSmoothNormalsInHierarchy } from './SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './HairShadow';
 import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './HairRing';
+import { attachFaceSdf, createFaceSdfFrame, injectFaceSdf } from './FaceSdf';
 import { CHARACTER_LAYER } from '../postprocessing/LightWrap';
 
 export interface EyeGlowConfig {
@@ -291,6 +292,11 @@ export function applyToonShader(
   // 向きは軸がそろった正規化ボーンから取る（Y が上、Z が前）
   const hairRingHeadFrame = createHairRingHeadFrame();
   const headBoneNode = vrm.humanoid?.getNormalizedBoneNode('head') ?? null;
+  // 顔の SDF 陰影はバインド姿勢の骨の座標系でマップを作るので、生の頭の骨を使う
+  const rawHeadBone = vrm.humanoid?.getRawBoneNode('head') ?? null;
+  const faceSdfFrame = createFaceSdfFrame();
+  const faceSdfMeshes = new Set<THREE.Mesh>();
+  const faceSdfTargets: Array<{ value: number }> = [];
   const hairRingMeshes = new Set<THREE.Mesh>();
 
   const bottomGradientUniforms = {
@@ -365,6 +371,12 @@ export function applyToonShader(
       };
       // 天使の輪を描くのは髪（アウトラインを除く）
       const hairRingTarget = { value: !material.isOutline && kind === 'hair' ? 1 : 0 };
+      // 顔の陰影を SDF マップで決めるのは顔の肌・口まわり（アウトラインを除く）。マップは走査後にまとめて作る
+      const faceSdfTarget = { value: 0 };
+      if (!material.isOutline && kind === 'face') {
+        faceSdfMeshes.add(mesh);
+        faceSdfTargets.push(faceSdfTarget);
+      }
 
       // Preserve original VRM shade color, matcap factor & emissive properties
       if (material.shadeColorFactor) {
@@ -444,6 +456,7 @@ export function applyToonShader(
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
         injectHairRing(shader, hairRingTarget, hairRingHeadFrame);
+        injectFaceSdf(shader, faceSdfTarget, faceSdfFrame);
 
         shader.fragmentShader = shader.fragmentShader.replace(
           'void main() {',
@@ -502,6 +515,11 @@ export function applyToonShader(
       }
     });
   });
+
+  // 顔の SDF 陰影: 顔のメッシュ群から 1 枚のマップを作り、作れたら顔のマテリアルで使う
+  if (rawHeadBone && faceSdfMeshes.size > 0 && attachFaceSdf([...faceSdfMeshes], rawHeadBone, faceSdfFrame)) {
+    faceSdfTargets.forEach((target) => (target.value = 1));
+  }
 
   // Apply eye highlight glow (luminous sparkle)
   const applyEyeGlow = (eyeGlowCfg?: EyeGlowConfig) => {
