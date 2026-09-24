@@ -57,10 +57,9 @@
 
 - **セルルックシェーディング (MToon 最適化)**:
   - 肌・髪・衣装の自動マテリアル分類とパラメトリック調整
-  - **Auto HSV Shadow**: テクスチャ平均色から肌の血色感（暖色シフト）や髪・衣装の青紫系影色を自動計算
-  - 影境界のチーク・発色感（`shadowBoundaryTint`）
+  - **影の乗算色 (`shadeMultiply`)**: 影 = 乗算色 × マテリアル自身のテクスチャ。アバターごとに色が違ってもその色を暗くした影になる
+  - **顔の SDF 陰影 (`faceSdf`)**: 顔の明暗を法線ではなく光の水平角とマップで決め、頬の斑や影割れを防ぐ
   - **眼窩法線平坦化 (`flattenEyeOrbitNormals`)**: 目頭・眼窩周辺の法線を前向きへブレンド補正し、アニメ調のすっきりした目元と不要な影落ち・黒ずみ防止を実現
-  - 顔部分の不要な影落ち・割れを抑制するフェイシャル保護（`faceShadingShiftFactor`）
   - 足元のグラデーション影・空気感演出（`bottomGradient`）
 - **高品質アウトライン (Inverted Hull)**:
   - **Smooth Normal (スムーズ法線)**: 頂点法線のハードエッジによる輪郭線破綻を解消
@@ -180,8 +179,8 @@ flowchart TD
 
     B4 --> C[シェーディング & マテリアル適用]
     C --> C1[マテリアル自動分類: body, hair, cloth, face]
-    C --> C2[Auto HSV Shadow: テクスチャ色から影色を自動計算]
-    C --> C3[MToon パラメータ適用: Toony, Shift, GI, Rim, ShadowBoundaryTint]
+    C --> C2[影の乗算色 + 顔の SDF 陰影]
+    C --> C3[MToon パラメータ適用: Toony, Shift, GI, Rim]
     C --> C4[特殊演出モード: ヤンデレ / シャフト単色化 / うるうる瞳]
 
     C4 --> D[メイン描画ループ tick]
@@ -218,12 +217,10 @@ flowchart TD
 ### 2. トゥーンシェーディング & マテリアル処理
 - **パーツ自動分類**:
   メッシュ名・マテリアル名の正規表現から `body`（体・肌）、`hair`（髪）、`cloth`（衣装）、`face`（顔）に自動分類。
-- **Auto HSV Shadow (自動影色計算)**:
-  マテリアルテクスチャのピクセル平均色を抽出し、HSL 色空間で最適な影色を自動算出。
-  - **肌・顔**: 暖色（ピーチ〜赤系）へシフトし、血色感のある影色を生成。影境界のチーク感（`shadowBoundaryTint`）も付加。
-  - **髪・衣装**: 彩度を高めつつクールな青紫系へシフトさせ、アニメ調の鮮やかな陰影を生成。
-- **フェイシャル保護 (`faceShadingShiftFactor`)**:
-  顔パーツに対しては、不自然な影割れを防ぐため `shadingShiftFactor` の下限制限やリムライト発光の抑制を実施。
+- **影の乗算色 (`shadeMultiply`)**:
+  影色を「乗算色 × マテリアル自身のテクスチャ」で作る。肌・髪・衣装ごとに乗算色を持つ。
+- **顔の SDF 陰影 (`faceSdf`, `shader/FaceSdf.ts`)**:
+  顔の明暗は法線の代わりに、顔メッシュから自動で作るマップと光の水平角で決める。このため顔には `shadingShiftFactor` / `shadingToonyFactor` が効かない（マップが作れなかったときだけ、影割れを防ぐため `shadingShiftFactor` を 0.65 以上に寄せる）。顔のリムライト発光は常に抑制。
 - **ボトムグラデーション (`bottomGradient`)**:
   モデル足元に向けてプロシージャルな減光グラデーションをかけ、地面への接地感と空気遠近法を表現。
 
@@ -412,12 +409,9 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
 | `color` | `string` | `#ffffff` | 基本色・血色感（Base Color / Tint） |
 | `matcapEnabled` | `boolean` | `true` | ハイライト (MatCap / スフィアマップ) の表示 ON/OFF |
 | `emissiveIntensity` | `number` | `0.0` | 自己発光（エミッシブ）強度 |
-| `shadowHueShift` | `number` | `0.02` | 影色の色相シフト量（正: 暖色寄り, 負: 寒色寄り） |
-| `shadowLightnessFactor` | `number` | `0.16` | 影色の明度比率（低いほど影が濃くなる） |
-| `shadowBoundaryTint` | `number` | `0.35` | 明暗境界のチーク・発色強度 |
-| `shadingToonyFactor` | `number` | `1.0` | トゥーンの硬さ（`1.0` で完全なセル調2値境界） |
+| `shadeMultiply` | `string` | `#d49ea3` | 影の乗算色（影 = この色 × テクスチャ） |
+| `shadingToonyFactor` | `number` | `0.9895` | トゥーンの硬さ（`1.0` で完全なセル調2値境界） |
 | `shadingShiftFactor` | `number` | `-0.05` | 明暗境界の位置オフセット |
-| `faceShadingShiftFactor` | `number` | `0.65` | 顔パーツ専用の影落ちオフセット |
 | `giEqualizationFactor` | `number` | `0.9` | 環境光の均一化率（アニメ調のフラットさを向上） |
 | `rimEnabled` | `boolean` | `false` | パラメトリックリムライトの有効/無効 |
 | `rimColor` | `string` | `#ffffff` | リムライトの発光色 |
@@ -447,7 +441,6 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
 | `directional.color` / `intensity` | `string` / `number` | `#ffffff` / `3.2` | 主光源の色と強度 |
 | `directional.posX / Y / Z` | `number` | `-0.7 / 0.5 / 0.4` | 主光源の 3D 位置 |
 | `rim.enabled` / `color` / `intensity` | `boolean` / `string` / `number` | `false` / `#dde8ff` / `0.05` | 補助環境リム光 |
-| `depthRim.enabled` / `power` / `intensity` | `boolean` / `number` / `number` | `true` / `4.0` / `0.8` | 深度リムライト効果 |
 | `sunShafts.enabled` / `color` / `exposure` | `boolean` / `string` / `number` | `true` / `#ff7826` / `0.36` | 太陽光条（God Rays） |
 | `sunShafts.decay` / `density` / `weight` | `number` | `0.83 / 0.5 / 0.48` | サンシャフトの減衰・密度・重み |
 | `sunShafts.shimmer` | `number` | `0.25` | サンシャフトの陽炎・揺らぎ強度 |

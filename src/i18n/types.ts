@@ -409,13 +409,9 @@ export interface Translations {
     baseColor: string;
     highlightMatcap: string;
     emissiveIntensity: string;
-    shadowHueShift: string;
-    shadowLightness: string;
     shadeMultiply: string;
-    shadowBoundaryTint: string;
     toonyFactor: string;
     shadingShift: string;
-    faceShadingShift: string;
     giFactor: string;
     rimEnabled: string;
     rimColor: string;

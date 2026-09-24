@@ -40,21 +40,9 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     folder.addColor(params, 'color').name(tr.gui.baseColor).onChange(update);
     folder.add(params, 'matcapEnabled').name(tr.gui.highlightMatcap).onChange(update);
     folder.add(params, 'emissiveIntensity', 0.0, 5.0, 0.1).name(tr.gui.emissiveIntensity).onChange(update);
-    folder.add(params, 'shadowHueShift', -0.5, 0.5, 0.01).name(tr.gui.shadowHueShift).onChange(update);
-    folder.add(params, 'shadowLightnessFactor', 0.02, 1.0, 0.01).name(tr.gui.shadowLightness).onChange(update);
-    folder.add(params, 'shadowBoundaryTint', 0.0, 1.0, 0.02).name(tr.gui.shadowBoundaryTint).onChange(update);
-    folder.add(params, 'shadingToonyFactor', 0, 1, 0.01).name(tr.gui.toonyFactor).onChange(update);
+    folder.add(params, 'shadingToonyFactor', 0, 1, 0.001).name(tr.gui.toonyFactor).onChange(update);
     folder.add(params, 'shadingShiftFactor', -1, 1, 0.01).name(tr.gui.shadingShift).onChange(update);
-    if (params.shadeMultiply === undefined) {
-      params.shadeMultiply = { body: '#d49ea3', hair: '#8474a4', cloth: '#b8bcd8' }[kind];
-    }
-    folder.addColor(params as any, 'shadeMultiply').name(tr.gui.shadeMultiply).onChange(update);
-    if (kind === 'body') {
-      if (params.faceShadingShiftFactor === undefined) {
-        params.faceShadingShiftFactor = 0.65;
-      }
-      folder.add(params as any, 'faceShadingShiftFactor', -1, 1, 0.01).name(tr.gui.faceShadingShift).onChange(update);
-    }
+    folder.addColor(params, 'shadeMultiply').name(tr.gui.shadeMultiply).onChange(update);
     folder.add(params, 'giEqualizationFactor', 0, 1, 0.01).name(tr.gui.giFactor).onChange(update);
 
     folder.add(params, 'rimEnabled').name(tr.gui.rimEnabled).onChange(update);
