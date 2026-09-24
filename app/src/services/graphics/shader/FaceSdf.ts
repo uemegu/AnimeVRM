@@ -9,6 +9,7 @@ import * as THREE from 'three';
  * なめらかに移動し、鼻の横には光の角度に応じて伸びる三角の影が出る。
  *
  * マップは読み込んだ顔メッシュから自動で作る（顔を楕円体で近似＋鼻の影）。
+ * 頬の陰の弧の頂点は、顔の凹凸をずらして下まぶたの高さに合わせる。
  * R/G: 頭の +X 側 / -X 側から光が来たときの頬の陰のしきい値（0 = 正面, 1 = 真後ろ）
  * B/A: 同じく +X 側 / -X 側から光が来たときの、鼻の影の三角の中での位置
  *      （0 = 鼻の付け根, 1 = 最大の三角の外）。大きさと出始めは実行時に決める。
@@ -31,11 +32,11 @@ export interface FaceSdfParams {
 
 export const DEFAULT_FACE_SDF_PARAMS: FaceSdfParams = {
   enabled: true,
-  softness: 3,
+  softness: 0,
   noseSize: 0.5,
   noseStart: 30,
-  skipStart: 60,
-  skipEnd: 120,
+  skipStart: 45,
+  skipEnd: 135,
   skipBlend: 4,
 };
 
@@ -63,7 +64,7 @@ export function setFaceSdfParams(params: Partial<FaceSdfParams>): void {
 /** アバターごとのマップと頭の向き。顔を構成する全マテリアルで共有する。 */
 export interface FaceSdfFrame {
   map: { value: THREE.Texture };
-  /** 頭の横方向（マップの +X）と前方向（ワールド座標） */
+  /** 頭の横方向（マップの +X）と前方向（ワールド座標の水平面に寝かせたもの） */
   right: { value: THREE.Vector3 };
   forward: { value: THREE.Vector3 };
 }
@@ -101,12 +102,20 @@ export function attachFaceSdf(
   frame.map.value = built.texture;
 
   const quat = new THREE.Quaternion();
+  const right = new THREE.Vector3();
+  const forward = new THREE.Vector3();
   for (const mesh of meshes) {
     const prevOnBeforeRender = mesh.onBeforeRender;
     mesh.onBeforeRender = function (...args) {
       headBone.getWorldQuaternion(quat);
-      frame.right.value.set(1, 0, 0).applyQuaternion(quat);
-      frame.forward.value.set(0, 0, built.frontSign).applyQuaternion(quat);
+      right.set(1, 0, 0).applyQuaternion(quat);
+      forward.set(0, 0, built.frontSign).applyQuaternion(quat);
+      // 顔の左右の向き（ヨー）だけで陰を決める。うつむき・首のかしげ・体の揺れで
+      // 頭の軸が傾いても、上からの光の成分が角度に混ざって陰が動かないよう水平に寝かせる。
+      right.y = 0;
+      forward.y = 0;
+      if (right.lengthSq() > 1e-6) frame.right.value.copy(right).normalize();
+      if (forward.lengthSq() > 1e-6) frame.forward.value.copy(forward).normalize();
       prevOnBeforeRender.apply(this, args);
     };
   }
@@ -198,6 +207,12 @@ function buildFaceSdfMap(
       noseY = y;
     }
   }
+  // 頬の陰の弧は、顔の凹凸のせいで鼻の高さを頂点にした形になる。
+  // その頂点を下まぶたの高さへ移すため、顔の前後の凹凸（高さマップ）を上にずらして使う。
+  const lowerLidY = findLowerEyelidY(local, triangles, x0, halfWidth, noseY, height, centerZ) ?? noseY + height * 0.1;
+  const profileShift = THREE.MathUtils.clamp(lowerLidY - noseY, 0, height * 0.25);
+  const depthAt = buildDepthField(local, triangles, x0, halfWidth, yMin, height);
+
   // 鼻の影の最大の三角: 鼻筋の上端で細く、鼻先で最も広い。実行時の noseSize でこれを相似に縮める
   const noseTop = noseY + height * 0.1;
   const noseBottom = noseY - height * 0.025;
@@ -211,7 +226,8 @@ function buildFaceSdfMap(
     return Math.min(1, distance / noseMaxWidth + vertical);
   };
   const channels = (x: number, y: number, z: number): [number, number, number, number] => {
-    const phi = Math.atan2((x - x0) / radiusX, (z - centerZ) / radiusZ);
+    const shiftedZ = z + depthAt(x, y - profileShift) - depthAt(x, y);
+    const phi = Math.atan2((x - x0) / radiusX, (shiftedZ - centerZ) / radiusZ);
     // 正面からの光では必ず明るい
     const right = clamp01(Math.max((phi + halfPi) / Math.PI, 0.03));
     const left = clamp01(Math.max((halfPi - phi) / Math.PI, 0.03));
@@ -266,6 +282,163 @@ function buildFaceSdfMap(
   texture.flipY = false;
   texture.needsUpdate = true;
   return { texture, frontSign };
+}
+
+/**
+ * 目の穴（顔の肌メッシュの縁）の下端 ≒ 下まぶたの高さ。見つからなければ null。
+ * アウトライン用に同じ三角形が 2 回入っていたり、UV の継ぎ目で頂点が分かれていても数えられるよう、
+ * 位置で頂点をまとめてから、1 つの三角形にしか属さない辺（穴の縁）を探す。
+ */
+function findLowerEyelidY(
+  local: Float32Array,
+  triangles: number[],
+  x0: number,
+  halfWidth: number,
+  noseY: number,
+  height: number,
+  frontZ: number
+): number | null {
+  const ids = new Map<string, number>();
+  const weld = (i: number) => {
+    const key = `${Math.round(local[i * 3] * 1e4)},${Math.round(local[i * 3 + 1] * 1e4)},${Math.round(local[i * 3 + 2] * 1e4)}`;
+    let id = ids.get(key);
+    if (id === undefined) {
+      id = ids.size;
+      ids.set(key, id);
+    }
+    return id;
+  };
+  const seenTriangles = new Set<string>();
+  const edges = new Map<string, { count: number; a: number; b: number }>();
+  for (let t = 0; t + 2 < triangles.length; t += 3) {
+    const corners = [triangles[t], triangles[t + 1], triangles[t + 2]];
+    const welded = corners.map(weld);
+    const triangleKey = [...welded].sort((p, q) => p - q).join('|');
+    if (seenTriangles.has(triangleKey)) continue;
+    seenTriangles.add(triangleKey);
+    for (let e = 0; e < 3; e += 1) {
+      const p = welded[e];
+      const q = welded[(e + 1) % 3];
+      const edgeKey = p < q ? `${p}#${q}` : `${q}#${p}`;
+      const edge = edges.get(edgeKey) ?? { count: 0, a: corners[e], b: corners[(e + 1) % 3] };
+      edge.count += 1;
+      edges.set(edgeKey, edge);
+    }
+  }
+  const lidYs: number[] = [];
+  edges.forEach(({ count, a, b }) => {
+    if (count !== 1) return;
+    const y = (local[a * 3 + 1] + local[b * 3 + 1]) / 2;
+    const side = Math.abs((local[a * 3] + local[b * 3]) / 2 - x0);
+    const z = (local[a * 3 + 2] + local[b * 3 + 2]) / 2;
+    // 鼻より上・額より下で、中心線から離れた前面の穴 = 目
+    if (y > noseY && y < noseY + height * 0.45 && side > halfWidth * 0.08 && side < halfWidth * 0.75 && z > frontZ) {
+      lidYs.push(y);
+    }
+  });
+  return lidYs.length >= 8 ? percentile(lidYs, 0.03) : null;
+}
+
+/**
+ * 顔を正面から見たときの前後の位置（最前面の z）の高さマップ。目や口の穴は周りから埋め、細かい凹凸はならす。
+ * 返す関数は (x, y) の z を補間して返す。
+ */
+function buildDepthField(
+  local: Float32Array,
+  triangles: number[],
+  x0: number,
+  halfWidth: number,
+  yMin: number,
+  height: number
+): (x: number, y: number) => number {
+  const grid = 64;
+  const left = x0 - halfWidth * 1.1;
+  const cellX = (halfWidth * 2.2) / grid;
+  const cellY = height / grid;
+  const depth = new Float32Array(grid * grid).fill(-Infinity);
+  for (let t = 0; t + 2 < triangles.length; t += 3) {
+    const a = triangles[t], b = triangles[t + 1], c = triangles[t + 2];
+    const ax = (local[a * 3] - left) / cellX, ay = (local[a * 3 + 1] - yMin) / cellY;
+    const bx = (local[b * 3] - left) / cellX, by = (local[b * 3 + 1] - yMin) / cellY;
+    const cx = (local[c * 3] - left) / cellX, cy = (local[c * 3 + 1] - yMin) / cellY;
+    const area = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+    if (Math.abs(area) < 1e-9) continue;
+    const minX = Math.max(0, Math.floor(Math.min(ax, bx, cx)));
+    const maxX = Math.min(grid - 1, Math.ceil(Math.max(ax, bx, cx)));
+    const minY = Math.max(0, Math.floor(Math.min(ay, by, cy)));
+    const maxY = Math.min(grid - 1, Math.ceil(Math.max(ay, by, cy)));
+    for (let gy = minY; gy <= maxY; gy += 1) {
+      for (let gx = minX; gx <= maxX; gx += 1) {
+        const sx = gx + 0.5, sy = gy + 0.5;
+        const w0 = ((bx - sx) * (cy - sy) - (cx - sx) * (by - sy)) / area;
+        const w1 = ((cx - sx) * (ay - sy) - (ax - sx) * (cy - sy)) / area;
+        const w2 = 1 - w0 - w1;
+        if (w0 < -1e-4 || w1 < -1e-4 || w2 < -1e-4) continue;
+        const z = w0 * local[a * 3 + 2] + w1 * local[b * 3 + 2] + w2 * local[c * 3 + 2];
+        const cell = gy * grid + gx;
+        if (z > depth[cell]) depth[cell] = z;
+      }
+    }
+  }
+  // 穴や外側を周りの値で埋める
+  for (let pass = 0; pass < grid; pass += 1) {
+    let changed = false;
+    const next = depth.slice();
+    for (let gy = 0; gy < grid; gy += 1) {
+      for (let gx = 0; gx < grid; gx += 1) {
+        const cell = gy * grid + gx;
+        if (depth[cell] !== -Infinity) continue;
+        let sum = 0, n = 0;
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = gx + dx, ny = gy + dy;
+          if (nx < 0 || ny < 0 || nx >= grid || ny >= grid) continue;
+          const value = depth[ny * grid + nx];
+          if (value === -Infinity) continue;
+          sum += value;
+          n += 1;
+        }
+        if (n > 0) {
+          next[cell] = sum / n;
+          changed = true;
+        }
+      }
+    }
+    depth.set(next);
+    if (!changed) break;
+  }
+  // 唇や鼻・目の穴の段差まで上にずらすと陰の境目が折れるので、顔全体の丸みだけ残るよう大きくならす
+  const radius = 6;
+  for (let pass = 0; pass < 3; pass += 1) {
+    const blurred = new Float32Array(depth.length);
+    for (let gy = 0; gy < grid; gy += 1) {
+      for (let gx = 0; gx < grid; gx += 1) {
+        let sum = 0, n = 0;
+        for (let dy = -radius; dy <= radius; dy += 1) {
+          for (let dx = -radius; dx <= radius; dx += 1) {
+            const nx = gx + dx, ny = gy + dy;
+            if (nx < 0 || ny < 0 || nx >= grid || ny >= grid) continue;
+            const value = depth[ny * grid + nx];
+            if (!Number.isFinite(value)) continue;
+            sum += value;
+            n += 1;
+          }
+        }
+        blurred[gy * grid + gx] = n > 0 ? sum / n : depth[gy * grid + gx];
+      }
+    }
+    depth.set(blurred);
+  }
+  return (x, y) => {
+    const fx = THREE.MathUtils.clamp((x - left) / cellX - 0.5, 0, grid - 1);
+    const fy = THREE.MathUtils.clamp((y - yMin) / cellY - 0.5, 0, grid - 1);
+    const x1 = Math.floor(fx), y1 = Math.floor(fy);
+    const x2 = Math.min(grid - 1, x1 + 1), y2 = Math.min(grid - 1, y1 + 1);
+    const tx = fx - x1, ty = fy - y1;
+    const top = depth[y1 * grid + x1] * (1 - tx) + depth[y1 * grid + x2] * tx;
+    const bottom = depth[y2 * grid + x1] * (1 - tx) + depth[y2 * grid + x2] * tx;
+    const value = top * (1 - ty) + bottom * ty;
+    return Number.isFinite(value) ? value : 0;
+  };
 }
 
 /** 顔の外（UV の隙間）に隣の値を広げ、境目でのにじみを防ぐ。 */
@@ -358,7 +531,7 @@ export function injectFaceSdf(
     uniform vec3 uFaceSdfRight;
     uniform vec3 uFaceSdfForward;
 
-    // 1 = 光が当たる, 0 = 陰。光の向き（ビュー空間）を頭の水平面に投影した角度でマップを引く。
+    // 1 = 光が当たる, 0 = 陰。光の向き（ビュー空間）を水平面に投影し、顔の向きとの角度でマップを引く。
     float faceSdfLit( const in vec3 lightDir ) {
       #ifdef MTOON_USE_UV
         vec3 rightView = normalize( ( viewMatrix * vec4( uFaceSdfRight, 0.0 ) ).xyz );
