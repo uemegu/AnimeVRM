@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { validateScenario } from '../ScenarioValidator';
 import { diskScenarioRepository } from './diskScenarioRepository';
 import scenarioIndex from '../../../data/scenarioIndex.json';
+import { LOCATION_VISUAL_PRESETS } from '../../../data/locationVisualPresets';
 
 const HEROINE_IDS = ['aoi', 'emili', 'shion'];
 const PUBLIC_DIR = path.resolve(__dirname, '../../../../public');
@@ -29,9 +30,22 @@ describe('シナリオファイル（public/scenarios）', () => {
   const storyEntries = diskScenarioRepository.list().filter((e) => e.category !== 'call' && e.category !== 'mail');
   for (const entry of storyEntries) {
     describe(entry.id, () => {
-      it('バリデーションエラーがないこと', async () => {
+      it('バリデーションのエラー・警告がないこと', async () => {
         const scenario = await diskScenarioRepository.load(entry.id);
-        expect(validateScenario(scenario).errors).toEqual([]);
+        const result = validateScenario(scenario);
+        expect(result.errors).toEqual([]);
+        expect(result.warnings).toEqual([]);
+      });
+
+      it('指定しているモーションと背景が存在すること', async () => {
+        const scenario = await diskScenarioRepository.load(entry.id);
+        const motions = scenario.scenes.flatMap((scene) =>
+          Object.values(scene.avatars ?? {}).map((avatar) => avatar.motion).filter((m): m is string => Boolean(m))
+        );
+        const missingMotions = motions.filter((m) => !fs.existsSync(path.join(PUBLIC_DIR, 'animations', `${m}.fbx`)));
+        expect(missingMotions).toEqual([]);
+        const backgrounds = scenario.scenes.map((scene) => scene.background).filter((b): b is string => Boolean(b));
+        expect(backgrounds.filter((b) => !LOCATION_VISUAL_PRESETS[b])).toEqual([]);
       });
 
       it('参照しているボイスファイルが存在すること', async () => {

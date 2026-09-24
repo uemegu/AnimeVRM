@@ -20,6 +20,7 @@ import { WateryEyeEffect, WateryEyeConfig } from './effects/eye';
 import { FaceOverlayEffect, FaceOverlayKind, FaceOverlayState, getFaceOverlayKindForTexture } from './effects/FaceOverlayEffect';
 import { MorphTargetPreview } from './avatar/MorphTargetPreview';
 import { getSeamlessLoopClip } from './animation/seamlessLoop';
+import { replaceHappyWithEyesOnly } from './avatar/happyEyesOnly';
 
 export interface BlushOptions {
   enabled?: boolean;
@@ -491,6 +492,7 @@ export class Avatar {
 
         // Register custom expressions (e.g. nima)
         this.setupCustomExpressions(vrm);
+        replaceHappyWithEyesOnly(vrm);
 
         // 1. Flatten eye orbit normals to prevent crease/step shadows at inner eye corners
         //flattenEyeOrbitNormals(vrm.scene);

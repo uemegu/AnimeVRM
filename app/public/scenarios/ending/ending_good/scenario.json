@@ -1,0 +1,105 @@
+{
+  "id": "ending_good",
+  "title": {
+    "ja": "GOOD END: 穏やかな幼馴染の約束"
+  },
+  "availability": {
+    "requireFlags": [
+      "confessed"
+    ]
+  },
+  "priority": 2,
+  "location": "shrine",
+  "bgm": "main_bgm",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……ふふ。びっくりした。でも、嬉しい。",
+      "background": "shrine",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s1_1bf07a6e.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あのね、正直に言うと……まだ、自分の気持ちがはっきりわからないの。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s2_35f1ad6a.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "でも、タカシくんとなら、これからゆっくり見つけていける気がする。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_1fff024e.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "だから……よろしくお願いします。まずは、手をつなぐところから、ね？",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s4_0b5295fc.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "女神の試練は、なんとか乗り越えた。",
+      "background": "town",
+      "scrollingBackground": {},
+      "timeOfDay": "morning",
+      "bgm": "main_bgm",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking",
+          "modelUrl": "/models/aoi/aoi-school-with-bag.vrm"
+        }
+      }
+    },
+    {
+      "id": "s6",
+      "text": "劇的な何かがあったわけじゃない。それでも、翌朝からの通学路は、少しだけ違って見えた。"
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "おはよ、タカシくん。……はい、手。",
+      "voiceUrl": "v_s7_547953c7.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "差し出された小さな手を、そっと握る。俺たちの恋は、ここから始まるのだ。"
+    },
+    {
+      "id": "s9",
+      "text": "GOOD END ――穏やかな幼馴染の約束――"
+    }
+  ]
+}

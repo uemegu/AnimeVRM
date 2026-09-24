@@ -1,0 +1,149 @@
+{
+  "id": "emili_warning",
+  "title": {
+    "ja": "屋上: パパの防犯訓練"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 8,
+      "to": 10
+    },
+    "locations": [
+      "rooftop"
+    ],
+    "unlessFlags": [
+      "seen_emili_warning"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintText": {
+        "ja": "屋上でエミリが電話している。なんだか不機嫌そうだ。"
+      },
+      "hintCharacterIds": [
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "だからパパ、訓練なんていらないってば！ ……もう、切るからね！",
+      "setFlags": {
+        "seen_emili_warning": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "angry",
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s1_3970c05a.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "あ、タカシくん。……聞こえちゃった？ ごめんね、うるさくて。",
+      "avatars": {
+        "emili": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s2_c7a3224a.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "パパがね、「近々、抜き打ちで誘拐防止の訓練をやる」って言うの。私に内緒で。",
+      "avatars": {
+        "emili": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s3_19e89ce8.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "内緒って言いながら、私に言っちゃってるんだけどね。パパ、そういうとこ抜けてるの。",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_3801456d.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「いいお父さんじゃないか」",
+          "goto": "a",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「……それ、いつやるって？」",
+          "goto": "b",
+          "setFlags": {
+            "knows_drill": true
+          },
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "……うん。心配性なだけで、悪い人じゃないの。ありがと。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_a_202e637a.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "わかんない。「来週のどこか」だって。まあ、私の周りでやるんでしょ。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_b_8f210c6b.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "（エミリの周りで……。まあ、俺には関係ないか）"
+    },
+    {
+      "id": "end",
+      "text": "屋上の風に、エミリの金髪がふわりとなびいた。"
+    }
+  ]
+}

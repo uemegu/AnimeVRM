@@ -1,0 +1,54 @@
+{
+  "id": "shion_mail_d17",
+  "characterId": "shion",
+  "title": "シオンからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 16,
+      "to": 19
+    },
+    "requireFlags": [
+      "know_legend"
+    ],
+    "unlessFlags": [
+      "teacher_advice"
+    ]
+  },
+  "previewText": {
+    "ja": "先生とは話した？"
+  },
+  "time": "22:20",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "白石先生とは、もう話した？"
+      },
+      "time": "22:19"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "職員室、放課後なら大抵いるわ。……急いだ方がいい。"
+      },
+      "time": "22:20"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "明日行ってみる"
+      },
+      "reactionText": {
+        "ja": "……そう。"
+      },
+      "reactionTime": "22:22",
+      "addAffinity": {
+        "shion": 1
+      }
+    }
+  ]
+}

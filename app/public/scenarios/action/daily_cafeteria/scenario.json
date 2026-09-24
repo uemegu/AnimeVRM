@@ -1,0 +1,29 @@
+{
+  "id": "daily_cafeteria",
+  "title": {
+    "ja": "購買部: 昼の戦場"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "cafeteria"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "購買部は今日も戦場だった。焼きそばパンを求める男子の群れが、雪崩のように押し寄せる。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（……今日はおにぎりで我慢しよう）"
+    }
+  ]
+}

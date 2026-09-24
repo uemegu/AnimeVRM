@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { GameState, ActionLocationId, DayPhase } from './types/game';
-import { ScenarioIndexEntry, ScenarioPackage } from './types/scenario';
+import { ScenarioIndexEntry, ScenarioPackage, resolveLocalizedText } from './types/scenario';
 import { CommunicationResult } from './types/communication';
 import { ScheduleManager } from './services/schedule/ScheduleManager';
 import { SaveService } from './services/save/SaveService';
@@ -8,7 +8,13 @@ import { scenarioRepository } from './services/scenario/ScenarioRepository';
 import { soundManager } from './services/audio/SoundManager';
 import { AssetPreloader } from './services/loader/AssetPreloader';
 import { ShareService } from './services/share/ShareService';
-import { resolveActiveCharacter, resolveLocationId, resolveTimeOfDay } from './services/stage/sceneView';
+import {
+  resolveCameraShot,
+  resolveCast,
+  resolveLocationId,
+  resolveScrollingBackground,
+  resolveTimeOfDay,
+} from './services/stage/sceneView';
 import { getLocationName } from './data/locations';
 import { useLanguage } from './contexts/LanguageContext';
 import { useScenarioPlayer, ScenarioProgress } from './hooks/useScenarioPlayer';
@@ -115,8 +121,9 @@ export const App: React.FC = () => {
   // 行動場所選択モーダル表示フラグ
   const [isSelectingLocation, setIsSelectingLocation] = useState(() => initialPhaseParam === 'holiday');
   const [selectedLocationId, setSelectedLocationId] = useState<ActionLocationId | null>(null);
-  // 28日目完走エンディングフラグ
+  // エンディング画面の表示フラグと、到達したエンディングのタイトル
   const [isGameEnded, setIsGameEnded] = useState(false);
+  const [endingTitle, setEndingTitle] = useState<string | null>(null);
 
   // シェア中フラグおよびトーストメッセージ
   const [isSharing, setIsSharing] = useState(false);
@@ -177,18 +184,18 @@ export const App: React.FC = () => {
   const { currentScene, isFinished, isWaitingChoice } = player;
 
   // 何を映すか（時間帯・場所・キャラ）
-  const activeTimeOfDay = resolveTimeOfDay(gameState.phase, currentScene);
+  const { stage } = player;
+  const activeTimeOfDay = resolveTimeOfDay(gameState.phase, stage);
   const activeLocationId = resolveLocationId({
     phase: gameState.phase,
-    scene: currentScene,
+    stage,
     scenario: player.scenario,
     selectedLocationId,
   });
   const activeLocationName = getLocationName(activeLocationId, lang);
-  const activeCharacter = useMemo(
-    () => resolveActiveCharacter(currentScene, gameState.phase),
-    [currentScene, gameState.phase]
-  );
+  const cast = useMemo(() => resolveCast(stage, currentScene, gameState.phase), [stage, currentScene, gameState.phase]);
+  const cameraShot = resolveCameraShot(currentScene, cast);
+  const scrolling = useMemo(() => resolveScrollingBackground(stage, activeLocationId), [stage, activeLocationId]);
 
   // タイトル画面・進行フェーズ・シーンに応じたBGM（シーン個別指定があればそれを優先）
   useEffect(() => {
@@ -197,10 +204,14 @@ export const App: React.FC = () => {
       soundManager.playBgm('main_theme');
       return;
     }
-    const sceneBgm = currentScene?.bgm || currentScene?.bgmUrl;
     const phaseBgm = gameState.phase === 'night' && !isGameEnded ? 'night_room' : 'main_bgm';
-    soundManager.playBgm(sceneBgm || phaseBgm);
-  }, [isInitialLoading, isTitleScreen, gameState.phase, isGameEnded, currentScene?.id, currentScene?.bgm, currentScene?.bgmUrl]);
+    const bgm = stage.bgm ?? phaseBgm;
+    if (bgm === 'silence') {
+      soundManager.stopBgm();
+    } else {
+      soundManager.playBgm(bgm);
+    }
+  }, [isInitialLoading, isTitleScreen, gameState.phase, isGameEnded, currentScene?.id, stage.bgm]);
 
   // 会話履歴（直近3セッション）の自動記録
   const historyKey = {
@@ -242,7 +253,8 @@ export const App: React.FC = () => {
   /** シナリオ本文を読み込み、舞台の背景・ボイスを事前読み込みする */
   const loadScenario = useCallback(async (entry: ScenarioIndexEntry, locationId?: string) => {
     const scenario = await scenarioRepository.load(entry.id);
-    await AssetPreloader.preloadSceneAssets(locationId ?? entry.location, scenario);
+    const phase = entry.category === 'holiday' ? 'holiday_action' : entry.category === 'morning' ? 'morning' : undefined;
+    await AssetPreloader.preloadSceneAssets(locationId ?? entry.location, scenario, { phase });
     return scenario;
   }, []);
 
@@ -289,13 +301,28 @@ export const App: React.FC = () => {
   // シナリオ終了後: 朝 → 午前行動、行動シナリオ → 次のフェーズ（強制イベント後は同じフェーズの場所選択へ）
   const handleScenarioFinished = useCallback(
     async (scenario: ScenarioPackage, state: GameState) => {
+      // エンディングを見終えたらエンディング画面へ
+      if (scenarioRepository.get(scenario.id)?.category === 'ending') {
+        stopPlayer();
+        setEndingTitle(resolveLocalizedText(scenario.title, lang));
+        setIsGameEnded(true);
+        return;
+      }
+      // 決着のシナリオでエンディングの条件がそろったら、そのエンディングを再生する
+      const ending = ScheduleManager.getEndingScenario(state);
+      if (ending) {
+        startScenario(await loadScenario(ending), state);
+        return;
+      }
+
       if (state.phase === 'morning') {
         await proceedToActionPhase('morning_action', state);
         return;
       }
       if (!ACTION_PHASES.includes(state.phase)) return;
 
-      if (scenarioRepository.get(scenario.id)?.category === 'forced') {
+      const entry = scenarioRepository.get(scenario.id);
+      if (entry?.category === 'forced' && !entry.consumesTurn) {
         stopPlayer();
         setIsSelectingLocation(true);
         return;
@@ -310,7 +337,7 @@ export const App: React.FC = () => {
         await proceedToActionPhase(nextPhase, state);
       }
     },
-    [proceedToActionPhase, stopPlayer]
+    [proceedToActionPhase, stopPlayer, startScenario, loadScenario, lang]
   );
   handleScenarioFinishedRef.current = handleScenarioFinished;
 
@@ -508,7 +535,7 @@ export const App: React.FC = () => {
     playInterlude(async () => {
       const { nextState, isEnding } = ScheduleManager.advanceToNextDay(gameStateRef.current);
       if (isEnding) {
-        // TODO: エンディング仕様確定後に実装
+        setEndingTitle(null);
         setIsGameEnded(true);
         stopPlayer();
         return;
@@ -584,7 +611,7 @@ export const App: React.FC = () => {
           onOpenLicense={() => setIsLicenseModalOpen(true)}
         />
       ) : isGameEnded ? (
-        <EndingPage affinities={gameState.affinities} onRestart={handleReturnToTitle} />
+        <EndingPage affinities={gameState.affinities} endingTitle={endingTitle} onRestart={handleReturnToTitle} />
       ) : (
         <>
           {/* 上部ヘッダー */}
@@ -626,11 +653,12 @@ export const App: React.FC = () => {
               isWaitingChoice={isWaitingChoice}
               activeTimeOfDay={activeTimeOfDay}
               activeLocationId={activeLocationId}
-              activeCharId={activeCharacter.charId}
-              activeModelUrl={activeCharacter.modelUrl}
-              activeExpression={activeCharacter.expression}
+              cast={cast}
+              cameraShot={cameraShot}
+              scrolling={scrolling}
               onDialogueClick={player.advance}
               onChoiceClick={handleChoiceClick}
+              onChoiceTimeout={player.timeoutChoice}
               onTypingComplete={player.handleTypingComplete}
             />
           )}

@@ -11,55 +11,66 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     expect(state.dayStartSnapshot?.flags).toEqual({});
   });
 
-  it('朝シナリオが日付に応じて適切に取得できること', () => {
-    const day1State = ScheduleManager.createInitialState();
-    const scenario1 = ScheduleManager.getMorningScenario(day1State);
-    expect(scenario1.id).toBe('morning_day_1');
+  const at = (overrides: Partial<GameState>): GameState => ({ ...ScheduleManager.createInitialState(), ...overrides });
 
-    const day2State: GameState = { ...day1State, day: 2 };
-    const scenario2 = ScheduleManager.getMorningScenario(day2State);
-    expect(scenario2.id).toBe('morning_default');
+  it('朝シナリオが日付に応じて選ばれること（1日目はプロローグ、特別な日がなければ通常の登校）', () => {
+    expect(ScheduleManager.getMorningScenario(at({ day: 1 })).id).toBe('prologue_day1');
+    expect(ScheduleManager.getMorningScenario(at({ day: 2 })).id).toBe('morning_d2_door');
+    expect(ScheduleManager.getMorningScenario(at({ day: 15 })).id).toBe('morning_d15_dream');
+    expect(ScheduleManager.getMorningScenario(at({ day: 11 })).id).toBe('morning_default');
   });
 
-  it('各行動場所の事前情報（ヒント・滞在キャラ）が生成されること', () => {
-    const state = ScheduleManager.createInitialState();
-    const options = ScheduleManager.getActionLocationOptions(state);
-
-    expect(options.length).toBeGreaterThan(0);
-    const libraryOpt = options.find((opt) => opt.id === 'library');
-    expect(libraryOpt).toBeDefined();
-    expect(libraryOpt?.hintCharacterIds).toContain('shion');
-    expect(libraryOpt?.hintText?.ja).toContain('シオン');
+  it('各行動場所に、そこにいるキャラのヒントが出ること', () => {
+    const options = ScheduleManager.getActionLocationOptions(at({ day: 1, phase: 'afterschool_action' }));
+    const library = options.find((opt) => opt.id === 'library');
+    expect(library?.hintCharacterIds).toContain('shion');
+    expect(library?.hintText?.ja).toContain('シオン');
   });
 
-  it('未遭遇キャラ救済（強制割り込みイベント）が正しく判定されること', () => {
-    // Day 1: 強制イベントなし
-    const day1State = ScheduleManager.createInitialState();
-    expect(ScheduleManager.checkForcedInterruption(day1State)).toBeNull();
-
-    // Day 2 morning_action でシオン未遭遇: 強制遭遇イベント発生
-    const day2State: GameState = {
-      ...day1State,
-      day: 2,
-      phase: 'morning_action',
-      flags: {},
-    };
-    const forced = ScheduleManager.checkForcedInterruption(day2State);
-    expect(forced).not.toBeNull();
-    expect(forced?.id).toBe('forced_meet_shion');
-
-    // 既に会っている場合は発生しない
-    const metState: GameState = {
-      ...day2State,
-      flags: { met_shion: true },
-    };
-    expect(ScheduleManager.checkForcedInterruption(metState)).toBeNull();
+  it('物語の節目では強制イベントが割り込むこと', () => {
+    expect(ScheduleManager.checkForcedInterruption(at({ day: 1, phase: 'morning_action' }))?.id).toBe('homeroom_day1');
+    expect(ScheduleManager.checkForcedInterruption(at({ day: 2, phase: 'morning_action' }))).toBeNull();
+    expect(ScheduleManager.checkForcedInterruption(at({ day: 9, phase: 'lunch_action' }))?.id).toBe('blazer_swap');
+    // 黒服の襲撃はブレザー交換が済んでいることが前提
+    expect(ScheduleManager.checkForcedInterruption(at({ day: 11, phase: 'afterschool_action' }))).toBeNull();
+    expect(
+      ScheduleManager.checkForcedInterruption(at({ day: 11, phase: 'afterschool_action', flags: { blazer_swapped: true } }))?.id
+    ).toBe('black_suits');
   });
 
-  it('場所に応じたシナリオが返されること', () => {
-    const state = ScheduleManager.createInitialState();
-    const scenario = ScheduleManager.getScenarioForLocation('library', state);
-    expect(scenario.id).toBe('action_library_shion');
+  it('アオイのイベントは、前のイベントで正解を選んだ時だけ続くこと（好感度だけでは進まない）', () => {
+    const lunch = { day: 2, phase: 'lunch_action' as const };
+    expect(ScheduleManager.getScenarioForLocation('library', at({ ...lunch, affinities: { aoi: 99 } })).id).not.toBe('aoi_t2_library');
+    expect(ScheduleManager.getScenarioForLocation('library', at({ ...lunch, flags: { aoi_t1_textbook: true } })).id).toBe('aoi_t2_library');
+  });
+
+  it('一度見たイベントは繰り返さず、その場所の日常になること', () => {
+    const state = at({ day: 1, phase: 'afterschool_action' });
+    expect(ScheduleManager.getScenarioForLocation('classroom', state).id).toBe('aoi_t1_textbook');
+    const seen = at({ day: 1, phase: 'afterschool_action', flags: { seen_aoi_t1_textbook: true } });
+    expect(ScheduleManager.getScenarioForLocation('classroom', seen).id).toBe('daily_classroom');
+  });
+
+  describe('エンディング', () => {
+    const final = (flags: Record<string, boolean>, aoi: number) => at({ day: 21, phase: 'holiday_action', flags, affinities: { aoi } });
+    const TRUE_ROUTE = { aoi_t10_promise: true, confessed: true, confession_sincere: true };
+
+    it('約束と本気の告白に加え、好感度が足りていれば TRUE END になること', () => {
+      expect(ScheduleManager.getEndingScenario(final(TRUE_ROUTE, 30))?.id).toBe('ending_true');
+    });
+
+    it('好感度が高くても、約束のフラグがなければ TRUE END にはならないこと', () => {
+      expect(ScheduleManager.getEndingScenario(final({ confessed: true, confession_sincere: true }, 99))?.id).toBe('ending_good');
+    });
+
+    it('フラグがそろっていても、好感度が足りなければ TRUE END にはならないこと', () => {
+      expect(ScheduleManager.getEndingScenario(final(TRUE_ROUTE, 10))?.id).toBe('ending_good');
+    });
+
+    it('告白に失敗したら BAD END、決着前はエンディングにならないこと', () => {
+      expect(ScheduleManager.getEndingScenario(final({ confession_failed: true }, 30))?.id).toBe('ending_bad');
+      expect(ScheduleManager.getEndingScenario(final({}, 30))).toBeNull();
+    });
   });
 
   it('フェーズが正しく順番に遷移すること', () => {
@@ -91,9 +102,9 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     expect(rolledBack.affinities).toEqual({ aoi: 5 });
   });
 
-  it('就寝で翌日へ進み、Day 28を超えるとエンディング判定になること', () => {
+  it('就寝で翌日へ進み、最終日（Day 21）を超えるとエンディング判定になること', () => {
     const state: GameState = {
-      day: 27,
+      day: 20,
       phase: 'night',
       flags: {},
       affinities: {},
@@ -101,14 +112,14 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
       dayStartSnapshot: null,
     };
 
-    // Day 27 -> Day 28
+    // Day 20 -> Day 21
     const { nextState, isEnding } = ScheduleManager.advanceToNextDay(state);
     expect(isEnding).toBe(false);
-    expect(nextState.day).toBe(28);
-    // Day 28 は日曜なので休日の行動から始まる
+    expect(nextState.day).toBe(21);
+    // Day 21 は日曜なので休日の行動から始まる
     expect(nextState.phase).toBe('holiday_action');
 
-    // Day 28 -> 就寝でエンディング
+    // Day 21 -> 就寝でエンディング
     const { isEnding: finalEnding } = ScheduleManager.advanceToNextDay(nextState);
     expect(finalEnding).toBe(true);
   });
@@ -143,27 +154,28 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
       expect(rolledBack.phase).toBe('holiday_action');
     });
 
-    it('初期の行き先は公園・商店街・映画館・自宅で、フラグで遊園地・水族館が増えること', () => {
+    it('初期の行き先は公園・商店街・映画館・自宅・神社で、フラグで遊園地・水族館・アオイの家が増えること', () => {
       const ids = ScheduleManager.getActionLocationOptions(holidayState()).map((opt) => opt.id);
-      expect(ids).toEqual(['park', 'shopping_street', 'cinema', 'home']);
+      expect(ids).toEqual(['park', 'shopping_street', 'cinema', 'home', 'shrine']);
 
       const unlocked = ScheduleManager.getActionLocationOptions(
-        holidayState({ flags: { unlock_amusement_park: true, unlock_aquarium: true } })
+        holidayState({ flags: { unlock_amusement_park: true, unlock_aquarium: true, invited_aoi_house: true } })
       ).map((opt) => opt.id);
-      expect(unlocked).toEqual(['park', 'shopping_street', 'cinema', 'home', 'amusement_park', 'aquarium']);
+      expect(unlocked).toEqual(['park', 'shopping_street', 'cinema', 'home', 'amusement_park', 'aquarium', 'shrine', 'aoi_house']);
     });
 
-    it('休日の行き先ごとにシナリオが決まり、自宅は休日の汎用シナリオになること', () => {
-      const state = holidayState();
-      expect(ScheduleManager.getScenarioForLocation('park', state).id).toBe('holiday_park_aoi');
-      expect(ScheduleManager.getScenarioForLocation('shopping_street', state).id).toBe('holiday_shopping_emili');
-      expect(ScheduleManager.getScenarioForLocation('cinema', state).id).toBe('holiday_cinema_shion');
-      expect(ScheduleManager.getScenarioForLocation('home', state).id).toBe('holiday_generic');
-      expect(ScheduleManager.getScenarioForLocation('aquarium', state).id).toBe('holiday_aquarium_aoi');
+    it('休日の行き先ごとにシナリオが決まり、何もなければその場所の日常になること', () => {
+      expect(ScheduleManager.getScenarioForLocation('park', holidayState()).id).toBe('daily_park');
+      expect(ScheduleManager.getScenarioForLocation('park', holidayState({ flags: { aoi_t3_danish: true } })).id).toBe('aoi_t4_hoodie');
+      expect(ScheduleManager.getScenarioForLocation('shopping_street', holidayState()).id).toBe('emili_lottery');
+      expect(ScheduleManager.getScenarioForLocation('cinema', holidayState()).id).toBe('shion_cinema');
+      expect(ScheduleManager.getScenarioForLocation('home', holidayState()).id).toBe('daily_home');
     });
 
-    it('休日には未遭遇キャラの強制イベントが割り込まないこと', () => {
+    it('休日には強制イベントが割り込まず、最終日だけ決着のイベントになること', () => {
       expect(ScheduleManager.checkForcedInterruption(holidayState({ day: 13 }))).toBeNull();
+      expect(ScheduleManager.checkForcedInterruption(holidayState({ day: 21 }))?.id).toBe('finale_default');
+      expect(ScheduleManager.checkForcedInterruption(holidayState({ day: 21, flags: { aoi_t10_promise: true } }))?.id).toBe('finale_promised');
     });
   });
 
@@ -177,22 +189,27 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const summary = (state: GameState) =>
       ScheduleManager.getNightCommunications(state).map((c) => `${c.characterId}:${c.id}${c.done ? '(done)' : ''}`);
 
-    it('条件を満たすものが1人1件ずつ、優先度の高いものから届くこと', () => {
-      expect(summary(night(1))).toEqual(['aoi:aoi_day1_call', 'emili:emili_day1_mail', 'shion:shion_day1_mail']);
+    it('条件を満たすものが1人1件ずつ届くこと', () => {
+      expect(summary(night(1))).toEqual(['aoi:aoi_mail_d1', 'emili:emili_mail_d1']);
+    });
+
+    it('条件のフラグがそろうと、優先度の高いものが届くこと', () => {
+      const state = { ...night(20), flags: { aoi_t9_corridor: true } };
+      expect(summary(state)[0]).toBe('aoi:aoi_call_d20');
     });
 
     it('今夜応答したら、同じ人からは他の電話・メールが届かないこと', () => {
-      const state = night(1, [{ scenarioId: 'aoi_day1_call', day: 1, type: 'completed' }]);
-      expect(summary(state)[0]).toBe('aoi:aoi_day1_call(done)');
+      const state = { ...night(20, [{ scenarioId: 'aoi_call_d20', day: 20, type: 'completed' as const }]), flags: { aoi_t9_corridor: true } };
+      expect(summary(state)[0]).toBe('aoi:aoi_call_d20(done)');
     });
 
-    it('前の夜に終えたものは届かず、次の候補が届くこと', () => {
-      const state = night(2, [{ scenarioId: 'aoi_day1_call', day: 1, type: 'completed' }]);
-      expect(summary(state)[0]).toBe('aoi:aoi_day1_mail');
+    it('前の夜に終えたものは届かないこと', () => {
+      const state = night(2, [{ scenarioId: 'emili_mail_d1', day: 1, type: 'completed' as const }]);
+      expect(summary(state).some((line) => line.startsWith('emili:'))).toBe(false);
     });
 
     it('期間外のものは届かないこと', () => {
-      expect(summary(night(4))).toEqual([]);
+      expect(summary(night(21))).toEqual([]);
     });
   });
 });

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T16:00:44.996Z",
+  "generatedAt": "2026-09-24T22:56:20.079Z",
   "assets": [
     {
       "category": "bgm",
@@ -9,8 +9,8 @@
       },
       "provider": "Lyria3.5",
       "description": {
-        "ja": "メインテーマ、日常・会話BGM、夜の自室BGM、バッドエンドBGM",
-        "en": "Main theme, daily conversations, night room, and bad ending music"
+        "ja": "メインテーマ、日常・会話BGM、夜の自室BGM、恋愛シーン、神秘的なシーン、追跡劇、バッドエンドBGM",
+        "en": "Main theme, daily life, night room, romance, mystic, chase, and bad ending music"
       },
       "licenseNote": {
         "ja": "Lyria3.5 AI生成音楽モデルにより制作",
@@ -42,8 +42,8 @@
       },
       "provider": "Irodori-TTS",
       "description": {
-        "ja": "各登場ヒロイン（アオイ・シオン・エミリ）の会話音声・リップシンク連動",
-        "en": "Dialogue voice acting and lip-sync for all heroines (Aoi, Shion, Emili)"
+        "ja": "アオイ・エミリ・シオン・女神・白石先生・ナルセ・クラスメイト・SP部隊などの会話音声（新規キャラクターはボイスデザインで作成）とリップシンク連動",
+        "en": "Dialogue voices for all characters (new characters created with voice design) and lip-sync"
       },
       "licenseNote": {
         "ja": "Irodori-TTS 日本語音声合成・ボイスデザイン技術により生成",
@@ -58,12 +58,28 @@
       },
       "provider": "ChatGPT Images 2.5",
       "description": {
-        "ja": "通学路、学校（校門・屋上・図書室・中庭・体育館）、カフェ、公園、自室等の背景画像",
-        "en": "School routes, school areas, cafe, park, and player room background art"
+        "ja": "通学路、学校（校門・教室・屋上・図書室・中庭・体育館・職員室）、神社、商店街、映画館、遊園地、水族館、自室・アオイの部屋、病室等の背景画像",
+        "en": "Backgrounds for school, shrine, town, cinema, amusement park, aquarium, rooms, and hospital"
       },
       "licenseNote": {
         "ja": "ChatGPT Images 2.5 により生成されたイラスト背景",
         "en": "Illustrated backgrounds generated with ChatGPT Images 2.5"
+      }
+    },
+    {
+      "category": "motion",
+      "name": {
+        "ja": "キャラクターモーション",
+        "en": "Character Motions"
+      },
+      "provider": "Mixamo / ardy-mini",
+      "description": {
+        "ja": "待機・歩行・お辞儀などの基本動作（Mixamo）と、祈る・照れる・手を振る等の演技モーション（ardy-mini による生成）",
+        "en": "Basic motions from Mixamo and acting motions generated with ardy-mini"
+      },
+      "licenseNote": {
+        "ja": "Mixamo 利用規約に準拠、ardy-mini により生成",
+        "en": "Mixamo terms of use; generated with ardy-mini"
       }
     }
   ],

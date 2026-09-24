@@ -1,0 +1,64 @@
+{
+  "id": "shion_mail_d12",
+  "characterId": "shion",
+  "title": "シオンからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 12,
+      "to": 13
+    },
+    "requireFlags": [
+      "black_suits_done"
+    ]
+  },
+  "previewText": {
+    "ja": "キャットウォークから"
+  },
+  "time": "23:10",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "体育館、キャットウォークから全部見てた。"
+      },
+      "time": "23:09"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "……叫んでた内容は最低だったけど。動きは、悪くなかった。"
+      },
+      "time": "23:10"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "最低は余計だ"
+      },
+      "reactionText": {
+        "ja": "事実よ。……でも、嫌いじゃない。"
+      },
+      "reactionTime": "23:12",
+      "addAffinity": {
+        "shion": 2
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "見てたなら助けてくれよ"
+      },
+      "reactionText": {
+        "ja": "観察者は手を出さない主義なの。"
+      },
+      "reactionTime": "23:12",
+      "addAffinity": {
+        "shion": 1
+      }
+    }
+  ]
+}

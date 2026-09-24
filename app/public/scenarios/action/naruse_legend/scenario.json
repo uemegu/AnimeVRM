@@ -1,0 +1,113 @@
+{
+  "id": "naruse_legend",
+  "title": {
+    "ja": "教室: 伝説の男"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "dayRange": {
+      "from": 12,
+      "to": 12
+    },
+    "locations": [
+      "classroom"
+    ],
+    "requireFlags": [
+      "black_suits_done"
+    ],
+    "unlessFlags": [
+      "seen_naruse_legend"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintText": {
+        "ja": "教室が妙にざわついている。"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "タカシぃぃぃ！ お前、昨日すごかったらしいな！ 学校中の噂だぞ！",
+      "setFlags": {
+        "seen_naruse_legend": true
+      },
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        }
+      },
+      "voiceUrl": "v_s1_fc45451b.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "「黒服をマットに沈めた変態紳士」ってな！",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "voiceUrl": "v_s2_6b5bacfa.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "変態紳士は余計だろ！"
+    },
+    {
+      "id": "s4",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "いや、目撃者の証言によれば、お前は叫んでいたそうだ。「靴下の境界線も！ 膝裏の聖域も！」と。",
+      "avatars": {
+        "naruse": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s4_6ba480e3.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "（……全部聞かれてた）"
+    },
+    {
+      "id": "s6",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "だがな、タカシ。恋愛マスターとして言わせてもらう。",
+      "camera": "close",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s6_7a7c6f16.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "あんなに本気で誰かを守ろうとするやつを、女子は放っておかない。……よくやった、親友。",
+      "avatars": {
+        "naruse": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s7_f206d6ca.mp3"
+    }
+  ]
+}

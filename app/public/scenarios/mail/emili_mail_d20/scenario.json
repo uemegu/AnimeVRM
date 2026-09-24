@@ -1,0 +1,48 @@
+{
+  "id": "emili_mail_d20",
+  "characterId": "emili",
+  "title": "エミリからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 19,
+      "to": 20
+    }
+  },
+  "previewText": {
+    "ja": "明日、がんばって！"
+  },
+  "time": "22:30",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "タカシくん！ 明日なんでしょ？ シオンちゃんから聞いた！"
+      },
+      "time": "22:29"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "何があるのかよくわかんないけど、とにかくファイト！！"
+      },
+      "time": "22:30"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "ありがとう。行ってくる"
+      },
+      "reactionText": {
+        "ja": "いってらっしゃい！ 結果報告、待ってるから！"
+      },
+      "reactionTime": "22:32",
+      "addAffinity": {
+        "emili": 1
+      }
+    }
+  ]
+}

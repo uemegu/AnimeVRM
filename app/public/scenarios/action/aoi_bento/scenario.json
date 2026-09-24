@@ -1,0 +1,133 @@
+{
+  "id": "aoi_bento",
+  "title": {
+    "ja": "中庭: 手作りのお弁当"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 8,
+      "to": 10
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "unlessFlags": [
+      "seen_aoi_bento"
+    ]
+  },
+  "bgm": "love",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintText": {
+        "ja": "中庭のベンチで、アオイがお弁当を広げている。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん。……あのね、お弁当、作りすぎちゃって。よかったら、一緒に食べない？",
+      "setFlags": {
+        "seen_aoi_bento": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s1_c4f98d67.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "二段のお弁当箱。一段目は、見事なまでに俺の好物で埋め尽くされていた。"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（作りすぎたにしては、俺の好きなものしか入ってないんだが……）"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "はい、卵焼き。甘いやつ、好きだったよね？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s4_c4e37b03.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「覚えててくれたんだ」と素直に喜ぶ",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「アオイの手作りが食べられるなんて、今日が命日でもいい」",
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "うん。……タカシくんのことなら、だいたい覚えてるよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_a_47e6fdbf.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "め、命日！？ ダメだよ、長生きしてくれなきゃ！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_b_b0d63b2a.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "（……割とシャレにならないんだよな、それが）"
+    },
+    {
+      "id": "end",
+      "text": "甘い卵焼きは、昔と同じ味がした。"
+    }
+  ]
+}

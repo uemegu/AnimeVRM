@@ -1,0 +1,105 @@
+{
+  "id": "morning_d15_dream",
+  "title": {
+    "ja": "朝: 女神の夢枕"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 15,
+      "to": 15
+    }
+  },
+  "priority": 10,
+  "location": "school_gate",
+  "bgm": "mysterious",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "……夢を見ていた。純白の光の中に、あの女神が浮かんでいる。",
+      "background": "god_realm",
+      "timeOfDay": "divine",
+      "avatars": {
+        "god": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "ごきげんよう、人の子。期限まで、あと7日です。",
+      "voiceUrl": "v_s2_90a5b501.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "先日の体育館。神界のモニターで、全部見ていましたよ。",
+      "avatars": {
+        "god": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_5a549720.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "勘違いだと知った時の、あなたの間抜け面……神々の間で大爆笑でした。",
+      "avatars": {
+        "god": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "voiceUrl": "v_s4_dbf4b335.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "見世物にするなよ！"
+    },
+    {
+      "id": "s6",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "でも、少しだけ見直しました。……意外と、やるじゃないですか。",
+      "avatars": {
+        "god": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s6_fa1b82ec.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "残り7日。積み上げたものを、無駄にしないことです。",
+      "camera": "close",
+      "avatars": {
+        "god": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s7_29600772.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "目覚まし時計の音で飛び起きた。枕元には、また紙切れが一枚。「あと7日」。",
+      "flashEffect": "white",
+      "background": "myroom",
+      "timeOfDay": "morning",
+      "bgm": "main_bgm",
+      "clearCast": true
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "（……わかってるよ。もう、逃げない）"
+    }
+  ]
+}

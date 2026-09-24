@@ -2,7 +2,14 @@
  * BGMプリセット定義およびマスターデータ
  */
 
-export type BgmId = 'main_theme' | 'main_bgm' | 'night_room' | 'bad_ending';
+export type BgmId =
+  | 'main_theme'
+  | 'main_bgm'
+  | 'night_room'
+  | 'bad_ending'
+  | 'love'
+  | 'mysterious'
+  | 'action';
 
 export interface BgmPreset {
   /** BGM識別ID */
@@ -40,6 +47,24 @@ export const BGM_PRESETS: Record<BgmId, BgmPreset> = {
     url: '/bgm/bad_music.mp3',
     defaultVolumeScale: 0.8,
     title: { ja: '陰りゆく日々', en: 'Shadowed Days' },
+  },
+  love: {
+    id: 'love',
+    url: '/bgm/love_bgm.mp3',
+    defaultVolumeScale: 0.9,
+    title: { ja: '胸の鼓動', en: 'Heartbeat' },
+  },
+  mysterious: {
+    id: 'mysterious',
+    url: '/bgm/mysterious.mp3',
+    defaultVolumeScale: 0.9,
+    title: { ja: '神域の気配', en: 'Divine Presence' },
+  },
+  action: {
+    id: 'action',
+    url: '/bgm/locking_beat.mp3',
+    defaultVolumeScale: 0.9,
+    title: { ja: '全力疾走', en: 'Full Sprint' },
   },
 };
 

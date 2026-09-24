@@ -1,0 +1,157 @@
+{
+  "id": "naruse_lecture",
+  "title": {
+    "ja": "中庭: ナルセの恋愛講座"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 5
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "unlessFlags": [
+      "seen_naruse_lecture"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 2,
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintText": {
+        "ja": "ナルセが中庭で手招きしている。"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "来たな、迷える子羊よ。今日は恋愛マスター・ナルセ先生の特別講義だ。",
+      "setFlags": {
+        "seen_naruse_lecture": true
+      },
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "mob_chat_gesture"
+        }
+      },
+      "voiceUrl": "v_s1_3e7540ba.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "第一講。「好きな子の前では、あえてクールに振る舞え」。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_point"
+        }
+      },
+      "voiceUrl": "v_s2_c9587096.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "……クールに。"
+    },
+    {
+      "id": "s4",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "そう。興味ないフリをすることで、相手に「あれ？」と思わせる。押して駄目なら引いてみろだ。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_7897f680.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "（……それ、21日しかない俺がやったら、引いてる間に◯されるんだが）"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「俺には時間がない。押して押して押しまくる」",
+          "goto": "push",
+          "setFlags": {
+            "mindset_push": true
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「なるほど、参考になる」",
+          "goto": "pull"
+        }
+      ]
+    },
+    {
+      "id": "push",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "……ほう。いい目だ。お前、何かに追われてるな？",
+      "avatars": {
+        "naruse": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_push_4a80880d.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "（女神にな）"
+    },
+    {
+      "id": "s9",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "気に入った。恋愛マスターとして全力で応援してやる。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_victory"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s9_adbefee3.mp3"
+    },
+    {
+      "id": "pull",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "そうだろうそうだろう。ちなみに俺はこの作戦で、中学時代に3回フラれている。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_pull_4b3d178f.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "タカシ",
+      "text": "実績ゼロじゃねーか！"
+    },
+    {
+      "id": "end",
+      "text": "中庭に、昼休みの終わりを告げるチャイムが鳴った。"
+    }
+  ]
+}

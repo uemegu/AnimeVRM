@@ -1,0 +1,22 @@
+{
+  "id": "daily_amusement_park",
+  "title": {
+    "ja": "遊園地: 人混み"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "amusement_park"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "遊園地は家族連れで賑わっている。一人で来るところじゃなかった。"
+    }
+  ]
+}

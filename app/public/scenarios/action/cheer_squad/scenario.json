@@ -1,0 +1,203 @@
+{
+  "id": "cheer_squad",
+  "title": {
+    "ja": "中庭: お節介な応援団"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 19,
+      "to": 19
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "unlessFlags": [
+      "seen_cheer_squad"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintText": {
+        "ja": "中庭に、エミリとシオンとナルセが集まっている。"
+      },
+      "hintCharacterIds": [
+        "emili",
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "来た来た！ タカシくん、作戦会議だよ！",
+      "setFlags": {
+        "seen_cheer_squad": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        },
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_proud"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s1_4ec08eae.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "恋愛マスターの俺と、お嬢様と、図書委員。最強の布陣だ。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s2_24d5afff.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……私は巻き込まれただけ。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_349057b9.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "アオイちゃん、最近ずーっとタカシくんのこと目で追ってるもん。もう告白するしかないって！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_49436f4e.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "いいかタカシ。告白に必要なのは、雰囲気、タイミング、そして勢いだ。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_point"
+        }
+      },
+      "voiceUrl": "v_s5_52f891b5.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……それと、短く、まっすぐ。飾った言葉は、時間切れのもと。",
+      "camera": "speaker",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s6_aea97923.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "シオンちゃん、詳しいね！？",
+      "avatars": {
+        "emili": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s7_54cc8bef.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……本で読んだだけ。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s8_1faba6a6.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "よーし、じゃあ最後にみんなで！ タカシくん、ファイトーッ！",
+      "avatars": {
+        "emili": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        },
+        "naruse": {
+          "position": "center",
+          "expression": "happy"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s9_8358d567.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "ファイトーッ！",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_victory"
+        }
+      },
+      "voiceUrl": "v_s10_6dca53d2.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……ふぁいと。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s11_f535a9a7.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "（……こいつら。ありがとな）"
+    }
+  ]
+}

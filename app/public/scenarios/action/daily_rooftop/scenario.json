@@ -1,0 +1,40 @@
+{
+  "id": "daily_rooftop",
+  "title": {
+    "ja": "屋上: 風の通り道"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "rooftop"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "屋上には誰もいなかった。春の風が、フェンスを鳴らして通り過ぎていく。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（空が高い……。女神もこの空のどこかから見てるのか？）"
+    },
+    {
+      "id": "s3",
+      "speaker": "女神の声",
+      "text": "……見てますよ。サボってないで、さっさと行動しなさい。",
+      "voiceUrl": "v_s3_690ae5fd.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "うわっ！？ ……幻聴、だよな……？"
+    }
+  ]
+}

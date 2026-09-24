@@ -1,0 +1,158 @@
+{
+  "id": "shion_cinema",
+  "title": {
+    "ja": "休日の映画館: シオンと原作"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 6,
+      "to": 14
+    },
+    "locations": [
+      "cinema"
+    ],
+    "unlessFlags": [
+      "seen_shion_cinema"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "cinema",
+      "hintText": {
+        "ja": "映画館のロビーに、シオンの姿がある。"
+      },
+      "hintCharacterIds": [
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……あなたも観るの？ この映画。原作、読んだわ。",
+      "setFlags": {
+        "seen_shion_cinema": true
+      },
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s1_8e979690.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "シオンって、恋愛映画も観るんだな。"
+    },
+    {
+      "id": "s3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "原作者が民俗学者なの。神様に期限付きで告白を迫られる話。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_bed622e9.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（……俺の話か？）"
+    },
+    {
+      "id": "s5",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "主人公はね、最後に言葉を飾りすぎて失敗しかけるの。",
+      "camera": "close",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s5_74c73a99.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "神様は、長い言葉より、短くても本気の言葉を好むんだって。……覚えておいて損はないわ。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s6_285e6a17.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「一緒に観ないか」と誘う",
+          "goto": "watch",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「参考になった、ありがとう」と礼を言う",
+          "goto": "thanks",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "watch",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……ポップコーン、キャラメル味なら。",
+      "avatars": {
+        "shion": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_watch_e88e05e2.mp3"
+    },
+    {
+      "id": "s9",
+      "text": "上映中、シオンは一度も泣かなかった。……エンドロールで、こっそり目元を拭っていたけれど。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "thanks",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……別に。独り言よ。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_thanks_2fa13476.mp3"
+    },
+    {
+      "id": "end",
+      "text": "短くても、本気の言葉。シオンの言葉が、なぜか頭から離れなかった。",
+      "setFlags": {
+        "hint_short_words": true
+      }
+    }
+  ]
+}

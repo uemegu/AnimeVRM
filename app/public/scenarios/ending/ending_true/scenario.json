@@ -1,0 +1,183 @@
+{
+  "id": "ending_true",
+  "title": {
+    "ja": "TRUE END: 永遠の聖母と変態ヒーロー"
+  },
+  "availability": {
+    "requireFlags": [
+      "aoi_t10_promise",
+      "confession_sincere"
+    ],
+    "minAffinity": {
+      "aoi": 26
+    }
+  },
+  "priority": 3,
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……嬉しい。私も……私も、タカシくんが大好き！！",
+      "background": "shrine",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_confess_hug"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s1_856d49e5.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ずっと、ずーーっと一緒にいようね。私のヒーロー……！",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s2_75525f5a.mp3"
+    },
+    {
+      "id": "s3",
+      "text": "アオイが胸に飛び込んでくる。しっかりと受け止めて、抱きしめた。"
+    },
+    {
+      "id": "s4",
+      "speaker": "女神の声",
+      "text": "まったく……世話の焼ける。",
+      "voiceUrl": "v_s4_ec80effe.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "女神の声",
+      "text": "21日間、積み上げたものはすべて本物でした。……末永く、お幸せに。",
+      "voiceUrl": "v_s5_a63078b0.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "――そして、春が過ぎ、夏が来た。",
+      "background": "school_gate",
+      "timeOfDay": "morning",
+      "bgm": "main_bgm",
+      "clearCast": true,
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking",
+          "modelUrl": "/models/aoi/aoi-school-with-bag.vrm"
+        }
+      }
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん、おはよ！ はい、今日のお弁当。今日もタカシくんの好きなものだけ。",
+      "voiceUrl": "v_s7_489c0198.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ちょっとアオイちゃん、甘やかしすぎ！ タカシくん、完全にダメ人間になってるじゃん！",
+      "avatars": {
+        "aoi": {
+          "position": "left"
+        },
+        "emili": {
+          "position": "right",
+          "expression": "angry",
+          "motion": "ardy_pout",
+          "modelUrl": "/models/emili/emili-school-with-bag.vrm"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s8_0174c43a.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……ある意味、最強の防犯対策ね。あの男、アオイに近づく不審者がいたら、また跳び箱で翻弄するでしょうし。",
+      "avatars": {
+        "emili": {
+          "visible": false
+        },
+        "shion": {
+          "position": "right",
+          "expression": "relaxed",
+          "modelUrl": "/models/shion/shion-school-with-bag.vrm"
+        }
+      },
+      "voiceUrl": "v_s9_0e56ae38.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……おめでとう。私の分まで、ちゃんと幸せになりなさい。",
+      "avatars": {
+        "shion": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "right",
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s10_cb2f4775.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ねえ、タカシくん。",
+      "avatars": {
+        "teacher": {
+          "visible": false
+        },
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s11_2dc76e9a.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "靴下の境界線も、膝裏も……タカシくんになら、ぜんぶ見せてあげるね。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s12_6c6d8bca.mp3"
+    },
+    {
+      "id": "s13",
+      "speaker": "タカシ",
+      "text": "ぶっっっ！？"
+    },
+    {
+      "id": "s14",
+      "text": "聖母の愛は、変態紳士のすべてを、笑顔で包み込んでいくのだった。"
+    },
+    {
+      "id": "s15",
+      "text": "TRUE END ――永遠の聖母と変態ヒーロー――"
+    }
+  ]
+}

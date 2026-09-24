@@ -1,0 +1,64 @@
+{
+  "id": "aoi_mail_d18",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 18,
+      "to": 19
+    },
+    "requireFlags": [
+      "aoi_t9_corridor"
+    ]
+  },
+  "previewText": {
+    "ja": "……言っちゃった"
+  },
+  "time": "23:20",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "……言っちゃった。"
+      },
+      "time": "23:19"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "明日から、どんな顔してタカシくんに会えばいいんだろう。"
+      },
+      "time": "23:20"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "いつも通りの笑顔でいてほしい"
+      },
+      "reactionText": {
+        "ja": "……うん。がんばる。えへへ。"
+      },
+      "reactionTime": "23:22",
+      "addAffinity": {
+        "aoi": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "俺も同じこと考えてた"
+      },
+      "reactionText": {
+        "ja": "ふふ、おそろいだね。おやすみ。"
+      },
+      "reactionTime": "23:22",
+      "addAffinity": {
+        "aoi": 1
+      }
+    }
+  ]
+}

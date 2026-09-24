@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import preloadManifest from '../../data/preloadManifest.json';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { ScenarioPackage } from '../../types/scenario';
+import { CHARACTERS } from '../../data/characters';
+import { DayPhase } from '../../types/game';
+import { outfitModelUrl } from '../stage/sceneView';
 
 // Three.js のメモリキャッシュを有効化
 THREE.Cache.enabled = true;
@@ -115,13 +118,26 @@ export class AssetPreloader {
   }
 
   /**
-   * 幕間待機中に、次に映す場所の背景とシナリオのボイス・待機モーションを一括ロード
+   * 幕間待機中に、次に映す場所の背景とシナリオのボイス・登場キャラのモデル・モーションを一括ロード
+   * （途中で登場するキャラが遅れて表示されないように）
    */
-  public static async preloadSceneAssets(locationId?: string, scenario?: ScenarioPackage | null): Promise<void> {
+  public static async preloadSceneAssets(
+    locationId?: string,
+    scenario?: ScenarioPackage | null,
+    options: { phase?: DayPhase } = {}
+  ): Promise<void> {
     const layers = locationId ? LOCATION_VISUAL_PRESETS[locationId]?.layers : undefined;
-    const locationUrls = [layers?.background?.url, layers?.midground?.url, layers?.nearground?.url];
-    const voiceUrls = scenario?.scenes.map((scene) => scene.voiceUrl) ?? [];
-    await this.preloadAssets([...locationUrls, ...voiceUrls, '/animations/Standing Idle.fbx']);
+    const urls = [layers?.background?.url, layers?.midground?.url, layers?.nearground?.url, '/animations/Standing Idle.fbx'];
+    for (const scene of scenario?.scenes ?? []) {
+      urls.push(scene.voiceUrl);
+      if (scene.background) urls.push(LOCATION_VISUAL_PRESETS[scene.background]?.layers.background?.url);
+      for (const [id, avatar] of Object.entries(scene.avatars ?? {})) {
+        const character = CHARACTERS[avatar.characterId ?? id];
+        urls.push(avatar.modelUrl ?? outfitModelUrl(character, options.phase ?? 'morning_action'));
+        if (avatar.motion) urls.push(`/animations/${avatar.motion}.fbx`);
+      }
+    }
+    await this.preloadAssets([...new Set(urls)]);
   }
 
   /**

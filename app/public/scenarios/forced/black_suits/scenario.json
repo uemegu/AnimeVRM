@@ -1,0 +1,677 @@
+{
+  "id": "black_suits",
+  "title": {
+    "ja": "放課後: 黒服の襲撃"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 11,
+      "to": 11
+    },
+    "requireFlags": [
+      "blazer_swapped"
+    ]
+  },
+  "priority": 9,
+  "consumesTurn": true,
+  "location": "gate_ambush",
+  "bgm": "silence",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "木曜日の放課後。エミリの金糸エンブレム付きブレザーを着たままのアオイと、校門を出たその時――",
+      "background": "school_gate",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking"
+        }
+      },
+      "setFlags": {
+        "black_suits_done": true
+      }
+    },
+    {
+      "id": "s2",
+      "text": "キキィィィーーーッ！！ 黒塗りのセダンが3台、白煙を上げてロータリーを封鎖した。",
+      "background": "gate_ambush",
+      "bgm": "action",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "surprised",
+          "motion": "ardy_startled"
+        }
+      },
+      "seUrl": "/se/door_rattle.mp3"
+    },
+    {
+      "id": "s3",
+      "text": "ドアが開き、漆黒のスーツにサングラス、インカムを付けた屈強な男たちが十数名、一斉に降りてくる！"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "きゃっ……！？ な、なに……！？",
+      "voiceUrl": "v_s4_ce520c9c.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "黒服リーダー",
+      "text": "ターゲット確認！ 胸元に金糸のエンブレム……間違いない、お嬢様だ！",
+      "voiceUrl": "v_s5_5bb4f772.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "黒服たち",
+      "text": "確保せよ！ 保護ネット、展開用意！",
+      "voiceUrl": "v_s6_99fbe4ba.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えっ！？ お、お嬢様！？ 違います、私はアオイで――",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s7_94d8b1e3.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "黒服リーダー",
+      "text": "問答無用！ お嬢様、旦那様の命により、ご同行願います！",
+      "voiceUrl": "v_s8_8bcb9924.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "（ヤバい……！ テレビで見る国際シンジケートか何かの誘拐部隊だ！！）"
+    },
+    {
+      "id": "s10",
+      "speaker": "タカシ",
+      "text": "（アオイが連れて行かれたら……二度と会えなくなるかもしれない！！）"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タ、タカシくん……っ！",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s11_ccde4cbf.mp3"
+    },
+    {
+      "id": "s12",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "アオイの手を引いて、体育館へ全力疾走する",
+          "goto": "hand",
+          "setFlags": {
+            "escape_hand": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "アオイをお姫様抱っこして逃げる",
+          "goto": "carry",
+          "setFlags": {
+            "escape_carry": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "hand",
+      "speaker": "タカシ",
+      "text": "アオイ、俺の手を掴め！ 逃げるぞおおおおっ！！"
+    },
+    {
+      "id": "s14",
+      "text": "アオイの手を固く握り締め、校舎の脇を駆け抜ける。",
+      "nextSceneId": "gym"
+    },
+    {
+      "id": "carry",
+      "speaker": "タカシ",
+      "text": "アオイ、ちょっとごめん！！"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ひゃあっ！？ タ、タカシくん！？ お、おろして……っ！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s16_ff2a4e9f.mp3"
+    },
+    {
+      "id": "s17",
+      "text": "アオイを抱きかかえたまま、校舎の脇を駆け抜ける。……軽い。そして、柔らかい。いや、今はそれどころじゃない！"
+    },
+    {
+      "id": "gym",
+      "text": "放課後の体育館に飛び込む。背後から、ドタドタと無数の足音が迫る。",
+      "background": "gym",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "sad",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s19",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ハァ……ハァ……っ。タカシくん、私、もう足が……っ。",
+      "voiceUrl": "v_s19_2c800949.mp3"
+    },
+    {
+      "id": "s20",
+      "speaker": "タカシ",
+      "text": "大丈夫だ。俺の後ろに隠れてろ。"
+    },
+    {
+      "id": "s21",
+      "text": "バァァァン！！ 両開きの扉が開き、黒服部隊が雪崩れ込んでくる！",
+      "seUrl": "/se/door_knock.mp3"
+    },
+    {
+      "id": "s22",
+      "speaker": "黒服リーダー",
+      "text": "少年、そこまでだ。大人しくお嬢様を渡してもらおう。",
+      "voiceUrl": "v_s22_83fcb353.mp3"
+    },
+    {
+      "id": "s23",
+      "speaker": "黒服A",
+      "text": "保護ネット、発射！",
+      "voiceUrl": "v_s23_ec50a45d.mp3"
+    },
+    {
+      "id": "s24",
+      "text": "バシュッ！ 特大のネットが宙を舞う。その時――俺の脳内で、何かが弾けた。"
+    },
+    {
+      "id": "s25",
+      "speaker": "タカシ",
+      "text": "（見える……！ アオイの足首の角度、スカートの翻り、ネットの落下軌道……全部がスローモーションに見える……！）"
+    },
+    {
+      "id": "s26",
+      "speaker": "タカシ",
+      "text": "（この2週間、アオイを観察し続けて鍛え上げた、この変態的動体視力が……！）"
+    },
+    {
+      "id": "s27",
+      "text": "アオイを抱えて床をスライディング！ ネットをミリ単位ですり抜け、跳び箱の裏に滑り込む！"
+    },
+    {
+      "id": "s28",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "きゃっ……！ す、すごい……！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s28_f854fc53.mp3"
+    },
+    {
+      "id": "s29",
+      "text": "積み上げられたエバーマットを蹴り倒す。転がしたバスケットボールに足を取られた黒服たちが、次々とフカフカのマットにダイブしていく！"
+    },
+    {
+      "id": "s30",
+      "speaker": "黒服B",
+      "text": "ぐわっ！ マ、マットが柔らかすぎて起き上がれん……！",
+      "voiceUrl": "v_s30_a03605d8.mp3"
+    },
+    {
+      "id": "s31",
+      "speaker": "黒服リーダー",
+      "text": "ええい、ただの高校生がなぜこれほどの身のこなしを……！ 少年、貴様は何者だ！？",
+      "voiceUrl": "v_s31_c5227b7b.mp3"
+    },
+    {
+      "id": "s32",
+      "text": "ふと見上げると、2階のキャットウォークから、シオンが文庫本片手にこちらを見下ろしていた。",
+      "avatars": {
+        "shion": {
+          "position": "right",
+          "expression": "neutral",
+          "motion": "chin_rest"
+        },
+        "aoi": {
+          "position": "left"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s33",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……アクション映画の撮影かしら。怪我人が出ないなら、好きにしなさい。",
+      "voiceUrl": "v_s33_e4ad5599.mp3"
+    },
+    {
+      "id": "s34",
+      "text": "黒服リーダーが、じり、と間合いを詰めてくる。俺はアオイを背中に庇い、立ち上がった。",
+      "avatars": {
+        "shion": {
+          "visible": false
+        },
+        "aoi": {
+          "position": "center",
+          "expression": "sad"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s35",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c2_1",
+          "text": "「アオイの笑顔も、優しい声も……全部、俺が一生守る！！」",
+          "goto": "hero",
+          "setFlags": {
+            "aoi_t6_hero": true,
+            "aoi_rescued": true
+          },
+          "addAffinity": {
+            "aoi": 3
+          },
+          "condition": {
+            "flag": "aoi_t5_uchiwa",
+            "value": true
+          }
+        },
+        {
+          "id": "c2_2",
+          "text": "「アオイに手を出すな！！」",
+          "goto": "brave",
+          "setFlags": {
+            "aoi_rescued": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c2_3",
+          "text": "「す、すみませんでした！！」と土下座する",
+          "goto": "dogeza"
+        }
+      ],
+      "choiceTimeout": {
+        "seconds": 10,
+        "goto": "dogeza"
+      }
+    },
+    {
+      "id": "hero",
+      "speaker": "タカシ",
+      "text": "俺は……アオイの幼馴染だ！！",
+      "camera": "close"
+    },
+    {
+      "id": "s37",
+      "speaker": "タカシ",
+      "text": "アオイの笑顔も！ 優しい声も！ 教科書を覗き込む時の真剣な横顔も！ 汗を拭う時の首筋も！"
+    },
+    {
+      "id": "s38",
+      "speaker": "タカシ",
+      "text": "靴下の境界線も！ 膝裏の聖域も！ 全部、俺が一生守るって決めたんだよおおおおっ！！"
+    },
+    {
+      "id": "s39",
+      "speaker": "タカシ",
+      "text": "お前らなんかに、アオイの髪の毛一本触れさせてたまるかああああっっ！！"
+    },
+    {
+      "id": "s40",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……っ！？ タカシくん……っ！",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s40_cb585104.mp3"
+    },
+    {
+      "id": "s41",
+      "text": "夕暮れの体育館に、魂の絶叫がこだまする。叫んでいる内容は変態紳士の戯言そのもの。"
+    },
+    {
+      "id": "s42",
+      "text": "だが、その熱量と、命を捨ててでも守るという覚悟は――1000%、本物だった。",
+      "nextSceneId": "reveal"
+    },
+    {
+      "id": "brave",
+      "speaker": "タカシ",
+      "text": "アオイに……手を出すなああああっ！！",
+      "camera": "close"
+    },
+    {
+      "id": "s44",
+      "text": "震える足で、それでも一歩も引かずに、俺は黒服たちの前に立ちはだかった。"
+    },
+    {
+      "id": "s45",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん……！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "nextSceneId": "reveal",
+      "voiceUrl": "v_s45_dfb5f555.mp3"
+    },
+    {
+      "id": "dogeza",
+      "text": "俺は、流れるような美しい土下座を決めた。"
+    },
+    {
+      "id": "s47",
+      "speaker": "タカシ",
+      "text": "命だけは！ 命だけはお助けを！！ あとアオイも！！"
+    },
+    {
+      "id": "s48",
+      "speaker": "黒服リーダー",
+      "text": "……いや、君の命は別に取らないが。",
+      "voiceUrl": "v_s48_2a68fde4.mp3"
+    },
+    {
+      "id": "s49",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タ、タカシくん……？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s49_12aaae98.mp3"
+    },
+    {
+      "id": "reveal",
+      "speaker": "エミリの声",
+      "text": "ストーーーーーーーップッッッ！！！！",
+      "bgm": "silence",
+      "voiceUrl": "v_reveal_f709886b.mp3"
+    },
+    {
+      "id": "s51",
+      "text": "体育館の扉から、メガホンを持ったエミリが息を切らして飛び込んできた！",
+      "bgm": "main_bgm",
+      "avatars": {
+        "emili": {
+          "position": "left",
+          "expression": "surprised",
+          "motion": "ardy_declare"
+        },
+        "aoi": {
+          "position": "right",
+          "expression": "surprised"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s52",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "パパのSP部隊！ 全員ストップーーッ！！ それアオイちゃん！ 私じゃないのーーーっ！！",
+      "voiceUrl": "v_s52_50dc61f9.mp3"
+    },
+    {
+      "id": "s53",
+      "speaker": "黒服リーダー",
+      "text": "な……なんですと！？ エミリお嬢様！？",
+      "voiceUrl": "v_s53_0b0d969d.mp3"
+    },
+    {
+      "id": "s54",
+      "speaker": "黒服たち",
+      "text": "ええっ！？ 本物のお嬢様はあちら！？",
+      "voiceUrl": "v_s54_b83ad308.mp3"
+    },
+    {
+      "id": "s55",
+      "speaker": "タカシ",
+      "text": "……へ？ パパの……SP部隊……？"
+    },
+    {
+      "id": "s56",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……へ？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s56_8b8f67d6.mp3"
+    },
+    {
+      "id": "s57",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ごめんアオイちゃん！ ごめんタカシくん！！",
+      "avatars": {
+        "emili": {
+          "expression": "sad",
+          "motion": "ardy_beg",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s57_8587aa52.mp3"
+    },
+    {
+      "id": "s58",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "うちのパパが「お嬢様の抜き打ち防犯訓練」ってSP雇ってて……！ アオイちゃんが私のブレザー着てたから、完全に人違いで……！",
+      "avatars": {
+        "emili": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s58_11c50708.mp3"
+    },
+    {
+      "id": "s59",
+      "speaker": "黒服リーダー",
+      "text": "……大変な無礼をいたしました。しかし少年、怪我はないか。",
+      "voiceUrl": "v_s59_25521315.mp3"
+    },
+    {
+      "id": "s60",
+      "speaker": "黒服リーダー",
+      "text": "マットと跳び箱だけで我々をいなし、身を挺して彼女を守り抜くとは……実に見事だ。感服した！",
+      "voiceUrl": "v_s60_3aeac54f.mp3"
+    },
+    {
+      "id": "s61",
+      "text": "黒服部隊全員が、ビシッと直立不動で俺に敬礼した。もちろん、誰一人、かすり傷ひとつ負っていない。"
+    },
+    {
+      "id": "s62",
+      "speaker": "タカシ",
+      "text": "……なんだよそれええええっ！？ 俺、ガチで犯罪組織かと思って、死ぬ気で走ったんだぞおおおっ！？"
+    },
+    {
+      "id": "s63",
+      "text": "全身の力が抜け、俺はその場にへたり込んだ。その横に、アオイがそっと屈み込む。",
+      "avatars": {
+        "emili": {
+          "visible": false
+        },
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s64",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシくん。",
+      "voiceUrl": "v_s64_3c133db0.mp3"
+    },
+    {
+      "id": "s65",
+      "speaker": "タカシ",
+      "text": "ごめんな、アオイ。俺が勝手に勘違いして、騒ぎ立てて……。"
+    },
+    {
+      "id": "s66",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ううん、違うよ。……私ね、すっごく怖かったの。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s66_ae191e2e.mp3"
+    },
+    {
+      "id": "s67",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "でも、タカシくんが私の前に立ってくれた時……胸がぎゅーって熱くなって、涙が出そうだった。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s67_9a9add08.mp3"
+    },
+    {
+      "id": "s68",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "勘違いでも……タカシくんが私のためにあんなに必死になってくれたこと、絶対に忘れない。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s68_e30f2402.mp3"
+    },
+    {
+      "id": "s69",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……すっごく、かっこよかったよ。私の、本物のヒーローだね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_confess_joy"
+        }
+      },
+      "voiceUrl": "v_s69_a6c554b5.mp3"
+    },
+    {
+      "id": "s70",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……騒々しいわね。でも、あの子の目。完全に恋する乙女の目よ。",
+      "avatars": {
+        "aoi": {
+          "position": "left"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral"
+        },
+        "emili": {
+          "visible": false
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s70_474a8d1b.mp3"
+    },
+    {
+      "id": "s71",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "きゃーっ！ 怪我の功名ってやつ！？ アオイちゃん、完全にフォーリンラブじゃん！",
+      "avatars": {
+        "shion": {
+          "visible": false
+        },
+        "emili": {
+          "position": "right",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        }
+      },
+      "voiceUrl": "v_s71_3748c6f0.mp3"
+    },
+    {
+      "id": "s72",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "も、もう、エミリちゃん……！",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s72_da430714.mp3"
+    },
+    {
+      "id": "s73",
+      "text": "壮大な勘違いから始まったドタバタ劇。けれど、その中で見せた覚悟は、確かにアオイの心に届いていた。"
+    }
+  ]
+}

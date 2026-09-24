@@ -1,14 +1,20 @@
 import React, { useEffect, useRef } from 'react';
 import { StageManager } from '../../services/graphics/StageManager';
 import { TimeOfDayId } from '../../types/visual';
+import { CameraShot } from '../../types/scenario';
+import { StageCastMember } from '../../services/stage/sceneView';
+import { ScrollingBackgroundSettings } from '../../services/graphics/scene/ScrollingBackground';
 
 export interface StageViewProps {
   timeOfDay: TimeOfDayId;
   locationId: string;
-  characterId?: string | null;
-  characterModelUrl?: string;
-  expression?: string;
-  characterPositionX?: number;
+  /** 登場キャラ（位置・モデル・表情・モーション） */
+  cast: StageCastMember[];
+  cameraShot: CameraShot;
+  /** 話者（カメラの寄り先・口パク対象） */
+  speakerId?: string | null;
+  /** 流れる背景（歩きながらの会話）。null なら場所の遠景 */
+  scrolling?: ScrollingBackgroundSettings | null;
   className?: string;
   onLoaded?: () => void;
 }
@@ -16,10 +22,10 @@ export interface StageViewProps {
 export const StageView: React.FC<StageViewProps> = ({
   timeOfDay,
   locationId,
-  characterId,
-  characterModelUrl,
-  expression,
-  characterPositionX = 0,
+  cast,
+  cameraShot,
+  speakerId = null,
+  scrolling = null,
   className = '',
   onLoaded,
 }) => {
@@ -74,23 +80,25 @@ export const StageView: React.FC<StageViewProps> = ({
     }
   }, [locationId]);
 
-  // 4. キャラクター切り替え
+  // 4. 登場キャラの配置（内容が同じなら何もしない）
+  const castKey = JSON.stringify(cast);
   useEffect(() => {
-    if (stageManagerRef.current) {
-      stageManagerRef.current.setActiveCharacter(
-        characterId ?? null,
-        characterModelUrl,
-        characterPositionX
-      );
-    }
-  }, [characterId, characterModelUrl, characterPositionX]);
+    stageManagerRef.current?.setCast(cast);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [castKey]);
 
-  // 5. 表情更新
+  // 流れる背景（設定が同じなら何もしない）
+  const scrollingKey = JSON.stringify(scrolling);
   useEffect(() => {
-    if (stageManagerRef.current && characterId && expression) {
-      stageManagerRef.current.setExpression(characterId, expression, 1.0);
-    }
-  }, [characterId, expression]);
+    stageManagerRef.current?.setScrollingBackground(scrolling);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollingKey]);
+
+  // 5. 話者とカメラ構図
+  useEffect(() => {
+    stageManagerRef.current?.setSpeaker(speakerId);
+    stageManagerRef.current?.setCameraShot(cameraShot, speakerId);
+  }, [speakerId, cameraShot]);
 
   return (
     <div

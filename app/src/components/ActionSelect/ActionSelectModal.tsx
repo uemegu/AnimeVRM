@@ -32,6 +32,8 @@ const HOLIDAY_LOCATION_COORDINATES: Record<string, { left: string; top: string }
   home: { left: '15.00%', top: '46.00%' }, // 住宅街
   park: { left: '49.00%', top: '55.50%' }, // 噴水
   aquarium: { left: '70.50%', top: '75.00%' }, // 海辺のドーム（右下のヒロイン枠と重ならない位置）
+  shrine: { left: '49.00%', top: '6.00%' }, // 丘の上の社
+  aoi_house: { left: '27.00%', top: '52.00%' }, // 住宅街（自宅の近所）
 };
 
 export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({

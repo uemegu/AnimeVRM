@@ -1,0 +1,58 @@
+{
+  "id": "aoi_mail_d1",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 1
+    }
+  },
+  "previewText": {
+    "ja": "今日は神社でびっくりしたね"
+  },
+  "time": "22:10",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "タカシくん、今日はお疲れさま！"
+      },
+      "time": "22:09"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "神社で急に叫んだから、びっくりしたよ〜。ほんとに大丈夫？ 熱とかない？"
+      },
+      "time": "22:10"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "大丈夫。心配してくれてありがとう"
+      },
+      "reactionText": {
+        "ja": "よかった〜。明日も一緒に行こうね！ おやすみ！"
+      },
+      "reactionTime": "22:12",
+      "addAffinity": {
+        "aoi": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "女神に命を狙われてる"
+      },
+      "reactionText": {
+        "ja": "えっ……？ ふふ、タカシくん、昔から冗談うまいよね。おやすみ！"
+      },
+      "reactionTime": "22:12"
+    }
+  ]
+}

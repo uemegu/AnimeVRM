@@ -1,0 +1,48 @@
+{
+  "id": "shion_mail_d20",
+  "characterId": "shion",
+  "title": "シオンからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 20,
+      "to": 20
+    }
+  },
+  "previewText": {
+    "ja": "……明日"
+  },
+  "time": "23:50",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "明日ね。"
+      },
+      "time": "23:49"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "短く、まっすぐ。……それだけ。"
+      },
+      "time": "23:50"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "ありがとう、シオン"
+      },
+      "reactionText": {
+        "ja": "……健闘を祈るわ。観察対象さん。"
+      },
+      "reactionTime": "23:52",
+      "addAffinity": {
+        "shion": 1
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { soundManager } from '../../services/audio/SoundManager';
 import * as THREE from 'three';
 import { resolveLocalizedText } from '../../types/scenario';
 import { CallScenario, CommunicationResult } from '../../types/communication';
@@ -121,6 +122,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     const animate = () => {
       if (isDisposed) return;
       const delta = clock.getDelta();
+      avatar.updateLipSync(soundManager.getVoicePhoneme());
       avatar.update(delta);
       renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(animate);
@@ -147,6 +149,16 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
       avatarRef.current = null;
     };
   }, [scenario.characterId, scenario.modelUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // セリフステップごとのボイス（通話を閉じたら止める）
+  useEffect(() => {
+    if (step?.voiceUrl) {
+      soundManager.playVoice(step.voiceUrl);
+    } else {
+      soundManager.stopVoice();
+    }
+  }, [currentStepId, step?.voiceUrl]);
+  useEffect(() => () => soundManager.stopVoice(), []);
 
   // セリフステップ変更時の表情更新
   useEffect(() => {

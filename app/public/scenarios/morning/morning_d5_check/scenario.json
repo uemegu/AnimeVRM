@@ -1,0 +1,99 @@
+{
+  "id": "morning_d5_check",
+  "title": {
+    "ja": "朝: 校門の服装チェック"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 5,
+      "to": 5
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "校門では、白石先生が腕を組んで服装チェックをしていた。",
+      "background": "school_gate",
+      "timeOfDay": "morning",
+      "avatars": {
+        "teacher": {
+          "position": "right",
+          "expression": "neutral"
+        },
+        "aoi": {
+          "position": "left",
+          "expression": "happy"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "おはよう。……タカシくん、ネクタイが曲がってる。",
+      "voiceUrl": "v_s2_664d1c28.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、ほんとだ。直してあげるね。",
+      "camera": "medium",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_00b52211.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "アオイの指が、俺の喉元でネクタイを結び直す。近い。朝から近すぎる。"
+    },
+    {
+      "id": "s5",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……。",
+      "camera": "speaker",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s5_fdf61b0c.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "校門前でそういうのは、3回で処すから。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s6_de2c781c.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えっ、あ、す、すみません！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s7_d3392f25.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "（今のはノーカンじゃないのか……）"
+    }
+  ]
+}

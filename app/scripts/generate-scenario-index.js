@@ -18,6 +18,7 @@ const META_KEYS = [
   'title',
   'location',
   'fallback',
+  'consumesTurn',
   'availability',
   'priority',
   'actionHints',

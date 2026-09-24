@@ -1,0 +1,135 @@
+{
+  "id": "aoi_study",
+  "title": {
+    "ja": "教室: ふたりきりの勉強会"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 15,
+      "to": 19
+    },
+    "locations": [
+      "classroom"
+    ],
+    "unlessFlags": [
+      "seen_aoi_study"
+    ]
+  },
+  "bgm": "love",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintText": {
+        "ja": "放課後の教室に、アオイが残っている。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん。来週の小テスト、一緒に勉強しない？",
+      "setFlags": {
+        "seen_aoi_study": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s1_53858dc5.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "あの日と同じ、放課後の教室。けれど今は、教科書がなくても、肩が触れる距離に座れる。"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ねえ、覚えてる？ 最初の日、教科書見せてくれたの。",
+      "camera": "medium",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_cd4af404.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あの時から、ずっとドキドキしてたんだよ。……内緒ね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s4_da82db17.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「俺は、再会した瞬間からだよ」",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「……勉強、しようか」と照れ隠しする",
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……ずるい。そういうの、ずるいよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_a_19b14fc9.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ、はーい。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_b_67334a6b.mp3"
+    },
+    {
+      "id": "end",
+      "text": "結局、勉強はほとんど進まなかった。"
+    }
+  ]
+}

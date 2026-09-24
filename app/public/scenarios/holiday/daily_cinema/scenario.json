@@ -1,0 +1,27 @@
+{
+  "id": "daily_cinema",
+  "title": {
+    "ja": "映画館: 一人の休日"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "cinema"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "話題の恋愛映画を一人で観た。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（告白シーン、5秒どころか5分あったな……）"
+    }
+  ]
+}

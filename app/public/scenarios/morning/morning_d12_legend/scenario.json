@@ -1,0 +1,59 @@
+{
+  "id": "morning_d12_legend",
+  "title": {
+    "ja": "朝: 伝説の男"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 12,
+      "to": 12
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "校門をくぐった瞬間、周囲の視線が一斉に俺に突き刺さった。",
+      "background": "school_gate",
+      "timeOfDay": "morning",
+      "avatars": {
+        "yui": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "mob_chat_gesture"
+        },
+        "kana": {
+          "position": "right",
+          "expression": "surprised"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "あ、来た！ 体育館で黒服十人をマットに沈めた男！",
+      "voiceUrl": "v_s2_f5da93e6.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "アオイちゃんをお姫様抱っこして、パルクールしたってホント！？",
+      "avatars": {
+        "kana": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s3_42070c14.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（……噂の足が、また速すぎる）"
+    }
+  ]
+}

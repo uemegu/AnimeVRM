@@ -1,0 +1,96 @@
+{
+  "id": "morning_d16_hand",
+  "title": {
+    "ja": "朝: つないだ手"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 16,
+      "to": 16
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "love",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "おはよ、タカシくん。……ねえ、今日、ちょっと寒くない？",
+      "background": "town",
+      "scrollingBackground": {},
+      "timeOfDay": "morning",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking"
+        }
+      },
+      "voiceUrl": "v_s1_7fedfead.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "そう言いながら、アオイの指先が、俺の手の甲に触れた。"
+    },
+    {
+      "id": "s3",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "その手を、そっと握り返す",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「上着貸そうか？」と聞く",
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……えへへ。あったかい。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_a_ec90154d.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "校門の手前まで、俺たちは手を離さなかった。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ううん、大丈夫。……タカシくんの鈍感。",
+      "avatars": {
+        "aoi": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_b_93f29755.mp3"
+    },
+    {
+      "id": "end",
+      "text": "春の風は、ちっとも寒くなかった。"
+    }
+  ]
+}

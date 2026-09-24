@@ -1,0 +1,263 @@
+{
+  "id": "aoi_t4_hoodie",
+  "title": {
+    "ja": "休日の公園: 二人羽織パーカー"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 6,
+      "to": 7
+    },
+    "locations": [
+      "park"
+    ],
+    "requireFlags": [
+      "aoi_t3_danish"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t4_hoodie"
+    ]
+  },
+  "bgm": "love",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "park",
+      "hintText": {
+        "ja": "公園のベンチに、見覚えのある黄色い髪飾り。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "休日の公園。噴水のそばのベンチに、私服のアオイが座っていた。",
+      "setFlags": {
+        "seen_aoi_t4_hoodie": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん！ 偶然だね。……ううん、ちょっとだけ、会えたらいいなって思ってた。",
+      "voiceUrl": "v_s2_ce1efe17.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（私服……！ 制服の時とはまた違う破壊力が……！）"
+    },
+    {
+      "id": "s4",
+      "text": "二人でベンチに並んで座る。けれど、春の風はまだ少し冷たかった。"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "くしゅんっ。……えへへ、ちょっと薄着で来すぎちゃった。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "sad",
+          "motion": "ardy_shiver"
+        }
+      },
+      "voiceUrl": "v_s5_2cdd128f.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "俺が着ているのは、ぶかぶかのパーカーが一枚だけ。"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "パーカーを脱いで、アオイの肩にかける",
+          "goto": "lend",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "パーカーの前を開けて「一緒に入る？」と聞く",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t4_hoodie": true,
+            "unlock_aquarium": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "「走れば温まるぞ！」と公園を一周走りに誘う",
+          "goto": "run"
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えっ……い、一緒に？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_good_29dbd4ea.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……うん。入る。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s9_aa6a18da.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "一着のパーカーに、二人。いわゆる二人羽織。背中から伝わるアオイの体温が、やけに熱い。"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……あったかい。タカシくん、心臓の音すごいよ？",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s11_f0fca5b6.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "き、気のせいだ。これは寒さによる震えで……"
+    },
+    {
+      "id": "s13",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ。私もだから、おあいこ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s13_27f4b93a.mp3"
+    },
+    {
+      "id": "s14",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ねえ。今度はもっとちゃんと……水族館とか、行きたいな。二人で。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s14_02babf65.mp3"
+    },
+    {
+      "id": "s15",
+      "speaker": "タカシ",
+      "text": "……おう。行こう、絶対。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "lend",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "え、でもタカシくんが寒くなっちゃう……。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_lend_1cfbbeab.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": "タカシ",
+      "text": "俺は平気だ。鍛えてるから。"
+    },
+    {
+      "id": "s18",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ、ありがとう。……あったかい。タカシくんの匂いがする。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s18_1becf74d.mp3"
+    },
+    {
+      "id": "s19",
+      "text": "嬉しそうに袖を握るアオイ。俺は震えを必死に隠しながら、笑顔を作った。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "run",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えぇ〜！？ いきなり！？ ……もう、昔から体育会系なんだから！",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "surprised",
+          "motion": "Jogging"
+        }
+      },
+      "voiceUrl": "v_run_67eaadfc.mp3"
+    },
+    {
+      "id": "s21",
+      "text": "公園を一周走った頃には、二人とも汗だくで笑っていた。……ムードは、どこかへ消えていた。"
+    },
+    {
+      "id": "end",
+      "text": "夕方の公園に、噴水の音がやさしく響いていた。",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      }
+    }
+  ]
+}

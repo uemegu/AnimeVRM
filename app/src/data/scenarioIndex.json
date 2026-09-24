@@ -1,11 +1,180 @@
 [
   {
     "category": "morning",
-    "baseUrl": "/scenarios/morning/morning_day_1/",
-    "id": "morning_day_1",
+    "baseUrl": "/scenarios/morning/morning_d10_shion/",
+    "id": "morning_d10_shion",
     "title": {
-      "ja": "第1日 朝: 新学期の始まり",
-      "en": "Day 1 Morning: Start of the Semester"
+      "ja": "朝: 歩き読書のシオン"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 10,
+        "to": 10
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d12_legend/",
+    "id": "morning_d12_legend",
+    "title": {
+      "ja": "朝: 伝説の男"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 12,
+        "to": 12
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d15_dream/",
+    "id": "morning_d15_dream",
+    "title": {
+      "ja": "朝: 女神の夢枕"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 15,
+        "to": 15
+      }
+    },
+    "priority": 10
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d16_hand/",
+    "id": "morning_d16_hand",
+    "title": {
+      "ja": "朝: つないだ手"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 16,
+        "to": 16
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d19_countdown/",
+    "id": "morning_d19_countdown",
+    "title": {
+      "ja": "朝: 残り2日"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 19,
+        "to": 19
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d2_door/",
+    "id": "morning_d2_door",
+    "title": {
+      "ja": "朝: 玄関の前で"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 2,
+        "to": 2
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d3_naruse/",
+    "id": "morning_d3_naruse",
+    "title": {
+      "ja": "朝: ナルセの作戦会議"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 3,
+        "to": 3
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d4_limo/",
+    "id": "morning_d4_limo",
+    "title": {
+      "ja": "朝: 黒塗りの送迎車"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 4,
+        "to": 4
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d5_check/",
+    "id": "morning_d5_check",
+    "title": {
+      "ja": "朝: 校門の服装チェック"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 5,
+        "to": 5
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_d8_sp/",
+    "id": "morning_d8_sp",
+    "title": {
+      "ja": "朝: サングラスの見張り"
+    },
+    "location": "school_gate",
+    "availability": {
+      "dayRange": {
+        "from": 8,
+        "to": 8
+      }
+    },
+    "priority": 5
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_default/",
+    "id": "morning_default",
+    "title": {
+      "ja": "朝: いつもの通学路"
+    },
+    "location": "school_gate",
+    "fallback": true
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/prologue_day1/",
+    "id": "prologue_day1",
+    "title": {
+      "ja": "プロローグ: 5秒で告白しないと◯す"
     },
     "location": "school_gate",
     "availability": {
@@ -14,199 +183,1131 @@
         "to": 1
       }
     },
-    "priority": 1
-  },
-  {
-    "category": "morning",
-    "baseUrl": "/scenarios/morning/morning_default/",
-    "id": "morning_default",
-    "title": {
-      "ja": "朝の登校",
-      "en": "Morning Walk to School"
-    },
-    "location": "school_gate",
-    "fallback": true,
-    "priority": 0
-  },
-  {
-    "category": "action",
-    "baseUrl": "/scenarios/action/action_classroom_aoi/",
-    "id": "action_classroom_aoi",
-    "title": {
-      "ja": "教室: アオイとノートの貸し借り",
-      "en": "Classroom: Borrowing notes with Aoi"
-    },
-    "actionHints": [
-      {
-        "locationId": "classroom",
-        "hintCharacterIds": [
-          "aoi"
-        ],
-        "hintText": {
-          "ja": "アオイの元気な声が聞こえてくる。",
-          "en": "Aoi can be heard energetically nearby."
-        },
-        "phases": [
-          "morning_action"
-        ]
-      },
-      {
-        "locationId": "sports_ground",
-        "hintCharacterIds": [
-          "aoi"
-        ],
-        "hintText": {
-          "ja": "アオイの元気な声が聞こえてくる。",
-          "en": "Aoi can be heard energetically nearby."
-        }
-      }
-    ]
+    "priority": 10
   },
   {
     "category": "action",
     "baseUrl": "/scenarios/action/action_generic/",
     "id": "action_generic",
     "title": {
-      "ja": "放課後のひと休み",
-      "en": "Afternoon Break"
+      "ja": "何事もない時間"
     },
-    "fallback": true,
+    "fallback": true
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_bento/",
+    "id": "aoi_bento",
+    "title": {
+      "ja": "中庭: 手作りのお弁当"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 8,
+        "to": 10
+      },
+      "locations": [
+        "courtyard"
+      ],
+      "unlessFlags": [
+        "seen_aoi_bento"
+      ]
+    },
+    "priority": 4,
     "actionHints": [
       {
         "locationId": "courtyard",
         "hintText": {
-          "ja": "生徒たちがベンチでくつろいでいる。",
-          "en": "Students are relaxing on the benches."
-        }
-      },
-      {
-        "locationId": "cafeteria",
-        "hintText": {
-          "ja": "美味しそうなパンの香りが漂っている。",
-          "en": "The sweet scent of freshly baked bread fills the air."
-        }
-      }
-    ]
-  },
-  {
-    "category": "action",
-    "baseUrl": "/scenarios/action/action_library_shion/",
-    "id": "action_library_shion",
-    "title": {
-      "ja": "図書室: シオンと静かな時間",
-      "en": "Library: Quiet time with Shion"
-    },
-    "actionHints": [
-      {
-        "locationId": "library",
+          "ja": "中庭のベンチで、アオイがお弁当を広げている。"
+        },
         "hintCharacterIds": [
-          "shion"
-        ],
-        "hintText": {
-          "ja": "静かに本を読むシオンの姿が見える。",
-          "en": "Shion is seen quietly reading a book."
-        }
+          "aoi"
+        ]
       }
     ]
   },
   {
     "category": "action",
-    "baseUrl": "/scenarios/action/action_rooftop_emili/",
-    "id": "action_rooftop_emili",
+    "baseUrl": "/scenarios/action/aoi_rooftop_ahn/",
+    "id": "aoi_rooftop_ahn",
     "title": {
-      "ja": "屋上: エミリと青空",
-      "en": "Rooftop: Blue sky with Emili"
+      "ja": "屋上: あーん"
     },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 15,
+        "to": 17
+      },
+      "locations": [
+        "rooftop"
+      ],
+      "requireFlags": [
+        "aoi_rescued"
+      ],
+      "unlessFlags": [
+        "seen_aoi_rooftop_ahn"
+      ]
+    },
+    "priority": 4,
     "actionHints": [
       {
         "locationId": "rooftop",
-        "hintCharacterIds": [
-          "emili"
-        ],
         "hintText": {
-          "ja": "風に揺れる金髪のエミリがいるようだ。",
-          "en": "Emili seems to be enjoying the breeze here."
-        }
+          "ja": "屋上で、アオイがお弁当を持って待っている。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
       }
     ]
   },
   {
-    "category": "holiday",
-    "baseUrl": "/scenarios/holiday/holiday_amusement_emili/",
-    "id": "holiday_amusement_emili",
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_study/",
+    "id": "aoi_study",
     "title": {
-      "ja": "遊園地: エミリと観覧車",
-      "en": "Amusement Park: The Ferris wheel with Emili"
+      "ja": "教室: ふたりきりの勉強会"
     },
     "availability": {
       "timeSlots": [
-        "holiday"
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 15,
+        "to": 19
+      },
+      "locations": [
+        "classroom"
+      ],
+      "unlessFlags": [
+        "seen_aoi_study"
       ]
     },
-    "priority": 1,
+    "priority": 3,
     "actionHints": [
       {
-        "locationId": "amusement_park",
+        "locationId": "classroom",
+        "hintText": {
+          "ja": "放課後の教室に、アオイが残っている。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_t1_textbook/",
+    "id": "aoi_t1_textbook",
+    "title": {
+      "ja": "放課後の教室: ゼロ距離の教科書"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 1,
+        "to": 3
+      },
+      "locations": [
+        "classroom"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t1_textbook"
+      ]
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "classroom",
+        "hintText": {
+          "ja": "アオイが教科書を広げて困った顔をしている。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_t2_library/",
+    "id": "aoi_t2_library",
+    "title": {
+      "ja": "昼休みの図書室: 机の下の秘密"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 2,
+        "to": 5
+      },
+      "locations": [
+        "library"
+      ],
+      "requireFlags": [
+        "aoi_t1_textbook"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t2_library"
+      ]
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintText": {
+          "ja": "アオイが図書室で何かを探しているようだ。"
+        },
+        "hintCharacterIds": [
+          "aoi",
+          "shion"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_t3_danish/",
+    "id": "aoi_t3_danish",
+    "title": {
+      "ja": "購買部: いちごデニッシュ争奪戦"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 4,
+        "to": 8
+      },
+      "locations": [
+        "cafeteria"
+      ],
+      "requireFlags": [
+        "aoi_t2_library"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t3_danish"
+      ]
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "cafeteria",
+        "hintText": {
+          "ja": "購買の前でアオイとエミリが何か話している。"
+        },
+        "hintCharacterIds": [
+          "aoi",
+          "emili"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/aoi_t5_uchiwa/",
+    "id": "aoi_t5_uchiwa",
+    "title": {
+      "ja": "運動場: 夕暮れの団扇"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 8,
+        "to": 10
+      },
+      "locations": [
+        "sports_ground"
+      ],
+      "requireFlags": [
+        "aoi_t4_hoodie"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t5_uchiwa"
+      ]
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "sports_ground",
+        "hintText": {
+          "ja": "陸上の練習を終えたアオイが、ベンチで休んでいる。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/cheer_squad/",
+    "id": "cheer_squad",
+    "title": {
+      "ja": "中庭: お節介な応援団"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 19,
+        "to": 19
+      },
+      "locations": [
+        "courtyard"
+      ],
+      "unlessFlags": [
+        "seen_cheer_squad"
+      ]
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "courtyard",
+        "hintText": {
+          "ja": "中庭に、エミリとシオンとナルセが集まっている。"
+        },
+        "hintCharacterIds": [
+          "emili",
+          "shion"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_cafeteria/",
+    "id": "daily_cafeteria",
+    "title": {
+      "ja": "購買部: 昼の戦場"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "cafeteria"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_classroom/",
+    "id": "daily_classroom",
+    "title": {
+      "ja": "教室: いつもの休み時間"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "classroom"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_courtyard/",
+    "id": "daily_courtyard",
+    "title": {
+      "ja": "中庭: 昼下がりのベンチ"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "courtyard"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_library/",
+    "id": "daily_library",
+    "title": {
+      "ja": "図書室: 静かな時間"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "library"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_rooftop/",
+    "id": "daily_rooftop",
+    "title": {
+      "ja": "屋上: 風の通り道"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "rooftop"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_sports_ground/",
+    "id": "daily_sports_ground",
+    "title": {
+      "ja": "運動場: 部活の声"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "sports_ground"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/emili_apology/",
+    "id": "emili_apology",
+    "title": {
+      "ja": "屋上: お嬢様の謝罪"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 12,
+        "to": 12
+      },
+      "locations": [
+        "rooftop"
+      ],
+      "requireFlags": [
+        "black_suits_done"
+      ],
+      "unlessFlags": [
+        "seen_emili_apology"
+      ]
+    },
+    "priority": 4,
+    "actionHints": [
+      {
+        "locationId": "rooftop",
+        "hintText": {
+          "ja": "エミリが屋上でしょんぼりしている。"
+        },
         "hintCharacterIds": [
           "emili"
-        ],
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/emili_rooftop/",
+    "id": "emili_rooftop",
+    "title": {
+      "ja": "屋上: お嬢様のお弁当"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 1,
+        "to": 4
+      },
+      "locations": [
+        "rooftop"
+      ],
+      "unlessFlags": [
+        "seen_emili_rooftop"
+      ]
+    },
+    "priority": 3,
+    "actionHints": [
+      {
+        "locationId": "rooftop",
         "hintText": {
-          "ja": "エミリとの約束の場所だ。",
-          "en": "This is where I promised to meet Emili."
+          "ja": "屋上から、エミリの明るい声が聞こえる。"
+        },
+        "hintCharacterIds": [
+          "emili"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/emili_warning/",
+    "id": "emili_warning",
+    "title": {
+      "ja": "屋上: パパの防犯訓練"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 8,
+        "to": 10
+      },
+      "locations": [
+        "rooftop"
+      ],
+      "unlessFlags": [
+        "seen_emili_warning"
+      ]
+    },
+    "priority": 3,
+    "actionHints": [
+      {
+        "locationId": "rooftop",
+        "hintText": {
+          "ja": "屋上でエミリが電話している。なんだか不機嫌そうだ。"
+        },
+        "hintCharacterIds": [
+          "emili"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/gossip_classroom/",
+    "id": "gossip_classroom",
+    "title": {
+      "ja": "教室: 噂好きのふたり"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning"
+      ],
+      "dayRange": {
+        "from": 2,
+        "to": 5
+      },
+      "locations": [
+        "classroom"
+      ],
+      "unlessFlags": [
+        "seen_gossip_classroom"
+      ]
+    },
+    "priority": 2,
+    "actionHints": [
+      {
+        "locationId": "classroom",
+        "hintText": {
+          "ja": "教室の隅で、女子たちがひそひそ話している。"
         }
       }
     ]
   },
   {
-    "category": "holiday",
-    "baseUrl": "/scenarios/holiday/holiday_aquarium_aoi/",
-    "id": "holiday_aquarium_aoi",
+    "category": "action",
+    "baseUrl": "/scenarios/action/naruse_lecture/",
+    "id": "naruse_lecture",
     "title": {
-      "ja": "水族館: アオイとイルカショー",
-      "en": "Aquarium: The dolphin show with Aoi"
+      "ja": "中庭: ナルセの恋愛講座"
+    },
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 1,
+        "to": 5
+      },
+      "locations": [
+        "courtyard"
+      ],
+      "unlessFlags": [
+        "seen_naruse_lecture"
+      ]
+    },
+    "priority": 2,
+    "actionHints": [
+      {
+        "locationId": "courtyard",
+        "hintText": {
+          "ja": "ナルセが中庭で手招きしている。"
+        }
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/naruse_legend/",
+    "id": "naruse_legend",
+    "title": {
+      "ja": "教室: 伝説の男"
+    },
+    "availability": {
+      "timeSlots": [
+        "morning"
+      ],
+      "dayRange": {
+        "from": 12,
+        "to": 12
+      },
+      "locations": [
+        "classroom"
+      ],
+      "requireFlags": [
+        "black_suits_done"
+      ],
+      "unlessFlags": [
+        "seen_naruse_legend"
+      ]
+    },
+    "priority": 4,
+    "actionHints": [
+      {
+        "locationId": "classroom",
+        "hintText": {
+          "ja": "教室が妙にざわついている。"
+        }
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/shion_legend_1/",
+    "id": "shion_legend_1",
+    "title": {
+      "ja": "図書室: 五秒様の言い伝え"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 1,
+        "to": 6
+      },
+      "locations": [
+        "library"
+      ],
+      "unlessFlags": [
+        "seen_shion_legend_1"
+      ]
+    },
+    "priority": 3,
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintText": {
+          "ja": "シオンが古い本を読んでいる。"
+        },
+        "hintCharacterIds": [
+          "shion"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/shion_legend_2/",
+    "id": "shion_legend_2",
+    "title": {
+      "ja": "図書室: 五秒様の真実"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 15,
+        "to": 17
+      },
+      "locations": [
+        "library"
+      ],
+      "requireFlags": [
+        "legend_1"
+      ],
+      "unlessFlags": [
+        "seen_shion_legend_2"
+      ]
+    },
+    "priority": 4,
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintText": {
+          "ja": "シオンが「調べ終わった」と言いたげにこちらを見ている。"
+        },
+        "hintCharacterIds": [
+          "shion"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/shion_tarot/",
+    "id": "shion_tarot",
+    "title": {
+      "ja": "図書室: シオンの占い"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 8,
+        "to": 10
+      },
+      "locations": [
+        "library"
+      ],
+      "unlessFlags": [
+        "seen_shion_tarot"
+      ]
+    },
+    "priority": 3,
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintText": {
+          "ja": "シオンがカードを並べている。"
+        },
+        "hintCharacterIds": [
+          "shion"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/teacher_track/",
+    "id": "teacher_track",
+    "title": {
+      "ja": "運動場: 顧問の視線"
+    },
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 2,
+        "to": 6
+      },
+      "locations": [
+        "sports_ground"
+      ],
+      "unlessFlags": [
+        "seen_teacher_track"
+      ]
+    },
+    "priority": 3,
+    "actionHints": [
+      {
+        "locationId": "sports_ground",
+        "hintText": {
+          "ja": "陸上部が練習している。アオイの姿も見える。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/aoi_aquarium/",
+    "id": "aoi_aquarium",
+    "title": {
+      "ja": "水族館: 約束のデート"
     },
     "availability": {
       "timeSlots": [
         "holiday"
+      ],
+      "dayRange": {
+        "from": 7,
+        "to": 20
+      },
+      "locations": [
+        "aquarium"
+      ],
+      "requireFlags": [
+        "unlock_aquarium"
+      ],
+      "unlessFlags": [
+        "seen_aoi_aquarium"
       ]
     },
-    "priority": 1,
+    "priority": 5,
     "actionHints": [
       {
         "locationId": "aquarium",
+        "hintText": {
+          "ja": "約束の水族館。アオイが待っている。"
+        },
         "hintCharacterIds": [
           "aoi"
-        ],
-        "hintText": {
-          "ja": "アオイとの約束の場所だ。",
-          "en": "This is where I promised to meet Aoi."
-        }
+        ]
       }
     ]
   },
   {
     "category": "holiday",
-    "baseUrl": "/scenarios/holiday/holiday_cinema_shion/",
-    "id": "holiday_cinema_shion",
+    "baseUrl": "/scenarios/holiday/aoi_t4_hoodie/",
+    "id": "aoi_t4_hoodie",
     "title": {
-      "ja": "映画館: シオンと同じ映画",
-      "en": "Cinema: The same movie as Shion"
+      "ja": "休日の公園: 二人羽織パーカー"
     },
     "availability": {
       "timeSlots": [
         "holiday"
+      ],
+      "dayRange": {
+        "from": 6,
+        "to": 7
+      },
+      "locations": [
+        "park"
+      ],
+      "requireFlags": [
+        "aoi_t3_danish"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t4_hoodie"
       ]
     },
+    "priority": 5,
     "actionHints": [
       {
-        "locationId": "cinema",
-        "hintCharacterIds": [
-          "shion"
-        ],
+        "locationId": "park",
         "hintText": {
-          "ja": "ロビーで上映時間を確かめている人影がある。",
-          "en": "Someone in the lobby is checking the showtimes."
-        }
+          "ja": "公園のベンチに、見覚えのある黄色い髪飾り。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/aoi_t7_lap/",
+    "id": "aoi_t7_lap",
+    "title": {
+      "ja": "アオイの部屋: 甘いお礼"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "dayRange": {
+        "from": 13,
+        "to": 14
+      },
+      "locations": [
+        "aoi_house"
+      ],
+      "requireFlags": [
+        "invited_aoi_house"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t7_lap"
+      ]
+    },
+    "priority": 6,
+    "actionHints": [
+      {
+        "locationId": "aoi_house",
+        "hintText": {
+          "ja": "約束通り、アオイの部屋へ。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/aoi_t8_rain/",
+    "id": "aoi_t8_rain",
+    "title": {
+      "ja": "神社: 夕立と雨宿り"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "dayRange": {
+        "from": 13,
+        "to": 14
+      },
+      "locations": [
+        "shrine"
+      ],
+      "requireFlags": [
+        "aoi_t7_lap"
+      ],
+      "unlessFlags": [
+        "seen_aoi_t8_rain"
+      ]
+    },
+    "priority": 6,
+    "actionHints": [
+      {
+        "locationId": "shrine",
+        "hintText": {
+          "ja": "神社の方へ、アオイが歩いていくのが見えた。"
+        },
+        "hintCharacterIds": [
+          "aoi"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_amusement_park/",
+    "id": "daily_amusement_park",
+    "title": {
+      "ja": "遊園地: 人混み"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "amusement_park"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_aoi_house/",
+    "id": "daily_aoi_house",
+    "title": {
+      "ja": "アオイの家: 留守"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "aoi_house"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_aquarium/",
+    "id": "daily_aquarium",
+    "title": {
+      "ja": "水族館: 青い世界"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "aquarium"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_cinema/",
+    "id": "daily_cinema",
+    "title": {
+      "ja": "映画館: 一人の休日"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "cinema"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_home/",
+    "id": "daily_home",
+    "title": {
+      "ja": "自宅: 休息"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "home"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_park/",
+    "id": "daily_park",
+    "title": {
+      "ja": "公園: のどかな休日"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "park"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_shopping_street/",
+    "id": "daily_shopping_street",
+    "title": {
+      "ja": "商店街: ウィンドウショッピング"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "shopping_street"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/daily_shrine/",
+    "id": "daily_shrine",
+    "title": {
+      "ja": "神社: 静かな境内"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "locations": [
+        "shrine"
+      ]
+    },
+    "priority": -5
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/emili_amusement/",
+    "id": "emili_amusement",
+    "title": {
+      "ja": "遊園地: お嬢様のお忍びデート"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "dayRange": {
+        "from": 7,
+        "to": 20
+      },
+      "locations": [
+        "amusement_park"
+      ],
+      "unlessFlags": [
+        "seen_emili_amusement"
+      ]
+    },
+    "priority": 4,
+    "actionHints": [
+      {
+        "locationId": "amusement_park",
+        "hintText": {
+          "ja": "遊園地の入口で、エミリが手を振っている。"
+        },
+        "hintCharacterIds": [
+          "emili"
+        ]
+      }
+    ]
+  },
+  {
+    "category": "holiday",
+    "baseUrl": "/scenarios/holiday/emili_lottery/",
+    "id": "emili_lottery",
+    "title": {
+      "ja": "休日の商店街: お嬢様と福引き"
+    },
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "dayRange": {
+        "from": 6,
+        "to": 14
+      },
+      "locations": [
+        "shopping_street"
+      ],
+      "unlessFlags": [
+        "seen_emili_lottery"
+      ]
+    },
+    "priority": 4,
+    "actionHints": [
+      {
+        "locationId": "shopping_street",
+        "hintText": {
+          "ja": "商店街で、エミリが福引きの列に並んでいる。"
+        },
+        "hintCharacterIds": [
+          "emili"
+        ]
       }
     ]
   },
@@ -215,136 +1316,273 @@
     "baseUrl": "/scenarios/holiday/holiday_generic/",
     "id": "holiday_generic",
     "title": {
-      "ja": "休日のひと休み",
-      "en": "A Quiet Holiday"
+      "ja": "何事もない休日"
     },
-    "fallback": true,
-    "availability": {
-      "timeSlots": [
-        "holiday"
-      ]
-    }
+    "fallback": true
   },
   {
     "category": "holiday",
-    "baseUrl": "/scenarios/holiday/holiday_park_aoi/",
-    "id": "holiday_park_aoi",
+    "baseUrl": "/scenarios/holiday/shion_cinema/",
+    "id": "shion_cinema",
     "title": {
-      "ja": "公園: アオイと休日の散歩",
-      "en": "Park: A holiday walk with Aoi"
+      "ja": "休日の映画館: シオンと原作"
     },
     "availability": {
       "timeSlots": [
         "holiday"
+      ],
+      "dayRange": {
+        "from": 6,
+        "to": 14
+      },
+      "locations": [
+        "cinema"
+      ],
+      "unlessFlags": [
+        "seen_shion_cinema"
       ]
     },
+    "priority": 4,
     "actionHints": [
       {
-        "locationId": "park",
-        "hintCharacterIds": [
-          "aoi"
-        ],
+        "locationId": "cinema",
         "hintText": {
-          "ja": "噴水のそばで、聞き覚えのある明るい声がする。",
-          "en": "A familiar cheerful voice can be heard by the fountain."
-        }
-      }
-    ]
-  },
-  {
-    "category": "holiday",
-    "baseUrl": "/scenarios/holiday/holiday_shopping_emili/",
-    "id": "holiday_shopping_emili",
-    "title": {
-      "ja": "商店街: エミリと福引き",
-      "en": "Shopping Street: A lottery with Emili"
-    },
-    "availability": {
-      "timeSlots": [
-        "holiday"
-      ]
-    },
-    "actionHints": [
-      {
-        "locationId": "shopping_street",
+          "ja": "映画館のロビーに、シオンの姿がある。"
+        },
         "hintCharacterIds": [
-          "emili"
-        ],
-        "hintText": {
-          "ja": "福引き所の前に、見覚えのある赤い髪が見える。",
-          "en": "A familiar head of red hair is by the lottery stand."
-        }
+          "shion"
+        ]
       }
     ]
   },
   {
     "category": "forced",
-    "baseUrl": "/scenarios/forced/forced_meet_emili/",
-    "id": "forced_meet_emili",
+    "baseUrl": "/scenarios/forced/aoi_t9_corridor/",
+    "id": "aoi_t9_corridor",
     "title": {
-      "ja": "偶然の出会い: 迷子のエミリ",
-      "en": "Fateful Encounter: Lost Emili"
+      "ja": "夕暮れの渡り廊下: もう戻れない"
     },
-    "location": "courtyard",
+    "location": "corridor",
+    "consumesTurn": true,
     "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
       "dayRange": {
-        "from": 3
+        "from": 18,
+        "to": 18
       },
+      "requireFlags": [
+        "aoi_t8_rain"
+      ]
+    },
+    "priority": 8
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/black_suits/",
+    "id": "black_suits",
+    "title": {
+      "ja": "放課後: 黒服の襲撃"
+    },
+    "location": "gate_ambush",
+    "consumesTurn": true,
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 11,
+        "to": 11
+      },
+      "requireFlags": [
+        "blazer_swapped"
+      ]
+    },
+    "priority": 9
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/blazer_swap/",
+    "id": "blazer_swap",
+    "title": {
+      "ja": "昼休み: ブレザー交換っこ"
+    },
+    "location": "classroom",
+    "consumesTurn": true,
+    "availability": {
       "timeSlots": [
         "afternoon"
       ],
+      "dayRange": {
+        "from": 9,
+        "to": 9
+      },
       "unlessFlags": [
-        "met_emili"
+        "blazer_swapped"
       ]
-    }
+    },
+    "priority": 8
   },
   {
     "category": "forced",
-    "baseUrl": "/scenarios/forced/forced_meet_shion/",
-    "id": "forced_meet_shion",
+    "baseUrl": "/scenarios/forced/finale_default/",
+    "id": "finale_default",
     "title": {
-      "ja": "偶然の出会い: 廊下のシオン",
-      "en": "Fateful Encounter: Shion in the Corridor"
+      "ja": "21日目: 運命の神社"
     },
-    "location": "library",
+    "location": "shrine",
+    "consumesTurn": true,
     "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
       "dayRange": {
-        "from": 2
+        "from": 21,
+        "to": 21
+      }
+    },
+    "priority": 9
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/finale_promised/",
+    "id": "finale_promised",
+    "title": {
+      "ja": "21日目: 約束の神社"
+    },
+    "location": "shrine",
+    "consumesTurn": true,
+    "availability": {
+      "timeSlots": [
+        "holiday"
+      ],
+      "dayRange": {
+        "from": 21,
+        "to": 21
       },
+      "requireFlags": [
+        "aoi_t10_promise"
+      ]
+    },
+    "priority": 10
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/homeroom_day1/",
+    "id": "homeroom_day1",
+    "title": {
+      "ja": "ホームルーム: 新しいクラス"
+    },
+    "location": "classroom",
+    "consumesTurn": true,
+    "availability": {
       "timeSlots": [
         "morning"
       ],
-      "unlessFlags": [
-        "met_shion"
+      "dayRange": {
+        "from": 1,
+        "to": 1
+      }
+    },
+    "priority": 10
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/teacher_scold/",
+    "id": "teacher_scold",
+    "title": {
+      "ja": "放課後: 職員室への呼び出し"
+    },
+    "location": "staff_room",
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 12,
+        "to": 12
+      },
+      "requireFlags": [
+        "black_suits_done"
       ]
-    }
+    },
+    "priority": 6
+  },
+  {
+    "category": "forced",
+    "baseUrl": "/scenarios/forced/teacher_truth/",
+    "id": "teacher_truth",
+    "title": {
+      "ja": "職員室: 白石先生の過去"
+    },
+    "location": "staff_room",
+    "consumesTurn": true,
+    "availability": {
+      "timeSlots": [
+        "afterschool"
+      ],
+      "dayRange": {
+        "from": 16,
+        "to": 18
+      },
+      "requireFlags": [
+        "know_legend"
+      ],
+      "unlessFlags": [
+        "teacher_advice"
+      ]
+    },
+    "priority": 6
   },
   {
     "category": "ending",
-    "baseUrl": "/scenarios/ending/ending_aoi/",
-    "id": "ending_aoi",
+    "baseUrl": "/scenarios/ending/ending_bad/",
+    "id": "ending_bad",
     "title": {
-      "ja": "エンディング: アオイとの約束",
-      "en": "Ending: Promise with Aoi"
-    }
+      "ja": "BAD END: 女神の鉄槌・天罰覿面"
+    },
+    "location": "hospital",
+    "availability": {
+      "requireFlags": [
+        "confession_failed"
+      ]
+    },
+    "priority": 1
   },
   {
     "category": "ending",
-    "baseUrl": "/scenarios/ending/ending_normal/",
-    "id": "ending_normal",
+    "baseUrl": "/scenarios/ending/ending_good/",
+    "id": "ending_good",
     "title": {
-      "ja": "エンディング: 充実した28日間",
-      "en": "Ending: A Month Well Spent"
-    }
+      "ja": "GOOD END: 穏やかな幼馴染の約束"
+    },
+    "location": "shrine",
+    "availability": {
+      "requireFlags": [
+        "confessed"
+      ]
+    },
+    "priority": 2
   },
   {
     "category": "ending",
-    "baseUrl": "/scenarios/ending/ending_shion/",
-    "id": "ending_shion",
+    "baseUrl": "/scenarios/ending/ending_true/",
+    "id": "ending_true",
     "title": {
-      "ja": "エンディング: シオンと紡ぐ物語",
-      "en": "Ending: Story woven with Shion"
-    }
+      "ja": "TRUE END: 永遠の聖母と変態ヒーロー"
+    },
+    "location": "shrine",
+    "availability": {
+      "requireFlags": [
+        "aoi_t10_promise",
+        "confession_sincere"
+      ],
+      "minAffinity": {
+        "aoi": 26
+      }
+    },
+    "priority": 3
   },
   {
     "category": "special",
@@ -358,82 +1596,334 @@
   },
   {
     "category": "call",
-    "baseUrl": "/scenarios/call/aoi_day1_call/",
-    "id": "aoi_day1_call",
+    "baseUrl": "/scenarios/call/aoi_call_d14/",
+    "id": "aoi_call_d14",
     "title": {
-      "ja": "夜の通話",
-      "en": "Night Call"
+      "ja": "雨上がりの通話"
     },
+    "availability": {
+      "dayRange": {
+        "from": 14,
+        "to": 15
+      },
+      "requireFlags": [
+        "aoi_t8_rain"
+      ]
+    },
+    "priority": 3,
+    "characterId": "aoi"
+  },
+  {
+    "category": "call",
+    "baseUrl": "/scenarios/call/aoi_call_d20/",
+    "id": "aoi_call_d20",
+    "title": {
+      "ja": "決戦前夜"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 20,
+        "to": 20
+      },
+      "requireFlags": [
+        "aoi_t9_corridor"
+      ]
+    },
+    "priority": 10,
+    "characterId": "aoi"
+  },
+  {
+    "category": "call",
+    "baseUrl": "/scenarios/call/aoi_call_d5/",
+    "id": "aoi_call_d5",
+    "title": {
+      "ja": "夜の通話"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 5,
+        "to": 6
+      },
+      "requireFlags": [
+        "aoi_t2_library"
+      ]
+    },
+    "priority": 2,
+    "characterId": "aoi"
+  },
+  {
+    "category": "call",
+    "baseUrl": "/scenarios/call/emili_call_d11/",
+    "id": "emili_call_d11",
+    "title": {
+      "ja": "お嬢様の謝罪"
+    },
+    "availability": {
+      "dayRange": {
+        "from": 11,
+        "to": 12
+      },
+      "requireFlags": [
+        "black_suits_done"
+      ]
+    },
+    "priority": 5,
+    "characterId": "emili"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/aoi_mail_d1/",
+    "id": "aoi_mail_d1",
+    "title": "アオイからのメール",
     "availability": {
       "dayRange": {
         "from": 1,
         "to": 1
       }
     },
-    "priority": 1,
-    "characterId": "aoi"
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "今日は神社でびっくりしたね"
+    },
+    "time": "22:10"
   },
   {
     "category": "mail",
-    "baseUrl": "/scenarios/mail/aoi_day1_mail/",
-    "id": "aoi_day1_mail",
-    "title": {
-      "ja": "アオイからのメール",
-      "en": "Mail from Aoi"
-    },
+    "baseUrl": "/scenarios/mail/aoi_mail_d18/",
+    "id": "aoi_mail_d18",
+    "title": "アオイからのメール",
     "availability": {
       "dayRange": {
-        "from": 1,
-        "to": 3
-      }
+        "from": 18,
+        "to": 19
+      },
+      "requireFlags": [
+        "aoi_t9_corridor"
+      ]
     },
     "characterId": "aoi",
     "previewText": {
-      "ja": "……少しだけ、話せるかな？",
-      "en": "...Can we talk for a moment?"
+      "ja": "……言っちゃった"
     },
-    "time": "23:42"
+    "time": "23:20"
   },
   {
     "category": "mail",
-    "baseUrl": "/scenarios/mail/emili_day1_mail/",
-    "id": "emili_day1_mail",
-    "title": {
-      "ja": "エミリからのメール",
-      "en": "Mail from Emili"
+    "baseUrl": "/scenarios/mail/aoi_mail_d3/",
+    "id": "aoi_mail_d3",
+    "title": "アオイからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 2,
+        "to": 4
+      },
+      "requireFlags": [
+        "aoi_t1_textbook"
+      ]
     },
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "教科書、ありがとう"
+    },
+    "time": "21:30"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/aoi_mail_d7/",
+    "id": "aoi_mail_d7",
+    "title": "アオイからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 6,
+        "to": 8
+      },
+      "requireFlags": [
+        "aoi_t4_hoodie"
+      ]
+    },
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "パーカー、あったかかったね"
+    },
+    "time": "22:40"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/aoi_mail_invite/",
+    "id": "aoi_mail_invite",
+    "title": "アオイからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 11,
+        "to": 12
+      },
+      "requireFlags": [
+        "aoi_t6_hero"
+      ]
+    },
+    "priority": 5,
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "あのね、お願いがあるの"
+    },
+    "time": "23:05"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/aoi_mail_thanks/",
+    "id": "aoi_mail_thanks",
+    "title": "アオイからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 11,
+        "to": 12
+      },
+      "requireFlags": [
+        "aoi_rescued"
+      ],
+      "unlessFlags": [
+        "aoi_t6_hero"
+      ]
+    },
+    "priority": 4,
+    "characterId": "aoi",
+    "previewText": {
+      "ja": "今日はありがとう"
+    },
+    "time": "22:50"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/emili_mail_d1/",
+    "id": "emili_mail_d1",
+    "title": "エミリからのメール",
     "availability": {
       "dayRange": {
         "from": 1,
-        "to": 3
+        "to": 2
       }
     },
     "characterId": "emili",
     "previewText": {
-      "ja": "明日の購買パン争奪戦、協力要請！",
-      "en": "Help needed for tomorrow’s bakery rush!"
+      "ja": "よろしくね〜！"
     },
-    "time": "22:15"
+    "time": "21:15"
   },
   {
     "category": "mail",
-    "baseUrl": "/scenarios/mail/shion_day1_mail/",
-    "id": "shion_day1_mail",
-    "title": {
-      "ja": "シオンからのメール",
-      "en": "Mail from Shion"
-    },
+    "baseUrl": "/scenarios/mail/emili_mail_d20/",
+    "id": "emili_mail_d20",
+    "title": "エミリからのメール",
     "availability": {
       "dayRange": {
-        "from": 1,
-        "to": 3
+        "from": 19,
+        "to": 20
+      }
+    },
+    "characterId": "emili",
+    "previewText": {
+      "ja": "明日、がんばって！"
+    },
+    "time": "22:30"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/emili_mail_d9/",
+    "id": "emili_mail_d9",
+    "title": "エミリからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 9,
+        "to": 10
+      },
+      "requireFlags": [
+        "blazer_swapped"
+      ]
+    },
+    "characterId": "emili",
+    "previewText": {
+      "ja": "ブレザーありがと！"
+    },
+    "time": "22:00"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/shion_mail_d12/",
+    "id": "shion_mail_d12",
+    "title": "シオンからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 12,
+        "to": 13
+      },
+      "requireFlags": [
+        "black_suits_done"
+      ]
+    },
+    "characterId": "shion",
+    "previewText": {
+      "ja": "キャットウォークから"
+    },
+    "time": "23:10"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/shion_mail_d17/",
+    "id": "shion_mail_d17",
+    "title": "シオンからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 16,
+        "to": 19
+      },
+      "requireFlags": [
+        "know_legend"
+      ],
+      "unlessFlags": [
+        "teacher_advice"
+      ]
+    },
+    "characterId": "shion",
+    "previewText": {
+      "ja": "先生とは話した？"
+    },
+    "time": "22:20"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/shion_mail_d2/",
+    "id": "shion_mail_d2",
+    "title": "シオンからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 2,
+        "to": 5
+      },
+      "requireFlags": [
+        "legend_1"
+      ]
+    },
+    "characterId": "shion",
+    "previewText": {
+      "ja": "……五秒様の資料"
+    },
+    "time": "23:40"
+  },
+  {
+    "category": "mail",
+    "baseUrl": "/scenarios/mail/shion_mail_d20/",
+    "id": "shion_mail_d20",
+    "title": "シオンからのメール",
+    "availability": {
+      "dayRange": {
+        "from": 20,
+        "to": 20
       }
     },
     "characterId": "shion",
     "previewText": {
-      "ja": "……図書室のあの本について",
-      "en": "...Regarding that book in the library"
+      "ja": "……明日"
     },
-    "time": "21:50"
+    "time": "23:50"
   }
 ]

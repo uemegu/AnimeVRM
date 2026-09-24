@@ -1,0 +1,34 @@
+{
+  "id": "morning_d19_countdown",
+  "title": {
+    "ja": "朝: 残り2日"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 19,
+      "to": 19
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "校門をくぐろうとした瞬間、頭の中に声が響いた。",
+      "background": "school_gate",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "s2",
+      "speaker": "女神の声",
+      "text": "残り2日です。……言葉は、決まりましたか？",
+      "voiceUrl": "v_s2_7f159129.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（……まだだ。でも、伝えたいことはもう決まってる）"
+    }
+  ]
+}

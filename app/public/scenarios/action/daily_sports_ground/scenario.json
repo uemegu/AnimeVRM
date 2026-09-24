@@ -1,0 +1,29 @@
+{
+  "id": "daily_sports_ground",
+  "title": {
+    "ja": "運動場: 部活の声"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "sports_ground"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "運動場には、部活動のかけ声が響いている。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（体を動かしたい気分だ。女神に消される前に、体力だけはつけておこう）"
+    }
+  ]
+}

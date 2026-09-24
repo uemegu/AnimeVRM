@@ -1,0 +1,236 @@
+{
+  "id": "aoi_t1_textbook",
+  "title": {
+    "ja": "放課後の教室: ゼロ距離の教科書"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 3
+    },
+    "locations": [
+      "classroom"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t1_textbook"
+    ]
+  },
+  "bgm": "love",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintText": {
+        "ja": "アオイが教科書を広げて困った顔をしている。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "放課後の教室。アオイが自分の机で、教科書とにらめっこしていた。",
+      "setFlags": {
+        "seen_aoi_t1_textbook": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "sad"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん……。前の学校と進み方が違って、数学が全然わからなくて。",
+      "voiceUrl": "v_s2_3bfef0a4.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "教科書もまだ届いてなくて……よかったら、見せてもらえないかな？",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s3_b2559a37.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "お、おう。もちろん。"
+    },
+    {
+      "id": "s5",
+      "text": "机を寄せる。二人で一冊の教科書。……近い。距離が、ゼロだ。"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "教科書を真ん中に置いて、肩を並べて一緒に読む",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t1_textbook": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "教科書をアオイに渡して、自分は少し離れる",
+          "goto": "shy",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "教科書よりアオイの横顔を観察する",
+          "goto": "hentai",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "text": "教科書を真ん中に置く。アオイの肩が、とん、と俺の肩に触れた。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ここの式、こっちから解くとわかりやすいね。……タカシくん、説明上手。",
+      "voiceUrl": "v_s8_7d1aeaf0.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "（アオイの髪がいい匂いすぎて、自分が何を説明しているのかわからない）"
+    },
+    {
+      "id": "s10",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ。昔もこうやって、一緒に夏休みの宿題したよね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s10_1171bf41.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……なんだか、戻ってきたんだなって感じ。ありがとう、タカシくん。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s11_5fb9cf6e.mp3"
+    },
+    {
+      "id": "shy",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "え、いいの？ でもタカシくんが見られなくなっちゃうよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_shy_1522fdd5.mp3"
+    },
+    {
+      "id": "s13",
+      "speaker": "タカシ",
+      "text": "俺はもう予習済みだから！（してない）"
+    },
+    {
+      "id": "s14",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "そっか……。うん、ありがとう。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s14_1acb2d71.mp3"
+    },
+    {
+      "id": "s15",
+      "text": "アオイは少しだけ、寂しそうに笑った気がした。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "hentai",
+      "text": "夕日に透けるまつ毛。ペンを持つ指。耳にかけた髪の、その後ろのうなじ――。"
+    },
+    {
+      "id": "s17",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシくん？ 教科書、そっちじゃないよ？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s17_abc33b9d.mp3"
+    },
+    {
+      "id": "s18",
+      "speaker": "タカシ",
+      "text": "はっ！？ い、いや、光の反射角を計算してて！"
+    },
+    {
+      "id": "s19",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふっ、変なの。昔から、ときどき変だったもんね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s19_a8ffa20a.mp3"
+    },
+    {
+      "id": "end",
+      "text": "校舎に下校のチャイムが鳴り響いた。",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      }
+    }
+  ]
+}

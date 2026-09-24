@@ -1,0 +1,443 @@
+{
+  "id": "prologue_day1",
+  "title": {
+    "ja": "プロローグ: 5秒で告白しないと◯す"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 1
+    }
+  },
+  "priority": 10,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "目覚まし時計の電子音が、春休み気分の脳みそを容赦なく殴りつけた。",
+      "background": "myroom",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "s2",
+      "text": "カーテンを開けると、澄み渡る春の青空。今日から新学期――高校2年の春だ。"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "……今日から、アオイと同じ学校か。"
+    },
+    {
+      "id": "s4",
+      "text": "アオイ。小学生の頃、泥だらけになって一緒に走り回った幼馴染。"
+    },
+    {
+      "id": "s5",
+      "text": "親の転勤で遠くへ引っ越した彼女が、先日、よりによって同じマンションの隣の部屋に越してきたのだ。"
+    },
+    {
+      "id": "s6",
+      "speaker": "タカシ",
+      "text": "『初日は一緒に行こうね』……だったよな。"
+    },
+    {
+      "id": "s7",
+      "text": "昨夜のメッセージを思い出しただけで、心臓がうるさい。制服に袖を通し、玄関のドアを開けた。"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん！ おはよう！",
+      "background": "apartment_door",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Standing Greeting"
+        }
+      },
+      "seUrl": "/se/door_rattle.mp3",
+      "voiceUrl": "v_s8_fb9b334b.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "お、おはよう、アオイ。……待たせた？"
+    },
+    {
+      "id": "s10",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ううん、今来たとこ。えへへ、制服すっごく似合ってるね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s10_6caba574.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "昔は半ズボンで駆け回ってたのに。すっかり頼もしい男の子だ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s11_7da857bd.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "（……アオイの方こそ。息を呑むほど綺麗になってて、正直まともに顔が見られない）"
+    },
+    {
+      "id": "s13",
+      "text": "揺れる黄色い髪飾り。春風に乗って届く、甘いフローラルの香り。"
+    },
+    {
+      "id": "s14",
+      "text": "俺の視線は、なぜか彼女のソックスとスカートの間――いわゆる絶対領域に吸い寄せられていた。"
+    },
+    {
+      "id": "s15",
+      "speaker": "タカシ",
+      "text": "（違う、これは再会の感動による視線の揺らぎだ。断じてやましい気持ちでは……）"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……？ タカシくん、どうかした？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s16_bcb0584a.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": "タカシ",
+      "text": "な、なんでもない！ 行こう、遅刻する！"
+    },
+    {
+      "id": "s18",
+      "text": "桜並木の通学路。肩と肩が触れそうな距離に、俺の心臓はすでに破裂寸前だった。",
+      "background": "town",
+      "scrollingBackground": {},
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s19",
+      "speaker": "タカシ",
+      "text": "（こんなに可愛い幼馴染が隣にいて……でも俺なんか、昔の友達止まりだよな……）"
+    },
+    {
+      "id": "s20",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、見て見て！ こんなところに神社があるよ。",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_point",
+          "motionLoop": false,
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s20_8ca63a46.mp3"
+    },
+    {
+      "id": "s21",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "せっかくだし、初日のご挨拶していかない？ 「今年もよろしくお願いします」って。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s21_707ab396.mp3"
+    },
+    {
+      "id": "s22",
+      "speaker": "タカシ",
+      "text": "あ、ああ。そうだな。"
+    },
+    {
+      "id": "s23",
+      "text": "石段を登った先、ひっそりとした境内。アオイは丁寧に二礼二拍手一礼をした。",
+      "background": "shrine",
+      "scrollingBackground": false,
+      "bgm": "silence",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "neutral",
+          "motion": "ardy_pray"
+        }
+      }
+    },
+    {
+      "id": "s24",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……神様。今年も、みんなと仲良く楽しい一年になりますように。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s24_894c9243.mp3"
+    },
+    {
+      "id": "s25",
+      "speaker": "タカシ",
+      "text": "（俺も……アオイと特別な関係になれますように。……いや、俺なんかじゃ釣り合わないか）"
+    },
+    {
+      "id": "s26",
+      "text": "そう祈った、その瞬間だった。"
+    },
+    {
+      "id": "s27",
+      "speaker": "タカシ",
+      "text": "――っ！？ な、なんだ、この光……！？",
+      "flashEffect": "white",
+      "seUrl": "/se/piano_note.mp3"
+    },
+    {
+      "id": "s28",
+      "text": "天地が反転し、純白の光に満ちた異空間へと放り出される。",
+      "background": "god_realm",
+      "timeOfDay": "divine",
+      "bgm": "mysterious",
+      "clearCast": true,
+      "avatars": {
+        "god": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s29",
+      "text": "その中心に、黄金の後光を背負った何者かが浮かんでいた。"
+    },
+    {
+      "id": "s30",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "……迷える人の子よ。私の声が聞こえますか？",
+      "voiceUrl": "v_s30_19f1eac1.mp3"
+    },
+    {
+      "id": "s31",
+      "speaker": "タカシ",
+      "text": "だ、誰だあんた！？ ここはどこなんだ！？"
+    },
+    {
+      "id": "s32",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "私はこの地を統べる女神。先ほどから、そなたの祈りを聞いておりましたが……",
+      "voiceUrl": "v_s32_2bf15216.mp3"
+    },
+    {
+      "id": "s33",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "「俺なんかじゃ釣り合わない」「友達止まり」……。聞いていて虫酸が走るほど情けない！",
+      "camera": "speaker",
+      "avatars": {
+        "god": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s33_9cd8c785.mp3"
+    },
+    {
+      "id": "s34",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "じれったい！ じれったすぎて、もう見ていられません！",
+      "avatars": {
+        "god": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s34_3784d3ac.mp3"
+    },
+    {
+      "id": "s35",
+      "speaker": "タカシ",
+      "text": "ひ、人の心を勝手に盗み聞きするなよ！"
+    },
+    {
+      "id": "s36",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "黙りなさい。煮え切らない腑抜けに与える慈悲はありません。",
+      "avatars": {
+        "god": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s36_3b21b04e.mp3"
+    },
+    {
+      "id": "s37",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "私が「GO」と言ったら、5秒で告白しなさい。できなければ――◯します。",
+      "avatars": {
+        "god": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s37_7bb6e4c7.mp3"
+    },
+    {
+      "id": "s38",
+      "text": "ピーーーッ。どこからともなく、放送禁止のあの音が鳴った。"
+    },
+    {
+      "id": "s39",
+      "speaker": "タカシ",
+      "text": "ピー音鳴ったぞ今！？ ◯すって言ったのか！？ 女神なのに！？"
+    },
+    {
+      "id": "s40",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "猶予は21日。21日目、あの娘に命がけの告白をしてみせなさい。",
+      "avatars": {
+        "god": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s40_9c0b1bac.mp3"
+    },
+    {
+      "id": "s41",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "中途半端な言葉は認めません。愛も覚悟も、ぜんぶ積み上げてからいらっしゃい。",
+      "avatars": {
+        "god": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s41_057dba8c.mp3"
+    },
+    {
+      "id": "s42",
+      "speaker": "女神",
+      "speakerCharacterId": "god",
+      "text": "せいぜい足掻きなさい、哀れな人の子よ。",
+      "avatars": {
+        "god": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s42_7955e530.mp3"
+    },
+    {
+      "id": "s43",
+      "speaker": "タカシ",
+      "text": "うわああああっ！？",
+      "flashEffect": "white",
+      "background": "shrine",
+      "timeOfDay": "morning",
+      "bgm": "main_bgm",
+      "clearCast": true,
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "surprised",
+          "motion": "ardy_startled"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s44",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "きゃっ！？ タ、タカシくん！？ どうしたの急に叫んで！？",
+      "voiceUrl": "v_s44_22a52957.mp3"
+    },
+    {
+      "id": "s45",
+      "speaker": "タカシ",
+      "text": "ハァ……ハァ……ア、アオイ……？ ここは……神社……？"
+    },
+    {
+      "id": "s46",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "うん、神社だよ？ 急にぼーっとしたと思ったら、顔が真っ青で……熱でもあるの？",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s46_b889f8b4.mp3"
+    },
+    {
+      "id": "s47",
+      "speaker": "タカシ",
+      "text": "（さっきのは幻覚なんかじゃない。あの殺気は……本気だった）"
+    },
+    {
+      "id": "s48",
+      "speaker": "タカシ",
+      "text": "（21日以内に、アオイとちゃんと結ばれなきゃ……俺は消される！？）"
+    },
+    {
+      "id": "s49",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ほんとに大丈夫？ ……ほら、予鈴鳴っちゃうよ。走ろ！",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "Jogging",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s49_ff15872c.mp3"
+    },
+    {
+      "id": "s50",
+      "text": "差し出された手を取って、石段を駆け下りる。そのまま桜並木を、学校へ向かって全力で駆け抜けた。",
+      "background": "town",
+      "scrollingBackground": {
+        "speed": 1.6
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Jogging"
+        }
+      }
+    },
+    {
+      "id": "s51",
+      "text": "こうして、俺の命をかけた21日間の恋が――理不尽に、幕を開けてしまった。"
+    }
+  ]
+}

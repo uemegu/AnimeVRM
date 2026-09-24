@@ -56,10 +56,16 @@ export interface SceneTransition {
   background?: string;
 }
 
-/** シーン内のアバター演出指定 */
+/** シーン内のアバター演出指定（前のシーンの指定を引き継ぎ、書いた項目だけ上書きする） */
 export interface SceneAvatarConfig {
-  characterId: string;
+  /** 省略時はキー名をキャラIDとして使う */
+  characterId?: string;
+  /** public/animations/<motion>.fbx */
   motion?: string;
+  /** モーションをループするか（省略時は data/motions.ts の設定。false なら1回再生して待機モーションに戻る） */
+  motionLoop?: boolean;
+  /** モデルを差し替える（省略時はキャラの既定モデル。休日は私服） */
+  modelUrl?: string;
   expression?: string;
   expressionWeight?: number; // 原則 1.0 または 0.0
   position?: AvatarSlotPosition | [number, number, number];
@@ -126,7 +132,45 @@ export interface ScenarioScene {
   timeOfDay?: import('./visual').TimeOfDayId;
   /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
   transitions?: SceneTransition[];
+  /** カメラの構図（省略時は登場人数と話者から自動） */
+  camera?: CameraShot;
+  /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */
+  clearCast?: boolean;
+  /**
+   * 歩きながらの会話などで、背景を横に流し続ける（以降のシーンに引き継ぐ。false で止めて通常の背景に戻す）
+   */
+  scrollingBackground?: ScrollingBackgroundConfig | false;
+  /** 選択肢の制限時間（秒）と時間切れ時の分岐。省略時は10秒で1番目を自動選択 */
+  choiceTimeout?: {
+    seconds: number;
+    /** 時間切れ時の分岐先（省略時は1番目の選択肢を選ぶ） */
+    goto?: string;
+    setFlags?: Record<string, boolean | number | string>;
+  };
 }
+
+/** 流れる背景の指定（省略した項目は既定値） */
+export interface ScrollingBackgroundConfig {
+  /** 流す画像（省略時はその時の場所の遠景） */
+  textureUrl?: string;
+  /** 流れる速さ（既定 0.65。0 で止まる） */
+  speed?: number;
+  /** ぼかし 0.0〜1.0（既定 1.0。キャラに視線を集める） */
+  blur?: number;
+  /** 流れる向き（既定 left） */
+  direction?: 'left' | 'right';
+  /** つなぎ目をぼかす幅（既定 0.2） */
+  featherWidth?: number;
+}
+
+/**
+ * カメラの構図。極端な接写は禁止（開発ルール）なので close でもバストアップまで
+ * - wide: 登場キャラ全員が入る引き
+ * - medium: 話者を中心に隣の人物も入る会話ショット
+ * - speaker: 話者のウェストアップ（1人の場面の既定）
+ * - close: 話者のバストアップ（感情の強調）
+ */
+export type CameraShot = 'wide' | 'medium' | 'speaker' | 'close';
 
 import { ActionLocationId, DayPhase } from './game';
 
@@ -160,6 +204,10 @@ export interface ScenarioAvailability {
   requireFlags?: string[];
   /** 指定フラグのいずれかが立っていれば発生しない（出会いイベントの重複防止等） */
   unlessFlags?: string[];
+  /** 好感度の下限（キャラID → 値。すべて満たすこと） */
+  minAffinity?: Record<string, number>;
+  /** 好感度の上限（キャラID → 値。値より小さいこと） */
+  maxAffinity?: Record<string, number>;
 }
 
 /** 行動ターン等における場所ヒント情報 */
@@ -193,6 +241,8 @@ export interface ScenarioMeta {
   location?: string;
   /** 条件に合うシナリオが他にないときだけ選ばれる汎用シナリオ */
   fallback?: boolean;
+  /** 強制イベントがその時間帯の行動を使い切る（終わったら場所選択に戻らず次の時間帯へ） */
+  consumesTurn?: boolean;
   /** 未指定項目は制限なし。従来の actionHints があればその場所・フェーズ制約は別途適用 */
   availability?: ScenarioAvailability;
   /** 条件が重なる候補内で大きいものを優先（同値なら定義順） */
@@ -215,6 +265,10 @@ export interface ScenarioIndexEntry extends ScenarioMeta {
 
 /** シナリオパッケージ（1本のイベントシナリオ。scenario.json の中身） */
 export interface ScenarioPackage extends ScenarioMeta {
+  /** 開始時の BGM（ID または URL。'silence' で無音）。シーンの bgm 指定で切り替わり、以降のシーンに引き継がれる */
+  bgm?: string;
+  /** 開始時の時間帯（省略時はフェーズから） */
+  timeOfDay?: import('./visual').TimeOfDayId;
   /** 初期登場キャラクター一覧 */
   characters?: Array<{
     id: string;

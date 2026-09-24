@@ -1,0 +1,64 @@
+{
+  "id": "emili_mail_d9",
+  "characterId": "emili",
+  "title": "エミリからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 9,
+      "to": 10
+    },
+    "requireFlags": [
+      "blazer_swapped"
+    ]
+  },
+  "previewText": {
+    "ja": "ブレザーありがと！"
+  },
+  "time": "22:00",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "アオイちゃん、ボタン縫うのめっちゃ上手でびっくり！"
+      },
+      "time": "22:00"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "ブレザー、しばらく交換したままでいいって。仲良しっぽくない？ えへへ。"
+      },
+      "time": "22:00"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "いいな、そういうの"
+      },
+      "reactionText": {
+        "ja": "でしょ〜！ アオイちゃん大好き！"
+      },
+      "reactionTime": "22:02",
+      "addAffinity": {
+        "emili": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "そのエンブレム、目印なんだよな？"
+      },
+      "reactionText": {
+        "ja": "そうそう。……ま、平気平気！ おやすみ〜！"
+      },
+      "reactionTime": "22:02",
+      "setFlags": {
+        "noticed_emblem": true
+      }
+    }
+  ]
+}

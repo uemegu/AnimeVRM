@@ -1,0 +1,65 @@
+{
+  "id": "aoi_mail_invite",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "priority": 5,
+  "availability": {
+    "dayRange": {
+      "from": 11,
+      "to": 12
+    },
+    "requireFlags": [
+      "aoi_t6_hero"
+    ]
+  },
+  "previewText": {
+    "ja": "あのね、お願いがあるの"
+  },
+  "time": "23:05",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "今日は本当にありがとう。まだ胸がドキドキしてる。"
+      },
+      "time": "23:04"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "あのね、ちゃんとお礼がしたいの。……今度の土曜日、うちに来てくれない？ パフェ作って待ってる。"
+      },
+      "time": "23:05"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "行く。絶対に行く"
+      },
+      "reactionText": {
+        "ja": "やった……！ 待ってるね、私のヒーローさん♪"
+      },
+      "reactionTime": "23:07",
+      "setFlags": {
+        "invited_aoi_house": true
+      },
+      "addAffinity": {
+        "aoi": 2
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "お礼なんていいよ"
+      },
+      "reactionText": {
+        "ja": "……そっか。うん、わかった。でも、ありがとうは言わせてね。"
+      },
+      "reactionTime": "23:07"
+    }
+  ]
+}

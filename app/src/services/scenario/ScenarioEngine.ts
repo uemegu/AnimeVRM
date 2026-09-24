@@ -10,6 +10,7 @@ import {
   SupportedLanguage,
   resolveLocalizedText,
   SceneAvatarConfig,
+  CameraShot,
 } from '../../types/scenario';
 
 /** 画面描画用に言語解決済みのシーン情報 */
@@ -32,6 +33,10 @@ export interface ScenarioResolvedScene {
   flashEffect?: 'white' | 'none';
   timeOfDay?: import('../../types/visual').TimeOfDayId;
   autoNextSec?: number;
+  camera?: CameraShot;
+  clearCast?: boolean;
+  /** 選択肢の制限時間（秒） */
+  choiceTimeLimitSec?: number;
 }
 
 export class ScenarioEngine {
@@ -100,6 +105,9 @@ export class ScenarioEngine {
       flashEffect: raw.flashEffect,
       timeOfDay: raw.timeOfDay,
       autoNextSec: raw.autoNextSec,
+      camera: raw.camera,
+      clearCast: raw.clearCast,
+      choiceTimeLimitSec: raw.choiceTimeout?.seconds,
     };
   }
 
@@ -199,6 +207,31 @@ export class ScenarioEngine {
     this.sceneIndex = targetIndex;
     this.applyCurrentSceneEffects();
     return true;
+  }
+
+  /**
+   * 選択肢の時間切れ。choiceTimeout.goto があればそこへ分岐し、なければ1番目の選択肢を選ぶ
+   * @returns 選んだ扱いにした選択肢のID（分岐した場合は null）
+   */
+  public timeout(): string | null {
+    const raw = this.getRawScene();
+    if (!raw || !this.isWaitingForChoice()) return null;
+
+    const timeoutRule = raw.choiceTimeout;
+    if (!timeoutRule?.goto) {
+      this.choose(0);
+      return this.lastSelectedChoiceId;
+    }
+    if (timeoutRule.setFlags) {
+      Object.assign(this.flags, timeoutRule.setFlags);
+    }
+    const targetIndex = this.package.scenes.findIndex((s) => s.id === timeoutRule.goto);
+    if (targetIndex === -1) {
+      throw new Error(`Timeout goto target scene not found: ${timeoutRule.goto}`);
+    }
+    this.sceneIndex = targetIndex;
+    this.applyCurrentSceneEffects();
+    return null;
   }
 
   /** シーン突入時のフラグ更新などの副作用を適用 */

@@ -25,6 +25,8 @@ export interface CallSceneStep {
   motion?: string;
   choices?: CallChoice[];
   nextStepId?: string | null; // nullなら通話終了
+  /** ボイス（'/' で始まらなければ通話のディレクトリからの相対パス） */
+  voiceUrl?: string;
 }
 
 /**

@@ -1,0 +1,51 @@
+{
+  "id": "daily_classroom",
+  "title": {
+    "ja": "教室: いつもの休み時間"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "classroom"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "昨日のドラマ見た？ 最終回、告白のシーン5分くらいあったよね〜。",
+      "avatars": {
+        "yui": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "mob_chat_gesture"
+        },
+        "kana": {
+          "position": "right",
+          "expression": "neutral",
+          "motion": "mob_listen_nod"
+        }
+      },
+      "voiceUrl": "v_s1_bf77ef34.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "5分も告白されたら、途中で冷めない？",
+      "voiceUrl": "v_s2_db1c21de.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（5分……。俺には5秒しかないんだが……）"
+    }
+  ]
+}

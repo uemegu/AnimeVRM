@@ -1,0 +1,301 @@
+{
+  "id": "aoi_t3_danish",
+  "title": {
+    "ja": "購買部: いちごデニッシュ争奪戦"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 4,
+      "to": 8
+    },
+    "locations": [
+      "cafeteria"
+    ],
+    "requireFlags": [
+      "aoi_t2_library"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t3_danish"
+    ]
+  },
+  "bgm": "action",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "cafeteria",
+      "hintText": {
+        "ja": "購買の前でアオイとエミリが何か話している。"
+      },
+      "hintCharacterIds": [
+        "aoi",
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "購買部は、昼休みの戦場だ。",
+      "setFlags": {
+        "seen_aoi_t3_danish": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "expression": "happy"
+        },
+        "emili": {
+          "position": "right",
+          "expression": "happy",
+          "motion": "Excited"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "アオイちゃん、今日は幻のいちごデニッシュの入荷日だよ！ 1日3個限定！",
+      "voiceUrl": "v_s2_e78ebac4.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "わあ、食べてみたい……！ 前の学校にはなかったんだよね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_641816c4.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "よし、俺が確保してくる！"
+    },
+    {
+      "id": "s5",
+      "text": "人波をかき分け、ラグビー部の脇をすり抜け、伸ばした手が――最後の1個をつかんだ。"
+    },
+    {
+      "id": "s6",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "すごーい！ タカシくん、身のこなしが忍者みたい！",
+      "avatars": {
+        "emili": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s6_2d24abd8.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "……だが、手の中にあるのは1個だけ。二人の視線が、デニッシュに注がれている。"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "アオイに渡す",
+          "goto": "aoi",
+          "setFlags": {
+            "aoi_t3_danish": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "エミリに渡す",
+          "goto": "emili",
+          "addAffinity": {
+            "emili": 3,
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "命がけで手に入れたので自分で食べる",
+          "goto": "self"
+        }
+      ]
+    },
+    {
+      "id": "aoi",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "いいの？ ……えへへ、ありがとう。じゃあ、いただきます。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        },
+        "emili": {
+          "visible": false
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_aoi_6ddd39ef.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "一口かじったアオイの唇の端に、白い粉砂糖がちょこんと付いた。"
+    },
+    {
+      "id": "s11",
+      "speaker": "タカシ",
+      "text": "（……付いてる。言うべきか。いや、これは言うべきだ）"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "アオイ、口のとこ、砂糖付いてる。"
+    },
+    {
+      "id": "s13",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "え、どこ？ ……取って？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s13_411c043b.mp3"
+    },
+    {
+      "id": "s14",
+      "text": "差し出された顔。親指で、そっと粉砂糖を拭う。……柔らかい。"
+    },
+    {
+      "id": "s15",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……っ。あ、ありがと。",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s15_39f58608.mp3"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくんって、そういうとこ、ずるいよね……。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s16_d2dbbf09.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "きゃー！ 今の見た見た！？ 少女漫画じゃん！",
+      "avatars": {
+        "emili": {
+          "position": "right",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        },
+        "aoi": {
+          "position": "left"
+        }
+      },
+      "camera": "wide",
+      "nextSceneId": "end",
+      "voiceUrl": "v_s17_91051f3d.mp3"
+    },
+    {
+      "id": "emili",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "え、私に！？ やったー！ タカシくん、見る目あるぅ！",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_victory"
+        },
+        "aoi": {
+          "visible": false
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_emili_3ddf6e56.mp3"
+    },
+    {
+      "id": "s19",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "んー、おいしい！ お礼に今度、うちのシェフのケーキ持ってくるね！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s19_f056d8fd.mp3"
+    },
+    {
+      "id": "s20",
+      "text": "アオイは「よかったね」と笑っていたけれど、その笑顔は少しだけ、ぎこちなかった。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "self",
+      "text": "俺は、戦利品を一気に頬張った。……うまい。死ぬほどうまい。"
+    },
+    {
+      "id": "s22",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ひどーい！ そこは女の子に譲るとこでしょー！",
+      "avatars": {
+        "emili": {
+          "position": "right",
+          "expression": "angry",
+          "motion": "Angry",
+          "motionLoop": false
+        },
+        "aoi": {
+          "position": "left",
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s22_4043490b.mp3"
+    },
+    {
+      "id": "s23",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ……タカシくん、昔から食いしん坊だもんね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s23_bb54e79f.mp3"
+    },
+    {
+      "id": "end",
+      "text": "昼休みが終わる。購買の喧騒が、嘘のように引いていった。",
+      "clearCast": true
+    }
+  ]
+}

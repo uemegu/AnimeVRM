@@ -1,0 +1,116 @@
+{
+  "id": "teacher_scold",
+  "title": {
+    "ja": "放課後: 職員室への呼び出し"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 12,
+      "to": 12
+    },
+    "requireFlags": [
+      "black_suits_done"
+    ]
+  },
+  "priority": 6,
+  "location": "staff_room",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "放課後。俺は職員室に呼び出されていた。",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "angry"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……体育館のマット、全部ひっくり返したのは誰かしら。",
+      "voiceUrl": "v_s2_080f5a53.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "……俺です。"
+    },
+    {
+      "id": "s4",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "バスケットボール42個、跳び箱6段、エバーマット4枚。全部、片付けておきなさい。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s4_87bbf6dd.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "はい……。"
+    },
+    {
+      "id": "s6",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……それと。",
+      "camera": "close",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s6_f2500c97.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "勘違いとはいえ、生徒を守ろうとしたその姿勢は……教師として、評価します。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s7_18f94ca7.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……昔、同じくらい必死だった男の子を知っているから。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s8_298c54f7.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "先生……？"
+    },
+    {
+      "id": "s10",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "以上。3回目の説教は、ないようにね。",
+      "avatars": {
+        "teacher": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s10_0a627f1f.mp3"
+    }
+  ]
+}

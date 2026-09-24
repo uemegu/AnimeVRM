@@ -3,6 +3,7 @@ import { ScenarioPackage } from '../types/scenario';
 import { ScenarioEngine, ScenarioResolvedScene } from '../services/scenario/ScenarioEngine';
 import { soundManager } from '../services/audio/SoundManager';
 import { useLanguage } from '../contexts/LanguageContext';
+import { EMPTY_STAGE, StageState, initialStageState, mergeStageState } from '../services/stage/sceneView';
 
 /** シナリオ進行の通知（ゲーム状態への反映は呼び出し側で行う） */
 export interface ScenarioProgress {
@@ -34,6 +35,8 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
   const [engine, setEngine] = useState<ScenarioEngine | null>(null);
   const [, setRevision] = useState(0);
   const [isAuto, setIsAuto] = useState(false);
+  // 背景・時間帯・BGM・登場キャラ（シーンをまたいで引き継ぐ）
+  const [stage, setStage] = useState<StageState>(EMPTY_STAGE);
 
   // エンジンは可変オブジェクトなので、進めたら再描画を要求する
   const refresh = useCallback(() => setRevision((r) => r + 1), []);
@@ -58,8 +61,12 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
 
   const start = useCallback(
     (next: ScenarioPackage, flags: ScenarioProgress['flags'], affinities: ScenarioProgress['affinities']) => {
+      const nextEngine = new ScenarioEngine(next, flags, affinities, lang);
+      const firstScene = nextEngine.getRawScene();
+      const initial = initialStageState(next);
       setScenario(next);
-      setEngine(new ScenarioEngine(next, flags, affinities, lang));
+      setEngine(nextEngine);
+      setStage(firstScene ? mergeStageState(initial, firstScene) : initial);
     },
     [lang]
   );
@@ -68,7 +75,18 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
     clearAutoTimer();
     setScenario(null);
     setEngine(null);
+    setStage(EMPTY_STAGE);
   }, [clearAutoTimer]);
+
+  /** エンジンを進めた後、新しいシーンの指定を舞台に反映して再描画する */
+  const applySceneChange = useCallback(
+    (engine: ScenarioEngine) => {
+      const scene = engine.getRawScene();
+      if (scene) setStage((prev) => mergeStageState(prev, scene));
+      refresh();
+    },
+    [refresh]
+  );
 
   /** テキスト送り */
   const advance = useCallback(() => {
@@ -76,9 +94,9 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
     if (!engine || !scenario || isWaitingChoice || isFinished) return;
 
     const finished = engine.next();
-    refresh();
+    applySceneChange(engine);
     onProgress({ scenario, flags: engine.getFlags(), affinities: engine.getAffinities(), finished });
-  }, [refresh]);
+  }, [applySceneChange]);
 
   /** 選択肢の選択 */
   const choose = useCallback(
@@ -88,7 +106,7 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
       if (!engine || !scenario || !engine.isWaitingForChoice()) return;
 
       engine.choose(index);
-      refresh();
+      applySceneChange(engine);
       onProgress({
         scenario,
         flags: engine.getFlags(),
@@ -97,8 +115,24 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
         choiceId: engine.getLastSelectedChoiceId() ?? undefined,
       });
     },
-    [refresh]
+    [applySceneChange]
   );
+
+  /** 選択肢の時間切れ（シーンの choiceTimeout に従う） */
+  const timeoutChoice = useCallback(() => {
+    const { engine, scenario, onProgress } = latest.current;
+    if (!engine || !scenario || !engine.isWaitingForChoice()) return;
+
+    const choiceId = engine.timeout();
+    applySceneChange(engine);
+    onProgress({
+      scenario,
+      flags: engine.getFlags(),
+      affinities: engine.getAffinities(),
+      finished: false,
+      choiceId: choiceId ?? undefined,
+    });
+  }, [applySceneChange]);
 
   const scheduleAdvance = useCallback(
     (delaySec: number) => {
@@ -179,6 +213,7 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
   return {
     scenario,
     currentScene,
+    stage,
     isFinished,
     isWaitingChoice,
     isAuto,
@@ -186,6 +221,7 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
     stop,
     advance,
     choose,
+    timeoutChoice,
     toggleAuto,
     handleTypingComplete,
   };

@@ -1,0 +1,31 @@
+{
+  "id": "daily_home",
+  "title": {
+    "ja": "自宅: 休息"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "home"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "今日は家でゆっくり休むことにした。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（女神のことを忘れて、たまには昼寝でも……）"
+    },
+    {
+      "id": "s3",
+      "text": "夢の中で「サボるな」と女神に怒鳴られた。"
+    }
+  ]
+}

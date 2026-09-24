@@ -1,0 +1,258 @@
+{
+  "id": "finale_promised",
+  "title": {
+    "ja": "21日目: 約束の神社"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 21,
+      "to": 21
+    },
+    "requireFlags": [
+      "aoi_t10_promise"
+    ]
+  },
+  "priority": 10,
+  "consumesTurn": true,
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "21日目の夕方。紅に染まる神社の境内で、黄色い髪飾りを揺らしたアオイが待っていた。",
+      "background": "shrine",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "clasp_hands_front"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……来てくれたんだね、タカシくん。",
+      "voiceUrl": "v_s2_9ba2f9ea.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "約束したからな。"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "私ね、昨日の電話のあと、ぜんぜん眠れなかったの。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_9c781216.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくんの「伝えたいこと」……聞かせてくれる？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s5_1722d4f0.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "タカシ",
+      "text": "（積み重ねてきた21日間。言葉は――もう、決まってる）"
+    },
+    {
+      "id": "s7",
+      "text": "その時――空が割れ、あの理不尽な光が境内に降り注いだ。",
+      "timeOfDay": "evening",
+      "bgm": "silence",
+      "flashEffect": "white",
+      "seUrl": "/se/piano_note.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "女神の声",
+      "text": "21日間の猶予は、ここまでです。人の子よ。",
+      "voiceUrl": "v_s8_661369db.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "え……？ だ、誰の声……？ 空が、光ってる……！？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "motion": "ardy_startled"
+        }
+      },
+      "voiceUrl": "v_s9_331e338d.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "女神の声",
+      "text": "さあ、約束の刻。私が「GO」と言ったら、5秒で告白なさい。",
+      "voiceUrl": "v_s10_ce3d94be.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "女神の声",
+      "text": "できなければ……今度こそ、跡形もなく◯します。",
+      "voiceUrl": "v_s11_03368323.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "（来た……！ 女神の、最終試練……！）"
+    },
+    {
+      "id": "s13",
+      "speaker": "女神の声",
+      "text": "レディー……GO！！",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s13_a7a8efd4.mp3"
+    },
+    {
+      "id": "s14",
+      "text": "",
+      "camera": "speaker",
+      "choices": [
+        {
+          "id": "confess_sincere",
+          "text": "「アオイ、好きだ！ 俺と付き合ってくれ！！」",
+          "goto": "sincere",
+          "setFlags": {
+            "confessed": true,
+            "confession_sincere": true
+          }
+        },
+        {
+          "id": "confess_hentai",
+          "text": "「アオイの膝裏も靴下の境界線も、全部愛してる！！」",
+          "goto": "hentai",
+          "setFlags": {
+            "confessed": true
+          }
+        },
+        {
+          "id": "confess_poem",
+          "text": "「出会ったのは桜の季節で、君の横顔は春の陽だまりのようで――」",
+          "goto": "poem",
+          "setFlags": {
+            "confession_failed": true
+          }
+        }
+      ],
+      "choiceTimeout": {
+        "seconds": 5,
+        "goto": "timeout",
+        "setFlags": {
+          "confession_failed": true
+        }
+      }
+    },
+    {
+      "id": "sincere",
+      "speaker": "タカシ",
+      "text": "アオイ！！ 好きだ！！ 俺と、付き合ってくれ！！",
+      "camera": "close"
+    },
+    {
+      "id": "s16",
+      "speaker": "女神の声",
+      "text": "……2秒。ふん。短くて、まっすぐ。……合格です。",
+      "nextSceneId": "after",
+      "voiceUrl": "v_s16_fc55bfb0.mp3"
+    },
+    {
+      "id": "hentai",
+      "speaker": "タカシ",
+      "text": "アオイの膝裏も！ 靴下の境界線も！ 全部、全部愛してるうううう！！",
+      "camera": "close"
+    },
+    {
+      "id": "s18",
+      "speaker": "女神の声",
+      "text": "……4秒。……変態。けれど、本気は本気のようですね。……まあ、ぎりぎり合格としましょう。",
+      "nextSceneId": "after",
+      "voiceUrl": "v_s18_a5592ec7.mp3"
+    },
+    {
+      "id": "poem",
+      "speaker": "タカシ",
+      "text": "で、出会ったのは桜の季節で……君の横顔は春の陽だまりのようで、その――"
+    },
+    {
+      "id": "s20",
+      "speaker": "女神の声",
+      "text": "5秒。……長い！！",
+      "nextSceneId": "fail",
+      "voiceUrl": "v_s20_7b0f30b6.mp3"
+    },
+    {
+      "id": "timeout",
+      "speaker": "タカシ",
+      "text": "ア、アオイ……！ お、俺は、その……！"
+    },
+    {
+      "id": "s22",
+      "speaker": "女神の声",
+      "text": "……5秒。時間切れです。",
+      "voiceUrl": "v_s22_ecd74484.mp3"
+    },
+    {
+      "id": "fail",
+      "text": "轟音。視界が真っ白に染まり――俺の意識は、そこで途切れた。",
+      "flashEffect": "white",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "after",
+      "text": "光が粒子となって、夕空へ溶けていく。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "surprised"
+        }
+      }
+    },
+    {
+      "id": "s25",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシ、くん……。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s25_19da849a.mp3"
+    },
+    {
+      "id": "end",
+      "text": "――"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { CHARACTERS } from '../../data/characters';
+import { CHARACTERS, HEROINE_IDS } from '../../data/characters';
 import { CallScenario, CommunicationResult, MailScenario, NightCommunication } from '../../types/communication';
 import { scenarioRepository } from '../../services/scenario/ScenarioRepository';
 import { PhoneNotificationCard } from '../../components/Phone/PhoneNotificationCard';
@@ -149,8 +149,8 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
                 </span>
               </div>
               <div className="affinity-list">
-                {Object.entries(CHARACTERS).map(([charId, char]) => {
-                  if (charId === 'god') return null; // ヒロイン3人のみ表示
+                {HEROINE_IDS.map((charId) => {
+                  const char = CHARACTERS[charId];
                   const val = affinities[charId] || 0;
                   const name = char.name[lang] || char.name.ja;
                   const percent = Math.min(100, Math.round((val / MAX_AFFINITY_SCALE) * 100));

@@ -1,0 +1,147 @@
+{
+  "id": "shion_tarot",
+  "title": {
+    "ja": "図書室: シオンの占い"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 8,
+      "to": 10
+    },
+    "locations": [
+      "library"
+    ],
+    "unlessFlags": [
+      "seen_shion_tarot"
+    ]
+  },
+  "bgm": "mysterious",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintText": {
+        "ja": "シオンがカードを並べている。"
+      },
+      "hintCharacterIds": [
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……ちょうどよかった。あなたのこと、占ってたの。",
+      "setFlags": {
+        "seen_shion_tarot": true
+      },
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_s1_05938b30.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "俺のことを？"
+    },
+    {
+      "id": "s3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "五秒様の資料を読んでたら、試したくなって。……出たカードは「塔」。突然の災難。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_eb553d63.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "でも、その災難の中で、あなたは誰かの英雄になる。……らしいわ。",
+      "camera": "close",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s4_b7059fb5.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「シオンは、俺のこと心配してくれてるのか？」",
+          "goto": "a",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「英雄か……悪くないな」",
+          "goto": "b",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……別に。面白い観察対象がいなくなったら、退屈なだけ。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_a_a5a1a457.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……ほんとに、それだけよ。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s7_e5d3bd3a.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "ただの暇つぶしよ。真に受けないで。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_b_51fb9867.mp3"
+    },
+    {
+      "id": "end",
+      "text": "シオンはカードを片付けると、また本の世界へ戻っていった。"
+    }
+  ]
+}

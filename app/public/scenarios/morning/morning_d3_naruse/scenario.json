@@ -1,0 +1,85 @@
+{
+  "id": "morning_d3_naruse",
+  "title": {
+    "ja": "朝: ナルセの作戦会議"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 3,
+      "to": 3
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "よお、タカシ。聞いたぞ。アオイさんと毎朝一緒に登校してるらしいな。",
+      "background": "school_gate",
+      "timeOfDay": "morning",
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_proud"
+        }
+      },
+      "voiceUrl": "v_s1_01e58ab8.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "……隣に住んでるんだから、自然とそうなるだろ。"
+    },
+    {
+      "id": "s3",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "甘い！ 恋愛とは戦争だ。「自然と」なんて言ってるうちに、他の男にかっさらわれるぞ。",
+      "avatars": {
+        "naruse": {
+          "expression": "angry",
+          "motion": "ardy_point"
+        }
+      },
+      "voiceUrl": "v_s3_0976cfb2.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "いいか、恋愛マスターの格言を授けよう。「女子は、変化に気づいてくれる男に弱い」。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_f5a06150.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "……一応聞くけど、その格言の出典は？"
+    },
+    {
+      "id": "s6",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "昨日読んだ少女漫画だ。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s6_805eb3a5.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "タカシ",
+      "text": "（今の俺には、そんな藁にもすがりたい……）"
+    }
+  ]
+}

@@ -8,11 +8,15 @@ export interface ChoiceBoxProps {
     goto: string;
   }>;
   onSelect: (index: number) => void;
+  /** 制限時間（秒）。省略時は10秒 */
+  timeLimitSec?: number;
+  /** 時間切れ時。省略時は1番目の選択肢を選ぶ */
+  onTimeout?: () => void;
 }
 
-export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
+export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect, timeLimitSec = 10, onTimeout }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(timeLimitSec);
   const [isUrgent, setIsUrgent] = useState(false);
   const [isTick, setIsTick] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -28,11 +32,13 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
   // タイムアウト時の自動選択は最新の onSelect を呼ぶ（再描画で関数が変わってもタイマーを巻き戻さない）
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onTimeoutRef = useRef(onTimeout);
+  onTimeoutRef.current = onTimeout;
   const choicesKey = choices.map((choice) => `${choice.goto}:${choice.text}`).join('|');
 
-  // カウントダウンタイマー (10秒)。選択肢が変わったときだけ最初から数え直す
+  // カウントダウンタイマー。選択肢が変わったときだけ最初から数え直す
   useEffect(() => {
-    setCountdown(10);
+    setCountdown(timeLimitSec);
     setIsUrgent(false);
 
     timerRef.current = window.setInterval(() => {
@@ -45,11 +51,11 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
         timerRef.current = null;
       }
     };
-  }, [choicesKey]);
+  }, [choicesKey, timeLimitSec]);
 
   // 1秒ごとの演出と、0秒になったら1番目の選択肢を自動選択
   useEffect(() => {
-    if (countdown >= 10) return;
+    if (countdown >= timeLimitSec) return;
     setIsTick(true);
     const tickTimer = window.setTimeout(() => setIsTick(false), 220);
     if (countdown <= 3) setIsUrgent(true);
@@ -60,10 +66,14 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
         timerRef.current = null;
       }
       soundManager.playUiSe('select');
-      onSelectRef.current(0);
+      if (onTimeoutRef.current) {
+        onTimeoutRef.current();
+      } else {
+        onSelectRef.current(0);
+      }
     }
     return () => window.clearTimeout(tickTimer);
-  }, [countdown]);
+  }, [countdown, timeLimitSec]);
 
   // 選択肢クリックハンドラ
   const handleSelect = (idx: number, e: React.MouseEvent) => {

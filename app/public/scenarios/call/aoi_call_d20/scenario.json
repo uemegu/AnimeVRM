@@ -1,0 +1,114 @@
+{
+  "id": "aoi_call_d20",
+  "characterId": "aoi",
+  "title": {
+    "ja": "決戦前夜"
+  },
+  "priority": 10,
+  "availability": {
+    "dayRange": {
+      "from": 20,
+      "to": 20
+    },
+    "requireFlags": [
+      "aoi_t9_corridor"
+    ]
+  },
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……もしもし。ごめんね、こんな時間に。なんだか、眠れなくて。"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_d6bf2539.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "明日で、私がこの街に戻ってきて、ちょうど3週間なんだよ。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_8f6c9a8f.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "ねえ。明日の夕方、あの神社に来てくれない？ 最初の日に、一緒にお参りした神社。"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_4",
+      "voiceUrl": "v_step_3_9ced6455.mp3"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_call_d20_c1",
+          "text": {
+            "ja": "必ず行く。伝えたいことがあるんだ"
+          },
+          "goto": "promise",
+          "setFlags": {
+            "aoi_t10_promise": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "aoi_call_d20_c2",
+          "text": {
+            "ja": "明日はちょっと用事が……"
+          },
+          "goto": "busy"
+        }
+      ]
+    },
+    "promise": {
+      "id": "promise",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……うん。待ってる。私も、伝えたいことがあるから。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_6",
+      "voiceUrl": "v_promise_a5624ef7.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "おやすみ、タカシくん。……明日、ね。"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_step_6_0a53dec2.mp3"
+    },
+    "busy": {
+      "id": "busy",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……そっか。うん、ごめんね、急に。おやすみ。"
+      },
+      "expression": "sad",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_busy_b01acb80.mp3"
+    }
+  }
+}

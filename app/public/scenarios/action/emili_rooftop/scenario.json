@@ -1,0 +1,170 @@
+{
+  "id": "emili_rooftop",
+  "title": {
+    "ja": "屋上: お嬢様のお弁当"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 4
+    },
+    "locations": [
+      "rooftop"
+    ],
+    "unlessFlags": [
+      "seen_emili_rooftop"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintText": {
+        "ja": "屋上から、エミリの明るい声が聞こえる。"
+      },
+      "hintCharacterIds": [
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "あ、タカシくん！ 一緒にお昼食べよ！ 見て見て、今日のお弁当！",
+      "setFlags": {
+        "seen_emili_rooftop": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Ohoho"
+        }
+      },
+      "voiceUrl": "v_s1_aa0d74ac.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "重箱だった。三段重ねの、黒塗りに金蒔絵の。"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "うちのシェフが毎朝作ってくれるんだけど、量が多くて食べきれないの〜。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s3_27731879.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "よかったら伊勢海老、一本どう？",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_219b3f09.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "ありがたくいただく",
+          "goto": "eat",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「毎日こんなに豪華なの？」と聞いてみる",
+          "goto": "ask",
+          "setFlags": {
+            "emili_talked_dad": true
+          },
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "eat",
+      "text": "ぷりっぷりだった。人生で一番うまい昼飯だった。"
+    },
+    {
+      "id": "s7",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "でしょー！ タカシくん、いい食べっぷり！ 気に入った！",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s7_e18eac63.mp3"
+    },
+    {
+      "id": "ask",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "うん。パパがね、すっごく過保護なの。お弁当もSPも運転手も、ぜーんぶパパの手配。",
+      "avatars": {
+        "emili": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_ask_7eadece6.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "最近なんて「防犯訓練をする」とか言い出して、変な人たち雇ってるみたいでさ。",
+      "avatars": {
+        "emili": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s9_86146fbd.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "……ま、いっか！ 伊勢海老食べよ！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s10_24aeb99c.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "タカシ",
+      "text": "（防犯訓練……？）"
+    },
+    {
+      "id": "end",
+      "text": "屋上を吹き抜ける春風の中、エミリの笑い声が弾んでいた。"
+    }
+  ]
+}

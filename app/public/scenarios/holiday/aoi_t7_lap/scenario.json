@@ -1,0 +1,243 @@
+{
+  "id": "aoi_t7_lap",
+  "title": {
+    "ja": "アオイの部屋: 甘いお礼"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 13,
+      "to": 14
+    },
+    "locations": [
+      "aoi_house"
+    ],
+    "requireFlags": [
+      "invited_aoi_house"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t7_lap"
+    ]
+  },
+  "bgm": "love",
+  "priority": 6,
+  "actionHints": [
+    {
+      "locationId": "aoi_house",
+      "hintText": {
+        "ja": "約束通り、アオイの部屋へ。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "いらっしゃい、タカシくん。……散らかってないかな。えへへ、緊張する。",
+      "setFlags": {
+        "seen_aoi_t7_lap": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Standing Greeting"
+        }
+      },
+      "voiceUrl": "v_s1_ef6e88c0.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "黄色いクッション、ぬいぐるみ、甘い紅茶の香り。アオイの部屋だ。"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "はい、特製フルーツパフェ。タカシくんの好きなもの、全部乗せたの。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_951ceda1.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "すごい……お店のみたいだ。"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……ねえ、タカシくん。食べ終わったら……こっち、おいで？",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s5_73ad7b30.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "アオイが絨毯の上に正座して、スカートの上をぽんぽんと叩いた。"
+    },
+    {
+      "id": "s7",
+      "speaker": "タカシ",
+      "text": "ひ、膝枕……！？"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "うん。体育館で、私をかばって走ってくれたでしょ？ 今度は私が癒してあげる番。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s8_06ca388c.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "耳かきも、してあげるね。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s9_a19485e5.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "素直に、アオイの膝に頭を預ける",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t7_lap": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "照れくさくて「いや、大丈夫！」と遠慮する",
+          "goto": "shy",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "text": "柔らかな温もり。甘い香り。アオイの指先が、そっと耳元をくすぐる。……天国だった。"
+    },
+    {
+      "id": "s12",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん、あの時言ってくれたよね。「全部俺が一生守る」って。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s12_16bd462c.mp3"
+    },
+    {
+      "id": "s13",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……靴下の境界線とか、膝裏とか、いろいろ言ってたけど。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s13_cf45f055.mp3"
+    },
+    {
+      "id": "s14",
+      "speaker": "タカシ",
+      "text": "ぶっっ！？ あ、あれはテンパってて――"
+    },
+    {
+      "id": "s15",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ、いいの。すっごく嬉しかったんだもん。そんなに見ててくれたんだって。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s15_798b47d6.mp3"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……その代わり、一生、私のそばにいてね？ 私のヒーローさん。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s16_f44ffad2.mp3"
+    },
+    {
+      "id": "shy",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "そっか……。ふふ、タカシくん、照れ屋さんだもんね。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_shy_92a13e12.mp3"
+    },
+    {
+      "id": "s18",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "じゃあ、パフェもう一個作ってあげる！",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s18_a4638068.mp3"
+    },
+    {
+      "id": "s19",
+      "text": "アオイは笑っていたけれど、少しだけ残念そうに、膝の上のスカートを撫でた。"
+    },
+    {
+      "id": "end",
+      "text": "窓の外では、春の日差しがゆっくりと傾き始めていた。"
+    }
+  ]
+}

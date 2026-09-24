@@ -1,0 +1,131 @@
+{
+  "id": "aoi_rooftop_ahn",
+  "title": {
+    "ja": "屋上: あーん"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 15,
+      "to": 17
+    },
+    "locations": [
+      "rooftop"
+    ],
+    "requireFlags": [
+      "aoi_rescued"
+    ],
+    "unlessFlags": [
+      "seen_aoi_rooftop_ahn"
+    ]
+  },
+  "bgm": "love",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintText": {
+        "ja": "屋上で、アオイがお弁当を持って待っている。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん、こっちこっち。今日もお弁当、作ってきたよ。",
+      "setFlags": {
+        "seen_aoi_rooftop_ahn": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s1_763c4e70.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "はい、あーん。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s2_8a4c9f86.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（あの日以来、アオイの距離感が完全にバグっている……！）"
+    },
+    {
+      "id": "s4",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "素直に「あーん」を受け入れる",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「自分で食べられるって！」と照れる",
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "おいしい？ ……えへへ、よかった。一生作ってあげるね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_a_3be9725f.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "タカシ",
+      "text": "（一生……！）",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ、照れてる。かわいい。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "voiceUrl": "v_b_84d04bf0.mp3"
+    },
+    {
+      "id": "end",
+      "text": "屋上に吹く風は、もうすっかり初夏の匂いがした。"
+    }
+  ]
+}

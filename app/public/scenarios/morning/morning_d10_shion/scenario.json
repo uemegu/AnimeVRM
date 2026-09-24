@@ -1,0 +1,72 @@
+{
+  "id": "morning_d10_shion",
+  "title": {
+    "ja": "朝: 歩き読書のシオン"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 10,
+      "to": 10
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "校門の前で、シオンが本を読みながら器用に歩いていた。",
+      "background": "school_gate",
+      "timeOfDay": "morning",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "motion": "chin_rest"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……おはよう。今日の運勢、見てあげましょうか。",
+      "voiceUrl": "v_s2_92197226.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "シオン、占いもできるのか。"
+    },
+    {
+      "id": "s4",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "暇つぶしよ。……あなた、近いうちに「黒い災難」に見舞われるわ。",
+      "camera": "close",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s4_087627f8.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "でも、逃げずに立ち向かえば吉。……それと、跳び箱とマットがラッキーアイテム。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s5_bc3b3ae4.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "タカシ",
+      "text": "ずいぶん具体的だな！？"
+    }
+  ]
+}

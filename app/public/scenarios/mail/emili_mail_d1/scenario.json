@@ -1,0 +1,58 @@
+{
+  "id": "emili_mail_d1",
+  "characterId": "emili",
+  "title": "エミリからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 1,
+      "to": 2
+    }
+  },
+  "previewText": {
+    "ja": "よろしくね〜！"
+  },
+  "time": "21:15",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "やっほー！ エミリだよ！ 連絡先ゲットしちゃった♪"
+      },
+      "time": "21:14"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "ねえねえ、購買の「幻のいちごデニッシュ」知ってる？ いつか一緒に並ぼ！"
+      },
+      "time": "21:15"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "並ぼう。俺が確保する"
+      },
+      "reactionText": {
+        "ja": "頼もしい〜！ 期待してるね！"
+      },
+      "reactionTime": "21:17",
+      "addAffinity": {
+        "emili": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "連絡先いつ交換したっけ"
+      },
+      "reactionText": {
+        "ja": "ふふん、お嬢様の情報網をなめないでね♪"
+      },
+      "reactionTime": "21:17"
+    }
+  ]
+}

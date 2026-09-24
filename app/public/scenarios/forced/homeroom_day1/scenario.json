@@ -1,0 +1,311 @@
+{
+  "id": "homeroom_day1",
+  "title": {
+    "ja": "ホームルーム: 新しいクラス"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 1
+    }
+  },
+  "priority": 10,
+  "consumesTurn": true,
+  "location": "classroom",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "2年B組の教室。ざわめきが、教壇に立った女性の一瞥でぴたりと止んだ。",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "担任の白石です。……1年間よろしく。遅刻・居眠り・不純異性交遊は、見つけ次第処します。",
+      "voiceUrl": "v_s2_473269f7.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（処すって言った。今日だけで◯すと処すを両方聞いたぞ……）"
+    },
+    {
+      "id": "s4",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "転入生を紹介します。入って。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s4_c62f89fc.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "アオイです。小さい頃この街に住んでいて、戻ってきました。よろしくお願いします！",
+      "avatars": {
+        "teacher": {
+          "position": "left",
+          "expression": "neutral"
+        },
+        "aoi": {
+          "position": "right",
+          "expression": "happy",
+          "motion": "Quick Formal Bow"
+        }
+      },
+      "voiceUrl": "v_s5_096c095f.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "ねえカナ、今の子めっちゃ可愛くない！？",
+      "avatars": {
+        "teacher": {
+          "visible": false
+        },
+        "aoi": {
+          "visible": false
+        },
+        "yui": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "mob_chat_gesture",
+          "motionLoop": true
+        },
+        "kana": {
+          "position": "right",
+          "expression": "surprised"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s6_1300b4fb.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "しかもタカシくんと幼馴染らしいよ。朝、手繋いで走ってきたって。",
+      "avatars": {
+        "kana": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s7_9ee72beb.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "（噂の足が速すぎる）"
+    },
+    {
+      "id": "s9",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "よおタカシ。朝から手繋ぎ登校とは、いいご身分だな。",
+      "avatars": {
+        "yui": {
+          "visible": false
+        },
+        "kana": {
+          "visible": false
+        },
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_proud"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s9_f6df28c6.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "こいつはナルセ。中学からの腐れ縁で、恋愛経験ゼロのくせに自称・恋愛マスター。"
+    },
+    {
+      "id": "s11",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "安心しろ。この俺が、お前の恋を完璧にプロデュースしてやる。",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "motion": "ardy_point"
+        }
+      },
+      "voiceUrl": "v_s11_a975c526.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "……お前の指南で成功したやつ、見たことないんだけど。"
+    },
+    {
+      "id": "s13",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "はーい、そこの男子2人！ アオイちゃんの幼馴染ってどっち？",
+      "avatars": {
+        "naruse": {
+          "position": "left"
+        },
+        "emili": {
+          "position": "right",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      },
+      "voiceUrl": "v_s13_50d21271.mp3"
+    },
+    {
+      "id": "s14",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "こっちです！ 俺はただの親友です！",
+      "avatars": {
+        "naruse": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s14_d0bce4f6.mp3"
+    },
+    {
+      "id": "s15",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "エミリだよ、よろしくね！ アオイちゃんとはもう友達になったんだ〜。",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s15_488e44f5.mp3"
+    },
+    {
+      "id": "s16",
+      "text": "金髪をなびかせて笑う彼女は、この辺りで知らない人はいない名家のお嬢様らしい。"
+    },
+    {
+      "id": "s17",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……うるさい。朝から騒がしいのね、このクラス。",
+      "avatars": {
+        "naruse": {
+          "visible": false
+        },
+        "emili": {
+          "position": "left"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s17_d5f920f3.mp3"
+    },
+    {
+      "id": "s18",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "あ、シオンちゃん！ 本ばっかり読んでないで一緒に話そうよ〜。",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s18_776328a4.mp3"
+    },
+    {
+      "id": "s19",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……遠慮しておく。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s19_6cb4600e.mp3"
+    },
+    {
+      "id": "s20",
+      "text": "窓際で文庫本を閉じた彼女――シオンは、成績優秀・運動万能。そして極度の面倒くさがりだ。"
+    },
+    {
+      "id": "s21",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……あなた。朝、神社で叫んでたでしょう。",
+      "camera": "speaker",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s21_23786e0e.mp3"
+    },
+    {
+      "id": "s22",
+      "speaker": "タカシ",
+      "text": "えっ、なんで知って……"
+    },
+    {
+      "id": "s23",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "通学路から丸聞こえだったわ。……あの神社、変な言い伝えがあるから。気をつけて。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s23_7737426d.mp3"
+    },
+    {
+      "id": "s24",
+      "speaker": "タカシ",
+      "text": "（変な言い伝え……？）"
+    },
+    {
+      "id": "s25",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "そこ。ホームルーム中の私語は3回で処します。今、2回目。",
+      "avatars": {
+        "emili": {
+          "visible": false
+        },
+        "shion": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "center",
+          "expression": "angry"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s25_a473ab27.mp3"
+    },
+    {
+      "id": "s26",
+      "speaker": "タカシ",
+      "text": "すみませんでした！！"
+    }
+  ]
+}
