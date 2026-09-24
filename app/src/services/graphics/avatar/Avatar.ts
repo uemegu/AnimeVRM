@@ -6,6 +6,7 @@ import { applyToonShader, ToonShaderController } from '../shader/ToonShader';
 import { HairShadowUniforms } from '../shader/HairShadow';
 import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
+import { getSeamlessLoopClip } from './seamlessLoop';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -277,7 +278,9 @@ export class Avatar {
     }
 
     try {
-      const clip = await loadMixamoAnimation(url, this.vrm);
+      const sourceClip = await loadMixamoAnimation(url, this.vrm);
+      // Repeating clips are cross-faded into their own start so the loop point never jumps.
+      const clip = loop ? getSeamlessLoopClip(sourceClip) : sourceClip;
       const action = this.mixer.clipAction(clip);
 
       if (loop) {

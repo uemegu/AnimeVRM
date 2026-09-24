@@ -33,6 +33,8 @@ import { ShaftModeController } from '../effects/shaft/ShaftModeController';
 import { Persona5CrowdController } from '../crowd/Persona5CrowdController';
 import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
 import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
+import { CLASSROOM_CROWD_PRESET } from '../crowd/ClassroomCrowdPreset';
+import type { ClassroomStage } from '../scene/ClassroomStage';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
@@ -58,6 +60,9 @@ export class ScenarioController {
   private onSwitchScenePreset: (presetId: ScenePresetId) => void;
   private panoramaController?: PanoramaBackgroundController;
   private shaftModeController?: ShaftModeController;
+  private classroomStage?: ClassroomStage;
+  /** True while the classroom is shown because a scenario asked for it, not the free-roam mode. */
+  private isScenarioStageActive = false;
 
   private savedCameraPosBeforeMultiAvatar: THREE.Vector3 | null = null;
   private savedCameraTargetBeforeMultiAvatar: THREE.Vector3 | null = null;
@@ -72,6 +77,7 @@ export class ScenarioController {
     windController: WindController;
     panoramaController?: PanoramaBackgroundController;
     shaftModeController?: ShaftModeController;
+    classroomStage?: ClassroomStage;
     getConfig: () => AvatarConfig;
     onApplyConfig: (cfg: AvatarConfig) => void;
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
@@ -79,6 +85,7 @@ export class ScenarioController {
   }) {
     this.panoramaController = options.panoramaController;
     this.shaftModeController = options.shaftModeController;
+    this.classroomStage = options.classroomStage;
     const panoramaController = options.panoramaController;
     this.scene = options.scene;
     this.camera = options.camera;
@@ -389,6 +396,19 @@ export class ScenarioController {
       onSwitchShaftSpaceStage: (stage) => {
         this.shaftModeController?.setSpaceStage(stage);
       },
+      onSwitchStage: async (stage) => {
+        if (stage === 'classroom') {
+          if (!this.classroomStage) {
+            console.warn('[ScenarioController] No classroom stage is available in this viewer.');
+            return;
+          }
+          await this.classroomStage.enter();
+          this.isScenarioStageActive = true;
+        } else if (this.isScenarioStageActive) {
+          this.classroomStage?.exit();
+          this.isScenarioStageActive = false;
+        }
+      },
       onUpdateCrowd: async (crowdConfig) => {
         if (!crowdConfig) {
           this.crowdController.setVisible(false);
@@ -411,7 +431,9 @@ export class ScenarioController {
           const members =
             presetName === 'school_gate'
               ? MORNING_SCHOOL_GATE_CROWD
-              : CORRIDOR_CROWD_PRESET;
+              : presetName === 'classroom'
+                ? CLASSROOM_CROWD_PRESET
+                : CORRIDOR_CROWD_PRESET;
           for (const m of members) {
             await this.crowdController.addMember(m);
           }
@@ -476,6 +498,9 @@ export class ScenarioController {
       this.dreamBackground.update(delta);
     }
     this.crowdController.update(delta);
+    if (this.isScenarioStageActive) {
+      this.classroomStage?.update();
+    }
   }
 
   public syncPlayStateUI(): void {

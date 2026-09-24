@@ -17,6 +17,7 @@ import { AvatarManager } from './avatar/AvatarManager';
 import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
 import { ClassroomExperienceController } from './scenario/ClassroomExperienceController';
+import { ClassroomStage } from './scene/ClassroomStage';
 import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { ShaftModeController } from './effects/shaft/ShaftModeController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
@@ -156,6 +157,15 @@ const scenePresetManager = new ScenePresetManager({
   },
 });
 
+const classroomStage = new ClassroomStage({
+  scene: viewerCore.scene,
+  dirLight: viewerCore.dirLight,
+  getConfig: () => currentConfig,
+  onApplyConfig: (cfg) => {
+    applyConfigToSceneAndRenderer(cfg);
+  },
+});
+
 const scenarioController = new ScenarioController({
   scene: viewerCore.scene,
   camera: viewerCore.camera,
@@ -166,6 +176,7 @@ const scenarioController = new ScenarioController({
   windController,
   panoramaController: viewerCore.panoramaController,
   shaftModeController,
+  classroomStage,
   getConfig: () => currentConfig,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
@@ -176,17 +187,12 @@ const scenarioController = new ScenarioController({
 });
 
 const classroomExperienceController = new ClassroomExperienceController({
-  scene: viewerCore.scene,
   camera: viewerCore.camera,
-  dirLight: viewerCore.dirLight,
   controls: viewerCore.controls,
   avatarManager,
   scenarioController,
   avatarTransformController,
-  getConfig: () => currentConfig,
-  onApplyConfig: (cfg) => {
-    applyConfigToSceneAndRenderer(cfg);
-  },
+  stage: classroomStage,
 });
 
 // --------------------------------------------------

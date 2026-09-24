@@ -214,7 +214,7 @@ export interface ScenarioScene {
 
 export interface ScenarioCrowdConfig {
   enabled?: boolean;
-  preset?: 'school_gate' | 'corridor' | string;
+  preset?: 'school_gate' | 'corridor' | 'classroom' | string;
   opacity?: number;
   tone?: 'p5' | 'monotone';
 }
@@ -226,9 +226,13 @@ export interface ScenarioChapter {
   scenes: ScenarioScene[];
 }
 
+/** 3D の舞台。背景画像の代わりにモデルの部屋の中でシナリオを演じる */
+export type ScenarioStageId = 'classroom';
+
 export interface ScenarioPackage {
   id: string;
   title: string;
+  stage?: ScenarioStageId; // 3D の舞台（指定時は background 画像ではなく部屋のモデルを表示）
   characters?: ScenarioCharacterPlacement[]; // Placements for multi-character scenarios
   panoramaBackgroundUrl?: string; // パッケージ全体のデフォルト360°パノラマ背景URL
   bgm?: string;       // Sound Master ID (e.g. 'bgm_main')

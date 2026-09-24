@@ -12,6 +12,7 @@ import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { getScenarioMeta, SCENARIO_REGISTRY } from './scenario/scenarioRegistry';
 import { showToast } from './ui/components/Toast';
 import { ShaftModeController } from './effects/shaft/ShaftModeController';
+import { ClassroomStage } from './scene/ClassroomStage';
 
 // --------------------------------------------------
 // 1. Scenario Identification
@@ -455,6 +456,15 @@ let isStartingPlayback = false;
 // --------------------------------------------------
 // 4. Scenario Controller Setup
 // --------------------------------------------------
+const classroomStage = new ClassroomStage({
+  scene: viewerCore.scene,
+  dirLight: viewerCore.dirLight,
+  getConfig: () => currentConfig,
+  onApplyConfig: (cfg) => {
+    applyConfigToSceneAndRenderer(cfg);
+  },
+});
+
 const scenarioController = new ScenarioController({
   scene: viewerCore.scene,
   camera: viewerCore.camera,
@@ -465,6 +475,7 @@ const scenarioController = new ScenarioController({
   windController,
   panoramaController: viewerCore.panoramaController,
   shaftModeController,
+  classroomStage,
   getConfig: () => currentConfig,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);

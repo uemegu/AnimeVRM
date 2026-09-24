@@ -444,6 +444,14 @@ export interface Translations {
     hairShadowStrength: string;
     hairShadowDepthBias: string;
     hairShadowMaxDepthDiff: string;
+    faceSdfFolder: string;
+    faceSdfEnabled: string;
+    faceSdfSoftness: string;
+    faceSdfNoseSize: string;
+    faceSdfNoseStart: string;
+    faceSdfSkipStart: string;
+    faceSdfSkipEnd: string;
+    faceSdfSkipBlend: string;
     hairRingFolder: string;
     hairRingEnabled: string;
     hairRingHeight: string;

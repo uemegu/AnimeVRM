@@ -19,6 +19,7 @@ import { FastMotionEffect, FastMotionConfig } from './effects/motion';
 import { WateryEyeEffect, WateryEyeConfig } from './effects/eye';
 import { FaceOverlayEffect, FaceOverlayKind, FaceOverlayState, getFaceOverlayKindForTexture } from './effects/FaceOverlayEffect';
 import { MorphTargetPreview } from './avatar/MorphTargetPreview';
+import { getSeamlessLoopClip } from './animation/seamlessLoop';
 
 export interface BlushOptions {
   enabled?: boolean;
@@ -702,11 +703,13 @@ export class Avatar {
     this.ensureAnimationMixer();
 
     try {
-      const clip = await loadMixamoAnimation(url, this.vrm);
+      const sourceClip = await loadMixamoAnimation(url, this.vrm);
       if (!this.vrm || !this.mixer || requestId !== this.animationRequestId) {
         return null;
       }
       this.releaseTransientClip(crossFadeDuration);
+      // Repeating clips are cross-faded into their own start so the loop point never jumps.
+      const clip = loop ? getSeamlessLoopClip(sourceClip) : sourceClip;
       const action = this.mixer.clipAction(clip);
 
       if (loop) {
