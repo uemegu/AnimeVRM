@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
+import { soundManager } from '../../services/audio/SoundManager';
 import './ConfirmModal.css';
 
 export interface ConfirmModalProps {
@@ -20,38 +21,27 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  // 効果音再生ヘルパー（選択肢画面と共通）
-  const playSE = useCallback((url: string, volume = 0.5) => {
-    try {
-      const audio = new Audio(url);
-      audio.volume = volume;
-      audio.play().catch(() => {});
-    } catch {
-      // Audio play catch
-    }
-  }, []);
-
   // モーダルオープン時に表示SE再生
   useEffect(() => {
     if (isOpen) {
-      playSE('/se/items_shown.mp3', 0.6);
+      soundManager.playSe('/se/items_shown.mp3', 0.6);
     }
-  }, [isOpen, playSE]);
+  }, [isOpen]);
 
   // ホバー音
   const handleMouseEnter = () => {
-    playSE('/se/items_hover.mp3', 0.45);
+    soundManager.playSe('/se/items_hover.mp3', 0.45);
   };
 
   // 確定クリック
   const handleConfirm = () => {
-    playSE('/se/items_chose.mp3', 0.65);
+    soundManager.playSe('/se/items_chose.mp3', 0.65);
     onConfirm();
   };
 
   // キャンセルクリック
   const handleCancel = () => {
-    playSE('/se/items_chose.mp3', 0.55);
+    soundManager.playSe('/se/items_chose.mp3', 0.55);
     onCancel?.();
   };
 

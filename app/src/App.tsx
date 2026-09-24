@@ -8,8 +8,7 @@ import { SaveService } from './services/save/SaveService';
 import { GameHeader } from './components/Header/GameHeader';
 import { TimeOfDayId } from './types/visual';
 import { CHARACTERS } from './data/characters';
-import { AudioLipSync } from './services/audio/AudioLipSync';
-import { SoundManager } from './services/audio/SoundManager';
+import { soundManager } from './services/audio/SoundManager';
 import { ConfirmModal } from './components/Common/ConfirmModal';
 import { LicenseModal } from './components/License/LicenseModal';
 import { SaveLoadModal } from './components/SaveLoad/SaveLoadModal';
@@ -34,8 +33,6 @@ import {
 export const App: React.FC = () => {
   const [lang, setLang] = useState<SupportedLanguage>('ja');
   const saveService = useMemo(() => new SaveService(), []);
-  const soundManager = useMemo(() => new SoundManager(), []);
-  const audioLipSync = useMemo(() => new AudioLipSync(), []);
 
   // URLクエリパラメータによるテスト・開発用初期フェーズ指定
   const initialPhaseParam = useMemo(() => {
@@ -80,8 +77,7 @@ export const App: React.FC = () => {
   // ミュート状態をオーディオサービスに同期
   useEffect(() => {
     soundManager.setMuted(isMuted);
-    audioLipSync.setMuted(isMuted);
-  }, [isMuted, soundManager, audioLipSync]);
+  }, [isMuted]);
 
   // ゲーム全体の状態
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -145,13 +141,13 @@ export const App: React.FC = () => {
   useEffect(() => {
     // 初回アセット事前読み込み画面表示中はBGM停止
     if (isInitialLoading) {
-      audioLipSync.stop();
+      soundManager.stopVoice();
       return;
     }
 
     // タイトル画面
     if (isTitleScreen) {
-      audioLipSync.stop();
+      soundManager.stopVoice();
       soundManager.playBgm('main_theme');
       return;
     }
@@ -167,7 +163,7 @@ export const App: React.FC = () => {
     }
 
     if (!currentScene) {
-      audioLipSync.stop();
+      soundManager.stopVoice();
       return;
     }
 
@@ -178,10 +174,9 @@ export const App: React.FC = () => {
 
     // ボイス＆リップシンク再生
     if (currentScene.voiceUrl) {
-      audioLipSync.loadAudioUrl(currentScene.voiceUrl, currentScene.text);
-      audioLipSync.play().catch(() => {});
+      soundManager.playVoice(currentScene.voiceUrl, currentScene.text);
     } else {
-      audioLipSync.stop();
+      soundManager.stopVoice();
     }
   }, [
     isInitialLoading,
@@ -193,17 +188,7 @@ export const App: React.FC = () => {
     currentScene?.bgm,
     currentScene?.bgmUrl,
     currentScene?.seUrl,
-    soundManager,
-    audioLipSync,
   ]);
-
-  // コンポーネント破棄時のオーディオリソース解放
-  useEffect(() => {
-    return () => {
-      soundManager.dispose();
-      audioLipSync.dispose();
-    };
-  }, [soundManager, audioLipSync]);
 
   // 時間帯 (TimeOfDay) の決定
   const activeTimeOfDay: TimeOfDayId = useMemo(() => {
@@ -310,11 +295,9 @@ export const App: React.FC = () => {
   // ボイス再聴取（履歴モーダル等から）
   const handlePlayVoice = useCallback(
     (voiceUrl: string) => {
-      if (isMuted) return;
-      audioLipSync.loadAudioUrl(voiceUrl, '');
-      audioLipSync.play().catch(() => {});
+      soundManager.playVoice(voiceUrl);
     },
-    [audioLipSync, isMuted]
+    []
   );
 
   // 会話履歴（直近3セッション）の自動記録
@@ -387,11 +370,7 @@ export const App: React.FC = () => {
   // 初回ロード開始時のオーディオアンロック処理
   const handleStartPreload = useCallback(() => {
     soundManager.unlockAudio();
-    audioLipSync.initAudioContext();
-    if (audioLipSync.audioContext && audioLipSync.audioContext.state === 'suspended') {
-      audioLipSync.audioContext.resume().catch(() => {});
-    }
-  }, [soundManager, audioLipSync]);
+  }, []);
 
   // 初回ロード完了時
   const handlePreloadComplete = useCallback(() => {
@@ -575,13 +554,10 @@ export const App: React.FC = () => {
     }
   }, [handleDialogueClick, clearAutoTimer]);
 
-  // AudioLipSyncのイベント登録（ボイス終了時のAUTO送り連動）
+  // ボイス終了時のAUTO送り連動
   useEffect(() => {
-    audioLipSync.setEvents({
-      onEnded: handleVoiceEnded,
-      onError: handleVoiceEnded,
-    });
-  }, [audioLipSync, handleVoiceEnded]);
+    soundManager.setVoiceEndedHandler(handleVoiceEnded);
+  }, [handleVoiceEnded]);
 
   // タイピング完了ハンドラ（ルートScenarioEngine.handleTypingComplete準拠）
   const handleTypingComplete = useCallback(() => {
@@ -592,7 +568,7 @@ export const App: React.FC = () => {
     const scene = currentSceneRef.current;
     const voiceKey = scene?.voiceUrl;
     // ボイスが存在し、現在再生中の場合はボイス終了ハンドラ（handleVoiceEnded）に進行を委ねる
-    if (voiceKey && audioLipSync.isPlaying) {
+    if (voiceKey && soundManager.isVoicePlaying()) {
       return;
     }
 
@@ -605,7 +581,7 @@ export const App: React.FC = () => {
     autoTimerRef.current = window.setTimeout(() => {
       handleDialogueClick();
     }, delaySec * 1000);
-  }, [audioLipSync, handleDialogueClick, clearAutoTimer]);
+  }, [handleDialogueClick, clearAutoTimer]);
 
   // シーン切替時のタイマー・状態リセット
   useEffect(() => {
@@ -622,7 +598,7 @@ export const App: React.FC = () => {
       if (nextAuto && !isWaitingChoiceRef.current && !isFinishedRef.current && currentSceneRef.current) {
         const scene = currentSceneRef.current;
         const voiceKey = scene.voiceUrl;
-        const isVoicePlaying = Boolean(voiceKey && audioLipSync.isPlaying);
+        const isVoicePlaying = Boolean(voiceKey && soundManager.isVoicePlaying());
 
         // ボイス再生中でない場合、タイピングが既に完了していればAUTOタイマーを即時セット
         if (!isVoicePlaying && isTypingCompletedRef.current) {
@@ -634,7 +610,7 @@ export const App: React.FC = () => {
       }
       return nextAuto;
     });
-  }, [audioLipSync, handleDialogueClick, clearAutoTimer]);
+  }, [handleDialogueClick, clearAutoTimer]);
 
   // Xシェア実行ハンドラ
   const handleShare = useCallback(async () => {
@@ -1148,7 +1124,6 @@ export const App: React.FC = () => {
               flags={gameState.flags}
               scenarioHistory={gameState.scenarioHistory}
               lang={lang}
-              isMuted={isMuted}
               onSave={handleSave}
               onLoad={handleLoad}
               onRollbackDay={handleRollbackDay}
@@ -1188,7 +1163,6 @@ export const App: React.FC = () => {
               activeCharId={activeCharId}
               activeModelUrl={activeModelUrl}
               activeExpression={activeExpression}
-              audioLipSync={audioLipSync}
               onDialogueClick={handleDialogueClick}
               onChoiceClick={handleChoiceClick}
               onTypingComplete={handleTypingComplete}

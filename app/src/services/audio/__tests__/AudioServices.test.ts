@@ -124,6 +124,101 @@ describe('SoundManager', () => {
       globalThis.Audio = originalAudio;
     }
   });
+
+  it('MUTE時はSEが再生されないこと、および再生中のSEがミュート時に停止されること', () => {
+    let playCallCount = 0;
+    let pauseCallCount = 0;
+
+    class MockAudio {
+      public src: string;
+      public volume: number = 1.0;
+      public muted: boolean = false;
+      constructor(src: string) {
+        this.src = src;
+      }
+      play = async () => {
+        playCallCount++;
+      };
+      pause = () => {
+        pauseCallCount++;
+      };
+    }
+
+    const originalAudio = globalThis.Audio;
+    // @ts-expect-error mock audio
+    globalThis.Audio = MockAudio;
+
+    try {
+      const sm = new SoundManager();
+
+      // 1. 通常状態でのSE再生
+      sm.playSe('/se/items_shown.mp3');
+      expect(playCallCount).toBe(1);
+
+      // 2. ミュート有効化時のSE停止
+      sm.setMuted(true);
+      expect(pauseCallCount).toBe(1);
+
+      // 3. ミュート中のSE再生試行（再生されないこと）
+      sm.playSe('/se/items_hover.mp3');
+      expect(playCallCount).toBe(1);
+
+      // 4. ミュート解除後のSE再生試行（再生されること）
+      sm.setMuted(false);
+      sm.playSe('/se/items_shown.mp3');
+      expect(playCallCount).toBe(2);
+
+      sm.dispose();
+    } finally {
+      globalThis.Audio = originalAudio;
+    }
+  });
+
+  it('ループSEがミュート状態に追従し、停止関数で止まること', () => {
+    const created: Array<{ muted: boolean; loop: boolean; paused: boolean }> = [];
+
+    class MockAudio {
+      public volume = 1.0;
+      public muted = false;
+      public loop = false;
+      public paused = true;
+      public currentTime = 0;
+      constructor(public src: string) {
+        created.push(this);
+      }
+      play = async () => {
+        this.paused = false;
+      };
+      pause = () => {
+        this.paused = true;
+      };
+    }
+
+    const originalAudio = globalThis.Audio;
+    // @ts-expect-error mock audio
+    globalThis.Audio = MockAudio;
+
+    try {
+      const sm = new SoundManager();
+      sm.setMuted(true);
+      const stop = sm.playLoopSe('/sounds/phone_vibe.mp3');
+      const vibe = created[0];
+      expect(vibe.loop).toBe(true);
+      expect(vibe.muted).toBe(true);
+
+      sm.setMuted(false);
+      expect(vibe.muted).toBe(false);
+
+      stop();
+      expect(vibe.paused).toBe(true);
+
+      // 停止後はミュート切替の対象外
+      sm.setMuted(true);
+      expect(vibe.muted).toBe(false);
+    } finally {
+      globalThis.Audio = originalAudio;
+    }
+  });
 });
 
 describe('AudioLipSync', () => {

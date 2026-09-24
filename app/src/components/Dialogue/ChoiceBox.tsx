@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { soundManager } from '../../services/audio/SoundManager';
 import './ChoiceBox.css';
 
 export interface ChoiceBoxProps {
@@ -9,31 +10,20 @@ export interface ChoiceBoxProps {
   onSelect: (index: number) => void;
 }
 
-export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect }) => {
+export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [isUrgent, setIsUrgent] = useState(false);
   const [isTick, setIsTick] = useState(false);
   const timerRef = useRef<number | null>(null);
 
-  // 効果音再生ヘルパー
-  const playSE = useCallback((url: string, volume = 0.5) => {
-    try {
-      const audio = new Audio(url);
-      audio.volume = volume;
-      audio.play().catch(() => {});
-    } catch {
-      // Audio play catch
-    }
-  }, []);
-
   // マウント時にフェードイン & 表示SE
   useEffect(() => {
     const animId = requestAnimationFrame(() => setIsVisible(true));
-    playSE('/se/items_shown.mp3', 0.6);
+    soundManager.playSe('/se/items_shown.mp3', 0.6);
 
     return () => cancelAnimationFrame(animId);
-  }, [playSE]);
+  }, []);
 
   // カウントダウンタイマー (10秒)
   useEffect(() => {
@@ -56,7 +46,7 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect }) => {
             timerRef.current = null;
           }
           // タイムアウトで自動的に1番目の選択肢を選択
-          playSE('/se/items_chose.mp3', 0.65);
+          soundManager.playSe('/se/items_chose.mp3', 0.65);
           onSelect(0);
           return 0;
         }
@@ -70,7 +60,7 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect }) => {
         timerRef.current = null;
       }
     };
-  }, [choices, onSelect, playSE]);
+  }, [choices, onSelect]);
 
   // 選択肢クリックハンドラ
   const handleSelect = (idx: number, e: React.MouseEvent) => {
@@ -79,13 +69,13 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect }) => {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    playSE('/se/items_chose.mp3', 0.65);
+    soundManager.playSe('/se/items_chose.mp3', 0.65);
     onSelect(idx);
   };
 
   // ホバー音
   const handleMouseEnter = () => {
-    playSE('/se/items_hover.mp3', 0.45);
+    soundManager.playSe('/se/items_hover.mp3', 0.45);
   };
 
   // 吹き出し矢印SVGの計算

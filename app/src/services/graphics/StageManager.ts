@@ -18,13 +18,12 @@ import { HairShadowRenderer } from './shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader } from './postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from './postprocessing/Para';
 import { setHairRingTint } from './shader/HairRing';
-import { AudioLipSync } from '../audio/AudioLipSync';
+import { soundManager } from '../audio/SoundManager';
 
 export interface StageOptions {
   canvas: HTMLCanvasElement;
   initialTimeOfDay?: TimeOfDayId;
   initialLocationId?: string;
-  audioLipSync?: AudioLipSync | null;
 }
 
 export class StageManager {
@@ -63,7 +62,6 @@ export class StageManager {
   // アバター管理
   private loadedAvatars: Map<string, Avatar> = new Map();
   private activeAvatarId: string | null = null;
-  private audioLipSync: AudioLipSync | null = null;
 
   // 現在の状態
   private currentTimeOfDay: TimeOfDayId = 'day';
@@ -75,7 +73,6 @@ export class StageManager {
 
   constructor(options: StageOptions) {
     this.canvas = options.canvas;
-    this.audioLipSync = options.audioLipSync ?? null;
     this.clock = new THREE.Clock();
 
     // 1. シーン初期化
@@ -500,11 +497,7 @@ export class StageManager {
         const activeAvatar = this.loadedAvatars.get(this.activeAvatarId)!;
         if (activeAvatar.vrm && activeAvatar.vrm.scene.visible) {
           // リップシンク反映
-          if (this.audioLipSync && this.audioLipSync.isPlaying) {
-            activeAvatar.updateLipSync(this.audioLipSync.currentPhoneme);
-          } else {
-            activeAvatar.updateLipSync(undefined);
-          }
+          activeAvatar.updateLipSync(soundManager.getVoicePhoneme());
 
           activeAvatar.update(delta);
           activeMeshes = [activeAvatar.vrm.scene];
@@ -545,10 +538,6 @@ export class StageManager {
     };
 
     animate();
-  }
-
-  public setAudioLipSync(audioLipSync: AudioLipSync | null): void {
-    this.audioLipSync = audioLipSync;
   }
 
   public dispose(): void {

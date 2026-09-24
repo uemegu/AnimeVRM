@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ActionLocationId, ActionLocationOption, DayPhase } from '../../types/game';
 import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { ConfirmModal } from '../Common/ConfirmModal';
+import { soundManager } from '../../services/audio/SoundManager';
 import './ActionSelectModal.css';
 
 interface ActionSelectModalProps {
@@ -39,26 +40,15 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   // 決定確認ダイアログ用の選択中ロケーション
   const [pendingOption, setPendingOption] = useState<ActionLocationOption | null>(null);
 
-  // 効果音再生ヘルパー（ChoiceBoxと共通）
-  const playSE = useCallback((url: string, volume = 0.5) => {
-    try {
-      const audio = new Audio(url);
-      audio.volume = volume;
-      audio.play().catch(() => {});
-    } catch {
-      // Audio play catch
-    }
-  }, []);
-
   // マウント時に表示SE再生
   useEffect(() => {
-    playSE('/se/items_shown.mp3', 0.6);
-  }, [playSE]);
+    soundManager.playSe('/se/items_shown.mp3', 0.6);
+  }, []);
 
   // ホバー音
   const handleMouseEnter = (id: string) => {
     setHoveredId(id);
-    playSE('/se/items_hover.mp3', 0.45);
+    soundManager.playSe('/se/items_hover.mp3', 0.45);
   };
 
   const handleMouseLeave = () => {
@@ -72,7 +62,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
 
   // 場所クリック時: 直接決定ではなく自作YES/NOダイアログを表示
   const handleClickLocation = (opt: ActionLocationOption) => {
-    playSE('/se/items_hover.mp3', 0.5);
+    soundManager.playSe('/se/items_hover.mp3', 0.5);
     setPendingOption(opt);
   };
 
@@ -81,7 +71,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     if (!pendingOption) return;
     const targetId = pendingOption.id;
     setPendingOption(null);
-    playSE('/se/items_chose.mp3', 0.65);
+    soundManager.playSe('/se/items_chose.mp3', 0.65);
     onSelectLocation(targetId);
   };
 
@@ -95,12 +85,6 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     () => options.find((opt) => opt.id === activeId),
     [options, activeId]
   );
-
-  // ホバー中ロケーションのINFO文字列
-  const hoveredHintText = useMemo(() => {
-    if (!hoveredOption?.hintText) return null;
-    return hoveredOption.hintText[lang] || hoveredOption.hintText.ja || null;
-  }, [hoveredOption, lang]);
 
   // フォーカス時のヒロインポップアップ情報（感情判定・パステル背景色・「？」対応）
   const focusHeroineInfo = useMemo(() => {
@@ -140,6 +124,21 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
     // 誰も出会わない選択肢の場合は非表示
     return null;
   }, [hoveredOption, affinities, lang]);
+
+  // 帯にはカードのヒント文を繰り返さず、場所名と相手の様子を出す
+  const focusBannerText = useMemo(() => {
+    if (!focusHeroineInfo) return null;
+    if (focusHeroineInfo.type === 'unknown') {
+      return lang === 'ja' ? '誰がいるかは、行ってみないと分からない。' : "You won't know who's there until you go.";
+    }
+    const name = focusHeroineInfo.name;
+    const moods = {
+      good: { ja: `${name}は機嫌がよさそうだ。`, en: `${name} seems to be in a good mood.` },
+      normal: { ja: `${name}はいつも通りの様子だ。`, en: `${name} seems the same as always.` },
+      bad: { ja: `${name}は少し元気がないようだ。`, en: `${name} seems a little down.` },
+    };
+    return moods[focusHeroineInfo.emotion][lang === 'ja' ? 'ja' : 'en'];
+  }, [focusHeroineInfo, lang]);
 
   return (
     <div className={`action-select-overlay phase-${phase}`}>
@@ -206,14 +205,14 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
           </div>
 
           {/* ロケーションフォーカス時のINFO帯表示（地図下側・ヒロイン画像左側） */}
-          {focusHeroineInfo && hoveredHintText && (
+          {hoveredOption && focusBannerText && (
             <div
               key={`focus_info_${activeId}`}
               className="action-focus-info-banner"
             >
               <div className="action-focus-info-banner-inner">
-                <span className="focus-info-label">INFO</span>
-                <span className="focus-info-text">{hoveredHintText}</span>
+                <span className="focus-info-label">{hoveredOption.name[lang] || hoveredOption.name.ja}</span>
+                <span className="focus-info-text">{focusBannerText}</span>
               </div>
             </div>
           )}
@@ -228,10 +227,13 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
                 <>
                   <img
                     src={focusHeroineInfo.imgUrl}
-                    alt={focusHeroineInfo.name}
+                    alt=""
                     className="heroine-preview-img"
                   />
-                  <span className="heroine-preview-name">{focusHeroineInfo.name}</span>
+                  <span className="heroine-preview-name">
+                    <span className="heroine-preview-name-main">{focusHeroineInfo.name}</span>
+                    <span className="heroine-preview-name-en" aria-hidden="true">{CHARACTERS[focusHeroineInfo.charId]?.name.en}</span>
+                  </span>
                 </>
               ) : (
                 <span className="heroine-preview-unknown">?</span>
