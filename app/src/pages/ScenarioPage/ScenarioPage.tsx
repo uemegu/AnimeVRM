@@ -2,7 +2,6 @@ import React from 'react';
 import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
-import { AudioLipSync } from '../../services/audio/AudioLipSync';
 import { StageView } from '../../components/Stage/StageView';
 import { DialogueBox } from '../../components/Dialogue/DialogueBox';
 import { ChoiceBox } from '../../components/Dialogue/ChoiceBox';
@@ -18,7 +17,6 @@ export interface ScenarioPageProps {
   activeCharId: string | null;
   activeModelUrl?: string;
   activeExpression: string;
-  audioLipSync: AudioLipSync;
   onDialogueClick: () => void;
   onChoiceClick: (index: number) => void;
   onTypingComplete: () => void;
@@ -33,7 +31,6 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   activeCharId,
   activeModelUrl,
   activeExpression,
-  audioLipSync,
   onDialogueClick,
   onChoiceClick,
   onTypingComplete,
@@ -48,7 +45,6 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           characterId={activeCharId}
           characterModelUrl={activeModelUrl}
           expression={activeExpression}
-          audioLipSync={audioLipSync}
         />
       </main>
 

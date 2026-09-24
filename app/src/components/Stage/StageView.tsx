@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { StageManager } from '../../services/graphics/StageManager';
 import { TimeOfDayId } from '../../types/visual';
-import { AudioLipSync } from '../../services/audio/AudioLipSync';
 
 export interface StageViewProps {
   timeOfDay: TimeOfDayId;
@@ -10,7 +9,6 @@ export interface StageViewProps {
   characterModelUrl?: string;
   expression?: string;
   characterPositionX?: number;
-  audioLipSync?: AudioLipSync | null;
   className?: string;
   onLoaded?: () => void;
 }
@@ -22,7 +20,6 @@ export const StageView: React.FC<StageViewProps> = ({
   characterModelUrl,
   expression,
   characterPositionX = 0,
-  audioLipSync,
   className = '',
   onLoaded,
 }) => {
@@ -38,7 +35,6 @@ export const StageView: React.FC<StageViewProps> = ({
       canvas,
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
-      audioLipSync: audioLipSync ?? null,
     });
     stageManagerRef.current = manager;
 
@@ -95,13 +91,6 @@ export const StageView: React.FC<StageViewProps> = ({
       stageManagerRef.current.setExpression(characterId, expression, 1.0);
     }
   }, [characterId, expression]);
-
-  // 6. AudioLipSync更新
-  useEffect(() => {
-    if (stageManagerRef.current) {
-      stageManagerRef.current.setAudioLipSync(audioLipSync ?? null);
-    }
-  }, [audioLipSync]);
 
   return (
     <div

@@ -233,8 +233,8 @@
 }
 
 .focus-info-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--phase-accent);
@@ -266,9 +266,11 @@
   box-sizing: border-box;
   border-radius: 16px;
   border: 2px solid #fff;
+  /* A soft glow behind the head and diagonal light bands in the heroine's color. */
   background:
-    linear-gradient(145deg, #fff 0%, transparent 65%),
-    var(--heroine-surface);
+    radial-gradient(circle at 55% 30%, #ffffffe6 0%, #ffffff00 48%),
+    repeating-linear-gradient(115deg, #ffffff00 0 18px, #ffffff59 18px 26px),
+    linear-gradient(160deg, #fff 0%, var(--heroine-surface) 45%, color-mix(in srgb, var(--heroine-color) 45%, var(--heroine-surface)) 100%);
   box-shadow: 0 0 0 2px var(--heroine-color), 0 0 0 5px rgba(255, 255, 255, 0.5), 0 10px 26px rgba(17, 54, 87, 0.25);
   transform: skewX(-6deg);
   z-index: 5;
@@ -294,30 +296,59 @@
 .heroine-bg-shion { --heroine-color: #3b82f6; --heroine-surface: #dbeafe; }
 .action-focus-heroine-box.heroine-bg-unknown { background: linear-gradient(145deg, #64748b, #25354d); }
 
+/* The square portrait is framed from the head to the chest; the counter-skew
+   and slight overscan keep the skewed box's corners filled. */
 .heroine-preview-img {
-  width: 200%;
-  object-fit: contain;
-  object-position: center bottom;
-  transform: skewX(6deg) translateY(6px);
+  position: absolute;
+  inset: 0 -8%;
+  width: 116%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 0;
+  transform: skewX(6deg) translateX(6%);
+  filter: drop-shadow(0 4px 8px rgba(17, 54, 87, 0.18));
+  animation: heroine-portrait-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.heroine-bg-shion .heroine-preview-img {
-  transform: skewX(6deg) translateY(6px) scale(1.08);
+@keyframes heroine-portrait-in {
+  from { opacity: 0; transform: skewX(6deg) translateX(14%); }
 }
 
+/* The name runs vertically along the left edge, clear of the face. */
 .heroine-preview-name {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 16px 16px 10px;
-  background: linear-gradient(transparent, rgba(255, 255, 255, 0.92) 45%, var(--heroine-surface));
-  color: #173451;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-align: right;
-  text-shadow: 0 1px 0 #fff;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 3px;
+  transform: skewX(6deg);
+  z-index: 1;
+}
+
+.heroine-preview-name-main {
+  writing-mode: vertical-rl;
+  padding: 8px 4px;
+  border-radius: 4px;
+  background: var(--heroine-color);
+  color: #fff;
+  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--heroine-color) 45%, transparent);
+}
+
+.heroine-preview-name-en {
+  writing-mode: vertical-rl;
+  color: color-mix(in srgb, var(--heroine-color) 70%, #173451);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .heroine-preview-unknown {
@@ -533,7 +564,9 @@
   .focus-info-label { font-size: 0.6rem; padding: 4px 6px; }
   .focus-info-text { font-size: 0.68rem; padding-left: 8px; letter-spacing: 0; line-height: 1.5; }
   .action-focus-heroine-box { right: 0; border-radius: 10px; }
-  .heroine-preview-name { font-size: 0.76rem; padding: 12px 10px 5px; }
+  .heroine-preview-name { left: 6px; top: 6px; }
+  .heroine-preview-name-main { font-size: 0.64rem; padding: 6px 3px; }
+  .heroine-preview-name-en { display: none; }
   .heroine-preview-unknown { font-size: 3.5rem; }
   .action-sidebar { flex: 1; width: 100%; height: 50%; min-height: 0; border-left: 0; border-top: 1px solid #fff; }
   .action-sidebar-header { padding: 16px 20px 12px; }
@@ -577,7 +610,8 @@
 @media (prefers-reduced-motion: reduce) {
   .action-select-overlay,
   .action-focus-info-banner,
-  .action-focus-heroine-box { animation: none; }
+  .action-focus-heroine-box,
+  .heroine-preview-img { animation: none; }
   .action-map-pin,
   .location-item-card { transition: none; }
 }

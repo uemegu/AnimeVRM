@@ -18,7 +18,6 @@ export interface NightRoomPageProps {
   flags?: Record<string, boolean | number | string>;
   scenarioHistory?: Array<{ scenarioId: string; day: number; type: 'choice' | 'completed'; choiceId?: string }>;
   lang: SupportedLanguage;
-  isMuted?: boolean;
   onSave: () => void;
   onLoad: () => void;
   onRollbackDay: () => void;
@@ -35,7 +34,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
   affinities,
   flags = {},
   lang,
-  isMuted = false,
   onSave,
   onLoad,
   onRollbackDay,
@@ -153,7 +151,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
           <PhoneNotificationCard
             status={activeNotificationStatus}
             lang={lang}
-            isMuted={isMuted}
             onAnswerCall={handleAnswerCall}
             onRejectCall={handleRejectCall}
             onOpenMail={handleOpenMail}
@@ -332,7 +329,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
         <PhoneMailModal
           scenario={activeMailScenario}
           lang={lang}
-          isMuted={isMuted}
           alreadyReplied={Boolean(flags[`night_mail_replied_day${activeMailScenario.day}_${activeMailScenario.characterId}`])}
           onClose={handleCloseMailModal}
         />
