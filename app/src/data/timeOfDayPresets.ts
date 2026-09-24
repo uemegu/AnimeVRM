@@ -631,6 +631,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPreset> = {
       },
     },
     postProcessing: {
+      para: { enabled: false },
       bloom: {
         enabled: true,
         strength: 0.08,
