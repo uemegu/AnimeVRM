@@ -87,7 +87,8 @@
 }
 
 /* Preserve the blue → yellow → orange progression and purple night label. */
-.phase-badge.phase-lunch_action {
+.phase-badge.phase-lunch_action,
+.phase-badge.phase-holiday_action {
   background: linear-gradient(150deg, rgba(228, 189, 93, 0.88), rgba(158, 107, 26, 0.88));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 236, 170, 0.45), 0 3px 10px rgba(88, 63, 19, 0.25);
 }

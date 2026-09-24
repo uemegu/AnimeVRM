@@ -8,6 +8,7 @@ import { SaveService } from './services/save/SaveService';
 import { GameHeader } from './components/Header/GameHeader';
 import { TimeOfDayId } from './types/visual';
 import { CHARACTERS } from './data/characters';
+import { LOCATION_DEFINITIONS } from './data/locations';
 import { soundManager } from './services/audio/SoundManager';
 import { ConfirmModal } from './components/Common/ConfirmModal';
 import { LicenseModal } from './components/License/LicenseModal';
@@ -86,6 +87,12 @@ export const App: React.FC = () => {
       initial.phase = 'night';
       initial.currentScenarioId = null;
     }
+    if (initialPhaseParam === 'holiday') {
+      // 動作確認用: 最初の土曜日の休日行動から開始
+      initial.day = 6;
+      initial.phase = 'holiday_action';
+      initial.currentScenarioId = null;
+    }
     return initial;
   });
 
@@ -97,7 +104,7 @@ export const App: React.FC = () => {
   const [, setTick] = useState(0);
 
   // 行動場所選択モーダル表示フラグ
-  const [isSelectingLocation, setIsSelectingLocation] = useState(false);
+  const [isSelectingLocation, setIsSelectingLocation] = useState(() => initialPhaseParam === 'holiday');
   const [selectedLocationId, setSelectedLocationId] = useState<ActionLocationId | null>(null);
 
   // 28日目完走エンディングフラグ
@@ -198,6 +205,7 @@ export const App: React.FC = () => {
         return 'morning';
       case 'morning_action':
       case 'lunch_action':
+      case 'holiday_action':
         return 'day';
       case 'afterschool_action':
         return 'evening';
@@ -240,7 +248,9 @@ export const App: React.FC = () => {
       shrine: { ja: '神社', en: 'Shrine' },
       god_realm: { ja: '神界', en: 'God Realm' },
     };
-    return locNames[activeLocationId] ? locNames[activeLocationId][lang] : activeLocationId;
+    if (locNames[activeLocationId]) return locNames[activeLocationId][lang];
+    const definition = LOCATION_DEFINITIONS[activeLocationId as ActionLocationId];
+    return definition ? definition.name[lang] || definition.name.ja : activeLocationId;
   }, [activeLocationId, lang]);
 
   // 表示キャラクター・モデル・表情の決定
@@ -262,14 +272,19 @@ export const App: React.FC = () => {
       charId = currentScene.speakerCharacterId;
     }
 
-    const modelUrl = charId && CHARACTERS[charId] ? CHARACTERS[charId].defaultModelUrl : undefined;
+    // 休日はヒロインが私服で登場する
+    const character = charId ? CHARACTERS[charId] : undefined;
+    const modelUrl =
+      gameState.phase === 'holiday_action'
+        ? character?.privateModelUrl ?? character?.defaultModelUrl
+        : character?.defaultModelUrl;
 
     return {
       activeCharId: charId,
       activeModelUrl: modelUrl,
       activeExpression: expression,
     };
-  }, [currentScene]);
+  }, [currentScene, gameState.phase]);
 
   // 言語切り替え
   const handleToggleLanguage = useCallback(() => {
@@ -317,6 +332,7 @@ export const App: React.FC = () => {
           morning_action: { ja: '午前', en: 'Morning Action' },
           lunch_action: { ja: '昼休み', en: 'Lunch Action' },
           afterschool_action: { ja: '放課後', en: 'Afterschool' },
+          holiday_action: { ja: '休日', en: 'Holiday' },
           night: { ja: '夜', en: 'Night' },
         };
         const pName = phaseNames[gameState.phase] ? phaseNames[gameState.phase][lang] : gameState.phase;
@@ -433,6 +449,20 @@ export const App: React.FC = () => {
     [startScenario]
   );
 
+  // 1日の開始（平日は朝の登校イベント、休日は昼の行き先選択から）
+  const beginDay = useCallback(
+    async (state: GameState) => {
+      if (state.phase === 'holiday_action') {
+        proceedToActionPhase('holiday_action', state);
+        return;
+      }
+      const morningScenario = ScheduleManager.getMorningScenario(state);
+      await preloadInterludeResources('school_gate', morningScenario);
+      startScenario(morningScenario, state);
+    },
+    [proceedToActionPhase, preloadInterludeResources, startScenario]
+  );
+
   // テキスト送りクリック
   const handleDialogueClick = useCallback(() => {
     if (!engine || isWaitingChoice || isFinished) return;
@@ -466,7 +496,8 @@ export const App: React.FC = () => {
         } else if (
           gameState.phase === 'morning_action' ||
           gameState.phase === 'lunch_action' ||
-          gameState.phase === 'afterschool_action'
+          gameState.phase === 'afterschool_action' ||
+          gameState.phase === 'holiday_action'
         ) {
           if (
             activeScenario?.id === 'forced_meet_shion' ||
@@ -710,6 +741,7 @@ export const App: React.FC = () => {
               morning_action: { ja: '午前', en: 'Morning Action' },
               lunch_action: { ja: '昼休み', en: 'Lunch Action' },
               afterschool_action: { ja: '放課後', en: 'Afterschool' },
+              holiday_action: { ja: '休日', en: 'Holiday' },
               night: { ja: '夜', en: 'Night' },
             };
             const pName = phaseNames[gameState.phase] ? phaseNames[gameState.phase][lang] : gameState.phase;
@@ -943,19 +975,18 @@ export const App: React.FC = () => {
   const handleRollbackDay = useCallback(() => {
     showConfirm(
       lang === 'ja'
-        ? 'この1日の朝に戻ってやり直しますか？\n（本日の進行内容はリセットされます）'
+        ? 'この1日の始めに戻ってやり直しますか？\n（本日の進行内容はリセットされます）'
         : 'Restart from this morning?\n(Today\'s progress will be reset)',
       () => {
         const run = async () => {
           const rolledBack = ScheduleManager.rollbackToday(gameState);
-          const morningScenario = ScheduleManager.getMorningScenario(rolledBack);
-          await preloadInterludeResources('school_gate', morningScenario);
-          startScenario(morningScenario, rolledBack);
+          const isHolidayStart = rolledBack.phase === 'holiday_action';
           setIsSelectingLocation(false);
+          await beginDay(rolledBack);
           showNotice(
             lang === 'ja'
-              ? `第${rolledBack.day}日の朝に戻りました。`
-              : `Restarted from Day ${rolledBack.day} Morning.`,
+              ? `第${rolledBack.day}日の${isHolidayStart ? '昼' : '朝'}に戻りました。`
+              : `Restarted from Day ${rolledBack.day} ${isHolidayStart ? 'Noon' : 'Morning'}.`,
             lang === 'ja' ? '1日のやり直し' : 'Day Restarted'
           );
         };
@@ -970,7 +1001,7 @@ export const App: React.FC = () => {
       lang === 'ja' ? 'はい' : 'YES',
       lang === 'ja' ? 'いいえ' : 'NO'
     );
-  }, [gameState, lang, startScenario, showConfirm, showNotice, preloadInterludeResources]);
+  }, [gameState, lang, beginDay, showConfirm, showNotice]);
 
   // 自室コマンド: 就寝
   const handleSleep = useCallback(() => {
@@ -983,11 +1014,9 @@ export const App: React.FC = () => {
         return;
       }
 
-      // 翌日の朝へ
+      // 翌日へ（平日は朝、休日は昼から）
       saveService.saveDayStartBackup(nextState.dayStartSnapshot!);
-      const morningScenario = ScheduleManager.getMorningScenario(nextState);
-      await preloadInterludeResources('school_gate', morningScenario);
-      startScenario(morningScenario, nextState);
+      await beginDay(nextState);
     };
 
     if (interludeRef.current) {
@@ -995,7 +1024,7 @@ export const App: React.FC = () => {
     } else {
       run();
     }
-  }, [gameState, saveService, startScenario, preloadInterludeResources]);
+  }, [gameState, saveService, beginDay]);
 
   // タイトル画面: はじめから
   const handleStartGame = useCallback(() => {

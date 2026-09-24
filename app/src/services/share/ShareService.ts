@@ -168,6 +168,7 @@ export class ShareService {
       morning_action: '午前',
       lunch_action: '昼休み',
       afterschool_action: '放課後',
+      holiday_action: '休日',
       night: '夜',
     };
 
@@ -176,6 +177,7 @@ export class ShareService {
       morning_action: 'Morning Action',
       lunch_action: 'Lunch',
       afterschool_action: 'After School',
+      holiday_action: 'Holiday',
       night: 'Night',
     };
 

@@ -41,6 +41,11 @@ const PHASE_LABELS: Record<
     en: 'Afterschool',
     className: 'phase-afterschool_action',
   },
+  holiday_action: {
+    ja: '休日',
+    en: 'Holiday',
+    className: 'phase-holiday_action',
+  },
   night: {
     ja: '夜',
     en: 'Night',

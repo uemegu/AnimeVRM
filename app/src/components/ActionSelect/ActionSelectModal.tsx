@@ -25,6 +25,16 @@ const LOCATION_COORDINATES: Record<string, { left: string; top: string }> = {
   sports_ground: { left: '6.12%', top: '40.12%' }, // 水色丸: 運動場
 };
 
+// 休日の街マップ上のロケーション座標（画像に対するパーセンテージ）
+const HOLIDAY_LOCATION_COORDINATES: Record<string, { left: string; top: string }> = {
+  amusement_park: { left: '15.50%', top: '9.00%' }, // 観覧車
+  shopping_street: { left: '32.00%', top: '33.50%' }, // アーケード
+  cinema: { left: '70.50%', top: '38.50%' }, // 大型ビル
+  home: { left: '15.00%', top: '46.00%' }, // 住宅街
+  park: { left: '49.00%', top: '55.50%' }, // 噴水
+  aquarium: { left: '70.50%', top: '75.00%' }, // 海辺のドーム（右下のヒロイン枠と重ならない位置）
+};
+
 export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   options,
   lang,
@@ -32,6 +42,9 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
   phase = 'morning_action',
   affinities = {},
 }) => {
+  const isHolidayMap = phase === 'holiday_action';
+  const locationCoordinates = isHolidayMap ? HOLIDAY_LOCATION_COORDINATES : LOCATION_COORDINATES;
+
   // ホバー・キーボードフォーカスの連動（カード ⇔ マップピン）
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
@@ -147,14 +160,18 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
         <div className="action-map-wrapper">
           <div className="action-map-clip">
             <img
-              src="/assets/backgrounds/school_aerial.avif"
-              alt={lang === 'ja' ? '学校の俯瞰マップ' : 'School aerial map'}
+              src={isHolidayMap ? '/assets/backgrounds/town_map.avif' : '/assets/backgrounds/school_aerial.avif'}
+              alt={
+                isHolidayMap
+                  ? lang === 'ja' ? '街の俯瞰マップ' : 'Town aerial map'
+                  : lang === 'ja' ? '学校の俯瞰マップ' : 'School aerial map'
+              }
               className="action-map-img"
             />
 
             {/* マップ上の各ロケーションピン（インタラクティブラベル） */}
             {options.map((opt) => {
-              const coord = LOCATION_COORDINATES[opt.id];
+              const coord = locationCoordinates[opt.id];
               if (!coord) return null;
 
               const locName = opt.name[lang] || opt.name.ja;
@@ -247,10 +264,14 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
       <aside className="action-sidebar">
         <header className="action-sidebar-header">
           <h2 className="action-sidebar-title">
-            {lang === 'ja' ? '移動場所の選択' : 'Choose Destination'}
+            {isHolidayMap
+              ? lang === 'ja' ? '休日の行き先' : 'Holiday Plans'
+              : lang === 'ja' ? '移動場所の選択' : 'Choose Destination'}
           </h2>
           <p className="action-sidebar-description">
-            {lang === 'ja' ? '行きたい場所を選んでください。' : 'Choose where you would like to go.'}
+            {isHolidayMap
+              ? lang === 'ja' ? '今日は学校が休み。出かける先を1つ選んでください。' : 'No school today. Choose one place to go.'
+              : lang === 'ja' ? '行きたい場所を選んでください。' : 'Choose where you would like to go.'}
           </p>
         </header>
 

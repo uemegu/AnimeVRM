@@ -3,10 +3,14 @@ import {
   DayPhase,
   ActionLocationId,
   ActionLocationOption,
-  getDayOfWeek,
+  isHoliday,
 } from '../../types/game';
 import { ScenarioPackage, ScenarioTimeSlot } from '../../types/scenario';
-import { LOCATION_DEFINITIONS } from '../../data/locations';
+import {
+  LOCATION_DEFINITIONS,
+  SCHOOL_ACTION_LOCATIONS,
+  HOLIDAY_ACTION_LOCATIONS,
+} from '../../data/locations';
 import {
   MORNING_SCENARIO_DAY_1,
   MORNING_SCENARIO_DEFAULT,
@@ -15,6 +19,10 @@ import {
   ALL_ACTION_SCENARIOS,
   ACTION_SCENARIO_GENERIC,
 } from '../../scenarios/actionScenarios';
+import {
+  ALL_HOLIDAY_SCENARIOS,
+  HOLIDAY_SCENARIO_GENERIC,
+} from '../../scenarios/holidayScenarios';
 import {
   FORCED_SCENARIO_MEET_SHION,
   FORCED_SCENARIO_MEET_EMILI,
@@ -45,6 +53,13 @@ export class ScheduleManager {
   }
 
   /**
+   * 1日の開始フェーズ（平日は朝の登校イベント、土日は昼の休日行動から始まる）
+   */
+  public static getDayStartPhase(day: number): DayPhase {
+    return isHoliday(day) ? 'holiday_action' : 'morning';
+  }
+
+  /**
    * 朝フェーズのシナリオを取得
    */
   public static getMorningScenario(gameState: GameState): ScenarioPackage {
@@ -65,14 +80,12 @@ export class ScheduleManager {
    * シナリオデータ（ScenarioPackage.actionHints）から情報を解決
    */
   public static getActionLocationOptions(gameState: GameState): ActionLocationOption[] {
-    const locations: ActionLocationId[] = [
-      'classroom',
-      'courtyard',
-      'rooftop',
-      'library',
-      'cafeteria',
-      'sports_ground',
-    ];
+    const locations: ActionLocationId[] =
+      gameState.phase === 'holiday_action'
+        ? HOLIDAY_ACTION_LOCATIONS
+            .filter((location) => !location.unlockFlag || Boolean(gameState.flags[location.unlockFlag]))
+            .map((location) => location.id)
+        : SCHOOL_ACTION_LOCATIONS;
 
     return locations.map((locId) => {
       const base = LOCATION_DEFINITIONS[locId];
@@ -124,7 +137,8 @@ export class ScheduleManager {
    * 選択された場所に応じたシナリオを決定（ScenarioPackage.actionHints より解決）
    */
   public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioPackage {
-    return this.getEligibleActionScenarios(locationId, gameState)[0] ?? ACTION_SCENARIO_GENERIC;
+    const fallback = gameState.phase === 'holiday_action' ? HOLIDAY_SCENARIO_GENERIC : ACTION_SCENARIO_GENERIC;
+    return this.getEligibleActionScenarios(locationId, gameState)[0] ?? fallback;
   }
 
   /** 条件に一致する行動シナリオを優先順位順で返す */
@@ -132,7 +146,7 @@ export class ScheduleManager {
     locationId: ActionLocationId,
     gameState: GameState
   ): ScenarioPackage[] {
-    return ALL_ACTION_SCENARIOS
+    return [...ALL_ACTION_SCENARIOS, ...ALL_HOLIDAY_SCENARIOS]
       .map((scenario, index) => ({ scenario, index }))
       .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId))
       .sort((a, b) => {
@@ -145,7 +159,8 @@ export class ScheduleManager {
   }
 
   private static getScenarioPriority(scenario: ScenarioPackage, fallbackScenarioId: string): number {
-    return scenario.id === fallbackScenarioId ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
+    const isFallback = scenario.id === fallbackScenarioId || scenario.id === HOLIDAY_SCENARIO_GENERIC.id;
+    return isFallback ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
   }
 
   /** シナリオの日付・時間帯・場所・進行履歴条件を判定 */
@@ -204,10 +219,8 @@ export class ScheduleManager {
         return gameState.phase === 'lunch_action';
       case 'afterschool':
         return gameState.phase === 'afterschool_action';
-      case 'holiday': {
-        const dayOfWeek = getDayOfWeek(gameState.day);
-        return dayOfWeek === 'Sat' || dayOfWeek === 'Sun';
-      }
+      case 'holiday':
+        return isHoliday(gameState.day);
     }
     return false;
   }
@@ -224,6 +237,9 @@ export class ScheduleManager {
       case 'lunch_action':
         return 'afterschool_action';
       case 'afterschool_action':
+        return 'night';
+      case 'holiday_action':
+        // 休日の行動は1日1回
         return 'night';
       case 'night':
         return 'morning';
@@ -246,7 +262,7 @@ export class ScheduleManager {
     const nextState: GameState = {
       ...gameState,
       day: nextDay,
-      phase: 'morning',
+      phase: this.getDayStartPhase(nextDay),
       currentScenarioId: null,
       dayStartSnapshot: {
         day: nextDay,
@@ -269,7 +285,7 @@ export class ScheduleManager {
     if (!gameState.dayStartSnapshot) {
       return {
         ...gameState,
-        phase: 'morning',
+        phase: this.getDayStartPhase(gameState.day),
         scenarioHistory: (gameState.scenarioHistory ?? []).filter((entry) => entry.day < gameState.day),
         currentScenarioId: null,
       };
@@ -278,7 +294,7 @@ export class ScheduleManager {
     return {
       ...gameState,
       day: gameState.dayStartSnapshot.day,
-      phase: 'morning',
+      phase: this.getDayStartPhase(gameState.dayStartSnapshot.day),
       flags: { ...gameState.dayStartSnapshot.flags },
       affinities: { ...gameState.dayStartSnapshot.affinities },
       scenarioHistory: [...(gameState.dayStartSnapshot.scenarioHistory ?? [])],

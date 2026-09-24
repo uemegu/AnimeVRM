@@ -148,4 +148,79 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
       },
     },
   },
+
+  // ---- 休日（街マップ）の行き先 ----
+  // TODO: 映画館・遊園地・水族館は専用背景がないため既存背景で代用中
+
+  // 公園
+  park: {
+    id: 'park',
+    name: '公園',
+    isIndoor: false,
+    layers: {
+      background: {
+        url: '/textures/park-background.avif',
+      },
+    },
+  },
+
+  // 商店街
+  shopping_street: {
+    id: 'shopping_street',
+    name: '商店街',
+    isIndoor: false,
+    layers: {
+      background: {
+        url: '/textures/town_far.avif',
+      },
+    },
+  },
+
+  // 映画館（代用: カフェ）
+  cinema: {
+    id: 'cinema',
+    name: '映画館',
+    isIndoor: true,
+    layers: {
+      background: {
+        url: '/textures/cafe_far.avif',
+      },
+    },
+  },
+
+  // 自宅（昼の自室）
+  home: {
+    id: 'home',
+    name: '自宅',
+    isIndoor: true,
+    layers: {
+      background: {
+        url: '/textures/myroom_far.avif',
+      },
+    },
+  },
+
+  // 遊園地（代用: 公園の俯瞰）
+  amusement_park: {
+    id: 'amusement_park',
+    name: '遊園地',
+    isIndoor: false,
+    layers: {
+      background: {
+        url: '/textures/modern-park-far.avif',
+      },
+    },
+  },
+
+  // 水族館（代用: 海の見える公園）
+  aquarium: {
+    id: 'aquarium',
+    name: '水族館',
+    isIndoor: false,
+    layers: {
+      background: {
+        url: '/textures/park-with-sea-far.avif',
+      },
+    },
+  },
 };

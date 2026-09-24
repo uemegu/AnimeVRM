@@ -8,6 +8,7 @@ export type DayPhase =
   | 'morning_action'      // 午前: 行動ターン（場所選択）
   | 'lunch_action'        // 昼: 行動ターン（場所選択）
   | 'afterschool_action'  // 放課後: 行動ターン（場所選択）
+  | 'holiday_action'      // 休日（土日）の昼: 行動ターン（1日1回・街マップから選択）
   | 'night';              // 夜: 自室（セーブ/ロード/やり直し/就寝）
 
 /** 曜日 */
@@ -21,7 +22,14 @@ export type ActionLocationId =
   | 'rooftop'       // 屋上
   | 'library'       // 図書室
   | 'sports_ground' // 運動場
-  | 'cafeteria';    // 購買・学食
+  | 'cafeteria'     // 購買・学食
+  // 休日（街マップ）
+  | 'park'            // 公園
+  | 'shopping_street' // 商店街
+  | 'cinema'          // 映画館
+  | 'home'            // 自宅
+  | 'amusement_park'  // 遊園地（条件付きで解放）
+  | 'aquarium';       // 水族館（条件付きで解放）
 
 /** 行動場所の定義と事前情報 */
 export interface ActionLocationOption {
@@ -84,6 +92,12 @@ export function getDayOfWeek(day: number): DayOfWeek {
 /** 週番号 (1〜4週目) */
 export function getWeekNumber(day: number): number {
   return Math.floor((day - 1) / 7) + 1;
+}
+
+/** 休日（土日）判定 */
+export function isHoliday(day: number): boolean {
+  const dayOfWeek = getDayOfWeek(day);
+  return dayOfWeek === 'Sat' || dayOfWeek === 'Sun';
 }
 
 /** 最終日判定 */
