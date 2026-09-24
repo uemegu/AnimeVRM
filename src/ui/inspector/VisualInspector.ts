@@ -193,7 +193,7 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   const applyHairRing = () => setHairRingParams(hairRingCfg);
   const hairRingFolder = visualGui.addFolder(tr.gui.hairRingFolder);
   hairRingFolder.add(hairRingCfg, 'enabled').name(tr.gui.hairRingEnabled).onChange(applyHairRing);
-  hairRingFolder.add(hairRingCfg, 'height', -0.1, 0.15, 0.002).name(tr.gui.hairRingHeight).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'height', -0.05, 0.12, 0.002).name(tr.gui.hairRingHeight).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'width', 0.0, 0.05, 0.001).name(tr.gui.hairRingWidth).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'softness', 0.0, 0.02, 0.0005).name(tr.gui.hairRingSoftness).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'facingFade', 0.01, 1.0, 0.01).name(tr.gui.hairRingFacingFade).onChange(applyHairRing);
@@ -207,6 +207,9 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   hairRingFolder.add(hairRingCfg, 'jagAmplitude', 0.0, 0.03, 0.0005).name(tr.gui.hairRingJagAmplitude).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'jagCount', 0, 120, 1).name(tr.gui.hairRingJagCount).onChange(applyHairRing);
   hairRingFolder.add(hairRingCfg, 'viewShift', -0.05, 0.05, 0.001).name(tr.gui.hairRingViewShift).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'arc', 0.0, 0.15, 0.005).name(tr.gui.hairRingArc).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'gapCount', 0, 120, 1).name(tr.gui.hairRingGapCount).onChange(applyHairRing);
+  hairRingFolder.add(hairRingCfg, 'gapRate', 0.0, 1.0, 0.01).name(tr.gui.hairRingGapRate).onChange(applyHairRing);
   hairRingFolder.close();
 
   // 2.4 ライトラップ (Light Wrap)

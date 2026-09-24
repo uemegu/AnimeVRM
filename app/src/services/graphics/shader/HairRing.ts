@@ -6,7 +6,9 @@ import * as THREE from 'three';
  * 頭の向きを基準に、頭の中心から一定の高さにある水平な帯を描く。
  * 頭の向きに追従するので、正面・側面・後ろのどこから見ても頭に対して水平な輪になる。
  * （カメラ基準や頭を球とみなした角度基準にすると、前後に長い頭では側面から見て輪が斜めになる）
- * 帯の高さはカメラの仰角で少し動き、下の縁は頭の周りの角度に沿って毛束のようにギザギザにする。
+ * 帯は頭の正面で最も高く、横・後ろへ回り込むほど下がる（arc）。頭頂のドームに沿った「∩」型の弧になり、
+ * 頭の向きを基準にしているので、頭を回すと輪も一緒に回る（カメラ基準だと光だけが画面に固定されて見える）。
+ * 帯の高さはカメラの仰角でも少し動き、下の縁は頭の周りの角度に沿って毛束のようにギザギザにする。
  * 色はライティング後の髪色を時間帯ごとの色（tint）に寄せた色なので、髪色・時間帯になじむ。
  *
  * パラメータは数値だけなので全アバター・全レンダラーで共有する（HAIR_RING_UNIFORMS）。
@@ -40,22 +42,30 @@ export interface HairRingParams {
   jagCount: number;
   // カメラの仰角で帯を上下させる量（m）。上から見るほど輪が上がる
   viewShift: number;
+  // 弧の反り（m）。頭の正面から横に 90° 回り込んだ所で、正面よりこれだけ下がる
+  arc: number;
+  // 途切れ: 頭一周を区切る数と、そのうち輪を消す区間の割合（0 = 途切れなし）
+  gapCount: number;
+  gapRate: number;
 }
 
 export const DEFAULT_HAIR_RING_PARAMS: HairRingParams = {
   enabled: true,
-  height: 0.03,
-  width: 0.006,
+  height: 0.07,
+  width: 0.009,
   softness: 0.0015,
-  facingFade: 0.6,
-  lighten: 0.3,
-  desaturate: 0.2,
+  facingFade: 0.3,
+  lighten: 0.5,
+  desaturate: 0.1,
   strength: 0.85,
   strandJitter: 0.006,
   headCenterOffset: 0.08,
-  jagAmplitude: 0.008,
+  jagAmplitude: 0.012,
   jagCount: 48,
   viewShift: 0.01,
+  arc: 0.04,
+  gapCount: 40,
+  gapRate: 0.2,
 };
 
 export const HAIR_RING_UNIFORMS = {
@@ -73,6 +83,9 @@ export const HAIR_RING_UNIFORMS = {
   uHairRingJagAmplitude: { value: DEFAULT_HAIR_RING_PARAMS.jagAmplitude },
   uHairRingJagCount: { value: DEFAULT_HAIR_RING_PARAMS.jagCount },
   uHairRingViewShift: { value: DEFAULT_HAIR_RING_PARAMS.viewShift },
+  uHairRingArc: { value: DEFAULT_HAIR_RING_PARAMS.arc },
+  uHairRingGapCount: { value: DEFAULT_HAIR_RING_PARAMS.gapCount },
+  uHairRingGapRate: { value: DEFAULT_HAIR_RING_PARAMS.gapRate },
 };
 
 export function setHairRingParams(params: Partial<HairRingParams>): void {
@@ -90,6 +103,9 @@ export function setHairRingParams(params: Partial<HairRingParams>): void {
   if (params.jagAmplitude !== undefined) u.uHairRingJagAmplitude.value = params.jagAmplitude;
   if (params.jagCount !== undefined) u.uHairRingJagCount.value = params.jagCount;
   if (params.viewShift !== undefined) u.uHairRingViewShift.value = params.viewShift;
+  if (params.arc !== undefined) u.uHairRingArc.value = params.arc;
+  if (params.gapCount !== undefined) u.uHairRingGapCount.value = params.gapCount;
+  if (params.gapRate !== undefined) u.uHairRingGapRate.value = params.gapRate;
 }
 
 /**
@@ -169,6 +185,9 @@ export function injectHairRing(
     uniform float uHairRingJagAmplitude;
     uniform float uHairRingJagCount;
     uniform float uHairRingViewShift;
+    uniform float uHairRingArc;
+    uniform float uHairRingGapCount;
+    uniform float uHairRingGapRate;
     uniform vec3 uHairRingHeadPosition;
     uniform vec3 uHairRingHeadUp;
     uniform vec3 uHairRingHeadForward;
@@ -197,6 +216,11 @@ export function injectHairRing(
       float elevation = dot(normalize(-centerV), upV);
       float center = uHairRingHeight + elevation * uHairRingViewShift;
 
+      // 弧: 頭の水平面上で、頭の正面からどれだけ回り込んでいるか（0 = 正面, 1 = 真横）
+      vec3 relFlat = rel - upV * dot(rel, upV);
+      float turn = min(1.0 - dot(normalize(relFlat), fwdV), 1.0);
+      center -= uHairRingArc * turn;
+
       // 下の縁の毛先（頭の周りの角度で区切り、毛先ごとに長さをばらつかせる。頭と一緒に回る）
       float azimuth = atan(dot(rel, rightV), dot(rel, fwdV));
       float t = azimuth / 6.2831853 * uHairRingJagCount;
@@ -212,8 +236,12 @@ export function injectHairRing(
       float facing = dot(normalize(rel), normalize(-viewPos));
       float fade = smoothstep(uHairRingFacingFade, uHairRingFacingFade + 0.3, facing);
 
+      // 途切れ: 頭の周りを区切り、一部の区間だけ輪を消す（頭と一緒に回る）
+      float gapSeg = floor(azimuth / 6.2831853 * uHairRingGapCount);
+      float gap = step(hairRingHash(gapSeg + 31.7), uHairRingGapRate);
+
       float lit = smoothstep(0.2, 0.6, hairRingShading);
-      float ring = band * fade * lit * uHairRingStrength;
+      float ring = band * fade * lit * (1.0 - gap) * uHairRingStrength;
 
       vec3 ringCol = mix(col, uHairRingTint, uHairRingLighten);
       float luma = dot(ringCol, vec3(0.2126, 0.7152, 0.0722));
