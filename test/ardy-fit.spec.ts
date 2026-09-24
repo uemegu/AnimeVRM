@@ -28,7 +28,11 @@ function avatar() {
     const upper = bone(`${side}UpperArm`, chest, sign * 0.12, 0.15);
     const lower = bone(`${side}LowerArm`, upper, sign * 0.22, 0);
     const hand = bone(`${side}Hand`, lower, sign * 0.2, 0);
-    bone(`${side}MiddleProximal`, hand, sign * 0.08, 0);
+    // Fingers spread across the palm, which faces down in the rest pose.
+    for (const [finger, z] of [['Index', 0.02], ['Middle', 0], ['Ring', -0.01], ['Little', -0.02]] as const) {
+      const proximal = bone(`${side}${finger}Proximal`, hand, sign * 0.08, 0, z);
+      bone(`${side}${finger}Distal`, bone(`${side}${finger}Intermediate`, proximal, sign * 0.03, 0), sign * 0.025, 0);
+    }
     const upperLeg = bone(`${side}UpperLeg`, hips, sign * 0.08, -0.05);
     const lowerLeg = bone(`${side}LowerLeg`, upperLeg, 0, -0.35);
     bone(`${side}Foot`, lowerLeg, 0, -0.35);
