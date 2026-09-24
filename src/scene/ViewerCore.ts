@@ -243,7 +243,9 @@ export class ViewerCore {
     this.renderer.toneMapping = getToneMappingMode(initialConfig.postProcessing.toneMappingMode);
     this.renderer.toneMappingExposure = initialConfig.postProcessing.toneMappingExposure;
     this.renderer.shadowMap.enabled = initialConfig.lighting.castShadows;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // three r183 turns PCFSoft into PCF on the first shadow render. Materials compiled
+    // before that get SHADOWMAP_TYPE_BASIC and fail to draw against the PCF depth map.
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
     // 2. Stats & PerfBadge (Default OFF)
     this.stats = new Stats();
