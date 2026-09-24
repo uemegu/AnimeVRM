@@ -157,6 +157,9 @@ export class StageManager {
     this.composer.addPass(this.bloomPass);
 
     this.godRaysPass = new ShaderPass(GodRaysShader);
+    // 光源として拾うのは背景だけ（服の明暗から筋が出ないように）
+    this.godRaysPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.godRaysPass.uniforms['uUseMask'].value = 1.0;
     this.composer.addPass(this.godRaysPass);
 
     // ここまでリニア空間。OutputPass で表示用の sRGB に変換する
@@ -533,7 +536,7 @@ export class StageManager {
 
       // 6. 前髪の影用に髪の深度を描く
       this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
-      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5) {
+      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled) {
         this.characterMask.render(this.renderer, this.scene, this.camera);
       }
 

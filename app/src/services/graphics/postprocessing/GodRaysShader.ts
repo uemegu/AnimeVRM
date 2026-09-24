@@ -4,11 +4,18 @@ import * as THREE from 'three';
  * Anime Volumetric Sun Shafts (God Rays) Post-Processing Shader
  * Generates radiant light beams beaming from the 2D projected sun position
  * with smooth decay, anime color tinting, and atmospheric shimmer.
+ *
+ * 光源として拾うのは背景だけ（キャラのマスク tMask の所は 0 として扱う）。
+ * キャラも拾うと、白いシャツと暗いリボンのような服の明暗から、太陽と反対向きの影や光の筋が出るため。
+ * キャラは光をさえぎる側になり、背景から来た筋はキャラの上にも乗る。
  */
 export const GodRaysShader = {
   name: 'GodRaysShader',
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
+    // キャラのマスク（CharacterMaskRenderer.texture）。キャラがある所は深度 < 1。未指定なら画面全体を拾う
+    tMask: { value: null as THREE.Texture | null },
+    uUseMask: { value: 0.0 },
     uSunPosition: { value: new THREE.Vector2(0.5, 0.5) },
     uSunVisibility: { value: 1.0 },
     uExposure: { value: 0.35 },
@@ -29,6 +36,8 @@ export const GodRaysShader = {
   `,
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
+    uniform sampler2D tMask;
+    uniform float uUseMask;
     uniform vec2 uSunPosition;
     uniform float uSunVisibility;
     uniform float uExposure;
@@ -96,6 +105,10 @@ export const GodRaysShader = {
           float l = getLuma(sampleColor.rgb);
           float brightness = smoothstep(0.15, 0.85, l);
           vec3 sampleLight = sampleColor.rgb * brightness;
+          // キャラの画素は光源にしない（光をさえぎる）
+          if (uUseMask > 0.5 && texture2D(tMask, coord).r < 0.99999) {
+            sampleLight = vec3(0.0);
+          }
 
           sampleLight *= illuminationDecay * uWeight;
           accumulatedRays += sampleLight;
