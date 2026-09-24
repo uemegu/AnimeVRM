@@ -7,6 +7,7 @@ import { HairShadowUniforms } from '../shader/HairShadow';
 import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
 import { getSeamlessLoopClip } from './seamlessLoop';
+import { replaceHappyWithEyesOnly } from './happyEyesOnly';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -226,6 +227,7 @@ export class Avatar {
 
           this.vrm = vrm;
           VRMUtils.rotateVRM0(vrm);
+          replaceHappyWithEyesOnly(vrm);
 
           // 1. スムース法線の事前計算（綺麗なアニメアウトライン用）
           applySmoothNormalsToHierarchy(vrm.scene);

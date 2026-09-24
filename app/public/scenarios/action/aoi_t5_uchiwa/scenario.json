@@ -1,0 +1,213 @@
+{
+  "id": "aoi_t5_uchiwa",
+  "title": {
+    "ja": "運動場: 夕暮れの団扇"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 8,
+      "to": 10
+    },
+    "locations": [
+      "sports_ground"
+    ],
+    "requireFlags": [
+      "aoi_t4_hoodie"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t5_uchiwa"
+    ]
+  },
+  "bgm": "love",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "sports_ground",
+      "hintText": {
+        "ja": "陸上の練習を終えたアオイが、ベンチで休んでいる。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "夕暮れの運動場。陸上部の練習を終えたアオイが、ベンチで息を整えていた。",
+      "setFlags": {
+        "seen_aoi_t5_uchiwa": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "ardy_fan"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん。……ふぅ、今日は暑かったぁ。",
+      "voiceUrl": "v_s2_0c824ef2.mp3"
+    },
+    {
+      "id": "s3",
+      "text": "首筋を伝う汗。上気した頬。はだけたジャージの襟元――。"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（落ち着け。ここは紳士であるべき場面だ。脳内の変態を今すぐ鎮めろ）"
+    },
+    {
+      "id": "s5",
+      "text": "カバンの中には、購買でもらった宣伝用の団扇が一本。"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "団扇で、黙ってアオイを扇いであげる",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t5_uchiwa": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "自販機でスポーツドリンクを買ってくる",
+          "goto": "drink",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "首筋の汗の軌跡を、目に焼き付ける",
+          "goto": "hentai"
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "text": "パタパタ、パタパタ。夕風よりも少しだけ優しい風を、アオイに送る。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "わ、涼しい……。ふふ、王様になった気分。",
+      "voiceUrl": "v_s8_db9b03f5.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくんって、ときどき変なこと考えてそうな顔するけど……。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s9_8a1486c2.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "こういう時、何も言わずに優しいよね。昔から、ずっと。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s10_1886a3df.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "タカシ",
+      "text": "（顔に出てたのか……変なこと考えてるの……）",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "drink",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "わ、ありがとう！ ちょうど喉カラカラだったの。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_drink_dd120dd3.mp3"
+    },
+    {
+      "id": "s13",
+      "text": "アオイは嬉しそうに受け取った。優しさは伝わった……はずだ。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "hentai",
+      "text": "鎖骨のくぼみに溜まった一滴が、夕日を反射して――。"
+    },
+    {
+      "id": "s15",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシくん？ 目が、真剣すぎて怖いよ？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s15_6eb056b5.mp3"
+    },
+    {
+      "id": "s16",
+      "speaker": "タカシ",
+      "text": "い、いや、陸上競技における発汗の科学を……"
+    },
+    {
+      "id": "s17",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふっ、なにそれ。……へんなの。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s17_02c90e0d.mp3"
+    },
+    {
+      "id": "end",
+      "text": "グラウンドに、長い影が二つ伸びていた。",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "shion_mail_d2",
+  "characterId": "shion",
+  "title": "シオンからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 2,
+      "to": 5
+    },
+    "requireFlags": [
+      "legend_1"
+    ]
+  },
+  "previewText": {
+    "ja": "……五秒様の資料"
+  },
+  "time": "23:40",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "郷土史の棚の一番下。五秒様の資料、まとめて置いておいた。"
+      },
+      "time": "23:39"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "……別に、あなたのためじゃない。"
+      },
+      "time": "23:40"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "ありがとう、助かる"
+      },
+      "reactionText": {
+        "ja": "……おやすみ。"
+      },
+      "reactionTime": "23:42",
+      "addAffinity": {
+        "shion": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "シオンは優しいな"
+      },
+      "reactionText": {
+        "ja": "……うるさい。"
+      },
+      "reactionTime": "23:42",
+      "addAffinity": {
+        "shion": 2
+      }
+    }
+  ]
+}

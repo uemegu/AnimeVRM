@@ -2,6 +2,9 @@ import React from 'react';
 import { resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
+import { CameraShot } from '../../types/scenario';
+import { StageCastMember } from '../../services/stage/sceneView';
+import { ScrollingBackgroundSettings } from '../../services/graphics/scene/ScrollingBackground';
 import { StageView } from '../../components/Stage/StageView';
 import { DialogueBox } from '../../components/Dialogue/DialogueBox';
 import { ChoiceBox } from '../../components/Dialogue/ChoiceBox';
@@ -14,11 +17,12 @@ export interface ScenarioPageProps {
   isWaitingChoice: boolean;
   activeTimeOfDay: TimeOfDayId;
   activeLocationId: string;
-  activeCharId: string | null;
-  activeModelUrl?: string;
-  activeExpression: string;
+  cast: StageCastMember[];
+  cameraShot: CameraShot;
+  scrolling: ScrollingBackgroundSettings | null;
   onDialogueClick: () => void;
   onChoiceClick: (index: number) => void;
+  onChoiceTimeout: () => void;
   onTypingComplete: () => void;
 }
 
@@ -27,11 +31,12 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   isFinished,
   activeTimeOfDay,
   activeLocationId,
-  activeCharId,
-  activeModelUrl,
-  activeExpression,
+  cast,
+  cameraShot,
+  scrolling,
   onDialogueClick,
   onChoiceClick,
+  onChoiceTimeout,
   onTypingComplete,
 }) => {
   const { lang } = useLanguage();
@@ -42,9 +47,10 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
         <StageView
           timeOfDay={activeTimeOfDay}
           locationId={activeLocationId}
-          characterId={activeCharId}
-          characterModelUrl={activeModelUrl}
-          expression={activeExpression}
+          cast={cast}
+          cameraShot={cameraShot}
+          scrolling={scrolling}
+          speakerId={currentScene?.speakerCharacterId ?? null}
         />
       </main>
 
@@ -61,6 +67,8 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
             goto: c.goto,
           }))}
           onSelect={onChoiceClick}
+          timeLimitSec={currentScene.choiceTimeLimitSec}
+          onTimeout={onChoiceTimeout}
         />
       )}
 

@@ -1,0 +1,134 @@
+{
+  "id": "shion_legend_2",
+  "title": {
+    "ja": "図書室: 五秒様の真実"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 15,
+      "to": 17
+    },
+    "locations": [
+      "library"
+    ],
+    "requireFlags": [
+      "legend_1"
+    ],
+    "unlessFlags": [
+      "seen_shion_legend_2"
+    ]
+  },
+  "bgm": "mysterious",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintText": {
+        "ja": "シオンが「調べ終わった」と言いたげにこちらを見ている。"
+      },
+      "hintCharacterIds": [
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……調べ終わったわ、五秒様のこと。",
+      "setFlags": {
+        "seen_shion_legend_2": true
+      },
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_s1_91fb9ae7.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "五秒様は、期限の日に「GO」と言う。そこから5秒以内に、想いを告げなければならない。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s2_810b2aba.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "記録に残ってる失敗例は、だいたい同じ。「言葉を飾りすぎて、時間切れ」。",
+      "camera": "close",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_07f203f2.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "それと、面白いことがわかった。……10年前、この学校の生徒が五秒様に選ばれてる。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s4_94d865a8.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "タカシ",
+      "text": "10年前……？"
+    },
+    {
+      "id": "s6",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "その生徒、今はこの学校で教師をしてるらしいわ。……心当たり、あるでしょう？",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s6_0929e50c.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "タカシ",
+      "text": "（……白石先生？）"
+    },
+    {
+      "id": "s8",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……頑張りなさい。観察対象がいなくなったら、つまらないから。",
+      "avatars": {
+        "shion": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s8_dc97e945.mp3"
+    },
+    {
+      "id": "s9",
+      "text": "シオンは、ほんの少しだけ照れくさそうに、本で顔を隠した。",
+      "setFlags": {
+        "know_legend": true
+      }
+    }
+  ]
+}

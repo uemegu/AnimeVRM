@@ -1,0 +1,188 @@
+{
+  "id": "teacher_track",
+  "title": {
+    "ja": "運動場: 顧問の視線"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 6
+    },
+    "locations": [
+      "sports_ground"
+    ],
+    "unlessFlags": [
+      "seen_teacher_track"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "sports_ground",
+      "hintText": {
+        "ja": "陸上部が練習している。アオイの姿も見える。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "放課後の運動場。陸上部に入ったアオイが、トラックを軽やかに駆けていく。",
+      "setFlags": {
+        "seen_teacher_track": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Jogging"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（……美しいフォームだ。特に、着地の瞬間のふくらはぎの筋肉の――）"
+    },
+    {
+      "id": "s3",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……ずいぶん熱心に見ているのね。陸上部に入部希望？",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_5e89ad54.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "うわっ、白石先生！？ せ、先生こそなんでここに！？"
+    },
+    {
+      "id": "s5",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "陸上部の顧問だから。……で、何を見ていたの？",
+      "camera": "close",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s5_e577a1b9.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「アオイのフォームがきれいで」と正直に言う",
+          "goto": "honest",
+          "setFlags": {
+            "teacher_noticed": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「空を見ていました」とごまかす",
+          "goto": "sky"
+        }
+      ]
+    },
+    {
+      "id": "honest",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……そう。確かに、あの子のフォームはいい。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_honest_8051be1e.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "見る目はあるみたいね。……見すぎには注意しなさい。",
+      "avatars": {
+        "teacher": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s8_6f8b5e5a.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくーん！ 見ててくれたの？ ありがとー！",
+      "avatars": {
+        "teacher": {
+          "position": "right"
+        },
+        "aoi": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      },
+      "camera": "wide",
+      "nextSceneId": "end",
+      "voiceUrl": "v_s9_58dcf5ca.mp3"
+    },
+    {
+      "id": "sky",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……ふうん。空、ね。",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_sky_80f1b788.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "空にふくらはぎは浮かんでいないけど。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s11_eceee62a.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "（全部見抜かれている……！）"
+    },
+    {
+      "id": "end",
+      "text": "夕日の中、陸上部のかけ声がグラウンドに響いていた。"
+    }
+  ]
+}

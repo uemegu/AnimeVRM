@@ -1,0 +1,27 @@
+{
+  "id": "daily_park",
+  "title": {
+    "ja": "公園: のどかな休日"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "park"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "公園では、子どもたちがボール遊びをしている。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（ベンチに座って、女神の期限について考える。……考えても仕方ない。動くしかない）"
+    }
+  ]
+}

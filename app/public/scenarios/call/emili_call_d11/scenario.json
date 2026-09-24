@@ -1,0 +1,92 @@
+{
+  "id": "emili_call_d11",
+  "characterId": "emili",
+  "title": {
+    "ja": "お嬢様の謝罪"
+  },
+  "priority": 5,
+  "availability": {
+    "dayRange": {
+      "from": 11,
+      "to": 12
+    },
+    "requireFlags": [
+      "black_suits_done"
+    ]
+  },
+  "modelUrl": "/models/emili/emili-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "もしもし、タカシくん……？ 今日は本当に、本当にごめんなさい……！"
+      },
+      "expression": "sad",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_a8eb7124.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "パパのSPの人たち、みんなタカシくんのこと褒めてたよ。「あの少年、我が部隊にスカウトしたい」って。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_07f19aa6.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_call_d11_c1",
+          "text": {
+            "ja": "誰も怪我しなくてよかった"
+          },
+          "goto": "a",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "emili_call_d11_c2",
+          "text": {
+            "ja": "スカウトは丁重にお断りする"
+          },
+          "goto": "b",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    "a": {
+      "id": "a",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……タカシくんって、ほんといい人だね。アオイちゃんが惚れるの、わかるなあ。"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_a_c2660226.mp3"
+    },
+    "b": {
+      "id": "b",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "あはは！ だよね！ ……ほんとにありがと。おやすみ！"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_b_1c1bcee7.mp3"
+    }
+  }
+}

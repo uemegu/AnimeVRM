@@ -1,0 +1,156 @@
+{
+  "id": "teacher_truth",
+  "title": {
+    "ja": "職員室: 白石先生の過去"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 16,
+      "to": 18
+    },
+    "requireFlags": [
+      "know_legend"
+    ],
+    "unlessFlags": [
+      "teacher_advice"
+    ]
+  },
+  "priority": 6,
+  "consumesTurn": true,
+  "location": "staff_room",
+  "bgm": "mysterious",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "放課後の職員室。先生は窓の外を見ながら、俺の話を黙って聞いていた。",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "setFlags": {
+        "teacher_advice": true
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……そう。あなたも、五秒様に選ばれたのね。",
+      "voiceUrl": "v_s2_fa7c7d8c.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "10年前。私も、あの神社で同じことを言われたわ。「5秒で告白しないと◯す」って。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s3_721ce5ad.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "先生も……！？ それで、どうなったんですか！？"
+    },
+    {
+      "id": "s5",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "当日。私は、好きだった人の前で、一晩かけて考えた告白文を読み上げたの。",
+      "avatars": {
+        "teacher": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s5_f5460a7e.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "「出会ったのは桜の季節で、あなたの横顔は春の陽だまりのようで――」",
+      "avatars": {
+        "teacher": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s6_03b15e46.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……そこで5秒。雷が落ちて、私は1ヶ月アフロで過ごした。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry",
+          "motion": "ardy_troubled"
+        }
+      },
+      "voiceUrl": "v_s7_ef5f6ce2.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "アフロ……！",
+      "camera": "speaker"
+    },
+    {
+      "id": "s9",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "笑うところじゃないわ。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s9_a1c924b3.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "いい？ 大事なのは、飾った言葉じゃない。積み重ねた時間と、たった一言の本気よ。",
+      "camera": "close",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s10_0cfc7301.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "短く、まっすぐ。それだけで、ちゃんと届くから。",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s11_7cddecec.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……私の分まで、成功させなさい。これは担任命令。",
+      "avatars": {
+        "teacher": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s12_a2847521.mp3"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "aoi_mail_d3",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 2,
+      "to": 4
+    },
+    "requireFlags": [
+      "aoi_t1_textbook"
+    ]
+  },
+  "previewText": {
+    "ja": "教科書、ありがとう"
+  },
+  "time": "21:30",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "教科書、見せてくれてありがとう。"
+      },
+      "time": "21:29"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "タカシくんの説明、先生よりわかりやすかったかも。……また一緒に勉強してくれる？"
+      },
+      "time": "21:30"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "もちろん。いつでも"
+      },
+      "reactionText": {
+        "ja": "やった！ じゃあ、明日の放課後も予約ね♪"
+      },
+      "reactionTime": "21:32",
+      "addAffinity": {
+        "aoi": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "俺でよければ"
+      },
+      "reactionText": {
+        "ja": "タカシくんがいいの。……なんてね。おやすみ！"
+      },
+      "reactionTime": "21:32",
+      "addAffinity": {
+        "aoi": 1
+      }
+    }
+  ]
+}

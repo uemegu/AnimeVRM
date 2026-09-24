@@ -1,0 +1,292 @@
+{
+  "id": "aoi_t2_library",
+  "title": {
+    "ja": "昼休みの図書室: 机の下の秘密"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 5
+    },
+    "locations": [
+      "library"
+    ],
+    "requireFlags": [
+      "aoi_t1_textbook"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t2_library"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintText": {
+        "ja": "アオイが図書室で何かを探しているようだ。"
+      },
+      "hintCharacterIds": [
+        "aoi",
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "昼休みの図書室。アオイが机の下を覗き込んで、おろおろしていた。",
+      "setFlags": {
+        "seen_aoi_t2_library": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "expression": "sad"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん！ おばあちゃんにもらった髪飾り、落としちゃって……。",
+      "voiceUrl": "v_s2_71ae996b.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……さっきから机の下を這いずり回ってるわ。見てるこっちが落ち着かない。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s3_f2fe69f8.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "よし、一緒に探そう。"
+    },
+    {
+      "id": "s5",
+      "text": "二人で机の下に潜り込む。狭い。暗い。そして、とても近い。",
+      "avatars": {
+        "shion": {
+          "visible": false
+        },
+        "aoi": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      }
+    },
+    {
+      "id": "s6",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、あった……！ 奥の隙間に――",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s6_d769fc3d.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "白石先生",
+      "text": "……図書室で、何をしているの？",
+      "voiceUrl": "v_s7_ae3c0d7c.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "頭上から、氷点下の声。白石先生だ。ここで見つかったら、どう見ても不純異性交遊である。"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "（……っ！ タ、タカシくん、どうしよう……！）",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s9_594b2c06.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "とっさにアオイの頭を手でかばい、息を殺して隠れる",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t2_library": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "自分だけ机から出て、先生をごまかす",
+          "goto": "out",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "正直に「二人で潜ってました」と申告する",
+          "goto": "honest"
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "text": "アオイの頭が机の裏にぶつからないよう、そっと手のひらを添える。"
+    },
+    {
+      "id": "s12",
+      "text": "腕の中に収まったアオイの鼓動が、はっきりと伝わってきた。"
+    },
+    {
+      "id": "s13",
+      "speaker": "白石先生",
+      "text": "……気のせいかしら。",
+      "voiceUrl": "v_s13_050e954d.mp3"
+    },
+    {
+      "id": "s14",
+      "text": "足音が遠ざかる。"
+    },
+    {
+      "id": "s15",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……頭、守ってくれたんだね。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s15_c72c6245.mp3"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ドキドキしたぁ……。二人だけの秘密、だね。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s16_bde9933c.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……全部見えてたけど。まあ、言いふらす趣味はないわ。",
+      "avatars": {
+        "shion": {
+          "position": "right",
+          "expression": "neutral"
+        },
+        "aoi": {
+          "position": "left"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s17_da062ef1.mp3"
+    },
+    {
+      "id": "out",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……タカシくん。机の下で何を？",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_out_3474ca6c.mp3"
+    },
+    {
+      "id": "s19",
+      "speaker": "タカシ",
+      "text": "コ、コンタクトを落としまして！"
+    },
+    {
+      "id": "s20",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "あなた、裸眼で視力2.0でしょう。……まあいいわ。図書室では静かに。",
+      "voiceUrl": "v_s20_d98cba1e.mp3"
+    },
+    {
+      "id": "s21",
+      "text": "アオイは無事に脱出したが、その日、彼女は少しだけ口数が少なかった。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "honest",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "……二人で、机の下に。",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "center",
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_honest_c85f785c.mp3"
+    },
+    {
+      "id": "s23",
+      "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
+      "text": "反省文、原稿用紙5枚。題は「図書室の正しい使い方」。",
+      "avatars": {
+        "teacher": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s23_e5f3e83f.mp3"
+    },
+    {
+      "id": "s24",
+      "speaker": "タカシ",
+      "text": "（正直者が馬鹿を見るとは、このことか……）"
+    },
+    {
+      "id": "end",
+      "text": "昼休みの終わりを告げるチャイムが鳴った。",
+      "clearCast": true
+    }
+  ]
+}

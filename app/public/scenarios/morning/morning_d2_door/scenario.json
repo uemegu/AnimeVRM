@@ -1,0 +1,131 @@
+{
+  "id": "morning_d2_door",
+  "title": {
+    "ja": "朝: 玄関の前で"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 2,
+      "to": 2
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "玄関を開けると、昨日と同じ場所にアオイが立っていた。",
+      "background": "apartment_door",
+      "timeOfDay": "morning",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "おはよ、タカシくん。……えへへ、今日も一緒に行っていい？",
+      "voiceUrl": "v_s2_7652d6bb.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "（女神の宣告から一夜。夢であってくれと願ったが、枕元に「残り20日」と書いた紙が置いてあった）"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（あの女神、アナログな脅し方もするのか……）"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "どうしたの？ 顔色悪いよ？",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s5_f58c0d90.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「アオイの顔を見たら元気になった」と伝える",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「ちょっと寝不足で」とごまかす",
+          "goto": "b"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "も、もう……朝から何言ってるの。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_a_14312fa7.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……でも、ちょっと嬉しいかも。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s8_7d7e62af.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ダメだよ、ちゃんと寝なきゃ。今日のお昼、私のおかず分けてあげるね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_b_c3e422ce.mp3"
+    },
+    {
+      "id": "end",
+      "text": "二人並んで歩く通学路。女神のことはひとまず忘れて、俺はこの時間を噛み締めた。",
+      "background": "town",
+      "scrollingBackground": {},
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking"
+        }
+      }
+    }
+  ]
+}

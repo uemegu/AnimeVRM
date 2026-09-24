@@ -1,0 +1,163 @@
+{
+  "id": "aoi_aquarium",
+  "title": {
+    "ja": "水族館: 約束のデート"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 7,
+      "to": 20
+    },
+    "locations": [
+      "aquarium"
+    ],
+    "requireFlags": [
+      "unlock_aquarium"
+    ],
+    "unlessFlags": [
+      "seen_aoi_aquarium"
+    ]
+  },
+  "bgm": "love",
+  "priority": 5,
+  "actionHints": [
+    {
+      "locationId": "aquarium",
+      "hintText": {
+        "ja": "約束の水族館。アオイが待っている。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん！ ……えへへ、ほんとに来てくれた。",
+      "setFlags": {
+        "seen_aoi_aquarium": true
+      },
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      },
+      "voiceUrl": "v_s1_76edd6ad.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "青い光に満ちた大水槽。ジンベエザメが、ゆったりと頭上を横切っていく。"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "わあ……おっきい……！ ねえ見て、あの子、笑ってるみたい。",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "motion": "ardy_point"
+        }
+      },
+      "voiceUrl": "v_s3_b0e62de0.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "小さい頃ね、タカシくんとお父さんたちとここに来たの、覚えてる？",
+      "camera": "medium",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s4_7047abe3.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "私が迷子になって泣いてたら、タカシくんが見つけてくれたんだよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s5_c5718642.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「覚えてる。あの時からずっと、アオイは泣き虫だった」",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 3
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「……ごめん、覚えてない」",
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "もう！ ……でも、覚えててくれたんだ。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_a_147f008d.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……私ね、あの時から、タカシくんは私のことを見つけてくれる人だって思ってたの。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s8_4a890b55.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "そっか……ちっちゃかったもんね。でも、私はちゃんと覚えてるよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_b_ebe7d299.mp3"
+    },
+    {
+      "id": "end",
+      "text": "青い光の中で、アオイの横顔がやさしく揺れていた。"
+    }
+  ]
+}

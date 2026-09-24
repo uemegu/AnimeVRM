@@ -1,0 +1,140 @@
+{
+  "id": "emili_lottery",
+  "title": {
+    "ja": "休日の商店街: お嬢様と福引き"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 6,
+      "to": 14
+    },
+    "locations": [
+      "shopping_street"
+    ],
+    "unlessFlags": [
+      "seen_emili_lottery"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "shopping_street",
+      "hintText": {
+        "ja": "商店街で、エミリが福引きの列に並んでいる。"
+      },
+      "hintCharacterIds": [
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "あ、タカシくん！ 見て見て、福引き！ 一回やってみたかったの〜！",
+      "setFlags": {
+        "seen_emili_lottery": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Excited"
+        }
+      },
+      "voiceUrl": "v_s1_cd05ca61.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "名家のお嬢様は、商店街の福引きに並んだことがないらしい。"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ガラガラ回すやつだよね！？ どっちに回すの！？ 右？ 左？",
+      "avatars": {
+        "emili": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s3_4816a72e.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「右に、ゆっくり」とアドバイスする",
+          "goto": "a",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「俺が回してあげる」と代わる",
+          "goto": "b",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "text": "エミリがガラガラを回す。コロン、と転がり出たのは――金色の玉。",
+      "nextSceneId": "win"
+    },
+    {
+      "id": "b",
+      "text": "俺がガラガラを回す。コロン、と転がり出たのは――金色の玉。"
+    },
+    {
+      "id": "win",
+      "speaker": "商店街のおじさん",
+      "text": "大当たりーっ！ 遊園地のペアチケットだよ！",
+      "voiceUrl": "v_win_7662de92.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "きゃーっ！ やったやったー！ ねえタカシくん、今度一緒に行こうよ！",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_victory"
+        }
+      },
+      "voiceUrl": "v_s8_fa775f5e.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "パパには内緒ね。SPついてきちゃうから！",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s9_f1c94871.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "休日の街マップに「遊園地」が追加された。",
+      "setFlags": {
+        "unlock_amusement_park": true
+      }
+    }
+  ]
+}

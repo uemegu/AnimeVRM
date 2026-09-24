@@ -1,0 +1,160 @@
+{
+  "id": "gossip_classroom",
+  "title": {
+    "ja": "教室: 噂好きのふたり"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 5
+    },
+    "locations": [
+      "classroom"
+    ],
+    "unlessFlags": [
+      "seen_gossip_classroom"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 2,
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintText": {
+        "ja": "教室の隅で、女子たちがひそひそ話している。"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "ねえねえ聞いた？ アオイちゃん、隣のクラスの男子に告白されそうなんだって！",
+      "setFlags": {
+        "seen_gossip_classroom": true
+      },
+      "avatars": {
+        "yui": {
+          "position": "left",
+          "expression": "happy",
+          "motion": "mob_chat_gesture"
+        },
+        "kana": {
+          "position": "right",
+          "expression": "neutral",
+          "motion": "mob_listen_nod"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s1_8ae925b3.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "え、マジ？ 転入してまだ数日なのに？",
+      "avatars": {
+        "kana": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s2_e8992695.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "サッカー部のエースらしいよ。放課後、呼び出すとか呼び出さないとか。",
+      "voiceUrl": "v_s3_a0f169ff.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（……な、なんだと……！？）"
+    },
+    {
+      "id": "s5",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "あ、タカシくんじゃん。幼馴染なんでしょ？ いいの〜？",
+      "camera": "speaker",
+      "avatars": {
+        "kana": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s5_4d658440.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「よくない。……俺も負けてられない」",
+          "goto": "fire",
+          "setFlags": {
+            "mindset_push": true
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「アオイが決めることだから」",
+          "goto": "calm"
+        }
+      ]
+    },
+    {
+      "id": "fire",
+      "speaker": "ユイ",
+      "speakerCharacterId": "yui",
+      "text": "きゃー！ 宣戦布告きた！",
+      "avatars": {
+        "yui": {
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        }
+      },
+      "voiceUrl": "v_fire_7cd6d5ec.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "ま、ただの噂だけどね。エース、彼女いるし。",
+      "avatars": {
+        "kana": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s8_7c175696.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "噂かよ！！",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "calm",
+      "speaker": "カナ",
+      "speakerCharacterId": "kana",
+      "text": "ふーん、余裕じゃん。……ま、ただの噂だけどね。",
+      "avatars": {
+        "kana": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_calm_e93ec8dd.mp3"
+    },
+    {
+      "id": "end",
+      "text": "始業のチャイムが鳴り、二人は慌てて席に戻っていった。"
+    }
+  ]
+}

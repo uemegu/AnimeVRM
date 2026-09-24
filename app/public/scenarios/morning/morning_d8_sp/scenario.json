@@ -1,0 +1,102 @@
+{
+  "id": "morning_d8_sp",
+  "title": {
+    "ja": "朝: サングラスの見張り"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 8,
+      "to": 8
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ねえタカシくん。最近、電柱の陰にサングラスの人がいること、多くない？",
+      "background": "town",
+      "scrollingBackground": {},
+      "timeOfDay": "morning",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "Walking"
+        }
+      },
+      "voiceUrl": "v_s1_e4ad8af2.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（……いる。しかも3人。全員インカムを付けて、こっちを見ている）"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "この辺、物騒なのかな……。ちょっと怖いね。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s3_7fe91f3d.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「大丈夫。何かあったら俺が守る」",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「気のせいだよ、たぶん」",
+          "goto": "b"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……うん。ありがと、タカシくん。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_a_487d10ad.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "そっか……そうだよね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_b_9759eefc.mp3"
+    },
+    {
+      "id": "end",
+      "text": "振り返ると、サングラスの男たちは、さっと電柱の陰に隠れた。……隠れきれていないが。"
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "id": "emili_amusement",
+  "title": {
+    "ja": "遊園地: お嬢様のお忍びデート"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 7,
+      "to": 20
+    },
+    "locations": [
+      "amusement_park"
+    ],
+    "unlessFlags": [
+      "seen_emili_amusement"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "amusement_park",
+      "hintText": {
+        "ja": "遊園地の入口で、エミリが手を振っている。"
+      },
+      "hintCharacterIds": [
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "タカシくーん！ こっちこっち！ 今日はSPなし！ 完全お忍びだよ！",
+      "setFlags": {
+        "seen_emili_amusement": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_cheer"
+        }
+      },
+      "voiceUrl": "v_s1_1552f7c1.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "……背後の植え込みから、明らかにサングラスの男が覗いている気がするが、黙っておこう。"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ジェットコースター乗ろ！ そのあとメリーゴーランド！ そのあと観覧車！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_3f3f4836.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "夕方。観覧車のてっぺんで、エミリは珍しく静かだった。",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s5",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "……ねえ。私ね、友達とこういうとこ来るの、初めてなの。",
+      "voiceUrl": "v_s5_4828a910.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "いつもパパの人たちがいて、みんな私のこと「お嬢様」って呼ぶから。",
+      "avatars": {
+        "emili": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s6_e30c2101.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「エミリはエミリだろ」と笑う",
+          "goto": "a",
+          "setFlags": {
+            "emili_friend": true
+          },
+          "addAffinity": {
+            "emili": 3
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「お嬢様も大変なんだな」と労う",
+          "goto": "b",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "……！ うん。……えへへ、タカシくん、いいこと言うじゃん。",
+      "camera": "close",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_a_adfc143b.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "アオイちゃんが好きになるの、ちょっとわかるかも。……なーんてね！",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s9_52635c75.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "そうなの〜！ ……でも、今日は楽しかった！ ありがと！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_b_5964067d.mp3"
+    },
+    {
+      "id": "end",
+      "text": "観覧車の窓から見える街並みが、夕日に染まっていた。"
+    }
+  ]
+}

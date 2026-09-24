@@ -1,0 +1,27 @@
+{
+  "id": "daily_shopping_street",
+  "title": {
+    "ja": "商店街: ウィンドウショッピング"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "shopping_street"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "商店街をぶらぶらと歩く。雑貨屋のショーウィンドウに、黄色い髪飾りが飾られていた。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（……アオイに似合いそうだな）"
+    }
+  ]
+}

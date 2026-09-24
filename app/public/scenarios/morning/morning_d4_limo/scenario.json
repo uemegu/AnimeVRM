@@ -1,0 +1,76 @@
+{
+  "id": "morning_d4_limo",
+  "title": {
+    "ja": "朝: 黒塗りの送迎車"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 4,
+      "to": 4
+    }
+  },
+  "priority": 5,
+  "location": "school_gate",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "校門の前に、黒塗りの高級車が横付けされていた。",
+      "background": "gate_ambush",
+      "timeOfDay": "morning"
+    },
+    {
+      "id": "s2",
+      "text": "降りてきたサングラスの男が、後部座席のドアを恭しく開ける。"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ありがとう、田中さん！ いってきまーす！",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_wave"
+        }
+      },
+      "voiceUrl": "v_s3_fb70682f.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "黒服の男",
+      "text": "お嬢様、お気をつけて。……旦那様が「くれぐれも不審な輩に近づかぬように」と。",
+      "voiceUrl": "v_s4_b1a109f4.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "もー、パパは心配しすぎなんだから！",
+      "avatars": {
+        "emili": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s5_8530840c.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "あ、タカシくん、おっはよー！ 今の？ うちの運転手さん。パパがね、過保護なの。",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s6_6762b020.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "タカシ",
+      "text": "（……運転手にしては、首が太すぎるし、耳にインカム付けてたけど）"
+    }
+  ]
+}

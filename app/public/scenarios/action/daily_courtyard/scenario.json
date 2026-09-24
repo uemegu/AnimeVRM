@@ -1,0 +1,46 @@
+{
+  "id": "daily_courtyard",
+  "title": {
+    "ja": "中庭: 昼下がりのベンチ"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "courtyard"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "なあタカシ。恋ってなんなんだろうな。",
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s1_587dafaf.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "急にどうした。"
+    },
+    {
+      "id": "s3",
+      "speaker": "ナルセ",
+      "speakerCharacterId": "naruse",
+      "text": "いや、パンの袋を開けるのに失敗しただけだ。気にするな。",
+      "voiceUrl": "v_s3_32ca3d82.mp3"
+    }
+  ]
+}

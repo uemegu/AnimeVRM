@@ -1,0 +1,120 @@
+{
+  "id": "ending_bad",
+  "title": {
+    "ja": "BAD END: 女神の鉄槌・天罰覿面"
+  },
+  "availability": {
+    "requireFlags": [
+      "confession_failed"
+    ]
+  },
+  "priority": 1,
+  "location": "hospital",
+  "bgm": "bad_ending",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "……目を覚ますと、見知らぬ白い天井だった。",
+      "background": "hospital",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "sad"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "タカシくん！ よかった、目が覚めた……！",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s2_f6813e08.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "神社で急に雷が落ちて……タカシくん、3日も眠ってたんだよ。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s3_b6a40a45.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "タカシ",
+      "text": "（……生きてる。◯されなかった……？）"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "それでね、その……髪型が、すごいことになってて……。",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s5_1ed4acc8.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "鏡を見る。そこには、見事なまでに爆発したアフロ頭の男が映っていた。"
+    },
+    {
+      "id": "s7",
+      "speaker": "女神の声",
+      "text": "ごきげんよう、アフロの人の子。",
+      "flashEffect": "white",
+      "voiceUrl": "v_s7_c6dc5b43.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "タカシ",
+      "text": "め、女神……！"
+    },
+    {
+      "id": "s9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えっ、誰の声！？ 天井が光ってる……！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "motion": "ardy_startled"
+        }
+      },
+      "voiceUrl": "v_s9_21827ca6.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "女神の声",
+      "text": "◯すのは、やめておきました。あなたの間抜け面、見ていて退屈しませんから。",
+      "voiceUrl": "v_s10_364f5438.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "女神の声",
+      "text": "その代わり……もう一度、Day 1からやり直しです。今度こそ、積み上げてきなさい。",
+      "voiceUrl": "v_s11_9fe298fc.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "タカシ",
+      "text": "そんなあああああああ！！"
+    },
+    {
+      "id": "s13",
+      "text": "BAD END ――女神の鉄槌・天罰覿面――"
+    }
+  ]
+}

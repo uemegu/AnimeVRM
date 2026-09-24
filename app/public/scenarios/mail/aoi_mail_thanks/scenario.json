@@ -1,0 +1,47 @@
+{
+  "id": "aoi_mail_thanks",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "priority": 4,
+  "availability": {
+    "dayRange": {
+      "from": 11,
+      "to": 12
+    },
+    "requireFlags": [
+      "aoi_rescued"
+    ],
+    "unlessFlags": [
+      "aoi_t6_hero"
+    ]
+  },
+  "previewText": {
+    "ja": "今日はありがとう"
+  },
+  "time": "22:50",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "今日はありがとう。すっごく怖かったけど、タカシくんがいてくれてよかった。"
+      },
+      "time": "22:50"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "無事でよかった"
+      },
+      "reactionText": {
+        "ja": "うん。おやすみ、タカシくん。"
+      },
+      "reactionTime": "22:52",
+      "addAffinity": {
+        "aoi": 1
+      }
+    }
+  ]
+}

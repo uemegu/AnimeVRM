@@ -1,0 +1,22 @@
+{
+  "id": "daily_aoi_house",
+  "title": {
+    "ja": "アオイの家: 留守"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "aoi_house"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "アオイの家のチャイムを鳴らしたが、留守のようだった。"
+    }
+  ]
+}

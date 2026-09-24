@@ -1,0 +1,140 @@
+{
+  "id": "shion_legend_1",
+  "title": {
+    "ja": "図書室: 五秒様の言い伝え"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 6
+    },
+    "locations": [
+      "library"
+    ],
+    "unlessFlags": [
+      "seen_shion_legend_1"
+    ]
+  },
+  "bgm": "mysterious",
+  "priority": 3,
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintText": {
+        "ja": "シオンが古い本を読んでいる。"
+      },
+      "hintCharacterIds": [
+        "shion"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "放課後の図書室。シオンが、ずいぶん古びた郷土史の本を読んでいた。",
+      "setFlags": {
+        "seen_shion_legend_1": true
+      },
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "motion": "chin_rest"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……来ると思った。あなた、あの神社で何かあったでしょう。",
+      "voiceUrl": "v_s2_0012aaab.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "タカシ",
+      "text": "……なんでわかるんだ。"
+    },
+    {
+      "id": "s4",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "顔に書いてある。「死刑宣告を受けました」って。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s4_f20e941f.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "あの神社にはね、「五秒様」っていう言い伝えがあるの。",
+      "camera": "close",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s5_a3d0fb8b.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "煮え切らない恋をする者の前に現れて、期限までに想いを告げさせる、せっかちな神様。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s6_0b2d4bb8.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "タカシ",
+      "text": "……告げられなかったら？"
+    },
+    {
+      "id": "s8",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「雷に打たれた」とか「頭が爆発した」とか。記録によってまちまち。",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s8_1de5317d.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "タカシ",
+      "text": "頭が爆発！？"
+    },
+    {
+      "id": "s10",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "……続きは、まだ調べてる途中。わかったら教えてあげる。暇つぶしにはなるから。",
+      "avatars": {
+        "shion": {
+          "expression": "neutral"
+        }
+      },
+      "voiceUrl": "v_s10_ae93939c.mp3"
+    },
+    {
+      "id": "s11",
+      "text": "シオンは本に目を戻した。その口元が、ほんの少しだけ笑っていた気がした。",
+      "setFlags": {
+        "legend_1": true
+      }
+    }
+  ]
+}

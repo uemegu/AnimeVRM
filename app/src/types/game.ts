@@ -29,7 +29,9 @@ export type ActionLocationId =
   | 'cinema'          // 映画館
   | 'home'            // 自宅
   | 'amusement_park'  // 遊園地（条件付きで解放）
-  | 'aquarium';       // 水族館（条件付きで解放）
+  | 'aquarium'        // 水族館（条件付きで解放）
+  | 'shrine'          // 神社（女神の社）
+  | 'aoi_house';      // アオイの部屋（招待されると解放）
 
 /** 行動場所の定義と事前情報 */
 export interface ActionLocationOption {
@@ -49,7 +51,7 @@ export interface ActionLocationOption {
 
 /** ゲーム全体の状態 */
 export interface GameState {
-  /** 現在の日数 (1〜28) */
+  /** 現在の日数 (1〜FINAL_DAY) */
   day: number;
   /** 現在の時間帯フェーズ */
   phase: DayPhase;
@@ -100,7 +102,10 @@ export function isHoliday(day: number): boolean {
   return dayOfWeek === 'Sat' || dayOfWeek === 'Sun';
 }
 
+/** 最終日（女神の期限。21日目の日曜に決着する） */
+export const FINAL_DAY = 21;
+
 /** 最終日判定 */
 export function isFinalDay(day: number): boolean {
-  return day >= 28;
+  return day >= FINAL_DAY;
 }

@@ -43,7 +43,13 @@ export class ScenarioRepository {
 
   /** 夜の電話の本文を読み込む */
   public loadCall(id: string): Promise<CallScenario> {
-    return this.loadFile(id, (json) => json as CallScenario);
+    return this.loadFile(id, (json, entry) => {
+      const call = json as CallScenario;
+      const steps = Object.fromEntries(
+        Object.entries(call.steps).map(([key, step]) => [key, { ...step, voiceUrl: resolveRelative(step.voiceUrl, entry.baseUrl) }])
+      );
+      return { ...call, steps };
+    });
   }
 
   /** 夜のメールの本文を読み込む */

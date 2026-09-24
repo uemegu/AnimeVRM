@@ -76,6 +76,14 @@ export function validateScenario(scenario: ScenarioPackage): ValidationResult {
       });
     }
 
+    if (scene.choiceTimeout?.goto && !sceneIds.has(scene.choiceTimeout.goto)) {
+      issues.push({
+        type: 'error',
+        sceneId: scene.id,
+        message: `時間切れの遷移先(choiceTimeout.goto)シーンが見つかりません: "${scene.choiceTimeout.goto}"`,
+      });
+    }
+
     if (scene.choices && scene.choices.length > 0) {
       // 選択肢があるシーンのセリフ空文字ルールチェック (GEMINI.md シナリオ設計規則)
       const rawText = typeof scene.text === 'string' ? scene.text : scene.text?.ja;

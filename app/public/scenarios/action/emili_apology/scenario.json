@@ -1,0 +1,93 @@
+{
+  "id": "emili_apology",
+  "title": {
+    "ja": "屋上: お嬢様の謝罪"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 12,
+      "to": 12
+    },
+    "locations": [
+      "rooftop"
+    ],
+    "requireFlags": [
+      "black_suits_done"
+    ],
+    "unlessFlags": [
+      "seen_emili_apology"
+    ]
+  },
+  "bgm": "main_bgm",
+  "priority": 4,
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintText": {
+        "ja": "エミリが屋上でしょんぼりしている。"
+      },
+      "hintCharacterIds": [
+        "emili"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "タカシくん、昨日は本当にごめんなさい！",
+      "setFlags": {
+        "seen_emili_apology": true
+      },
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "sad",
+          "motion": "Quick Formal Bow"
+        }
+      },
+      "voiceUrl": "v_s1_64e22314.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "パパにはめちゃくちゃ怒っといたから！ 1ヶ月、口きかないって言ってやった！",
+      "avatars": {
+        "emili": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s2_30b7cba2.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "……でもね。パパ、タカシくんのこと、すっごく褒めてたよ。「あの少年は本物だ」って。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s3_4f01dac9.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ねえ。アオイちゃんのこと、ちゃんと捕まえといてあげてね。……じゃないと、私がもらっちゃうから！",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "motion": "ardy_laugh"
+        }
+      },
+      "voiceUrl": "v_s4_837a9fe0.mp3"
+    }
+  ]
+}

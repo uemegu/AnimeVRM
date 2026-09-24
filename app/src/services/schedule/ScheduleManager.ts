@@ -4,6 +4,7 @@ import {
   ActionLocationId,
   ActionLocationOption,
   isHoliday,
+  FINAL_DAY,
 } from '../../types/game';
 import { ScenarioCategory, ScenarioIndexEntry, ScenarioMeta, ScenarioTimeSlot } from '../../types/scenario';
 import { HeroineId, NightCommunication } from '../../types/communication';
@@ -140,6 +141,18 @@ export class ScheduleManager {
   }
 
   /**
+   * 条件を満たすエンディング（決着のシナリオが立てたフラグ等で決まる）。なければ null
+   */
+  public static getEndingScenario(gameState: GameState): ScenarioIndexEntry | null {
+    const played = new Set((gameState.scenarioHistory ?? []).map((entry) => entry.scenarioId));
+    return (
+      this.getEligibleScenarios(['ending'], gameState, undefined, true).find(
+        (scenario) => !scenario.fallback && !played.has(scenario.id)
+      ) ?? null
+    );
+  }
+
+  /**
    * 選択された場所に応じたシナリオを決定（ScenarioMeta.actionHints / availability より解決）
    */
   public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioIndexEntry {
@@ -197,6 +210,9 @@ export class ScheduleManager {
     const availability = scenario.availability;
     if (availability?.requireFlags?.some((flag) => !gameState.flags[flag])) return false;
     if (availability?.unlessFlags?.some((flag) => Boolean(gameState.flags[flag]))) return false;
+    const affinityOf = (charId: string) => gameState.affinities[charId] ?? 0;
+    if (Object.entries(availability?.minAffinity ?? {}).some(([charId, min]) => affinityOf(charId) < min)) return false;
+    if (Object.entries(availability?.maxAffinity ?? {}).some(([charId, max]) => affinityOf(charId) >= max)) return false;
     const dayRange = availability?.dayRange;
     if (dayRange?.from !== undefined && gameState.day < dayRange.from) return false;
     if (dayRange?.to !== undefined && gameState.day > dayRange.to) return false;
@@ -275,11 +291,11 @@ export class ScheduleManager {
 
   /**
    * 就寝処理（日付を1日進め、翌朝の状態へ）
-   * 28日目を超える場合はエンディング判定フラグを立てる
+   * 最終日を超える場合はエンディング判定フラグを立てる
    */
   public static advanceToNextDay(gameState: GameState): { nextState: GameState; isEnding: boolean } {
     const nextDay = gameState.day + 1;
-    if (nextDay > 28) {
+    if (nextDay > FINAL_DAY) {
       return {
         nextState: gameState,
         isEnding: true,

@@ -1,0 +1,92 @@
+{
+  "id": "aoi_call_d14",
+  "characterId": "aoi",
+  "title": {
+    "ja": "雨上がりの通話"
+  },
+  "priority": 3,
+  "availability": {
+    "dayRange": {
+      "from": 14,
+      "to": 15
+    },
+    "requireFlags": [
+      "aoi_t8_rain"
+    ]
+  },
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "もしもし、タカシくん？ 雨に濡れちゃったけど、風邪ひいてない？"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_59cda3e8.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……あのね。今日言ってくれたこと、ずっと頭の中でぐるぐるしてるの。「救われてるのは俺の方だ」って。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_f66bd799.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_call_d14_c1",
+          "text": {
+            "ja": "本心だよ"
+          },
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "aoi_call_d14_c2",
+          "text": {
+            "ja": "何回でも言う"
+          },
+          "goto": "b",
+          "addAffinity": {
+            "aoi": 2
+          }
+        }
+      ]
+    },
+    "a": {
+      "id": "a",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……うん。知ってる。タカシくん、嘘つくと耳が赤くなるもん。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_a_cf543656.mp3"
+    },
+    "b": {
+      "id": "b",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "も、もう……！ 眠れなくなっちゃうでしょ……！ おやすみっ！"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_b_cd85b83e.mp3"
+    }
+  }
+}

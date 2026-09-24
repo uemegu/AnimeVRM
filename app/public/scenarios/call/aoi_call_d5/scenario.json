@@ -1,0 +1,92 @@
+{
+  "id": "aoi_call_d5",
+  "characterId": "aoi",
+  "title": {
+    "ja": "夜の通話"
+  },
+  "priority": 2,
+  "availability": {
+    "dayRange": {
+      "from": 5,
+      "to": 6
+    },
+    "requireFlags": [
+      "aoi_t2_library"
+    ]
+  },
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "もしもし？ 夜遅くにごめんね……。なんだか、声が聞きたくなっちゃって。"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_8802168d.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "図書室の机の下、覚えてる？ ……あれから、思い出すたびにドキドキしちゃうの。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_dc637086.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_call_d5_c1",
+          "text": {
+            "ja": "俺も、ずっと思い出してた"
+          },
+          "goto": "yes",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "aoi_call_d5_c2",
+          "text": {
+            "ja": "先生にバレなくてよかったよな"
+          },
+          "goto": "safe",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    "yes": {
+      "id": "yes",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……ほんと？ えへへ、同じだね。……なんか、顔が熱くなってきちゃった。おやすみ！"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_yes_48096702.mp3"
+    },
+    "safe": {
+      "id": "safe",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "ふふ、ほんとにね。白石先生、目が怖いもん。……じゃあ、また明日ね。"
+      },
+      "expression": "happy",
+      "expressionWeight": 1.0,
+      "nextStepId": null,
+      "voiceUrl": "v_safe_93303aa8.mp3"
+    }
+  }
+}

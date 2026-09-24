@@ -13,12 +13,27 @@ import { CinematicAnimeShader } from './CinematicAnimeShader';
 import { GodRaysShader } from './postprocessing/GodRaysShader';
 import { SunEffect } from './postprocessing/SunEffect';
 import { SkyBackground } from './scene/SkyBackground';
+import { ScrollingBackground, ScrollingBackgroundSettings } from './scene/ScrollingBackground';
 import { Avatar } from './avatar/Avatar';
 import { HairShadowRenderer } from './shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader } from './postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from './postprocessing/Para';
 import { setHairRingTint } from './shader/HairRing';
 import { soundManager } from '../audio/SoundManager';
+import type { CameraShot } from '../../types/scenario';
+import type { StageCastMember } from '../stage/sceneView';
+
+const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
+const CAMERA_TRANSITION_SEC = 0.6;
+
+interface CameraPose {
+  position: THREE.Vector3;
+  target: THREE.Vector3;
+}
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 export interface StageOptions {
   canvas: HTMLCanvasElement;
@@ -52,6 +67,9 @@ export class StageManager {
   private rimLight: THREE.DirectionalLight;
   private ambientLight: THREE.AmbientLight;
   private skyBackground: SkyBackground;
+  private scrollingBackground: ScrollingBackground;
+  /** 場所の遠景（流れる背景を止めたときに戻す） */
+  private locationBackgroundTexture: THREE.Texture | null = null;
   private sunEffect: SunEffect;
 
   // 多層背景
@@ -61,7 +79,27 @@ export class StageManager {
 
   // アバター管理
   private loadedAvatars: Map<string, Avatar> = new Map();
-  private activeAvatarId: string | null = null;
+  /** 登場中のキャラ（表示順） */
+  private castIds: string[] = [];
+  private castPositions: Map<string, number> = new Map();
+  /** 登場中のキャラの頭の高さ（構図をキャラの背丈に合わせる） */
+  private castHeadHeights: Map<string, number> = new Map();
+  /** 口パクさせるキャラ */
+  private speakerId: string | null = null;
+  /** setCast の呼び出し番号（非同期ロード中に次の指定が来たら古い指定を捨てる） */
+  private castVersion = 0;
+  private pendingAvatars: Map<string, Promise<Avatar>> = new Map();
+  private avatarMotionUrls: Map<string, string> = new Map();
+  private motionReturnTimers: Map<string, number> = new Map();
+
+  // カメラ構図の補間
+  private cameraShot: CameraShot = 'speaker';
+  private cameraFocusId: string | null = null;
+  private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
+  private cameraTo: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
+  private cameraCurrentTarget = new THREE.Vector3(0, 1.15, 0);
+  private cameraElapsed = CAMERA_TRANSITION_SEC;
+  private hasCameraPose = false;
 
   // 現在の状態
   private currentTimeOfDay: TimeOfDayId = 'day';
@@ -102,6 +140,7 @@ export class StageManager {
 
     // 4. 空と雲の描画システム (SkyBackground)
     this.skyBackground = new SkyBackground(this.scene);
+    this.scrollingBackground = new ScrollingBackground(this.scene, this.camera);
 
     // 5. ライト初期化
     this.directionalLight = new THREE.DirectionalLight('#ffffff', 3.2);
@@ -340,9 +379,12 @@ export class StageManager {
       this.textureLoader.load(locPreset.layers.background.url, (texture) => {
         if (this.isDisposed) return;
         texture.colorSpace = THREE.SRGBColorSpace;
-        this.skyBackground.setBackgroundTexture(texture);
+        this.locationBackgroundTexture = texture;
+        // 流れる背景を出している間は、固定の遠景を重ねない
+        if (!this.scrollingBackground.isVisible) this.skyBackground.setBackgroundTexture(texture);
       });
     } else {
+      this.locationBackgroundTexture = null;
       this.skyBackground.setBackgroundTexture(null);
     }
 
@@ -396,11 +438,19 @@ export class StageManager {
   /**
    * アバターの非同期ロード
    */
-  public async loadAvatar(id: string, modelUrl: string): Promise<Avatar> {
-    if (this.loadedAvatars.has(id)) {
-      return this.loadedAvatars.get(id)!;
-    }
+  public loadAvatar(id: string, modelUrl: string): Promise<Avatar> {
+    const loaded = this.loadedAvatars.get(id);
+    if (loaded) return Promise.resolve(loaded);
+    // 読み込み中なら同じ Promise を返す（同じキャラを二重に作らない）
+    const pending = this.pendingAvatars.get(id);
+    if (pending) return pending;
 
+    const promise = this.createAvatar(id, modelUrl).finally(() => this.pendingAvatars.delete(id));
+    this.pendingAvatars.set(id, promise);
+    return promise;
+  }
+
+  private async createAvatar(id: string, modelUrl: string): Promise<Avatar> {
     const avatar = new Avatar({
       id,
       modelUrl,
@@ -420,30 +470,162 @@ export class StageManager {
   }
 
   /**
-   * 表示するキャラクターの切り替え
+   * 登場キャラの配置（モデルの読み込み・位置・向き・表情・モーション）。
+   * 指定にないキャラは隠す
    */
-  public async setActiveCharacter(
-    id: string | null,
-    modelUrl?: string,
-    positionX = 0
-  ): Promise<void> {
-    if (this.activeAvatarId && this.loadedAvatars.has(this.activeAvatarId)) {
-      const current = this.loadedAvatars.get(this.activeAvatarId)!;
-      if (current.vrm) current.vrm.scene.visible = false;
-    }
+  public async setCast(members: StageCastMember[]): Promise<void> {
+    const version = ++this.castVersion;
+    const avatars = await Promise.all(
+      members.map((member) => this.loadAvatar(member.id, member.modelUrl).catch((err) => {
+        console.error(`Failed to load avatar ${member.id}:`, err);
+        return null;
+      }))
+    );
+    if (version !== this.castVersion || this.isDisposed) return;
 
-    this.activeAvatarId = id;
-    if (!id) return;
+    const ids = new Set(members.map((member) => member.id));
+    this.loadedAvatars.forEach((avatar, id) => {
+      if (!ids.has(id) && avatar.vrm) avatar.vrm.scene.visible = false;
+    });
 
-    let avatar = this.loadedAvatars.get(id);
-    if (!avatar && modelUrl) {
-      avatar = await this.loadAvatar(id, modelUrl);
-    }
-
-    if (avatar && avatar.vrm) {
-      avatar.vrm.scene.position.set(positionX, 0, 0);
+    this.castIds = [];
+    this.castPositions.clear();
+    this.castHeadHeights.clear();
+    members.forEach((member, index) => {
+      const avatar = avatars[index];
+      if (!avatar?.vrm) return;
+      avatar.vrm.scene.position.set(...member.position);
+      avatar.vrm.scene.rotation.y = member.rotationY;
       avatar.vrm.scene.visible = true;
+      avatar.setExpression(member.expression, member.expressionWeight);
+      this.playMotion(member.id, avatar, member.motion, member.motionLoop, member.motionCue);
+      this.castIds.push(member.id);
+      this.castPositions.set(member.id, member.position[0]);
+      this.castHeadHeights.set(member.id, this.getHeadHeight(avatar));
+    });
+
+    // キャラの位置が決まったので構図を取り直す
+    this.updateCameraTarget();
+  }
+
+  /** 頭の高さ（直立時）。取得できなければ標準的な背丈を返す */
+  private getHeadHeight(avatar: Avatar): number {
+    const head = avatar.vrm?.humanoid?.getRawBoneNode('head');
+    if (!head) return 1.4;
+    avatar.vrm!.scene.updateMatrixWorld(true);
+    const y = head.getWorldPosition(new THREE.Vector3()).y - avatar.vrm!.scene.position.y;
+    return y > 0.8 && y < 2.2 ? y : 1.4;
+  }
+
+  /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す */
+  private playMotion(id: string, avatar: Avatar, motion: string | undefined, loop: boolean, cue = ''): void {
+    const url = motion ? `/animations/${motion}.fbx` : IDLE_ANIMATION_URL;
+    // 指定が変わった時だけ再生する（1回きりの身振りが待機に戻った後、同じ指定で再生し直さない）
+    const key = `${url}|${loop}|${cue}`;
+    if (this.avatarMotionUrls.get(id) === key) return;
+    this.avatarMotionUrls.set(id, key);
+
+    const pending = this.motionReturnTimers.get(id);
+    if (pending !== undefined) window.clearTimeout(pending);
+    this.motionReturnTimers.delete(id);
+
+    avatar.playAnimation(url, loop).then((action) => {
+      if (loop || !action || this.isDisposed) return;
+      const durationMs = action.getClip().duration * 1000;
+      const timer = window.setTimeout(() => {
+        this.motionReturnTimers.delete(id);
+        if (this.avatarMotionUrls.get(id) !== key) return;
+        avatar.playAnimation(IDLE_ANIMATION_URL, true);
+      }, durationMs);
+      this.motionReturnTimers.set(id, timer);
+    });
+  }
+
+  /** 歩きながらの会話などで背景を横に流す（null で止めて場所の遠景に戻す） */
+  public setScrollingBackground(settings: ScrollingBackgroundSettings | null): void {
+    this.scrollingBackground.set(settings);
+    this.skyBackground.setBackgroundTexture(settings ? null : this.locationBackgroundTexture);
+  }
+
+  /** 口パクさせるキャラ（話者） */
+  public setSpeaker(id: string | null): void {
+    this.speakerId = id;
+  }
+
+  /** カメラ構図の指定（focusId は話者など、寄る対象） */
+  public setCameraShot(shot: CameraShot, focusId: string | null): void {
+    this.cameraShot = shot;
+    this.cameraFocusId = focusId;
+    this.updateCameraTarget();
+  }
+
+  /** 構図と登場キャラの位置から、カメラの目標位置を決めて補間を始める */
+  private updateCameraTarget(): void {
+    const xs = this.castIds.map((id) => this.castPositions.get(id) ?? 0);
+    const focusX =
+      (this.cameraFocusId !== null ? this.castPositions.get(this.cameraFocusId) : undefined) ??
+      (xs.length === 1 ? xs[0] : 0);
+    const centerX = xs.length > 0 ? (Math.min(...xs) + Math.max(...xs)) / 2 : 0;
+    const spread = xs.length > 1 ? Math.max(...xs) - Math.min(...xs) : 0;
+    // 頭の高さに合わせて構図を上下させる（標準は頭の高さ 1.42）。複数人の構図は一番背の高い人に合わせる
+    const heads = this.castIds.map((id) => this.castHeadHeights.get(id) ?? 1.42);
+    const tallest = heads.length > 0 ? Math.max(...heads) : 1.42;
+    const focusHead =
+      (this.cameraFocusId !== null ? this.castHeadHeights.get(this.cameraFocusId) : undefined) ??
+      (heads.length === 1 ? heads[0] : tallest);
+
+    let pose: CameraPose;
+    switch (this.cameraShot) {
+      case 'wide':
+        pose = {
+          position: new THREE.Vector3(centerX, tallest - 0.22, 2.3 + spread * 0.9),
+          target: new THREE.Vector3(centerX, tallest - 0.37, 0),
+        };
+        break;
+      case 'medium': {
+        const x = focusX * 0.6 + centerX * 0.4;
+        pose = {
+          position: new THREE.Vector3(x, tallest - 0.2, 2.2),
+          target: new THREE.Vector3(x, tallest - 0.3, 0),
+        };
+        break;
+      }
+      case 'close':
+        pose = {
+          position: new THREE.Vector3(focusX, focusHead - 0.09, 1.2),
+          target: new THREE.Vector3(focusX, focusHead - 0.14, 0),
+        };
+        break;
+      case 'speaker':
+      default:
+        pose = {
+          position: new THREE.Vector3(focusX, focusHead - 0.17, 1.6),
+          target: new THREE.Vector3(focusX, focusHead - 0.27, 0),
+        };
+        break;
     }
+
+    if (
+      this.hasCameraPose &&
+      pose.position.distanceTo(this.cameraTo.position) < 1e-4 &&
+      pose.target.distanceTo(this.cameraTo.target) < 1e-4
+    ) {
+      return;
+    }
+
+    this.cameraFrom = { position: this.camera.position.clone(), target: this.cameraCurrentTarget.clone() };
+    this.cameraTo = pose;
+    // 最初の構図は補間せずに合わせる
+    this.cameraElapsed = this.hasCameraPose ? 0 : CAMERA_TRANSITION_SEC;
+    this.hasCameraPose = true;
+  }
+
+  private updateCamera(delta: number): void {
+    this.cameraElapsed = Math.min(CAMERA_TRANSITION_SEC, this.cameraElapsed + delta);
+    const t = easeInOutCubic(this.cameraElapsed / CAMERA_TRANSITION_SEC);
+    this.camera.position.lerpVectors(this.cameraFrom.position, this.cameraTo.position, t);
+    this.cameraCurrentTarget.lerpVectors(this.cameraFrom.target, this.cameraTo.target, t);
+    this.camera.lookAt(this.cameraCurrentTarget);
   }
 
   /**
@@ -491,17 +673,18 @@ export class StageManager {
 
       const currentPreset = TIME_OF_DAY_PRESETS[this.currentTimeOfDay] || TIME_OF_DAY_PRESETS.day;
 
-      // 1. アクティブなアバターメッシュ群の取得
-      let activeMeshes: THREE.Object3D[] = [];
-      if (this.activeAvatarId && this.loadedAvatars.has(this.activeAvatarId)) {
-        const activeAvatar = this.loadedAvatars.get(this.activeAvatarId)!;
-        if (activeAvatar.vrm && activeAvatar.vrm.scene.visible) {
-          // リップシンク反映
-          activeAvatar.updateLipSync(soundManager.getVoicePhoneme());
+      // 0. カメラ構図の補間と、流れる背景
+      this.updateCamera(delta);
+      this.scrollingBackground.update(delta);
 
-          activeAvatar.update(delta);
-          activeMeshes = [activeAvatar.vrm.scene];
-        }
+      // 1. 登場中のアバターの更新（口パクは話者だけ）
+      const activeMeshes: THREE.Object3D[] = [];
+      for (const id of this.castIds) {
+        const avatar = this.loadedAvatars.get(id);
+        if (!avatar?.vrm || !avatar.vrm.scene.visible) continue;
+        avatar.updateLipSync(id === this.speakerId ? soundManager.getVoicePhoneme() : undefined);
+        avatar.update(delta);
+        activeMeshes.push(avatar.vrm.scene);
       }
 
       // 2. 太陽・レンズフレア・オクルージョン計算
@@ -542,6 +725,8 @@ export class StageManager {
 
   public dispose(): void {
     this.isDisposed = true;
+    this.motionReturnTimers.forEach((timer) => window.clearTimeout(timer));
+    this.motionReturnTimers.clear();
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
     }
@@ -550,6 +735,7 @@ export class StageManager {
       avatar.dispose();
     });
     this.loadedAvatars.clear();
+    this.scrollingBackground.dispose();
 
     this.composer.renderTarget1?.dispose();
     this.composer.renderTarget2?.dispose();

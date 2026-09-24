@@ -1,0 +1,189 @@
+{
+  "id": "blazer_swap",
+  "title": {
+    "ja": "昼休み: ブレザー交換っこ"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 9,
+      "to": 9
+    },
+    "unlessFlags": [
+      "blazer_swapped"
+    ]
+  },
+  "priority": 8,
+  "consumesTurn": true,
+  "location": "classroom",
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "昼休みの教室。エミリが半泣きでアオイにすがりついていた。",
+      "avatars": {
+        "emili": {
+          "position": "left",
+          "expression": "sad",
+          "motion": "ardy_beg"
+        },
+        "aoi": {
+          "position": "right",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide",
+      "setFlags": {
+        "blazer_swapped": true
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "アオイちゃ〜ん！ 助けて〜！ 廊下走ってたら、ブレザーのボタンがポーンって飛んでっちゃったの〜！",
+      "voiceUrl": "v_s2_fee81d2a.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あらら。私、裁縫セット持ってるから、縫ってあげるよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s3_00146b46.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "ほんと！？ ありがと〜！ じゃあ直してもらう間、アオイちゃんのブレザー貸して！",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s4_da462515.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "うん、いいよ。はい、どうぞ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s5_65927161.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "二人はブレザーを交換した。エミリはアオイのブレザーを。アオイは、胸に金糸のエンブレムが入ったエミリの特注ブレザーを。"
+    },
+    {
+      "id": "s7",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "わ、アオイちゃんのブレザー、いい匂い〜。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s7_b52f57a5.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "エミリちゃんのは、なんだか重たいね……。この刺繍、本物の金？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s8_beb6ad23.mp3"
+    },
+    {
+      "id": "s9",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "うん。パパが「エミリの目印だ」って。変でしょ〜。",
+      "avatars": {
+        "emili": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s9_6414652f.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「アオイ、そのブレザーも似合ってるな」",
+          "goto": "a",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「……目印？」と引っかかる",
+          "goto": "b",
+          "setFlags": {
+            "noticed_emblem": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "え、そ、そうかな……。えへへ、なんだかお嬢様になった気分。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_a_e3a728b7.mp3"
+    },
+    {
+      "id": "b",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "うん、目印。パパの部下の人たち、私をこのエンブレムで見分けてるんだって。",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_b_8b0bf571.mp3"
+    },
+    {
+      "id": "s13",
+      "speaker": "タカシ",
+      "text": "（……それ、今アオイが着てるんだけど、大丈夫か？）"
+    },
+    {
+      "id": "end",
+      "text": "アオイの修繕作業は、少し時間がかかりそうだった。ブレザーは、しばらく交換したままだ。"
+    },
+    {
+      "id": "s15",
+      "text": "――これが、のちの大騒動の引き金になるとも知らずに。"
+    }
+  ]
+}

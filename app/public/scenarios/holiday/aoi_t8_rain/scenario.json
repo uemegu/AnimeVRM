@@ -1,0 +1,263 @@
+{
+  "id": "aoi_t8_rain",
+  "title": {
+    "ja": "神社: 夕立と雨宿り"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 13,
+      "to": 14
+    },
+    "locations": [
+      "shrine"
+    ],
+    "requireFlags": [
+      "aoi_t7_lap"
+    ],
+    "unlessFlags": [
+      "seen_aoi_t8_rain"
+    ]
+  },
+  "bgm": "love",
+  "priority": 6,
+  "actionHints": [
+    {
+      "locationId": "shrine",
+      "hintText": {
+        "ja": "神社の方へ、アオイが歩いていくのが見えた。"
+      },
+      "hintCharacterIds": [
+        "aoi"
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "夕方の神社。アオイが一人で、拝殿に手を合わせていた。",
+      "setFlags": {
+        "seen_aoi_t8_rain": true
+      },
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "ardy_pray"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "あ、タカシくん。……えへへ、お礼参り。この前、みんなが無事だったから。",
+      "voiceUrl": "v_s2_954d3668.mp3"
+    },
+    {
+      "id": "s3",
+      "text": "その時、空が急に暗くなり――大粒の雨が、境内を叩き始めた。",
+      "background": "shrine_rain",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "surprised",
+          "motion": "ardy_startled"
+        }
+      },
+      "seUrl": "/se/walking.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "きゃっ、夕立！ タカシくん、こっち！",
+      "voiceUrl": "v_s4_a661ab69.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "拝殿の軒下に駆け込む。肩が触れる。雨音だけが、世界を満たしていく。",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "relaxed",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s6",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……私ね。前の学校で、ずっとひとりだったの。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s6_75ca1fd2.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "引っ越しばっかりで、友達もすぐいなくなって。だから、戻ってくるの、怖かった。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s7_62cb159d.mp3"
+    },
+    {
+      "id": "s8",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "でもタカシくんは、昔と同じ顔で「おはよう」って言ってくれた。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s8_a91c219e.mp3"
+    },
+    {
+      "id": "s9",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「救われてるのは俺の方だ。アオイがいるから、毎日が楽しい」",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t8_rain": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「これからは、ずっと友達だから大丈夫」",
+          "goto": "friend",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "c1_3",
+          "text": "雨に濡れたアオイのブラウスが気になって、何も言えない",
+          "goto": "hentai"
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……っ。",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_good_31e4b336.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ずるいなあ、タカシくんは。……そういうこと、真っ直ぐ言うんだもん。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_shy_cover",
+          "motionLoop": true
+        }
+      },
+      "voiceUrl": "v_s11_65def53a.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "私のヒーローは、ほんとに、ずるい。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s12_c4ba8ecf.mp3"
+    },
+    {
+      "id": "friend",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……うん。そう、だね。友達、だもんね。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_friend_d4916eab.mp3"
+    },
+    {
+      "id": "s14",
+      "text": "アオイの笑顔が、雨の向こうで少しだけ滲んで見えた。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "hentai",
+      "text": "透けそうで透けない、その絶妙な――。"
+    },
+    {
+      "id": "s16",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシくん？ どこ見てるの？",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "angry"
+        }
+      },
+      "voiceUrl": "v_s16_bae7373b.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": "タカシ",
+      "text": "雨！ 雨を見てた！ 雨粒の、美しさを！"
+    },
+    {
+      "id": "s18",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "もう……えっち。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy"
+        }
+      },
+      "voiceUrl": "v_s18_94230b3d.mp3"
+    },
+    {
+      "id": "end",
+      "text": "いつの間にか雨は上がり、濡れた石畳に夕日がきらきらと反射していた。",
+      "background": "shrine",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy"
+        }
+      }
+    }
+  ]
+}

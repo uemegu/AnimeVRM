@@ -1,5 +1,10 @@
 import { LocationVisualPreset } from '../types/visual';
 
+/** 遠景1枚だけの場所 */
+function preset(id: string, name: string, isIndoor: boolean, url: string): LocationVisualPreset {
+  return { id, name, isIndoor, layers: { background: { url } } };
+}
+
 /**
  * ロケーション別ビジュアルプリセット
  * 時間帯に依存しない、純粋な多層背景（遠景・中景・近景）のアセット定義
@@ -149,8 +154,20 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     },
   },
 
+  // 自宅マンションの玄関前
+  apartment_door: preset('apartment_door', 'マンションの玄関前', false, '/textures/apartment_door_far.avif'),
+  // 体育館
+  gym: preset('gym', '体育館', true, '/textures/gym_far.avif'),
+  // 職員室
+  staff_room: preset('staff_room', '職員室', true, '/textures/staff_room_far.avif'),
+  // 黒塗りのセダンが並ぶ校門前
+  gate_ambush: preset('gate_ambush', '校門前', false, '/textures/gate_ambush_far.avif'),
+  // 夕立の神社
+  shrine_rain: preset('shrine_rain', '神社', true, '/textures/shrine_rain_far.avif'),
+  // 病室
+  hospital: preset('hospital', '病室', true, '/textures/hospital_far.avif'),
+
   // ---- 休日（街マップ）の行き先 ----
-  // TODO: 映画館・遊園地・水族館は専用背景がないため既存背景で代用中
 
   // 公園
   park: {
@@ -165,28 +182,13 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
   },
 
   // 商店街
-  shopping_street: {
-    id: 'shopping_street',
-    name: '商店街',
-    isIndoor: false,
-    layers: {
-      background: {
-        url: '/textures/town_far.avif',
-      },
-    },
-  },
+  shopping_street: preset('shopping_street', '商店街', false, '/textures/town2_far.avif'),
 
-  // 映画館（代用: カフェ）
-  cinema: {
-    id: 'cinema',
-    name: '映画館',
-    isIndoor: true,
-    layers: {
-      background: {
-        url: '/textures/cafe_far.avif',
-      },
-    },
-  },
+  // 映画館
+  cinema: preset('cinema', '映画館', true, '/textures/cinema_far.avif'),
+
+  // アオイの部屋
+  aoi_house: preset('aoi_house', 'アオイの部屋', true, '/textures/aoi_room_far.avif'),
 
   // 自宅（昼の自室）
   home: {
@@ -200,27 +202,9 @@ export const LOCATION_VISUAL_PRESETS: Record<string, LocationVisualPreset> = {
     },
   },
 
-  // 遊園地（代用: 公園の俯瞰）
-  amusement_park: {
-    id: 'amusement_park',
-    name: '遊園地',
-    isIndoor: false,
-    layers: {
-      background: {
-        url: '/textures/modern-park-far.avif',
-      },
-    },
-  },
+  // 遊園地
+  amusement_park: preset('amusement_park', '遊園地', false, '/textures/amusement_park_far.avif'),
 
-  // 水族館（代用: 海の見える公園）
-  aquarium: {
-    id: 'aquarium',
-    name: '水族館',
-    isIndoor: false,
-    layers: {
-      background: {
-        url: '/textures/park-with-sea-far.avif',
-      },
-    },
-  },
+  // 水族館
+  aquarium: preset('aquarium', '水族館', true, '/textures/aquarium_far.avif'),
 };

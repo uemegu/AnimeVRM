@@ -1,0 +1,246 @@
+{
+  "id": "aoi_t9_corridor",
+  "title": {
+    "ja": "夕暮れの渡り廊下: もう戻れない"
+  },
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 18,
+      "to": 18
+    },
+    "requireFlags": [
+      "aoi_t8_rain"
+    ]
+  },
+  "priority": 8,
+  "consumesTurn": true,
+  "location": "corridor",
+  "bgm": "love",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "夕暮れの渡り廊下。オレンジ色の光の中で、アオイが待っていた。",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "sad",
+          "motion": "clasp_hands_front"
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……タカシくん。ちょっとだけ、いい？",
+      "voiceUrl": "v_s2_268f82c3.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "今日ね、隣のクラスの女の子に聞かれたの。「タカシくんと付き合ってるの？」って。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s3_c8269012.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「その子、タカシくんのこと、かっこいいって言ってたよ」って。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s4_7bc51619.mp3"
+    },
+    {
+      "id": "s5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……それ聞いた時ね、胸の奥が、ぎゅってなったの。嫌だなって。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s5_d1e4054c.mp3"
+    },
+    {
+      "id": "s6",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "私、ずるいよね。タカシくんは私のものじゃないのに。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s6_d9afd9f5.mp3"
+    },
+    {
+      "id": "s7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "でも……もう、ただの幼馴染には戻れないよ。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "motion": "ardy_confess_hesitant"
+        }
+      },
+      "voiceUrl": "v_s7_98e18ac5.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "c1_1",
+          "text": "「俺も同じだ。もう、幼馴染のままじゃいられない」",
+          "goto": "good",
+          "setFlags": {
+            "aoi_t9_corridor": true
+          },
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "c1_2",
+          "text": "「……今まで通りでいようよ。その方が楽だろ」",
+          "goto": "bad"
+        },
+        {
+          "id": "c1_3",
+          "text": "「俺も好――」と言いかけて、女神の顔がよぎり黙る",
+          "goto": "wait",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "good",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……っ！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_good_a21e7b76.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "うん……うん。よかった……。私だけじゃ、なかったんだ。",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "motion": "ardy_confess_joy"
+        }
+      },
+      "voiceUrl": "v_s10_848a9bdb.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": "タカシ",
+      "text": "でも、ちゃんとした言葉は……ちゃんとした場所で言わせてほしい。"
+    },
+    {
+      "id": "s12",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……うん。待ってる。ずっと、待ってるから。",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "nextSceneId": "end",
+      "voiceUrl": "v_s12_4740eb02.mp3"
+    },
+    {
+      "id": "bad",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……そっか。そう、だよね。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_bad_8cbffc67.mp3"
+    },
+    {
+      "id": "s14",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ごめんね、変なこと言って。……忘れて。",
+      "avatars": {
+        "aoi": {
+          "expression": "sad"
+        }
+      },
+      "voiceUrl": "v_s14_f270ce76.mp3"
+    },
+    {
+      "id": "s15",
+      "text": "アオイは笑って、早足で去っていった。その背中が、夕日の中で小さく見えた。",
+      "nextSceneId": "end"
+    },
+    {
+      "id": "wait",
+      "text": "今ここで言ったら、女神の「GO」の前にフライングになるんじゃないか――そんな考えが頭をよぎって、言葉が止まった。"
+    },
+    {
+      "id": "s17",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……？ タカシくん？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised"
+        }
+      },
+      "voiceUrl": "v_s17_9255bf3a.mp3"
+    },
+    {
+      "id": "s18",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ふふ。……続き、いつか聞かせてね。",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed"
+        }
+      },
+      "voiceUrl": "v_s18_df05cefd.mp3"
+    },
+    {
+      "id": "end",
+      "text": "渡り廊下を、夕風が吹き抜けていった。",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "aoi_mail_d7",
+  "characterId": "aoi",
+  "title": "アオイからのメール",
+  "availability": {
+    "dayRange": {
+      "from": 6,
+      "to": 8
+    },
+    "requireFlags": [
+      "aoi_t4_hoodie"
+    ]
+  },
+  "previewText": {
+    "ja": "パーカー、あったかかったね"
+  },
+  "time": "22:40",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "今日はありがとう。パーカー、あったかかった。"
+      },
+      "time": "22:39"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "……二人羽織、実はすっごく恥ずかしかったんだからね！ 水族館の約束、忘れないでね。"
+      },
+      "time": "22:40"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "r1",
+      "text": {
+        "ja": "忘れるわけない"
+      },
+      "reactionText": {
+        "ja": "えへへ。楽しみにしてる！"
+      },
+      "reactionTime": "22:42",
+      "addAffinity": {
+        "aoi": 1
+      }
+    },
+    {
+      "id": "r2",
+      "text": {
+        "ja": "俺も恥ずかしかった"
+      },
+      "reactionText": {
+        "ja": "じゃあ、おあいこだね。おやすみ♪"
+      },
+      "reactionTime": "22:42",
+      "addAffinity": {
+        "aoi": 1
+      }
+    }
+  ]
+}

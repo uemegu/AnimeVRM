@@ -1,0 +1,22 @@
+{
+  "id": "daily_aquarium",
+  "title": {
+    "ja": "水族館: 青い世界"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "aquarium"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "大水槽の前で、ぼんやりと魚を眺めて過ごした。"
+    }
+  ]
+}

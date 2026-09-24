@@ -1,0 +1,31 @@
+{
+  "id": "daily_shrine",
+  "title": {
+    "ja": "神社: 静かな境内"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "locations": [
+      "shrine"
+    ]
+  },
+  "priority": -5,
+  "bgm": "main_bgm",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "静かな境内。賽銭箱の前で、手を合わせる。"
+    },
+    {
+      "id": "s2",
+      "speaker": "タカシ",
+      "text": "（……女神様。せめてヒントとか、くれませんか）"
+    },
+    {
+      "id": "s3",
+      "text": "……返事の代わりに、カラスが一声鳴いた。"
+    }
+  ]
+}
