@@ -5,28 +5,19 @@ import {
   ActionLocationOption,
   isHoliday,
 } from '../../types/game';
-import { ScenarioPackage, ScenarioTimeSlot } from '../../types/scenario';
+import { ScenarioCategory, ScenarioIndexEntry, ScenarioMeta, ScenarioTimeSlot } from '../../types/scenario';
+import { HeroineId, NightCommunication } from '../../types/communication';
 import {
   LOCATION_DEFINITIONS,
   SCHOOL_ACTION_LOCATIONS,
   HOLIDAY_ACTION_LOCATIONS,
 } from '../../data/locations';
-import {
-  MORNING_SCENARIO_DAY_1,
-  MORNING_SCENARIO_DEFAULT,
-} from '../../scenarios/morningScenarios';
-import {
-  ALL_ACTION_SCENARIOS,
-  ACTION_SCENARIO_GENERIC,
-} from '../../scenarios/actionScenarios';
-import {
-  ALL_HOLIDAY_SCENARIOS,
-  HOLIDAY_SCENARIO_GENERIC,
-} from '../../scenarios/holidayScenarios';
-import {
-  FORCED_SCENARIO_MEET_SHION,
-  FORCED_SCENARIO_MEET_EMILI,
-} from '../../scenarios/forcedScenarios';
+import { scenarioRepository } from '../scenario/ScenarioRepository';
+
+/**
+ * シナリオの選択はすべて目次（メタ情報）だけで行う。
+ * 戻り値の本文は scenarioRepository.load(id) で読み込むこと。
+ */
 
 export class ScheduleManager {
   /**
@@ -36,13 +27,13 @@ export class ScheduleManager {
     const initialDay = 1;
     const initialFlags = {};
     const initialAffinities = {};
-    return {
+    const state: GameState = {
       day: initialDay,
       phase: 'morning',
       flags: initialFlags,
       affinities: initialAffinities,
       scenarioHistory: [],
-      currentScenarioId: MORNING_SCENARIO_DAY_1.id,
+      currentScenarioId: null,
       dayStartSnapshot: {
         day: initialDay,
         flags: { ...initialFlags },
@@ -50,6 +41,8 @@ export class ScheduleManager {
         scenarioHistory: [],
       },
     };
+    state.currentScenarioId = this.getMorningScenario(state).id;
+    return state;
   }
 
   /**
@@ -62,17 +55,8 @@ export class ScheduleManager {
   /**
    * 朝フェーズのシナリオを取得
    */
-  public static getMorningScenario(gameState: GameState): ScenarioPackage {
-    const candidates = [MORNING_SCENARIO_DAY_1, MORNING_SCENARIO_DEFAULT]
-      .map((scenario, index) => ({ scenario, index }))
-      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState))
-      .sort((a, b) => {
-        const priorityDifference =
-          this.getScenarioPriority(b.scenario, MORNING_SCENARIO_DEFAULT.id) -
-          this.getScenarioPriority(a.scenario, MORNING_SCENARIO_DEFAULT.id);
-        return priorityDifference || a.index - b.index;
-      });
-    return candidates[0]?.scenario ?? MORNING_SCENARIO_DEFAULT;
+  public static getMorningScenario(gameState: GameState): ScenarioIndexEntry {
+    return this.selectScenario('morning', gameState);
   }
 
   /**
@@ -117,59 +101,102 @@ export class ScheduleManager {
    * 日中の強制割り込みイベントがあるかチェック
    * 未遭遇のキャラ救済イベント等を判定
    */
-  public static checkForcedInterruption(gameState: GameState): ScenarioPackage | null {
-    const candidates = [
-      { scenario: FORCED_SCENARIO_MEET_SHION, requiredFlag: 'met_shion' },
-      { scenario: FORCED_SCENARIO_MEET_EMILI, requiredFlag: 'met_emili' },
-    ]
-      .map((candidate, index) => ({ ...candidate, index }))
-      .filter(({ scenario, requiredFlag }) => {
-        return !gameState.flags[requiredFlag] && this.matchesScenarioAvailability(scenario, gameState);
-      })
-      .sort((a, b) => {
-        const priorityDifference = (b.scenario.priority ?? 0) - (a.scenario.priority ?? 0);
-        return priorityDifference || a.index - b.index;
-      });
-    return candidates[0]?.scenario ?? null;
+  public static checkForcedInterruption(gameState: GameState): ScenarioIndexEntry | null {
+    return this.getEligibleScenarios(['forced'], gameState)[0] ?? null;
   }
 
   /**
-   * 選択された場所に応じたシナリオを決定（ScenarioPackage.actionHints より解決）
+   * 今夜ヒロインから届く電話・メール（1人につき1件まで）
+   * - 今夜すでに応答・拒否・既読にしたものがあれば、その人からは他に届かない
+   * - なければ、条件を満たし未完了のものから優先度の高いもの（同値なら電話→メール、目次順）
    */
-  public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioPackage {
-    const fallback = gameState.phase === 'holiday_action' ? HOLIDAY_SCENARIO_GENERIC : ACTION_SCENARIO_GENERIC;
-    return this.getEligibleActionScenarios(locationId, gameState)[0] ?? fallback;
+  public static getNightCommunications(gameState: GameState): NightCommunication[] {
+    const history = gameState.scenarioHistory ?? [];
+    const isCompleted = (id: string, onDay?: number) =>
+      history.some(
+        (entry) => entry.scenarioId === id && entry.type === 'completed' && (onDay === undefined || entry.day === onDay)
+      );
+    const communications = this.getEligibleScenarios(['call', 'mail'], gameState, undefined, true);
+    const all = [...scenarioRepository.list('call'), ...scenarioRepository.list('mail')];
+
+    const result: NightCommunication[] = [];
+    const heroines = new Set(all.map((entry) => entry.characterId).filter((id): id is HeroineId => Boolean(id)));
+    for (const characterId of heroines) {
+      const doneTonight = all.find((entry) => entry.characterId === characterId && isCompleted(entry.id, gameState.day));
+      const selected =
+        doneTonight ??
+        communications.find((entry) => entry.characterId === characterId && !isCompleted(entry.id));
+      if (!selected) continue;
+      result.push({
+        kind: selected.category === 'call' ? 'call' : 'mail',
+        id: selected.id,
+        characterId,
+        previewText: selected.previewText,
+        time: selected.time,
+        done: Boolean(doneTonight),
+      });
+    }
+    return result;
   }
 
-  /** 条件に一致する行動シナリオを優先順位順で返す */
-  private static getEligibleActionScenarios(
-    locationId: ActionLocationId,
-    gameState: GameState
-  ): ScenarioPackage[] {
-    return [...ALL_ACTION_SCENARIOS, ...ALL_HOLIDAY_SCENARIOS]
+  /**
+   * 選択された場所に応じたシナリオを決定（ScenarioMeta.actionHints / availability より解決）
+   */
+  public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioIndexEntry {
+    return (
+      this.getEligibleActionScenarios(locationId, gameState)[0] ??
+      this.getFallbackScenario(gameState.phase === 'holiday_action' ? 'holiday' : 'action')
+    );
+  }
+
+  /** 条件に合う最優先のシナリオ。なければその種類の汎用シナリオ（fallback） */
+  private static selectScenario(category: ScenarioCategory, gameState: GameState): ScenarioIndexEntry {
+    return this.getEligibleScenarios([category], gameState)[0] ?? this.getFallbackScenario(category);
+  }
+
+  private static getFallbackScenario(category: ScenarioCategory): ScenarioIndexEntry {
+    const fallback = scenarioRepository.list(category).find((scenario) => scenario.fallback);
+    if (!fallback) throw new Error(`No fallback scenario for category: ${category}`);
+    return fallback;
+  }
+
+  /** 行動フェーズで選ばれ得るシナリオ（場所ヒント表示用）を優先順位順で返す */
+  private static getEligibleActionScenarios(locationId: ActionLocationId, gameState: GameState): ScenarioIndexEntry[] {
+    return this.getEligibleScenarios(['action', 'holiday'], gameState, locationId);
+  }
+
+  /** 条件に一致するシナリオを優先順位順で返す（汎用シナリオは最後、同優先度は目次順） */
+  private static getEligibleScenarios(
+    categories: ScenarioCategory[],
+    gameState: GameState,
+    locationId?: ActionLocationId,
+    ignoreTimeSlots = false
+  ): ScenarioIndexEntry[] {
+    return categories
+      .flatMap((category) => scenarioRepository.list(category))
       .map((scenario, index) => ({ scenario, index }))
-      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId))
+      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId, ignoreTimeSlots))
       .sort((a, b) => {
-        const priorityDifference =
-          this.getScenarioPriority(b.scenario, ACTION_SCENARIO_GENERIC.id) -
-          this.getScenarioPriority(a.scenario, ACTION_SCENARIO_GENERIC.id);
+        const priorityDifference = this.getScenarioPriority(b.scenario) - this.getScenarioPriority(a.scenario);
         return priorityDifference || a.index - b.index;
       })
       .map(({ scenario }) => scenario);
   }
 
-  private static getScenarioPriority(scenario: ScenarioPackage, fallbackScenarioId: string): number {
-    const isFallback = scenario.id === fallbackScenarioId || scenario.id === HOLIDAY_SCENARIO_GENERIC.id;
-    return isFallback ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
+  private static getScenarioPriority(scenario: ScenarioMeta): number {
+    return scenario.fallback ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
   }
 
-  /** シナリオの日付・時間帯・場所・進行履歴条件を判定 */
+  /** シナリオの日付・時間帯・場所・フラグ・進行履歴条件を判定 */
   private static matchesScenarioAvailability(
-    scenario: ScenarioPackage,
+    scenario: ScenarioMeta,
     gameState: GameState,
-    locationId?: ActionLocationId
+    locationId?: ActionLocationId,
+    ignoreTimeSlots = false
   ): boolean {
     const availability = scenario.availability;
+    if (availability?.requireFlags?.some((flag) => !gameState.flags[flag])) return false;
+    if (availability?.unlessFlags?.some((flag) => Boolean(gameState.flags[flag]))) return false;
     const dayRange = availability?.dayRange;
     if (dayRange?.from !== undefined && gameState.day < dayRange.from) return false;
     if (dayRange?.to !== undefined && gameState.day > dayRange.to) return false;
@@ -189,7 +216,7 @@ export class ScheduleManager {
       if (!matchesLegacyPhase) return false;
     }
 
-    if (availability?.timeSlots) {
+    if (availability?.timeSlots && !ignoreTimeSlots) {
       if (!availability.timeSlots.some((timeSlot) => this.matchesTimeSlot(timeSlot, gameState))) {
         return false;
       }

@@ -1,17 +1,17 @@
 import React from 'react';
-import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
+import { resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
 import { StageView } from '../../components/Stage/StageView';
 import { DialogueBox } from '../../components/Dialogue/DialogueBox';
 import { ChoiceBox } from '../../components/Dialogue/ChoiceBox';
 import { WhiteFlashOverlay } from '../../components/Common/WhiteFlashOverlay';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface ScenarioPageProps {
   currentScene: ScenarioResolvedScene | null;
   isFinished: boolean;
   isWaitingChoice: boolean;
-  lang: SupportedLanguage;
   activeTimeOfDay: TimeOfDayId;
   activeLocationId: string;
   activeCharId: string | null;
@@ -25,7 +25,6 @@ export interface ScenarioPageProps {
 export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   currentScene,
   isFinished,
-  lang,
   activeTimeOfDay,
   activeLocationId,
   activeCharId,
@@ -35,6 +34,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   onChoiceClick,
   onTypingComplete,
 }) => {
+  const { lang } = useLanguage();
   return (
     <>
       {/* メインステージ（3D/背景描画領域） */}

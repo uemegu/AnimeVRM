@@ -1,33 +1,33 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
-import { CallScenario } from '../../types/communication';
+import { resolveLocalizedText } from '../../types/scenario';
+import { CallScenario, CommunicationResult } from '../../types/communication';
 import { Avatar } from '../../services/graphics/avatar/Avatar';
 import { CHARACTERS } from '../../data/characters';
 import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
 import { DialogueBox } from '../Dialogue/DialogueBox';
 import { ChoiceBox } from '../Dialogue/ChoiceBox';
 import './Phone.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface PhoneCallModalProps {
   scenario: CallScenario;
-  lang: SupportedLanguage;
-  onClose: (flagsToUpdate?: Record<string, boolean | number | string>, affinityDelta?: Record<string, number>) => void;
+  /** 閉じたときの結果（フラグ・好感度・選んだ選択肢）。完了の記録は呼び出し側で行う */
+  onClose: (result: Omit<CommunicationResult, 'id'>) => void;
 }
 
 export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   scenario,
-  lang,
   onClose,
 }) => {
+  const { lang } = useLanguage();
   const [currentStepId, setCurrentStepId] = useState<string>(scenario.initialStepId);
   const [callDurationSec, setCallDurationSec] = useState<number>(0);
 
   // 蓄積されたフラグと好感度変更
-  const accumulatedFlagsRef = useRef<Record<string, boolean | number | string>>({
-    [`night_call_completed_day${scenario.day}_${scenario.characterId}`]: true,
-  });
+  const accumulatedFlagsRef = useRef<Record<string, boolean | number | string>>({});
   const accumulatedAffinityRef = useRef<Record<string, number>>({});
+  const chosenIdsRef = useRef<string[]>([]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const avatarRef = useRef<Avatar | null>(null);
@@ -168,7 +168,11 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
       setCurrentStepId(step.nextStepId);
     } else {
       // 全ステップ完了 -> 通話終了
-      onClose(accumulatedFlagsRef.current, accumulatedAffinityRef.current);
+      onClose({
+        flags: accumulatedFlagsRef.current,
+        affinityDelta: accumulatedAffinityRef.current,
+        choiceIds: chosenIdsRef.current,
+      });
     }
   };
 
@@ -177,6 +181,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     if (!step?.choices || !step.choices[choiceIndex]) return;
     const choice = step.choices[choiceIndex];
 
+    chosenIdsRef.current.push(choice.id);
     if (choice.setFlags) {
       Object.assign(accumulatedFlagsRef.current, choice.setFlags);
     }

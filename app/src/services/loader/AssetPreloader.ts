@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import preloadManifest from '../../data/preloadManifest.json';
+import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
+import { ScenarioPackage } from '../../types/scenario';
 
 // Three.js のメモリキャッシュを有効化
 THREE.Cache.enabled = true;
@@ -113,15 +115,13 @@ export class AssetPreloader {
   }
 
   /**
-   * 幕間待機中に特定ロケーションとシナリオに必要なアセットを一括ロード
+   * 幕間待機中に、次に映す場所の背景とシナリオのボイス・待機モーションを一括ロード
    */
-  public static async preloadInterludeAssets(
-    locationUrls: (string | undefined | null)[] = [],
-    scenarioVoiceUrls: (string | undefined | null)[] = [],
-    motionUrls: string[] = ['/animations/Standing Idle.fbx']
-  ): Promise<void> {
-    const allUrls = [...locationUrls, ...scenarioVoiceUrls, ...motionUrls];
-    await this.preloadAssets(allUrls);
+  public static async preloadSceneAssets(locationId?: string, scenario?: ScenarioPackage | null): Promise<void> {
+    const layers = locationId ? LOCATION_VISUAL_PRESETS[locationId]?.layers : undefined;
+    const locationUrls = [layers?.background?.url, layers?.midground?.url, layers?.nearground?.url];
+    const voiceUrls = scenario?.scenes.map((scene) => scene.voiceUrl) ?? [];
+    await this.preloadAssets([...locationUrls, ...voiceUrls, '/animations/Standing Idle.fbx']);
   }
 
   /**

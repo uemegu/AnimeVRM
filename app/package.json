@@ -7,7 +7,8 @@
     "dev": "vite",
     "generate:licenses": "node scripts/generate-licenses.js",
     "generate:preload-manifest": "node scripts/generate-preload-manifest.js",
-    "build": "npm run generate:licenses && npm run generate:preload-manifest && tsc --noEmit && vite build",
+    "generate:scenario-index": "node scripts/generate-scenario-index.js",
+    "build": "npm run generate:licenses && npm run generate:preload-manifest && npm run generate:scenario-index && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

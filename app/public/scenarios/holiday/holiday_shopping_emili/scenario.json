@@ -1,0 +1,151 @@
+{
+  "id": "holiday_shopping_emili",
+  "title": {
+    "ja": "商店街: エミリと福引き",
+    "en": "Shopping Street: A lottery with Emili"
+  },
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ]
+  },
+  "actionHints": [
+    {
+      "locationId": "shopping_street",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "福引き所の前に、見覚えのある赤い髪が見える。",
+        "en": "A familiar head of red hair is by the lottery stand."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "ちょっと、見て見て！福引きで遊園地のペアチケットが当たったんだけど！",
+        "en": "Hey, look look! I won a pair of amusement park tickets in the lottery!"
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "……で、一枚余ってるのよね。別に、誰かと行きたいとかじゃないんだけど。",
+        "en": "...So, I have one extra. Not that I want to go with anyone in particular."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "shopping_accept_ticket",
+          "text": {
+            "ja": "よかったら一緒に行きたい",
+            "en": "I'd like to go with you, if that's okay."
+          },
+          "goto": "s_accept",
+          "setFlags": {
+            "unlock_amusement_park": true
+          },
+          "addAffinity": {
+            "emili": 5
+          }
+        },
+        {
+          "id": "shopping_decline_ticket",
+          "text": {
+            "ja": "友達を誘ってみたら？",
+            "en": "Why not invite a friend?"
+          },
+          "goto": "s_decline",
+          "addAffinity": {
+            "emili": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "s_accept",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "し、仕方ないわね！次のお休みに遊園地ね。遅れたら承知しないから！",
+        "en": "W-well, if you insist! Next holiday at the amusement park. Don't you dare be late!"
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_decline",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "……ふーん。まあ、そうするわ。",
+        "en": "...Hmph. Fine, I will."
+      },
+      "avatars": {
+        "emili": {
+          "characterId": "emili",
+          "position": "center",
+          "visible": true,
+          "expression": "angry",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "s_end"
+    },
+    {
+      "id": "s_end",
+      "speaker": "",
+      "text": {
+        "ja": "エミリの買い物に付き合って、商店街をひと通り見て回った。",
+        "en": "I tagged along on Emili's shopping and looked around the shopping street."
+      }
+    }
+  ]
+}

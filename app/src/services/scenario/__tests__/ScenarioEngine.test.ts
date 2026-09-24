@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { ScenarioEngine } from '../ScenarioEngine';
 import { validateScenario } from '../ScenarioValidator';
-import { SAMPLE_SCENARIO } from '../../../scenarios/sampleScenario';
 import { ScenarioPackage } from '../../../types/scenario';
+import sampleScenario from './fixtures/sampleScenario.json';
+
+const SAMPLE_SCENARIO = sampleScenario as ScenarioPackage;
 
 describe('ScenarioValidator (シナリオ静的検証)', () => {
   it('SAMPLE_SCENARIO が正常にバリデーションを通過すること', () => {

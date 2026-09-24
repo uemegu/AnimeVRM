@@ -14,13 +14,17 @@
   - 28日目満了時のエンディング到達判定（※エンディング分岐仕様は確定待ちTODO）。
 - **画面構成（pages分割）**:
   - `src/pages/` 配下に各画面（`TitlePage`, `ScenarioPage`, `ActionSelectPage`, `NightRoomPage`, `EndingPage`）を分割独立。
-  - `App.tsx` は画面ルーティングおよび共通モーダル・サービスの管理に集約。
+  - `App.tsx` は画面ルーティングとゲーム進行（フェーズ遷移・セーブ/ロード・就寝）に集約。シナリオ再生・会話履歴・確認ダイアログは `src/hooks/`、表示する場所・キャラの判定は `services/stage/sceneView.ts`。
+  - 表示言語は `LanguageProvider` / `useLanguage()` で参照（props で中継しない）。
 - **シナリオ & 会話**:
   - Headless型ステートマシン（`ScenarioEngine.ts`、Vitestテスト対応）。
-  - 行動ヒント情報（場所・フェーズ・ヒント文・滞在キャラID）を `ScenarioPackage.actionHints` としてシナリオデータ側で一元管理。
+  - シナリオは `public/scenarios/<category>/<id>/scenario.json`（ボイスも同じディレクトリ）。発生判定用のメタ情報は `src/data/scenarioIndex.json` に自動生成し、本文は再生直前に遅延ロード（`ScenarioRepository`）。書き方は `FEATURES.md`。
+  - 行動ヒント情報（場所・フェーズ・ヒント文・滞在キャラID）は各シナリオの `actionHints` で管理。
+  - 夜の電話・メールも `public/scenarios/call|mail/` のマスターデータ。条件を満たすものが1人1件ずつ優先度順に届き、完了は進行履歴に残る（`ScheduleManager.getNightCommunications`）。
   - `ScenarioPackage.availability` による発生条件（前提シナリオ/選択肢、時間帯、日数、場所）、優先順位、セーブ対応の進行履歴。
   - 条件の指定例と時間帯・AND/ORの意味は `FEATURES.md` を参照。
   - タイピング演出、ルート準拠のボイス再生終了＆文字数同期AUTO送り、選択肢UI、幕間スライストランジション。
+  - **アオイ編シナリオ設計書（`app/scenarios/aoi_scenario.md`）**: 21日間デスゲーム×変態紳士サバイバルのプロット・スクリプト（共通プロローグ〜エンディング）を策定済み。
 - **3D描画 & ビジュアル**:
   - Three.js / VRM / 多層背景（AVIF、神社・神界・学校各所・運動場・自室等）、全自動リサイズ、ポストプロセス（Bloom/GodRays/薄明光線等）。
   - ルート準拠の `divine`（神聖・逆光シルエット＋黄金リムライト）を含む時間帯・演出プリセット。
@@ -29,7 +33,7 @@
 - **オーディオ & リップシンク**:
   - BGM ID管理（タイトル、プレイ中、夜自室）、シームレス継続、夜間音量縮小。
   - サウンドミュート機能（ヘッダー・タイトル画面から即時切替）。
-  - 音声（BGM・SE・ループSE・ボイス）の再生とミュートは共有の `soundManager` に集約。画面側で `new Audio()` や `isMuted` を扱わない。
+  - 音声（BGM・SE・ループSE・ボイス）の再生とミュート（保存含む）は共有の `soundManager` に集約。画面側で `new Audio()` や `isMuted` を扱わない。UI効果音は `sePresets.ts` のIDで鳴らす。
   - Web Audio API / WASMによる母音解析リップシンク（ミュート時も口パク解析は維持）。
 - **プリロード & ローディング**:
   - `preloadManifest.json` による静的アセットサイズ自動集計と事前ロード画面。
@@ -51,9 +55,11 @@
 
 ## 直近のNext Action
 
-1. [ ] シナリオコンテンツ・個別キャライベントの拡充
+1. [ ] アオイ編シナリオの `scenario.json` 化とテスト
+   - `app/scenarios/aoi_scenario.md` をもとに各フェーズのシーンデータ化
+2. [ ] シナリオコンテンツ・個別キャライベントの拡充
    - 映画館・遊園地・水族館の専用背景（現在は既存背景で代用）、移動先選択のヒロイン画像の私服版
-2. [ ] 基本操作・遊び方ヘルプ案内（オプション）
+3. [ ] 基本操作・遊び方ヘルプ案内（オプション）
 
 ---
 

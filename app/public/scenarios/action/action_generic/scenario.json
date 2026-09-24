@@ -1,0 +1,42 @@
+{
+  "id": "action_generic",
+  "title": {
+    "ja": "放課後のひと休み",
+    "en": "Afternoon Break"
+  },
+  "fallback": true,
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintText": {
+        "ja": "生徒たちがベンチでくつろいでいる。",
+        "en": "Students are relaxing on the benches."
+      }
+    },
+    {
+      "locationId": "cafeteria",
+      "hintText": {
+        "ja": "美味しそうなパンの香りが漂っている。",
+        "en": "The sweet scent of freshly baked bread fills the air."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "",
+      "text": {
+        "ja": "穏やかな陽気のなか、静かに気分転換の時間を過ごした。",
+        "en": "Spent some peaceful time relaxing under the pleasant weather."
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "",
+      "text": {
+        "ja": "心地よい風が通り抜け、心身ともにリフレッシュできた。",
+        "en": "A pleasant breeze blew by, refreshing mind and body."
+      }
+    }
+  ]
+}

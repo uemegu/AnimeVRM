@@ -1,12 +1,17 @@
 import { resolveAssetUrl } from '../../utils/path';
 import { BgmId, resolveBgmInfo } from '../../data/bgmPresets';
+import { UI_SE_PRESETS, UiSeId } from '../../data/sePresets';
 import { AudioLipSync, Phoneme } from './AudioLipSync';
+
+const MUTE_STORAGE_KEY = 'galgame_audio_muted';
 
 export interface SoundManagerOptions {
   masterVolume?: number;
   bgmVolume?: number;
   seVolume?: number;
   voiceVolume?: number;
+  /** ミュート状態を localStorage に保存・復元する（アプリ共有インスタンスのみ有効にする） */
+  persistMute?: boolean;
 }
 
 export class SoundManager {
@@ -20,6 +25,8 @@ export class SoundManager {
   private voiceAudio: AudioLipSync | null = null;
 
   private isMuted: boolean = false;
+  private readonly persistMute: boolean;
+  private readonly muteListeners = new Set<() => void>();
 
   public masterVolume: number = 1.0;
   public bgmVolume: number = 0.4;
@@ -31,6 +38,14 @@ export class SoundManager {
     if (options.bgmVolume !== undefined) this.bgmVolume = options.bgmVolume;
     if (options.seVolume !== undefined) this.seVolume = options.seVolume;
     if (options.voiceVolume !== undefined) this.voiceVolume = options.voiceVolume;
+    this.persistMute = options.persistMute ?? false;
+    if (this.persistMute) {
+      try {
+        this.isMuted = localStorage.getItem(MUTE_STORAGE_KEY) === 'true';
+      } catch {
+        // localStorage が使えない環境ではミュート解除で開始
+      }
+    }
 
     if (typeof window !== 'undefined') {
       (window as any).__soundManager = this;
@@ -41,7 +56,17 @@ export class SoundManager {
    * ミュート状態の設定
    */
   public setMuted(muted: boolean): void {
-    this.isMuted = muted;
+    if (this.isMuted !== muted) {
+      this.isMuted = muted;
+      if (this.persistMute) {
+        try {
+          localStorage.setItem(MUTE_STORAGE_KEY, String(muted));
+        } catch {
+          // 保存できなくても再生制御は続ける
+        }
+      }
+      this.muteListeners.forEach((listener) => listener());
+    }
     if (this.bgmAudio) {
       this.bgmAudio.muted = muted;
     }
@@ -59,9 +84,22 @@ export class SoundManager {
     this.voiceAudio?.setMuted(muted);
   }
 
-  public getIsMuted(): boolean {
+  // 以下はイベントハンドラや useSyncExternalStore に直接渡せるよう、アロー関数で this を束縛する
+  public toggleMuted = (): void => {
+    this.setMuted(!this.isMuted);
+  };
+
+  public getIsMuted = (): boolean => {
     return this.isMuted;
-  }
+  };
+
+  /** ミュート状態の変化を購読する。戻り値で購読解除 */
+  public subscribeMuted = (listener: () => void): (() => void) => {
+    this.muteListeners.add(listener);
+    return () => {
+      this.muteListeners.delete(listener);
+    };
+  };
 
   /**
    * BGM 再生（BGM ID または URL による指定、同一曲の場合はシームレス継続）
@@ -193,6 +231,22 @@ export class SoundManager {
   }
 
   /**
+   * UI操作音・通知音をプリセットIDで再生
+   */
+  public playUiSe(id: UiSeId): void {
+    const preset = UI_SE_PRESETS[id];
+    this.playSe(preset.url, preset.volumeScale);
+  }
+
+  /**
+   * UI操作音・通知音をプリセットIDでループ再生。戻り値の関数で停止する
+   */
+  public playLoopUiSe(id: UiSeId): () => void {
+    const preset = UI_SE_PRESETS[id];
+    return this.playLoopSe(preset.url, preset.volumeScale);
+  }
+
+  /**
    * SE（効果音）のループ再生。戻り値の関数で停止する
    */
   public playLoopSe(url: string, volumeScale: number = 1.0): () => void {
@@ -288,4 +342,4 @@ export class SoundManager {
  * アプリ全体で共有するサウンドサービス。
  * ミュート状態はここで一元管理するため、各画面はミュートを気にせず playSe を呼べばよい。
  */
-export const soundManager = new SoundManager();
+export const soundManager = new SoundManager({ persistMute: true });

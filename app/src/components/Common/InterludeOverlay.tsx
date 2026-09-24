@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { SupportedLanguage } from '../../types/scenario';
+import { useLanguage } from '../../contexts/LanguageContext';
 import './InterludeOverlay.css';
 
 export interface InterludeTransitionOptions {
@@ -14,12 +14,9 @@ export interface InterludeOverlayHandle {
   isRunning: () => boolean;
 }
 
-interface InterludeOverlayProps {
-  lang: SupportedLanguage;
-}
-
-export const InterludeOverlay = forwardRef<InterludeOverlayHandle, InterludeOverlayProps>(
-  ({ lang }, ref) => {
+export const InterludeOverlay = forwardRef<InterludeOverlayHandle>(
+  (_props, ref) => {
+    const { lang } = useLanguage();
     const [isVisible, setIsVisible] = useState(false);
     const [isCovered, setIsCovered] = useState(false);
     const [isExiting, setIsExiting] = useState(false);

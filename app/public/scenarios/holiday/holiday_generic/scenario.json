@@ -1,0 +1,31 @@
+{
+  "id": "holiday_generic",
+  "title": {
+    "ja": "休日のひと休み",
+    "en": "A Quiet Holiday"
+  },
+  "fallback": true,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "",
+      "text": {
+        "ja": "今日は特に予定もない。ゆっくり過ごすことにした。",
+        "en": "No particular plans today. I decided to take it easy."
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": "",
+      "text": {
+        "ja": "平日の疲れが抜けて、明日への元気が湧いてきた。",
+        "en": "The week's fatigue faded, and I felt ready for tomorrow."
+      }
+    }
+  ]
+}

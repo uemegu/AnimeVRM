@@ -1,0 +1,83 @@
+{
+  "id": "ending_shion",
+  "title": {
+    "ja": "エンディング: シオンと紡ぐ物語",
+    "en": "Ending: Story woven with Shion"
+  },
+  "characters": [
+    {
+      "id": "shion",
+      "modelUrl": "/models/shion/shion.vrm",
+      "initialPosition": "center"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "",
+      "text": {
+        "ja": "放課後の図書室。夕暮れの光が窓から差し込み、シオンが静かに微笑んでいた。",
+        "en": "In the after-school library. Sunset sunlight poured through the window as Shion smiled softly."
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s2",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "あなたと過ごした日々は、私が読んできたどんな物語よりも温かい時間でした。",
+        "en": "The days I spent with you were warmer and more precious than any story I have ever read."
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s3",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "次の物語のページも……あなたと一緒にめくってもいいですか？",
+        "en": "May I continue to turn the pages of the next chapter... together with you?"
+      },
+      "avatars": {
+        "shion": {
+          "characterId": "shion",
+          "position": "center",
+          "visible": true,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speaker": "",
+      "text": {
+        "ja": "本を閉じたシオンと静かに手を重ね合わせた。",
+        "en": "As Shion closed her book, our hands gently intertwined."
+      }
+    }
+  ]
+}

@@ -32,28 +32,49 @@
   - 稀に日中も行動選択を挟まずに強制イベントが発生する
   - 例: 未遭遇の重要キャラクターの出会いイベントを自発的に起こさなかった場合に、シナリオ進行上強制的に出会わせるイベントなど
 
+## シナリオファイル
+
+シナリオは `public/scenarios/<category>/<id>/scenario.json` に1本ずつ置き、そのシナリオのボイスも同じディレクトリに置きます。
+
+- `category` は `morning`（朝）、`action`（平日の行動）、`holiday`（休日の行動）、`forced`（強制割り込みイベント）、`ending`、`special`（タイトルから始める実験シナリオ等）、`call`（夜の電話）、`mail`（夜のメール）のいずれかです。
+- ディレクトリ名とシナリオの `id` は同じにします。
+- `voiceUrl` はディレクトリからの相対パス（例: `"01_aoi.wav"`）で書けます。`/` で始まる場合は `public/` からの絶対パスです。
+- 発生判定に使うメタ情報（`id` `title` `location` `fallback` `availability` `priority` `actionHints`、電話・メールの `characterId` `previewText` `time`）は、開発サーバー起動時とビルド時に `src/data/scenarioIndex.json` へ自動で集められます。開発中は `scenario.json` を保存すると作り直されます。本文（`scenes` 等）は再生直前に読み込みます。
+- `npm test` で全シナリオのバリデーション、参照しているボイスファイルの存在、目次が最新であることを確認できます。
+
+## 夜の電話・メール
+
+電話（`call`）とメール（`mail`）はマスターデータとして全件を置き、夜の自室で条件を満たしたものが届きます。
+
+- 発生条件は下の `availability` と同じ書き方です（`dayRange` `requireFlags` `unlessFlags` `after`。時間帯と場所は使いません）。
+- 1人のヒロインからは一晩に1件だけ届きます。条件を満たすものが複数あれば `priority` の大きいものが選ばれ、同じ値なら電話→メール、ディレクトリ名の順です。
+- 応答した電話・着信拒否した電話・開いたメールは完了として進行履歴に残り、以後は届きません。その夜、同じ人からは他の電話・メールも届きません。
+- 電話の選択肢とメールの返信の `id` は、選んだ選択肢として履歴に残ります（着信拒否は `rejected`）。`after` 条件で「このメールにこう返信したら次の電話が来る」のように続きを作れます。
+
 ## シナリオの発生条件
 
-`ScenarioPackage` の `availability` で発生条件を指定できます。項目を省略するとその項目では制限されません。`availability` と `actionHints` を省略したシナリオは、すべての行動場所・時間帯で候補になります。既存の `actionHints` は引き続き場所・フェーズの発生範囲とヒント表示に使われます。
+`scenario.json` の `availability` で発生条件を指定できます。項目を省略するとその項目では制限されません。`availability` と `actionHints` を省略したシナリオは、すべての行動場所・時間帯で候補になります。`actionHints` は場所・フェーズの発生範囲とヒント表示に使われます。
 
-```ts
+```json
 {
-  id: 'aoi_followup',
-  title: 'アオイとの続きのイベント',
-  availability: {
-    after: {
-      all: [{ scenarioId: 'morning_day_1' }],
-      any: [
-        { scenarioId: 'action_classroom_aoi', choiceId: 's_accept' },
-        { scenarioId: 'action_library_shion', choiceId: 's_recommend' },
-      ],
+  "id": "aoi_followup",
+  "title": "アオイとの続きのイベント",
+  "availability": {
+    "after": {
+      "all": [{ "scenarioId": "morning_day_1" }],
+      "any": [
+        { "scenarioId": "action_classroom_aoi", "choiceId": "s_accept" },
+        { "scenarioId": "action_library_shion", "choiceId": "s_recommend" }
+      ]
     },
-    timeSlots: ['afternoon', 'afterschool'],
-    dayRange: { from: 3, to: 10 },
-    locations: ['library', 'rooftop'],
+    "timeSlots": ["afternoon", "afterschool"],
+    "dayRange": { "from": 3, "to": 10 },
+    "locations": ["library", "rooftop"],
+    "requireFlags": ["met_aoi"],
+    "unlessFlags": ["aoi_followup_done"]
   },
-  priority: 10,
-  scenes: [],
+  "priority": 10,
+  "scenes": []
 }
 ```
 
@@ -61,8 +82,11 @@
 - `choiceId` を省いた条件は指定シナリオの完了を待ちます。指定した場合はその選択肢を選んだ時点で条件を満たします。選択肢の `id` を使い、未指定の場合は `goto` のシーンIDが履歴IDになります。
 - `timeSlots` と `locations` はそれぞれ複数指定を OR として扱います。時間帯は `morning`（朝・午前）、`afternoon`（昼）、`afterschool`（放課後）、`holiday`（土日）です。
 - `availability.locations` を指定すると発生場所はそちらで判定します。未指定時は `actionHints` の場所が適用されます。同様に、`timeSlots` 未指定時は該当する `actionHints.phases` が適用されます。
-- `dayRange.from` / `to` は両端を含みます。時間帯・日付・場所・先行条件は互いに AND で評価します。
-- 条件を満たすシナリオが複数ある場合は `priority` の大きいものを選び、同じ値なら定義順を使います。
+- `requireFlags` のフラグがすべて立っているときだけ発生します。`unlessFlags` のフラグがどれか1つでも立っていると発生しません（出会いイベントを一度きりにする等）。
+- `dayRange.from` / `to` は両端を含みます。時間帯・日付・場所・フラグ・先行条件は互いに AND で評価します。
+- 条件を満たすシナリオが複数ある場合は `priority` の大きいものを選び、同じ値ならディレクトリ名の順を使います。
+- `"fallback": true` のシナリオは、同じ種類で条件に合うものが他にないときだけ選ばれる汎用シナリオです。
+- `location` はシナリオの舞台です。場所選択を経ずに始まるシナリオ（強制イベント等）の背景になります。
 
 ## 必須（個人開発のブラウザゲームとしての最小構成）
 

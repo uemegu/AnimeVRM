@@ -1,14 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { SupportedLanguage } from '../../types/scenario';
 import { AppLicensesData, LibraryLicense, AssetCredit } from '../../types/license';
 import rawLicensesData from '../../data/licenses.json';
 import './LicenseModal.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const licensesData = rawLicensesData as unknown as AppLicensesData;
 
 export interface LicenseModalProps {
   isOpen: boolean;
-  lang: SupportedLanguage;
   onClose: () => void;
 }
 
@@ -16,9 +15,9 @@ type LicenseTab = 'assets' | 'libraries';
 
 export const LicenseModal: React.FC<LicenseModalProps> = ({
   isOpen,
-  lang,
   onClose,
 }) => {
+  const { lang } = useLanguage();
   const [activeTab, setActiveTab] = useState<LicenseTab>('assets');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedLibs, setExpandedLibs] = useState<Record<string, boolean>>({});

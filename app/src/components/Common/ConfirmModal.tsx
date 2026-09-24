@@ -24,24 +24,24 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   // モーダルオープン時に表示SE再生
   useEffect(() => {
     if (isOpen) {
-      soundManager.playSe('/se/items_shown.mp3', 0.6);
+      soundManager.playUiSe('shown');
     }
   }, [isOpen]);
 
   // ホバー音
   const handleMouseEnter = () => {
-    soundManager.playSe('/se/items_hover.mp3', 0.45);
+    soundManager.playUiSe('hover');
   };
 
   // 確定クリック
   const handleConfirm = () => {
-    soundManager.playSe('/se/items_chose.mp3', 0.65);
+    soundManager.playUiSe('select');
     onConfirm();
   };
 
   // キャンセルクリック
   const handleCancel = () => {
-    soundManager.playSe('/se/items_chose.mp3', 0.55);
+    soundManager.playUiSe('cancel');
     onCancel?.();
   };
 

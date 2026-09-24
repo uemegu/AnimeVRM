@@ -2,7 +2,7 @@
  * コミュニケーション機能（TV電話・LINE風メール）の型定義
  */
 
-import { LocalizedString } from './scenario';
+import { LocalizedString, ScenarioAvailability } from './scenario';
 
 export type HeroineId = 'aoi' | 'emili' | 'shion';
 
@@ -27,20 +27,25 @@ export interface CallSceneStep {
   nextStepId?: string | null; // nullなら通話終了
 }
 
-/** TV電話のシナリオパッケージ */
-export interface CallScenario {
+/**
+ * 夜の電話・メールの共通項目。
+ * 発生条件（availability）を満たすものが優先度順に選ばれ、1人のヒロインからは一晩に1件だけ届く
+ */
+export interface CommunicationMeta {
   id: string;
   characterId: HeroineId;
-  day: number;
-  modelUrl?: string; // 例: 私服モデル
   title: LocalizedString;
+  /** 発生条件（日付範囲・フラグ・先行シナリオ等）。time slot と場所は使わない */
+  availability?: ScenarioAvailability;
+  /** 同じヒロインで条件が重なったとき大きいものを優先（同値なら電話→メール、ディレクトリ名順） */
+  priority?: number;
+}
+
+/** TV電話のシナリオパッケージ */
+export interface CallScenario extends CommunicationMeta {
+  modelUrl?: string; // 例: 私服モデル
   initialStepId: string;
   steps: Record<string, CallSceneStep>;
-  /** 発生条件（指定フラグが真、または好感度条件など） */
-  condition?: {
-    requiredFlag?: string;
-    minAffinity?: number;
-  };
 }
 
 /** LINE風メールの1通のメッセージ */
@@ -62,28 +67,32 @@ export interface MailReplyOption {
 }
 
 /** LINE風メールのシナリオ */
-export interface MailScenario {
-  id: string;
-  characterId: HeroineId;
-  day: number;
+export interface MailScenario extends CommunicationMeta {
+  /** 通知カードに出す本文プレビュー */
   previewText: LocalizedString;
+  /** 通知カードに出す受信時刻 */
   time: string;
   messages: MailMessage[];
   replyOptions?: MailReplyOption[];
-  condition?: {
-    requiredFlag?: string;
-    minAffinity?: number;
-  };
 }
 
-/** ヒロインごとの夜のコミュニケーション状態 */
-export interface HeroineCommunicationStatus {
+/** 今夜ヒロインから届く電話・メール（目次の情報のみ。本文は開くときに読み込む） */
+export interface NightCommunication {
+  kind: 'call' | 'mail';
+  id: string;
   characterId: HeroineId;
-  statusText: LocalizedString; // 添付画像のアオイ「今、話せる？🌙」、エミリ「また話そーね！」等
-  hasIncomingCall: boolean;
-  incomingCallScenario?: CallScenario;
-  unreadMailCount: number;
-  activeMailScenario?: MailScenario;
-  callCompleted: boolean;
-  mailReplied: boolean;
+  /** メール通知カード用 */
+  previewText?: LocalizedString;
+  time?: string;
+  /** 今夜すでに応答・拒否・既読にした */
+  done: boolean;
+}
+
+/** 電話・メールを終えたときの結果（ゲーム状態への反映は App 側で行う） */
+export interface CommunicationResult {
+  id: string;
+  flags: Record<string, boolean | number | string>;
+  affinityDelta: Record<string, number>;
+  /** 選んだ選択肢・返信のID（履歴条件 after.choiceId から参照できる）。着信拒否は 'rejected' */
+  choiceIds: string[];
 }

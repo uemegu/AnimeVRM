@@ -1,0 +1,28 @@
+{
+  "id": "morning_default",
+  "title": {
+    "ja": "朝の登校",
+    "en": "Morning Walk to School"
+  },
+  "location": "school_gate",
+  "fallback": true,
+  "priority": 0,
+  "scenes": [
+    {
+      "id": "scene_1",
+      "speaker": "",
+      "text": {
+        "ja": "爽やかな朝の風を感じながら、通学路を歩く。",
+        "en": "Walking along the school route, feeling the refreshing morning breeze."
+      }
+    },
+    {
+      "id": "scene_2",
+      "speaker": "",
+      "text": {
+        "ja": "教室に向かって歩みを進めた。さあ、今日も1日頑張ろう。",
+        "en": "Heading towards the classroom. Let's make the most of today."
+      }
+    }
+  ]
+}

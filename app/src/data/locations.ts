@@ -1,4 +1,5 @@
 import { ActionLocationId, ActionLocationOption } from '../types/game';
+import { SupportedLanguage } from '../types/scenario';
 
 export const LOCATION_DEFINITIONS: Record<ActionLocationId, ActionLocationOption> = {
   classroom: {
@@ -77,3 +78,18 @@ export const HOLIDAY_ACTION_LOCATIONS: Array<{ id: ActionLocationId; unlockFlag?
   { id: 'amusement_park', unlockFlag: 'unlock_amusement_park' },
   { id: 'aquarium', unlockFlag: 'unlock_aquarium' },
 ];
+
+/** 行動ターンでは選べないがシナリオの舞台になる場所の表示名 */
+const SCENE_LOCATION_NAMES: Record<string, { ja: string; en: string }> = {
+  myroom: { ja: '自室', en: 'My Room' },
+  school_gate: { ja: '正門前', en: 'School Gate' },
+  shrine: { ja: '神社', en: 'Shrine' },
+  god_realm: { ja: '神界', en: 'God Realm' },
+};
+
+/** 場所IDの表示名（未登録ならIDをそのまま返す） */
+export function getLocationName(locationId: string, lang: SupportedLanguage): string {
+  const name =
+    SCENE_LOCATION_NAMES[locationId] ?? LOCATION_DEFINITIONS[locationId as ActionLocationId]?.name;
+  return name ? name[lang] || name.ja : locationId;
+}

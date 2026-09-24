@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { SupportedLanguage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
+import { soundManager } from '../../services/audio/SoundManager';
+import { useSoundMuted } from '../../hooks/useSoundMuted';
 import './TitleScreen.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface TitleScreenProps {
   hasSaveData: boolean;
-  lang: SupportedLanguage;
-  isMuted?: boolean;
-  onToggleMute?: () => void;
   onStartGame: () => void;
   onContinueGame: () => void;
   onStartGodExperiment?: () => void;
-  onToggleLanguage: () => void;
   onOpenLicense?: () => void;
 }
 
@@ -26,15 +24,13 @@ const PORTRAITS: { slot: 'left' | 'center' | 'right'; id: HeroineId; src: string
 
 export const TitleScreen: React.FC<TitleScreenProps> = ({
   hasSaveData,
-  lang,
-  isMuted = false,
-  onToggleMute,
   onStartGame,
   onContinueGame,
   onStartGodExperiment,
-  onToggleLanguage,
   onOpenLicense,
 }) => {
+  const { lang, toggleLanguage } = useLanguage();
+  const isMuted = useSoundMuted();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const [focusedHeroine, setFocusedHeroine] = useState<HeroineId | null>(null);
@@ -61,7 +57,6 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
     <div
       ref={containerRef}
       className="title-screen-container"
-      lang={lang}
       data-focus={focusedHeroine ?? undefined}
       onPointerMove={handlePointerMove}
     >
@@ -158,39 +153,37 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
         <footer className="title-footer">
           <div className="title-quick-actions">
             {/* サウンド ミュート/解除 */}
-            {onToggleMute && (
-              <button
-                type="button"
-                className={`title-icon-btn ${isMuted ? 'muted' : ''}`}
-                onClick={onToggleMute}
-                data-testid="btn-mute"
-                aria-pressed={isMuted}
-                aria-label={isMuted
-                  ? lang === 'ja' ? 'サウンド: 消音中' : 'Sound: Muted'
-                  : lang === 'ja' ? 'サウンド: ON' : 'Sound: ON'}
-                title={isMuted
-                  ? lang === 'ja' ? 'サウンド: 消音中' : 'Sound: Muted'
-                  : lang === 'ja' ? 'サウンド: ON' : 'Sound: ON'}
-              >
-                {isMuted ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="m17 9 6 6m0-6-6 6" />
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                  </svg>
-                )}
-              </button>
-            )}
+            <button
+              type="button"
+              className={`title-icon-btn ${isMuted ? 'muted' : ''}`}
+              onClick={soundManager.toggleMuted}
+              data-testid="btn-mute"
+              aria-pressed={isMuted}
+              aria-label={isMuted
+                ? lang === 'ja' ? 'サウンド: 消音中' : 'Sound: Muted'
+                : lang === 'ja' ? 'サウンド: ON' : 'Sound: ON'}
+              title={isMuted
+                ? lang === 'ja' ? 'サウンド: 消音中' : 'Sound: Muted'
+                : lang === 'ja' ? 'サウンド: ON' : 'Sound: ON'}
+            >
+              {isMuted ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="m17 9 6 6m0-6-6 6" />
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+              )}
+            </button>
 
             {/* 言語切替 */}
             <button
               type="button"
               className="title-icon-btn"
-              onClick={onToggleLanguage}
+              onClick={toggleLanguage}
               data-testid="btn-language"
               aria-label={lang === 'ja' ? 'Language' : '言語'}
               title={lang === 'ja' ? 'Language' : '言語'}

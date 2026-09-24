@@ -3,6 +3,7 @@ import { ScheduleManager } from '../ScheduleManager';
 import { ScenarioEngine } from '../../scenario/ScenarioEngine';
 import { SaveService } from '../../save/SaveService';
 import { GameState } from '../../../types/game';
+import { loadScenario } from '../../scenario/__tests__/diskScenarioRepository';
 
 // インメモリストレージ
 class MemoryStorage implements Storage {
@@ -28,13 +29,13 @@ class MemoryStorage implements Storage {
 }
 
 describe('GameLoopIntegration (ゲームループ・28日間コアループ結合テスト)', () => {
-  it('Day 1: 朝 → 午前(教室) → 昼(図書室) → 放課後(屋上) → 夜(自室) → 就寝 → Day 2朝へ正常に完走できること', () => {
+  it('Day 1: 朝 → 午前(教室) → 昼(図書室) → 放課後(屋上) → 夜(自室) → 就寝 → Day 2朝へ正常に完走できること', async () => {
     let state: GameState = ScheduleManager.createInitialState();
     expect(state.day).toBe(1);
     expect(state.phase).toBe('morning');
 
     // 1. 朝シナリオ再生
-    const morningScenario = ScheduleManager.getMorningScenario(state);
+    const morningScenario = await loadScenario(ScheduleManager.getMorningScenario(state).id);
     const morningEngine = new ScenarioEngine(morningScenario, state.flags, state.affinities);
     while (!morningEngine.isFinished()) {
       morningEngine.next();
@@ -49,7 +50,7 @@ describe('GameLoopIntegration (ゲームループ・28日間コアループ結�
     expect(state.flags.met_aoi).toBe(true);
 
     // 2. 午前行動: 教室を選択
-    const morningLocScenario = ScheduleManager.getScenarioForLocation('classroom', state);
+    const morningLocScenario = await loadScenario(ScheduleManager.getScenarioForLocation('classroom', state).id);
     const morningLocEngine = new ScenarioEngine(morningLocScenario, state.flags, state.affinities);
     // 選択肢分岐をシミュレート
     morningLocEngine.next();
@@ -69,7 +70,7 @@ describe('GameLoopIntegration (ゲームループ・28日間コアループ結�
     expect(state.affinities.aoi).toBe(5);
 
     // 3. 昼行動: 図書室を選択
-    const lunchLocScenario = ScheduleManager.getScenarioForLocation('library', state);
+    const lunchLocScenario = await loadScenario(ScheduleManager.getScenarioForLocation('library', state).id);
     const lunchLocEngine = new ScenarioEngine(lunchLocScenario, state.flags, state.affinities);
     lunchLocEngine.next();
     lunchLocEngine.next();
@@ -89,7 +90,7 @@ describe('GameLoopIntegration (ゲームループ・28日間コアループ結�
     expect(state.affinities.shion).toBe(5);
 
     // 4. 放課後行動: 屋上を選択
-    const afterschoolScenario = ScheduleManager.getScenarioForLocation('rooftop', state);
+    const afterschoolScenario = await loadScenario(ScheduleManager.getScenarioForLocation('rooftop', state).id);
     const afterschoolEngine = new ScenarioEngine(afterschoolScenario, state.flags, state.affinities);
     afterschoolEngine.next();
     afterschoolEngine.next();

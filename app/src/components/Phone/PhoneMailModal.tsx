@@ -1,31 +1,31 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
-import { MailScenario, MailReplyOption, MailMessage } from '../../types/communication';
+import { resolveLocalizedText } from '../../types/scenario';
+import { MailScenario, MailReplyOption, MailMessage, CommunicationResult } from '../../types/communication';
 import { CHARACTERS } from '../../data/characters';
 import { soundManager } from '../../services/audio/SoundManager';
 import './Phone.css';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface PhoneMailModalProps {
   scenario: MailScenario;
-  lang: SupportedLanguage;
   alreadyReplied?: boolean;
-  onClose: (flagsToUpdate?: Record<string, boolean | number | string>, affinityDelta?: Record<string, number>) => void;
+  /** 閉じたときの結果（フラグ・好感度・選んだ選択肢）。完了の記録は呼び出し側で行う */
+  onClose: (result: Omit<CommunicationResult, 'id'>) => void;
 }
 
 export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
   scenario,
-  lang,
   alreadyReplied = false,
   onClose,
 }) => {
+  const { lang } = useLanguage();
   const [messages, setMessages] = useState<MailMessage[]>(() => [...scenario.messages]);
   const [isReplied, setIsReplied] = useState<boolean>(alreadyReplied);
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
-  const accumulatedFlagsRef = useRef<Record<string, boolean | number | string>>({
-    [`night_mail_read_day${scenario.day}_${scenario.characterId}`]: true,
-  });
+  const accumulatedFlagsRef = useRef<Record<string, boolean | number | string>>({});
   const accumulatedAffinityRef = useRef<Record<string, number>>({});
+  const chosenIdsRef = useRef<string[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -61,7 +61,7 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
     if (option.setFlags) {
       Object.assign(accumulatedFlagsRef.current, option.setFlags);
     }
-    accumulatedFlagsRef.current[`night_mail_replied_day${scenario.day}_${scenario.characterId}`] = true;
+    chosenIdsRef.current.push(option.id);
 
     if (option.addAffinity) {
       for (const [key, val] of Object.entries(option.addAffinity)) {
@@ -81,12 +81,16 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
       };
       setMessages((prev) => [...prev, heroineReactionMsg]);
 
-      soundManager.playSe('/sounds/mail_notification.mp3');
+      soundManager.playUiSe('mailNotification');
     }, 1100);
   };
 
   const handleBack = () => {
-    onClose(accumulatedFlagsRef.current, accumulatedAffinityRef.current);
+    onClose({
+      flags: accumulatedFlagsRef.current,
+      affinityDelta: accumulatedAffinityRef.current,
+      choiceIds: chosenIdsRef.current,
+    });
   };
 
   return (
