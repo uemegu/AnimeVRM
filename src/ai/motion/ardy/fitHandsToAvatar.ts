@@ -71,8 +71,10 @@ const PALMS_MEET = 0.12;
 const PALMS_APART = 0.25;
 /** The most a hand turns so the palms meet; beyond this the wrist would look broken. */
 const MAX_PALM_TURN = MathUtils.degToRad(60);
-/** A hand is this many palm offsets long, which decides whether two hands overlap. */
-const HAND_LENGTHS_PER_PALM_OFFSET = 2.5;
+/** The furthest two hands are pushed apart, in hand thicknesses, so interlaced fingers do not fling the hands away. */
+const MAX_HAND_PUSH = 3;
+/** Fingers are this fraction of the hand's thickness. */
+const FINGER_THICKNESS = 0.6;
 /** In the normalized rest pose palms face down. */
 const REST_PALM_NORMAL = new Vector3(0, -1, 0);
 /** ardy-mini's HandEnd sits about three quarters of the way from the wrist to the knuckles. */
@@ -221,6 +223,7 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
     const arms = SIDES.flatMap(arm => {
       const upper = node(arm.upper), lower = node(arm.lower), hand = node(arm.hand);
       if (!upper || !lower || !hand) return [];
+      const side = arm.source === 'Right' ? 'right' : 'left';
       const knuckle = node(arm.knuckle);
       const wrist = worldPosition(hand);
       const palm = knuckle ? wrist.clone().lerp(worldPosition(knuckle), PALM_FRACTION) : wrist.clone();
@@ -247,6 +250,7 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
       return [{
         upper, lower, hand, wrist, palm, sourcePalm, sourceWrist: sourcePoint(frame, `${arm.source}Hand`), goal,
         copiedWorld: handWorld.clone(), handWorld, restInverse: body.handRestInverse[arm.source === 'Right' ? 'right' : 'left'],
+        chains: handChains(vrm, side),
       }];
     });
 
@@ -276,9 +280,9 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
           .applyQuaternion(region.rotation).add(region.targetOrigin));
       }
     }
-    if (right && left) separateHands(right, left, body.handThickness, regions.find(region => region.name === 'chest')!.rotation);
-
+    // Turn the palms first; turning can swing fingers into the other hand, which the separation then resolves.
     if (right && left) meetPalms(right, left, right.sourcePalm.distanceTo(left.sourcePalm));
+    if (right && left) separateHands(right, left, body.handThickness, regions.find(region => region.name === 'chest')!.rotation);
 
     for (const { upper, lower, hand, wrist, palm, goal, copiedWorld, handWorld } of arms) {
       if (goal.distanceToSquared(palm) < 1e-8 && handWorld.angleTo(copiedWorld) < 1e-6) continue;
@@ -298,10 +302,68 @@ export function fitHandsToAvatar(clip: AnimationClip, motion: StructuredMotionRe
   return fitted;
 }
 
+const FINGERS = ['Index', 'Middle', 'Ring', 'Little'] as const;
+const FINGER_JOINTS = ['Proximal', 'Intermediate', 'Distal'] as const;
+
+/**
+ * The hand as chains from the wrist through each finger to its tip, the tip estimated one segment past the last
+ * joint. Each chain is a row of capsules: the palm segment is as thick as the hand, finger segments thinner.
+ */
+function handChains(vrm: VRM, side: 'right' | 'left'): Vector3[][] {
+  const at = (name: string) => vrm.humanoid.getNormalizedBoneNode(name as VRMHumanBoneName)?.getWorldPosition(new Vector3());
+  const wrist = at(`${side}Hand`);
+  if (!wrist) return [];
+  return FINGERS.flatMap(finger => {
+    const joints = FINGER_JOINTS.map(joint => at(`${side}${finger}${joint}`)).filter((point): point is Vector3 => !!point);
+    if (joints.length < 2) return [];
+    return [[wrist.clone(), ...joints, joints[joints.length - 1].clone().multiplyScalar(2).sub(joints[joints.length - 2])]];
+  });
+}
+
+/** Smallest gap between the two hands' capsules; negative where they pass into each other. */
+function handClearance(right: Vector3[][], left: Vector3[][], thickness: number): number {
+  let clearance = Infinity;
+  for (const a of right) {
+    for (let i = 0; i + 1 < a.length; i++) {
+      for (const b of left) {
+        for (let j = 0; j + 1 < b.length; j++) {
+          const radii = (i === 0 ? thickness / 2 : thickness * FINGER_THICKNESS / 2) + (j === 0 ? thickness / 2 : thickness * FINGER_THICKNESS / 2);
+          clearance = Math.min(clearance, segmentDistance(a[i], a[i + 1], b[j], b[j + 1]) - radii);
+        }
+      }
+    }
+  }
+  return clearance;
+}
+
+/** Closest distance between segments p1-q1 and p2-q2. */
+function segmentDistance(p1: Vector3, q1: Vector3, p2: Vector3, q2: Vector3): number {
+  const d1 = q1.clone().sub(p1), d2 = q2.clone().sub(p2), r = p1.clone().sub(p2);
+  const a = d1.dot(d1), e = d2.dot(d2), f = d2.dot(r);
+  let s = 0, t = 0;
+  if (a <= 1e-12 && e <= 1e-12) return r.length();
+  if (a <= 1e-12) t = MathUtils.clamp(f / e, 0, 1);
+  else {
+    const c = d1.dot(r);
+    if (e <= 1e-12) s = MathUtils.clamp(-c / a, 0, 1);
+    else {
+      const b = d1.dot(d2), denominator = a * e - b * b;
+      s = denominator > 1e-12 ? MathUtils.clamp((b * f - c * e) / denominator, 0, 1) : 0;
+      t = (b * s + f) / e;
+      if (t < 0) { t = 0; s = MathUtils.clamp(-c / a, 0, 1); }
+      else if (t > 1) { t = 1; s = MathUtils.clamp((b - c) / a, 0, 1); }
+    }
+  }
+  return p1.clone().addScaledVector(d1, s).sub(p2.clone().addScaledVector(d2, t)).length();
+}
+
 interface ArmGoal {
   wrist: Vector3;
   palm: Vector3;
   goal: Vector3;
+  /** Wrist-to-fingertip chains in the copied pose. */
+  chains: Vector3[][];
+  copiedWorld: Quaternion;
   /** The hand's world rotation to solve for; starts as the copied one. */
   handWorld: Quaternion;
   restInverse: Quaternion;
@@ -312,32 +374,51 @@ function palmNormal(arm: ArmGoal): Vector3 {
 }
 
 /**
- * Overlapping hands are pushed a hand's thickness apart along the direction their palms face: forward from the
- * body for hands stacked on the chest, sideways for palms pressed together. Stacked hands move only the outer one.
+ * Hands whose points line up are pushed apart until every lined-up pair is a hand's thickness apart, keeping each
+ * hand on its side. Crossed hands can be separated several ways, so the direction needing the smallest push wins:
+ * either palm's facing, their average, the body's axes or the line between the palms. A push forward from the body
+ * moves only the outer hand, so stacked hands stay resting on the chest.
  */
 function separateHands(right: ArmGoal, left: ArmGoal, thickness: number, bodyRotation: Quaternion): void {
   const rightNormal = palmNormal(right), leftNormal = palmNormal(left);
-  const across = rightNormal.clone().add(rightNormal.dot(leftNormal) < 0 ? leftNormal.clone().negate() : leftNormal);
-  if (across.lengthSq() < 1e-8) return;
-  across.normalize();
-  const offset = right.goal.clone().sub(left.goal);
-  const depth = offset.dot(across);
-  const beside = offset.clone().addScaledVector(across, -depth).length();
-  const span = HAND_LENGTHS_PER_PALM_OFFSET * (right.palm.distanceTo(right.wrist) + left.palm.distanceTo(left.wrist)) / 2;
-  const overlap = 1 - MathUtils.smoothstep(beside, span * 0.5, span);
-  const missing = (thickness - Math.abs(depth)) * overlap;
-  if (missing <= 0) return;
   const forward = new Vector3(0, 0, 1).applyQuaternion(bodyRotation);
-  if (Math.abs(across.dot(forward)) > 0.7) {
-    // Stacked on the body: the hand further forward rests on the other.
-    const outer = right.goal.dot(forward) >= left.goal.dot(forward) ? right : left;
-    outer.goal.addScaledVector(across, across.dot(forward) >= 0 ? missing : -missing);
-  } else {
-    // Pressed together: both move apart, keeping the right hand on its side.
-    const push = across.multiplyScalar(depth < 0 ? -missing / 2 : missing / 2);
-    right.goal.add(push);
-    left.goal.sub(push);
+  const placed = (arm: ArmGoal, shift: Vector3) => {
+    const turn = arm.handWorld.clone().multiply(arm.copiedWorld.clone().invert());
+    return arm.chains.map(chain => chain.map(point => point.clone().sub(arm.palm).applyQuaternion(turn).add(arm.goal).add(shift)));
+  };
+  const zero = new Vector3();
+  if (handClearance(placed(right, zero), placed(left, zero), thickness) >= 0) return;
+  const axes = [
+    rightNormal, leftNormal, rightNormal.clone().add(rightNormal.dot(leftNormal) < 0 ? leftNormal.clone().negate() : leftNormal),
+    forward, new Vector3(0, 1, 0).applyQuaternion(bodyRotation), new Vector3(1, 0, 0).applyQuaternion(bodyRotation),
+    right.goal.clone().sub(left.goal),
+  ].filter(axis => axis.lengthSq() > 1e-8).map(axis => axis.normalize());
+  // Shift the right hand by the fraction of the push it takes; the left takes the rest the other way.
+  const shifted = (push: Vector3, rightShare: number) => handClearance(
+    placed(right, push.clone().multiplyScalar(rightShare)), placed(left, push.clone().multiplyScalar(rightShare - 1)), thickness);
+  const limit = MAX_HAND_PUSH * thickness;
+  let best: { push: Vector3; rightShare: number; clearance: number } | null = null;
+  for (const axis of axes) {
+    const direction = axis.multiplyScalar(Math.sign(right.goal.clone().sub(left.goal).dot(axis)) || 1);
+    // Pushing forward from the body moves only the outer hand, so stacked hands stay resting on the chest.
+    const along = direction.dot(forward);
+    const rightShare = Math.abs(along) > 0.7 ? (along > 0 ? 1 : 0) : 0.5;
+    let low = 0, high = limit;
+    if (shifted(direction.clone().multiplyScalar(high), rightShare) < 0) {
+      const clearance = shifted(direction.clone().multiplyScalar(high), rightShare);
+      if (!best || (best.clearance < 0 && clearance > best.clearance)) best = { push: direction.multiplyScalar(high), rightShare, clearance };
+      continue;
+    }
+    for (let step = 0; step < 12; step++) {
+      const middle = (low + high) / 2;
+      if (shifted(direction.clone().multiplyScalar(middle), rightShare) >= 0) high = middle;
+      else low = middle;
+    }
+    if (!best || best.clearance < 0 || high < best.push.length()) best = { push: direction.multiplyScalar(high), rightShare, clearance: 0 };
   }
+  if (!best) return;
+  right.goal.addScaledVector(best.push, best.rightShare);
+  left.goal.addScaledVector(best.push, best.rightShare - 1);
 }
 
 /** Palms that roughly face each other at close range turn the rest of the way, bending the wrists as a clap does. */
