@@ -1,4 +1,5 @@
 import { resolveAssetUrl } from '../utils/path';
+import { DEFAULT_PARA_PARAMS } from '../postprocessing/Para';
 import type { AvatarConfig } from '../Config';
 
 export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | 'divine';
@@ -241,6 +242,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1,
       antialiasing: {
@@ -429,6 +431,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       farFogIntensity: 0.12,
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1.0,
       antialiasing: {
@@ -615,6 +618,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       farFogIntensity: 0.28,
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1.0,
       antialiasing: {
@@ -802,6 +806,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1,
       antialiasing: {
@@ -1003,6 +1008,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1,
       antialiasing: {
@@ -1221,6 +1227,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1.0,
       antialiasing: {
@@ -1415,6 +1422,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       farFogIntensity: 0.56,
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS },
       toneMappingMode: 'None',
       toneMappingExposure: 1.0,
       antialiasing: {
@@ -1605,6 +1613,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       },
     },
     postProcessing: {
+      para: { ...DEFAULT_PARA_PARAMS, enabled: false },
       toneMappingMode: 'None',
       toneMappingExposure: 1.0,
       antialiasing: {

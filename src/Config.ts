@@ -5,6 +5,7 @@ import { type FastMotionConfig, DEFAULT_FAST_MOTION_CONFIG } from './effects/mot
 import { type Live2DConfig, DEFAULT_LIVE2D_CONFIG } from './live2d/types';
 import { type HairRingParams, DEFAULT_HAIR_RING_PARAMS } from './shader/HairRing';
 import { type LightWrapParams, DEFAULT_LIGHT_WRAP_PARAMS } from './postprocessing/LightWrap';
+import { type ParaParams, DEFAULT_PARA_PARAMS } from './postprocessing/Para';
 
 export type { RainConfig, FastMotionConfig, Live2DConfig };
 
@@ -242,6 +243,8 @@ export interface AvatarConfig {
     lensFlare: LensFlareConfig;
   };
   postProcessing: {
+    // パラ（空気感のグラデーション）。各値の意味は postprocessing/Para.ts を参照
+    para?: ParaParams;
     toneMappingMode: 'ACESFilmic' | 'Reinhard' | 'AgX' | 'Linear' | 'None';
     toneMappingExposure: number;
     antialiasing: {
@@ -472,6 +475,7 @@ export const DEFAULT_CONFIG: AvatarConfig = {
     },
   },
   postProcessing: {
+    para: { ...DEFAULT_PARA_PARAMS },
     toneMappingMode: 'None',
     toneMappingExposure: 1.0,
     antialiasing: {

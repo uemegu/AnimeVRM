@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
 import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '../../postprocessing/LightWrap';
+import { DEFAULT_PARA_PARAMS, ParaShader, applyParaParams } from '../../postprocessing/Para';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
@@ -222,6 +223,20 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
   lightWrapFolder.add(lightWrapCfg, 'edgePower', 0.2, 5.0, 0.1).name(tr.gui.lightWrapEdgePower).onChange(applyLightWrap);
   lightWrapFolder.add(lightWrapCfg, 'bodyStrength', 0.0, 1.0, 0.01).name(tr.gui.lightWrapBodyStrength).onChange(applyLightWrap);
   lightWrapFolder.close();
+
+  // 2.5 パラ・空気感 (Para)
+  if (!currentConfig.postProcessing.para) {
+    currentConfig.postProcessing.para = { ...DEFAULT_PARA_PARAMS };
+  }
+  const paraCfg = currentConfig.postProcessing.para;
+  const applyPara = () => applyParaParams(viewerCore.paraPass.uniforms as typeof ParaShader.uniforms, paraCfg);
+  const paraFolder = visualGui.addFolder(tr.gui.paraFolder);
+  paraFolder.add(paraCfg, 'enabled').name(tr.gui.paraEnabled).onChange(applyPara);
+  paraFolder.add(paraCfg, 'topOpacity', 0.0, 1.0, 0.01).name(tr.gui.paraTopOpacity).onChange(applyPara);
+  paraFolder.add(paraCfg, 'bottomOpacity', 0.0, 1.0, 0.01).name(tr.gui.paraBottomOpacity).onChange(applyPara);
+  paraFolder.add(paraCfg, 'desaturate', 0.0, 1.0, 0.01).name(tr.gui.paraDesaturate).onChange(applyPara);
+  paraFolder.add(paraCfg, 'tintAmount', 0.0, 1.0, 0.01).name(tr.gui.paraTintAmount).onChange(applyPara);
+  paraFolder.close();
 
   // 3. Lighting Folder
   const lightFolder = visualGui.addFolder(tr.gui.lightFolder);

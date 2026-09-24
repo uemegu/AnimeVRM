@@ -465,6 +465,12 @@ export interface Translations {
     lightWrapStrength: string;
     lightWrapEdgePower: string;
     lightWrapBodyStrength: string;
+    paraFolder: string;
+    paraEnabled: string;
+    paraTopOpacity: string;
+    paraBottomOpacity: string;
+    paraDesaturate: string;
+    paraTintAmount: string;
     envFolder: string;
     farFolder: string;
     selectFarImage: string;

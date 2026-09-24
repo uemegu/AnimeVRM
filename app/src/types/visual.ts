@@ -1,3 +1,4 @@
+import type { ParaParams } from '../services/graphics/postprocessing/Para';
 /**
  * 3D・ビジュアル描画用型定義
  * 時間帯（ライト・ポストプロセス・マテリアル）とロケーション（背景）を直交・独立管理
@@ -125,6 +126,8 @@ export interface CinematicShaderConfig {
 export interface PostProcessingConfig {
   bloom: BloomConfig;
   cinematic: CinematicShaderConfig;
+  // パラ（空気感のグラデーション）。未指定の項目は既定値（postprocessing/Para.ts）
+  para?: Partial<ParaParams>;
 }
 
 export interface FogConfig {

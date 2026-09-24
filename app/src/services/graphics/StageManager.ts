@@ -16,6 +16,7 @@ import { SkyBackground } from './scene/SkyBackground';
 import { Avatar } from './avatar/Avatar';
 import { HairShadowRenderer } from './shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader } from './postprocessing/LightWrap';
+import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from './postprocessing/Para';
 import { setHairRingTint } from './shader/HairRing';
 import { AudioLipSync } from '../audio/AudioLipSync';
 
@@ -36,6 +37,7 @@ export class StageManager {
   // ポストプロセスパス群
   private renderPass: RenderPass;
   private lightWrapPass: ShaderPass;
+  private paraPass: ShaderPass;
   private bloomPass: UnrealBloomPass;
   private godRaysPass: ShaderPass;
   private cinematicAnimePass: ShaderPass;
@@ -160,6 +162,11 @@ export class StageManager {
     // ここまでリニア空間。OutputPass で表示用の sRGB に変換する
     this.composer.addPass(new OutputPass());
 
+    // パラ（背景の空気の色をキャラの上だけにグラデーションで重ねる。スクリーン合成なので sRGB で行う）
+    this.paraPass = new ShaderPass(ParaShader);
+    this.paraPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.composer.addPass(this.paraPass);
+
     // 色調補正（明度0.5基準の影/ハイライト判定・S字カーブ）とSMAAのエッジ検出は sRGB 値を前提にする
     this.cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
@@ -269,6 +276,12 @@ export class StageManager {
       (this.godRaysPass.uniforms['uRayColor'].value as THREE.Color).set(sunShafts.color);
       this.godRaysPass.uniforms['uShimmer'].value = sunShafts.shimmer;
     }
+
+    // 5.5 パラ（divine のように逆光シルエットを締めたい時間帯はプリセットで切る）
+    applyParaParams(this.paraPass.uniforms as typeof ParaShader.uniforms, {
+      ...DEFAULT_PARA_PARAMS,
+      ...preset.postProcessing.para,
+    });
 
     // 6. CinematicAnimeShader (Uber Pass)
     const u = this.cinematicAnimePass.uniforms;
@@ -520,7 +533,7 @@ export class StageManager {
 
       // 6. 前髪の影用に髪の深度を描く
       this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
-      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5) {
+      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5) {
         this.characterMask.render(this.renderer, this.scene, this.camera);
       }
 
