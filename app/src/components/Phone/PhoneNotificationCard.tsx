@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
 import { HeroineCommunicationStatus, HeroineId } from '../../types/communication';
 import { CHARACTERS } from '../../data/characters';
+import { resolveAssetUrl } from '../../utils/path';
 import './Phone.css';
 
 export interface PhoneNotificationCardProps {
@@ -29,11 +30,12 @@ export const PhoneNotificationCard: React.FC<PhoneNotificationCardProps> = ({
   const avatarImgUrl = `/assets/characters/${status.characterId}_normal.avif`;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playedMailScenarioRef = useRef<string | null>(null);
 
   // 着信バイブ音のループ再生制御
   useEffect(() => {
     if (status.hasIncomingCall && !isMuted) {
-      const audio = new Audio('/sounds/phone_vibe.mp3');
+      const audio = new Audio(resolveAssetUrl('/sounds/phone_vibe.mp3'));
       audio.loop = true;
       audio.play().catch(() => {
         // ユーザーインタラクション制限等による自動再生ブロックのフォールバック
@@ -51,6 +53,20 @@ export const PhoneNotificationCard: React.FC<PhoneNotificationCardProps> = ({
       audioRef.current = null;
     }
   }, [status.hasIncomingCall, isMuted]);
+
+  // 新着メール通知音（添付音声ファイル）の単発再生制御
+  useEffect(() => {
+    if (status.unreadMailCount > 0 && status.activeMailScenario && !isMuted) {
+      const scenarioKey = `${status.characterId}_${status.activeMailScenario.id}`;
+      if (playedMailScenarioRef.current !== scenarioKey) {
+        playedMailScenarioRef.current = scenarioKey;
+        const mailAudio = new Audio(resolveAssetUrl('/sounds/mail_notification.mp3'));
+        mailAudio.play().catch(() => {
+          // 自動再生ブロック時のフォールバック
+        });
+      }
+    }
+  }, [status.unreadMailCount, status.activeMailScenario, status.characterId, isMuted]);
 
   const stopAudio = () => {
     if (audioRef.current) {
