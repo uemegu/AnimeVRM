@@ -19,7 +19,8 @@
   animation: action-map-fade 0.25s ease-out both;
 }
 
-.action-select-overlay.phase-lunch_action {
+.action-select-overlay.phase-lunch_action,
+.action-select-overlay.phase-holiday_action {
   --phase-accent: #ae7b21;
   --phase-rgb: 217, 178, 71;
   --phase-light: #fff8da;
@@ -48,6 +49,10 @@
   inset: -24px;
   background: url('/assets/backgrounds/school_campus.png') center / cover no-repeat;
   filter: blur(10px) saturate(0.9);
+}
+
+.action-select-overlay.phase-holiday_action::before {
+  background-image: url('/assets/backgrounds/town_map.avif');
 }
 
 .action-select-overlay::after {

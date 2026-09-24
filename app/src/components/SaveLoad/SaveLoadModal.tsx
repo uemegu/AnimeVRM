@@ -18,6 +18,7 @@ const PHASE_NAMES: Record<string, { ja: string; en: string }> = {
   morning_action: { ja: '午前', en: 'Morning Action' },
   lunch_action: { ja: '昼休み', en: 'Lunch Action' },
   afterschool_action: { ja: '放課後', en: 'Afterschool' },
+  holiday_action: { ja: '休日', en: 'Holiday' },
   night: { ja: '夜', en: 'Night' },
 };
 

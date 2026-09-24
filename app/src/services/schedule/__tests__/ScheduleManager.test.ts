@@ -105,10 +105,65 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const { nextState, isEnding } = ScheduleManager.advanceToNextDay(state);
     expect(isEnding).toBe(false);
     expect(nextState.day).toBe(28);
-    expect(nextState.phase).toBe('morning');
+    // Day 28 は日曜なので休日の行動から始まる
+    expect(nextState.phase).toBe('holiday_action');
 
     // Day 28 -> 就寝でエンディング
     const { isEnding: finalEnding } = ScheduleManager.advanceToNextDay(nextState);
     expect(finalEnding).toBe(true);
+  });
+
+  describe('休日（土日）', () => {
+    const holidayState = (overrides: Partial<GameState> = {}): GameState => ({
+      day: 6,
+      phase: 'holiday_action',
+      flags: {},
+      affinities: {},
+      currentScenarioId: null,
+      dayStartSnapshot: null,
+      ...overrides,
+    });
+
+    it('金曜の夜に就寝すると土曜は休日の行動から始まり、行動後は夜になること', () => {
+      const friday: GameState = { ...holidayState({ day: 5, phase: 'night' }) };
+      const { nextState } = ScheduleManager.advanceToNextDay(friday);
+      expect(nextState.day).toBe(6);
+      expect(nextState.phase).toBe('holiday_action');
+      expect(ScheduleManager.getNextPhase('holiday_action')).toBe('night');
+
+      const { nextState: monday } = ScheduleManager.advanceToNextDay({ ...nextState, day: 7, phase: 'night' });
+      expect(monday.day).toBe(8);
+      expect(monday.phase).toBe('morning');
+    });
+
+    it('休日のやり直しは休日の行動から始まること', () => {
+      const rolledBack = ScheduleManager.rollbackToday(
+        holidayState({ phase: 'night', dayStartSnapshot: { day: 6, flags: {}, affinities: {} } })
+      );
+      expect(rolledBack.phase).toBe('holiday_action');
+    });
+
+    it('初期の行き先は公園・商店街・映画館・自宅で、フラグで遊園地・水族館が増えること', () => {
+      const ids = ScheduleManager.getActionLocationOptions(holidayState()).map((opt) => opt.id);
+      expect(ids).toEqual(['park', 'shopping_street', 'cinema', 'home']);
+
+      const unlocked = ScheduleManager.getActionLocationOptions(
+        holidayState({ flags: { unlock_amusement_park: true, unlock_aquarium: true } })
+      ).map((opt) => opt.id);
+      expect(unlocked).toEqual(['park', 'shopping_street', 'cinema', 'home', 'amusement_park', 'aquarium']);
+    });
+
+    it('休日の行き先ごとにシナリオが決まり、自宅は休日の汎用シナリオになること', () => {
+      const state = holidayState();
+      expect(ScheduleManager.getScenarioForLocation('park', state).id).toBe('holiday_park_aoi');
+      expect(ScheduleManager.getScenarioForLocation('shopping_street', state).id).toBe('holiday_shopping_emili');
+      expect(ScheduleManager.getScenarioForLocation('cinema', state).id).toBe('holiday_cinema_shion');
+      expect(ScheduleManager.getScenarioForLocation('home', state).id).toBe('holiday_generic');
+      expect(ScheduleManager.getScenarioForLocation('aquarium', state).id).toBe('holiday_aquarium_aoi');
+    });
+
+    it('休日には未遭遇キャラの強制イベントが割り込まないこと', () => {
+      expect(ScheduleManager.checkForcedInterruption(holidayState({ day: 13 }))).toBeNull();
+    });
   });
 });
