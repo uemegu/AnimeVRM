@@ -24,6 +24,8 @@ XW, YW = W / 2, L / 2
 ROOM_SCALE = (0.70, 0.72, 0.85)
 DESK_COLUMNS = (-4.35, -2.75, -1.20, 1.20, 2.75, 4.35)
 DESK_ROWS = (-5.0, -3.32, -1.64, 0.04, 1.72, 3.40)
+# Blackboard center height before ROOM_SCALE (the viewer's chalk layer follows it).
+BOARD_Z = 2.05
 scene = bpy.context.scene
 
 # Remove the previous classroom before creating fresh materials, keeping the
@@ -48,6 +50,35 @@ def rgba(hex_color, alpha=1.0):
     hex_color = hex_color.lstrip('#')
     rgb = tuple(int(hex_color[i:i + 2], 16) / 255 for i in (0, 2, 4))
     return (*rgb, alpha)
+
+
+def warm_texture(source, output, dark_hex, light_hex):
+    """Recolor a cool painted texture into a warm afternoon palette.
+
+    Luminance keeps the brush detail; the two colors set the new range.
+    """
+    import numpy as np
+    image = bpy.data.images.load(str(TEXTURES / source), check_existing=False)
+    width, height = image.size
+    pixels = np.array(image.pixels[:], dtype=np.float32).reshape(height, width, 4)
+    luminance = pixels[..., :3] @ np.array([0.299, 0.587, 0.114], dtype=np.float32)
+    lo, hi = np.percentile(luminance, (1, 99))
+    t = np.clip((luminance - lo) / max(hi - lo, 1e-4), 0.0, 1.0)[..., None]
+    dark = np.array(rgba(dark_hex)[:3], dtype=np.float32)
+    light = np.array(rgba(light_hex)[:3], dtype=np.float32)
+    pixels[..., :3] = dark + (light - dark) * t
+    warm = bpy.data.images.new(output, width, height, alpha=True)
+    warm.pixels.foreach_set(pixels.ravel())
+    warm.filepath_raw = str(TEXTURES / output)
+    warm.file_format = 'PNG'
+    warm.save()
+    bpy.data.images.remove(warm)
+    bpy.data.images.remove(image)
+    return output
+
+
+WALL_TEXTURE = warm_texture("wall-plaster-cel.png", "wall-plaster-warm-cel.png", "dfd2bf", "f7f1e6")
+FLOOR_TEXTURE = warm_texture("floor-tile-cel.png", "floor-tile-warm-cel.png", "9a8b77", "ddd3c2")
 
 
 def material(name, color, texture=None, alpha=1.0, roughness=0.78,
@@ -82,20 +113,20 @@ def material(name, color, texture=None, alpha=1.0, roughness=0.78,
 
 
 M = {
-    "wall": material("pale blue plaster", "d9e8f3", "wall-plaster-cel.png"),
-    "lower": material("porcelain wainscot", "9ebdce"),
-    "trim": material("powder blue trim", "789eb5"),
-    "dark_trim": material("slate window metal", "547185"),
-    "floor": material("ceramic floor tile", "dae3e8", "floor-tile-cel.png"),
-    "ceiling": material("matte ceiling", "edf3f6"),
-    "ceiling_seam": material("ceiling panel seams", "c6d4dd"),
+    "wall": material("warm cream plaster", "f1e9dc", WALL_TEXTURE),
+    "lower": material("porcelain wainscot", "d3cbbb"),
+    "trim": material("silver window trim", "aab3b6"),
+    "dark_trim": material("dark window metal", "6d767b"),
+    "floor": material("ceramic floor tile", "d8cfbf", FLOOR_TEXTURE),
+    "ceiling": material("matte ceiling", "f0ebe2"),
+    "ceiling_seam": material("ceiling panel seams", "d3ccc0"),
     "window": material("daylight glass", "c8e7f5", alpha=0.27, roughness=0.12),
-    "door": material("classroom sliding door", "b6cddd"),
+    "door": material("classroom sliding door", "cdbfa6"),
     "wood": material("sunlit honey wood", "d6a06d", "desk-wood-cel.png", roughness=0.82),
     "wood_dark": material("warm walnut edge", "976b4a"),
     "wood_light": material("beech cabinet", "dbc09a"),
-    "metal": material("blue grey painted steel", "6f899b", roughness=0.45),
-    "metal_dark": material("dark seat support", "4a6375"),
+    "metal": material("silver painted steel", "9aa4aa", roughness=0.45),
+    "metal_dark": material("dark seat support", "5b6468"),
     "board": material("blank deep green board", "244c43", "chalkboard-blank-cel.png"),
     "cork": material("warm notice cork", "aa7954"),
     "poster": material("school bulletin posters", "ffffff", "classroom-posters-cel.png", texture_alpha=True),
@@ -105,18 +136,22 @@ M = {
     "soil": material("pot soil", "6d5c4a"),
     "pot": material("ceramic planter", "e8d7b8"),
     "light": material("fluorescent warm white", "ecfaff", roughness=0.2, emission=1.9),
-    "outside": material("neighboring school facade", "e5edf0"),
     "outside_window": material("neighboring school windows", "9ebbd0"),
     "book_blue": material("blue textbook", "6e9bb4"),
     "book_red": material("coral textbook", "c88987"),
     "book_green": material("green textbook", "8aa997"),
-    "curtain": material("linen curtains", "e5e9da"),
-    "hall_floor": material("corridor blue stone", "9daebc"),
+    "curtain": material("sheer linen curtain", "f6f0e1", alpha=0.7),
+    "hall_floor": material("corridor stone", "b5ad9f"),
 }
 DESK_TOP_MATERIALS = tuple(
     material(f"varnished desk top {i + 1}", "d6a06d", "desk-wood-cel.png", roughness=roughness)
     for i, roughness in enumerate((0.25, 0.38, 0.52, 0.68))
 )
+
+
+# Furniture is modelled at true size in final coordinates, so the room-wide
+# ROOM_SCALE squash never distorts round pipes or desk proportions.
+FINAL_SPACE = [False]
 
 
 def link_new(obj, name):
@@ -125,14 +160,16 @@ def link_new(obj, name):
         collection.objects.unlink(obj)
     COLLECTION.objects.link(obj)
     obj["classroom_export"] = True
+    obj["final_space"] = FINAL_SPACE[0]
     return obj
 
 
-def box(name, center, size, mat, bevel=0.0, uv_scale=(1, 1)):
+def box(name, center, size, mat, bevel=0.0, uv_scale=(1, 1), yaw=0.0, tilt=0.0, segments=2):
     bpy.ops.mesh.primitive_cube_add(size=1, location=center)
     obj = link_new(bpy.context.object, name)
     obj.dimensions = size
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    obj.rotation_euler = (tilt, 0.0, yaw)
     obj.data.materials.append(mat)
     for face in obj.data.polygons:
         for loop_idx in face.loop_indices:
@@ -142,9 +179,52 @@ def box(name, center, size, mat, bevel=0.0, uv_scale=(1, 1)):
     if bevel:
         modifier = obj.modifiers.new("Soft manufactured edges", 'BEVEL')
         modifier.width = bevel
-        modifier.segments = 2
+        modifier.segments = segments
         modifier.affect = 'EDGES'
         obj.modifiers.new("Weighted face normals", 'WEIGHTED_NORMAL')
+    return obj
+
+
+def rounded_path(points, radius):
+    # Replace each interior corner with a short arc, like bent steel tube.
+    points = [Vector(p) for p in points]
+    result = [points[0]]
+    for a, b, c in zip(points, points[1:], points[2:]):
+        r = min(radius, (b - a).length * 0.45, (c - b).length * 0.45)
+        start = b + (a - b).normalized() * r
+        end = b + (c - b).normalized() * r
+        for i in range(5):
+            t = i / 4
+            result.append(start * (1 - t) ** 2 + b * 2 * t * (1 - t) + end * t * t)
+    result.append(points[-1])
+    return result
+
+
+def pipe(name, points, radius, mat, bend=0.045):
+    curve = bpy.data.curves.new(name, 'CURVE')
+    curve.dimensions = '3D'
+    curve.bevel_depth = radius
+    curve.bevel_resolution = 2
+    curve.use_fill_caps = True
+    path = rounded_path(points, bend)
+    spline = curve.splines.new('POLY')
+    spline.points.add(len(path) - 1)
+    for point, co in zip(spline.points, path):
+        point.co = (*co, 1.0)
+    temp = bpy.data.objects.new(name, curve)
+    scene.collection.objects.link(temp)
+    bpy.context.view_layer.update()
+    mesh = bpy.data.meshes.new_from_object(temp.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    bpy.data.objects.remove(temp, do_unlink=True)
+    bpy.data.curves.remove(curve)
+    for poly in mesh.polygons:
+        poly.use_smooth = True
+    mesh.materials.clear()
+    mesh.materials.append(mat)
+    obj = bpy.data.objects.new(name, mesh)
+    COLLECTION.objects.link(obj)
+    obj["classroom_export"] = True
+    obj["final_space"] = FINAL_SPACE[0]
     return obj
 
 
@@ -152,14 +232,6 @@ def cylinder(name, center, radius, depth, mat, vertices=24, rotate_x=0):
     bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth, location=center)
     obj = link_new(bpy.context.object, name)
     obj.rotation_euler.x = rotate_x
-    obj.data.materials.append(mat)
-    return obj
-
-
-def foliage(name, center, size, mat):
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=1, location=center)
-    obj = link_new(bpy.context.object, name)
-    obj.scale = size
     obj.data.materials.append(mat)
     return obj
 
@@ -189,31 +261,77 @@ def look_at(obj, target):
 
 
 def desk(x, y, row, col):
+    """A Japanese school desk and chair at true size (65 x 45 cm top)."""
     prefix = f"Desk {row + 1:02d}-{col + 1:02d}"
-    # The chair is behind the desk; the class faces the front wall at +Y.
+    cx, cy = x * ROOM_SCALE[0], y * ROOM_SCALE[1]
+    FINAL_SPACE[0] = True
+    # The class faces +Y; the book box opens toward the student's chair at -Y.
     top_material = DESK_TOP_MATERIALS[(row * 3 + col * 5) % len(DESK_TOP_MATERIALS)]
-    box(prefix + " / tabletop", (x, y, 0.735), (0.91, 0.62, 0.055), top_material, 0.035)
-    box(prefix + " / dark rim", (x, y, 0.701), (0.92, 0.63, 0.035), M["wood_dark"], 0.015)
-    for dx in (-0.37, 0.37):
-        for dy in (-0.235, 0.235):
-            box(prefix + " / desk leg", (x + dx, y + dy, 0.354), (0.036, 0.036, 0.68), M["metal"], 0.006)
-    box(prefix + " / book tray", (x, y + 0.06, 0.575), (0.72, 0.45, 0.025), M["metal_dark"])
-    box(prefix + " / tray lip", (x, y - 0.17, 0.555), (0.72, 0.025, 0.1), M["metal"])
-    box(prefix + " / foot bar", (x, y + 0.12, 0.19), (0.76, 0.023, 0.024), M["metal"])
+    box(prefix + " / tabletop", (cx, cy, 0.708), (0.65, 0.45, 0.024), top_material, 0.009, segments=3)
+    box(prefix + " / edge band", (cx, cy, 0.706), (0.656, 0.456, 0.011), M["wood_dark"], 0.004)
+    box(prefix + " / top frame", (cx, cy, 0.683), (0.60, 0.40, 0.026), M["metal"], 0.004)
+    box(prefix + " / book box floor", (cx, cy + 0.02, 0.585), (0.56, 0.34, 0.008), M["metal"])
+    box(prefix + " / book box back", (cx, cy + 0.19, 0.628), (0.56, 0.008, 0.094), M["metal"])
+    for side in (-1, 1):
+        box(prefix + " / book box side", (cx + side * 0.28, cy + 0.02, 0.628),
+            (0.008, 0.34, 0.094), M["metal"])
+        lx = cx + side * 0.295
+        for dy in (-0.19, 0.19):
+            pipe(prefix + " / desk leg", [(lx, cy + dy, 0.67), (lx, cy + dy, 0.012)], 0.012, M["metal"])
+            box(prefix + " / leg cap", (lx, cy + dy, 0.012), (0.03, 0.03, 0.024), M["metal_dark"], 0.006)
+        pipe(prefix + " / side stretcher", [(lx, cy - 0.19, 0.13), (lx, cy + 0.19, 0.13)], 0.009, M["metal"])
+    pipe(prefix + " / foot rest", [(cx - 0.295, cy + 0.19, 0.13), (cx + 0.295, cy + 0.19, 0.13)],
+         0.009, M["metal"])
+    box(prefix + " / bag hook", (cx + 0.315, cy - 0.05, 0.64), (0.012, 0.02, 0.05), M["metal_dark"], 0.004)
 
-    seat_y = y - 0.56
-    box(prefix + " / seat", (x, seat_y, 0.44), (0.66, 0.48, 0.055), M["wood"], 0.03)
-    box(prefix + " / seat edge", (x, seat_y, 0.41), (0.68, 0.5, 0.025), M["wood_dark"], 0.008)
-    for dx in (-0.27, 0.27):
-        for dy in (-0.18, 0.18):
-            box(prefix + " / chair leg", (x + dx, seat_y + dy, 0.215), (0.032, 0.032, 0.41), M["metal"], 0.006)
-    box(prefix + " / chair back", (x, seat_y - 0.22, 0.685), (0.66, 0.05, 0.35), M["wood"], 0.04)
-    for dx in (-0.27, 0.27):
-        box(prefix + " / back rail", (x + dx, seat_y - 0.20, 0.69), (0.027, 0.035, 0.45), M["metal"])
+    # Chairs are left slightly askew, as students leave them.
+    jitter = math.sin(row * 12.9898 + col * 78.233) * 43758.5453
+    jitter -= math.floor(jitter)
+    yaw = (jitter - 0.5) * 0.16
+    sx, sy = cx + (jitter - 0.5) * 0.05, cy - 0.47 - jitter * 0.06
+    cos_a, sin_a = math.cos(yaw), math.sin(yaw)
+
+    def at(dx, dy, z):
+        return (sx + dx * cos_a - dy * sin_a, sy + dx * sin_a + dy * cos_a, z)
+
+    box(prefix + " / seat", at(0, 0, 0.415), (0.40, 0.38, 0.02), M["wood"], 0.008, yaw=yaw, segments=3)
+    box(prefix + " / backrest", at(0, -0.205, 0.695), (0.38, 0.018, 0.16), M["wood"], 0.007,
+        yaw=yaw, tilt=0.12, segments=3)
+    for side in (-1, 1):
+        px = side * 0.185
+        pipe(prefix + " / chair front frame",
+             [at(px, 0.17, 0.012), at(px, 0.17, 0.395), at(px, -0.16, 0.395)], 0.011, M["metal"])
+        pipe(prefix + " / chair rear frame",
+             [at(px, -0.19, 0.012), at(px, -0.175, 0.395), at(px, -0.225, 0.79)], 0.011, M["metal"])
+        box(prefix + " / leg cap", at(px, 0.17, 0.012), (0.028, 0.028, 0.024), M["metal_dark"], 0.006, yaw=yaw)
+        box(prefix + " / leg cap", at(px, -0.19, 0.012), (0.028, 0.028, 0.024), M["metal_dark"], 0.006, yaw=yaw)
+    for dy in (0.15, -0.15):
+        pipe(prefix + " / seat stretcher", [at(-0.185, dy, 0.38), at(0.185, dy, 0.38)], 0.009, M["metal"])
     # A few objects on desks make the room feel used without obstructing play.
     if (row, col) in {(0, 1), (1, 4), (2, 2), (3, 0), (4, 5), (5, 3)}:
         book_mat = [M["book_blue"], M["book_red"], M["book_green"]][(row + col) % 3]
-        box(prefix + " / exercise book", (x - 0.2, y + 0.1, 0.774), (0.28, 0.2, 0.018), book_mat, 0.004)
+        box(prefix + " / exercise book", (cx - 0.12, cy + 0.04, 0.727), (0.18, 0.257, 0.012), book_mat,
+            0.003, yaw=0.15)
+    FINAL_SPACE[0] = False
+
+
+def teacher_lectern(cx, cy):
+    """A wooden lectern (kyotaku) facing the class, open on the teacher's side."""
+    FINAL_SPACE[0] = True
+    box("Teacher desk top", (cx, cy, 0.935), (0.98, 0.60, 0.035), DESK_TOP_MATERIALS[1], 0.01, segments=3)
+    box("Teacher desk top edge", (cx, cy, 0.932), (0.986, 0.606, 0.014), M["wood_dark"], 0.004)
+    for side in (-1, 1):
+        box("Teacher desk side panel", (cx + side * 0.45, cy, 0.46), (0.03, 0.54, 0.88), M["wood_light"], 0.006)
+    box("Teacher desk front panel", (cx, cy - 0.26, 0.47), (0.87, 0.022, 0.86), M["wood_light"], 0.004)
+    box("Teacher desk front inset", (cx, cy - 0.274, 0.50), (0.72, 0.008, 0.56), M["wood"], 0.003)
+    for z in (0.21, 0.79):
+        box("Teacher desk front rail", (cx, cy - 0.276, z), (0.80, 0.012, 0.03), M["wood_dark"], 0.004)
+    box("Teacher desk shelf", (cx, cy + 0.02, 0.52), (0.87, 0.48, 0.02), M["wood_light"])
+    box("Teacher desk plinth", (cx, cy, 0.035), (0.90, 0.52, 0.07), M["wood_dark"], 0.004)
+    box("Teacher attendance book", (cx - 0.22, cy + 0.02, 0.962), (0.24, 0.32, 0.018), M["book_blue"],
+        0.004, yaw=-0.08)
+    box("Teacher chalk box", (cx + 0.28, cy + 0.08, 0.975), (0.14, 0.09, 0.045), M["paper"], 0.004)
+    FINAL_SPACE[0] = False
 
 
 def pot_plant(x, y, scale=1.0):
@@ -262,6 +380,39 @@ def build_shell():
             box("Fluorescent diffuser", (x, y, 4.05), (1.14, 0.115, 0.035), M["light"], 0.012)
 
 
+def sheer_curtain(y, width, top=3.38, bottom=1.12, columns=48, rows=12):
+    # Gentle pleats in depth, with the hem drifting into the room.
+    x0 = -XW + 0.31
+    verts, faces, uvs = [], [], []
+    for r in range(rows + 1):
+        v = r / rows
+        z = bottom + (top - bottom) * v
+        for c in range(columns + 1):
+            u = c / columns
+            pleat = math.sin(u * math.pi * 2 * width * 5.2) * 0.045
+            drift = 0.10 * (1 - v) ** 2
+            verts.append((x0 + pleat + drift, y + (u - 0.5) * width, z))
+            uvs.append((u, v))
+    for r in range(rows):
+        for c in range(columns):
+            i = r * (columns + 1) + c
+            faces.append((i, i + 1, i + columns + 2, i + columns + 1))
+    mesh = bpy.data.meshes.new("Sheer curtain")
+    mesh.from_pydata(verts, [], faces)
+    mesh.update()
+    uv_layer = mesh.uv_layers.new()
+    for poly in mesh.polygons:
+        for loop_idx in poly.loop_indices:
+            uv_layer.data[loop_idx].uv = uvs[mesh.loops[loop_idx].vertex_index]
+    for poly in mesh.polygons:
+        poly.use_smooth = True
+    obj = bpy.data.objects.new("Sheer curtain", mesh)
+    COLLECTION.objects.link(obj)
+    obj.data.materials.append(M["curtain"])
+    obj["classroom_export"] = True
+    return obj
+
+
 def build_windows():
     # Four equal daylight bays; the exterior shapes give the glass a visible world.
     for i in range(5):
@@ -274,23 +425,12 @@ def build_windows():
         box("Window middle rail", (-XW + 0.11, y, 2.17), (0.065, 2.95, 0.065), M["trim"])
         box("Window lower sill", (-XW + 0.16, y, 1.02), (0.27, 2.95, 0.08), M["paper"], 0.012)
         box("Window upper header", (-XW + 0.09, y, 3.32), (0.10, 2.95, 0.09), M["trim"])
-    for y in (-5.93, -0.18, 5.53):
-        box("Open gathered curtain", (-XW + 0.28, y, 2.28), (0.12, 0.28, 2.02), M["curtain"], 0.026)
-        for offset in (-0.08, 0, 0.08):
-            box("Curtain soft pleat", (-XW + 0.35, y + offset, 2.28),
-                (0.035, 0.025, 2.02), M["paper"])
+    # Sheer curtains half cover the bays, as in the painted classroom.
+    # The viewer sways them from the rail, so each panel stays one thin sheet.
+    for y, width in ((-5.55, 1.05), (-2.45, 1.30), (0.60, 1.05), (3.65, 1.30), (5.70, 0.95)):
+        sheer_curtain(y, width)
     box("Curtain rail", (-XW + 0.23, 0, 3.43), (0.07, 13.1, 0.06), M["metal"])
-    # A pale neighboring wing and foliage are visible beyond the left windows.
-    box("Exterior school wing", (-8.7, 0, 2.6), (0.12, L + 2, 5.2), M["outside"])
-    for y in (-6.1, -3.0, 0.1, 3.2, 6.3):
-        box("Exterior distant blue window", (-8.60, y, 2.6), (0.04, 1.8, 1.7), M["outside_window"])
-        box("Exterior white window divider", (-8.55, y, 2.6), (0.06, 0.055, 1.7), M["paper"])
-    for y in (-4.7, 0.1, 4.9):
-        cylinder("Exterior garden tree trunk", (-7.45, y, 0.68),
-                 0.11, 1.35, M["wood_dark"], 10)
-        for i in range(4):
-            foliage("Exterior garden canopy", (-7.45, y + (i - 1.5) * 0.40, 1.47 + 0.25 * (i % 2)),
-                    (0.48, 0.55, 0.70), M["green"] if i % 2 else M["green_dark"])
+    # The courtyard beyond the glass is a painted backdrop added by the viewer.
 
 
 def sliding_door(y):
@@ -359,27 +499,23 @@ def build_hallway_glimpse():
 
 
 def build_front():
-    # Keep the front board blank, wide, and unmistakably the teaching wall.
-    board_y = YW - 0.105
-    box("Blank blackboard backing", (0, board_y, 2.37), (6.60, 0.095, 1.88), M["dark_trim"], 0.015)
-    box("Blank chalkboard textured surface", (0, board_y - 0.06, 2.37),
+    # Keep the board low enough to write on: the chalk rail lands near 0.93 m.
+    board_y, board_z = YW - 0.105, BOARD_Z
+    box("Blank blackboard backing", (0, board_y, board_z), (6.60, 0.095, 1.88), M["dark_trim"], 0.015)
+    box("Blank chalkboard textured surface", (0, board_y - 0.06, board_z),
         (6.38, 0.022, 1.63), M["board"])
     for x in (-3.29, 3.29):
-        box("Blackboard silver side frame", (x, board_y - 0.08, 2.37),
+        box("Blackboard silver side frame", (x, board_y - 0.08, board_z),
             (0.06, 0.10, 1.94), M["trim"])
-    for z in (1.43, 3.31):
-        box("Blackboard silver top bottom frame", (0, board_y - 0.08, z),
+    for dz in (-0.94, 0.94):
+        box("Blackboard silver top bottom frame", (0, board_y - 0.08, board_z + dz),
             (6.62, 0.10, 0.055), M["trim"])
-    box("Blackboard chalk rail", (0, board_y - 0.2, 1.41),
+    box("Blackboard chalk rail", (0, board_y - 0.2, board_z - 0.96),
         (6.75, 0.23, 0.06), M["metal"], 0.008)
     for x in (-2.8, -2.65, 1.9):
-        box("Unused white chalk", (x, board_y - 0.25, 1.47),
+        box("Unused white chalk", (x, board_y - 0.25, board_z - 0.90),
             (0.09, 0.014, 0.025), M["paper"], 0.005)
-    box("Teacher desk top", (0, 5.55, 0.86), (1.95, 0.78, 0.075), DESK_TOP_MATERIALS[1], 0.032)
-    box("Teacher desk front panel", (0, 5.85, 0.46), (1.78, 0.04, 0.68), M["wood_light"])
-    for x in (-0.7, 0.7):
-        for y in (5.23, 5.88):
-            box("Teacher desk leg", (x, y, 0.41), (0.06, 0.06, 0.76), M["metal"])
+    teacher_lectern(0, 5.62 * ROOM_SCALE[1])
     # Simple analogue clock with no labels or text.
     cylinder("Front wall clock rim", (3.67, YW - 0.12, 3.75), 0.29, 0.09,
              M["metal"], 32, math.pi / 2)
@@ -461,13 +597,22 @@ def configure_preview(camera_name, position, target, output):
 
 
 def configure_lighting():
-    world = bpy.data.worlds.new("Classroom cool daylight")
+    world = bpy.data.worlds.new("Classroom late afternoon")
     world.use_nodes = True
-    world.node_tree.nodes["Background"].inputs["Color"].default_value = rgba("c9dbed")
+    world.node_tree.nodes["Background"].inputs["Color"].default_value = rgba("c3c2dc")
     world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.42
     scene.world = world
+    # Low sun through the window bank, matching the viewer's key light.
+    sun = bpy.data.lights.new("Classroom window sun", 'SUN')
+    sun.energy = 3.2
+    sun.color = rgba("ffd3a3")[:3]
+    sun.angle = math.radians(1.5)
+    obj = bpy.data.objects.new("Classroom window sun", sun)
+    CAMERAS.objects.link(obj)
+    obj.location = (-10.0, -2.6, 5.4)
+    look_at(obj, (0, 0, 0))
     for name, location, energy, size, color, target in (
-        ("Classroom ceiling key", (-1.5, 0.2, 3.20), 760, 5.0, "d7e5f5", (0, 0, 0)),
+        ("Classroom ceiling fill", (-1.5, 0.2, 3.20), 260, 5.0, "c9cdea", (0, 0, 0)),
     ):
         data = bpy.data.lights.new(name, 'AREA')
         data.energy = energy
@@ -502,11 +647,11 @@ def configure_preview_toon_materials():
         ramp.color_ramp.interpolation = 'CONSTANT'
         dark, light = ramp.color_ramp.elements
         dark.position = 0.25
-        dark.color = (0.23, 0.34, 0.51, 1)
+        dark.color = (0.36, 0.36, 0.55, 1)
         mid = ramp.color_ramp.elements.new(0.57)
-        mid.color = (0.62, 0.72, 0.82, 1)
+        mid.color = (0.74, 0.70, 0.78, 1)
         light.position = 0.84
-        light.color = (0.96, 0.96, 0.93, 1)
+        light.color = (1.0, 0.92, 0.80, 1)
         ramp.color_ramp.elements.new(0.95).color = (1, 1, 1, 1)
         normalize = nodes.new('ShaderNodeMath')
         normalize.operation = 'MULTIPLY'
@@ -613,8 +758,8 @@ for obj in COLLECTION.objects:
         continue
     world = obj.matrix_world.copy()
     sx, sy, sz = ROOM_SCALE
-    if obj.name.startswith(('Desk ', 'Teacher desk ')):
-        sz = 1.0
+    if obj.get("final_space"):
+        sx = sy = sz = 1.0
     scale = Matrix.Diagonal((sx, sy, sz, 1.0))
     obj.data.transform(scale @ world)
     obj.matrix_world = Matrix.Identity(4)
