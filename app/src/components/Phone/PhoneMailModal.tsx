@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { SupportedLanguage, resolveLocalizedText } from '../../types/scenario';
 import { MailScenario, MailReplyOption, MailMessage } from '../../types/communication';
 import { CHARACTERS } from '../../data/characters';
+import { resolveAssetUrl } from '../../utils/path';
 import './Phone.css';
 
 export interface PhoneMailModalProps {
   scenario: MailScenario;
   lang: SupportedLanguage;
   alreadyReplied?: boolean;
+  isMuted?: boolean;
   onClose: (flagsToUpdate?: Record<string, boolean | number | string>, affinityDelta?: Record<string, number>) => void;
 }
 
@@ -15,6 +17,7 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
   scenario,
   lang,
   alreadyReplied = false,
+  isMuted = false,
   onClose,
 }) => {
   const [messages, setMessages] = useState<MailMessage[]>(() => [...scenario.messages]);
@@ -79,6 +82,15 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
         time: option.reactionTime || '23:44',
       };
       setMessages((prev) => [...prev, heroineReactionMsg]);
+
+      if (!isMuted) {
+        try {
+          const audio = new Audio(resolveAssetUrl('/sounds/mail_notification.mp3'));
+          audio.play().catch(() => {});
+        } catch {
+          // ignore
+        }
+      }
     }, 1100);
   };
 

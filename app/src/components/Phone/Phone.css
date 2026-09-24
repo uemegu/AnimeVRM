@@ -556,6 +556,10 @@
   object-fit: cover;
   object-position: top center;
   border: 1px solid var(--heroine-color, #cbd5e1);
+  background-color: #f1f5f9;
+  background: radial-gradient(circle at 50% 30%, #ffffff 15%, color-mix(in srgb, var(--heroine-color, #93c5fd) 32%, #ffffff) 100%);
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .phone-mail-target-info {

@@ -332,6 +332,7 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
         <PhoneMailModal
           scenario={activeMailScenario}
           lang={lang}
+          isMuted={isMuted}
           alreadyReplied={Boolean(flags[`night_mail_replied_day${activeMailScenario.day}_${activeMailScenario.characterId}`])}
           onClose={handleCloseMailModal}
         />
