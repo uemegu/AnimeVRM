@@ -36,9 +36,9 @@ export interface ScenarioMeta {
 export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
   'painted-classroom': {
     id: 'painted-classroom',
-    title: '放課後の教室 — 1枚絵の簡易3Dで会話テスト',
-    shortTitle: '教室の簡易3D',
-    description: 'school-classroom-far2 の1枚絵を簡易3Dにした教室で、アオイとエミリの会話を引き・切り返し・寄りのカメラワークで確認。',
+    title: '昼休みの教室 — 簡易3Dの教室で会話',
+    shortTitle: '昼休みの教室',
+    description: '床・壁・天井の1枚絵と机のアクスタで組んだ簡易3Dの昼の教室で、背景モブの生徒たちが談笑する中、アオイとエミリが午後の小テストや放課後の約束を交わす日常シーン。',
     ogpImage: '/textures/school-classroom-far2.avif',
     getScenario: getPaintedClassroomScenario,
   },

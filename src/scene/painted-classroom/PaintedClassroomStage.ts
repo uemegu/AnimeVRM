@@ -1,12 +1,16 @@
 import * as THREE from 'three';
 import type { AvatarConfig } from '../../Config';
-import { loadPaintedClassroom, disposePaintedClassroom } from './PaintedClassroom';
+import { loadPaintedClassroom, disposePaintedClassroom, SKY_ONLY_BACKGROUND } from './PaintedClassroom';
+import { resolveAssetUrl } from '../../utils/path';
 
-/** Scenario adapter. The set itself can also be used by a lightweight preview. */
+/** Scenario adapter. The set itself can also be used by a lightweight preview.
+ * Lighting and post-processing come from the scene preset (e.g. day_school), exactly as
+ * for painted backgrounds; the stage only swaps the flat background layers for the set.
+ * The background image becomes a transparent one, so the viewer's sky shows in the windows. */
 export class PaintedClassroomStage {
   private room: THREE.Group | null = null;
   private generation = 0;
-  private saved: Pick<AvatarConfig, 'environment' | 'lighting'> | null = null;
+  private saved: Pick<AvatarConfig, 'environment'> | null = null;
 
   constructor(private options: {
     scene: THREE.Scene;
@@ -23,17 +27,20 @@ export class PaintedClassroomStage {
       return;
     }
     const config = this.options.getConfig();
-    this.saved = structuredClone({ environment: config.environment, lighting: config.lighting });
-    Object.assign(config.environment, {
-      showBackgroundImage: false, showMidground: false, showNearground: false,
-      showFloor: false, backgroundColor: '#b8c3d3',
-    });
-    config.lighting.sunShafts.enabled = false;
-    config.lighting.lensFlare.enabled = false;
-    Object.assign(config.lighting.ambient, { color: '#bfcddd', intensity: 1.2 });
-    Object.assign(config.lighting.directional, { color: '#fff4df', intensity: 2.0, posX: -4, posY: 3, posZ: 2 });
+    this.saved = structuredClone({ environment: config.environment });
     this.room = room;
     this.options.scene.add(room);
+    this.hideFlatBackground();
+  }
+
+  /** Scene presets restore the preset's background layers; call after applying one. */
+  hideFlatBackground(): void {
+    if (!this.room) return;
+    const config = this.options.getConfig();
+    Object.assign(config.environment, {
+      showBackgroundImage: true, backgroundImageUrl: resolveAssetUrl(SKY_ONLY_BACKGROUND),
+      showMidground: false, showNearground: false, showFloor: false,
+    });
     this.options.onApplyConfig(config);
   }
 
@@ -51,7 +58,6 @@ export class PaintedClassroomStage {
       }
     };
     restore(config.environment, this.saved.environment);
-    restore(config.lighting, this.saved.lighting);
     this.saved = null;
     this.options.onApplyConfig(config);
   }
