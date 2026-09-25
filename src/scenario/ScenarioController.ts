@@ -35,6 +35,7 @@ import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
 import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
 import { CLASSROOM_CROWD_PRESET } from '../crowd/ClassroomCrowdPreset';
 import type { ClassroomStage } from '../scene/ClassroomStage';
+import { PaintedClassroomStage } from '../scene/painted-classroom/PaintedClassroomStage';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
@@ -61,6 +62,7 @@ export class ScenarioController {
   private panoramaController?: PanoramaBackgroundController;
   private shaftModeController?: ShaftModeController;
   private classroomStage?: ClassroomStage;
+  private paintedClassroomStage: PaintedClassroomStage;
   /** True while the classroom is shown because a scenario asked for it, not the free-roam mode. */
   private isScenarioStageActive = false;
 
@@ -95,6 +97,7 @@ export class ScenarioController {
     this.windController = options.windController;
     this.getConfig = options.getConfig;
     this.onApplyConfig = options.onApplyConfig;
+    this.paintedClassroomStage = new PaintedClassroomStage(options);
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.audioLipSync = options.audioLipSync;
     this.masterManager = new MasterDataManager();
@@ -188,6 +191,7 @@ export class ScenarioController {
       masterManager: this.masterManager,
       onPlayStateChange: () => {
         if (!this.scenarioEngine.isPlaying) {
+          this.paintedClassroomStage.exit();
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
           this.pvTitleOverlay.hide();
@@ -397,6 +401,13 @@ export class ScenarioController {
         this.shaftModeController?.setSpaceStage(stage);
       },
       onSwitchStage: async (stage) => {
+        this.paintedClassroomStage.exit();
+        if (stage === 'painted-classroom') {
+          if (this.isScenarioStageActive) this.classroomStage?.exit();
+          this.isScenarioStageActive = false;
+          await this.paintedClassroomStage.enter();
+          return;
+        }
         if (stage === 'classroom') {
           if (!this.classroomStage) {
             console.warn('[ScenarioController] No classroom stage is available in this viewer.');
