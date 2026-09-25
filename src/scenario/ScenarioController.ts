@@ -34,6 +34,7 @@ import { Persona5CrowdController } from '../crowd/Persona5CrowdController';
 import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
 import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
 import { CLASSROOM_CROWD_PRESET } from '../crowd/ClassroomCrowdPreset';
+import { PAINTED_CLASSROOM_CROWD_PRESET } from '../crowd/PaintedClassroomCrowdPreset';
 import type { ClassroomStage } from '../scene/ClassroomStage';
 import { PaintedClassroomStage } from '../scene/painted-classroom/PaintedClassroomStage';
 
@@ -192,6 +193,7 @@ export class ScenarioController {
       onPlayStateChange: () => {
         if (!this.scenarioEngine.isPlaying) {
           this.paintedClassroomStage.exit();
+          this.crowdController.setVisible(false);
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
           this.pvTitleOverlay.hide();
@@ -357,6 +359,7 @@ export class ScenarioController {
       },
       onSwitchScenePreset: (presetId) => {
         this.onSwitchScenePreset(presetId as ScenePresetId);
+        this.paintedClassroomStage.hideFlatBackground();
       },
       onApplyFisheye: (fisheyeConfig) => {
         const cfg = this.getConfig();
@@ -442,9 +445,11 @@ export class ScenarioController {
           const members =
             presetName === 'school_gate'
               ? MORNING_SCHOOL_GATE_CROWD
-              : presetName === 'classroom'
-                ? CLASSROOM_CROWD_PRESET
-                : CORRIDOR_CROWD_PRESET;
+              : presetName === 'painted-classroom'
+                ? PAINTED_CLASSROOM_CROWD_PRESET
+                : presetName === 'classroom'
+                  ? CLASSROOM_CROWD_PRESET
+                  : CORRIDOR_CROWD_PRESET;
           for (const m of members) {
             await this.crowdController.addMember(m);
           }

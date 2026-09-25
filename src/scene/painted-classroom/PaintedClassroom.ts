@@ -1,137 +1,150 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
+import { BACK_Z, DESK, DESK_COLUMNS_X, DESK_ROWS_Z, FRONT_Z, HALF_WIDTH, HEIGHT, PLACED_DESK_ROWS, ROW_PAINTING_FIT, rowGeometry } from './layout';
 
-type Point = [number, number];
-type Quad = [Point, Point, Point, Point];
-export const PAINTED_CLASSROOM_IMAGE = '/textures/school-classroom-far2.avif';
-export const PAINTED_CLASSROOM_GLB = '/models/school-environments/school-classroom-far2-standee.glb';
-export const REFERENCE_ASPECT = 1672 / 941;
+/**
+ * Painted 2.5D classroom: every surface is one generated painting, and furniture
+ * is acrylic-standee cards (transparent outside the furniture). Each desk row is
+ * painted over a blockout render of its own row and projected back from that
+ * camera, so the painted perspective matches the set. The sky is not painted: the
+ * window cut-outs show the viewer's own sky (SkyBackground, via SKY_ONLY_BACKGROUND).
+ * Layout and units: see layout.ts.
+ */
+const TEXTURE_DIR = '/textures/painted-classroom';
+/** Fully transparent background image: the viewer then draws only its sky behind the set. */
+export const SKY_ONLY_BACKGROUND = `${TEXTURE_DIR}/sky-only.png`;
+
 export const AVATAR_POSITION: [number, number, number] = [0, 0, -1.9];
-// The image is the composition, not a reference for rearranging its furniture.
-// This camera is also stored inside the GLB, so other viewers can recover it.
 export const PAINTED_CLASSROOM_SHOTS = [
-  { label: '元絵の構図', position: [0, 1.25, 0], target: [0, 1.19, -1], fov: 50 },
+  { label: '教室後方から', position: [0, 1.25, 0], target: [0, 1.19, -1], fov: 50 },
   { label: '会話', position: [0, 1.25, -0.12], target: [0, 1.14, -1.9], fov: 46 },
-  { label: '左から', position: [-0.12, 1.25, 0], target: [0, 1.14, -1.9], fov: 50 },
-  { label: '右から', position: [0.12, 1.25, 0], target: [0, 1.14, -1.9], fov: 50 },
+  { label: '左から', position: [-0.3, 1.25, 0], target: [0, 1.14, -1.9], fov: 50 },
+  { label: '右から', position: [0.3, 1.25, 0], target: [0, 1.14, -1.9], fov: 50 },
 ] as const;
 
-export async function loadPaintedClassroom(): Promise<THREE.Group> {
-  const room = (await new GLTFLoader().loadAsync(resolveAssetUrl(PAINTED_CLASSROOM_GLB))).scene;
-  // The shell extends past the painting's edges. Clamped UVs smear the edge pixels
-  // into streaks once the camera turns toward a side wall; mirroring continues the
-  // window frames and ceiling lights instead.
-  room.traverse((object) => {
-    const map = object instanceof THREE.Mesh ? (object.material as THREE.MeshBasicMaterial).map : null;
-    if (!map) return;
-    map.wrapS = map.wrapT = THREE.MirroredRepeatWrapping;
-    map.needsUpdate = true;
+async function paintedMaterial(file: string, cutout: boolean): Promise<THREE.MeshBasicMaterial> {
+  const map = await new THREE.TextureLoader().loadAsync(resolveAssetUrl(`${TEXTURE_DIR}/${file}`));
+  map.colorSpace = THREE.SRGBColorSpace;
+  map.anisotropy = 8;
+  const material = new THREE.MeshBasicMaterial({ map, toneMapped: false, side: THREE.DoubleSide });
+  if (cutout) {
+    material.alphaTest = 0.5;
+    material.alphaToCoverage = true;
+  }
+  material.name = file;
+  return material;
+}
+
+function plane(name: string, material: THREE.Material, width: number, height: number,
+  position: [number, number, number], rotation: [number, number, number] = [0, 0, 0]): THREE.Mesh {
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), material);
+  mesh.name = name;
+  mesh.position.set(...position);
+  mesh.rotation.set(...rotation);
+  return mesh;
+}
+
+function deskRows(materials: THREE.Material[]): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'Desk rows';
+  PLACED_DESK_ROWS.forEach(({ row, z }, i) => {
+    const paintedZ = DESK_ROWS_Z[row - 1];
+    const mesh = new THREE.Mesh(rowGeometry(paintedZ, ROW_PAINTING_FIT[row]).translate(0, 0, z - paintedZ), materials[i]);
+    mesh.name = `Desk row ${i + 1} | painting ${row}`;
+    group.add(mesh);
   });
-  return room;
+  return group;
 }
 
-export function referenceCamera(): THREE.PerspectiveCamera {
-  const shot = PAINTED_CLASSROOM_SHOTS[0];
-  const camera = new THREE.PerspectiveCamera(shot.fov, REFERENCE_ASPECT, 0.05, 60);
-  camera.name = 'Reference camera | original image composition';
-  camera.position.fromArray(shot.position);
-  camera.lookAt(new THREE.Vector3(...shot.target));
-  camera.updateMatrixWorld();
-  return camera;
-}
-
-/** Match the original image's cover crop even outside its native 1672:941 ratio. */
-export function coverFov(fov: number, aspect: number): number {
-  return THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(fov) / 2) * Math.min(1, REFERENCE_ASPECT / aspect)));
-}
-
-/** Project the unmodified source image onto a surface from its reference camera.
- * Subdivided UVs approximate projective texturing using portable glTF materials;
- * there are no custom shaders or runtime camera-facing billboards in the asset. */
-function imageQuad(corners: Quad, plane: THREE.Plane, camera: THREE.PerspectiveCamera): THREE.BufferGeometry {
-  const cols = 48, rows = 24;
-  const geometry = new THREE.PlaneGeometry(1, 1, cols, rows);
+/**
+ * podium.avif (1374x1145, 1208px wide podium = 1.2m, feet at y=1083) was painted
+ * looking down on it, but from the back of the room the top is seen almost edge-on.
+ * The top surface band (y 150-276) is squashed vertically; the front edge and body keep their size.
+ */
+function podiumStandee(material: THREE.Material): THREE.Mesh {
+  const [imageWidth, imageHeight] = [1374, 1145];
+  const metresPerPx = 1.2 / 1208;
+  const feet = 1083, fold = 276, top = 150, topSquash = 0.25;
+  const geometry = new THREE.PlaneGeometry(imageWidth * metresPerPx, 1, 1, 2);
   const positions = geometry.getAttribute('position');
   const uv = geometry.getAttribute('uv');
-  const ray = new THREE.Ray();
-  const point = new THREE.Vector3();
-  const [a, b, c, d] = corners;
+  // PlaneGeometry rows run top to bottom: squashed top, fold, image bottom.
+  const rows = [
+    { imageY: top, y: (feet - fold + (fold - top) * topSquash) * metresPerPx },
+    { imageY: fold, y: (feet - fold) * metresPerPx },
+    { imageY: imageHeight, y: (feet - imageHeight) * metresPerPx },
+  ];
   for (let i = 0; i < positions.count; i++) {
-    const u = uv.getX(i), v = 1 - uv.getY(i);
-    const x = THREE.MathUtils.lerp(THREE.MathUtils.lerp(a[0], b[0], u), THREE.MathUtils.lerp(d[0], c[0], u), v);
-    const y = THREE.MathUtils.lerp(THREE.MathUtils.lerp(a[1], b[1], u), THREE.MathUtils.lerp(d[1], c[1], u), v);
-    point.set(x / 1672 * 2 - 1, 1 - y / 941 * 2, 0.5).unproject(camera);
-    ray.set(camera.position, point.sub(camera.position).normalize());
-    if (!ray.intersectPlane(plane, point)) throw new Error('Source pixel misses classroom surface');
-    positions.setXYZ(i, point.x, point.y, point.z);
-    uv.setXY(i, x / 1672, 1 - y / 941);
+    const row = rows[Math.floor(i / 2)];
+    positions.setY(i, row.y);
+    uv.setY(i, 1 - row.imageY / imageHeight);
   }
-  geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
-  return geometry;
+  const podium = new THREE.Mesh(geometry, material);
+  podium.name = 'Teacher podium';
+  podium.position.set(0, 0, -7.9);
+  return podium;
 }
 
-// Each pair of quads is ONE horizontal row mesh/material, with the aisle open.
-// Preserve the source's desk sizes, overlap and perspective instead of placing
-// copies of an isolated desk. Slight overlaps prevent cracks between row cards.
-const ROWS: { depth: number; left: Quad; right: Quad }[] = [
-  { depth: 4.0, left: [[218, 490], [735, 490], [739, 522], [150, 522]], right: [[805, 490], [1310, 490], [1418, 522], [817, 522]] },
-  { depth: 3.6, left: [[145, 506], [738, 506], [744, 547], [10, 547]], right: [[816, 506], [1418, 506], [1558, 547], [835, 547]] },
-  { depth: 3.2, left: [[0, 526], [744, 526], [748, 582], [0, 582]], right: [[835, 526], [1672, 526], [1672, 582], [869, 582]] },
-  { depth: 2.8, left: [[0, 554], [748, 554], [752, 637], [0, 637]], right: [[862, 554], [1672, 554], [1672, 637], [914, 637]] },
-  { depth: 2.45, left: [[0, 602], [752, 602], [770, 762], [0, 762]], right: [[895, 602], [1672, 602], [1672, 762], [978, 762]] },
-  { depth: 2.1, left: [[0, 709], [770, 709], [770, 941], [0, 941]], right: [[975, 709], [1672, 709], [1672, 941], [982, 941]] },
-];
-
-export async function createPaintedClassroom(): Promise<THREE.Group> {
-  const texture = await new THREE.TextureLoader().loadAsync(resolveAssetUrl(PAINTED_CLASSROOM_IMAGE));
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 8;
-  const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, toneMapped: false });
-  material.name = 'Original classroom painting | unlit';
-  const group = new THREE.Group();
-  group.name = 'school-classroom-far2 | projected row set';
-  const camera = referenceCamera();
-  const back = new THREE.Plane(new THREE.Vector3(0, 0, 1), 7.2);
-  const ray = new THREE.Ray();
-  const rearCorner = new THREE.Vector3(330 / 1672 * 2 - 1, 1 - 110 / 941 * 2, 0.5).unproject(camera);
-  ray.set(camera.position, rearCorner.sub(camera.position).normalize()).intersectPlane(back, rearCorner);
-  const rearRight = new THREE.Vector3(1200 / 1672 * 2 - 1, 1 - 110 / 941 * 2, 0.5).unproject(camera);
-  ray.set(camera.position, rearRight.sub(camera.position).normalize()).intersectPlane(back, rearRight);
-  function surface(name: string, corners: Quad, plane: THREE.Plane) {
-    const mesh = new THREE.Mesh(imageQuad(corners, plane, camera), material);
-    mesh.name = name;
-    group.add(mesh);
-  }
-  // A recessed safety painting covers tiny disocclusions at the edge of the
-  // camera-projected shell; the six row layers still provide the foreground depth.
-  surface('Occlusion safety painting', [[-160, -120], [1832, -120], [1832, 1101], [-160, 1101]], new THREE.Plane(new THREE.Vector3(0, 0, 1), 8.0));
-  // These polygons tile the source exactly. The original painting supplies all
-  // room details and lighting; no extra clock, cabinets or replacement windows.
-  surface('Back wall | original blackboard', [[330, 110], [1200, 110], [1200, 580], [330, 580]], back);
-  surface('Left window wall', [[-160, -120], [330, 110], [330, 580], [-160, 1101]], new THREE.Plane(new THREE.Vector3(1, 0, 0), -rearCorner.x));
-  surface('Right corridor wall', [[1200, 110], [1832, -120], [1832, 1101], [1200, 580]], new THREE.Plane(new THREE.Vector3(1, 0, 0), -rearRight.x));
-  surface('Ceiling', [[-160, -120], [1832, -120], [1200, 110], [330, 110]], new THREE.Plane(new THREE.Vector3(0, 1, 0), -rearCorner.y));
-  surface('Floor', [[330, 580], [1200, 580], [1832, 1101], [-160, 1101]], new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
-  ROWS.forEach((row, index) => {
-    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), row.depth);
-    const parts = [row.left, row.right].map((quad) => imageQuad(quad, plane, camera));
-    const geometry = mergeGeometries(parts);
-    parts.forEach((part) => part.dispose());
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.name = `Desk row ${index + 1} | original image strip`;
-    mesh.userData = { kind: 'row-standee', row: index + 1, depthMetres: row.depth };
-    group.add(mesh);
+/** Soft floor shadow under each desk; the generated floor has no furniture shadows. */
+function deskShadows(): THREE.InstancedMesh {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const context = canvas.getContext('2d')!;
+  const gradient = context.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradient.addColorStop(0, 'rgba(0,0,0,1)');
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 64, 64);
+  const material = new THREE.MeshBasicMaterial({
+    color: '#3c4658', alphaMap: new THREE.CanvasTexture(canvas), transparent: true, opacity: 0.22,
+    depthWrite: false, toneMapped: false,
   });
-  group.add(camera);
-  group.userData = {
-    source: 'school-classroom-far2', units: 'metres', referenceImageSize: [1672, 941],
-    design: 'Original image projected onto room shell and six complete horizontal desk-row cards; no individual furniture models.',
-    avatarPosition: AVATAR_POSITION,
-    cameraUse: 'Use embedded reference camera. Approximate source reconstruction; lateral moves limited to +/- 0.12m.',
-  };
+  const geometry = new THREE.PlaneGeometry(0.85, 0.8).rotateX(-Math.PI / 2);
+  const shadows = new THREE.InstancedMesh(geometry, material, PLACED_DESK_ROWS.length * DESK_COLUMNS_X.length);
+  shadows.name = 'Desk contact shadows';
+  const matrix = new THREE.Matrix4();
+  let i = 0;
+  for (const { z } of PLACED_DESK_ROWS) {
+    for (const x of DESK_COLUMNS_X) shadows.setMatrixAt(i++, matrix.makeTranslation(x, 0.003, z + DESK.backZ / 2));
+  }
+  return shadows;
+}
+
+export async function loadPaintedClassroom(): Promise<THREE.Group> {
+  const deskRowMaterials = Promise.all(PLACED_DESK_ROWS.map(({ row }) => paintedMaterial(`desk-row-${row}.avif`, true)));
+  const [floor, ceiling, front, windows, corridor, desks, podium, cabinet] = await Promise.all([
+    paintedMaterial('floor.avif', false),
+    paintedMaterial('ceiling.avif', false),
+    paintedMaterial('wall-front.avif', false),
+    paintedMaterial('wall-left.avif', true),
+    paintedMaterial('wall-right.avif', false),
+    deskRowMaterials,
+    paintedMaterial('podium.avif', true),
+    paintedMaterial('cabinet.avif', true),
+  ]);
+  const width = HALF_WIDTH * 2, depth = BACK_Z - FRONT_Z, centerZ = (FRONT_Z + BACK_Z) / 2;
+  const group = new THREE.Group();
+  group.name = 'Painted classroom';
+  // Floor/ceiling textures: top edge = blackboard side, left edge = window side.
+  // Desk row planes stand mid-desk, so the painted chair feet lie slightly below
+  // floor level on them. The floor is drawn first without depth so it never hides them.
+  floor.depthWrite = false;
+  const floorMesh = plane('Floor', floor, width, depth, [0, 0, centerZ], [-Math.PI / 2, 0, 0]);
+  floorMesh.renderOrder = -1;
+  group.add(floorMesh);
+  group.add(plane('Ceiling', ceiling, width, depth, [0, HEIGHT, centerZ], [-Math.PI / 2, 0, 0]));
+  group.add(plane('Front wall | blackboard', front, width, HEIGHT, [0, HEIGHT / 2, FRONT_Z]));
+  // Wall textures are painted as seen from inside: window wall's right edge and corridor wall's left edge face the blackboard.
+  group.add(plane('Window wall', windows, depth, HEIGHT, [-HALF_WIDTH, HEIGHT / 2, centerZ], [0, Math.PI / 2, 0]));
+  group.add(plane('Corridor wall', corridor, depth, HEIGHT, [HALF_WIDTH, HEIGHT / 2, centerZ], [0, -Math.PI / 2, 0]));
+  group.add(plane('Back wall', new THREE.MeshBasicMaterial({ color: '#c3cddb', toneMapped: false }),
+    width, HEIGHT, [0, HEIGHT / 2, BACK_Z], [0, Math.PI, 0]));
+  group.add(deskRows(desks));
+  group.add(deskShadows());
+  group.add(podiumStandee(podium));
+  // cabinet.avif 1024x1536: 629px wide cabinet = 0.9m.
+  group.add(plane('Cabinet', cabinet, 1024 * 0.9 / 629, 1536 * 0.9 / 629, [-2.85, 1.006, -8.6]));
   return group;
 }
 
@@ -144,7 +157,9 @@ export function disposePaintedClassroom(group: THREE.Group): void {
     geometries.add(object.geometry);
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
       materials.add(material);
-      if (material.map) textures.add(material.map);
+      for (const texture of [(material as THREE.MeshBasicMaterial).map, (material as THREE.MeshBasicMaterial).alphaMap]) {
+        if (texture) textures.add(texture);
+      }
     }
   });
   group.removeFromParent();

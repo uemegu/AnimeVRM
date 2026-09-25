@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>教室の簡易3Dセット | AnimeVRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Kiwi+Maru:wght@400;500&family=Montserrat:wght@300;400;600;800;900&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; color: #eef4fc; background: #b8c3d3; font: 14px/1.6 system-ui, sans-serif; }
@@ -22,11 +25,11 @@
 </head>
 <body>
   <canvas aria-label="画像テクスチャで構成した教室とアオイ"></canvas>
-  <header><h1>school-classroom-far2 / 簡易3Dセット</h1><p>元絵の見た目を保ち、机の横一列ごとに奥行きを付けた撮影用セット。</p><p id="status" role="status">教室を読み込み中…</p></header>
-  <div id="shot">元絵の構図</div>
+  <header><h1>教室 / 簡易3Dセット</h1><p>床・壁・天井を面ごとの1枚絵、机を段ごとのアクスタで組んだ撮影用セット。</p><p id="status" role="status">教室を読み込み中…</p></header>
+  <div id="shot">教室後方から</div>
   <nav aria-label="カメラと比較">
-    <button data-shot="0" aria-pressed="true">元絵の構図</button><button data-shot="1" aria-pressed="false">会話</button><button data-shot="2" aria-pressed="false">左から</button><button data-shot="3" aria-pressed="false">右から</button>
-    <button id="avatar-toggle" disabled aria-pressed="false">アバターを隠す</button><button id="play">カメラを再生</button><button id="compare" aria-pressed="false" disabled>元の1枚絵と比較</button><a href="./models/school-environments/school-classroom-far2-standee.glb" download>GLBを保存</a><a href="./scenarios/painted-classroom.html">シナリオで見る</a>
+    <button data-shot="0" aria-pressed="true">教室後方から</button><button data-shot="1" aria-pressed="false">会話</button><button data-shot="2" aria-pressed="false">左から</button><button data-shot="3" aria-pressed="false">右から</button>
+    <button id="avatar-toggle" disabled aria-pressed="false">アバターを隠す</button><button id="play">カメラを再生</button><a href="./scenarios/painted-classroom.html">シナリオで見る</a>
   </nav>
   <script type="module" src="/src/painted-classroom-preview.ts"></script>
 </body>

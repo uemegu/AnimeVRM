@@ -1,4 +1,4 @@
-import type { ScenarioPackage, ScenarioSceneAvatarConfig, ScenarioScene } from './types';
+import type { ScenarioPackage, ScenarioSceneAvatarConfig, ScenarioScene, ScenarioCrowdConfig } from './types';
 import { PAINTED_CLASSROOM_SHOTS } from '../scene/painted-classroom/PaintedClassroom';
 import { resolveAssetUrl } from '../utils/path';
 
@@ -22,7 +22,7 @@ const WIDE: Shot = { cameraPosition: [...REFERENCE.position], cameraTarget: [...
 const TWO_SHOT: Shot = { cameraPosition: [0, 1.3, -0.55], cameraTarget: [0, 1.22, -1.9], cameraFov: 40 };
 // Speaker shots are taken from the listener's side, over the aisle.
 const AOI_SHOT: Shot = { cameraPosition: [-0.36, 1.32, -0.65], cameraTarget: [0.26, 1.28, -1.9], cameraFov: 30 };
-const EMILY_SHOT: Shot = { cameraPosition: [0.36, 1.32, -0.65], cameraTarget: [-0.26, 1.28, -1.9], cameraFov: 30 };
+const EMILY_SHOT: Shot = { cameraPosition: [0.30, 1.32, -0.65], cameraTarget: [-0.12, 1.28, -1.9], cameraFov: 28 };
 /** Bust-up for the key line. Still well short of an extreme close-up. */
 const AOI_CLOSE: Shot = { cameraPosition: [-0.22, 1.37, -0.95], cameraTarget: [0.3, 1.31, -1.9], cameraFov: 28 };
 
@@ -30,24 +30,31 @@ const CUT = { cameraPreset: 'hold', cameraTransitionDuration: 0, cameraTransitio
 const glide = (seconds: number) => ({ cameraPreset: 'hold', cameraTransitionDuration: seconds, cameraTransitionEasing: 'smooth' } as const);
 
 const anim = (name: string) => resolveAssetUrl(`/animations/${name}.fbx`);
+const voice = (name: string) => resolveAssetUrl(`/voices/${name}.wav`);
 const FACE_PARTNER = { lookAtTarget: 'partner', shallowHeadAngle: false } as const;
 const aoi = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig =>
   ({ visible: true, position: AOI_POSITION, rotationY: AOI_ROTATION_Y, ...FACE_PARTNER, ...config });
 const emily = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig =>
   ({ visible: true, position: EMILY_POSITION, rotationY: EMILY_ROTATION_Y, ...FACE_PARTNER, ...config });
 
-const LOCATION = '放課後の教室';
-const AOI = { speaker: 'アオイ', speakerCharacterId: 'aoi', dialogueTarget: 'partner' } as const;
-const EMILY = { speaker: 'エミリ', speakerCharacterId: 'emily', dialogueTarget: 'partner' } as const;
+const CLASSROOM_CROWD: ScenarioCrowdConfig = {
+  enabled: true,
+  preset: 'painted-classroom',
+  opacity: 0.65,
+};
 
-/** Silent conversation that checks whether dialogue camerawork reads naturally in the painted set. */
+const LOCATION = '昼休みの教室';
+const AOI = { speaker: 'アオイ', speakerCharacterId: 'aoi', dialogueTarget: 'partner', crowd: CLASSROOM_CROWD } as const;
+const EMILY = { speaker: 'エミリ', speakerCharacterId: 'emily', dialogueTarget: 'partner', crowd: CLASSROOM_CROWD } as const;
+
+/** Classroom conversation with background mob and voice acting in the painted 3D set. */
 export function getPaintedClassroomScenario(): ScenarioPackage {
   const scenes: ScenarioScene[] = [
     {
-      id: 'pc_1', location: LOCATION, ...WIDE, ...CUT,
+      id: 'pc_1', location: LOCATION, scenePreset: 'day_school', ...WIDE, ...CUT, crowd: CLASSROOM_CROWD,
       // A slow creep into the painting sells its depth before anyone speaks.
       cameraPreset: 'pushIn', cameraStrength: 0.35,
-      text: '放課後。みんなが部活に行ったあとの教室に、二人だけが残っていた。',
+      text: '昼休みの教室。クラスメイトたちの賑やかな声が響く中、窓際で二人が話していた。',
       avatars: {
         aoi: aoi({ motion: anim('Standing Idle'), expression: 'neutral', expressionWeight: 1.0, lookAtTarget: 'forward' }),
         emily: emily({ motion: anim('Idle'), expression: 'neutral', expressionWeight: 1.0 }),
@@ -55,48 +62,54 @@ export function getPaintedClassroomScenario(): ScenarioPackage {
     },
     {
       id: 'pc_2', location: LOCATION, ...EMILY, ...EMILY_SHOT, ...CUT,
-      text: '「アオイ、まだ帰らないの？ もうみんな行っちゃったよ」',
+      voiceUrl: voice('pc_2'),
+      text: '「アオイ、午後の小テストの範囲、もう見直した？ 古典の文法が全然頭に入らなくて……！」',
       avatars: {
         aoi: aoi({ motion: anim('Standing Idle'), expression: 'neutral', expressionWeight: 1.0 }),
-        emily: emily({ motion: anim('mob_chat_gesture'), expression: 'happy', expressionWeight: 1.0 }),
+        emily: emily({ motion: anim('mob_chat_gesture'), expression: 'surprised', expressionWeight: 1.0 }),
       },
     },
     {
       id: 'pc_3', location: LOCATION, ...AOI, ...AOI_SHOT, ...CUT,
-      text: '「うん……。もうちょっとだけ、ここにいたくて」',
+      voiceUrl: voice('pc_3'),
+      text: '「ふふ、大丈夫だよエミリちゃん。大事なところ、後で一緒におさらいしよっか」',
       avatars: {
-        aoi: aoi({ motion: anim('clasp_hands_front'), expression: 'relax', expressionWeight: 1.0 }),
+        aoi: aoi({ motion: anim('clasp_hands_front'), expression: 'happy', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('Idle'), expression: 'neutral', expressionWeight: 1.0 }),
       },
     },
     {
       id: 'pc_4', location: LOCATION, ...EMILY, ...TWO_SHOT, ...glide(1.6),
-      text: '「なにそれ、黄昏れちゃって。アオイらしくないなー」',
+      voiceUrl: voice('pc_4'),
+      text: '「ほんと！？ さすがアオイ、頼りになる〜！ 助かったぁ……！」',
       avatars: {
-        aoi: aoi({ motion: anim('clasp_hands_front'), expression: 'neutral', expressionWeight: 1.0 }),
+        aoi: aoi({ motion: anim('clasp_hands_front'), expression: 'happy', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('ardy_laugh'), expression: 'happy', expressionWeight: 1.0 }),
       },
     },
     {
       id: 'pc_5', location: LOCATION, ...AOI, ...AOI_SHOT, ...CUT,
-      text: '「た、黄昏れてないってば！ ……たぶん」',
+      voiceUrl: voice('pc_5'),
+      text: '「もう、大げさなんだから。その代わり、今日の放課後は購買のパン、付き合ってね？」',
       avatars: {
-        aoi: aoi({ motion: anim('Dismissing Gesture'), expression: 'angry', expressionWeight: 1.0 }),
+        aoi: aoi({ motion: anim('Dismissing Gesture'), expression: 'happy', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('Idle'), expression: 'happy', expressionWeight: 1.0 }),
       },
     },
     {
       id: 'pc_6', location: LOCATION, ...EMILY, ...EMILY_SHOT, ...CUT,
-      cameraPreset: 'pushIn', cameraStrength: 0.5,
-      text: '「ふーん？ じゃあ、何考えてたの？」',
+      cameraPreset: 'pushIn', cameraStrength: 0.4,
+      voiceUrl: voice('pc_6'),
+      text: '「もちろん！ 新作のいちごデニッシュ、半分こしよ！」',
       avatars: {
         aoi: aoi({ motion: anim('Standing Idle'), expression: 'neutral', expressionWeight: 1.0 }),
-        emily: emily({ motion: anim('Standing Idle'), expression: 'neutral', expressionWeight: 1.0 }),
+        emily: emily({ motion: anim('Standing Greeting'), expression: 'happy', expressionWeight: 1.0 }),
       },
     },
     {
       id: 'pc_7', location: LOCATION, ...AOI, ...AOI_CLOSE, ...glide(2.2),
-      text: '「来年も、この教室でみんなと一緒だったらいいなって」',
+      voiceUrl: voice('pc_7'),
+      text: '「うん、約束ね。……ふふっ、エミリちゃんといると、何気ない時間もすごく楽しいな」',
       avatars: {
         aoi: aoi({ motion: anim('Standing Idle'), expression: 'relax', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('Idle'), expression: 'neutral', expressionWeight: 1.0 }),
@@ -104,7 +117,8 @@ export function getPaintedClassroomScenario(): ScenarioPackage {
     },
     {
       id: 'pc_8', location: LOCATION, ...EMILY, ...TWO_SHOT, ...CUT,
-      text: '「……なに急に。そういうの、ずるいんだけど」',
+      voiceUrl: voice('pc_8'),
+      text: '「……なに急に、照れるじゃん。でも……私もだよ！」',
       avatars: {
         aoi: aoi({ motion: anim('Standing Idle'), expression: 'happy', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('Acknowledging'), expression: 'relax', expressionWeight: 1.0, lookAtTarget: 'forward' }),
@@ -112,7 +126,8 @@ export function getPaintedClassroomScenario(): ScenarioPackage {
     },
     {
       id: 'pc_9', location: LOCATION, ...AOI, ...WIDE, ...glide(3.5),
-      text: '「ふふっ。帰ろっか、エミリちゃん」',
+      voiceUrl: voice('pc_9'),
+      text: '「さ、予習しよっか。午後の授業も一緒に頑張ろうね！」',
       avatars: {
         aoi: aoi({ motion: anim('ardy_wave'), expression: 'happy', expressionWeight: 1.0 }),
         emily: emily({ motion: anim('Idle'), expression: 'happy', expressionWeight: 1.0 }),
@@ -120,11 +135,15 @@ export function getPaintedClassroomScenario(): ScenarioPackage {
     },
   ];
   return {
-    id: 'painted-classroom', title: '放課後の教室（簡易3D会話テスト）', stage: 'painted-classroom',
+    id: 'painted-classroom',
+    title: '昼休みの教室（簡易3D日常会話）',
+    stage: 'painted-classroom',
+    bgmUrl: resolveAssetUrl('/bgm/bgm.mp3'),
+    bgmVolume: 0.15,
     characters: [
       { id: 'aoi', character: resolveAssetUrl('/models/aoi/aoi-school.vrm'), position: AOI_POSITION, rotationY: AOI_ROTATION_Y },
       { id: 'emily', character: resolveAssetUrl('/models/emili/emili.vrm'), position: EMILY_POSITION, rotationY: EMILY_ROTATION_Y },
     ],
-    chapters: [{ id: 'after-school', title: '放課後の教室', scenes }],
+    chapters: [{ id: 'lunch-break', title: '昼休みの教室', scenes }],
   };
 }
