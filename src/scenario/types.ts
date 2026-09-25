@@ -227,7 +227,7 @@ export interface ScenarioChapter {
 }
 
 /** 3D の舞台。背景画像の代わりにモデルの部屋の中でシナリオを演じる */
-export type ScenarioStageId = 'classroom';
+export type ScenarioStageId = 'classroom' | 'painted-classroom';
 
 export interface ScenarioPackage {
   id: string;

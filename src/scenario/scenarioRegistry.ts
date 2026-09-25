@@ -17,6 +17,7 @@ import { getTeacherGateScenario } from './teacherGateScenario';
 import { getSilverWeekScenario } from './silverWeekScenario';
 import { getGestureBattleScenario } from './gestureBattleScenario';
 import { getCorridorConversationScenario } from './corridorConversationScenario';
+import { getPaintedClassroomScenario } from './paintedClassroomScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -33,6 +34,14 @@ export interface ScenarioMeta {
 }
 
 export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
+  'painted-classroom': {
+    id: 'painted-classroom',
+    title: '放課後の教室 — 1枚絵の簡易3Dで会話テスト',
+    shortTitle: '教室の簡易3D',
+    description: 'school-classroom-far2 の1枚絵を簡易3Dにした教室で、アオイとエミリの会話を引き・切り返し・寄りのカメラワークで確認。',
+    ogpImage: '/textures/school-classroom-far2.avif',
+    getScenario: getPaintedClassroomScenario,
+  },
   'five-seconds-pv': {
     id: 'five-seconds-pv',
     title: '【PV】5秒の告白 〜5 Seconds Confession〜',

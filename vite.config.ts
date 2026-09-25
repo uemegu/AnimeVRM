@@ -97,6 +97,7 @@ function getHtmlInputs() {
     cli_runner: path.resolve(__dirname, 'cli-runner.html'),
     quality_calibrate: path.resolve(__dirname, 'quality-calibrate.html'),
     crowd_test: path.resolve(__dirname, 'crowd-test.html'),
+    painted_classroom: path.resolve(__dirname, 'painted-classroom.html'),
   };
 
   const scenariosDir = path.resolve(__dirname, 'scenarios');
