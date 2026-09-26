@@ -38,7 +38,7 @@
 
 - `category` は `morning`（朝）、`action`（平日の行動）、`holiday`（休日の行動）、`forced`（強制割り込みイベント）、`ending`、`special`（タイトルから始める実験シナリオ等）、`call`（夜の電話）、`mail`（夜のメール）のいずれかです。
 - ディレクトリ名とシナリオの `id` は同じにします。
-- `voiceUrl` はディレクトリからの相対パス（例: `"01_aoi.wav"`）で書けます。`/` で始まる場合は `public/` からの絶対パスです。
+- `voiceUrl` はディレクトリからの相対パス（例: `"01_aoi.mp3"`）で書けます。`/` で始まる場合は `public/` からの絶対パスです。
 - 発生判定に使うメタ情報（`id` `title` `location` `fallback` `availability` `priority` `actionHints`、電話・メールの `characterId` `previewText` `time`）は、開発サーバー起動時とビルド時に `src/data/scenarioIndex.json` へ自動で集められます。開発中は `scenario.json` を保存すると作り直されます。本文（`scenes` 等）は再生直前に読み込みます。
 - `npm test` で全シナリオのバリデーション、参照しているボイスファイルの存在、目次が最新であることを確認できます。
 

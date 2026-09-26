@@ -24,7 +24,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '放課後の並木道',
           text: '「放課後、こうして一緒に並んで歩いて帰るの……なんだか久しぶりだね！」',
-          voiceUrl: '/voices/town_walk_1.wav',
+          voiceUrl: '/voices/town_walk_1.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'relax',
@@ -53,7 +53,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '放課後の並木道',
           text: '「この並木道、街並みも綺麗だし、風がふわっと抜けてすごく気持ちいいな〜」',
-          voiceUrl: '/voices/town_walk_2.wav',
+          voiceUrl: '/voices/town_walk_2.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -84,7 +84,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '放課後の並木道',
           text: '「ねえ、聞いてる？ ……ふふっ、私の横顔ばっかり見て、どうしたの？」',
-          voiceUrl: '/voices/town_walk_3.wav',
+          voiceUrl: '/voices/town_walk_3.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'relax',
@@ -131,7 +131,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '放課後の並木道',
           text: '「も、もう〜！ 急にそういうこと言うんだから……ちょっと照れるじゃん」',
-          voiceUrl: '/voices/town_walk_admire.wav',
+          voiceUrl: '/voices/town_walk_admire.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -167,7 +167,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '放課後の並木道',
           text: '「あ、知ってた！？ 私もちょうどその話しようと思ってたんだよね！」',
-          voiceUrl: '/voices/town_walk_shop.wav',
+          voiceUrl: '/voices/town_walk_shop.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -205,7 +205,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '街の広場・カフェ前',
           text: '「あっ、見て見て！ ほら、あそこの看板……ちょっと止まって！」',
-          voiceUrl: '/voices/town_walk_stop.wav',
+          voiceUrl: '/voices/town_walk_stop.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
@@ -233,7 +233,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '街の広場・カフェ前',
           text: '「ここだよ！ ねこちゃんの看板のカフェ！ ここのアップルパイ、すっごく評判なんだって〜」',
-          voiceUrl: '/voices/town_walk_cafe_1.wav',
+          voiceUrl: '/voices/town_walk_cafe_1.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
@@ -254,7 +254,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '街の広場・カフェ前',
           text: '「もし急ぎの用事がないなら……ちょっと寄っていかない？ 一緒に食べよ！」',
-          voiceUrl: '/voices/town_walk_cafe_2.wav',
+          voiceUrl: '/voices/town_walk_cafe_2.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
@@ -290,7 +290,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           speaker: 'アオイ',
           location: '街の広場・カフェ前',
           text: '「わぁ、本当！？ やったぁ〜！ ありがとう、優しい〜！ じゃあ一番大きいやつ頼んじゃお♪ 行こ！」',
-          voiceUrl: '/voices/town_walk_treat.wav',
+          voiceUrl: '/voices/town_walk_treat.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
@@ -316,7 +316,7 @@ export const TOWN_WALK_SCENARIO_JA: ScenarioPackage = {
           location: '街の広場・カフェ前',
           conditions: ['choice_ask'],
           text: '「えーっ！？ なんで私が奢る前提なの〜！？ ……まぁ、半分こならいいけどねっ♪ 行こ！」',
-          voiceUrl: '/voices/town_walk_ask.wav',
+          voiceUrl: '/voices/town_walk_ask.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',
@@ -376,7 +376,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Tree-lined Avenue',
           text: '"Walking home together side by side like this... it has been quite a while, hasn\'t it?"',
-          voiceUrl: '/voices/town_walk_1.wav',
+          voiceUrl: '/voices/town_walk_1.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -407,7 +407,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Tree-lined Avenue',
           text: '"This avenue has such lovely town scenery, and the gentle breeze feels so refreshing!"',
-          voiceUrl: '/voices/town_walk_2.wav',
+          voiceUrl: '/voices/town_walk_2.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -438,7 +438,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Tree-lined Avenue',
           text: '"Hey, are you listening? ...Hehe, why are you staring at my face like that?"',
-          voiceUrl: '/voices/town_walk_3.wav',
+          voiceUrl: '/voices/town_walk_3.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -485,7 +485,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Tree-lined Avenue',
           text: '"Come on! Saying something like that out of nowhere... you\'re making me blush!"',
-          voiceUrl: '/voices/town_walk_admire.wav',
+          voiceUrl: '/voices/town_walk_admire.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -519,7 +519,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Tree-lined Avenue',
           text: '"Oh, you knew about it too?! I was just about to bring that up!"',
-          voiceUrl: '/voices/town_walk_shop.wav',
+          voiceUrl: '/voices/town_walk_shop.mp3',
           avatar: {
             motion: '/animations/Walking.fbx',
             expression: 'happy',
@@ -552,7 +552,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Town Square - Before Cafe',
           text: '"Look, look! Over there, that cute cat signboard... wait, let\'s stop here!"',
-          voiceUrl: '/voices/town_walk_stop.wav',
+          voiceUrl: '/voices/town_walk_stop.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
@@ -574,7 +574,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Town Square - Before Cafe',
           text: '"Right here! The cafe with the cat signboard! Their apple pie is supposedly super delicious!"',
-          voiceUrl: '/voices/town_walk_cafe_1.wav',
+          voiceUrl: '/voices/town_walk_cafe_1.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
@@ -595,7 +595,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Town Square - Before Cafe',
           text: '"If you\'re not in a hurry... want to drop by? Let\'s eat together!"',
-          voiceUrl: '/voices/town_walk_cafe_2.wav',
+          voiceUrl: '/voices/town_walk_cafe_2.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
@@ -629,7 +629,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Aoi',
           location: 'Town Square - Before Cafe',
           text: '"Really?! Yay! Thank you, you\'re so sweet! I\'m ordering the biggest slice! Let\'s go!"',
-          voiceUrl: '/voices/town_walk_treat.wav',
+          voiceUrl: '/voices/town_walk_treat.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Excited.fbx',
@@ -653,7 +653,7 @@ export const TOWN_WALK_SCENARIO_EN: ScenarioPackage = {
           location: 'Town Square - Before Cafe',
           conditions: ['choice_ask'],
           text: '"What?! Why are you assuming I\'m treating?! ...Well, I guess going half-and-half is fine! Let\'s go!"',
-          voiceUrl: '/voices/town_walk_ask.wav',
+          voiceUrl: '/voices/town_walk_ask.mp3',
           background: '/textures/town_far.avif',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',

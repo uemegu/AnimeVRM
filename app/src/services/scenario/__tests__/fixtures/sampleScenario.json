@@ -16,7 +16,7 @@
         "ja": "おはよう！今日もいい天気だね。",
         "en": "Good morning! Beautiful weather today, right?"
       },
-      "voiceUrl": "/voices/aoi_morning_01.wav",
+      "voiceUrl": "/voices/aoi_morning_01.mp3",
       "avatars": {
         "girl_01": {
           "characterId": "girl_01",
@@ -37,7 +37,7 @@
         "ja": "放課後、一緒に図書室に行かない？",
         "en": "Do you want to go to the library together after school?"
       },
-      "voiceUrl": "/voices/aoi_morning_02.wav",
+      "voiceUrl": "/voices/aoi_morning_02.mp3",
       "avatars": {
         "girl_01": {
           "characterId": "girl_01",
@@ -87,7 +87,7 @@
         "ja": "やった！約束だよ、楽しみにしてるね！",
         "en": "Yay! It's a promise then, can't wait!"
       },
-      "voiceUrl": "/voices/aoi_accept.wav",
+      "voiceUrl": "/voices/aoi_accept.mp3",
       "avatars": {
         "girl_01": {
           "characterId": "girl_01",
@@ -109,7 +109,7 @@
         "ja": "そっか……残念。また今度誘うね。",
         "en": "I see... That's too bad. I'll ask you again another time."
       },
-      "voiceUrl": "/voices/aoi_decline.wav",
+      "voiceUrl": "/voices/aoi_decline.mp3",
       "avatars": {
         "girl_01": {
           "characterId": "girl_01",

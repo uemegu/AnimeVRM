@@ -32,7 +32,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '放課後の校門前',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_01_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_01_aoi.mp3'),
           text: '「エミリちゃん！アニメの格闘シーンみたいに、腕を高速で動かしたときのスピード線や残像エフェクトを試してみようよ！」',
           avatars: {
             girl_01: {
@@ -59,7 +59,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           location: '放課後の校門前',
           scenePreset: 'day_school',
           motionBlur: true,
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_02_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_02_aoi.mp3'),
           text: '「まずは高速手振り！ブンブン振ると、手首や肘の軌道に沿ってスピード線と残像がシュババッと走るよ！」',
           avatars: {
             girl_01: {
@@ -87,7 +87,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '放課後の校門前',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_03_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_03_emily.mp3'),
           text: '「ふふっ、甘いわねアオイ。スピード線の本気を見たいなら、私の鋭いストレートパンチを見てなさい！」',
           avatars: {
             girl_01: {
@@ -114,7 +114,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           location: '放課後の校門前',
           scenePreset: 'day_school',
           motionBlur: true,
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_04_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_04_emily.mp3'),
           text: '「せいっ！やあっ！――腕の軌跡に沿うスピード線、背後に残る残像、そして逆方向に伸びるぼかしアウトライン！」',
           avatars: {
             girl_01: {
@@ -142,7 +142,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '放課後の校門前',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_05_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_05_aoi.mp3'),
           text: '「すごーい！全身のモーションブラーじゃなくて、動いた腕の周辺だけにピタッと追従して超カッコいい作画になってる！」',
           avatars: {
             girl_01: {
@@ -169,7 +169,7 @@ export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'camera',
           location: '放課後の校門前',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_06_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_06_emily.mp3'),
           text: '「腕も脚も、一定以上の速度で振り抜いた瞬間だけ自動発生するわ。これぞアニメ作画の真骨頂ね！」',
           avatars: {
             girl_01: {
@@ -221,7 +221,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'School Gate after School',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_01_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_01_aoi.mp3'),
           text: '"Emily! Let\'s test out anime-style speed lines and afterimage effects when moving arms at high speed!"',
           avatars: {
             girl_01: {
@@ -247,7 +247,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           location: 'School Gate after School',
           scenePreset: 'day_school',
           motionBlur: true,
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_02_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_02_aoi.mp3'),
           text: '"First, rapid hand waving! Speed lines and afterimages instantly emerge along the wrist trajectory!"',
           avatars: {
             girl_01: {
@@ -274,7 +274,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'School Gate after School',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_03_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_03_emily.mp3'),
           text: '"Hehe, not bad Aoi! But if you want to see true action velocity, watch my rapid punches!"',
           avatars: {
             girl_01: {
@@ -300,7 +300,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           location: 'School Gate after School',
           scenePreset: 'day_school',
           motionBlur: true,
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_04_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_04_emily.mp3'),
           text: '"Take that! Sharp tapered speed lines, ghost afterimages behind the arm, and directional trailing blur outline!"',
           avatars: {
             girl_01: {
@@ -327,7 +327,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'School Gate after School',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_05_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_05_aoi.mp3'),
           text: '"Incredible! Instead of whole-screen blur, it perfectly pinpoints the moving arms and looks like hand-drawn anime sakuga!"',
           avatars: {
             girl_01: {
@@ -353,7 +353,7 @@ export const FAST_MOTION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'camera',
           location: 'School Gate after School',
           scenePreset: 'day_school',
-          voiceUrl: resolveAssetUrl('/voices/fastmotion_06_emily.wav'),
+          voiceUrl: resolveAssetUrl('/voices/fastmotion_06_emily.mp3'),
           text: '"Both arms and legs trigger dynamically whenever swinging past threshold speeds. Anime motion at its finest!"',
           avatars: {
             girl_01: {

@@ -18,17 +18,17 @@ SCEN = os.path.join(REPO, 'app/public/scenarios')
 CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending']
 
 REFS = {
-    'aoi': f'{REPO}/public/voices/001.wav',
-    'emili': f'{REPO}/public/voices/trio_intro_2.wav',
-    'shion': f'{REPO}/public/voices/girl4_ref.wav',
+    'aoi': f'{REPO}/public/voices/001.mp3',
+    'emili': f'{REPO}/public/voices/trio_intro_2.mp3',
+    'shion': f'{REPO}/public/voices/girl4_ref.mp3',
     'god': f'{REPO}/scratch/god_exp_02_god_raw.wav',
-    'teacher': f'{REPO}/public/voices/teacher/sample_03_cool_strict.wav',
-    'naruse': f'{REPO}/public/voices/naruse_ref.wav',
-    'yui': f'{REPO}/public/voices/yui_ref.wav',
-    'kana': f'{REPO}/public/voices/kana_ref.wav',
-    'sp_leader': f'{REPO}/public/voices/sp_leader_ref.wav',
-    'sp_member': f'{REPO}/public/voices/sp_member_ref.wav',
-    'shopkeeper': f'{REPO}/public/voices/shopkeeper_ref.wav',
+    'teacher': f'{REPO}/public/voices/teacher/sample_03_cool_strict.mp3',
+    'naruse': f'{REPO}/public/voices/naruse_ref.mp3',
+    'yui': f'{REPO}/public/voices/yui_ref.mp3',
+    'kana': f'{REPO}/public/voices/kana_ref.mp3',
+    'sp_leader': f'{REPO}/public/voices/sp_leader_ref.mp3',
+    'sp_member': f'{REPO}/public/voices/sp_member_ref.mp3',
+    'shopkeeper': f'{REPO}/public/voices/shopkeeper_ref.mp3',
 }
 
 BASE = {

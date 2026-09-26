@@ -26,7 +26,7 @@ app/
 │   └── scenarios/
 │       └── <category>/<id>/
 │           ├── scenario.json
-│           └── *.wav
+│           └── *.mp3
 └── src/
     ├── pages/
     ├── components/

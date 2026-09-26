@@ -61,7 +61,7 @@ describe('ScenarioEngine (Headless シナリオ進行・フラグ検証)', () =>
     expect(scene1?.id).toBe('scene_01');
     expect(scene1?.speaker).toBe('アオイ');
     expect(scene1?.text).toBe('おはよう！今日もいい天気だね。');
-    expect(scene1?.voiceUrl).toBe('/voices/aoi_morning_01.wav');
+    expect(scene1?.voiceUrl).toBe('/voices/aoi_morning_01.mp3');
 
     // 次へ
     expect(engine.next()).toBe(false);
@@ -127,6 +127,6 @@ describe('ScenarioEngine (Headless シナリオ進行・フラグ検証)', () =>
     expect(scene1?.speaker).toBe('Aoi');
     expect(scene1?.text).toBe('Good morning! Beautiful weather today, right?');
     // 日本語ボイスURLは英語表示時でもそのまま維持されること
-    expect(scene1?.voiceUrl).toBe('/voices/aoi_morning_01.wav');
+    expect(scene1?.voiceUrl).toBe('/voices/aoi_morning_01.mp3');
   });
 });

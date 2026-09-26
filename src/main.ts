@@ -232,7 +232,7 @@ window.addEventListener('keydown', (e) => {
 // Initial load
 avatarManager.loadAvatarModel(avatarManager.currentModelUrl);
 scenePresetManager.switchTimeOfDay('day', false);
-audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.wav'), '001.wav');
+audioLipSync.loadAudioUrl(resolveAssetUrl('/voices/001.mp3'), '001.mp3');
 
 // --------------------------------------------------
 // 5. Main Render Loop

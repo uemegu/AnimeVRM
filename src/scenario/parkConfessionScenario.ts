@@ -20,7 +20,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの公園',
           scenePreset: 'evening_park',
           text: '「あ、来てくれたんだ……！ 急にこんな公園に呼び出したりして、ごめんね」',
-          voiceUrl: '/voices/confess_intro_1.wav',
+          voiceUrl: '/voices/confess_intro_1.mp3',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
             expression: 'neutral',
@@ -39,7 +39,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園・ベンチ前',
           text: '「あのね……ずっと前から、あなたに伝えたいことがあって……」',
-          voiceUrl: '/voices/confess_intro_2.wav',
+          voiceUrl: '/voices/confess_intro_2.mp3',
           avatar: {
             motion: '/animations/ardy_confess_hesitant.fbx',
             expression: 'neutral',
@@ -59,7 +59,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園・ベンチ前',
           text: '「私のこと……どう思ってる……？」',
-          voiceUrl: '/voices/confess_intro_3.wav',
+          voiceUrl: '/voices/confess_intro_3.mp3',
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'neutral',
@@ -101,7 +101,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「やったーっ！ え……！？ ほんとに……！？ 夢じゃないよね……！？」',
-          voiceUrl: '/voices/confess_love_1.wav',
+          voiceUrl: '/voices/confess_love_1.mp3',
           avatar: {
             motion: '/animations/ardy_confess_joy.fbx',
             expression: 'happy',
@@ -120,7 +120,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「すっごく嬉しい……！ 私、ずっとあなたのことばかり考えてたの……っ！」',
-          voiceUrl: '/voices/confess_love_2.wav',
+          voiceUrl: '/voices/confess_love_2.mp3',
           avatar: {
             motion: '/animations/ardy_confess_heart.fbx',
             expression: 'relaxed',
@@ -142,7 +142,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「ねぇ...これって夢じゃないよね？ぎゅ〜ってしてくれる？」',
-          voiceUrl: '/voices/confess_love_hug.wav',
+          voiceUrl: '/voices/confess_love_hug.mp3',
           avatar: {
             motion: '/animations/ardy_confess_hug.fbx',
             expression: 'relaxed',
@@ -164,7 +164,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「ずっと...そばにいてね...」',
-          voiceUrl: '/voices/asmr_tuned2.wav',
+          voiceUrl: '/voices/asmr_tuned2.mp3',
           voicePan: 1.0, // ステレオ右チャンネルのみで再生 (Right Ear ASMR)
           screenTransition: 'eyelid_close', // 瞼を閉じるように上下から中央へ暗幕が閉じる
           avatar: {
@@ -193,7 +193,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「え……？ ご、500えん……？」',
-          voiceUrl: '/voices/confess_money_1.wav',
+          voiceUrl: '/voices/confess_money_1.mp3',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',
             expression: 'surprised',
@@ -211,7 +211,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「そ、そんな理由でこんな呼び出しに応じたの……！？ 私の心の準備とドキドキを返してよー！！」',
-          voiceUrl: '/voices/confess_money_2.wav',
+          voiceUrl: '/voices/confess_money_2.mp3',
           avatar: {
             motion: '/animations/Angry.fbx',
             expression: 'angry',
@@ -229,7 +229,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「ほら！ 500円！ これで文句ないでしょ！ もうっ、鈍感バカーッ！」',
-          voiceUrl: '/voices/confess_money_3.wav',
+          voiceUrl: '/voices/confess_money_3.mp3',
           avatar: {
             motion: '/animations/Angry.fbx',
             expression: 'angry',
@@ -269,7 +269,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「ちょ、ちょっと……なんで何も言わないの……！？ 気まずいから何か言ってよ〜っ！」',
-          voiceUrl: '/voices/confess_silent_2.wav',
+          voiceUrl: '/voices/confess_silent_2.mp3',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
             expression: 'surprised',
@@ -287,7 +287,7 @@ export const PARK_CONFESSION_SCENARIO_JA: ScenarioPackage = {
           speaker: '女の子',
           location: '夕暮れの公園',
           text: '「うぅ……からかわないでよね……。もう一回、ちゃんと最初からやり直してあげるからね！」',
-          voiceUrl: '/voices/confess_silent_3.wav',
+          voiceUrl: '/voices/confess_silent_3.mp3',
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'happy',
@@ -345,7 +345,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           location: 'Twilight Park',
           scenePreset: 'evening_park',
           text: '"Ah, you came...! Sorry for calling you out to this park so suddenly."',
-          voiceUrl: '/voices/confess_intro_1.wav',
+          voiceUrl: '/voices/confess_intro_1.mp3',
           avatar: {
             motion: '/animations/Standing Greeting.fbx',
             expression: 'neutral',
@@ -364,7 +364,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park - Near Bench',
           text: '"Um, you know... there\'s something I\'ve been meaning to tell you for a long time..."',
-          voiceUrl: '/voices/confess_intro_2.wav',
+          voiceUrl: '/voices/confess_intro_2.mp3',
           avatar: {
             motion: '/animations/ardy_confess_hesitant.fbx',
             expression: 'neutral',
@@ -384,7 +384,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park - Near Bench',
           text: '"How... how do you feel about me...?"',
-          voiceUrl: '/voices/confess_intro_3.wav',
+          voiceUrl: '/voices/confess_intro_3.mp3',
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'neutral',
@@ -426,7 +426,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Yay!! Wait... really!? You mean it!? This isn\'t a dream, right...!?"',
-          voiceUrl: '/voices/confess_love_1.wav',
+          voiceUrl: '/voices/confess_love_1.mp3',
           avatar: {
             motion: '/animations/ardy_confess_joy.fbx',
             expression: 'happy',
@@ -445,7 +445,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"I\'m so happy...! I\'ve been thinking about you non-stop all this time...!"',
-          voiceUrl: '/voices/confess_love_2.wav',
+          voiceUrl: '/voices/confess_love_2.mp3',
           avatar: {
             motion: '/animations/ardy_confess_heart.fbx',
             expression: 'relaxed',
@@ -467,7 +467,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Hey... this isn\'t a dream, right? Will you give me a hug...?"',
-          voiceUrl: '/voices/confess_love_hug.wav',
+          voiceUrl: '/voices/confess_love_hug.mp3',
           avatar: {
             motion: '/animations/ardy_confess_hug.fbx',
             expression: 'relaxed',
@@ -489,7 +489,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Stay... by my side forever..."',
-          voiceUrl: '/voices/asmr_tuned2.wav',
+          voiceUrl: '/voices/asmr_tuned2.mp3',
           voicePan: 1.0, // Right channel ASMR
           screenTransition: 'eyelid_close', // Eyelid closing transition
           avatar: {
@@ -518,7 +518,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Huh...? F-Five hundred yen...?"',
-          voiceUrl: '/voices/confess_money_1.wav',
+          voiceUrl: '/voices/confess_money_1.mp3',
           avatar: {
             motion: '/animations/Dismissing Gesture.fbx',
             expression: 'surprised',
@@ -536,7 +536,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Is that why you showed up today...!? Give me back my heartfelt anticipation and racing heart!!"',
-          voiceUrl: '/voices/confess_money_2.wav',
+          voiceUrl: '/voices/confess_money_2.mp3',
           avatar: {
             motion: '/animations/Angry.fbx',
             expression: 'angry',
@@ -554,7 +554,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Here! Take your 500 yen! Happy now?! Geez, you dense idiot!"',
-          voiceUrl: '/voices/confess_money_3.wav',
+          voiceUrl: '/voices/confess_money_3.mp3',
           avatar: {
             motion: '/animations/Angry.fbx',
             expression: 'angry',
@@ -594,7 +594,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"W-Wait... why aren\'t you saying anything...!? This is so awkward, say something already~!"',
-          voiceUrl: '/voices/confess_silent_2.wav',
+          voiceUrl: '/voices/confess_silent_2.mp3',
           avatar: {
             motion: '/animations/Acknowledging.fbx',
             expression: 'surprised',
@@ -612,7 +612,7 @@ export const PARK_CONFESSION_SCENARIO_EN: ScenarioPackage = {
           speaker: 'Girl',
           location: 'Twilight Park',
           text: '"Ugh... don\'t tease me like that... Fine, I\'ll let you start over properly from the beginning!"',
-          voiceUrl: '/voices/confess_silent_3.wav',
+          voiceUrl: '/voices/confess_silent_3.mp3',
           avatar: {
             motion: '/animations/Idle.fbx',
             expression: 'happy',

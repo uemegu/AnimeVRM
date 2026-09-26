@@ -146,7 +146,7 @@
 ## 8. オーディオ・ボイス・リップシンク（完了）
 - [x] **オーディオアセット配置**:
   - [x] WASMバイナリ (`public/wasm/lipsync.wasm`) および AudioWorklet (`public/worklets/lipsync-processor.js`) の配置
-  - [x] BGM (`public/bgm/*.mp3`)、SE (`public/se/*.mp3`)、ボイス音声 (`public/voices/*.wav`) の配置
+  - [x] BGM (`public/bgm/*.mp3`)、SE (`public/se/*.mp3`)、ボイス音声 (`public/voices/*.mp3`) の配置
 - [x] **オーディオサービス実装**:
   - [x] `AudioLipSync.ts`: AudioWorklet + WebAssembly によるリアルタイム母音解析（`aa`, `ee`, `ih`, `oh`, `ou`）
   - [x] `bgmPresets.ts` & `SoundManager.ts`: BGM ID管理（`main_theme`, `main_bgm`, `night_room` 等）、URL解決、夜自室音量抑制、同一曲シームレス継続、SEワンショット再生、マスター/BGM/SE音量制御

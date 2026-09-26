@@ -16,26 +16,26 @@ interface AudioTrackOption {
 
 const SAMPLE_TRACKS: AudioTrackOption[] = [
   // Irodori-TTS Female Samples
-  { label: '🌟 [Irodori-TTS] あーいーうーえーおー (女性)', url: '/voices/lipsync_vowels_female.wav', gender: 'female', isVowels: true },
-  { label: '🌟 [Irodori-TTS] あーーーーー (女性)', url: '/voices/lipsync_female_a.wav', gender: 'female' },
-  { label: '🌟 [Irodori-TTS] いーーーーー (女性)', url: '/voices/lipsync_female_i.wav', gender: 'female' },
-  { label: '🌟 [Irodori-TTS] うーーーーー (女性)', url: '/voices/lipsync_female_u.wav', gender: 'female' },
-  { label: '🌟 [Irodori-TTS] えーーーーー (女性)', url: '/voices/lipsync_female_e.wav', gender: 'female' },
-  { label: '🌟 [Irodori-TTS] おーーーーー (女性)', url: '/voices/lipsync_female_o.wav', gender: 'female' },
+  { label: '🌟 [Irodori-TTS] あーいーうーえーおー (女性)', url: '/voices/lipsync_vowels_female.mp3', gender: 'female', isVowels: true },
+  { label: '🌟 [Irodori-TTS] あーーーーー (女性)', url: '/voices/lipsync_female_a.mp3', gender: 'female' },
+  { label: '🌟 [Irodori-TTS] いーーーーー (女性)', url: '/voices/lipsync_female_i.mp3', gender: 'female' },
+  { label: '🌟 [Irodori-TTS] うーーーーー (女性)', url: '/voices/lipsync_female_u.mp3', gender: 'female' },
+  { label: '🌟 [Irodori-TTS] えーーーーー (女性)', url: '/voices/lipsync_female_e.mp3', gender: 'female' },
+  { label: '🌟 [Irodori-TTS] おーーーーー (女性)', url: '/voices/lipsync_female_o.mp3', gender: 'female' },
   // Existing Female Samples
-  { label: '👧 アオイ会話: 「今日はいい天気だね！」 (date_aoi_01)', url: '/voices/date_aoi_01.wav', gender: 'female' },
-  { label: '👧 アオイ告白: 「来てくれたんだ！」 (confess_intro_1)', url: '/voices/confess_intro_1.wav', gender: 'female' },
-  { label: '👧 アオイ決め台詞: 「大好き！」 (pv_cut9_daisuki)', url: '/voices/pv_cut9_daisuki.wav', gender: 'female' },
-  { label: '👱‍♀️ エミリ会話: 「カフェに寄っていこうよ」 (chat_cafe_1)', url: '/voices/chat_cafe_1.wav', gender: 'female' },
-  { label: '💤 シオン解説: 「投資信託とは…」 (nisa_01)', url: '/voices/nisa_01.wav', gender: 'female' },
+  { label: '👧 アオイ会話: 「今日はいい天気だね！」 (date_aoi_01)', url: '/voices/date_aoi_01.mp3', gender: 'female' },
+  { label: '👧 アオイ告白: 「来てくれたんだ！」 (confess_intro_1)', url: '/voices/confess_intro_1.mp3', gender: 'female' },
+  { label: '👧 アオイ決め台詞: 「大好き！」 (pv_cut9_daisuki)', url: '/voices/pv_cut9_daisuki.mp3', gender: 'female' },
+  { label: '👱‍♀️ エミリ会話: 「カフェに寄っていこうよ」 (chat_cafe_1)', url: '/voices/chat_cafe_1.mp3', gender: 'female' },
+  { label: '💤 シオン解説: 「投資信託とは…」 (nisa_01)', url: '/voices/nisa_01.mp3', gender: 'female' },
 
   // Irodori-TTS Male Samples
-  { label: '🌟 [Irodori-TTS] あーいーうーえーおー (男性)', url: '/voices/lipsync_vowels_male.wav', gender: 'male', isVowels: true },
-  { label: '🌟 [Irodori-TTS] あーーーーー (男性)', url: '/voices/lipsync_male_a.wav', gender: 'male' },
-  { label: '🌟 [Irodori-TTS] いーーーーー (男性)', url: '/voices/lipsync_male_i.wav', gender: 'male' },
-  { label: '🌟 [Irodori-TTS] うーーーーー (男性)', url: '/voices/lipsync_male_u.wav', gender: 'male' },
-  { label: '🌟 [Irodori-TTS] えーーーーー (男性)', url: '/voices/lipsync_male_e.wav', gender: 'male' },
-  { label: '🌟 [Irodori-TTS] おーーーーー (男性)', url: '/voices/lipsync_male_o.wav', gender: 'male' },
+  { label: '🌟 [Irodori-TTS] あーいーうーえーおー (男性)', url: '/voices/lipsync_vowels_male.mp3', gender: 'male', isVowels: true },
+  { label: '🌟 [Irodori-TTS] あーーーーー (男性)', url: '/voices/lipsync_male_a.mp3', gender: 'male' },
+  { label: '🌟 [Irodori-TTS] いーーーーー (男性)', url: '/voices/lipsync_male_i.mp3', gender: 'male' },
+  { label: '🌟 [Irodori-TTS] うーーーーー (男性)', url: '/voices/lipsync_male_u.mp3', gender: 'male' },
+  { label: '🌟 [Irodori-TTS] えーーーーー (男性)', url: '/voices/lipsync_male_e.mp3', gender: 'male' },
+  { label: '🌟 [Irodori-TTS] おーーーーー (男性)', url: '/voices/lipsync_male_o.mp3', gender: 'male' },
 ];
 
 const PHONEME_LABEL_MAP: Record<string, { char: string; name: string }> = {
