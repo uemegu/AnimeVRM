@@ -24,22 +24,29 @@ const shion = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig => 
 });
 const SHION = { speaker: 'シオン', speakerCharacterId: 'shion', dialogueTarget: 'player' } as const;
 
+const voice = (name: string) => resolveAssetUrl(`/voices/${name}.wav`);
+
 /** Viewing check for the painted library: the same seat in the morning, at noon and after school. */
 export function getPaintedLibraryScenario(): ScenarioPackage {
   const period = (id: string, scenePreset: ScenePresetId, location: string, narration: string, line: string, expression: string): ScenarioScene[] => [
     {
       id: `${id}_1`, location, scenePreset, ...WIDE, ...CUT, cameraPreset: 'pushIn', cameraStrength: 0.3,
       text: narration,
+      autoNextSec: 2.2,
       avatars: { shion: shion({ lookAtTarget: 'forward' }) },
     },
     {
       id: `${id}_2`, location, ...SHION, ...ACROSS, ...glide(1.6),
       text: line,
+      voiceUrl: voice(`pl_${id}_2`),
+      autoNextSec: 0.8,
       avatars: { shion: shion({ expression }) },
     },
     {
       id: `${id}_3`, location, ...SHION, ...(id === 'evening' ? CLOSE : id === 'morning' ? WINDOW_SIDE : AISLE_SIDE), ...CUT,
       text: '「……用がないなら、静かにしてて」',
+      voiceUrl: voice(`pl_${id}_3`),
+      autoNextSec: id === 'evening' ? 1.2 : 1.0,
       avatars: { shion: shion({ expression: 'neutral' }) },
     },
   ];
@@ -52,6 +59,8 @@ export function getPaintedLibraryScenario(): ScenarioPackage {
     id: 'painted-library',
     title: '図書室のシオン（簡易3D）',
     stage: 'painted-library',
+    bgmUrl: resolveAssetUrl('/bgm/bgm.mp3'),
+    bgmVolume: 0.12,
     characters: [
       { id: 'shion', character: resolveAssetUrl('/models/shion/shion-school.vrm'), position: AVATAR_POSITION, rotationY: 0 },
     ],
