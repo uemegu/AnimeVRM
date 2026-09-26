@@ -1,4 +1,4 @@
-import { AvatarConfig, deepAssign } from '../Config';
+import { AvatarConfig, deepAssign } from '@anime-vrm/engine/Config';
 import {
   ScenePresetId,
   TimeOfDayId,
@@ -9,7 +9,7 @@ import {
   SCENE_PRESETS,
   TIME_OF_DAY_PRESETS,
   createCombinedSceneConfig,
-} from '../presets/ScenePresets';
+} from '@anime-vrm/engine/presets/ScenePresets';
 import { t } from '../i18n';
 import { showToast } from '../ui/components/Toast';
 import { syncBgButtons } from '../ui/helpers';

@@ -7,8 +7,6 @@ import { WindController } from '../wind/WindController';
 import { TypographyOverlay } from '../animation/TypographyOverlay';
 import { ShortAnimationPlayer } from '../animation/ShortAnimationPlayer';
 import { resolveAssetUrl } from '../utils/path';
-import { showToast } from '../ui/components/Toast';
-import { updateAnimationPlayStateUI } from '../ui/helpers';
 import { AudioLipSync } from '../AudioLipSync';
 import { FACE_OVERLAY_KINDS, FACE_OVERLAY_TEXTURES, FaceOverlayKind, FaceOverlayState } from '../effects/FaceOverlayEffect';
 
@@ -40,6 +38,9 @@ export class AvatarManager {
   private windController: WindController;
   private getConfig: () => AvatarConfig;
   private onAvatarLoaded?: (avatar: Avatar) => void;
+  private onModelLoadProgress?: (progress: number) => void;
+  private onModelLoaded?: (modelUrl: string) => void;
+  private onModelLoadError?: (error: unknown) => void;
 
   constructor(options: {
     scene: THREE.Scene;
@@ -54,6 +55,11 @@ export class AvatarManager {
     onEnterTransparent: () => void;
     onExitTransparent: () => void;
     onAvatarLoaded?: (avatar: Avatar) => void;
+    /** UI 向けの通知（読み込み進捗・完了・失敗、短い演出アニメの再生状態） */
+    onModelLoadProgress?: (progress: number) => void;
+    onModelLoaded?: (modelUrl: string) => void;
+    onModelLoadError?: (error: unknown) => void;
+    onAnimationPlayStateChange?: (isPlaying: boolean) => void;
   }) {
     this.renderer = options.renderer ?? null;
     this.hairShadow = options.hairShadow;
@@ -64,6 +70,9 @@ export class AvatarManager {
     this.windController = options.windController;
     this.getConfig = options.getConfig;
     this.onAvatarLoaded = options.onAvatarLoaded;
+    this.onModelLoadProgress = options.onModelLoadProgress;
+    this.onModelLoaded = options.onModelLoaded;
+    this.onModelLoadError = options.onModelLoadError;
 
     this.typographyOverlay = new TypographyOverlay();
     this.animationPlayer = new ShortAnimationPlayer({
@@ -79,7 +88,7 @@ export class AvatarManager {
         options.onExitTransparent();
       },
       onPlayStateChange: (isPlaying) => {
-        updateAnimationPlayStateUI(isPlaying);
+        options.onAnimationPlayStateChange?.(isPlaying);
       },
       onPlayMotion: (motionUrl) => {
         if (!this.avatarInstance) return;
@@ -146,8 +155,7 @@ export class AvatarManager {
       renderer: this.renderer ?? undefined,
       hairShadow: this.hairShadow,
       onProgress: (progress) => {
-        const el = document.getElementById('progress-text');
-        if (el) el.textContent = `${progress.toFixed(0)}%`;
+        this.onModelLoadProgress?.(progress);
       },
       onLoaded: (avatar) => {
         if (this.avatarInstance !== avatar || this.isMultiAvatarScenarioActive) {
@@ -167,27 +175,11 @@ export class AvatarManager {
           this.onAvatarLoaded(avatar);
         }
         window.dispatchEvent(new CustomEvent('avatar-model-change'));
-
-        const el = document.getElementById('loading-status');
-        if (el) {
-          const displayName = modelUrl.startsWith('blob:') ? 'ローカルVRM' : modelUrl.split('/').pop();
-          el.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (${displayName})`;
-        }
-        const displayName = modelUrl.startsWith('blob:') ? 'ローカルVRM' : modelUrl.split('/').pop();
-        showToast(`👤 モデルを読み込みました: ${displayName}`);
-
-        document.querySelectorAll<HTMLButtonElement>('.model-btn').forEach((btn) => {
-          const btnModel = btn.getAttribute('data-model');
-          btn.classList.toggle('active', btnModel === modelUrl);
-        });
+        this.onModelLoaded?.(modelUrl);
       },
       onError: (error) => {
         console.error('Failed to load VRM avatar:', error);
-        const el = document.getElementById('loading-status');
-        if (el) {
-          el.innerHTML = `<span style="color: #dc2626; font-weight: 600;">✗ ロード失敗</span>`;
-        }
-        showToast('❌ モデルの読み込みに失敗しました');
+        this.onModelLoadError?.(error);
       },
     });
     window.dispatchEvent(new CustomEvent('avatar-face-overlays-change'));

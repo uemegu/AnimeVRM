@@ -1,6 +1,6 @@
 import { ScenarioPackage } from './types';
 import { Language, getLanguage } from '../i18n';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export const FAST_MOTION_SCENARIO_JA: ScenarioPackage = {
   id: 'fast_motion_action',

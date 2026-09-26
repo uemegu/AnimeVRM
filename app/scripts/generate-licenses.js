@@ -5,6 +5,51 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const APP_ROOT = path.resolve(__dirname, '..');
+// npm workspaces のため lockfile はリポジトリ直下に1つだけある
+const REPO_ROOT = path.resolve(APP_ROOT, '..');
+const packageLockPath = path.join(REPO_ROOT, 'package-lock.json');
+const APP_LOCK_PATH = path.relative(REPO_ROOT, APP_ROOT);
+
+/**
+ * lockfile 内で、location にあるパッケージから name を解決する（Node の node_modules 探索と同じ順）
+ */
+function resolveInLock(packages, location, name) {
+  let dir = location;
+  for (;;) {
+    const candidate = dir ? `${dir}/node_modules/${name}` : `node_modules/${name}`;
+    if (packages[candidate]) return candidate;
+    if (!dir) return null;
+    const idx = dir.lastIndexOf('/node_modules/');
+    dir = idx >= 0 ? dir.slice(0, idx) : '';
+  }
+}
+
+/**
+ * app の dependencies から本番で使うパッケージを lockfile 上でたどる。
+ * ワークスペース（packages/*）は中身の依存だけをたどり、パッケージ自体は一覧に含めない。
+ */
+function collectProductionPackages(packages) {
+  const result = new Map();
+  const visited = new Set();
+  const visit = (location) => {
+    if (visited.has(location)) return;
+    visited.add(location);
+    let info = packages[location];
+    if (!info) return;
+    if (info.link) {
+      visit(info.resolved);
+      return;
+    }
+    const isWorkspace = !location.includes('node_modules/');
+    if (!isWorkspace) result.set(location, info);
+    for (const dep of Object.keys({ ...info.dependencies, ...info.optionalDependencies })) {
+      const resolved = resolveInLock(packages, location, dep);
+      if (resolved) visit(resolved);
+    }
+  };
+  visit(APP_LOCK_PATH);
+  return [...result.entries()];
+}
 
 const LICENSE_FILENAMES = [
   'LICENSE',
@@ -22,8 +67,6 @@ const LICENSE_FILENAMES = [
  * 本番依存パッケージのライセンス一覧およびアセットクレジットを収集・生成する
  */
 export function generateLicenses() {
-  const packageJsonPath = path.join(APP_ROOT, 'package.json');
-  const packageLockPath = path.join(APP_ROOT, 'package-lock.json');
   const assetCreditsPath = path.join(APP_ROOT, 'src', 'data', 'assetCredits.json');
 
   if (!fs.existsSync(packageLockPath)) {
@@ -31,18 +74,12 @@ export function generateLicenses() {
   }
 
   const lockContent = JSON.parse(fs.readFileSync(packageLockPath, 'utf-8'));
-  const packages = lockContent.packages || {};
-
-  // 本番依存（dev が false または undefined）かつ root自身以外
-  const prodEntries = Object.entries(packages).filter(([pkgPath, info]) => {
-    if (!pkgPath || pkgPath === '') return false;
-    return !info.dev;
-  });
+  const prodEntries = collectProductionPackages(lockContent.packages || {});
 
   const libraries = [];
 
   for (const [pkgRelPath, lockInfo] of prodEntries) {
-    const dir = path.join(APP_ROOT, pkgRelPath);
+    const dir = path.join(REPO_ROOT, pkgRelPath);
     let pkgJson = {};
     if (fs.existsSync(path.join(dir, 'package.json'))) {
       try {
@@ -61,7 +98,7 @@ export function generateLicenses() {
       }
     }
 
-    const name = pkgJson.name || pkgRelPath.replace(/^node_modules\//, '');
+    const name = pkgJson.name || pkgRelPath.replace(/^.*node_modules\//, '');
     const version = pkgJson.version || lockInfo.version || '';
     const licenseType = pkgJson.license || lockInfo.license || 'UNKNOWN';
 

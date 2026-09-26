@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Avatar } from '../../src/Avatar';
+import { Avatar } from '@anime-vrm/engine/Avatar';
 import { GeminiLiveChatController } from '../../src/ai/live/GeminiLiveChatController';
 import { GeminiLiveClient } from '../../src/ai/live/GeminiLiveClient';
 import { CORE27_SKELETON } from '../../src/ai/motion/ardy/vendor/motion-data';

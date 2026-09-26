@@ -14,7 +14,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@pixiv/three-vrm": "^3.5.1",
+    "@anime-vrm/engine": "*",
+    "@pixiv/three-vrm": "^3.5.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.183.2"

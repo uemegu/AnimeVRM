@@ -4,11 +4,11 @@ import {
   deepAssign,
   copyConfigToClipboard,
   downloadConfigJSON,
-} from '../Config';
+} from '@anime-vrm/engine/Config';
 import { getLanguage, setLanguage, t, onLanguageChange, Language } from '../i18n';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import vrmModels from 'virtual:vrm-models';
-import { TimeOfDayId } from '../presets/ScenePresets';
+import { TimeOfDayId } from '@anime-vrm/engine/presets/ScenePresets';
 import { getParkConfessionScenario } from '../scenario/parkConfessionScenario';
 import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversationScenario';
 import { getTrioConversationScenario } from '../scenario/trioConversationScenario';
@@ -28,19 +28,19 @@ import { getCorridorConversationScenario } from '../scenario/corridorConversatio
 import { getPaintedClassroomScenario } from '../scenario/paintedClassroomScenario';
 import { getPaintedLibraryScenario } from '../scenario/paintedLibraryScenario';
 import { getCafeMonitoringScenario } from '../scenario/cafeMonitoringScenario';
-import { AudioLipSync } from '../AudioLipSync';
-import { ViewerCore } from '../scene/ViewerCore';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
+import { ViewerCore } from '@anime-vrm/engine/scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
-import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
+import { AvatarManager, isMotionLoop } from '@anime-vrm/engine/avatar/AvatarManager';
 import { ScenarioController } from '../scenario/ScenarioController';
 import type { ClassroomExperienceController } from '../scenario/ClassroomExperienceController';
 import { InspectorManager } from './inspector/InspectorManager';
 import { showToast } from './components/Toast';
 import { openImportModal } from './components/ImportExportModal';
-import { AvatarTransformController } from '../avatar/AvatarTransformController';
+import { AvatarTransformController } from '@anime-vrm/engine/avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
-import type { ShaftModeController } from '../effects/shaft/ShaftModeController';
-import { FACE_OVERLAY_KINDS, FaceOverlayKind } from '../effects/FaceOverlayEffect';
+import type { ShaftModeController } from '@anime-vrm/engine/effects/shaft/ShaftModeController';
+import { FACE_OVERLAY_KINDS, FaceOverlayKind } from '@anime-vrm/engine/effects/FaceOverlayEffect';
 import { MorphTargetPanel } from './components/MorphTargetPanel';
 
 export interface UnifiedPanelContext {

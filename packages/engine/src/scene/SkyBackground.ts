@@ -8,7 +8,7 @@ export class SkyBackground {
     depthTest: false,
     depthWrite: false,
     uniforms: {
-      uPainting: { value: null },
+      uPainting: { value: null as THREE.Texture | null },
       uTime: { value: 0 },
       uSkyGlow: { value: 0.85 },
       uInteriorShadowStrength: { value: 0 },
@@ -83,11 +83,12 @@ export class SkyBackground {
   });
   readonly mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.material);
 
-  constructor(scene: THREE.Scene) {
+  /** visible: 作った直後から表示するか（ルートは背景を読み込んでから表示するので既定は false） */
+  constructor(scene: THREE.Scene, options: { visible?: boolean } = {}) {
     this.mesh.name = 'SkyBackground';
     this.mesh.frustumCulled = false;
     this.mesh.renderOrder = -1000;
-    this.mesh.visible = false;
+    this.mesh.visible = options.visible ?? false;
     scene.add(this.mesh);
   }
 
@@ -107,6 +108,12 @@ export class SkyBackground {
     ['uZenith', 'uHorizon', 'uCloudLight', 'uCloudShade'].forEach((key, i) => {
       this.material.uniforms[key].value.set(colors[i]);
     });
+  }
+
+  /** 遠景画像を差し替えて表示する（null なら空だけ） */
+  setBackgroundTexture(texture: THREE.Texture | null): void {
+    this.material.uniforms.uPainting.value = texture;
+    this.mesh.visible = true;
   }
 
   setTransform(transform?: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null): void {

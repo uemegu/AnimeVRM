@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import type { AvatarManager } from '../avatar/AvatarManager';
-import type { AvatarTransformController } from '../avatar/AvatarTransformController';
-import type { ClassroomStage } from '../scene/ClassroomStage';
+import type { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
+import type { AvatarTransformController } from '@anime-vrm/engine/avatar/AvatarTransformController';
+import type { ClassroomStage } from '@anime-vrm/engine/scene/ClassroomStage';
 import type { ScenarioController } from './ScenarioController';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /** Shows the furnished classroom and provides simple free-roam controls for Aoi. */
 export class ClassroomExperienceController {

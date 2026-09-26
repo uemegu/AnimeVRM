@@ -1,6 +1,6 @@
 import { ScenarioPackage } from './types';
 import { Language } from '../i18n';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
   id: 'cafe-monitoring',

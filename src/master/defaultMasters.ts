@@ -1,6 +1,6 @@
 import { MasterDatabase } from './types';
-import { SCENE_PRESETS } from '../presets/ScenePresets';
-import { resolveAssetUrl } from '../utils/path';
+import { SCENE_PRESETS } from '@anime-vrm/engine/presets/ScenePresets';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export const DEFAULT_CHARACTERS: MasterDatabase['characters'] = {
   girl_01: {

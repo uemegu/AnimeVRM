@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
-import { loadMixamoAnimation, releaseMixamoAnimation } from '../../../Avatar';
+import { loadMixamoAnimation, releaseMixamoAnimation } from '@anime-vrm/engine/Avatar';
 
 const CELL_WIDTH = 220;
 const CELL_HEIGHT = 330;

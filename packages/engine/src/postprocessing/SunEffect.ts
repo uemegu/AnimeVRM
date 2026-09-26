@@ -1,6 +1,29 @@
 import * as THREE from 'three';
 import { OcclusionRaycaster } from './OcclusionRaycaster';
-import type { AvatarConfig, SunShaftsConfig, LensFlareConfig } from '../Config';
+import type { SunShaftsConfig, LensFlareConfig } from '../Config';
+
+const DISABLED_SUN_SHAFTS: SunShaftsConfig = {
+  enabled: false,
+  followDirectionalLight: false,
+  sunPosition: { x: 0, y: 5, z: 0 },
+  exposure: 0,
+  decay: 0.9,
+  density: 0.5,
+  weight: 0.1,
+  color: '#ffffff',
+  shimmer: 0,
+};
+
+const DISABLED_LENS_FLARE: LensFlareConfig = {
+  enabled: false,
+  sunSize: 1.0,
+  sunColor: '#ffffff',
+  glowIntensity: 0,
+  starburstIntensity: 0,
+  anamorphicIntensity: 0,
+  ghostIntensity: 0,
+  haloIntensity: 0,
+};
 
 /**
  * Procedural texture helpers for anime-style lens flare & sun glow
@@ -332,7 +355,7 @@ export class SunEffect {
     camera: THREE.Camera,
     delta: number,
     elapsed: number,
-    config: AvatarConfig,
+    config: { lighting: { sunShafts?: SunShaftsConfig; lensFlare?: LensFlareConfig } },
     dirLight: THREE.DirectionalLight,
     vrmMeshes?: THREE.Object3D[]
   ): {
@@ -340,8 +363,8 @@ export class SunEffect {
     sunVisibility: number;
     sunWorldPosition: THREE.Vector3;
   } {
-    const sunCfg = config.lighting.sunShafts;
-    const flareCfg = config.lighting.lensFlare;
+    const sunCfg = config.lighting.sunShafts ?? DISABLED_SUN_SHAFTS;
+    const flareCfg = config.lighting.lensFlare ?? DISABLED_LENS_FLARE;
 
     const isEffectActive = sunCfg.enabled || flareCfg.enabled;
 

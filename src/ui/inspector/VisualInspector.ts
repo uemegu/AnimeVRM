@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '../../shader/HairRing';
-import { DEFAULT_FACE_SDF_PARAMS, setFaceSdfParams } from '../../shader/FaceSdf';
-import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '../../postprocessing/LightWrap';
-import { DEFAULT_PARA_PARAMS, ParaShader, applyParaParams } from '../../postprocessing/Para';
+import { DEFAULT_HAIR_RING_PARAMS, setHairRingParams, setHairRingTint } from '@anime-vrm/engine/shader/HairRing';
+import { DEFAULT_FACE_SDF_PARAMS, setFaceSdfParams } from '@anime-vrm/engine/shader/FaceSdf';
+import { DEFAULT_LIGHT_WRAP_PARAMS, LightWrapShader, applyLightWrapParams } from '@anime-vrm/engine/postprocessing/LightWrap';
+import { DEFAULT_PARA_PARAMS, ParaShader, applyParaParams } from '@anime-vrm/engine/postprocessing/Para';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
 import { showToast } from '../components/Toast';
 import { syncBgButtons } from '../helpers';
 import { InspectorContext } from './InspectorManager';
-import { DEFAULT_FAST_MOTION_CONFIG } from '../../effects/motion';
+import { DEFAULT_FAST_MOTION_CONFIG } from '@anime-vrm/engine/effects/motion/index';
 
 export function setupVisualInspector(container: HTMLElement, ctx: InspectorContext, guis: GUI[]): void {
   const tr = t();

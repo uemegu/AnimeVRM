@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
 import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig } from './Config';
+
+/** ToonShader が使う設定。ルートは AvatarConfig 全体、app は必要な部分だけを渡す */
+export interface ToonShaderAvatarConfig {
+  materials?: Partial<AvatarConfig['materials']>;
+  outline?: AvatarConfig['outline'];
+  eyeGlow?: EyeGlowConfig;
+  bottomGradient?: BottomGradientConfig;
+}
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
 import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './shader/HairRing';
@@ -11,7 +19,7 @@ export type ToonShaderOptions = {
   bodyPattern?: RegExp;
   hairPattern?: RegExp;
   clothPattern?: RegExp;
-  config?: AvatarConfig;
+  config?: ToonShaderAvatarConfig;
   camera?: THREE.Camera;
   // 前髪の影（HairShadowRenderer.uniforms）。未指定なら影は出ない
   hairShadow?: HairShadowUniforms;
@@ -26,7 +34,7 @@ export type ToonShaderController = {
   updateOutline: (params: Partial<AvatarConfig['outline']>) => void;
   updateEyeGlow: (cfg?: EyeGlowConfig) => void;
   updateBottomGradient: (cfg?: Partial<BottomGradientConfig>) => void;
-  applyFullConfig: (config: AvatarConfig) => void;
+  applyFullConfig: (config: ToonShaderAvatarConfig) => void;
 };
 
 type MToonLikeMaterial = THREE.Material & {
@@ -60,7 +68,6 @@ const DEFAULT_FACE_PATTERN = /Face|Mouth|顔|口/i;
 const DEFAULT_BODY_PATTERN = /Body.*SKIN|body|skin|肌|体/i;
 const DEFAULT_HAIR_PATTERN = /Hair|hair|髪/i;
 const DEFAULT_CLOTH_PATTERN = /Shoes|Cloth|Tops|Bottoms|Onepiece|outfit|dress|jacket|shirt|skirt|shoes|suit|pant|服|靴|衣/i;
-const NON_HAIR_EXCLUSION_PATTERN = /Face|Mouth|Eye|Brow|Eyelash|Skin|Body|Cloth|Tops|Bottoms|Shoes|Dress|Skirt|Suit|Shirt|Pant|Onepiece|肌|体|顔|目|服|靴|衣/i;
 
 export function isEyeMaterial(matName: string): boolean {
   if (/Eyeline|Eyelash|アイライン|まつ毛|まつげ/i.test(matName)) {
@@ -202,7 +209,7 @@ function classifyStyleMaterial(
 
 export function applyToonShader(
   vrm: VRM,
-  scene: THREE.Scene,
+  _scene: THREE.Scene,
   options: ToonShaderOptions
 ): ToonShaderController {
   const bodyPattern = options.bodyPattern ?? DEFAULT_BODY_PATTERN;
@@ -733,10 +740,10 @@ export function applyToonShader(
 
   // Initial config application
   if (activeConfig) {
-    applyMaterialStyle('body', activeConfig.materials.body);
-    applyMaterialStyle('hair', activeConfig.materials.hair);
-    applyMaterialStyle('cloth', activeConfig.materials.cloth);
-    applyOutline(activeConfig.outline);
+    if (activeConfig.materials?.body) applyMaterialStyle('body', activeConfig.materials.body);
+    if (activeConfig.materials?.hair) applyMaterialStyle('hair', activeConfig.materials.hair);
+    if (activeConfig.materials?.cloth) applyMaterialStyle('cloth', activeConfig.materials.cloth);
+    if (activeConfig.outline) applyOutline(activeConfig.outline);
     if (activeConfig.bottomGradient) {
       applyBottomGradient(activeConfig.bottomGradient);
     }

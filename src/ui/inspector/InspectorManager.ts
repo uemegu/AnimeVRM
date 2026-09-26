@@ -1,8 +1,8 @@
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
-import { AvatarConfig } from '../../Config';
-import { ViewerCore } from '../../scene/ViewerCore';
-import { AvatarManager } from '../../avatar/AvatarManager';
-import { AudioLipSync } from '../../AudioLipSync';
+import { AvatarConfig } from '@anime-vrm/engine/Config';
+import { ViewerCore } from '@anime-vrm/engine/scene/ViewerCore';
+import { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
 import { setupStageInspector } from './StageInspector';
 import { setupVisualInspector } from './VisualInspector';
 

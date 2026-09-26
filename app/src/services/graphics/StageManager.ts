@@ -9,16 +9,16 @@ import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { TimeOfDayId } from '../../types/visual';
 import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
-import { CinematicAnimeShader } from './CinematicAnimeShader';
-import { GodRaysShader } from './postprocessing/GodRaysShader';
-import { SunEffect } from './postprocessing/SunEffect';
-import { SkyBackground } from './scene/SkyBackground';
+import { CinematicAnimeShader } from '@anime-vrm/engine/postprocessing/CinematicAnimeShader';
+import { GodRaysShader } from '@anime-vrm/engine/postprocessing/GodRaysShader';
+import { SunEffect } from '@anime-vrm/engine/postprocessing/SunEffect';
+import { SkyBackground } from '@anime-vrm/engine/scene/SkyBackground';
 import { ScrollingBackground, ScrollingBackgroundSettings } from './scene/ScrollingBackground';
 import { Avatar } from './avatar/Avatar';
-import { HairShadowRenderer } from './shader/HairShadow';
-import { CharacterMaskRenderer, LightWrapShader } from './postprocessing/LightWrap';
-import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from './postprocessing/Para';
-import { setHairRingTint } from './shader/HairRing';
+import { HairShadowRenderer } from '@anime-vrm/engine/shader/HairShadow';
+import { CharacterMaskRenderer, LightWrapShader } from '@anime-vrm/engine/postprocessing/LightWrap';
+import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '@anime-vrm/engine/postprocessing/Para';
+import { setHairRingTint } from '@anime-vrm/engine/shader/HairRing';
 import { soundManager } from '../audio/SoundManager';
 import type { CameraShot } from '../../types/scenario';
 import type { StageCastMember } from '../stage/sceneView';
@@ -139,7 +139,7 @@ export class StageManager {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     // 4. 空と雲の描画システム (SkyBackground)
-    this.skyBackground = new SkyBackground(this.scene);
+    this.skyBackground = new SkyBackground(this.scene, { visible: true });
     this.scrollingBackground = new ScrollingBackground(this.scene, this.camera);
 
     // 5. ライト初期化

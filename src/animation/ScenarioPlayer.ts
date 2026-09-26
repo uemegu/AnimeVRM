@@ -1,9 +1,9 @@
-import { Avatar } from '../Avatar';
-import { AudioLipSync } from '../AudioLipSync';
-import { resolveAssetUrl } from '../utils/path';
+import { Avatar } from '@anime-vrm/engine/Avatar';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { AdventureMessageWindow } from './AdventureMessageWindow';
 import { CameraZoomType, CameraTransitionEasing } from '../scenario/types';
-import { CameraPreset, CameraStartAngle } from './types';
+import { CameraPreset, CameraStartAngle } from '@anime-vrm/engine/animation/types';
 import { Language, getLanguage } from '../i18n';
 
 export interface ScenarioStep {

@@ -1,11 +1,11 @@
-import { EffectPresetName } from '../effects/text/types';
-import { CameraPreset, CameraStartAngle } from '../animation/types';
-import { ScenePresetId } from '../presets/ScenePresets';
-import { TearConfig } from '../effects/tears';
-import { FocusLinesConfig } from '../effects/FocusLinesOverlay';
-import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
-import type { CinematicFisheyeConfig } from '../Config';
-import type { YandereOptions } from '../Avatar';
+import { EffectPresetName } from '@anime-vrm/engine/effects/text/types';
+import { CameraPreset, CameraStartAngle } from '@anime-vrm/engine/animation/types';
+import { ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
+import { TearConfig } from '@anime-vrm/engine/effects/tears/index';
+import { FocusLinesConfig } from '@anime-vrm/engine/effects/FocusLinesOverlay';
+import { AnimeDreamBackgroundConfig } from '@anime-vrm/engine/effects/AnimeDreamBackground';
+import type { CinematicFisheyeConfig } from '@anime-vrm/engine/Config';
+import type { YandereOptions } from '@anime-vrm/engine/Avatar';
 
 export interface ScenarioChoice {
   text: string;

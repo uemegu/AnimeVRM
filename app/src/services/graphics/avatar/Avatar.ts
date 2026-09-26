@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
-import { applyToonShader, ToonShaderController } from '../shader/ToonShader';
-import { HairShadowUniforms } from '../shader/HairShadow';
-import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
+import { applyToonShader, ToonShaderController } from '@anime-vrm/engine/ToonShader';
+import { HairShadowUniforms } from '@anime-vrm/engine/shader/HairShadow';
+import { applySmoothNormalsToHierarchy } from '@anime-vrm/engine/shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
-import { getSeamlessLoopClip } from './seamlessLoop';
-import { replaceHappyWithEyesOnly } from './happyEyesOnly';
+import { getSeamlessLoopClip } from '@anime-vrm/engine/animation/seamlessLoop';
+import { replaceHappyWithEyesOnly } from '@anime-vrm/engine/avatar/happyEyesOnly';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();

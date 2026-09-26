@@ -4,9 +4,9 @@ import {
   SoundMasterItem,
   MasterDatabase,
 } from './types';
-import { ScenePresetData, ScenePresetId } from '../presets/ScenePresets';
+import { ScenePresetData, ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
 import { DEFAULT_MASTER_DATABASE } from './defaultMasters';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export class MasterDataManager {
   private db: MasterDatabase;

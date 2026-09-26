@@ -1,5 +1,5 @@
 import { ScenarioPackage } from './types';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { Language, getLanguage } from '../i18n';
 
 export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {

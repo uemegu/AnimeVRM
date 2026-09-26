@@ -155,8 +155,6 @@ export class RainEffect {
   private readonly boxCenter = new THREE.Vector3(0, 1.8, 0);
 
   private config: RainConfig;
-  private currentCount = 0;
-  private currentSplashCount = 0;
 
   constructor(scene: THREE.Scene, config: Partial<RainConfig> = {}) {
     this.config = { ...DEFAULT_RAIN_CONFIG, ...config };
@@ -210,7 +208,6 @@ export class RainEffect {
     }
 
     const count = this.config.count;
-    this.currentCount = count;
 
     // 各雨粒は2頂点（head と tail）
     const totalVertices = count * 2;
@@ -276,7 +273,6 @@ export class RainEffect {
     if (!this.config.splashEnabled) return;
 
     const count = this.config.splashCount;
-    this.currentSplashCount = count;
 
     const positions = new Float32Array(count * 3);
     const aSplashPos = new Float32Array(count * 3);

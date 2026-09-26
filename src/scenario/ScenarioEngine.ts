@@ -1,5 +1,5 @@
-import { Avatar } from '../Avatar';
-import { AudioLipSync } from '../AudioLipSync';
+import { Avatar } from '@anime-vrm/engine/Avatar';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
 import { AdventureMessageWindow } from '../animation/AdventureMessageWindow';
 import {
   ScenarioPackage,
@@ -15,15 +15,15 @@ import {
   AvatarTransition,
   SceneTransition,
 } from './types';
-import { ScenePresetId } from '../presets/ScenePresets';
-import { CameraPreset, CameraStartAngle } from '../animation/types';
-import { resolveAssetUrl } from '../utils/path';
+import { ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
+import { CameraPreset, CameraStartAngle } from '@anime-vrm/engine/animation/types';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { MasterDataManager } from '../master/MasterDataManager';
-import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
-import { ShaftCutInOverlay } from '../effects/shaft/ShaftCutInOverlay';
-import { AnimeDreamBackgroundConfig } from '../effects/AnimeDreamBackground';
+import { FocusLinesOverlay } from '@anime-vrm/engine/effects/FocusLinesOverlay';
+import { ShaftCutInOverlay } from '@anime-vrm/engine/effects/shaft/ShaftCutInOverlay';
+import { AnimeDreamBackgroundConfig } from '@anime-vrm/engine/effects/AnimeDreamBackground';
 import { BlackoutOverlay } from '../ui/BlackoutOverlay';
-import type { CinematicFisheyeConfig } from '../Config';
+import type { CinematicFisheyeConfig } from '@anime-vrm/engine/Config';
 import * as THREE from 'three';
 
 export interface ScenarioEngineOptions {
