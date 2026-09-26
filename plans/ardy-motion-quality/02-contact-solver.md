@@ -70,7 +70,7 @@ prayerCenterのworld点をM、身体左方向をX、gapをgとする。
 
 接触時は既存FingerMotionServiceのopenポーズを再利用し、強さwで元の指姿勢から補間する。腕・手首トラックをFingerMotion処理で上書きしない。タスク05の軽い指曲げより接触ポーズを優先する。
 
-プロファイルは `public/motion-profiles/aoi-school.json`, `emili.json` に保存する。元モデルのSHA-256、頭・手のnormalized boneローカル値を記録する。
+プロファイルは `assets/motion-profiles/aoi-school.json`, `emili.json` に保存する。元モデルのSHA-256、頭・手のnormalized boneローカル値を記録する。
 
 初期候補は頭と目ボーン、手首と中指付け根の位置から作ってよいが、骨だけでは皮膚表面・掌表裏を保証できない。正面・側面で目標点と手の向きを確認して位置・gapを調整する。目視できない場合は `calibrated:false` のまま残し、未検証と報告する。計測を通すためにアンカーを誤った手の位置へ移動しない。
 

@@ -66,6 +66,7 @@ function scenarioIndexPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), licenseGeneratorPlugin(), preloadManifestPlugin(), scenarioIndexPlugin()],
+  publicDir: '../assets',
   server: {
     port: 5174,
   },

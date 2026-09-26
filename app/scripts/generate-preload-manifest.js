@@ -56,7 +56,7 @@ function generateLabelFromUrl(url) {
  */
 export async function generatePreloadManifest() {
   const targetsModulePath = path.join(APP_ROOT, 'src', 'config', 'preloadTargets.ts');
-  const publicDir = path.join(APP_ROOT, 'public');
+  const publicDir = path.join(APP_ROOT, '..', 'assets');
   const outputPath = path.join(APP_ROOT, 'src', 'data', 'preloadManifest.json');
 
   const { PRELOAD_TARGETS } = await import(targetsModulePath);

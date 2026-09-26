@@ -34,9 +34,9 @@ Synthesize speech matching the exact speaker identity of the reference `.wav`:
 ```bash
 /Users/ueda/git/practice/tts/Irodori-TTS/.venv/bin/python \
   .agents/skills/irodori-tts/scripts/synthesize.py \
-  --ref-wav "public/voices/001.wav" \
+  --ref-wav "assets/voices/001.wav" \
   --text "あ、来てくれたんだ！急に呼び出したりして、ごめんね。" \
-  --output-wav "public/voices/dialogue_01.wav" \
+  --output-wav "assets/voices/dialogue_01.wav" \
   --device mps
 ```
 
@@ -50,10 +50,10 @@ Keep the original speaker's timbre, but direct their acting/emotion (e.g. crying
 ```bash
 /Users/ueda/git/practice/tts/Irodori-TTS/.venv/bin/python \
   .agents/skills/irodori-tts/scripts/synthesize.py \
-  --ref-wav "public/voices/001.wav" \
+  --ref-wav "assets/voices/001.wav" \
   --caption "深く傷つき、今にも泣き出しそうな様子。声が震えており、悲痛なトーンで弱々しく話す。" \
   --text "どうしてもっと早く教えてくれなかったの？私、ずっと待ってたのに……っ。" \
-  --output-wav "public/voices/confess_crying.wav" \
+  --output-wav "assets/voices/confess_crying.wav" \
   --device mps
 ```
 
@@ -66,7 +66,7 @@ Generate a brand-new character voice entirely from a descriptive prompt:
   --no-ref \
   --caption "落ち着いた女性の声で、近い距離感でやわらかく自然に読み上げてください。" \
   --text "こんにちは。本日もお疲れ様でした。" \
-  --output-wav "public/voices/calm_lady.wav" \
+  --output-wav "assets/voices/calm_lady.wav" \
   --device mps
 ```
 
@@ -89,19 +89,19 @@ Synthesize all dialogue lines for a scenario in a single run. The model loads **
     "id": "intro_1",
     "text": "あ、来てくれたんだ！急に呼び出したりして、ごめんね。",
     "caption": "少し緊張しながらも嬉しそうに微笑む明るいトーン",
-    "output": "public/voices/confess_intro_1.wav"
+    "output": "assets/voices/confess_intro_1.wav"
   },
   {
     "id": "route_love_1",
     "text": "やったーっ！ え……！？ ほんとに……！？ 夢じゃないよね……！？",
     "caption": "飛び上がるほど大喜びし、感極まって声が弾んでいるトーン",
-    "output": "public/voices/confess_love_1.wav"
+    "output": "assets/voices/confess_love_1.wav"
   },
   {
     "id": "route_money_2",
     "text": "そ、そんな理由でこんな呼び出しに応じたの……！？ 私の心の準備とドキドキを返してよー！！",
     "caption": "激怒してぷんぷんと怒鳴りつけるようなコミカルな怒り声",
-    "output": "public/voices/confess_money_2.wav"
+    "output": "assets/voices/confess_money_2.wav"
   }
 ]
 ```
@@ -110,7 +110,7 @@ Synthesize all dialogue lines for a scenario in a single run. The model loads **
 ```bash
 /Users/ueda/git/practice/tts/Irodori-TTS/.venv/bin/python \
   .agents/skills/irodori-tts/scripts/synthesize.py \
-  --ref-wav "public/voices/001.wav" \
+  --ref-wav "assets/voices/001.wav" \
   --batch-json "scratch/scenario_lines.json" \
   --device mps
 ```

@@ -1,7 +1,7 @@
 """Rebuild the explorable school classroom and export its GLB/previews.
 
 Run with Blender in background mode against school-environments.blend:
-  Blender -b public/models/school-environments/school-environments.blend \
+  Blender -b assets/models/school-environments/school-environments.blend \
     --python tools/build_classroom.py
 
 The corridor collection is left intact.  Classroom pieces stay separate and

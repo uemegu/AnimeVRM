@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const APP_ROOT = path.resolve(__dirname, '..');
 
-export const SCENARIOS_DIR = path.join(APP_ROOT, 'public', 'scenarios');
+export const SCENARIOS_DIR = path.join(APP_ROOT, '..', 'assets', 'scenarios');
 const OUTPUT_PATH = path.join(APP_ROOT, 'src', 'data', 'scenarioIndex.json');
 
 /** 目次の並び順（同じ優先度のシナリオはこの順→ディレクトリ名順で選ばれる） */
@@ -29,7 +29,7 @@ const META_KEYS = [
 ];
 
 /**
- * public/scenarios/<category>/<id>/scenario.json を走査し、
+ * assets/scenarios/<category>/<id>/scenario.json を走査し、
  * 発生判定に使うメタ情報だけを集めた src/data/scenarioIndex.json を生成する。
  * 内容が変わらない場合は書き込まない（開発サーバーの無駄な再読み込みを防ぐ）。
  */

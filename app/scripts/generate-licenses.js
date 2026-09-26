@@ -107,7 +107,7 @@ export function generateLicenses() {
   };
 
   const outputSrcPath = path.join(APP_ROOT, 'src', 'data', 'licenses.json');
-  const outputPublicPath = path.join(APP_ROOT, 'public', 'licenses.json');
+  const outputPublicPath = path.join(APP_ROOT, '..', 'assets', 'licenses.json');
 
   fs.mkdirSync(path.dirname(outputSrcPath), { recursive: true });
   fs.mkdirSync(path.dirname(outputPublicPath), { recursive: true });

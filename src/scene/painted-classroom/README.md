@@ -4,7 +4,7 @@
 
 - 確認ページ: `/AnimeVRM/painted-classroom.html`
 - シナリオ: `/AnimeVRM/scenarios/painted-classroom.html`（`stage: 'painted-classroom'`）
-- 素材: `public/textures/painted-classroom/*.avif`
+- 素材: `assets/textures/painted-classroom/*.avif`
 
 ## 構成
 

@@ -4,7 +4,7 @@
 
 - シナリオ: `/AnimeVRM/scenarios/painted-library.html`（`stage: 'painted-library'`。シーンプリセットで朝・昼・放課後を切り替え、ライト・ポストプロセスは既存プリセットのまま）
 - 確認ページ: `/AnimeVRM/painted-library.html`（簡易ライトでの配置確認用。`?blockout` で灰色の箱のみ）
-- 素材: `public/textures/painted-library/*.avif`（絵柄の参照は `app/public/textures/school-library-far.png`）
+- 素材: `assets/textures/painted-library/*.avif`（絵柄の参照は `assets/textures/school-library-far.png`）
 
 ## 構成
 

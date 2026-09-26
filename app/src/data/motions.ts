@@ -1,5 +1,5 @@
 /**
- * モーション（public/animations/<名前>.fbx）の再生方法
+ * モーション（assets/animations/<名前>.fbx）の再生方法
  * 待機・歩行など、繰り返して自然なものだけループする。身振りは1回再生して待機モーションに戻る
  */
 export const LOOPING_MOTIONS = new Set([

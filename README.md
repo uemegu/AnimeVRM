@@ -114,7 +114,7 @@
 - **Node.js**: v18.0 以上
 
 ```bash
-# 依存パッケージのインストール
+# 依存パッケージのインストール（app/ と packages/ もまとめて入る）
 npm install
 
 # 開発サーバー起動
@@ -487,7 +487,7 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
 
 ## 👤 キャラクターアバター構成
 
-リポジトリ内の `public/models` に最適化済み VRM モデルが同梱されており、UI 上で即座に切り替えて演出を楽しめます。
+リポジトリ内の `assets/models` に最適化済み VRM モデルが同梱されており、UI 上で即座に切り替えて演出を楽しめます。
 
 - 👧 **アオイ (Aoi)**:
   - `aoi/aoi-school.vrm`（制服）
@@ -542,7 +542,7 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
 
 ```text
 vrm-genshin-like/
-├── public/
+├── assets/
 │   ├── animations/        # 待機・歩行・挨拶・ダンス等の Mixamo FBX アニメーション
 │   ├── bgm/               # シナリオ用 BGM (mp3)
 │   ├── img/               # UI・ダイアログ用キャラクター立ち絵 (AVIF)
