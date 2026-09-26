@@ -8,7 +8,8 @@ import { useStudioData } from '../../data/useStudioData';
 import { format, useI18n } from '../../i18n';
 import { CutInspector } from './CutInspector';
 import { CutList } from './CutList';
-import { CutPreview, type Outfit } from './CutPreview';
+import type { Outfit } from './CutPreview';
+import { CutWorkbench } from './CutWorkbench';
 import { FlowChart } from './FlowChart';
 import { JsonDocumentEditor, ScenarioSettings } from './ScenarioSettings';
 import { duplicateScene, insertScene, moveScene, referencesTo, removeScene, replaceScene, textJa } from './scenarioEdit';
@@ -272,9 +273,14 @@ export function ScenariosView() {
                   )}
                 </div>
                 {center === 'preview' && (
-                  <div className="scenario-frame">
-                    <CutPreview scenario={story} baseUrl={`/scenarios/${category}/${id}/`} index={cutIndex} data={data} outfit={outfit} />
-                  </div>
+                  <CutWorkbench
+                    scenario={story}
+                    index={cutIndex}
+                    baseUrl={`/scenarios/${category}/${id}/`}
+                    data={data}
+                    outfit={outfit}
+                    onChangeScene={(scene) => updateStory(replaceScene(story, cutIndex, scene))}
+                  />
                 )}
                 {center === 'flow' && (
                   <div className="scenario-flow">
@@ -288,7 +294,24 @@ export function ScenariosView() {
                     <ScenarioSettings scenario={story} data={data} onChange={updateStory} />
                   </div>
                 ) : (
-                  <CutInspector scenario={story} index={cutIndex} data={data} onChange={(scene: ScenarioScene) => updateStory(replaceScene(story, cutIndex, scene))} />
+                  <CutInspector
+                    scenario={story}
+                    index={cutIndex}
+                    data={data}
+                    voice={{
+                      category: category!,
+                      scenarioId: id!,
+                      baseUrl: `/scenarios/${category}/${id}/`,
+                      dirty,
+                      // 採用するとサーバーがシナリオの voiceUrl を書き換えるので読み直す
+                      onReload: () =>
+                        api.scenario(category!, id!).then((fresh) => {
+                          setSaved(fresh);
+                          setDraft(structuredClone(fresh));
+                        }),
+                    }}
+                    onChange={(scene: ScenarioScene) => updateStory(replaceScene(story, cutIndex, scene))}
+                  />
                 )}
               </aside>
             </div>

@@ -300,6 +300,7 @@
   height: 100%;
 }
 .cut-dialogue {
+  pointer-events: none;
   position: absolute;
   left: 0;
   right: 0;
@@ -333,6 +334,7 @@
   font-size: 13px;
 }
 .cut-preview-hud {
+  pointer-events: none;
   position: absolute;
   top: 10px;
   left: 10px;
@@ -631,4 +633,208 @@
 }
 .flow-legend-flags {
   line-height: 1.5;
+}
+
+/* プレビュー＋タイムライン */
+.workbench {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.workbench-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.workbench-time {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 12px;
+  color: var(--text-sub);
+  min-width: 110px;
+}
+.workbench-spacer {
+  flex: 1;
+}
+.workbench-key {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.workbench-key .field-hint {
+  margin: 0;
+}
+
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  overflow: hidden;
+  user-select: none;
+}
+.timeline-row,
+.timeline-playhead-layer {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  min-height: 30px;
+}
+.timeline-row + .timeline-row {
+  border-top: 1px solid var(--border);
+}
+.timeline-row.ruler {
+  min-height: 24px;
+  background: var(--bg-subtle);
+}
+.timeline-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 10px;
+  border-right: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-sub);
+  min-width: 0;
+}
+.timeline-label-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.timeline-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.timeline-add {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex: none;
+}
+.timeline-add:hover {
+  background: var(--bg-muted);
+}
+.timeline-track {
+  position: relative;
+  margin: 0 12px;
+}
+.ruler .timeline-track {
+  cursor: pointer;
+}
+.timeline-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding-left: 3px;
+  line-height: 24px;
+}
+.timeline-tick.major {
+  border-left-color: var(--border-strong);
+}
+.timeline-voice {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  height: 12px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(90deg, #a7f3d0 0 3px, #6ee7b7 3px 5px);
+}
+.timeline-key {
+  position: absolute;
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  margin-left: -6.5px;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  transform: translateY(-50%) rotate(45deg);
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.25);
+  cursor: ew-resize;
+  padding: 0;
+}
+.timeline-key.selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.timeline-playhead-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.timeline-playhead-layer .timeline-label {
+  border-right: none;
+}
+.timeline-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #ef4444;
+}
+
+.key-editor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px 12px;
+  align-items: end;
+}
+.key-editor .key-at {
+  max-width: 120px;
+}
+.key-delete {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.voice-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.voice-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.voice-generate {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.voice-count {
+  width: 96px;
+}
+.voice-candidates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.voice-candidates li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.voice-candidates li span {
+  flex: 1;
+  font-size: 13px;
 }

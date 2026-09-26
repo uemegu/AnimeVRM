@@ -13,6 +13,7 @@ import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
 import { cutWarnings, makeText, textEn, textJa } from './scenarioEdit';
+import { VoicePanel } from './VoicePanel';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
@@ -20,10 +21,20 @@ const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 
+/** 音声生成に必要な、シナリオの場所と保存状態 */
+export interface VoiceContext {
+  category: string;
+  scenarioId: string;
+  baseUrl: string;
+  dirty: boolean;
+  onReload: () => void;
+}
+
 interface Props {
   scenario: ScenarioPackage;
   index: number;
   data: StudioData;
+  voice: VoiceContext;
   onChange: (scene: ScenarioScene) => void;
 }
 
@@ -35,7 +46,7 @@ function withField<T extends object, K extends keyof T>(obj: T, key: K, value: T
   return copy;
 }
 
-export function CutInspector({ scenario, index, data, onChange }: Props) {
+export function CutInspector({ scenario, index, data, voice, onChange }: Props) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>('line');
   const scene = scenario.scenes[index];
@@ -59,7 +70,7 @@ export function CutInspector({ scenario, index, data, onChange }: Props) {
             ))}
           </ul>
         )}
-        {tab === 'line' && <LineTab scene={scene} data={data} set={set} onChange={onChange} />}
+        {tab === 'line' && <LineTab scene={scene} data={data} voice={voice} set={set} onChange={onChange} />}
         {tab === 'stage' && <StageTab scenario={scenario} index={index} data={data} set={set} />}
         {tab === 'cast' && <CastTab scenario={scenario} index={index} data={data} set={set} />}
         {tab === 'flow' && <FlowTab scenario={scenario} index={index} set={set} />}
@@ -71,7 +82,7 @@ export function CutInspector({ scenario, index, data, onChange }: Props) {
 
 type Setter = <K extends keyof ScenarioScene>(key: K, value: ScenarioScene[K] | undefined) => void;
 
-function LineTab({ scene, data, set, onChange }: { scene: ScenarioScene; data: StudioData; set: Setter; onChange: (s: ScenarioScene) => void }) {
+function LineTab({ scene, data, voice, set, onChange }: { scene: ScenarioScene; data: StudioData; voice: VoiceContext; set: Setter; onChange: (s: ScenarioScene) => void }) {
   const { t } = useI18n();
   const character = data.characters.characters.find((c) => c.id === scene.speakerCharacterId);
   return (
@@ -118,7 +129,15 @@ function LineTab({ scene, data, set, onChange }: { scene: ScenarioScene; data: S
       </label>
       <div className="field">
         <span className="field-label">{t.scenarios.voice}</span>
-        <span className="inspector-mono">{scene.voiceUrl ?? t.scenarios.noVoice}</span>
+        <VoicePanel
+          category={voice.category}
+          scenarioId={voice.scenarioId}
+          lineId={scene.id}
+          voiceUrl={scene.voiceUrl}
+          baseUrl={voice.baseUrl}
+          dirty={voice.dirty}
+          onAdopted={voice.onReload}
+        />
       </div>
     </div>
   );
