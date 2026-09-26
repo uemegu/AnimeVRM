@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import type { ServerConfig } from './config.ts';
 import { assetRoutes } from './routes/assets.ts';
+import { characterRoutes } from './routes/characters.ts';
 import { scenarioRoutes } from './routes/scenarios.ts';
 import { studioDataRoutes } from './routes/studioData.ts';
 import { ttsRoutes } from './routes/tts.ts';
@@ -47,6 +48,7 @@ export function createApp(config: ServerConfig) {
   api.route('/assets', assetRoutes(config));
   api.route('/studio-data', studioDataRoutes(config));
   api.route('/tts', ttsRoutes(config, store));
+  api.route('/characters', characterRoutes(config, store));
   app.route('/api', api);
 
   return app;

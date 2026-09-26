@@ -1,0 +1,352 @@
+{
+  "description": "キャラクター管理（Studio）。シナリオからは id で参照する。speakerNames は ID を付けずに話者名だけで書かれたセリフ（「女神の声」など）をこのキャラとみなす名前。voice は音声生成の設定で、ref は参照音声（リポジトリ直下からの相対パス）、caption は声質、direction はキャラ固有のボイス指導（声の説明に足す）",
+  "characters": [
+    {
+      "id": "aoi",
+      "name": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "role": "heroine",
+      "themeColor": "#eab308",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/aoi/aoi-school.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/aoi/aoi-private.vrm"
+        },
+        {
+          "key": "commute",
+          "label": {
+            "ja": "通学（カバン）",
+            "en": "Commute"
+          },
+          "url": "/models/aoi/aoi-school-with-bag.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/001.mp3",
+        "caption": "穏やかで優しい、清楚な幼馴染の女子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [],
+      "profile": "穏やかで優しい聖母。黒服騒動で自分を命がけで守ってくれた主人公にガチ惚れ。以降は「タカシくんは私のヒーロー」「一生お世話してあげる」と、穏やかな笑顔のまま愛が重くなる。"
+    },
+    {
+      "id": "emili",
+      "name": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "role": "heroine",
+      "themeColor": "#ef4444",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/emili/emili.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/emili/emili-private.vrm"
+        },
+        {
+          "key": "commute",
+          "label": {
+            "ja": "通学（カバン）",
+            "en": "Commute"
+          },
+          "url": "/models/emili/emili-school-with-bag.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/trio_intro_2.mp3",
+        "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [
+        "エミリの声"
+      ],
+      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。"
+    },
+    {
+      "id": "shion",
+      "name": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "role": "heroine",
+      "themeColor": "#3b82f6",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/shion/shion-school.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/shion/shion-private.vrm"
+        },
+        {
+          "key": "commute",
+          "label": {
+            "ja": "通学（カバン）",
+            "en": "Commute"
+          },
+          "url": "/models/shion/shion-school-with-bag.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/girl4_ref.mp3",
+        "caption": "ダウナーでクールな、気だるげで低めの女子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [],
+      "profile": "ダウナー系・文武両道。体育館のキャットウォークから騒動を高みの見物。「……アクション映画の撮影かしら。怪我人が出ないなら好きにしなさい」とクールに見届ける。"
+    },
+    {
+      "id": "god",
+      "name": {
+        "ja": "女神",
+        "en": "Goddess"
+      },
+      "role": "sub",
+      "themeColor": "#f59e0b",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/god.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/god_ref.mp3",
+        "caption": "神々しく威厳のある女神の声。理不尽でせっかちな一面もある。",
+        "direction": "",
+        "postprocess": "divine_reverb"
+      },
+      "speakerNames": [
+        "女神の声"
+      ],
+      "profile": "短気で理不尽な超越者。「5秒で告白しないと◯すから（ピー音）」。主人公のアクションシーンを神界のモニターで見て「意外とやるじゃないですか」と感心している。"
+    },
+    {
+      "id": "teacher",
+      "name": {
+        "ja": "白石先生",
+        "en": "Ms. Shiraishi"
+      },
+      "role": "sub",
+      "themeColor": "#64748b",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/teacher/teacher.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/teacher/sample_03_cool_strict.mp3",
+        "caption": "クールで厳格な、若い女性教師の声。",
+        "direction": ""
+      },
+      "speakerNames": [
+        "白石先生"
+      ],
+      "profile": "担任。クールで厳しいが、少女漫画と恋バナに目がない。"
+    },
+    {
+      "id": "naruse",
+      "name": {
+        "ja": "ナルセ",
+        "en": "Naruse"
+      },
+      "role": "sub",
+      "themeColor": "#0ea5e9",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/boy.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/naruse_ref.mp3",
+        "caption": "お調子者で自信満々な男子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [],
+      "profile": "主人公の悪友。恋愛経験ゼロの自称恋愛マスター。"
+    },
+    {
+      "id": "yui",
+      "name": {
+        "ja": "ユイ",
+        "en": "Yui"
+      },
+      "role": "sub",
+      "themeColor": "#a855f7",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/mob/classmate_yui.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/yui_ref.mp3",
+        "caption": "噂話が大好きな、はしゃいだ女子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [],
+      "profile": "クラスメイトの噂好きコンビの一人。"
+    },
+    {
+      "id": "kana",
+      "name": {
+        "ja": "カナ",
+        "en": "Kana"
+      },
+      "role": "sub",
+      "themeColor": "#14b8a6",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/mob/classmate_kana.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/kana_ref.mp3",
+        "caption": "少しクールで気だるげな女子高校生の声。",
+        "direction": ""
+      },
+      "speakerNames": [],
+      "profile": "クラスメイトの噂好きコンビの一人。"
+    },
+    {
+      "id": "player",
+      "name": {
+        "ja": "タカシ",
+        "en": "Takashi"
+      },
+      "role": "player",
+      "themeColor": "#475569",
+      "models": [],
+      "speakerNames": [
+        "タカシ"
+      ],
+      "profile": "主人公。女神から「5秒で告白しないと◯す」と脅されている男子高校生。普段は奇行を連発しているが、アオイの危機には火事場の馬鹿力と驚異の運動神経を発揮する。怪我はしないが全力疾走で息は上がる。"
+    },
+    {
+      "id": "sp_leader",
+      "name": {
+        "ja": "黒服リーダー",
+        "en": "SP Leader"
+      },
+      "role": "mob",
+      "themeColor": "#1e293b",
+      "models": [],
+      "voice": {
+        "ref": "assets/voices/sp_leader_ref.mp3",
+        "caption": "低く威厳のある、軍人のようなSP部隊の隊長の声。",
+        "direction": ""
+      },
+      "speakerNames": [
+        "黒服リーダー",
+        "黒服の男"
+      ],
+      "profile": "エミリの家の SP 部隊の隊長。"
+    },
+    {
+      "id": "sp_member",
+      "name": {
+        "ja": "黒服",
+        "en": "SP Member"
+      },
+      "role": "mob",
+      "themeColor": "#334155",
+      "models": [],
+      "voice": {
+        "ref": "assets/voices/sp_member_ref.mp3",
+        "caption": "屈強なSP部隊員の、張りのある男性の声。",
+        "direction": ""
+      },
+      "speakerNames": [
+        "黒服たち",
+        "黒服A",
+        "黒服B"
+      ],
+      "profile": "エミリの家の SP 部隊員。"
+    },
+    {
+      "id": "shopkeeper",
+      "name": {
+        "ja": "商店街のおじさん",
+        "en": "Shopkeeper"
+      },
+      "role": "mob",
+      "themeColor": "#78716c",
+      "models": [],
+      "voice": {
+        "ref": "assets/voices/shopkeeper_ref.mp3",
+        "caption": "陽気な商店街のおじさんの声。",
+        "direction": ""
+      },
+      "speakerNames": [
+        "商店街のおじさん"
+      ],
+      "profile": "陽気な商店街のおじさん。"
+    }
+  ],
+  "voiceMoods": {
+    "happy": "明るく嬉しそうに、弾むようなトーンで話す。",
+    "relaxed": "柔らかく穏やかに、少し照れながら親しげに話す。",
+    "sad": "少し寂しそうに、しおらしく弱々しいトーンで話す。",
+    "angry": "語気を強めて、怒ったように話す。",
+    "surprised": "驚いて動揺し、声が上ずる。",
+    "neutral": "自然な会話のトーンで話す。"
+  },
+  "whisperCaption": "周りに聞こえないよう、小声で囁くように話す。",
+  "shoutCaption": "感情が高ぶり、大きな声で叫ぶ。"
+}

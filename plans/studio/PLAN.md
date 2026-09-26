@@ -68,6 +68,7 @@ tools/eye-editor/
 4. **シナリオ再生**：これまで作ったシナリオの一覧と再生（Pages 版と同じ部品）
 5. **モーション**：英語プロンプトから ardy-mini で複数候補を補正込みで生成し、並べて比較して採用する。接触点の校正もここで行う
 6. **ツール**：MorphTarget 調整、Eye Atelier、音声生成（Irodori-TTS をサーバー経由で呼ぶ）
+7. **キャラクター管理**：ID・名前・関連アバター（制服・私服など）・音声生成の参照音声とボイス指導・キャラ設定を編集する。キャラから登場シナリオ・セリフ・ボイスを逆引きできる。データは `assets/studio/characters.json`
 
 ## シナリオ形式の拡張方針
 
@@ -85,8 +86,8 @@ tools/eye-editor/
 2. **基盤**（2026-09-26 完了）：workspaces を作る。TS / Vite のバージョンをそろえる（ルートは TS7/Vite8、app/ は TS5.7/Vite6）。`packages/scenario` のスキーマを作り、app/ の全82シナリオが検証を通ることを確かめる。アセットを `assets/` に集約する
 3. **engine 統合**（2026-09-26 完了）：ルートの描画コードを `packages/engine` に移し、app/ と中身が同じ・ほぼ同じだったもの（シェーダー、ポストプロセス、空の背景、ToonShader、CinematicAnimeShader など）は app/ も engine の版を使う。違いがあったものはルートの版（機能の多い方）に、app/ の使い方を足して1本にした。統合前後のスクリーンショットで、ルート・app/ とも見た目が変わらないことを確認済み
    - app/ の `Avatar`・`StageManager`・`ScrollingBackground` は作りが別物なので、まだ app/ 側にある。第10段階で engine の `Avatar`・`ViewerCore` に載せ替える。それまでは、この3つに関わる描画の修正は両方に入れる
-4. **サーバー**（2026-09-26 完了）：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る。`server/README.md`。音声の話者設定は `assets/studio/voice-profiles.json` に移し、`app/scripts/scenario-voices.py` と共有
-5. **Studio の土台とビューア**
+4. **サーバー**（2026-09-26 完了）：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る。`server/README.md`。音声の話者設定はキャラクター管理（`assets/studio/characters.json`）に移し、`app/scripts/scenario-voices.py` と共有
+5. **Studio の土台・ビューア・キャラクター管理**
 6. **シーン編集**（簡易3D表示とカメラ調整、painted-* の組み込み）
 7. **シナリオ編集**（フロー → カット編集 → タイムライン → プレビュー → インポート・エクスポート）
 8. **再生と Pages**：ルートの20シナリオを JSON に移し、player をビルドして `docs/` を差し替える

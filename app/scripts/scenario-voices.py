@@ -6,7 +6,7 @@
   3. <Irodori-TTS の python> app/scripts/scenario-voices.py attach
        … 生成した wav を mp3 に変換して scenario.json の voiceUrl に結びつける（女神はリバーブ加工）
 ファイル名はセリフ本文のハッシュ付きなので、本文を直したセリフだけ作り直しになる。
-話者ごとの参照音声は REFS。新しいキャラはボイスデザイン（--no-ref + caption）で参照音声を作ってから加える。
+話者ごとの参照音声は assets/studio/characters.json（Studio のキャラクター管理）。新しいキャラはボイスデザイン（--no-ref + caption）で参照音声を作ってから加える。
 """
 import hashlib
 import json
@@ -17,15 +17,17 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 SCEN = os.path.join(REPO, 'assets/scenarios')
 CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending']
 
-# 話者ごとの参照音声・声の説明・表情ごとの演技指示は Studio と共有する JSON にある
-PROFILES = json.load(open(os.path.join(REPO, 'assets/studio/voice-profiles.json')))
-REFS = {k: os.path.join(REPO, v['ref']) for k, v in PROFILES['speakers'].items()}
-BASE = {k: v['caption'] for k, v in PROFILES['speakers'].items()}
-MOOD = PROFILES['moods']
+# 話者ごとの参照音声・声質・ボイス指導は Studio のキャラクター管理（assets/studio/characters.json）にある
+BOOK = json.load(open(os.path.join(REPO, 'assets/studio/characters.json')))
+VOICED = [c for c in BOOK['characters'] if c.get('voice')]
+REFS = {c['id']: os.path.join(REPO, c['voice']['ref']) for c in VOICED}
+BASE = {c['id']: c['voice']['caption'] + c['voice'].get('direction', '') for c in VOICED}
+POSTPROCESS = {c['id']: c['voice']['postprocess'] for c in VOICED if c['voice'].get('postprocess')}
+MOOD = BOOK['voiceMoods']
 # 画面にいない人物の名前 → 声
-VOICE_NAMES = PROFILES['speakerNames']
-WHISPER = PROFILES['whisperCaption']
-SHOUT = PROFILES['shoutCaption']
+VOICE_NAMES = {name: c['id'] for c in VOICED for name in c['speakerNames']}
+WHISPER = BOOK['whisperCaption']
+SHOUT = BOOK['shoutCaption']
 
 
 def speaker_of(scene):
@@ -79,7 +81,7 @@ def plan(out_json):
     items = []
     for path, scene, who, expression, text, fname in lines():
         out = os.path.join(os.path.dirname(path), fname)
-        raw = out + '.raw.wav' if who == 'god' else out
+        raw = out + '.raw.wav' if who in POSTPROCESS else out
         if os.path.exists(out) or os.path.exists(raw) or os.path.exists(out[:-4] + '.mp3'):
             continue
         caption = BASE[who] + MOOD.get(expression, MOOD['neutral'])
@@ -101,8 +103,8 @@ def attach():
     for path, scene, who, _, _, fname in lines():
         out = os.path.join(os.path.dirname(path), fname)
         raw = out + '.raw.wav'
-        if who == 'god' and os.path.exists(raw) and not os.path.exists(out):
-            apply_file('divine_reverb', raw, out)
+        if who in POSTPROCESS and os.path.exists(raw) and not os.path.exists(out):
+            apply_file(POSTPROCESS[who], raw, out)
         if os.path.exists(raw) and os.path.exists(out):
             os.remove(raw)
         # 配信用に mp3（モノラル 96kbps）へ変換する

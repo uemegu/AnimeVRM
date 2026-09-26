@@ -24,8 +24,6 @@ export function ttsRoutes(config: ServerConfig, store: ScenarioStore) {
     return (await store.read(category, id)) as ScenarioPackage | CallScenario | null;
   }
 
-  app.get('/profiles', async (c) => c.json(await loadVoiceProfiles(config.assetsDir)));
-
   /** セリフから決まる既定の話者・声の説明（Studio の入力欄の初期値） */
   app.get('/lines/:category/:id/:lineId', async (c) => {
     const { category, id, lineId } = c.req.param();
