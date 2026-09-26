@@ -23,6 +23,12 @@ import { getTeacherGateScenario } from '../scenario/teacherGateScenario';
 import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
 import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
 import { GHOST_MASS_SCENARIO } from '../scenario/ghostMassScenario';
+import { getSilverWeekScenario } from '../scenario/silverWeekScenario';
+import { getGestureBattleScenario } from '../scenario/gestureBattleScenario';
+import { getCorridorConversationScenario } from '../scenario/corridorConversationScenario';
+import { getPaintedClassroomScenario } from '../scenario/paintedClassroomScenario';
+import { getPaintedLibraryScenario } from '../scenario/paintedLibraryScenario';
+import { getCafeMonitoringScenario } from '../scenario/cafeMonitoringScenario';
 import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
 import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
@@ -630,6 +636,72 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #c7d2fe; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.teacherGateDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #f59e0b; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #fbbf24; font-weight: 700;">${tr.scenario.silverWeekTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-silverweek-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playSilverWeek}</button>
+              <button id="scenario-silverweek-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fde68a; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.silverWeekDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #06b6d4; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #22d3ee; font-weight: 700;">${tr.scenario.gestureBattleTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-gesturebattle-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(8, 145, 178, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playGestureBattle}</button>
+              <button id="scenario-gesturebattle-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #a5f3fc; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.gestureBattleDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #3b82f6; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #60a5fa; font-weight: 700;">${tr.scenario.corridorMobTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-corridormob-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playCorridorMob}</button>
+              <button id="scenario-corridormob-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #bfdbfe; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.corridorMobDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #10b981; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #34d399; font-weight: 700;">${tr.scenario.paintedClassroomTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-paintedclassroom-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #059669 0%, #047857 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playPaintedClassroom}</button>
+              <button id="scenario-paintedclassroom-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #a7f3d0; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.paintedClassroomDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #6366f1; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #818cf8; font-weight: 700;">${tr.scenario.paintedLibraryTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-paintedlibrary-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playPaintedLibrary}</button>
+              <button id="scenario-paintedlibrary-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #c7d2fe; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.paintedLibraryDesc}
+            </div>
+          </div>
+
+          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #e11d48; padding: 8px; border-radius: 4px;">
+            <label class="section-label" style="color: #fb7185; font-weight: 700;">${tr.scenario.cafeMonitoringTitle}</label>
+            <div style="display: flex; gap: 4px; margin-top: 4px;">
+              <button id="scenario-cafemonitoring-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #be123c 0%, #9f1239 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playCafeMonitoring}</button>
+              <button id="scenario-cafemonitoring-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
+            </div>
+            <div style="font-size: 10.5px; color: #fecdd3; line-height: 1.4; margin-top: 5px;">
+              ${tr.scenario.cafeMonitoringDesc}
             </div>
           </div>
 
@@ -1632,6 +1704,153 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
 
     document.getElementById('scenario-ghost-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Silver Week Twilight Scenario Play/Stop
+    document.getElementById('scenario-silverweek-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getSilverWeekScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'SILVER WEEK TWILIGHT',
+        });
+        showToast(t().toasts.silverWeekStarted);
+      }
+    });
+
+    document.getElementById('scenario-silverweek-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Gesture Battle Scenario Play/Stop
+    document.getElementById('scenario-gesturebattle-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getGestureBattleScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'AFTER SCHOOL GESTURE BATTLE',
+        });
+        showToast(t().toasts.gestureBattleStarted);
+      }
+    });
+
+    document.getElementById('scenario-gesturebattle-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Classroom Break Time (3D Mob) Scenario Play/Stop
+    document.getElementById('scenario-corridormob-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getCorridorConversationScenario();
+        await scenarioController.scenarioEngine.play(scenario);
+        showToast(t().toasts.corridorMobStarted);
+      }
+    });
+
+    document.getElementById('scenario-corridormob-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Painted Classroom (Lightweight 3D) Scenario Play/Stop
+    document.getElementById('scenario-paintedclassroom-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getPaintedClassroomScenario();
+        await scenarioController.scenarioEngine.play(scenario);
+        showToast(t().toasts.paintedClassroomStarted);
+      }
+    });
+
+    document.getElementById('scenario-paintedclassroom-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Painted Library (Lightweight 3D) Scenario Play/Stop
+    document.getElementById('scenario-paintedlibrary-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getPaintedLibraryScenario();
+        await scenarioController.scenarioEngine.play(scenario);
+        showToast(t().toasts.paintedLibraryStarted);
+      }
+    });
+
+    document.getElementById('scenario-paintedlibrary-stop-btn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      scenarioController.scenarioEngine.stop();
+      showToast(t().toasts.scenarioStopped);
+    });
+
+    // Interactive Cafe Monitoring Scenario Play/Stop
+    document.getElementById('scenario-cafemonitoring-btn')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (scenarioController.scenarioEngine.isPlaying) {
+        scenarioController.scenarioEngine.stop();
+      } else {
+        if (viewerCore.panoramaController.isActive) {
+          viewerCore.panoramaController.deactivate();
+        }
+        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
+        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
+        const scenario = getCafeMonitoringScenario(getLanguage());
+        await scenarioController.playWithInterlude(scenario, {
+          title: scenario.title,
+          subtitle: 'CAFE SURVEILLANCE MISSION',
+        });
+        showToast(t().toasts.cafeMonitoringStarted);
+      }
+    });
+
+    document.getElementById('scenario-cafemonitoring-stop-btn')?.addEventListener('click', (e) => {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);
