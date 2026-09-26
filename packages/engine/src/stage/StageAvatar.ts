@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
-import { applyToonShader, ToonShaderController } from '@anime-vrm/engine/ToonShader';
-import { HairShadowUniforms } from '@anime-vrm/engine/shader/HairShadow';
-import { applySmoothNormalsToHierarchy } from '@anime-vrm/engine/shader/SmoothNormalHelper';
-import type { MaterialStyleParams, OutlineConfig } from '../../../types/visual';
-import { getSeamlessLoopClip } from '@anime-vrm/engine/animation/seamlessLoop';
-import { replaceHappyWithEyesOnly } from '@anime-vrm/engine/avatar/happyEyesOnly';
+import { applyToonShader, ToonShaderController } from '../ToonShader';
+import { HairShadowUniforms } from '../shader/HairShadow';
+import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
+import type { MaterialStyleParams, OutlineConfig } from './visual';
+import { getSeamlessLoopClip } from '../animation/seamlessLoop';
+import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -139,7 +139,7 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   return resultClip;
 }
 
-export interface AvatarOptions {
+export interface StageAvatarOptions {
   id: string;
   modelUrl: string;
   scene: THREE.Scene;
@@ -151,8 +151,10 @@ export interface AvatarOptions {
   initialPosition?: THREE.Vector3;
 }
 
-export class Avatar {
+export class StageAvatar {
   public id: string;
+  /** 読み込んだ（読み込み中の）モデル */
+  public readonly modelUrl: string;
   public vrm: VRM | null = null;
   public scene: THREE.Scene;
   private camera: THREE.Camera | undefined;
@@ -204,8 +206,9 @@ export class Avatar {
     return this.isLipSyncActive;
   }
 
-  constructor(options: AvatarOptions) {
+  constructor(options: StageAvatarOptions) {
     this.id = options.id;
+    this.modelUrl = options.modelUrl;
     this.scene = options.scene;
     this.camera = options.camera;
     this.hairShadow = options.hairShadow;

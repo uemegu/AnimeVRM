@@ -3,7 +3,7 @@ import { soundManager } from '../../services/audio/SoundManager';
 import * as THREE from 'three';
 import { resolveLocalizedText } from '../../types/scenario';
 import { CallScenario, CommunicationResult } from '../../types/communication';
-import { Avatar } from '../../services/graphics/avatar/Avatar';
+import { StageAvatar } from '@anime-vrm/engine/stage/StageAvatar';
 import { CHARACTERS } from '../../data/characters';
 import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
 import { DialogueBox } from '../Dialogue/DialogueBox';
@@ -31,7 +31,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   const chosenIdsRef = useRef<string[]>([]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const avatarRef = useRef<Avatar | null>(null);
+  const avatarRef = useRef<StageAvatar | null>(null);
 
   const step = scenario.steps[currentStepId];
   const char = CHARACTERS[scenario.characterId];
@@ -52,7 +52,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     return `${m}:${s}`;
   };
 
-  // 3D Canvas / Avatar レンダリングセットアップ（室内明設定）
+  // 3D Canvas / StageAvatar レンダリングセットアップ（室内明設定）
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -94,7 +94,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     const modelUrl = scenario.modelUrl || char?.defaultModelUrl || '/models/aoi/aoi-school.vrm';
 
     // アバター読み込み
-    const avatar = new Avatar({
+    const avatar = new StageAvatar({
       id: scenario.characterId,
       modelUrl,
       scene,
@@ -238,7 +238,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
 
         {/* TV Call Screen Container */}
         <div className="phone-call-container">
-          {/* 3D Stage (Avatar closeup) */}
+          {/* 3D Stage (StageAvatar closeup) */}
           <div className="phone-call-canvas-area">
             <canvas ref={canvasRef} className="phone-call-canvas" />
           </div>

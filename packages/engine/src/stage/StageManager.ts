@@ -6,22 +6,19 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 
-import { TimeOfDayId } from '../../types/visual';
-import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
-import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
-import { CinematicAnimeShader } from '@anime-vrm/engine/postprocessing/CinematicAnimeShader';
-import { GodRaysShader } from '@anime-vrm/engine/postprocessing/GodRaysShader';
-import { SunEffect } from '@anime-vrm/engine/postprocessing/SunEffect';
-import { SkyBackground } from '@anime-vrm/engine/scene/SkyBackground';
-import { ScrollingBackground, ScrollingBackgroundSettings } from './scene/ScrollingBackground';
-import { Avatar } from './avatar/Avatar';
-import { HairShadowRenderer } from '@anime-vrm/engine/shader/HairShadow';
-import { CharacterMaskRenderer, LightWrapShader } from '@anime-vrm/engine/postprocessing/LightWrap';
-import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '@anime-vrm/engine/postprocessing/Para';
-import { setHairRingTint } from '@anime-vrm/engine/shader/HairRing';
-import { soundManager } from '../audio/SoundManager';
-import type { CameraShot } from '../../types/scenario';
-import type { StageCastMember } from '../stage/sceneView';
+import type { LocationVisualPreset, TimeOfDayId, TimeOfDayPreset } from './visual';
+import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
+import { GodRaysShader } from '../postprocessing/GodRaysShader';
+import { SunEffect } from '../postprocessing/SunEffect';
+import { SkyBackground } from '../scene/SkyBackground';
+import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
+import { StageAvatar } from './StageAvatar';
+import { HairShadowRenderer } from '../shader/HairShadow';
+import { CharacterMaskRenderer, LightWrapShader } from '../postprocessing/LightWrap';
+import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
+import { setHairRingTint } from '../shader/HairRing';
+import type { CameraShot } from '@anime-vrm/scenario';
+import type { StageCastMember } from './types';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 const CAMERA_TRANSITION_SEC = 0.6;
@@ -35,14 +32,26 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+export interface StagePresets {
+  /** 時間帯ごとの見た目（assets/studio/time-of-day.json） */
+  timeOfDay: Record<string, TimeOfDayPreset>;
+  /** 場所ごとの背景（assets/studio/locations.json） */
+  locations: Record<string, LocationVisualPreset>;
+}
+
 export interface StageOptions {
   canvas: HTMLCanvasElement;
+  presets: StagePresets;
+  /** 話しているキャラの口の形（音声の解析結果）。なければ口パクしない */
+  getSpeakerPhoneme?: () => string | undefined;
   initialTimeOfDay?: TimeOfDayId;
   initialLocationId?: string;
 }
 
 export class StageManager {
   private canvas: HTMLCanvasElement;
+  private readonly presets: StagePresets;
+  private readonly getSpeakerPhoneme?: () => string | undefined;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
@@ -78,7 +87,7 @@ export class StageManager {
   private neargroundMesh: THREE.Mesh | null = null;
 
   // アバター管理
-  private loadedAvatars: Map<string, Avatar> = new Map();
+  private loadedAvatars: Map<string, StageAvatar> = new Map();
   /** 登場中のキャラ（表示順） */
   private castIds: string[] = [];
   private castPositions: Map<string, number> = new Map();
@@ -88,7 +97,7 @@ export class StageManager {
   private speakerId: string | null = null;
   /** setCast の呼び出し番号（非同期ロード中に次の指定が来たら古い指定を捨てる） */
   private castVersion = 0;
-  private pendingAvatars: Map<string, Promise<Avatar>> = new Map();
+  private pendingAvatars: Map<string, Promise<StageAvatar>> = new Map();
   private avatarMotionUrls: Map<string, string> = new Map();
   private motionReturnTimers: Map<string, number> = new Map();
 
@@ -111,6 +120,8 @@ export class StageManager {
 
   constructor(options: StageOptions) {
     this.canvas = options.canvas;
+    this.presets = options.presets;
+    this.getSpeakerPhoneme = options.getSpeakerPhoneme;
     this.clock = new THREE.Clock();
 
     // 1. シーン初期化
@@ -269,7 +280,7 @@ export class StageManager {
    */
   public setTimeOfDay(todId: TimeOfDayId): void {
     this.currentTimeOfDay = todId;
-    const preset = TIME_OF_DAY_PRESETS[todId] || TIME_OF_DAY_PRESETS.day;
+    const preset = this.presets.timeOfDay[todId] || this.presets.timeOfDay.day;
 
     // 1. 平行光
     this.directionalLight.color.set(preset.lighting.directional.color);
@@ -372,7 +383,7 @@ export class StageManager {
    */
   public setLocation(locationId: string): void {
     this.currentLocationId = locationId;
-    const locPreset = LOCATION_VISUAL_PRESETS[locationId] || LOCATION_VISUAL_PRESETS.classroom;
+    const locPreset = this.presets.locations[locationId] || this.presets.locations.classroom;
 
     // 1. 遠景画像 (SkyBackground の前面にアルファカット合成)
     if (locPreset.layers.background.url) {
@@ -438,20 +449,31 @@ export class StageManager {
   /**
    * アバターの非同期ロード
    */
-  public loadAvatar(id: string, modelUrl: string): Promise<Avatar> {
+  public loadAvatar(id: string, modelUrl: string): Promise<StageAvatar> {
     const loaded = this.loadedAvatars.get(id);
-    if (loaded) return Promise.resolve(loaded);
+    if (loaded?.modelUrl === modelUrl) return Promise.resolve(loaded);
+    // 同じキャラでモデル（服装など）が変わったら作り直す
+    if (loaded) {
+      loaded.dispose();
+      this.loadedAvatars.delete(id);
+      this.avatarMotionUrls.delete(id);
+      const timer = this.motionReturnTimers.get(id);
+      if (timer !== undefined) window.clearTimeout(timer);
+      this.motionReturnTimers.delete(id);
+    }
     // 読み込み中なら同じ Promise を返す（同じキャラを二重に作らない）
     const pending = this.pendingAvatars.get(id);
-    if (pending) return pending;
+    if (pending) {
+      return pending.then((avatar) => (avatar.modelUrl === modelUrl ? avatar : this.loadAvatar(id, modelUrl)));
+    }
 
     const promise = this.createAvatar(id, modelUrl).finally(() => this.pendingAvatars.delete(id));
     this.pendingAvatars.set(id, promise);
     return promise;
   }
 
-  private async createAvatar(id: string, modelUrl: string): Promise<Avatar> {
-    const avatar = new Avatar({
+  private async createAvatar(id: string, modelUrl: string): Promise<StageAvatar> {
+    const avatar = new StageAvatar({
       id,
       modelUrl,
       scene: this.scene,
@@ -462,7 +484,7 @@ export class StageManager {
     await avatar.load(modelUrl);
 
     // 現在の時間帯マテリアル設定を初期反映
-    const currentPreset = TIME_OF_DAY_PRESETS[this.currentTimeOfDay] || TIME_OF_DAY_PRESETS.day;
+    const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
     avatar.updateMaterialPreset(currentPreset.materials, currentPreset.outline);
 
     this.loadedAvatars.set(id, avatar);
@@ -509,7 +531,7 @@ export class StageManager {
   }
 
   /** 頭の高さ（直立時）。取得できなければ標準的な背丈を返す */
-  private getHeadHeight(avatar: Avatar): number {
+  private getHeadHeight(avatar: StageAvatar): number {
     const head = avatar.vrm?.humanoid?.getRawBoneNode('head');
     if (!head) return 1.4;
     avatar.vrm!.scene.updateMatrixWorld(true);
@@ -518,7 +540,7 @@ export class StageManager {
   }
 
   /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す */
-  private playMotion(id: string, avatar: Avatar, motion: string | undefined, loop: boolean, cue = ''): void {
+  private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = ''): void {
     const url = motion ? `/animations/${motion}.fbx` : IDLE_ANIMATION_URL;
     // 指定が変わった時だけ再生する（1回きりの身振りが待機に戻った後、同じ指定で再生し直さない）
     const key = `${url}|${loop}|${cue}`;
@@ -671,7 +693,7 @@ export class StageManager {
       const delta = this.clock.getDelta();
       const elapsed = this.clock.getElapsedTime();
 
-      const currentPreset = TIME_OF_DAY_PRESETS[this.currentTimeOfDay] || TIME_OF_DAY_PRESETS.day;
+      const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
 
       // 0. カメラ構図の補間と、流れる背景
       this.updateCamera(delta);
@@ -682,7 +704,7 @@ export class StageManager {
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm || !avatar.vrm.scene.visible) continue;
-        avatar.updateLipSync(id === this.speakerId ? soundManager.getVoicePhoneme() : undefined);
+        avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined);
         avatar.update(delta);
         activeMeshes.push(avatar.vrm.scene);
       }

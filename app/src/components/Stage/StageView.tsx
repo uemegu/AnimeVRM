@@ -1,9 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { StageManager } from '../../services/graphics/StageManager';
+import { StageManager } from '@anime-vrm/engine/stage/StageManager';
+import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
+import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
+import { soundManager } from '../../services/audio/SoundManager';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
-import { ScrollingBackgroundSettings } from '../../services/graphics/scene/ScrollingBackground';
+import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 
 export interface StageViewProps {
   timeOfDay: TimeOfDayId;
@@ -39,6 +42,8 @@ export const StageView: React.FC<StageViewProps> = ({
 
     const manager = new StageManager({
       canvas,
+      presets: { timeOfDay: TIME_OF_DAY_PRESETS, locations: LOCATION_VISUAL_PRESETS },
+      getSpeakerPhoneme: () => soundManager.getVoicePhoneme(),
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
     });

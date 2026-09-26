@@ -4,7 +4,7 @@ import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
-import { ScrollingBackgroundSettings } from '../../services/graphics/scene/ScrollingBackground';
+import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { StageView } from '../../components/Stage/StageView';
 import { DialogueBox } from '../../components/Dialogue/DialogueBox';
 import { ChoiceBox } from '../../components/Dialogue/ChoiceBox';

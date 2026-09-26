@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resolveAssetUrl } from '../../../utils/path';
+import { resolveAssetUrl } from '../utils/path';
 
 /**
  * 歩きながらの会話で使う、横に流れ続ける背景（ルートの ScrollingBackgroundManager の移植）。
