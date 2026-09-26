@@ -4,8 +4,6 @@
 
 🌐 **Live Demos & Tools:**
 - **メインビューア (Main Viewer):** [https://uemegu.github.io/AnimeVRM/](https://uemegu.github.io/AnimeVRM/)
-- **モーションミキサー (Motion Mixer):** [https://uemegu.github.io/AnimeVRM/motion.html](https://uemegu.github.io/AnimeVRM/motion.html)
-- **リップシンクアナライザー (LipSync Analyzer):** [https://uemegu.github.io/AnimeVRM/lipsync.html](https://uemegu.github.io/AnimeVRM/lipsync.html)
 - **シャフト風演出シナリオ「幽霊の質量」:** [https://uemegu.github.io/AnimeVRM/scenarios/ghost-mass.html](https://uemegu.github.io/AnimeVRM/scenarios/ghost-mass.html)
 - **オリジナル短編PV「5秒の告白」:** [https://uemegu.github.io/AnimeVRM/scenarios/five-seconds-pv.html](https://uemegu.github.io/AnimeVRM/scenarios/five-seconds-pv.html)
 
@@ -13,7 +11,7 @@
 
 ## 📖 目次
 
-**Gemini の動作生成:** Others に [ardy-mini 連携](src/ai/motion/ardy/README.md)を追加。AI が返す英語の動作説明からブラウザー内でモーションを生成し、VRM アバターへ適用できます。
+**モーション生成:** [ardy-mini](src/ai/motion/ardy/README.md) で英語の動作説明からモーションを生成できます（CLI）。
 
 - [✨ 特徴](#-特徴)
 - [🚀 クイックスタート](#-クイックスタート)
@@ -21,7 +19,7 @@
   - [1. モデルロード & ジオメトリ前処理](#1-モデルロード--ジオメトリ前処理)
   - [2. トゥーンシェーディング & マテリアル処理](#2-トゥーンシェーディング--マテリアル処理)
   - [3. 高品質アウトライン (反転法線押し出し法)](#3-高品質アウトライン-反転法線押し出し法)
-  - [4. 多層背景システム & スクロール・パノラマ・プロシージャル空](#4-多層背景システム--スクロールパノラマプロシージャル空)
+  - [4. 多層背景システム & スクロール・プロシージャル空](#4-多層背景システム--スクロールプロシージャル空)
   - [5. 環境光・太陽光・大気エフェクト](#5-環境光太陽光大気エフェクト)
   - [6. 風・雨・環境物理パーティクル](#6-風雨環境物理パーティクル)
   - [7. シネマティック ポストプロセス パイプライン](#7-シネマティック-ポストプロセス-パイプライン)
@@ -30,10 +28,7 @@
   - [10. シャフト風演出モード (Shaft Mode & Cut-in)](#10-シャフト風演出モード-shaft-mode--cut-in)
   - [11. アニメ高速アクション演出 (Fast Motion & Limb Effects)](#11-アニメ高速アクション演出-fast-motion--limb-effects)
   - [12. 14種類の多彩なインタラクティブADVシナリオエンジン](#12-14種類の多彩なインタラクティブadvシナリオエンジン)
-  - [13. Gemini Multimodal Live API リアルタイム双方向音声対話](#13-gemini-multimodal-live-api-リアルタイム双方向音声対話)
 - [🎛️ 付属スタジオ & 開発ツール](#️-付属スタジオ--開発ツール)
-  - [Motion Mixer (`motion.html`)](#motion-mixer-motionhtml)
-  - [LipSync Analyzer (`lipsync.html`)](#lipsync-analyzer-lipsynchtml)
   - [Eye Atelier (`tools/eye-editor/`)](#eye-atelier-toolseye-editor)
 - [🖥️ 統合スタジオ UI (Unified Studio Panel)](#️-統合スタジオ-ui-unified-studio-panel)
 - [⚙️ 設定パラメータ (Configuration)](#️-設定パラメータ-configuration)
@@ -66,12 +61,11 @@
   - **Screen-Space Width**: カメラ距離に依存しない一定の輪郭線幅
   - **Auto Line Weight**: 視線角度（シルエット）に応じた線の抑揚自動補正
   - テクスチャ色に応じた自動輪郭線カラー（色相維持＋暗度・彩度調整）
-- **多層背景システム & スクロール・パノラマ・プロシージャル空**:
+- **多層背景システム & スクロール・プロシージャル空**:
   - **遠景 (Far Background)**: `scene.background` に設定される広域背景＋大気霞み（Far Fog）
   - **中景 (Midground)**: アバターより奥（`renderOrder = -1`）に配置される透過環境プレーン（公園の樹木など）
   - **近景 (Nearground)**: アバターより手前（`renderOrder = 2`）に配置される前景オブジェクト（カフェのテーブルなど）。アバターを挟み込むことでリアルな空間深度を表現
   - **横スクロール背景 (`ScrollingBackgroundManager`)**: 歩行アニメーションと完全連動。すりガラス風被写界深度ブラー、左右フェザー減衰、パララックス移動
-  - **360度パノラマ背景 (`PanoramaBackgroundController`)**: ドラッグ操作によるスムーズな全天周視点移動
   - **プロシージャル空背景 (`SkyBackground`) & アニメ夢背景 (`AnimeDreamBackground`)**: 時間帯連動の空グラデーションや回想・内面描写向けの幾何学抽象背景
 - **シャフト風演出モード (`ShaftModeController` & `ShaftCutInOverlay`)**:
   - キャラクターの単色シルエット化（赤・黒・緑・白）＋ホワイトアウトライン
@@ -104,17 +98,10 @@
   - 楽曲完全同期短編PV、ホラー、ラブコメ、新NISA投資、高速アクション特訓、日常会話など多彩なジャンル
   - 発話者にフォーカスするダイアログカメラ演出（`DialogueCameraController`）
   - 選択肢分岐・タイポグラフィ幕間タイトル演出（`PvTitleOverlay`）
-- **Gemini Multimodal Live API リアルタイム双方向音声対話**:
-  - WebSocket (`BidiGenerateContent`) による超低遅延な双方向音声ストリーミング
-  - マイク音声入力（16kHz PCM）＆ Gemini リアルタイム音声出力（24kHz PCM）
-  - 会話内容・感情に連動したモーション・表情・カメラの自律ツール呼び出し（Function Calling）
-  - 30種類の Gemini 公式プリセットボイス切り替え
-- **高精度リアルタイム リップシンク (Meyda + VAD)**:
+- **高精度リアルタイム リップシンク (Meyda)**:
   - Meyda 音声解析（フォルマント F1/F2、RMS）による高精度な母音（あ・い・う・え・お）口パク追従
-  - 女性・男性別プロファイル、VAD（音声区間検出）による口開閉の安定化
+  - 女性・男性別プロファイル
 - **独立 Web スタジオ & 制作ツール同梱**:
-  - **Motion Mixer (`motion.html`)**: ブラウザ上でMixamoモーションをタイムライン合成・部位別ブレンド・接地補正し、FBX 7.4 binaryを書き出し
-  - **LipSync Analyzer (`lipsync.html`)**: 音声ファイルやマイクから母音距離・一音判定ミリ秒レイテンシを可視化・検証
   - **Eye Atelier (`tools/eye-editor/`)**: Blender連携でVRoidモデルの目元・アイライン・瞳・眉をWeb UIでミリ単位調整しVRM出力
 - **完全日英バイリンガル対応 (i18n)**: 日本語 / English をワンクリックでシームレス切り替え
 
@@ -139,8 +126,6 @@ npm run dev
 | 画面 | ローカル URL | 説明 |
 | :--- | :--- | :--- |
 | **メインビューア** | `http://localhost:5173/AnimeVRM/` | 統合スタジオパネル、3Dシーン、全演出・全シナリオ実行 |
-| **Motion Mixer** | `http://localhost:5173/AnimeVRM/motion.html` | モーションタイムライン合成・部位ブレンド・FBX書き出し |
-| **LipSync Analyzer** | `http://localhost:5173/AnimeVRM/lipsync.html` | リップシンク性能検証・母音距離解析・レイテンシ測定 |
 | **独立シナリオ (例)** | `http://localhost:5173/AnimeVRM/scenarios/ghost-mass.html` | 単独で動作する各ADVシナリオプレイヤー |
 
 ### ビルド & プレビュー
@@ -229,15 +214,13 @@ flowchart TD
 - `outlineWidthMode = 'screenCoordinates'` により、カメラ距離に左右されない安定した線幅を維持。
 - テクスチャ平均色から明度を下げ彩度を微調整したアウトラインカラー（`getDarkenedOutlineColor`）を自動適用。
 
-### 4. 多層背景システム & スクロール・パノラマ・プロシージャル空
+### 4. 多層背景システム & スクロール・プロシージャル空
 - **3層構造 (Far / Mid / Near)**:
   - **遠景 (Far Background)**: `scene.background` に設定。大気霞み（Far Fog）とブレンド。
   - **中景 (Midground)**: アバターの背後（`renderOrder = -1`）に配置される環境レイヤー（公園の樹木など）。自動ルミナンスキーイングで白背景を透過。
   - **近景 (Nearground)**: アバターの手前（`renderOrder = 2`）に配置される前景レイヤー（カフェのテーブルなど）。アバターを前後から挟み込むことでリアルな空間深度とシチュエーションを表現。
 - **横スクロール背景 (`ScrollingBackgroundManager.ts`)**:
   歩行アニメーションに合わせて背景をスムーズに横スクロール。すりガラス風ノイズブラー（`uBlurAmount`）、エッジ透過フェザー（`uFeatherWidth`）、パララックス・ズーム制御を搭載。
-- **360度パノラマ背景 (`PanoramaBackgroundController.ts`)**:
-  全天周パノラマ画像を球体/天球上にマッピングし、スムーズなドラッグ操作と自動アイドリング視点移動を提供。
 - **プロシージャル空背景 (`SkyBackground.ts`) & 夢背景 (`AnimeDreamBackground.ts`)**:
   時間帯に応じた美しい空のグラデーションや、回想・内面描写用の幾何学パステル背景。
 
@@ -317,39 +300,13 @@ flowchart TD
 | **`park-confession`** | 夕暮れの公園と放課後の期待 | 夕暮れの公園、茜色の並木道、マルチエンディング選択肢 |
 | **`two-girls`** | 放課後の寄り道〜アオイとエミリ〜 | 2人女子の放課後カフェ掛け合いトーク |
 | **`town-walk`** | 放課後の並木道 〜君と歩く帰り道〜 | スクロール背景と歩行モーションが完全同期 |
-| **`behind-you`** | 噂話は背後にご注意〜教室の秘密〜 | 放課後の教室、360度パノラマ視点ホラー |
 | **`nisa`** | 夕暮れの校門とオルカンの憂鬱 | 新NISAオルカン投資相談、資産暴落チャート演出 |
-
-### 13. Gemini Multimodal Live API リアルタイム双方向音声対話
-- **WebSocket 双方向ストリーミング (`GeminiLiveClient.ts`)**:
-  Google Gemini の `GenerativeService.BidiGenerateContent` WebSocket プロトコルに対応。
-- **音声ストリーミング & リップシンク (`GeminiLiveChatController.ts`)**:
-  ユーザーのマイク音声（16kHz PCM）をリアルタイム送信し、Gemini から返された音声（24kHz PCM）を再生しながら Meyda でリップシンク。
-- **自律的ツール呼び出し (Function Calling)**:
-  会話の文脈や感情に合わせて、Gemini がモーション再生（挨拶・お辞儀・照れ・怒り等）、表情モーフ、カメラワークを自律的に制御。
-- **多彩なボイス選択**: `Aoede`, `Kore`, `Puck`, `Charon` など 30 種類の公式プリセットボイスに対応。
 
 ---
 
 ## 🎛️ 付属スタジオ & 開発ツール
 
-AnimeVRM には、メインビューアに加えて高度な制作・解析ツールが同梱されています。
-
-### Motion Mixer (`motion.html`)
-ブラウザ上で複数のアニメーションをタイムライン合成・部位別ブレンドし、Mixamo 互換の **FBX 7.4 binary** を書き出す Web スタジオです。
-
-- **部位別マスク合成**: 全身、頭、体幹、右腕、左腕、手首、下半身、脚などに分離してブレンド
-- **タイムライン編集**: 開始秒・再生時間・速度・フレーム範囲トリミング・フェード・区間反復
-- **肘・肩 IK & 接地補正**: 髪をかきあげる動作や接触動作での手のめり込み防止、足の床接地補正
-- **関節の自由角度指定**: 任意の関節（指を含む）に X/Y/Z 回転を自由に追加
-- **Mixamo 互換 FBX 7.4 Binary エクスポート**: アニメーション専用 FBX をブラウザ内で直接生成・検証
-
-### LipSync Analyzer (`lipsync.html`)
-リアルタイム音声解析とリップシンクの精度・レイテンシを徹底検証するためのアナライザーです。
-
-- **母音距離スコアリング**: Meyda によるフォルマント（F1/F2）解析から日本語母音（あ・い・う・え・お）の合致度をリアルタイム表示
-- **ミリ秒単位レイテンシ測定**: 一音判定の平均・最小・最大処理時間をリアルタイム計測
-- **マルチソース対応**: サンプル音声、ブラウザマイク入力、ローカル音声ファイル（WAV/MP3）
+AnimeVRM には、メインビューアに加えて制作ツールが同梱されています。
 
 ### Eye Atelier (`tools/eye-editor/`)
 Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛を Web UI からミリ単位で直感的に調整して VRM を書き出すツールです。
@@ -375,7 +332,6 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
    - **表情・感情**: 喜怒哀楽、ウインク等のモーフコントロール
    - **🖤 ヤンデレ闇落ちボタン**: ワンクリックでハイライト消灯・瞳濁り・見開き笑顔のヤンデレ状態へ移行/解除
    - **演出エフェクト**: 汗（飛び散り/冷や汗）、涙、ウルウル瞳、3Dオノマトペ、瞳発光
-   - **Gemini Live AI 対話**: Gemini Multimodal Live API によるリアルタイム音声チャット（ボイス選択・ツール呼び出し連動）
 2. **🎪 ステージ (Stage)**:
    - **シーンプリセット**: 時間帯（朝・昼・夕・雨・夜）× ロケーション（公園・校門・教室・屋上・海辺・祭り・カフェ・並木道等）のワンクリック切り替え
    - **多層背景設定**: 遠景画像、ルミナンス透過中景、近景レイヤー（カフェテーブル等）、プロシージャル空、床面グリッド
@@ -389,7 +345,6 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
    - **ボトムグラデーション**: 足元のプロシージャル落ち影・空気感
    - **アウトライン**: スムーズ法線、画面空間幅、Auto Line Weight
    - **シネマティック ポストプロセス**: 色収差、ディフュージョン、カラーグレーディング、フィルムグレイン、ビネット、シャープニング、魚眼レンズ歪み、ブルーム、トーンマッピング、アンチエイリアシング
-   - **カラーヒストグラム**: リアルタイム RGB 分布・波形モニター
 4. **⚙️ システム (System)**:
    - **設定 JSON 管理**: クリップボードへコピー、ファイル保存、JSON 読み込み
    - **リセット**: 初期設定へのワンクリック復元
@@ -598,9 +553,7 @@ vrm-genshin-like/
 │   └── voices/            # シナリオ音声・リップシンク用音声ファイル (WAV形式)
 ├── scenarios/             # 独立シナリオ実行 HTML ページ群 (14シナリオ)
 ├── src/
-│   ├── ai/                # Gemini Multimodal Live API リアルタイム双方向音声対話
-│   │   ├── live/          # WebSocket BidiGenerateContent、オーディオ録音/再生、ボイス定義
-│   │   └── motion/        # 音声・テキストからのモーションレシピ生成サービス
+│   ├── ai/motion/         # ardy-mini モーション生成 & 品質補正
 │   ├── animation/         # 演出プレイヤー & メッセージウィンドウ
 │   ├── avatar/            # アバター管理 & トランスフォーム制御 (AvatarTransformController)
 │   ├── effects/           # 漫画調漫符・シャフト演出・高速アクション
@@ -611,14 +564,12 @@ vrm-genshin-like/
 │   │   ├── sweat/         # 汗・冷や汗エフェクト (fly4 / jito)
 │   │   ├── tears/         # 涙エフェクト
 │   │   └── text/          # 3D 空間オノマトペ・漫符テキスト
-│   ├── histogram/         # リアルタイム RGB カラーヒストグラム
 │   ├── i18n/              # 日英バイリンガル多言語辞書
-│   ├── lipsync/           # LipSync Analyzer スタジオ実装
-│   ├── motion/            # Motion Mixer スタジオ実装 & FBX 7.4 Binary エクスポーター
+│   ├── motion/            # モーション合成エンジン & FBX 7.4 Binary エクスポーター（ardy-mini が使用）
 │   ├── postprocessing/    # ポストプロセス シェーダー (Cinematic, GodRays, SunEffect)
 │   ├── presets/           # 時間帯 × ロケーション シーンプリセット
 │   ├── scenario/          # ADVシナリオエンジン、全14シナリオ定義、ダイアログカメラ
-│   ├── scene/             # Three.js コア (ViewerCore, ScrollingBg, PanoramaBg, SkyBg)
+│   ├── scene/             # Three.js コア (ViewerCore, ScrollingBg, SkyBg)
 │   ├── shader/            # スムーズ法線・眼窩法線平坦化 (SmoothNormalHelper)
 │   ├── ui/                # 統合スタジオ UI (UnifiedPanel, インスペクター, 各種オーバーレイ)
 │   ├── AudioLipSync.ts    # Meyda スペクトル解析 & リアルタイムリップシンク
@@ -630,8 +581,6 @@ vrm-genshin-like/
 ├── tools/
 │   └── eye-editor/        # Blender連携 VRoid 目元・眉毛微調整ツール (Eye Atelier)
 ├── index.html             # メインビューア HTML
-├── motion.html            # Motion Mixer HTML
-├── lipsync.html           # LipSync Analyzer HTML
 ├── package.json
 └── vite.config.ts
 ```
@@ -642,8 +591,8 @@ vrm-genshin-like/
 
 - **3D Engine**: [Three.js](https://threejs.org/) (r183)
 - **VRM Support**: [@pixiv/three-vrm](https://github.com/pixiv/three-vrm) (v3.5)
-- **Real-Time AI Audio**: Google Gemini Multimodal Live API (WebSocket `BidiGenerateContent`, Realtime 16kHz PCM In / 24kHz PCM Out, Function Calling)
-- **Audio Analysis & Lip-Sync**: [Meyda](https://meyda.js.org/) (Formant & Spectral Feature Extraction), [@ricky0123/vad-web](https://github.com/ricky0123/vad-web) (Voice Activity Detection)
+- **Motion Generation**: [ardy-mini](https://github.com/intsuc/ardy-mini) (WebGPU, ONNX Runtime Web)
+- **Audio Analysis & Lip-Sync**: [Meyda](https://meyda.js.org/) (Formant & Spectral Feature Extraction)
 - **Motion Processing & Export**: Mixamo 互換 FBX 7.4 Binary Generator, Three.js FBXLoader
 - **E2E Visual Testing**: [@playwright/test](https://playwright.dev/)
 - **Bundler & Tooling**: [Vite](https://vitejs.dev/) (v8), TypeScript (v7)

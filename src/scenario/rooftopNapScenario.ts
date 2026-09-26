@@ -21,7 +21,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '（ぽかぽか陽気のお昼休み。あまりに風が心地よくて、屋上の隅で直に寝転がってうとうとしていた……）',
           character: 'girl_01',
-          live2d: false,
           avatar: {
             visible: false,
           },
@@ -40,7 +39,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「あれ？ こんなところで誰か寝転がってると思ったら……きみだったんだ！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_01.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             visible: true,
             motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -64,7 +62,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「ふふっ、すっごく気持ちよさそうな寝顔。ちょっといたずらして驚かせちゃおうかな」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_02.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             visible: true,
             position: [0, 0, -0.9],
@@ -81,7 +78,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
         },
         // Scene 4: Live2Dモードへ切り替え（しゃがみこんで顔を覗き込む）
         {
-          id: 'rooftop_live2d_4',
+          id: 'rooftop_nap_4',
           speaker: 'アオイ',
           location: '学校・屋上',
           screenTransition: 'none',
@@ -90,14 +87,13 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「……ねぇ。いつまで寝てるの？ 起こしちゃって悪いんだけど……起きて？」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_03.mp3'),
           character: 'girl_01',
-          live2d: true,
           cameraZoom: 'speaker_close',
           cameraDistance: 0.7,
           cameraPreset: 'hold',
         },
         // Scene 5: 主人公が目を覚まして視線が合う
         {
-          id: 'rooftop_live2d_5',
+          id: 'rooftop_nap_5',
           speaker: 'アオイ',
           location: '学校・屋上',
           screenTransition: 'none',
@@ -106,14 +102,13 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「……あ、起きた。ふふ、おはよう。……ん？ なにじっと見てるの？ 私の顔、変……？」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_04.mp3'),
           character: 'girl_01',
-          live2d: true,
           cameraZoom: 'speaker_close',
           cameraDistance: 0.7,
           cameraPreset: 'hold',
         },
         // Scene 6: スカートでしゃがんでいることに気づいて激しく赤面！
         {
-          id: 'rooftop_live2d_6',
+          id: 'rooftop_nap_6',
           speaker: 'アオイ',
           location: '学校・屋上',
           screenTransition: 'none',
@@ -122,7 +117,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「……えっ？ ちょっと、待って……どこ見て――きゃあっ！？ わ、わたし、スカートでこんな屈み方……っ！！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_05.mp3'),
           character: 'girl_01',
-          live2d: true,
           avatar: {
             faceTexture: resolveAssetUrl('/textures/girl_face_blush.png'),
           },
@@ -142,7 +136,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「ば、バカっ！ 見たでしょ今！？ 絶対見えたよね……！？ 最低ぇっ、変態っ！！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_06.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             visible: true,
             position: [0, 0, -0.9],
@@ -170,7 +163,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             visible: true,
             position: [0, 0, -0.9],
@@ -219,7 +211,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「〜〜っバカ！ そういうこと堂々と言わないでよ……！ 余計に恥ずかしいじゃん……！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_ans_1.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             position: [0, 0, -0.9],
             motion: resolveAssetUrl('/animations/Female Standing Pose.fbx'),
@@ -249,7 +240,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「大嘘つき！ 目線が完全に下向いてたの、バッチリ見えてたんだからね……！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_ans_2.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             position: [0, 0, -0.9],
             motion: resolveAssetUrl('/animations/Angry.fbx'),
@@ -279,7 +269,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           text: '「堂々と報告するなーーっ！！ ほんっと信じられない……！ バカバカバカッ！」',
           voiceUrl: resolveAssetUrl('/voices/rooftop_ans_3.mp3'),
           character: 'girl_01',
-          live2d: false,
           avatar: {
             position: [0, 0, -0.9],
             motion: resolveAssetUrl('/animations/Punching.fbx'),
@@ -308,7 +297,6 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '（……真っ赤な顔で怒るアオイに平謝りしながら、騒がしくも照れくさいお昼休みの時間は過ぎていった。【シナリオ終了】）',
           character: 'girl_01',
-          live2d: false,
           avatar: {
             position: [0, 0, -0.9],
             motion: resolveAssetUrl('/animations/Female Standing Pose.fbx'),

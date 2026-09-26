@@ -9,7 +9,6 @@ import { DialogueCameraController } from './DialogueCameraController';
 import { ScenarioEngine } from './ScenarioEngine';
 import { ScenarioPlayer, ScenarioStep } from '../animation/ScenarioPlayer';
 import { ScrollingBackgroundManager } from '../scene/ScrollingBackgroundManager';
-import { PanoramaBackgroundController } from '../scene/PanoramaBackgroundController';
 import { InterludeOverlay } from '../ui/InterludeOverlay';
 import {
   ScenarioPackage,
@@ -30,12 +29,6 @@ import { AvatarManager } from '../avatar/AvatarManager';
 import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
 import { PvTitleOverlay } from '../ui/PvTitleOverlay';
 import { ShaftModeController } from '../effects/shaft/ShaftModeController';
-import { Persona5CrowdController } from '../crowd/Persona5CrowdController';
-import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
-import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
-import { CLASSROOM_CROWD_PRESET } from '../crowd/ClassroomCrowdPreset';
-import { PAINTED_CLASSROOM_CROWD_PRESET } from '../crowd/PaintedClassroomCrowdPreset';
-import { CAFE_STREET_CROWD_PRESET } from '../crowd/CafeStreetCrowdPreset';
 import type { ClassroomStage } from '../scene/ClassroomStage';
 import { PaintedClassroomStage } from '../scene/painted-classroom/PaintedClassroomStage';
 import { loadPaintedLibrary, disposePaintedLibrary } from '../scene/painted-library/PaintedLibrary';
@@ -44,14 +37,12 @@ export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
   public scrollingBackgroundManager: ScrollingBackgroundManager;
   public dreamBackground: AnimeDreamBackground;
-  public crowdController: Persona5CrowdController;
   public interludeOverlay: InterludeOverlay;
   public pvTitleOverlay: PvTitleOverlay;
   public scenarioPlayer: ScenarioPlayer;
   public scenarioEngine: ScenarioEngine;
   public masterManager: MasterDataManager;
   public audioLipSync: AudioLipSync;
-  private currentCrowdPreset: string | null = null;
 
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -62,7 +53,6 @@ export class ScenarioController {
   private getConfig: () => AvatarConfig;
   private onApplyConfig: (cfg: AvatarConfig) => void;
   private onSwitchScenePreset: (presetId: ScenePresetId) => void;
-  private panoramaController?: PanoramaBackgroundController;
   private shaftModeController?: ShaftModeController;
   private classroomStage?: ClassroomStage;
   private paintedClassroomStage: PaintedClassroomStage;
@@ -81,7 +71,6 @@ export class ScenarioController {
     audioLipSync: AudioLipSync;
     sharedEffectTextManager: EffectTextManager;
     windController: WindController;
-    panoramaController?: PanoramaBackgroundController;
     shaftModeController?: ShaftModeController;
     classroomStage?: ClassroomStage;
     getConfig: () => AvatarConfig;
@@ -89,10 +78,8 @@ export class ScenarioController {
     onSwitchScenePreset: (presetId: ScenePresetId) => void;
     onFinished?: () => void;
   }) {
-    this.panoramaController = options.panoramaController;
     this.shaftModeController = options.shaftModeController;
     this.classroomStage = options.classroomStage;
-    const panoramaController = options.panoramaController;
     this.scene = options.scene;
     this.camera = options.camera;
     this.controls = options.controls;
@@ -113,7 +100,6 @@ export class ScenarioController {
     });
 
     this.dreamBackground = new AnimeDreamBackground(this.scene, this.camera);
-    this.crowdController = new Persona5CrowdController(this.scene);
 
     this.interludeOverlay = new InterludeOverlay();
     this.pvTitleOverlay = new PvTitleOverlay();
@@ -121,7 +107,6 @@ export class ScenarioController {
     this.dialogueCameraController = new DialogueCameraController({
       camera: this.camera,
       controls: this.controls,
-      panoramaController: options.panoramaController,
       getAvatar: (charId?: string) => {
         if (this.avatarManager.isMultiAvatarScenarioActive) {
           if (charId && this.avatarManager.scenarioAvatars.has(charId)) {
@@ -198,7 +183,6 @@ export class ScenarioController {
         if (!this.scenarioEngine.isPlaying) {
           this.paintedClassroomStage.exit();
           this.paintedLibraryStage.exit();
-          this.crowdController.setVisible(false);
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
           this.pvTitleOverlay.hide();
@@ -332,24 +316,6 @@ export class ScenarioController {
         cfg.environment.neargroundImageUrl = undefined;
         this.onApplyConfig(cfg);
       },
-      onSwitchPanoramaBackground: (bgUrl: string | null) => {
-        if (bgUrl && panoramaController) {
-          const cfg = this.getConfig();
-          cfg.environment.showMidground = false;
-          cfg.environment.midgroundImageUrl = undefined;
-          cfg.environment.showFloor = false;
-          panoramaController.load({
-            imageUrl: resolveAssetUrl(bgUrl),
-            initialYaw: 0,
-            initialPitch: 0,
-            initialFov: cfg.camera.fov || 30,
-          });
-        } else if (panoramaController && panoramaController.isActive) {
-          panoramaController.deactivate();
-          const cfg = this.getConfig();
-          this.onApplyConfig(cfg);
-        }
-      },
       onSwitchAvatar: async (modelUrl) => {
         if (this.avatarManager.currentModelUrl === modelUrl && this.avatarManager.avatarInstance) {
           return;
@@ -436,46 +402,10 @@ export class ScenarioController {
           this.isScenarioStageActive = false;
         }
       },
-      onUpdateCrowd: async (crowdConfig) => {
-        if (!crowdConfig) {
-          this.crowdController.setVisible(false);
-          return;
-        }
-        const isObj = typeof crowdConfig === 'object';
-        const enabled = isObj ? (crowdConfig.enabled ?? true) : crowdConfig;
-        if (!enabled) {
-          this.crowdController.setVisible(false);
-          return;
-        }
-
-        const presetName = isObj ? (crowdConfig.preset ?? 'corridor') : 'corridor';
-        const opacity = isObj ? (crowdConfig.opacity ?? 0.6) : 0.6;
-
-        this.crowdController.setOpacity(opacity);
-        if (this.currentCrowdPreset !== presetName) {
-          this.currentCrowdPreset = presetName;
-          this.crowdController.clear();
-          const members =
-            presetName === 'school_gate'
-              ? MORNING_SCHOOL_GATE_CROWD
-              : presetName === 'painted-classroom'
-                ? PAINTED_CLASSROOM_CROWD_PRESET
-                : presetName === 'classroom'
-                  ? CLASSROOM_CROWD_PRESET
-                  : presetName === 'cafe_street'
-                    ? CAFE_STREET_CROWD_PRESET
-                    : CORRIDOR_CROWD_PRESET;
-          for (const m of members) {
-            await this.crowdController.addMember(m);
-          }
-        }
-        this.crowdController.setVisible(true);
-      },
       onFinished: () => {
         this.dialogueCameraController.stop();
         this.scrollingBackgroundManager.hide();
         this.dreamBackground.stop(true);
-        this.crowdController.setVisible(false);
         this.pvTitleOverlay.hide();
         this.shaftModeController?.setShaftMode(false);
         this.shaftModeController?.setSpaceStage(false);
@@ -528,7 +458,6 @@ export class ScenarioController {
     if (this.dreamBackground) {
       this.dreamBackground.update(delta);
     }
-    this.crowdController.update(delta);
     if (this.isScenarioStageActive) {
       this.classroomStage?.update();
     }
@@ -562,7 +491,7 @@ export class ScenarioController {
       characters.some((c) => (Array.isArray(c.position) ? c.position[2] > 0.3 : false)) &&
       characters.some((c) => (Array.isArray(c.position) ? c.position[2] < -0.3 : false));
 
-    if (this.panoramaController?.isActive || hasFrontAndBack) {
+    if (hasFrontAndBack) {
       this.camera.position.set(0, 1.15, 0);
       this.controls.target.set(0, 1.25, -1.0);
       this.controls.update();

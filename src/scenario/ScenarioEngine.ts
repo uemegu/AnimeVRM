@@ -51,10 +51,8 @@ export interface ScenarioEngineOptions {
     scene?: ScenarioScene
   ) => void;
   onSwitchBackground?: (bgUrl: string) => void;
-  onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
   onSwitchShaftMode?: (active: boolean) => void;
   onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
-  onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
   onSwitchStage?: (stage?: import('./types').ScenarioStageId) => Promise<void>;
 }
 
@@ -83,7 +81,6 @@ export class ScenarioEngine {
     scene?: ScenarioScene
   ) => void;
   private onSwitchBackground?: (bgUrl: string) => void;
-  private onSwitchPanoramaBackground?: (bgUrl: string | null) => void;
 
   private messageWindow: AdventureMessageWindow;
   private currentPackage: ScenarioPackage | null = null;
@@ -118,7 +115,6 @@ export class ScenarioEngine {
   private shaftCutInOverlay: ShaftCutInOverlay = new ShaftCutInOverlay();
   private onSwitchShaftMode?: (active: boolean) => void;
   private onSwitchShaftSpaceStage?: (stage?: 'orbit' | 'ghost_left_behind' | false) => void;
-  private onUpdateCrowd?: (config?: boolean | import('./types').ScenarioCrowdConfig) => void;
   private onSwitchStage?: (stage?: import('./types').ScenarioStageId) => Promise<void>;
   private lastLocation: string | undefined = undefined;
   private isSceneTransitioning = false;
@@ -149,10 +145,8 @@ export class ScenarioEngine {
     this.onUpdateScrollingBackground = options.onUpdateScrollingBackground;
     this.onUpdateDreamBackground = options.onUpdateDreamBackground;
     this.onSwitchBackground = options.onSwitchBackground;
-    this.onSwitchPanoramaBackground = options.onSwitchPanoramaBackground;
     this.onSwitchShaftMode = options.onSwitchShaftMode;
     this.onSwitchShaftSpaceStage = options.onSwitchShaftSpaceStage;
-    this.onUpdateCrowd = options.onUpdateCrowd;
     this.onSwitchStage = options.onSwitchStage;
 
     this.messageWindow = new AdventureMessageWindow({
@@ -342,7 +336,6 @@ export class ScenarioEngine {
     this.stopAudioAndVoice();
     this.stopBgm();
     this.stopSe();
-    this.onUpdateCrowd?.(false);
 
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
     allAvatars.forEach((avatar) => {
@@ -368,7 +361,6 @@ export class ScenarioEngine {
     this.currentBackgroundUrl = null;
     this.onUpdateScrollingBackground?.(undefined);
     this.onUpdateDreamBackground?.(undefined);
-    this.onSwitchPanoramaBackground?.(null);
     this.onPlayStateChange?.(false);
     this.onFinished?.();
 
@@ -1066,19 +1058,14 @@ export class ScenarioEngine {
       this.onSwitchScenePreset(scene.scenePreset);
       // Preset切り替えによってプリセット既定の背景（例: classroom）で上書きされるのを防ぐため、
       // 既にシナリオ側で背景が指定されていれば再適用する
-      if (this.currentBackgroundUrl && !scene.background && !scene.panoramaBackgroundUrl && this.onSwitchBackground) {
+      if (this.currentBackgroundUrl && !scene.background && this.onSwitchBackground) {
         this.onSwitchBackground(this.currentBackgroundUrl);
       }
     }
 
     // 1.2 Switch Direct Background Image (Standard single background)
-    const panoramaUrl = scene.panoramaBackgroundUrl || this.currentPackage?.panoramaBackgroundUrl;
-    if (panoramaUrl) {
-      this.currentBackgroundUrl = null;
-      this.onSwitchPanoramaBackground?.(panoramaUrl);
-    } else if (scene.background && this.onSwitchBackground) {
+    if (scene.background && this.onSwitchBackground) {
       this.currentBackgroundUrl = scene.background;
-      this.onSwitchPanoramaBackground?.(null);
       this.onSwitchBackground(scene.background);
     }
 
@@ -1101,9 +1088,6 @@ export class ScenarioEngine {
     } else {
       this.focusLinesOverlay.hide();
     }
-
-    // 1.91 Persona 5 Crowd Mobs (群衆モブ演出)
-    this.onUpdateCrowd?.(scene.crowd);
 
     // 1.95 Fast Motion Directional Blur (シーン単位でのブラーON/OFF。デフォルトOFF)
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];

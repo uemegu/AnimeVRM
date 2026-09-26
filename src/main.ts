@@ -8,9 +8,7 @@ import {
 } from './Config';
 import { resolveAssetUrl } from './utils/path';
 import { AudioLipSync } from './AudioLipSync';
-import { GeminiLiveChatController } from './ai/live/GeminiLiveChatController';
 import { WindController } from './wind/WindController';
-import { ColorHistogram } from './histogram/ColorHistogram';
 import { ViewerCore } from './scene/ViewerCore';
 import { ScenePresetManager } from './scene/ScenePresetManager';
 import { AvatarManager } from './avatar/AvatarManager';
@@ -18,7 +16,6 @@ import { AvatarTransformController } from './avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
 import { ClassroomExperienceController } from './scenario/ClassroomExperienceController';
 import { ClassroomStage } from './scene/ClassroomStage';
-import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { ShaftModeController } from './effects/shaft/ShaftModeController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
 import { setupUnifiedPanel } from './ui/UnifiedPanel';
@@ -35,7 +32,6 @@ import {
 const currentConfig: AvatarConfig = cloneConfig(DEFAULT_CONFIG);
 
 const windController = new WindController();
-const colorHistogram = new ColorHistogram();
 
 const audioLipSync = new AudioLipSync({
   onPhonemeChange: (phoneme) => {
@@ -51,9 +47,6 @@ const audioLipSync = new AudioLipSync({
     updatePlayStateUI(false);
   },
 });
-
-const geminiLiveChatController = new GeminiLiveChatController();
-geminiLiveChatController.setAudioLipSync(audioLipSync);
 
 // --------------------------------------------------
 // 2. Three.js Core Setup (ViewerCore)
@@ -72,7 +65,6 @@ const avatarManager = new AvatarManager({
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
   getConfig: () => currentConfig,
-  liveChatController: geminiLiveChatController,
   renderer: viewerCore.renderer,
   onEnterTransparent: () => {
     viewerCore.scene.background = null;
@@ -107,15 +99,6 @@ const avatarTransformController = new AvatarTransformController({
   avatarManager,
 });
 (window as any).avatarTransformController = avatarTransformController;
-
-// 3.6 Live2D (2.5D Rig) Transition Manager
-const live2DTransitionManager = new Live2DTransitionManager({
-  avatarManager,
-  viewerCore,
-  audioLipSync,
-  config: currentConfig.live2d,
-});
-(window as any).live2DTransitionManager = live2DTransitionManager;
 
 // 3.7 Shaft Mode Controller
 const shaftModeController = new ShaftModeController({
@@ -174,7 +157,6 @@ const scenarioController = new ScenarioController({
   audioLipSync,
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
-  panoramaController: viewerCore.panoramaController,
   shaftModeController,
   classroomStage,
   getConfig: () => currentConfig,
@@ -207,26 +189,14 @@ setupUnifiedPanel({
   classroomExperienceController,
   inspectorManager,
   audioLipSync,
-  geminiLiveChatController,
-  colorHistogram,
   avatarTransformController,
   shaftModeController,
-  live2DTransitionManager,
   onApplyConfig: (cfg) => {
     applyConfigToSceneAndRenderer(cfg);
   },
   onResize: () => {
     viewerCore.onResize();
   },
-});
-
-// Shortcut 'L' to toggle Live2D mode
-window.addEventListener('keydown', (e) => {
-  const target = e.target as HTMLElement | null;
-  const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
-  if (!isInput && (e.key === 'l' || e.key === 'L')) {
-    live2DTransitionManager.toggle();
-  }
 });
 
 // Initial load
@@ -252,9 +222,6 @@ function tick(timestamp?: number): void {
   } else if (avatarManager.animationPlayer.isPlaying) {
     avatarTransformController.setEnabled(false);
     avatarManager.animationPlayer.update(delta);
-  } else if (viewerCore.panoramaController.isActive) {
-    avatarTransformController.setEnabled(false);
-    viewerCore.panoramaController.update(delta, elapsed);
   } else {
     avatarTransformController.setEnabled(true);
     // OrbitControls disabled (enabled=false) so user input won't move camera/sun,
@@ -297,24 +264,6 @@ function tick(timestamp?: number): void {
   // Render Scene & Post-processing
   const vrmMeshes = avatarManager.getVrmMeshes();
   viewerCore.render(delta, elapsed, currentConfig, vrmMeshes);
-
-  // Update Live2D Close-up Cut-in (Scene override & distance check)
-  const isScenarioPlaying =
-    scenarioController.scenarioEngine.isPlaying || scenarioController.scenarioPlayer.isPlaying;
-  if (isScenarioPlaying) {
-    if (currentScene?.live2d !== undefined) {
-      const live2dOpt = currentScene.live2d;
-      const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
-      live2DTransitionManager.setSceneOverride(isExplicit);
-    } else {
-      // In scenario playback, scenes without explicit live2d are kept in VRM mode
-      live2DTransitionManager.setSceneOverride(false);
-    }
-  } else {
-    // Outside scenario playback, no scene override (toggle via Live2D button)
-    live2DTransitionManager.setSceneOverride(null);
-  }
-  live2DTransitionManager.update(delta);
 
   // Update Shaft Mode typography overlay position
   shaftModeController.update();
@@ -410,7 +359,6 @@ function debugPositions() {
 (window as any).scenarioController = scenarioController;
 (window as any).avatarManager = avatarManager;
 (window as any).viewerCore = viewerCore;
-(window as any).live2DTransitionManager = live2DTransitionManager;
 (window as any).scenePresetManager = scenePresetManager;
 (window as any).currentConfig = currentConfig;
 (window as any).audioLipSync = audioLipSync;

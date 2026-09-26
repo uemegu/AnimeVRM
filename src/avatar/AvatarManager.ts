@@ -10,7 +10,6 @@ import { resolveAssetUrl } from '../utils/path';
 import { showToast } from '../ui/components/Toast';
 import { updateAnimationPlayStateUI } from '../ui/helpers';
 import { AudioLipSync } from '../AudioLipSync';
-import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
 import { FACE_OVERLAY_KINDS, FACE_OVERLAY_TEXTURES, FaceOverlayKind, FaceOverlayState } from '../effects/FaceOverlayEffect';
 
 export function isMotionLoop(url: string): boolean {
@@ -41,7 +40,6 @@ export class AvatarManager {
   private windController: WindController;
   private getConfig: () => AvatarConfig;
   private onAvatarLoaded?: (avatar: Avatar) => void;
-  private liveChatController?: GeminiLiveChatController;
 
   constructor(options: {
     scene: THREE.Scene;
@@ -50,7 +48,6 @@ export class AvatarManager {
     sharedEffectTextManager: EffectTextManager;
     windController: WindController;
     getConfig: () => AvatarConfig;
-    liveChatController?: GeminiLiveChatController;
     renderer?: THREE.WebGLRenderer;
     // 前髪の影（ViewerCore の HairShadowRenderer.uniforms）
     hairShadow?: HairShadowUniforms;
@@ -66,7 +63,6 @@ export class AvatarManager {
     this.sharedEffectTextManager = options.sharedEffectTextManager;
     this.windController = options.windController;
     this.getConfig = options.getConfig;
-    this.liveChatController = options.liveChatController;
     this.onAvatarLoaded = options.onAvatarLoaded;
 
     this.typographyOverlay = new TypographyOverlay();
@@ -122,10 +118,6 @@ export class AvatarManager {
     }
   }
 
-  public setLiveChatController(controller: GeminiLiveChatController): void {
-    this.liveChatController = controller;
-  }
-
   public loadAvatarModel(modelUrl: string): void {
     this.currentModelUrl = modelUrl;
 
@@ -161,9 +153,6 @@ export class AvatarManager {
         if (this.avatarInstance !== avatar || this.isMultiAvatarScenarioActive) {
           avatar.dispose();
           return;
-        }
-        if (this.liveChatController) {
-          this.liveChatController.setAvatar(avatar);
         }
         if (this.currentExprName !== 'neutral') {
           avatar.setExpression(this.currentExprName, 1.0);

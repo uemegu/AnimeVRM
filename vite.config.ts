@@ -92,11 +92,8 @@ function vrmModelsPlugin(): Plugin {
 function getHtmlInputs() {
   const inputs: Record<string, string> = {
     viewer: path.resolve(__dirname, 'index.html'),
-    motion: path.resolve(__dirname, 'motion.html'),
-    lipsync: path.resolve(__dirname, 'lipsync.html'),
     cli_runner: path.resolve(__dirname, 'cli-runner.html'),
     quality_calibrate: path.resolve(__dirname, 'quality-calibrate.html'),
-    crowd_test: path.resolve(__dirname, 'crowd-test.html'),
     painted_classroom: path.resolve(__dirname, 'painted-classroom.html'),
     painted_library: path.resolve(__dirname, 'painted-library.html'),
   };

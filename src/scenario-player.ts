@@ -8,7 +8,6 @@ import { ViewerCore } from './scene/ViewerCore';
 import { ScenePresetManager } from './scene/ScenePresetManager';
 import { AvatarManager } from './avatar/AvatarManager';
 import { ScenarioController } from './scenario/ScenarioController';
-import { Live2DTransitionManager } from './live2d/Live2DTransitionManager';
 import { getScenarioMeta, SCENARIO_REGISTRY } from './scenario/scenarioRegistry';
 import { showToast } from './ui/components/Toast';
 import { ShaftModeController } from './effects/shaft/ShaftModeController';
@@ -70,13 +69,6 @@ const avatarManager = new AvatarManager({
   onAvatarLoaded: () => {
     applyConfigToSceneAndRenderer(currentConfig);
   },
-});
-
-const live2DTransitionManager = new Live2DTransitionManager({
-  avatarManager,
-  viewerCore,
-  audioLipSync,
-  config: currentConfig.live2d,
 });
 
 const shaftModeController = new ShaftModeController({
@@ -473,7 +465,6 @@ const scenarioController = new ScenarioController({
   audioLipSync,
   sharedEffectTextManager: viewerCore.sharedEffectTextManager,
   windController,
-  panoramaController: viewerCore.panoramaController,
   shaftModeController,
   classroomStage,
   getConfig: () => currentConfig,
@@ -522,9 +513,6 @@ async function startScenarioPlayback() {
   }
   if (scenarioController.scenarioPlayer.isPlaying) {
     scenarioController.scenarioPlayer.stop();
-  }
-  if (viewerCore.panoramaController.isActive) {
-    viewerCore.panoramaController.deactivate();
   }
 
     const scenarioPackage = meta.getScenario('ja');
@@ -576,8 +564,6 @@ function tick(timestamp?: number): void {
     scenarioController.dialogueCameraController.update(delta);
   } else if (avatarManager.animationPlayer.isPlaying) {
     avatarManager.animationPlayer.update(delta);
-  } else if (viewerCore.panoramaController.isActive) {
-    viewerCore.panoramaController.update(delta, elapsed);
   }
 
   // Update scenario engine
@@ -616,24 +602,6 @@ function tick(timestamp?: number): void {
   const vrmMeshes = avatarManager.getVrmMeshes();
   viewerCore.render(delta, elapsed, currentConfig, vrmMeshes);
 
-  // Live2D Close-up Cut-in
-  const isScenarioPlaying =
-    scenarioController.scenarioEngine.isPlaying || scenarioController.scenarioPlayer.isPlaying;
-  if (isScenarioPlaying) {
-    if (currentScene?.live2d !== undefined) {
-      const live2dOpt = currentScene.live2d;
-      const isExplicit = typeof live2dOpt === 'boolean' ? live2dOpt : (live2dOpt.enabled ?? true);
-      live2DTransitionManager.setSceneOverride(isExplicit);
-    } else {
-      // In scenario playback, scenes without explicit live2d are kept in VRM mode
-      live2DTransitionManager.setSceneOverride(false);
-    }
-  } else {
-    // Outside scenario playback, no scene override
-    live2DTransitionManager.setSceneOverride(null);
-  }
-  live2DTransitionManager.update(delta);
-
   viewerCore.stats.end();
   requestAnimationFrame(tick);
 }
@@ -659,5 +627,4 @@ window.addEventListener(
 (window as any).avatarManager = avatarManager;
 (window as any).viewerCore = viewerCore;
 (window as any).scenarioController = scenarioController;
-(window as any).live2DTransitionManager = live2DTransitionManager;
 (window as any).audioLipSync = audioLipSync;
