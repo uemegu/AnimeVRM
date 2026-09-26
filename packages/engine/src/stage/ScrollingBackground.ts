@@ -71,16 +71,9 @@ const ScrollingBlurShader = {
   `,
 };
 
-export interface ScrollingBackgroundSettings {
-  textureUrl: string;
-  /** 流れる速さ（0 で止まる） */
-  speed: number;
-  /** ぼかし 0.0〜1.0 */
-  blur: number;
-  direction: 'left' | 'right';
-  /** 板の端をぼかす幅（板の幅に対する比率） */
-  featherWidth: number;
-}
+/** 流れる背景の設定。定義はシナリオと共有するパッケージ（packages/scenario/src/stage.ts）にある */
+export type { ScrollingBackgroundSettings } from '@anime-vrm/scenario';
+import type { ScrollingBackgroundSettings } from '@anime-vrm/scenario';
 
 const PLANE_DISTANCE = 4.5;
 

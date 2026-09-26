@@ -1,41 +1,30 @@
 /**
- * 進行状態から「何を映すか」（時間帯・場所・登場キャラ・カメラ構図・BGM）を決める純粋関数群
+ * 進行状態から「何を映すか」（時間帯・場所・登場キャラ・カメラ構図・BGM）を決める。
+ * 舞台の状態の引き継ぎ・キャラの配置・構図の決め方は Studio と共有（packages/scenario/src/stage.ts）。
+ * ここにはゲーム固有のルール（フェーズごとの時間帯・服装・場所）を置く
  */
-import { DayPhase } from '../../types/game';
 import {
-  CameraShot,
-  SceneAvatarConfig,
-  ScenarioMeta,
-  ScenarioPackage,
-  ScenarioScene,
-  ScrollingBackgroundConfig,
-} from '../../types/scenario';
+  resolveCast as resolveSharedCast,
+  resolveScrollingBackground as resolveSharedScrolling,
+  type ScrollingBackgroundSettings,
+  type StageCastMember,
+  type StageState,
+} from '@anime-vrm/scenario';
+import { DayPhase } from '../../types/game';
+import { ScenarioMeta } from '../../types/scenario';
 import { TimeOfDayId } from '../../types/visual';
 import { CHARACTERS, CharacterMaster } from '../../data/characters';
 import { LOOPING_MOTIONS } from '../../data/motions';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
-import type { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
-import { ScenarioResolvedScene } from '../scenario/ScenarioEngine';
 
-/**
- * シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ
- */
-export interface StageState {
-  background?: string;
-  timeOfDay?: TimeOfDayId;
-  /** BGM の ID または URL。'silence' で無音 */
-  bgm?: string;
-  /** 登場中のキャラ（キー: キャラID） */
-  cast: Record<string, SceneAvatarConfig>;
-  /** キャラごとに、モーションを最後に指定したシーンID */
-  motionCues?: Record<string, string>;
-  /** 流れる背景（歩きながらの会話） */
-  scrolling?: ScrollingBackgroundConfig | null;
-}
-
-/** 画面に出すキャラ1人分（位置・モデル解決済み） */
-export type { StageCastMember } from '@anime-vrm/engine/stage/types';
-import type { StageCastMember } from '@anime-vrm/engine/stage/types';
+export {
+  EMPTY_STAGE,
+  initialStageState,
+  mergeStageState,
+  resolveCameraShot,
+  type StageCastMember,
+  type StageState,
+} from '@anime-vrm/scenario';
 
 const PHASE_TIME_OF_DAY: Record<DayPhase, TimeOfDayId> = {
   morning: 'morning',
@@ -45,36 +34,6 @@ const PHASE_TIME_OF_DAY: Record<DayPhase, TimeOfDayId> = {
   afterschool_action: 'evening',
   night: 'night',
 };
-
-export const EMPTY_STAGE: StageState = { cast: {} };
-
-/** シナリオ開始時の舞台 */
-export function initialStageState(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay'>): StageState {
-  return { bgm: scenario.bgm, timeOfDay: scenario.timeOfDay, cast: {} };
-}
-
-/** シーンの指定を舞台に反映する（キャラは項目ごとに上書き、visible: false で退場） */
-export function mergeStageState(prev: StageState, scene: ScenarioScene): StageState {
-  const cast: Record<string, SceneAvatarConfig> = scene.clearCast ? {} : { ...prev.cast };
-  const motionCues: Record<string, string> = scene.clearCast ? {} : { ...prev.motionCues };
-  for (const [id, config] of Object.entries(scene.avatars ?? {})) {
-    if (config.visible === false) {
-      delete cast[id];
-    } else {
-      cast[id] = { ...cast[id], ...config };
-      // モーションを指定したシーンを覚えておく（同じ身振りを別のシーンで指定したら再生し直す）
-      if (config.motion !== undefined) motionCues[id] = scene.id;
-    }
-  }
-  return {
-    background: scene.background ?? prev.background,
-    timeOfDay: scene.timeOfDay ?? prev.timeOfDay,
-    bgm: scene.bgm ?? scene.bgmUrl ?? prev.bgm,
-    cast,
-    motionCues,
-    scrolling: scene.scrollingBackground === undefined ? prev.scrolling : scene.scrollingBackground || null,
-  };
-}
 
 /** 時間帯（舞台の指定を優先し、なければフェーズから） */
 export function resolveTimeOfDay(phase: DayPhase, stage: StageState): TimeOfDayId {
@@ -110,50 +69,13 @@ export function outfitModelUrl(character: CharacterMaster | undefined, phase: Da
  * 服装はフェーズで決まる（outfitModelUrl）。シーンの modelUrl 指定が優先
  */
 export function resolveCast(stage: StageState, phase: DayPhase): StageCastMember[] {
-  const entries = Object.entries(stage.cast);
-
-  const members: StageCastMember[] = [];
-  for (const [key, config] of entries) {
-    const characterId = config.characterId ?? key;
-    const character = CHARACTERS[characterId];
-    const modelUrl = config.modelUrl ?? outfitModelUrl(character, phase);
-    if (!modelUrl) continue;
-
-    // 立ち位置の名前（left など）は、場所ごとの立ち位置の設定に合わせて描画側で座標にする
-    members.push({
-      id: key,
-      modelUrl,
-      ...(Array.isArray(config.position) ? { position: config.position } : { slot: config.position ?? 'center' }),
-      rotationY: config.rotationY,
-      expression: config.expression ?? 'neutral',
-      expressionWeight: config.expressionWeight ?? 1.0,
-      motion: config.motion,
-      motionLoop: config.motionLoop ?? (config.motion ? LOOPING_MOTIONS.has(config.motion) : true),
-      motionCue: stage.motionCues?.[key],
-    });
-  }
-  return members;
+  return resolveSharedCast(stage, {
+    modelUrlFor: (characterId) => outfitModelUrl(CHARACTERS[characterId], phase),
+    isLoopingMotion: (motion) => LOOPING_MOTIONS.has(motion),
+  });
 }
 
 /** 流れる背景の設定（画像を省略したらその場所の遠景を流す）。流さない時は null */
 export function resolveScrollingBackground(stage: StageState, locationId: string): ScrollingBackgroundSettings | null {
-  const config = stage.scrolling;
-  if (!config) return null;
-  const textureUrl = config.textureUrl ?? LOCATION_VISUAL_PRESETS[locationId]?.layers.background?.url;
-  if (!textureUrl) return null;
-  return {
-    textureUrl,
-    speed: config.speed ?? 0.65,
-    blur: config.blur ?? 1.0,
-    direction: config.direction ?? 'left',
-    featherWidth: config.featherWidth ?? 0.2,
-  };
-}
-
-/** カメラ構図（指定がなければ、1人なら話者、選択肢や話者不在は全体、複数人の会話は話者中心） */
-export function resolveCameraShot(scene: ScenarioResolvedScene | null, cast: StageCastMember[]): CameraShot {
-  if (scene?.camera) return scene.camera;
-  if (cast.length <= 1) return 'speaker';
-  if (scene?.choices) return 'wide';
-  return scene?.speakerCharacterId && cast.some((m) => m.id === scene.speakerCharacterId) ? 'medium' : 'wide';
+  return resolveSharedScrolling(stage, LOCATION_VISUAL_PRESETS[locationId]?.layers.background?.url);
 }
