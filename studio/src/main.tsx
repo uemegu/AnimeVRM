@@ -7,6 +7,7 @@ import { LanguageProvider } from './i18n';
 import { CharactersView } from './views/characters/CharactersView';
 import { ViewerView } from './views/viewer/ViewerView';
 import { ScenesView } from './views/scenes/ScenesView';
+import { ScenariosView } from './views/scenarios/ScenariosView';
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
       { path: 'viewer', element: <ViewerView /> },
       { path: 'characters/:characterId?', element: <CharactersView /> },
       { path: 'scenes/:tab?/:id?', element: <ScenesView /> },
+      { path: 'scenarios/:category?/:id?/:cut?', element: <ScenariosView /> },
       ...NAV_ITEMS.filter((item) => !item.ready).map((item) => ({ path: item.path.slice(1), element: <ComingSoon /> })),
     ],
   },

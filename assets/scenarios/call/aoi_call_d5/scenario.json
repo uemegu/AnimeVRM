@@ -24,7 +24,7 @@
         "ja": "もしもし？ 夜遅くにごめんね……。なんだか、声が聞きたくなっちゃって。"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_2",
       "voiceUrl": "v_step_1_8802168d.mp3"
     },
@@ -35,7 +35,7 @@
         "ja": "図書室の机の下、覚えてる？ ……あれから、思い出すたびにドキドキしちゃうの。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_3",
       "voiceUrl": "v_step_2_dc637086.mp3"
     },
@@ -73,7 +73,7 @@
         "ja": "……ほんと？ えへへ、同じだね。……なんか、顔が熱くなってきちゃった。おやすみ！"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_yes_48096702.mp3"
     },
@@ -84,7 +84,7 @@
         "ja": "ふふ、ほんとにね。白石先生、目が怖いもん。……じゃあ、また明日ね。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_safe_93303aa8.mp3"
     }

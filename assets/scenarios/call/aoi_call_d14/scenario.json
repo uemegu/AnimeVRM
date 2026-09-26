@@ -24,7 +24,7 @@
         "ja": "もしもし、タカシくん？ 雨に濡れちゃったけど、風邪ひいてない？"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_2",
       "voiceUrl": "v_step_1_59cda3e8.mp3"
     },
@@ -35,7 +35,7 @@
         "ja": "……あのね。今日言ってくれたこと、ずっと頭の中でぐるぐるしてるの。「救われてるのは俺の方だ」って。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_3",
       "voiceUrl": "v_step_2_f66bd799.mp3"
     },
@@ -73,7 +73,7 @@
         "ja": "……うん。知ってる。タカシくん、嘘つくと耳が赤くなるもん。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_a_cf543656.mp3"
     },
@@ -84,7 +84,7 @@
         "ja": "も、もう……！ 眠れなくなっちゃうでしょ……！ おやすみっ！"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_b_cd85b83e.mp3"
     }
