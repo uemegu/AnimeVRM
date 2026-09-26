@@ -11,12 +11,14 @@ interface Props {
   cast: StageCastMember[];
   cameraShot: CameraShot;
   focusId: string | null;
+  /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
+  onManager?: (manager: StageManager | null) => void;
 }
 
 /**
  * app と同じ描画（StageManager）で舞台を表示する。親要素いっぱいに広がる
  */
-export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, focusId }: Props) {
+export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, focusId, onManager }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
 
@@ -24,12 +26,14 @@ export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, 
     const canvas = canvasRef.current!;
     const manager = new StageManager({ canvas, presets, initialTimeOfDay: timeOfDay, initialLocationId: locationId });
     managerRef.current = manager;
+    onManager?.(manager);
     const observer = new ResizeObserver(([entry]) => manager.resize(entry.contentRect.width, entry.contentRect.height));
     observer.observe(canvas.parentElement ?? canvas);
     return () => {
       observer.disconnect();
       manager.dispose();
       managerRef.current = null;
+      onManager?.(null);
     };
     // 作り直すと VRM を読み直すので、最初の1回だけ作る。以降の変更は下の effect で当てる
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -66,13 +66,15 @@ describe('sceneView', () => {
     expect(resolveLocationId({ ...base, phase: 'night', stage: { ...EMPTY_STAGE, background: 'shrine' } })).toBe('shrine');
   });
 
-  it('登場キャラは位置とモデルを解決し、休日は私服・朝は通学カバン付き、誰もいなければ話者を出すこと', () => {
+  it('登場キャラは立ち位置とモデルを解決し、休日は私服・朝は通学カバン付きになること', () => {
     const stage = { cast: { aoi: { position: 'left' as const, expression: 'happy' }, emili: { position: 'right' as const } } };
     const cast = resolveCast(stage, 'lunch_action');
-    expect(cast.map((m) => [m.id, m.position[0], m.modelUrl])).toEqual([
-      ['aoi', -0.45, '/models/aoi/aoi-school.vrm'],
-      ['emili', 0.45, '/models/emili/emili.vrm'],
+    expect(cast.map((m) => [m.id, m.slot, m.modelUrl])).toEqual([
+      ['aoi', 'left', '/models/aoi/aoi-school.vrm'],
+      ['emili', 'right', '/models/emili/emili.vrm'],
     ]);
+    // 座標で指定したときはそのまま使う
+    expect(resolveCast({ cast: { aoi: { position: [0.2, 0, -0.3] } } }, 'lunch_action')[0].position).toEqual([0.2, 0, -0.3]);
     expect(resolveCast(stage, 'holiday_action')[0].modelUrl).toBe('/models/aoi/aoi-private.vrm');
     // 朝の登校中は通学カバンを背負ったモデル
     expect(resolveCast(stage, 'morning').map((m) => m.modelUrl)).toEqual([

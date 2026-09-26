@@ -10,9 +10,11 @@ export interface FieldMeta {
   max?: number;
   step?: number;
   /** 文字列の入力方法（色・画像の選択） */
-  kind?: 'color' | 'image';
+  kind?: 'color' | 'image' | 'environment';
   /** 未指定のときに使われる値（フォームで表示し、項目を足すときの初期値にする） */
   default?: unknown;
+  /** 選択肢の表示名 */
+  options?: Record<string, { ja: string; en: string }>;
 }
 
 declare module 'zod' {
@@ -177,6 +179,83 @@ export type TimeOfDayPreset = z.infer<typeof TimeOfDayPreset>;
 
 const layerPosition = (ja: string, en: string) => vec3(ja, en, -5, 5, 0.05);
 
+/** カメラ構図ごとの置き方（高さは登場キャラの頭の高さからの差） */
+export interface ShotRig {
+  distance: number;
+  height: number;
+  targetHeight: number;
+}
+
+/** 構図の既定値（場所で指定がなければこれを使う） */
+export const DEFAULT_SHOT_RIGS: Record<'wide' | 'medium' | 'speaker' | 'close', ShotRig> = {
+  wide: { distance: 2.3, height: -0.22, targetHeight: -0.37 },
+  medium: { distance: 2.2, height: -0.2, targetHeight: -0.3 },
+  speaker: { distance: 1.6, height: -0.17, targetHeight: -0.27 },
+  close: { distance: 1.2, height: -0.09, targetHeight: -0.14 },
+};
+export const DEFAULT_CAMERA_FOV = 32;
+export const DEFAULT_SLOT_POSITIONS: Record<'left' | 'center' | 'right', [number, number, number]> = {
+  left: [-0.45, 0, 0],
+  center: [0, 0, 0],
+  right: [0.45, 0, 0],
+};
+export const DEFAULT_BACKDROP = { mode: 'screen' as const, distance: 8, height: 7.5, offsetY: 1.0 };
+
+const shotRig = (ja: string, en: string, def: ShotRig) =>
+  group(ja, en, {
+    distance: num('距離', 'Distance', 0.6, 6, 0.05, def.distance),
+    height: num('カメラの高さ（頭から）', 'Height (from head)', -1.2, 1, 0.01, def.height),
+    targetHeight: num('注視点の高さ（頭から）', 'Look-at height (from head)', -1.2, 1, 0.01, def.targetHeight),
+  });
+
+const slot = (ja: string, en: string, def: [number, number, number]) =>
+  z
+    .tuple([z.number(), z.number(), z.number()])
+    .meta({ ...label(ja, en), min: -3, max: 3, step: 0.01, default: def });
+
+export const LocationStage = group('配置とカメラ', 'Staging & camera', {
+  slots: group('立ち位置', 'Standing slots', {
+    left: slot('左', 'Left', DEFAULT_SLOT_POSITIONS.left).optional(),
+    center: slot('中央', 'Center', DEFAULT_SLOT_POSITIONS.center).optional(),
+    right: slot('右', 'Right', DEFAULT_SLOT_POSITIONS.right).optional(),
+  }).optional(),
+  camera: group('カメラ', 'Camera', {
+    fov: num('画角', 'Field of view', 15, 60, 1, DEFAULT_CAMERA_FOV).optional(),
+    wide: shotRig('引き', 'Wide', DEFAULT_SHOT_RIGS.wide).optional(),
+    medium: shotRig('会話', 'Two-shot', DEFAULT_SHOT_RIGS.medium).optional(),
+    speaker: shotRig('話者', 'Speaker', DEFAULT_SHOT_RIGS.speaker).optional(),
+    close: shotRig('アップ', 'Close', DEFAULT_SHOT_RIGS.close).optional(),
+  }).optional(),
+  backdrop: group('遠景の置き方', 'Backdrop placement', {
+    mode: z.enum(['screen', 'world']).meta({
+      ...label('方式', 'Mode'),
+      options: {
+        screen: { ja: '画面に貼る（カメラが動いても同じ見え方）', en: 'Screen (same view for every shot)' },
+        world: { ja: '3D空間に置く（寄ると背景も拡大）', en: 'In the world (zooms with the camera)' },
+      },
+    }),
+    distance: num('奥行き', 'Distance', 2, 30, 0.1, DEFAULT_BACKDROP.distance),
+    height: num('高さ（大きさ）', 'Height (size)', 1, 30, 0.1, DEFAULT_BACKDROP.height),
+    offsetY: num('上下の位置', 'Vertical offset', -5, 10, 0.05, DEFAULT_BACKDROP.offsetY),
+  }).optional(),
+});
+export type LocationStage = z.infer<typeof LocationStage>;
+
+/** 組み込みの3D背景（コードで組み立てるセット） */
+export const BUILTIN_ENVIRONMENTS = {
+  'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
+  'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
+} as const;
+
+export const LocationEnvironment = group('3D背景', '3D set', {
+  /** builtin:<名前>、または glb の URL（assets/ 基準） */
+  model: z.string().min(1).meta({ ...label('モデル', 'Model'), kind: 'environment' }),
+  position: vec3('位置', 'Position', -20, 20, 0.05),
+  rotationY: num('向き（度）', 'Rotation (deg)', -180, 180, 1, 0),
+  scale: num('大きさ', 'Scale', 0.1, 10, 0.05, 1),
+});
+export type LocationEnvironment = z.infer<typeof LocationEnvironment>;
+
 export const LocationVisualPreset = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
   name: z.string().meta(label('名前', 'Name')),
@@ -199,6 +278,8 @@ export const LocationVisualPreset = z.strictObject({
       opacity: num('不透明度', 'Opacity', 0, 1, 0.05),
     }).optional(),
   }),
+  environment: LocationEnvironment.optional(),
+  stage: LocationStage.optional(),
 });
 export type LocationVisualPreset = z.infer<typeof LocationVisualPreset>;
 

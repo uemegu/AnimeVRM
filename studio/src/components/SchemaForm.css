@@ -212,3 +212,21 @@
 .schema-group.depth-0 > .schema-group-body {
   padding-left: 12px;
 }
+
+.schema-tuple {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+}
+.schema-tuple label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.schema-tuple .schema-number {
+  width: 100%;
+  min-width: 0;
+}

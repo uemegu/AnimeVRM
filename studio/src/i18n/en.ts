@@ -50,6 +50,8 @@ export const en: Dictionary = {
     previewCharacter: 'Character',
     previewLocation: 'Location',
     previewTimeOfDay: 'Time',
+    castCount: 'Cast',
+    director: 'Overhead (schematic)',
     newLocation: 'New location',
     set: 'Set',
     unset: 'Not set',

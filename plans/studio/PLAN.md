@@ -89,7 +89,7 @@ tools/eye-editor/
    - app/ の `Avatar`・`StageManager`・`ScrollingBackground` は作りが別物なので、まだ app/ 側にある。第10段階で engine の `Avatar`・`ViewerCore` に載せ替える。それまでは、この3つに関わる描画の修正は両方に入れる
 4. **サーバー**（2026-09-26 完了）：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る。`server/README.md`。音声の話者設定はキャラクター管理（`assets/studio/characters.json`）に移し、`app/scripts/scenario-voices.py` と共有
 5. **Studio の土台・ビューア・キャラクター管理**（2026-09-26 完了。app/ の描画を `packages/engine/src/stage/` に移して共有し、時間帯・場所のプリセットは `assets/studio/*.json` にした）
-6. **シーン編集**（簡易3D表示とカメラ調整、painted-* の組み込み）
+6. **シーン編集**（2026-09-26 完了）：時間帯・場所の設定をスキーマから作ったフォームで編集し、プレビューに即時反映・保存する。場所ごとに立ち位置・カメラの画角と構図・遠景の置き方（画面に貼る／3D空間に置く）・3D背景（組み込みの painted 教室・図書室、または glb）を持てる。俯瞰の簡易3D表示でキャラ・立ち位置・カメラの視野・背景の位置関係を確認できる
 7. **シナリオ編集**（フロー → カット編集 → タイムライン → プレビュー → インポート・エクスポート）
 8. **再生と Pages**：ルートの20シナリオを JSON に移し、player をビルドして `docs/` を差し替える
 9. **モーション・音声・ツール**：ardy の複数候補生成、接触点の校正、TTS、MorphTarget、Eye Atelier

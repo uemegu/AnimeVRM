@@ -48,6 +48,8 @@ export const ja = {
     previewCharacter: 'キャラ',
     previewLocation: '場所',
     previewTimeOfDay: '時間帯',
+    castCount: '人数',
+    director: '俯瞰（簡易3D）',
     newLocation: '新しい場所',
     set: '設定する',
     unset: '未設定',
