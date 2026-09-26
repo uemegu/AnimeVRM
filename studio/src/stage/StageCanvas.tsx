@@ -31,23 +31,25 @@ export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, 
       manager.dispose();
       managerRef.current = null;
     };
-    // プリセットが変わったら作り直す（シーン設定の編集を反映する）
+    // 作り直すと VRM を読み直すので、最初の1回だけ作る。以降の変更は下の effect で当てる
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [presets]);
+  }, []);
 
-  useEffect(() => managerRef.current?.setTimeOfDay(timeOfDay), [timeOfDay, presets]);
-  useEffect(() => managerRef.current?.setLocation(locationId), [locationId, presets]);
+  // シーン設定の編集をその場で反映する
+  useEffect(() => managerRef.current?.setPresets(presets), [presets]);
+  useEffect(() => managerRef.current?.setTimeOfDay(timeOfDay), [timeOfDay]);
+  useEffect(() => managerRef.current?.setLocation(locationId), [locationId]);
 
   const castKey = JSON.stringify(cast);
   useEffect(() => {
     void managerRef.current?.setCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [castKey, presets]);
+  }, [castKey]);
 
   useEffect(() => {
     managerRef.current?.setSpeaker(focusId);
     managerRef.current?.setCameraShot(cameraShot, focusId);
-  }, [cameraShot, focusId, presets]);
+  }, [cameraShot, focusId]);
 
   return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />;
 }

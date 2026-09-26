@@ -1,3 +1,4 @@
+import './styles/global.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
@@ -5,7 +6,7 @@ import { ComingSoon, Layout, NAV_ITEMS } from './components/Layout';
 import { LanguageProvider } from './i18n';
 import { CharactersView } from './views/characters/CharactersView';
 import { ViewerView } from './views/viewer/ViewerView';
-import './styles/global.css';
+import { ScenesView } from './views/scenes/ScenesView';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/viewer" replace /> },
       { path: 'viewer', element: <ViewerView /> },
       { path: 'characters/:characterId?', element: <CharactersView /> },
+      { path: 'scenes/:tab?/:id?', element: <ScenesView /> },
       ...NAV_ITEMS.filter((item) => !item.ready).map((item) => ({ path: item.path.slice(1), element: <ComingSoon /> })),
     ],
   },

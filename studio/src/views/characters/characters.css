@@ -133,27 +133,6 @@
   font-size: 12px;
 }
 
-.characters-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.characters-status {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-right: 4px;
-}
-.characters-status.saved {
-  color: var(--success);
-}
-.characters-status.error {
-  color: var(--danger);
-}
-.characters-status.dirty {
-  color: #b45309;
-}
-
 .character-editor {
   display: flex;
   flex-direction: column;

@@ -50,7 +50,7 @@ export interface StageOptions {
 
 export class StageManager {
   private canvas: HTMLCanvasElement;
-  private readonly presets: StagePresets;
+  private presets: StagePresets;
   private readonly getSpeakerPhoneme?: () => string | undefined;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -264,6 +264,17 @@ export class StageManager {
     this.neargroundMesh = new THREE.Mesh(geo.clone(), nearMat);
     this.neargroundMesh.renderOrder = 2;
     this.scene.add(this.neargroundMesh);
+  }
+
+  /** シーン設定を差し替えて、今の時間帯・場所に当て直す（Studio での編集をその場で反映する） */
+  public setPresets(presets: StagePresets): void {
+    const previous = this.presets;
+    this.presets = presets;
+    this.setTimeOfDay(this.currentTimeOfDay);
+    const location = this.currentLocationId;
+    if (JSON.stringify(previous.locations[location]) !== JSON.stringify(presets.locations[location])) {
+      this.setLocation(location);
+    }
   }
 
   public getCurrentTimeOfDay(): TimeOfDayId {

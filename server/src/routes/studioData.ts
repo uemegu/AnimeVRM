@@ -1,11 +1,20 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Hono } from 'hono';
+import type { z } from 'zod';
+import { CharacterBook, LocationFile, TimeOfDayFile } from '@anime-vrm/scenario';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
 
+/** 形式が決まっているファイルは保存前に検証する */
+const SCHEMAS: Record<string, z.ZodType> = {
+  'time-of-day': TimeOfDayFile,
+  locations: LocationFile,
+  characters: CharacterBook,
+};
+
 /**
- * Studio が管理する JSON（assets/studio/<name>.json）。シーン設定や音声の話者設定など
+ * Studio が管理する JSON（assets/studio/<name>.json）。シーン設定やキャラクター管理など
  */
 export function studioDataRoutes(config: ServerConfig) {
   const app = new Hono();
@@ -32,6 +41,14 @@ export function studioDataRoutes(config: ServerConfig) {
       body = await c.req.json();
     } catch {
       return c.json({ error: 'JSON として読めません' }, 400);
+    }
+    const schema = SCHEMAS[c.req.param('name')];
+    const parsed = schema?.safeParse(body);
+    if (parsed && !parsed.success) {
+      return c.json(
+        { error: '形式が正しくありません', issues: parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) },
+        400
+      );
     }
     await fs.mkdir(path.dirname(file), { recursive: true });
     await fs.writeFile(file, JSON.stringify(body, null, 2) + '\n');

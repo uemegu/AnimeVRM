@@ -55,4 +55,6 @@ export const api = {
   saveCharacters: (book: CharacterBook) => putJson<{ ok: true }>('/characters', book),
   characterUsage: (id: string) => request<CharacterScenarioUsage[]>(`/characters/${encodeURIComponent(id)}/usage`),
   assets: (kind: AssetKind) => request<AssetEntry[]>(`/assets/${kind}`),
+  studioData: <T>(name: string) => request<T>(`/studio-data/${encodeURIComponent(name)}`),
+  saveStudioData: (name: string, data: unknown) => putJson<{ ok: true }>(`/studio-data/${encodeURIComponent(name)}`, data),
 };

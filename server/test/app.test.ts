@@ -159,6 +159,14 @@ describe('Studio 用 JSON', () => {
     expect(await json(request('/api/studio-data'))).toEqual(['characters', 'scenes']);
     expect((await putJson('/api/studio-data/..%2Fx', {})).status).toBe(400);
   });
+
+  it('形式が決まっているファイルは検証してから保存する', async () => {
+    const res = await putJson('/api/studio-data/locations', { presets: { school: { id: 'other', name: '学校', layers: { background: {} } } } });
+    expect(res.status).toBe(400);
+    expect((await json(res)).issues[0].path).toBe('presets.school.id');
+    const ok = await putJson('/api/studio-data/locations', { presets: { school: { id: 'school', name: '学校', layers: { background: {} } } } });
+    expect(ok.status).toBe(200);
+  });
 });
 
 describe('音声生成', () => {
