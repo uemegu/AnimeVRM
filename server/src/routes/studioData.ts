@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Hono } from 'hono';
 import type { z } from 'zod';
-import { CharacterBook, LocationFile, TimeOfDayFile } from '@anime-vrm/scenario';
+import { BgmBook, CharacterBook, LocationFile, MotionBook, TimeOfDayFile } from '@anime-vrm/scenario';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
 
@@ -11,6 +11,8 @@ const SCHEMAS: Record<string, z.ZodType> = {
   'time-of-day': TimeOfDayFile,
   locations: LocationFile,
   characters: CharacterBook,
+  motions: MotionBook,
+  bgm: BgmBook,
 };
 
 /**
