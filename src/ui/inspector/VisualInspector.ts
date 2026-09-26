@@ -539,6 +539,27 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
     .add(currentConfig.environment, 'midgroundOpacity', 0, 1, 0.05)
     .name(tr.gui.midOpacity)
     .onChange(() => viewerCore.updateMidgroundDisplay(currentConfig));
+
+  const midActions = {
+    selectImage: () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const blobUrl = URL.createObjectURL(file);
+          currentConfig.environment.showMidground = true;
+          currentConfig.environment.midgroundImageUrl = blobUrl;
+          viewerCore.updateMidgroundDisplay(currentConfig);
+          updateAllInspectorsDisplay();
+          showToast(`中景(mid)画像を読み込みました: ${file.name}`);
+        }
+      };
+      input.click();
+    },
+  };
+  midFolder.add(midActions, 'selectImage').name(tr.gui.selectMidImage);
   midFolder.close();
 
   // Nearground layer folder (e.g. cafe table)

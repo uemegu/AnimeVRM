@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { VRM, VRMLoaderPlugin, VRMUtils, VRMExpression, VRMExpressionMorphTargetBind } from '@pixiv/three-vrm';
+import { VRM, VRMLoaderPlugin, VRMUtils, VRMExpression, VRMExpressionMorphTargetBind, VRMHumanBoneName } from '@pixiv/three-vrm';
 import {
   applyToonShader,
   ToonShaderController,
@@ -21,6 +21,7 @@ import { FaceOverlayEffect, FaceOverlayKind, FaceOverlayState, getFaceOverlayKin
 import { MorphTargetPreview } from './avatar/MorphTargetPreview';
 import { getSeamlessLoopClip } from './animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from './avatar/happyEyesOnly';
+import { setDaylight } from './scene/Daylight';
 
 export interface BlushOptions {
   enabled?: boolean;
@@ -79,10 +80,19 @@ export interface AvatarOptions {
   renderer?: THREE.WebGLRenderer;
   // 前髪の影（ViewerCore の HairShadowRenderer から受け取る）
   hairShadow?: HairShadowUniforms;
+  daylight?: number; // 日なたの明るさ（窓の外の通行人など。0 で室内の光のみ、1 を超えるとブルームで白く飛ぶ）
+  renderOrder?: number; // custom renderOrder (e.g. -2 for outdoor behind midground)
   onProgress?: (progress: number) => void;
   onLoaded?: (avatar: Avatar) => void;
   onError?: (error: unknown) => void;
 }
+
+const seatedQuaternion = (x: number, z: number) => new THREE.Quaternion().setFromEuler(new THREE.Euler(x, 0, z));
+const SEATED_LEGS: [VRMHumanBoneName, THREE.Quaternion][] = [
+  ['leftUpperLeg', seatedQuaternion(-1.5, 0.04)], ['rightUpperLeg', seatedQuaternion(-1.5, -0.04)],
+  ['leftLowerLeg', seatedQuaternion(1.45, 0)], ['rightLowerLeg', seatedQuaternion(1.45, 0)],
+  ['leftFoot', seatedQuaternion(0.05, 0)], ['rightFoot', seatedQuaternion(0.05, 0)],
+];
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -290,6 +300,8 @@ export class Avatar {
 
   public initialPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
   public initialRotationY: number = 0;
+  private daylight = 0;
+  private customRenderOrder: number | null = null;
 
   private isBlushActive = false;
   private blushConfig: Required<BlushOptions> = {
@@ -323,6 +335,7 @@ export class Avatar {
 
   private isYandereActive = false;
   private isShafudoActive = false;
+  private isSeated = false;
   private yandereConfig: Required<YandereOptions> = {
     enabled: false,
     color: '#3b080f',
@@ -438,6 +451,12 @@ export class Avatar {
     if (typeof options.rotationY === 'number') {
       this.initialRotationY = options.rotationY;
     }
+    if (typeof options.daylight === 'number') {
+      this.daylight = options.daylight;
+    }
+    if (typeof options.renderOrder === 'number') {
+      this.customRenderOrder = options.renderOrder;
+    }
 
     this.ownsEffectTextManager = !options.effectTextManager;
     this.effectTextManager = options.effectTextManager ?? new EffectTextManager(scene);
@@ -470,6 +489,27 @@ export class Avatar {
     if (this.vrm) {
       this.vrm.scene.rotation.y = rad;
     }
+  }
+
+  public setDaylightAndRenderOrder(daylight?: number, renderOrder?: number): void {
+    if (typeof daylight === 'number') {
+      this.daylight = daylight;
+    }
+    if (typeof renderOrder === 'number') {
+      this.customRenderOrder = renderOrder;
+    }
+    this.applyDaylightAndRenderOrder();
+  }
+
+  private applyDaylightAndRenderOrder(): void {
+    if (!this.vrm) return;
+    setDaylight(this.vrm.scene, this.daylight);
+    if (this.customRenderOrder === null) return;
+    this.vrm.scene.traverse((obj) => {
+      if ((obj as THREE.Mesh).isMesh) {
+        obj.renderOrder = this.customRenderOrder!;
+      }
+    });
   }
 
   private loadModel(): void {
@@ -606,6 +646,8 @@ export class Avatar {
 
         // Initialize fast motion effect (arms & legs anime motion effects)
         this.fastMotionEffect = new FastMotionEffect(vrm, this.scene, this.options.config?.fastMotion);
+
+        this.applyDaylightAndRenderOrder();
 
         this.options.onLoaded?.(this);
       },
@@ -1584,6 +1626,7 @@ export class Avatar {
     if (this.mixer) {
       this.mixer.update(delta);
     }
+    if (this.isSeated) this.applySeatedLegs();
 
     // Apply procedural Head Look-At on top of FBX animation (before vrm.update)
     this.updateHeadLookAt(delta);
@@ -2254,6 +2297,18 @@ export class Avatar {
 
   public getYandereConfig(): Required<YandereOptions> {
     return { ...this.yandereConfig };
+  }
+
+  /** Replace the legs of the current motion with seated legs (thighs forward, shins down).
+   * For upper-body motions without a seat, e.g. chin_rest; place the root so the hips sit on the chair. */
+  public setSeated(enabled: boolean): void {
+    this.isSeated = enabled;
+  }
+
+  private applySeatedLegs(): void {
+    const humanoid = this.vrm?.humanoid;
+    if (!humanoid) return;
+    for (const [bone, rotation] of SEATED_LEGS) humanoid.getNormalizedBoneNode(bone)?.quaternion.copy(rotation);
   }
 
   public setShafudo(enabled: boolean): void {

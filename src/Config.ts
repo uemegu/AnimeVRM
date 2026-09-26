@@ -147,6 +147,8 @@ export interface WindConfig {
 export interface EnvironmentConfig {
   showBackgroundImage: boolean;
   backgroundImageUrl: string;
+  /** 遠景の明るさ倍率。1 を超えるとブルームで白く飛ぶ（窓の外の日なたなど） */
+  backgroundExposure?: number;
   backgroundColor: string;
   showFloor: boolean;
   floorColor: string;
@@ -279,7 +281,7 @@ export interface AvatarConfig {
   lipSync: LipSyncConfig;
   activeScene?: {
     presetId?: string;
-    timeOfDay?: 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | string;
+    timeOfDay?: 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | 'dark_indoor_2' | string;
     location?: 'modern_park' | 'school_gate' | 'classroom' | 'old_park' | 'cafe' | 'town' | 'apartment_door' | 'myroom' | 'none' | 'outdoor' | 'indoor' | string;
   };
   wind: WindConfig;

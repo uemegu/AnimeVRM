@@ -3,6 +3,12 @@ import type { AvatarConfig } from '../../Config';
 import { loadPaintedClassroom, disposePaintedClassroom, SKY_ONLY_BACKGROUND } from './PaintedClassroom';
 import { resolveAssetUrl } from '../../utils/path';
 
+/** A painted set the stage can show: the classroom by default, or e.g. the library. */
+export interface PaintedSet {
+  load: () => Promise<THREE.Group>;
+  dispose: (room: THREE.Group) => void;
+}
+
 /** Scenario adapter. The set itself can also be used by a lightweight preview.
  * Lighting and post-processing come from the scene preset (e.g. day_school), exactly as
  * for painted backgrounds; the stage only swaps the flat background layers for the set.
@@ -16,14 +22,14 @@ export class PaintedClassroomStage {
     scene: THREE.Scene;
     getConfig: () => AvatarConfig;
     onApplyConfig: (config: AvatarConfig) => void;
-  }) {}
+  }, private set: PaintedSet = { load: loadPaintedClassroom, dispose: disposePaintedClassroom }) {}
 
   async enter(): Promise<void> {
     if (this.room) return;
     const generation = ++this.generation;
-    const room = await loadPaintedClassroom();
+    const room = await this.set.load();
     if (generation !== this.generation) {
-      disposePaintedClassroom(room);
+      this.set.dispose(room);
       return;
     }
     const config = this.options.getConfig();
@@ -46,7 +52,7 @@ export class PaintedClassroomStage {
 
   exit(): void {
     this.generation++;
-    if (this.room) disposePaintedClassroom(this.room);
+    if (this.room) this.set.dispose(this.room);
     this.room = null;
     if (!this.saved) return;
     const config = this.options.getConfig();

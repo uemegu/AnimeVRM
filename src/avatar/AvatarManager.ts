@@ -158,6 +158,10 @@ export class AvatarManager {
         if (el) el.textContent = `${progress.toFixed(0)}%`;
       },
       onLoaded: (avatar) => {
+        if (this.avatarInstance !== avatar || this.isMultiAvatarScenarioActive) {
+          avatar.dispose();
+          return;
+        }
         if (this.liveChatController) {
           this.liveChatController.setAvatar(avatar);
         }

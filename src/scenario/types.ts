@@ -33,6 +33,9 @@ export interface ScenarioCharacterPlacement {
   character: string; // Character Master ID (e.g. 'girl_01') or Model URL
   position?: AvatarSlotPosition | [number, number, number];
   rotationY?: number;
+  daylight?: number; // 日なたの明るさ（窓の外の通行人など。0 で室内の光のみ、1 を超えるとブルームで白く飛ぶ）
+  renderOrder?: number; // custom renderOrder (e.g. -2 for outdoor behind midground)
+  fastMotion?: boolean; // 高速手足アニメーション残像エフェクトの有効/無効 (false で残像を無効化)
 }
 
 /** セリフ途中のアバター演出遷移キーフレーム（表情・モーション・視線等） */
@@ -118,6 +121,11 @@ export interface ScenarioSceneAvatarConfig {
   motionBlur?: boolean; // 高速動作時の方向性輪郭ブラーのON/OFF
   yandere?: boolean | Partial<YandereOptions>; // 瞳ハイライト消去・暗黒化・首傾げ
   shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
+  seated?: boolean; // 脚だけ座り姿勢に差し替える（chin_rest など座面のない上半身モーション用。腰が座面に乗るよう position の y を下げる）
+  daylight?: number; // 日なたの明るさ（窓の外の通行人など。0 で室内の光のみ、1 を超えるとブルームで白く飛ぶ）
+  renderOrder?: number; // custom renderOrder (e.g. -2 for outdoor behind midground)
+  fastMotion?: boolean; // 高速手足アニメーション残像エフェクトの有効/無効 (false で残像を無効化)
+  faceOverlays?: { blush?: boolean; anger?: boolean; sweat?: boolean }; // 顔の重ね表示 (赤らめ・怒りマーク・汗)
   /** セリフ中の表情・モーション・視線遷移タイムライン（at 昇順で指定） */
   transitions?: AvatarTransition[];
 }
@@ -206,6 +214,7 @@ export interface ScenarioScene {
   crowd?: boolean | ScenarioCrowdConfig; // ペルソナ5風モブ群衆演出
   conditions?: string[];
   goto?: string;
+  isEnding?: boolean; // このシーンの終了後にシナリオ全体を終了（リプレイ画面へ遷移）
   waitClick?: boolean;
   autoNextSec?: number;
   /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
@@ -214,7 +223,7 @@ export interface ScenarioScene {
 
 export interface ScenarioCrowdConfig {
   enabled?: boolean;
-  preset?: 'school_gate' | 'corridor' | 'classroom' | string;
+  preset?: 'school_gate' | 'corridor' | 'classroom' | 'cafe_street' | string;
   opacity?: number;
   tone?: 'p5' | 'monotone';
 }
@@ -227,7 +236,7 @@ export interface ScenarioChapter {
 }
 
 /** 3D の舞台。背景画像の代わりにモデルの部屋の中でシナリオを演じる */
-export type ScenarioStageId = 'classroom' | 'painted-classroom';
+export type ScenarioStageId = 'classroom' | 'painted-classroom' | 'painted-library';
 
 export interface ScenarioPackage {
   id: string;

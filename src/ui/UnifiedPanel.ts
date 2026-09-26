@@ -393,9 +393,10 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               </div>
               <div>
                 <span style="font-size: 10.5px; color: #aaaaaa; font-weight: 600; display: block; margin-bottom: 3px;">室内 (Indoor)</span>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;">
                   <button data-timeofday="bright_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'bright_indoor' ? 'active' : ''}" title="${tr.scenes.presetBrightIndoorTip}">${tr.scenes.bright}</button>
                   <button data-timeofday="dark_indoor" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'dark_indoor' ? 'active' : ''}" title="${tr.scenes.presetDarkIndoorTip}">${tr.scenes.dark}</button>
+                  <button data-timeofday="dark_indoor_2" class="timeofday-btn ${currentConfig.activeScene?.timeOfDay === 'dark_indoor_2' ? 'active' : ''}" title="${tr.scenes.presetDarkIndoor2Tip}">${tr.scenes.dark2}</button>
                 </div>
               </div>
               <div>
@@ -421,6 +422,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
               <button data-location="night_festival" data-bg="${resolveAssetUrl('/textures/night-festival-far.avif')}" class="bg-btn">${tr.scenes.backgrounds.nightFestival}</button>
               <button data-location="old_park" data-bg="${resolveAssetUrl('/textures/park-background.avif')}" class="bg-btn">${tr.scenes.backgrounds.oldPark}</button>
               <button data-location="cafe" data-bg="${resolveAssetUrl('/textures/cafe_far.avif')}" data-near="${resolveAssetUrl('/textures/cafe_near.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafe}</button>
+              <button data-location="cafe_indoor" data-bg="${resolveAssetUrl('/textures/cafe_indoor_far.avif')}" data-mid="${resolveAssetUrl('/textures/cafe_indoor_mid.avif')}" class="bg-btn">${tr.scenes.backgrounds.cafeIndoor}</button>
               <button data-location="town" data-bg="${resolveAssetUrl('/textures/town_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.town}</button>
               <button data-location="apartment_door" data-bg="${resolveAssetUrl('/textures/apartment_door_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.apartmentDoor}</button>
               <button data-location="myroom" data-bg="${resolveAssetUrl('/textures/myroom_far.avif')}" class="bg-btn">${tr.scenes.backgrounds.myroom}</button>

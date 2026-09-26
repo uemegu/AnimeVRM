@@ -554,7 +554,10 @@ replayBtn.addEventListener('click', (e) => {
 });
 
 // Initial Model & Scene Setup
-avatarManager.loadAvatarModel(avatarManager.currentModelUrl);
+const initialPkg = meta?.getScenario('ja');
+if (!initialPkg?.characters || initialPkg.characters.length <= 1) {
+  avatarManager.loadAvatarModel(avatarManager.currentModelUrl);
+}
 scenePresetManager.switchTimeOfDay('day', false);
 
 // --------------------------------------------------

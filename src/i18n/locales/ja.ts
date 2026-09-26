@@ -250,6 +250,7 @@ export const ja: Translations = {
     night: '🏮 夜',
     bright: '💡 室内・明',
     dark: '🌙 室内・暗',
+    dark2: '室内・暗2',
     divine: '神聖・後光',
     backgroundTitle: '🌄 背景 (Background)',
     backgrounds: {
@@ -261,6 +262,7 @@ export const ja: Translations = {
       nightFestival: '🏮 夏祭り',
       oldPark: '🌲 旧公園',
       cafe: '☕ カフェ',
+      cafeIndoor: 'カフェ店内',
       town: '🏙️ 街',
       apartmentDoor: '🚪 アパート前',
       myroom: '🛏️ 自室',
@@ -287,6 +289,7 @@ export const ja: Translations = {
     presetNightSchoolTip: '夜の校門・十分な明るさのある夜間照明',
     presetBrightIndoorTip: '教室背景・均一で明るい室内照明',
     presetDarkIndoorTip: '教室背景・薄暗い間接照明・夜光',
+    presetDarkIndoor2Tip: 'カフェ店内・温かみのあるアンビエントと柔らかな明暗',
     presetDivineTip: '神聖な後光（薄明光線）と黄金の輪郭光・逆光シルエット',
   },
   render: {
@@ -494,6 +497,7 @@ export const ja: Translations = {
     midZ: 'Z深度 (Pos Z / Depth)',
     midScale: 'サイズ (Scale)',
     midOpacity: '不透明度 (Opacity)',
+    selectMidImage: '画像ファイルを選択 (Mid)...',
     nearFolder: '☕ 近景レイヤー (Nearground Layer)',
     showNearground: '近景の表示 (Show Nearground)',
     nearX: 'X位置 (Pos X)',

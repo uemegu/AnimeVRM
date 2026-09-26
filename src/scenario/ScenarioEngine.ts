@@ -347,12 +347,16 @@ export class ScenarioEngine {
     const allAvatars = this.getAvatars ? this.getAvatars() : [this.getAvatar()].filter(Boolean) as Avatar[];
     allAvatars.forEach((avatar) => {
       avatar.resetFaceTexture();
+      void avatar.setFaceOverlay('blush', false);
+      void avatar.setFaceOverlay('anger', false);
+      void avatar.setFaceOverlay('sweat', false);
       avatar.clearEffectText();
       avatar.setTearsEnabled(false);
       avatar.setMotionBlurEnabled(false);
       avatar.setMotionSpeed(1.0);
       avatar.setYandereMode(false);
       avatar.setShafudo(false);
+      avatar.setSeated(false);
       avatar.setVisible(true);
     });
 
@@ -409,6 +413,10 @@ export class ScenarioEngine {
     }
 
     const currentScene = chapter.scenes[this.sceneIndex];
+    if (currentScene?.isEnding || currentScene?.goto === '__end__' || currentScene?.goto === 'end') {
+      this.stop();
+      return;
+    }
     if (currentScene?.goto) {
       this.jumpToTarget(currentScene.goto);
       return;
@@ -576,6 +584,11 @@ export class ScenarioEngine {
       avatar.setRotationY(rotationY);
     }
 
+    // 日なたの明るさと描画順（窓の中景より奥に描く）
+    if (config.daylight !== undefined || config.renderOrder !== undefined) {
+      avatar.setDaylightAndRenderOrder(config.daylight, config.renderOrder);
+    }
+
     // Smooth position/rotation interpolation (moveTo)
     if (config.moveTo) {
       const startPos = new THREE.Vector3();
@@ -695,6 +708,19 @@ export class ScenarioEngine {
       }
     }
 
+    // Fast Motion Effect (残像・スピード線) override per avatar
+    if (config.fastMotion !== undefined) {
+      avatar.fastMotionEffect?.updateConfig({ enabled: config.fastMotion });
+    }
+
+    // Face Overlays (怒りマーク・赤らめ・汗)
+    if (config.faceOverlays !== undefined) {
+      for (const kind of ['blush', 'anger', 'sweat'] as const) {
+        const shouldEnable = Boolean(config.faceOverlays[kind]);
+        void avatar.setFaceOverlay(kind, shouldEnable);
+      }
+    }
+
     // Fast Motion Directional Blur override per avatar
     if (config.motionBlur !== undefined) {
       avatar.setMotionBlurEnabled(config.motionBlur);
@@ -713,6 +739,9 @@ export class ScenarioEngine {
     // Shafudo (Shaft head/neck tilt pose) override per avatar
     if (config.shafudo !== undefined) {
       avatar.setShafudo(config.shafudo);
+    }
+    if (config.seated !== undefined) {
+      avatar.setSeated(config.seated);
     }
 
     // Mid-dialogue transitions timeline registration
