@@ -16,12 +16,10 @@ import { getHaremConversationScenario } from '../scenario/haremScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
-import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
 import { getPrivateDateScenario } from '../scenario/privateDateScenario';
 import { getTeacherGateScenario } from '../scenario/teacherGateScenario';
 import { getFiveSecondsConfessionPvScenario } from '../scenario/fiveSecondsConfessionPvScenario';
 import { getRooftopNapScenario } from '../scenario/rooftopNapScenario';
-import { GHOST_MASS_SCENARIO } from '../scenario/ghostMassScenario';
 import { getSilverWeekScenario } from '../scenario/silverWeekScenario';
 import { getGestureBattleScenario } from '../scenario/gestureBattleScenario';
 import { getCorridorConversationScenario } from '../scenario/corridorConversationScenario';
@@ -475,19 +473,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
           </div>
 
-          <!-- ★ SPECIAL: 幽霊の質量（シャフト風） -->
-          <div class="section-box" style="background: linear-gradient(135deg, rgba(20, 20, 25, 0.95) 0%, rgba(30, 25, 35, 0.95) 100%); border: 2px solid #f59e0b; border-left: 5px solid #dc2626; padding: 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <label class="section-label" style="color: #fbbf24; font-weight: 800; font-size: 13px; margin-bottom: 0;">👻 幽霊の質量 〜シャフト風会話劇〜</label>
-              <span style="font-size: 10px; padding: 2px 7px; background: linear-gradient(135deg, #dc2626, #f59e0b); color: #ffffff; border-radius: 999px; font-weight: 800; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);">SHAFT</span>
-            </div>
-            <div style="display: flex; gap: 6px; margin-top: 8px;">
-              <button id="scenario-ghost-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #dc2626 0%, #d97706 100%); font-weight: 800; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4); font-size: 13px; padding: 8px 10px; letter-spacing: 0.04em;">▶ 「幽霊の質量」を再生</button>
-              <button id="scenario-ghost-stop-btn" class="action-btn" style="min-width: 60px; font-weight: 700;">停止</button>
-            </div>
-            <div style="font-size: 11px; color: #fef3c7; line-height: 1.45; margin-top: 6px;">
-              単色アバター・白輪郭・ローポリ教室・赤緑明朝体カットイン・シャフ度（流し目）のシャフト演出劇。
-            </div>
           </div>
 
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #10b981; padding: 8px; border-radius: 4px;">
@@ -575,17 +560,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
             <div style="font-size: 10.5px; color: #bae6fd; line-height: 1.4; margin-top: 5px;">
               ${tr.scenario.fastMotionDesc}
-            </div>
-          </div>
-
-          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #dc2626; padding: 8px; border-radius: 4px;">
-            <label class="section-label" style="color: #f87171; font-weight: 700;">${tr.scenario.doorPeepTitle}</label>
-            <div style="display: flex; gap: 4px; margin-top: 4px;">
-              <button id="scenario-doorpeep-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playDoorPeep}</button>
-              <button id="scenario-doorpeep-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
-            </div>
-            <div style="font-size: 10.5px; color: #fecaca; line-height: 1.4; margin-top: 5px;">
-              ${tr.scenario.doorPeepDesc}
             </div>
           </div>
 
@@ -1165,26 +1139,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       showToast(t().toasts.scenarioStopped);
     });
 
-    // Interactive Door Peep-hole Yandere Scenario Play/Stop
-    document.getElementById('scenario-doorpeep-btn')?.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (scenarioController.scenarioEngine.isPlaying) {
-        scenarioController.scenarioEngine.stop();
-      } else {
-        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
-        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
-        const scenario = getDoorPeepYandereScenario(getLanguage());
-        scenarioController.scenarioEngine.play(scenario);
-        showToast(t().toasts.doorPeepStarted);
-      }
-    });
-
-    document.getElementById('scenario-doorpeep-stop-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      scenarioController.scenarioEngine.stop();
-      showToast(t().toasts.scenarioStopped);
-    });
-
     // Interactive Holiday Private Date Scenario Play/Stop
     document.getElementById('scenario-privatedate-btn')?.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -1252,28 +1206,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       e.stopPropagation();
       scenarioController.scenarioEngine.stop();
       scenarioController.pvTitleOverlay.hide();
-      showToast(t().toasts.scenarioStopped);
-    });
-
-    // Ghost Mass (Shaft Style) Scenario Play/Stop
-    document.getElementById('scenario-ghost-btn')?.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (scenarioController.scenarioEngine.isPlaying) {
-        scenarioController.scenarioEngine.stop();
-      } else {
-        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
-        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
-        await scenarioController.playWithInterlude(GHOST_MASS_SCENARIO, {
-          title: '幽霊の質量',
-          subtitle: 'THE MASS OF A GHOST - SHAFT STYLE -',
-        });
-        showToast('👻 「幽霊の質量」を再生します');
-      }
-    });
-
-    document.getElementById('scenario-ghost-stop-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      scenarioController.scenarioEngine.stop();
       showToast(t().toasts.scenarioStopped);
     });
 
