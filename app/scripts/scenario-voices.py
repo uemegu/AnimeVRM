@@ -24,17 +24,13 @@ REFS = {c['id']: os.path.join(REPO, c['voice']['ref']) for c in VOICED}
 BASE = {c['id']: c['voice']['caption'] + c['voice'].get('direction', '') for c in VOICED}
 POSTPROCESS = {c['id']: c['voice']['postprocess'] for c in VOICED if c['voice'].get('postprocess')}
 MOOD = BOOK['voiceMoods']
-# 画面にいない人物の名前 → 声
-VOICE_NAMES = {name: c['id'] for c in VOICED for name in c['speakerNames']}
 WHISPER = BOOK['whisperCaption']
 SHOUT = BOOK['shoutCaption']
 
 
 def speaker_of(scene):
     sid = scene.get('speakerCharacterId')
-    if sid in REFS:
-        return sid
-    return VOICE_NAMES.get(scene.get('speaker', ''))
+    return sid if sid in REFS else None
 
 
 def tts_text(text):

@@ -74,6 +74,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……な、なんだと……！？）"
     },
     {
@@ -137,6 +138,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "噂かよ！！",
       "nextSceneId": "end"
     },

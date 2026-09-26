@@ -65,6 +65,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "変態紳士は余計だろ！"
     },
     {
@@ -82,6 +83,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……全部聞かれてた）"
     },
     {

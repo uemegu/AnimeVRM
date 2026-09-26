@@ -56,6 +56,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……なんでわかるんだ。"
     },
     {
@@ -98,6 +99,7 @@
     {
       "id": "s7",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……告げられなかったら？"
     },
     {
@@ -115,6 +117,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "頭が爆発！？"
     },
     {

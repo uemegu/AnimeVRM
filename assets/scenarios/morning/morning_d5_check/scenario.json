@@ -93,6 +93,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（今のはノーカンじゃないのか……）"
     }
   ]

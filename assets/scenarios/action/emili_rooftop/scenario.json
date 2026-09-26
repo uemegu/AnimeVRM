@@ -160,6 +160,7 @@
     {
       "id": "s11",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（防犯訓練……？）"
     },
     {

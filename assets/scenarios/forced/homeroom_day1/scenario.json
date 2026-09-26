@@ -37,6 +37,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（処すって言った。今日だけで◯すと処すを両方聞いたぞ……）"
     },
     {
@@ -110,6 +111,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（噂の足が速すぎる）"
     },
     {
@@ -153,6 +155,7 @@
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……お前の指南で成功したやつ、見たことないんだけど。"
     },
     {
@@ -263,6 +266,7 @@
     {
       "id": "s22",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "えっ、なんで知って……"
     },
     {
@@ -280,6 +284,7 @@
     {
       "id": "s24",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（変な言い伝え……？）"
     },
     {
@@ -305,6 +310,7 @@
     {
       "id": "s26",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "すみませんでした！！"
     }
   ]

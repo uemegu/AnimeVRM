@@ -59,6 +59,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（私服……！ 制服の時とはまた違う破壊力が……！）"
     },
     {
@@ -164,6 +165,7 @@
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "き、気のせいだ。これは寒さによる震えで……"
     },
     {
@@ -193,6 +195,7 @@
     {
       "id": "s15",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……おう。行こう、絶対。",
       "nextSceneId": "end"
     },
@@ -213,6 +216,7 @@
     {
       "id": "s17",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "俺は平気だ。鍛えてるから。"
     },
     {

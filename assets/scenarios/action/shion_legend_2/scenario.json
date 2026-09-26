@@ -92,6 +92,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "10年前……？"
     },
     {
@@ -109,6 +110,7 @@
     {
       "id": "s7",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……白石先生？）"
     },
     {

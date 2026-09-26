@@ -23,6 +23,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……今日はおにぎりで我慢しよう）"
     }
   ]

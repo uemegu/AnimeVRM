@@ -21,6 +21,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（告白シーン、5秒どころか5分あったな……）"
     }
   ]

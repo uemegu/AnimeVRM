@@ -77,6 +77,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "よし、俺が確保してくる！"
     },
     {
@@ -155,11 +156,13 @@
     {
       "id": "s11",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……付いてる。言うべきか。いや、これは言うべきだ）"
     },
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アオイ、口のとこ、砂糖付いてる。"
     },
     {

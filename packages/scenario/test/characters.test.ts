@@ -27,11 +27,10 @@ describe('assets/studio/characters.json', () => {
     expect([color('aoi'), color('emili'), color('shion')]).toEqual(['#eab308', '#ef4444', '#3b82f6']);
   });
 
-  it('シナリオで使われているキャラ ID・話者名がすべて登録されていること', () => {
+  it('シナリオで使われているキャラ ID がすべて登録され、話者名のあるセリフには ID が付いていること', () => {
     const ids = new Set<string>(book.characters.map((c: { id: string }) => c.id));
-    const names = new Set<string>(book.characters.flatMap((c: { speakerNames: string[]; name: { ja: string } }) => [...c.speakerNames, c.name.ja]));
     const unknownIds = new Set<string>();
-    const unknownNames = new Set<string>();
+    const withoutId: string[] = [];
     const dir = path.join(ASSETS, 'scenarios');
     for (const category of fs.readdirSync(dir)) {
       for (const id of fs.readdirSync(path.join(dir, category))) {
@@ -45,12 +44,11 @@ describe('assets/studio/characters.json', () => {
             const cid = (avatar as { characterId?: string }).characterId ?? key;
             if (!ids.has(cid)) unknownIds.add(cid);
           }
-          const speaker = typeof scene.speaker === 'string' ? scene.speaker : scene.speaker?.ja;
-          if (speaker && !scene.speakerCharacterId && !names.has(speaker)) unknownNames.add(speaker);
+          if (scene.speaker && !scene.speakerCharacterId) withoutId.push(`${category}/${id}#${scene.id}`);
         }
       }
     }
     expect([...unknownIds]).toEqual([]);
-    expect([...unknownNames]).toEqual([]);
+    expect(withoutId).toEqual([]);
   });
 });

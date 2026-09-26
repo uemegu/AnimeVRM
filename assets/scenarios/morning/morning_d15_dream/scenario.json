@@ -60,6 +60,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "見世物にするなよ！"
     },
     {
@@ -99,6 +100,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……わかってるよ。もう、逃げない）"
     }
   ]

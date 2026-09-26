@@ -62,6 +62,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……クールに。"
     },
     {
@@ -79,6 +80,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……それ、21日しかない俺がやったら、引いてる間に◯されるんだが）"
     },
     {
@@ -116,6 +118,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（女神にな）"
     },
     {
@@ -147,6 +150,7 @@
     {
       "id": "s11",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "実績ゼロじゃねーか！"
     },
     {

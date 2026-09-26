@@ -33,6 +33,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……いる。しかも3人。全員インカムを付けて、こっちを見ている）"
     },
     {

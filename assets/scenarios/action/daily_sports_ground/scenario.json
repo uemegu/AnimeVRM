@@ -23,6 +23,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（体を動かしたい気分だ。女神に消される前に、体力だけはつけておこう）"
     }
   ]

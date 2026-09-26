@@ -22,12 +22,14 @@
     {
       "id": "s2",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "残り2日です。……言葉は、決まりましたか？",
       "voiceUrl": "v_s2_7f159129.mp3"
     },
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……まだだ。でも、伝えたいことはもう決まってる）"
     }
   ]

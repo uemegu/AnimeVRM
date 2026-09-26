@@ -160,6 +160,7 @@
     {
       "id": "s11",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "でも、ちゃんとした言葉は……ちゃんとした場所で言わせてほしい。"
     },
     {

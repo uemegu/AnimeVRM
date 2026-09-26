@@ -51,6 +51,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "シオンって、恋愛映画も観るんだな。"
     },
     {
@@ -68,6 +69,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……俺の話か？）"
     },
     {

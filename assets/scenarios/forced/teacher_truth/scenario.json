@@ -58,6 +58,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "先生も……！？ それで、どうなったんですか！？"
     },
     {
@@ -100,6 +101,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アフロ……！",
       "camera": "speaker"
     },

@@ -55,6 +55,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（作りすぎたにしては、俺の好きなものしか入ってないんだが……）"
     },
     {
@@ -123,6 +124,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……割とシャレにならないんだよな、それが）"
     },
     {

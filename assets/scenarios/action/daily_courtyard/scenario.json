@@ -33,6 +33,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "急にどうした。"
     },
     {
