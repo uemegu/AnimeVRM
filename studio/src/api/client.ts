@@ -59,7 +59,29 @@ export interface ScenarioSummary {
   updatedAt: string;
 }
 
+export interface TtsLine {
+  lineId: string;
+  text: string;
+  speaker: string | null;
+  expression: string;
+  caption: string;
+}
+
+export interface TtsJob {
+  id: string;
+  status: 'queued' | 'running' | 'done' | 'error';
+  candidates: number[];
+  error?: string;
+  log: string[];
+}
+
 export const api = {
+  ttsLine: (category: string, id: string, lineId: string) => request<TtsLine>(`/tts/lines/${category}/${encodeURIComponent(id)}/${encodeURIComponent(lineId)}`),
+  ttsStart: (body: { category: string; id: string; lineId: string; candidates: number; caption?: string }) =>
+    request<TtsJob>('/tts/jobs', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+  ttsJob: (jobId: string) => request<TtsJob>(`/tts/jobs/${jobId}`),
+  ttsAdopt: (jobId: string, index: number) =>
+    request<{ ok: true; voiceUrl: string }>(`/tts/jobs/${jobId}/adopt`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ index }) }),
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   scenario: (category: string, id: string) => request<unknown>(`/scenarios/${category}/${encodeURIComponent(id)}`),
   saveScenario: (category: string, id: string, data: unknown) => putJson<{ ok: true }>(`/scenarios/${category}/${encodeURIComponent(id)}`, data),

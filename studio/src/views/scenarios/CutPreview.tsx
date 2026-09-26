@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import {
+  type CameraPose,
   resolveCameraShot,
   resolveCast,
   resolveScrollingBackground,
@@ -11,8 +12,6 @@ import type { StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StudioData } from '../../data/useStudioData';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
-import { useAudioPreview } from '../characters/useAudioPreview';
-import { Icon } from '../../components/Icon';
 import { textJa } from './scenarioEdit';
 
 export type Outfit = 'default' | 'private' | 'commute';
@@ -24,14 +23,18 @@ interface Props {
   index: number;
   data: StudioData;
   outfit: Outfit;
+  /** カット内の時刻（タイムライン） */
+  cutTime: number;
+  playing: boolean;
+  freeCamera: boolean;
+  onCameraPose: (pose: CameraPose) => void;
 }
 
 /**
  * カットの見え方（app と同じ描画）。先頭からこのカットまでの指定を引き継いだ舞台を映す
  */
-export function CutPreview({ scenario, baseUrl, index, data, outfit }: Props) {
+export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose }: Props) {
   const { t } = useI18n();
-  const audio = useAudioPreview();
   const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
   const scene = scenario.scenes[index];
   const stage = useMemo(() => stageAtScene(scenario, index), [scenario, index]);
@@ -52,7 +55,6 @@ export function CutPreview({ scenario, baseUrl, index, data, outfit }: Props) {
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
   const shot = resolveCameraShot(scene ?? null, cast);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
-  const voiceUrl = scene?.voiceUrl ? (scene.voiceUrl.startsWith('/') ? scene.voiceUrl : `${baseUrl}${scene.voiceUrl}`) : null;
   const speaker = textJa(scene?.speaker) || (scene?.speakerCharacterId ? data.characters.characters.find((c) => c.id === scene.speakerCharacterId)?.name.ja : '');
 
   return (
@@ -65,6 +67,11 @@ export function CutPreview({ scenario, baseUrl, index, data, outfit }: Props) {
         cameraShot={shot}
         focusId={scene?.speakerCharacterId ?? null}
         scrolling={scrolling}
+        cut={scene ?? null}
+        cutTime={cutTime}
+        playing={playing}
+        freeCamera={freeCamera}
+        onCameraPose={onCameraPose}
       />
       {scene && (textJa(scene.text) || scene.choices?.length) ? (
         <div className="cut-dialogue">
@@ -82,13 +89,7 @@ export function CutPreview({ scenario, baseUrl, index, data, outfit }: Props) {
       <div className="cut-preview-hud">
         <span>{data.locations[locationId]?.name ?? locationId}</span>
         <span>{data.timeOfDay[timeOfDay]?.name ?? timeOfDay}</span>
-        <span>{t.viewer.shots[shot]}</span>
-        {voiceUrl && (
-          <button type="button" className="cut-voice" onClick={() => audio.toggle(voiceUrl)}>
-            <Icon name={audio.playingUrl === voiceUrl ? 'stop' : 'play'} size={12} />
-            {t.scenarios.voice}
-          </button>
-        )}
+        <span>{scene?.cameraPose ? t.scenarios.timeline.pose : t.viewer.shots[shot]}</span>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
-import type { CameraShot, ScrollingBackgroundSettings } from '@anime-vrm/scenario';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { CameraPose, CameraShot, ScenarioScene, ScrollingBackgroundSettings } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -13,6 +14,15 @@ interface Props {
   focusId: string | null;
   /** 流れる背景（歩きながらの会話）。null で止める */
   scrolling?: ScrollingBackgroundSettings | null;
+  /** 今のカット（カメラの直接指定とカット内のタイムライン） */
+  cut?: ScenarioScene | null;
+  /** カット内の時刻。playing でなければ、その時刻へ頭出しする */
+  cutTime?: number;
+  playing?: boolean;
+  /** カメラを手で動かす（ドラッグで回転・右ドラッグで移動・ホイールで前後） */
+  freeCamera?: boolean;
+  /** 手で動かしたカメラの位置が変わったとき */
+  onCameraPose?: (pose: CameraPose) => void;
   /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
   onManager?: (manager: StageManager | null) => void;
 }
@@ -20,7 +30,21 @@ interface Props {
 /**
  * app と同じ描画（StageManager）で舞台を表示する。親要素いっぱいに広がる
  */
-export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, focusId, scrolling = null, onManager }: Props) {
+export function StageCanvas({
+  presets,
+  timeOfDay,
+  locationId,
+  cast,
+  cameraShot,
+  focusId,
+  scrolling = null,
+  cut = null,
+  cutTime = 0,
+  playing = false,
+  freeCamera = false,
+  onCameraPose,
+  onManager,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
 
@@ -63,5 +87,57 @@ export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, 
     managerRef.current?.setCameraShot(cameraShot, focusId);
   }, [cameraShot, focusId]);
 
-  return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />;
+  // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
+  const cutKey = JSON.stringify(cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id } : null);
+  useEffect(() => {
+    const manager = managerRef.current;
+    if (!manager) return;
+    manager.setCameraPose(cut?.cameraPose ?? null);
+    manager.setCutTimeline(cut);
+    manager.setCutTime(cutTime, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cutKey]);
+
+  useEffect(() => {
+    managerRef.current?.setCutTime(cutTime, !playing);
+  }, [cutTime, playing]);
+
+  // カメラを手で動かす
+  const onCameraPoseRef = useRef(onCameraPose);
+  onCameraPoseRef.current = onCameraPose;
+  useEffect(() => {
+    const manager = managerRef.current;
+    const canvas = canvasRef.current;
+    if (!manager || !canvas || !freeCamera) return;
+    const camera = manager.viewCamera;
+    manager.setFreeCamera(true);
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.copy(manager.viewTarget);
+    controls.enableDamping = true;
+    controls.update();
+    const report = () => {
+      manager.setFreeCameraTarget(controls.target);
+      onCameraPoseRef.current?.({
+        position: camera.position.toArray().map((v) => Math.round(v * 1000) / 1000) as [number, number, number],
+        target: controls.target.toArray().map((v) => Math.round(v * 1000) / 1000) as [number, number, number],
+        fov: camera.fov,
+      });
+    };
+    controls.addEventListener('change', report);
+    report();
+    let frame = 0;
+    const tick = () => {
+      frame = requestAnimationFrame(tick);
+      controls.update();
+    };
+    tick();
+    return () => {
+      cancelAnimationFrame(frame);
+      controls.removeEventListener('change', report);
+      controls.dispose();
+      manager.setFreeCamera(false);
+    };
+  }, [freeCamera]);
+
+  return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined }} />;
 }

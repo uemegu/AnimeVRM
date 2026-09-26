@@ -136,6 +136,8 @@ export class StageManager {
   private timelineShot: CameraShot | null = null;
   private timelinePose: { pose: CameraPoseSetting; duration?: number } | null = null;
   private cameraTransitionSec = CAMERA_TRANSITION_SEC;
+  /** Studio でカメラを手で動かしている間は、構図によるカメラの移動を止める */
+  private freeCamera = false;
 
   // カット内のタイムライン（キーフレーム）
   private cutScene: ScenarioScene | null = null;
@@ -750,6 +752,25 @@ export class StageManager {
   }
 
   /** カメラ構図の指定（focusId は話者など、寄る対象） */
+  /** Studio 用：カメラを手で動かす間は構図の自動決定を止める（戻すと今の構図へ動く） */
+  public setFreeCamera(enabled: boolean): void {
+    this.freeCamera = enabled;
+    if (!enabled) {
+      this.cameraFrom = { position: this.camera.position.clone(), target: this.cameraCurrentTarget.clone() };
+      this.cameraElapsed = 0;
+    }
+  }
+
+  /** Studio 用：手で動かしたカメラの注視点を伝える（戻したときにそこから補間する） */
+  public setFreeCameraTarget(target: THREE.Vector3): void {
+    this.cameraCurrentTarget.copy(target);
+  }
+
+  /** 今の注視点（カメラを手で動かすときの初期値） */
+  public get viewTarget(): THREE.Vector3 {
+    return this.cameraCurrentTarget.clone();
+  }
+
   /** カットでカメラを直接指定する（null で構図の自動決定に戻す） */
   public setCameraPose(pose: CameraPoseSetting | null): void {
     this.basePose = pose;
@@ -980,7 +1001,7 @@ export class StageManager {
         const time = this.getCutTime() ?? elapsed - this.cutStartedAt;
         if (time !== this.cutTime) this.setCutTime(time);
       }
-      this.updateCamera(delta);
+      if (!this.freeCamera) this.updateCamera(delta);
       this.scrollingBackground.update(delta);
 
       // 1. 登場中のアバターの更新（口パクは話者だけ）
