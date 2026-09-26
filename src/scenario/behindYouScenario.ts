@@ -61,7 +61,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'morning_school',
           panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '「ねえねえ、ちょっとここだけの内緒話なんだけど……聞いてくれる？」',
-          voiceUrl: resolveAssetUrl('/voices/behind_intro_1.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_intro_1.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -86,7 +86,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: '放課後の教室',
           text: '「実はね、エミリちゃん……普段はあんなにツンツンしてるのに、家ではめちゃくちゃ可愛いピンクのぬいぐるみに囲まれて寝てるらしいの！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_gossip_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_gossip_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Excited.fbx'),
@@ -111,7 +111,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: '放課後の教室',
           text: '「しかも毎日『くまちゃん、今日も大好きだよ〜♡』ってぎゅーって抱きしめてるんだって！ ふふっ、エミリちゃんがここにいなくて本当に良かった〜！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_secret_3.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_secret_3.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Acknowledging.fbx'),
@@ -137,7 +137,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           cameraTargetCharacterId: 'girl_01', // カメラはアオイ(girl_01)を映したまま
           location: '放課後の教室',
           text: '「……へぇ？ 私のくまちゃんの話、随分と盛り上がってるみたいじゃない……？」',
-          voiceUrl: resolveAssetUrl('/voices/behind_emily_4.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_emily_4.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -168,7 +168,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: '放課後の教室',
           text: '「ひ、ひぃぃぃっ！？ う、後ろ……！ あなたの真後ろにエミリちゃんが立ってる……！！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_panic_5.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_panic_5.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Dismissing Gesture.fbx'),
@@ -198,7 +198,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_02', // エミリへカメラが180°旋回
           location: '放課後の教室',
           text: '「私のいない場所で、一体何を話してたのかなぁ……？ じっくり聞かせてもらおうじゃない」',
-          voiceUrl: resolveAssetUrl('/voices/behind_turn_6.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_turn_6.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -267,7 +267,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: '放課後の教室',
           text: '「な、なによそれ……！ か、可愛いだなんて、そんなこと言って誤魔化そうとしても無駄なんだからねっ///」',
-          voiceUrl: resolveAssetUrl('/voices/behind_praise.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_praise.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -294,7 +294,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // アオイ側へカメラが振り返る
           location: '放課後の教室',
           text: '「ふふっ、エミリちゃん顔真っ赤だよ〜！ すっごく可愛い〜♪」',
-          voiceUrl: resolveAssetUrl('/voices/behind_praise_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_praise_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -325,7 +325,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // アオイ側へカメラが戻る
           location: '放課後の教室',
           text: '「えええっ！？ ちょっと、自分だけ助かろうとするなんてひどいよ〜〜！！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_blame_1.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_blame_1.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Angry.fbx'),
@@ -351,7 +351,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_02', // 再びエミリへ
           location: '放課後の教室',
           text: '「ふふっ、醜い責任の擦り付け合いね……！ 二人まとめてお仕置き決定♪」',
-          voiceUrl: resolveAssetUrl('/voices/behind_blame_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_blame_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -380,7 +380,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: '放課後の教室',
           text: '「……まったく。素直に謝ったから今回は許してあげる。でも次くまちゃんの話をしたら、本当に怒るからね！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_apology.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_apology.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -406,7 +406,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // アオイ側へカメラが振り返る
           location: '放課後の教室',
           text: '「ふぅ〜〜よかったぁ……！ 許してもらえて命拾いしたね！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_apology_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_apology_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -435,7 +435,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: '放課後の教室',
           text: '「さ、放課後なんだから三人で駅前カフェ行くわよ！ 二人とも、私の奢りなんだから感謝しなさいよね！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_ending.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_ending.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -462,7 +462,7 @@ export const BEHIND_YOU_SCENARIO_JA: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // 最後は正面のアオイへ振り返って完結
           location: '放課後の教室',
           text: '「ふふっ、エミリちゃん本当にスイーツ大好きだよね。写真いっぱい撮っちゃお♪ カフェ行こ行こー！」',
-          voiceUrl: resolveAssetUrl('/voices/behind_ending_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_ending_aoi.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -543,7 +543,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           scenePreset: 'morning_school',
           panoramaBackgroundUrl: resolveAssetUrl('/textures/class_room_3d.avif'),
           text: '"Hey, can you keep a secret just between us...?"',
-          voiceUrl: resolveAssetUrl('/voices/behind_intro_1.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_intro_1.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -568,7 +568,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: 'Classroom After School',
           text: '"The truth is, even though Emily is always acting so tsundere... she sleeps surrounded by cute pink plushies at home!"',
-          voiceUrl: resolveAssetUrl('/voices/behind_gossip_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_gossip_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Excited.fbx'),
@@ -592,7 +592,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: 'Classroom After School',
           text: '"And she literally hugs her teddy bear saying \'I love you so much today too, Teddy♡\' every day! Ahaha, I\'m so glad Emily isn\'t here right now~!"',
-          voiceUrl: resolveAssetUrl('/voices/behind_secret_3.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_secret_3.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Acknowledging.fbx'),
@@ -618,7 +618,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           cameraTargetCharacterId: 'girl_01',
           location: 'Classroom After School',
           text: '"...Oh really? Sounds like you two are having quite a thrilling conversation about my teddy bear...?"',
-          voiceUrl: resolveAssetUrl('/voices/behind_emily_4.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_emily_4.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Angry.fbx'),
@@ -648,7 +648,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: 'Classroom After School',
           text: '"E-Eeeek!? B-Behind you...! Emily is standing right behind you...!!" ',
-          voiceUrl: resolveAssetUrl('/voices/behind_panic_5.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_panic_5.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Dismissing Gesture.fbx'),
@@ -676,7 +676,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: 'Classroom After School',
           text: '"What were you two gossiping about behind my back, huh? Why don\'t you tell me all the details?"',
-          voiceUrl: resolveAssetUrl('/voices/behind_turn_6.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_turn_6.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -740,7 +740,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: 'Classroom After School',
           text: '"W-What are you saying...?! C-Calling me cute won\'t save you, okay...?!///"',
-          voiceUrl: resolveAssetUrl('/voices/behind_praise.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_praise.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -767,7 +767,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // Turns back to Aoi
           location: 'Classroom After School',
           text: '"Hehe, Emily\'s face is completely red! She\'s so adorable~♪"',
-          voiceUrl: resolveAssetUrl('/voices/behind_praise_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_praise_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -794,7 +794,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01',
           location: 'Classroom After School',
           text: '"Whaaat?! How could you betray me just to save yourself?!"',
-          voiceUrl: resolveAssetUrl('/voices/behind_blame_1.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_blame_1.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Angry.fbx'),
@@ -820,7 +820,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: 'Classroom After School',
           text: '"Hehe, throwing each other under the bus, are we? You\'re both getting punished together♪"',
-          voiceUrl: resolveAssetUrl('/voices/behind_blame_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_blame_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -845,7 +845,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: 'Classroom After School',
           text: '"...Good grief. Since you apologized honestly, I\'ll let you off this once. But mention my teddy bear again and you\'ll regret it!"',
-          voiceUrl: resolveAssetUrl('/voices/behind_apology.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_apology.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Idle.fbx'),
@@ -871,7 +871,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // Turns back to Aoi
           location: 'Classroom After School',
           text: '"Phew~~ What a relief...! We barely survived that one!"',
-          voiceUrl: resolveAssetUrl('/voices/behind_apology_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_apology_2.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -896,7 +896,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_02',
           location: 'Classroom After School',
           text: '"Alright, school\'s over so the three of us are heading to the station cafe! And of course, it\'s on you two♪"',
-          voiceUrl: resolveAssetUrl('/voices/behind_ending.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_ending.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),
@@ -923,7 +923,7 @@ export const BEHIND_YOU_SCENARIO_EN: ScenarioPackage = {
           speakerCharacterId: 'girl_01', // Final turn to front Aoi
           location: 'Classroom After School',
           text: '"Yay! Going to the cafe together with Emily! Let\'s go, let\'s go~♪"',
-          voiceUrl: resolveAssetUrl('/voices/behind_ending_aoi.wav'),
+          voiceUrl: resolveAssetUrl('/voices/behind_ending_aoi.mp3'),
           avatars: {
             girl_01: {
               motion: resolveAssetUrl('/animations/Standing Greeting.fbx'),

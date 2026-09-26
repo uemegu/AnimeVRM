@@ -30,7 +30,7 @@ const CUT = { cameraPreset: 'hold', cameraTransitionDuration: 0, cameraTransitio
 const glide = (seconds: number) => ({ cameraPreset: 'hold', cameraTransitionDuration: seconds, cameraTransitionEasing: 'smooth' } as const);
 
 const anim = (name: string) => resolveAssetUrl(`/animations/${name}.fbx`);
-const voice = (name: string) => resolveAssetUrl(`/voices/${name}.wav`);
+const voice = (name: string) => resolveAssetUrl(`/voices/${name}.mp3`);
 const FACE_PARTNER = { lookAtTarget: 'partner', shallowHeadAngle: false } as const;
 const aoi = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig =>
   ({ visible: true, position: AOI_POSITION, rotationY: AOI_ROTATION_Y, ...FACE_PARTNER, ...config });

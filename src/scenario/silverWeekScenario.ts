@@ -33,7 +33,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'evening_outdoor',
           background: '/textures/town_far.avif',
           text: '「ふあぁ……楽しかったシルバーウィークも、とうとう今日で終わっちゃうね……」',
-          voiceUrl: '/voices/sw_1.wav',
+          voiceUrl: '/voices/sw_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -80,7 +80,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「ほんと、あっという間だったよね！ でもアオイとショッピングもカフェも行けて、最高に充実してたよ！」',
-          voiceUrl: '/voices/sw_2.wav',
+          voiceUrl: '/voices/sw_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -126,7 +126,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「うん！ エミリちゃんのおかげで、毎日すっごく笑ってた気がするな〜」',
-          voiceUrl: '/voices/sw_3.wav',
+          voiceUrl: '/voices/sw_3.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Acknowledging.fbx',
@@ -165,7 +165,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「ねえ、明日からまた学校だけど……放課後の約束、どうする？」',
-          voiceUrl: '/voices/sw_4.wav',
+          voiceUrl: '/voices/sw_4.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -226,7 +226,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「賛成！ じゃあ明日の朝、いつもの交差点で待ち合わせね！」',
-          voiceUrl: '/voices/sw_reaction_together.wav',
+          voiceUrl: '/voices/sw_reaction_together.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -271,7 +271,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「やったー！ 約束だよ！ 次はもっと遠くまでお出かけしちゃおう！」',
-          voiceUrl: '/voices/sw_reaction_next_trip.wav',
+          voiceUrl: '/voices/sw_reaction_next_trip.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -316,7 +316,7 @@ export const SILVER_WEEK_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの並木道',
           background: '/textures/town_far.avif',
           text: '「それじゃあ、また明日ね！ 気をつけて帰ってね〜！」',
-          voiceUrl: '/voices/sw_end.wav',
+          voiceUrl: '/voices/sw_end.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/ardy_wave.fbx',

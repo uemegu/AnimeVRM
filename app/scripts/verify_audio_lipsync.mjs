@@ -56,7 +56,7 @@ async function run() {
     await page.screenshot({ path: path.resolve(appRoot, 'scripts/audio_stage_init.png') });
     console.log('Captured audio_stage_init.png');
 
-    // Click dialogue box to advance to scene_2 (Aoi speaks: "おーい！おはよう！" with voice 001.wav)
+    // Click dialogue box to advance to scene_2 (Aoi speaks: "おーい！おはよう！" with voice 001.mp3)
     console.log('Clicking dialogue box to advance to voice line...');
     await page.click('.dialogue-window');
 

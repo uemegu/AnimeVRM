@@ -2,7 +2,7 @@ import {chromium} from '@playwright/test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
-const browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',`--use-file-for-fake-audio-capture=${process.cwd()}/public/voices/lipsync_vowels_female.wav`]});
+const browser=await chromium.launch({headless:true,args:['--autoplay-policy=no-user-gesture-required','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream',`--use-file-for-fake-audio-capture=${process.cwd()}/public/voices/lipsync_vowels_female.mp3`]});
 const page=await browser.newPage({viewport:{width:1280,height:1100}}),errors=[];
 page.on('pageerror',e=>errors.push(String(e)));
 await page.goto('http://127.0.0.1:8877/?test=expressions');await page.waitForFunction(()=>window.referenceRig?.ready);
@@ -33,7 +33,7 @@ await page.locator('#vowel').selectOption('ih');await page.waitForTimeout(75);as
 await page.locator('#opening').fill('0.5');await page.locator('#opening').dispatchEvent('input');await page.waitForTimeout(600);assert(Math.abs((await page.evaluate(()=>window.referenceRig.state.expression.inputOpenness))-.5)<.03);
 await page.locator('#blush').fill('0.7');await page.locator('#blush').dispatchEvent('input');await page.waitForTimeout(800);assert((await page.evaluate(()=>window.referenceRig.state.blush))>.6);
 // Exercise the real file/audio analysis path with a local existing voice sample.
-await page.locator('#audioFile').setInputFiles('public/voices/lipsync_vowels_female.wav');await page.locator('#audioPlay').click();
+await page.locator('#audioFile').setInputFiles('public/voices/lipsync_vowels_female.mp3');await page.locator('#audioPlay').click();
 await page.waitForTimeout(500);
 const audioStates=[];for(let i=0;i<8;i++){audioStates.push(await page.evaluate(()=>window.referenceRig.state.expression));await page.waitForTimeout(120);}
 assert(audioStates.some(s=>s.inputOpenness>.2),'real audio never drove articulation');

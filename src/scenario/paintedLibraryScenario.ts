@@ -24,7 +24,7 @@ const shion = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig => 
 });
 const SHION = { speaker: 'シオン', speakerCharacterId: 'shion', dialogueTarget: 'player' } as const;
 
-const voice = (name: string) => resolveAssetUrl(`/voices/${name}.wav`);
+const voice = (name: string) => resolveAssetUrl(`/voices/${name}.mp3`);
 
 /** Viewing check for the painted library: the same seat in the morning, at noon and after school. */
 export function getPaintedLibraryScenario(): ScenarioPackage {

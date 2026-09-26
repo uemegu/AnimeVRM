@@ -38,7 +38,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「あれ？ こんなところで誰か寝転がってると思ったら……きみだったんだ！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_01.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_01.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {
@@ -62,7 +62,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「ふふっ、すっごく気持ちよさそうな寝顔。ちょっといたずらして驚かせちゃおうかな」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_02.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_02.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {
@@ -88,7 +88,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「……ねぇ。いつまで寝てるの？ 起こしちゃって悪いんだけど……起きて？」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_03.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_03.mp3'),
           character: 'girl_01',
           live2d: true,
           cameraZoom: 'speaker_close',
@@ -104,7 +104,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「……あ、起きた。ふふ、おはよう。……ん？ なにじっと見てるの？ 私の顔、変……？」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_04.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_04.mp3'),
           character: 'girl_01',
           live2d: true,
           cameraZoom: 'speaker_close',
@@ -120,7 +120,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「……えっ？ ちょっと、待って……どこ見て――きゃあっ！？ わ、わたし、スカートでこんな屈み方……っ！！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_05.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_05.mp3'),
           character: 'girl_01',
           live2d: true,
           avatar: {
@@ -140,7 +140,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「ば、バカっ！ 見たでしょ今！？ 絶対見えたよね……！？ 最低ぇっ、変態っ！！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_06.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_06.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {
@@ -217,7 +217,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「〜〜っバカ！ そういうこと堂々と言わないでよ……！ 余計に恥ずかしいじゃん……！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_1.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_1.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {
@@ -247,7 +247,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「大嘘つき！ 目線が完全に下向いてたの、バッチリ見えてたんだからね……！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_2.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_2.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {
@@ -277,7 +277,7 @@ export const ROOFTOP_NAP_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: resolveAssetUrl('/textures/school-rooftop-far.avif'),
           text: '「堂々と報告するなーーっ！！ ほんっと信じられない……！ バカバカバカッ！」',
-          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_3.wav'),
+          voiceUrl: resolveAssetUrl('/voices/rooftop_ans_3.mp3'),
           character: 'girl_01',
           live2d: false,
           avatar: {

@@ -38,7 +38,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「……ふぅ。ここのお店、落ち着いてていいね。外の光も綺麗だし……たまにはこういう静かな場所も悪くないかも。」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_01.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_01.mp3'),
           crowd: {
             enabled: true,
             preset: 'cafe_street',
@@ -77,7 +77,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「……ん？ 待って。あの水色のカーディガン……あそこ歩いてるの、アオイじゃない？」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_02.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_02.mp3'),
           crowd: {
             enabled: true,
             preset: 'cafe_street',
@@ -120,7 +120,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「誰か探してるみたい……待ち合わせかな。あんなにキョロキョロしてたら、すぐ迷子になっちゃいそうだけど。」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_03.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_03.mp3'),
           crowd: {
             enabled: true,
             preset: 'cafe_street',
@@ -166,7 +166,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「……って、ちょっと！ 私といるのに、そんなにアオイのことばっかり凝視しないでよ。」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_04.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_04.mp3'),
           crowd: {
             enabled: true,
             preset: 'cafe_street',
@@ -247,7 +247,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「まったく……お人好しなんだから。ほら、手振ったら気づくかもよ？ ……しょうがないなぁ。」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_06a.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_06a.mp3'),
           isEnding: true, // 1個目選択後にシナリオを正常終了
           crowd: {
             enabled: true,
@@ -281,7 +281,7 @@ export const CAFE_MONITORING_SCENARIO_JA: ScenarioPackage = {
           location: 'cafe_indoor',
           scenePreset: 'dark_indoor_2',
           text: '「……っ！ な、何よ急に真面目な顔して……バカ。……じゃあ、もうちょっとだけ、ここで二人で休んでいこっか。」',
-          voiceUrl: resolveAssetUrl('/voices/cafe_mon_06b.wav'),
+          voiceUrl: resolveAssetUrl('/voices/cafe_mon_06b.mp3'),
           isEnding: true,
           crowd: {
             enabled: true,

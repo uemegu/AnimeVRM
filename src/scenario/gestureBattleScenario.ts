@@ -33,7 +33,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           scenePreset: 'day_school',
           background: '/textures/school-gate-far.avif',
           text: '「ねえエミリちゃん！ 放課後の表現力勝負、どっちが全身で気持ちを伝えられるかバトルしよ！」',
-          voiceUrl: '/voices/gb_1.wav',
+          voiceUrl: '/voices/gb_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -80,7 +80,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「望むところだよアオイ！ 私の全力のリアクション、甘く見ないでよね！」',
-          voiceUrl: '/voices/gb_2.wav',
+          voiceUrl: '/voices/gb_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -126,7 +126,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「じゃあ行くよ！ どうしても宿題を教えてほしい時のお願い……からの、断られた時の顔！」',
-          voiceUrl: '/voices/gb_3.wav',
+          voiceUrl: '/voices/gb_3.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -182,7 +182,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「ふふん、まだまだね！ 私ならこう！ 限定スイーツをゲットできた歓喜……と、一口取られた怒り！」',
-          voiceUrl: '/voices/gb_4.wav',
+          voiceUrl: '/voices/gb_4.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -251,7 +251,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「どうかな？ どっちの全身ジェスチャーがより気持ちが伝わってきた？」',
-          voiceUrl: '/voices/gb_5.wav',
+          voiceUrl: '/voices/gb_5.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/ardy_shrug.fbx',
@@ -312,7 +312,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「やったー！ 私の勝ちだね！ エミリちゃん、放課後アイス奢ってね〜！」',
-          voiceUrl: '/voices/gb_reaction_aoi.wav',
+          voiceUrl: '/voices/gb_reaction_aoi.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/ardy_victory.fbx',
@@ -357,7 +357,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「よっしゃー！ やっぱり私の表現力は最強でしょ！ 次も勝っちゃうもんね！」',
-          voiceUrl: '/voices/gb_reaction_emili.wav',
+          voiceUrl: '/voices/gb_reaction_emili.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/ardy_laugh.fbx',
@@ -402,7 +402,7 @@ export const GESTURE_BATTLE_SCENARIO_JA: ScenarioPackage = {
           location: '校門前',
           background: '/textures/school-gate-far.avif',
           text: '「また放課後にいろんな動きで遊ぼうね！ 今日は付き合ってくれてありがとう！」',
-          voiceUrl: '/voices/gb_end.wav',
+          voiceUrl: '/voices/gb_end.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/ardy_wave.fbx',

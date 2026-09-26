@@ -341,16 +341,16 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
           <div class="section-box">
             <label class="section-label">${tr.character.lipSyncTitle}</label>
             <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;">
-              <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.wav')}">🎙️ 001.wav</button>
-              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/girl4_ref.wav')}">🎙️ 💤 ${lang === 'en' ? 'Downer (Sleepy)' : 'ダウナー (眠いし)'}</button>
-              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.wav')}">🎙️ 1. ${lang === 'en' ? 'Stalker?' : 'ストーカー？'}</button>
-              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.wav')}">🎙️ 2. ${lang === 'en' ? 'Kidding' : '冗談だ'}</button>
-              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.wav')}">🎙️ 3. ${lang === 'en' ? 'What are you doing?' : '何してるの？'}</button>
+              <button id="sample-voice-default" class="model-btn voice-btn active" data-voice="${resolveAssetUrl('/voices/001.mp3')}">🎙️ 001.mp3</button>
+              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/girl4_ref.mp3')}">🎙️ 💤 ${lang === 'en' ? 'Downer (Sleepy)' : 'ダウナー (眠いし)'}</button>
+              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_01.mp3')}">🎙️ 1. ${lang === 'en' ? 'Stalker?' : 'ストーカー？'}</button>
+              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_02.mp3')}">🎙️ 2. ${lang === 'en' ? 'Kidding' : '冗談だ'}</button>
+              <button class="model-btn voice-btn" data-voice="${resolveAssetUrl('/voices/scenario_03.mp3')}">🎙️ 3. ${lang === 'en' ? 'What are you doing?' : '何してるの？'}</button>
               <button id="open-audio-file-btn" class="model-btn" style="flex: 1; min-width: 90px;">${tr.character.openAudioFile}</button>
             </div>
             <div class="player-box">
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.wav</span>
+                <span id="audio-title" style="font-size: 11px; font-weight: 600; color: #e0e0e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;">001.mp3</span>
                 <span id="audio-time" style="font-size: 10px; color: #888888; font-family: monospace;">0:00 / 0:00</span>
               </div>
               <input type="range" id="audio-seekbar" min="0" max="100" value="0" step="0.1" style="width: 100%; cursor: pointer; accent-color: #4772b3; height: 4px;">

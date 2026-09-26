@@ -32,7 +32,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           location: '放課後の教室',
           scenePreset: 'morning_school',
           text: '「エミリちゃん！ 今日の放課後、もし予定なかったら一緒にどこか寄っていかない？」',
-          voiceUrl: '/voices/chat_intro_1.wav',
+          voiceUrl: '/voices/chat_intro_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Dismissing Gesture.fbx',
@@ -60,7 +60,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '放課後の教室',
           text: '「あ、アオイ！ ちょうど声かけようと思ってたの！ 駅前に新しくできたカフェ、行ってみない？」',
-          voiceUrl: '/voices/chat_intro_2.wav',
+          voiceUrl: '/voices/chat_intro_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -135,7 +135,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'player',
           location: '駅前カフェ通り',
           text: '「やったぁ！ 期間限定の特製ストロベリーパフェがあるんだって！ 楽しみ〜！」',
-          voiceUrl: '/voices/chat_cafe_1.wav',
+          voiceUrl: '/voices/chat_cafe_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -162,7 +162,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '駅前カフェ通り',
           text: '「ふふっ、エミリちゃん本当にスイーツ大好きだよね。私も写真いっぱい撮っちゃお♪」',
-          voiceUrl: '/voices/chat_cafe_2.wav',
+          voiceUrl: '/voices/chat_cafe_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Quick Formal Bow.fbx',
@@ -194,7 +194,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '学校の図書室',
           text: '「えぇ〜っ！？ 放課後なのに勉強〜！？ アオイ、真面目すぎるよ〜っ！」',
-          voiceUrl: '/voices/chat_study_1.wav',
+          voiceUrl: '/voices/chat_study_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -221,7 +221,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '学校の図書室',
           text: '「大丈夫、1時間だけ集中して終わったら美味しいジュースおごってあげるから！」',
-          voiceUrl: '/voices/chat_study_2.wav',
+          voiceUrl: '/voices/chat_study_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Acknowledging.fbx',
@@ -254,7 +254,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           location: '夕暮れの公園',
           scenePreset: 'evening_park',
           text: '「夕方の風が気持ちいいね。たまにはこうやってのんびり歩くのもいいかも」',
-          voiceUrl: '/voices/chat_park_1.wav',
+          voiceUrl: '/voices/chat_park_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Female Standing Pose.fbx',
@@ -281,7 +281,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_JA: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: '夕暮れの公園',
           text: '「うん！ 綺麗な夕焼けだね。アオイとおしゃべりしながら歩くの大好き♪」',
-          voiceUrl: '/voices/chat_park_2.wav',
+          voiceUrl: '/voices/chat_park_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -367,7 +367,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           location: 'Classroom after school',
           scenePreset: 'morning_school',
           text: '"Emiri! If you have no plans after school, want to hang out somewhere together?"',
-          voiceUrl: '/voices/chat_intro_1.wav',
+          voiceUrl: '/voices/chat_intro_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Dismissing Gesture.fbx',
@@ -394,7 +394,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'Classroom after school',
           text: '"Ah, Aoi! I was just about to ask you! Want to check out the new cafe in front of the station?"',
-          voiceUrl: '/voices/chat_intro_2.wav',
+          voiceUrl: '/voices/chat_intro_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -464,7 +464,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'player',
           location: 'Cafe Street',
           text: '"Yay! I heard they have a limited strawberry parfait! Can\'t wait~!"',
-          voiceUrl: '/voices/chat_cafe_1.wav',
+          voiceUrl: '/voices/chat_cafe_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -491,7 +491,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'Cafe Street',
           text: '"Hehe, Emiri really loves sweets. I\'m definitely taking lots of photos♪"',
-          voiceUrl: '/voices/chat_cafe_2.wav',
+          voiceUrl: '/voices/chat_cafe_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Quick Formal Bow.fbx',
@@ -519,7 +519,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'School Library',
           text: '"Whaaat!? Studying after school!? Aoi, you\'re way too serious~!"',
-          voiceUrl: '/voices/chat_study_1.wav',
+          voiceUrl: '/voices/chat_study_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
@@ -546,7 +546,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'School Library',
           text: '"It\'s okay, just 1 hour of focus and I\'ll buy you a delicious drink afterwards!"',
-          voiceUrl: '/voices/chat_study_2.wav',
+          voiceUrl: '/voices/chat_study_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Acknowledging.fbx',
@@ -575,7 +575,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           location: 'Twilight Park',
           scenePreset: 'evening_park',
           text: '"The evening breeze feels so nice. It\'s great to just take a relaxing walk like this once in a while."',
-          voiceUrl: '/voices/chat_park_1.wav',
+          voiceUrl: '/voices/chat_park_1.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Female Standing Pose.fbx',
@@ -602,7 +602,7 @@ export const TWO_GIRLS_CONVERSATION_SCENARIO_EN: ScenarioPackage = {
           dialogueTarget: 'partner',
           location: 'Twilight Park',
           text: '"Yeah! The sunset is so pretty. I love chatting with you while we walk, Aoi♪"',
-          voiceUrl: '/voices/chat_park_2.wav',
+          voiceUrl: '/voices/chat_park_2.mp3',
           avatars: {
             girl_01: {
               motion: '/animations/Standing Idle.fbx',
