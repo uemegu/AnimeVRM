@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import type { Character, CharacterBook, CharacterRole } from '@anime-vrm/scenario';
-import { api, ApiError, type AssetEntry } from '../../api/client';
+import { api, type AssetEntry } from '../../api/client';
+import { SaveBar, saveErrorStatus, type SaveStatus } from '../../components/SaveBar';
 import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n';
 import { CharacterEditor } from './CharacterEditor';
@@ -23,7 +24,7 @@ export function CharactersView() {
   const [models, setModels] = useState<AssetEntry[]>([]);
   const [voices, setVoices] = useState<AssetEntry[]>([]);
   const [loadError, setLoadError] = useState(false);
-  const [status, setStatus] = useState<{ kind: 'saving' | 'saved' | 'error'; message?: string } | null>(null);
+  const [status, setStatus] = useState<SaveStatus>(null);
   const [newId, setNewId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,8 +66,7 @@ export function CharactersView() {
       setSaved(structuredClone(draft));
       setStatus({ kind: 'saved' });
     } catch (err) {
-      const detail = err instanceof ApiError && err.issues.length > 0 ? err.issues.map((i) => `${i.path}: ${i.message}`).join(' / ') : undefined;
-      setStatus({ kind: 'error', message: detail });
+      setStatus(saveErrorStatus(err));
     }
   };
 
@@ -142,25 +142,7 @@ export function CharactersView() {
               </div>
             </div>
           )}
-          <div className="characters-actions">
-            <span className={`characters-status ${status?.kind ?? (dirty ? 'dirty' : '')}`}>
-              {status?.kind === 'saving'
-                ? t.common.saving
-                : status?.kind === 'saved'
-                  ? t.common.saved
-                  : status?.kind === 'error'
-                    ? `${t.common.saveFailed}${status.message ? `（${status.message}）` : ''}`
-                    : dirty
-                      ? t.common.unsaved
-                      : ''}
-            </span>
-            <button type="button" className="btn" disabled={!dirty} onClick={() => saved && setDraft(structuredClone(saved))}>
-              {t.common.revert}
-            </button>
-            <button type="button" className="btn primary" disabled={!dirty || status?.kind === 'saving'} onClick={save}>
-              {t.common.save}
-            </button>
-          </div>
+          <SaveBar dirty={dirty} status={status} onRevert={() => saved && setDraft(structuredClone(saved))} onSave={save} />
         </header>
         {selected && (
           <CharacterEditor

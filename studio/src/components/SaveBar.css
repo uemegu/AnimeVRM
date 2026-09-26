@@ -1,0 +1,25 @@
+.save-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.save-bar-status {
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+.save-bar-status.saved {
+  color: var(--success);
+}
+.save-bar-status.error {
+  color: var(--danger);
+}
+.save-bar-status.dirty {
+  color: #b45309;
+}
