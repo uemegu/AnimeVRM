@@ -14,7 +14,7 @@ import { TimeOfDayId } from '../../types/visual';
 import { CHARACTERS, CharacterMaster } from '../../data/characters';
 import { LOOPING_MOTIONS } from '../../data/motions';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
-import type { ScrollingBackgroundSettings } from '../graphics/scene/ScrollingBackground';
+import type { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { ScenarioResolvedScene } from '../scenario/ScenarioEngine';
 
 /**
@@ -34,18 +34,8 @@ export interface StageState {
 }
 
 /** 画面に出すキャラ1人分（位置・モデル解決済み） */
-export interface StageCastMember {
-  id: string;
-  modelUrl: string;
-  position: [number, number, number];
-  rotationY: number;
-  expression: string;
-  expressionWeight: number;
-  motion?: string;
-  motionLoop: boolean;
-  /** モーションを指定したシーン（変わったら同じモーションでも再生し直す） */
-  motionCue?: string;
-}
+export type { StageCastMember } from '@anime-vrm/engine/stage/types';
+import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 
 const SLOT_X: Record<string, number> = { left: -0.45, center: 0, right: 0.45 };
 

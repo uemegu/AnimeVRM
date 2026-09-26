@@ -69,6 +69,6 @@
 - **キャラクターのテーマカラー厳守**: アオイ=黄色、エミリ=赤、シオン=青。
 - **並びのボタン・ラベルのサイズ統一**: 同列に並ぶボタン・バッジは高さ・幅を揃える。
 - **デザイン先行確認**: UI変更時は自動テスト前に画面キャプチャでユーザー承認を得る。
-- **ルートとの共有**: 素材はリポジトリ直下の `assets/` をルートと共有する。シェーダー・ポストプロセス・空の背景などの描画コードは `packages/engine` を使う（app 側に複製を置かない）。`Avatar`・`StageManager`・`ScrollingBackground` はまだ app 独自で、後で engine に載せ替える（`plans/studio/PLAN.md`）。シナリオ JSON の形式は `packages/scenario` のスキーマが正で、アプリの型とずれると型チェックで失敗する。
+- **ルートとの共有**: 素材はリポジトリ直下の `assets/` をルートと共有する。描画（`StageManager`・`StageAvatar`・`ScrollingBackground`・シェーダー・ポストプロセス）は `packages/engine` にあり、Studio のプレビューと共有する（app 側に複製を置かない）。時間帯・場所の見た目は `assets/studio/time-of-day.json`・`locations.json`（Studio のシーン設定）で、app は `data/timeOfDayPresets.ts` などから読むだけ。キャラ定義の正は `assets/studio/characters.json`（`characters.ts` とずれるとテストが失敗する）。シナリオ JSON の形式は `packages/scenario` のスキーマが正で、アプリの型とずれると型チェックで失敗する。
 - **シナリオ発生条件**: 未指定項目は制限なし。優先順位は大きい値を優先し、同値時は定義順。休日時間帯は土日として判定。
 - **簡潔な記録**: 作業ログや引き継ぎメモにコードを見ればわかる細部・数値を書かない。

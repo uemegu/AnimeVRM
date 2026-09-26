@@ -88,7 +88,7 @@ tools/eye-editor/
 3. **engine 統合**（2026-09-26 完了。その後、Studio の描画は app/ を土台にすると決めたので、ルートの `Avatar`・`ViewerCore` は、必要な演出（高速アクションなど）を移植したあと旧ルートと一緒に消す）：ルートの描画コードを `packages/engine` に移し、app/ と中身が同じ・ほぼ同じだったもの（シェーダー、ポストプロセス、空の背景、ToonShader、CinematicAnimeShader など）は app/ も engine の版を使う。違いがあったものはルートの版（機能の多い方）に、app/ の使い方を足して1本にした。統合前後のスクリーンショットで、ルート・app/ とも見た目が変わらないことを確認済み
    - app/ の `Avatar`・`StageManager`・`ScrollingBackground` は作りが別物なので、まだ app/ 側にある。第10段階で engine の `Avatar`・`ViewerCore` に載せ替える。それまでは、この3つに関わる描画の修正は両方に入れる
 4. **サーバー**（2026-09-26 完了）：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る。`server/README.md`。音声の話者設定はキャラクター管理（`assets/studio/characters.json`）に移し、`app/scripts/scenario-voices.py` と共有
-5. **Studio の土台・ビューア・キャラクター管理**
+5. **Studio の土台・ビューア・キャラクター管理**（2026-09-26 完了。app/ の描画を `packages/engine/src/stage/` に移して共有し、時間帯・場所のプリセットは `assets/studio/*.json` にした）
 6. **シーン編集**（簡易3D表示とカメラ調整、painted-* の組み込み）
 7. **シナリオ編集**（フロー → カット編集 → タイムライン → プレビュー → インポート・エクスポート）
 8. **再生と Pages**：ルートの20シナリオを JSON に移し、player をビルドして `docs/` を差し替える
