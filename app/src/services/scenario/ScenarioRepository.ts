@@ -17,7 +17,7 @@ const fetchJson: ScenarioJsonLoader = async (url) => {
 /**
  * シナリオの目次と本文の読み込みを担う。
  * - 目次（scenarioIndex.json）は同期的に参照でき、発生判定や場所ヒントに使う
- * - 本文（public/scenarios/<category>/<id>/scenario.json）は再生直前に遅延ロードする
+ * - 本文（assets/scenarios/<category>/<id>/scenario.json）は再生直前に遅延ロードする
  */
 export class ScenarioRepository {
   private readonly cache = new Map<string, Promise<unknown>>();

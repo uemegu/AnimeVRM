@@ -49,7 +49,7 @@ Model files are fetched from immutable revision
 `intsuc/Llama-3-ARDY-Mini-Core40-Browser`. Model weights are not included in this
 repository or build. Their separate
 [model terms](https://huggingface.co/intsuc/Llama-3-ARDY-Mini-Core40-Browser/blob/1c21362effeecec0454bfc0d818661525ae6b387/MODEL_TERMS.md)
-apply. Source and dependency notices ship under `public/notices/ardy-mini/`.
+apply. Source and dependency notices ship under `assets/notices/ardy-mini/`.
 
 ## CLI でのモーション生成 (WebGPU)
 
@@ -59,13 +59,13 @@ Playwright 経由で macOS 上の Google Chrome（WebGPU / Metal）を実行し�
 
 ```bash
 # 単発生成 (FBX)
-npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -o public/animations/ardy_wave.fbx
+npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -o assets/animations/ardy_wave.fbx
 
 # 秒数指定 (2〜8秒)
-npm run ardy:generate -- -p "A person bows politely" -d 4 -o public/animations/ardy_bow.fbx
+npm run ardy:generate -- -p "A person bows politely" -d 4 -o assets/animations/ardy_bow.fbx
 
 # JSON 形式で出力
-npm run ardy:generate -- -p "A person points forward" -d 3 -o public/animations/ardy_point.json
+npm run ardy:generate -- -p "A person points forward" -d 3 -o assets/animations/ardy_point.json
 
 # バッチ一括生成
 npm run ardy:generate -- -b test/fixtures/ardy_batch_sample.json
@@ -108,7 +108,7 @@ ardy-mini は実写の体（身長約1.8m）の動きを出力します。アニ
 顔に近い手は ardy-mini の姿勢のままにします。アニメの顔は手に比べて小さいため、手のひらの中心を口に合わせると指が目を覆ってしまい、角度をそのまま移した方が自然に見えたためです。FBXは指定したVRMの体型に合わせて焼き込まれるので、体型が大きく違うモデル（例: mob/girl は aoi より肩がさらに狭い）には別に生成してください。
 
 ```bash
-npm run ardy:generate -- -p "A person puts hands on hips and laughs happily" -d 4 -n 6 --lock-legs --avatar /models/aoi/aoi-school.vrm --preview -o public/animations/ardy_laugh.fbx
+npm run ardy:generate -- -p "A person puts hands on hips and laughs happily" -d 4 -n 6 --lock-legs --avatar /models/aoi/aoi-school.vrm --preview -o assets/animations/ardy_laugh.fbx
 ```
 
 「顎に手を当てて考える」で手が顔の中央を覆うのは、変換ではなく ardy-mini の生成結果そのものです（手のひらが鼻の前に来ます）。"A person rests their chin on their right hand" の方が顎の下に手が来ます。同様に「力強い万歳」は `--amplitude` で縮めても腕が横に広がるだけで可愛くならないため、"A person claps their hands together in front of their chest excitedly" のようにプロンプトで動き自体を変えてください。
@@ -118,7 +118,7 @@ npm run ardy:generate -- -p "A person puts hands on hips and laughs happily" -d 
 拡散モデルはseedで当たり外れがあるため、`-n 8` などで複数生成し、`src/ai/motion/ardy/scoreMotion.ts` の採点で並べます。出力は1位、`.cand2.fbx` 以降が次点、`.candidates.json` に全候補のseed・cfg・指標を保存します。
 
 ```bash
-npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -n 8 --cfg 2,3.5 -o public/animations/ardy_wave.fbx
+npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -n 8 --cfg 2,3.5 -o assets/animations/ardy_wave.fbx
 ```
 
 採点するのは欠陥だけで、プロンプトどおりに動いているかは測りません。
@@ -129,4 +129,4 @@ npm run ardy:generate -- -p "A person raises their right hand and waves" -d 3 -n
 
 他の候補の半分未満しか手が動かない候補は、指示を無視している可能性が高いため後ろに回します。ardy-miniの出力は5Hz以上の成分がほぼなくガタつかないため、ジャークは採点しません。最終的な選択は、書き出したファイルを見て決めてください。
 
-quality生成には、同じVRMを `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output public/motion-profiles/aoi-school.json` で一度校正します。profileに埋め込まれるモデルhashが違うと補正を適用しません。Jevで作った時間プランは `.review.fbx` へ保存されるので、目視後に必要なら手書きplanへ確定してください。
+quality生成には、同じVRMを `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output assets/motion-profiles/aoi-school.json` で一度校正します。profileに埋め込まれるモデルhashが違うと補正を適用しません。Jevで作った時間プランは `.review.fbx` へ保存されるので、目視後に必要なら手書きplanへ確定してください。

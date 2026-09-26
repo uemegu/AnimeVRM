@@ -1,6 +1,6 @@
 # HANDOFF 引き継ぎメモ
 
-将来的な別リポジトリ移行を前提としたギャルゲーWebアプリ（`app/`）の引き継ぎメモです。
+ギャルゲーWebアプリ（`app/`）の引き継ぎメモです。
 細かな数値や実装詳細はコードを参照し、本書は要点のみを簡潔に保ってください。
 
 ---
@@ -18,9 +18,9 @@
   - 表示言語は `LanguageProvider` / `useLanguage()` で参照（props で中継しない）。
 - **シナリオ & 会話**:
   - Headless型ステートマシン（`ScenarioEngine.ts`、Vitestテスト対応）。
-  - シナリオは `public/scenarios/<category>/<id>/scenario.json`（ボイスも同じディレクトリ）。発生判定用のメタ情報は `src/data/scenarioIndex.json` に自動生成し、本文は再生直前に遅延ロード（`ScenarioRepository`）。書き方は `FEATURES.md`。
+  - シナリオは `assets/scenarios/<category>/<id>/scenario.json`（ボイスも同じディレクトリ）。発生判定用のメタ情報は `src/data/scenarioIndex.json` に自動生成し、本文は再生直前に遅延ロード（`ScenarioRepository`）。書き方は `FEATURES.md`。
   - 行動ヒント情報（場所・フェーズ・ヒント文・滞在キャラID）は各シナリオの `actionHints` で管理。
-  - 夜の電話・メールも `public/scenarios/call|mail/` のマスターデータ。条件を満たすものが1人1件ずつ優先度順に届き、完了は進行履歴に残る（`ScheduleManager.getNightCommunications`）。
+  - 夜の電話・メールも `assets/scenarios/call|mail/` のマスターデータ。条件を満たすものが1人1件ずつ優先度順に届き、完了は進行履歴に残る（`ScheduleManager.getNightCommunications`）。
   - `ScenarioPackage.availability` による発生条件（前提シナリオ/選択肢、時間帯、日数、場所）、優先順位、セーブ対応の進行履歴。
   - 条件の指定例と時間帯・AND/ORの意味は `FEATURES.md` を参照。
   - タイピング演出、ルート準拠のボイス再生終了＆文字数同期AUTO送り、選択肢UI、幕間スライストランジション。
@@ -69,6 +69,6 @@
 - **キャラクターのテーマカラー厳守**: アオイ=黄色、エミリ=赤、シオン=青。
 - **並びのボタン・ラベルのサイズ統一**: 同列に並ぶボタン・バッジは高さ・幅を揃える。
 - **デザイン先行確認**: UI変更時は自動テスト前に画面キャプチャでユーザー承認を得る。
-- **疎結合設計**: 将来の別リポジトリ移行のため、`app/` 配下で完結させる。
+- **ルートとの共有**: 素材はリポジトリ直下の `assets/` をルートと共有する。描画コードとシナリオ形式も、ルートの Studio 化に合わせて共有パッケージ（`packages/`）へ移していく（`plans/studio/PLAN.md`）。シナリオ JSON の形式は `packages/scenario` のスキーマが正で、アプリの型とずれると型チェックで失敗する。
 - **シナリオ発生条件**: 未指定項目は制限なし。優先順位は大きい値を優先し、同値時は定義順。休日時間帯は土日として判定。
 - **簡潔な記録**: 作業ログや引き継ぎメモにコードを見ればわかる細部・数値を書かない。

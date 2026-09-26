@@ -38,10 +38,10 @@ Node側でJSONの読込・検証・モデルのSHA-256照合を行い、ブラ�
 ```sh
 node scripts/ardy-generate.ts \
   -p "A person slowly presses their open palms together in front of their chest, holds them there, then lowers their hands." \
-  -d 4 -o public/animations/quality-prayer.fbx \
+  -d 4 -o assets/animations/quality-prayer.fbx \
   --quality-plan test/fixtures/motion-quality/prayer-plan.json \
   --avatar /AnimeVRM/models/aoi/aoi-school.vrm \
-  --contact-profile public/motion-profiles/aoi-school.json
+  --contact-profile assets/motion-profiles/aoi-school.json
 ```
 
 上記の新引数は**このタスクで作る仕様**。この指示書作成時点では動かない。

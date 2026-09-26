@@ -60,7 +60,7 @@ export interface SceneTransition {
 export interface SceneAvatarConfig {
   /** 省略時はキー名をキャラIDとして使う */
   characterId?: string;
-  /** public/animations/<motion>.fbx */
+  /** assets/animations/<motion>.fbx */
   motion?: string;
   /** モーションをループするか（省略時は data/motions.ts の設定。false なら1回再生して待機モーションに戻る） */
   motionLoop?: boolean;
@@ -219,7 +219,7 @@ export interface ActionLocationHint {
   phases?: DayPhase[];
 }
 
-/** シナリオの種類（public/scenarios/<category>/ のディレクトリ名）。call / mail は夜の電話・メール */
+/** シナリオの種類（assets/scenarios/<category>/ のディレクトリ名）。call / mail は夜の電話・メール */
 export type ScenarioCategory =
   | 'morning'
   | 'action'

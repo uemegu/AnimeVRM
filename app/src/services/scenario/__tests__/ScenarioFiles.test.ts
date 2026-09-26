@@ -7,10 +7,10 @@ import scenarioIndex from '../../../data/scenarioIndex.json';
 import { LOCATION_VISUAL_PRESETS } from '../../../data/locationVisualPresets';
 
 const HEROINE_IDS = ['aoi', 'emili', 'shion'];
-const PUBLIC_DIR = path.resolve(__dirname, '../../../../public');
+const PUBLIC_DIR = path.resolve(__dirname, '../../../../../assets');
 const SCENARIOS_DIR = path.join(PUBLIC_DIR, 'scenarios');
 
-/** public/scenarios/<category>/<id>/scenario.json の一覧 */
+/** assets/scenarios/<category>/<id>/scenario.json の一覧 */
 function listScenarioDirs(): Array<{ category: string; id: string }> {
   return fs.readdirSync(SCENARIOS_DIR).flatMap((category) =>
     fs
@@ -20,7 +20,7 @@ function listScenarioDirs(): Array<{ category: string; id: string }> {
   );
 }
 
-describe('シナリオファイル（public/scenarios）', () => {
+describe('シナリオファイル（assets/scenarios）', () => {
   it('目次（scenarioIndex.json）がすべてのシナリオディレクトリを含んでいること', () => {
     const indexed = scenarioIndex.map((entry) => `${entry.category}/${entry.id}`).sort();
     const onDisk = listScenarioDirs().map(({ category, id }) => `${category}/${id}`).sort();

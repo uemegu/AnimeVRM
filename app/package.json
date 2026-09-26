@@ -20,12 +20,14 @@
     "three": "^0.183.2"
   },
   "devDependencies": {
+    "@anime-vrm/scenario": "*",
+    "@types/node": "^24.13.6",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/three": "^0.185.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "^5.7.3",
-    "vite": "^6.2.0",
-    "vitest": "^3.0.5"
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.3",
+    "vitest": "^5.0.1"
   }
 }

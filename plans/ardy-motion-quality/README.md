@@ -31,7 +31,7 @@ Report changed files, checks run, and any remaining manual review in Japanese.
 
 ## Next work that needs a person or external credentials
 
-1. Calibrate each actual VRM once: `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output public/motion-profiles/aoi-school.json`. Click and inspect all five face/chest anchors and both palms; a profile is marked calibrated only after all seven points are recorded.
+1. Calibrate each actual VRM once: `npm run ardy:calibrate -- --avatar /models/aoi/aoi-school.vrm --output assets/motion-profiles/aoi-school.json`. Click and inspect all five face/chest anchors and both palms; a profile is marked calibrated only after all seven points are recorded.
 2. If Jev is enabled, set `JEV_API_KEY` in the shell or a local `.env` (`TYPESAFE_API_KEY` remains a fallback name). Jev is called once per motion request with nine independent Choice/Score questions. A cheek contact records the moving hand side and cheek side separately. Low confidence or unspecified required face details stops generation; uncertain timing and style strength use documented defaults. The key remains on Node and is not included in browser arguments or output files.
 3. A Jev-authored timing plan is always `needs-review`. Inspect the generated `.review.fbx` and `.quality.json`; edit and save a reviewed plan with `timingSource: "authored"` before treating it as final.
 4. The ardy-mini/WebGPU smoke generation succeeds. Quality generation still needs a visually calibrated real VRM profile. Confirm an Aoi/Emili contact result, its FBX reload measurements, and the baked FBX in the game's existing importer before tuning thresholds or style values.
@@ -43,8 +43,8 @@ npm run ardy:generate -- \
   -p "A person gently touches their left cheek, pauses, and lowers their hand." \
   -d 4 --jev --acting-note "soft, compact elbow path, restrained and brief" \
   --avatar /models/aoi/aoi-school.vrm \
-  --contact-profile public/motion-profiles/aoi-school.json \
-  -o public/animations/aoi-cheek.fbx
+  --contact-profile assets/motion-profiles/aoi-school.json \
+  -o assets/animations/aoi-cheek.fbx
 ```
 
 Or give the CLI a reviewed JSON plan using `--quality-plan`. `--format raw` cannot be combined with quality correction. A passed output writes the final FBX plus `.quality.json` and `.source.saved-motion.json`. The FBX already contains the contact correction and is played by the game as an ordinary animation; there is no runtime sidecar or game code change. A review-required output is written as `.review.fbx` and `.quality.json`; it does not overwrite the requested final path. Failed quality checks write the report and source motion but no final motion asset.
@@ -62,4 +62,4 @@ These files preserve the original small-task design for future targeted changes.
 | 05 | [Acting style](05-style.md) | Implemented as a compact elbow path plus smoother transition; visual tune remains |
 | 06 | [Scenario runtime and acceptance](06-runtime-and-acceptance.md) | Runtime solver is out of scope; verify the baked FBX in the existing game importer |
 
-`public/models/test.vrm` was already an untracked user file. Do not modify, delete, or add it to commits.
+`assets/models/test.vrm` was already an untracked user file. Do not modify, delete, or add it to commits.

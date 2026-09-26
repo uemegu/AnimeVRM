@@ -24,10 +24,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="${1:-}"
 
 if [ -z "$TARGET_DIR" ]; then
-  if [ -d "$SCRIPT_DIR/public/textures" ]; then
-    TARGET_DIR="$SCRIPT_DIR/public/textures"
-  elif [ -d "$PWD/public/textures" ]; then
-    TARGET_DIR="$PWD/public/textures"
+  if [ -d "$SCRIPT_DIR/assets/textures" ]; then
+    TARGET_DIR="$SCRIPT_DIR/assets/textures"
+  elif [ -d "$PWD/assets/textures" ]; then
+    TARGET_DIR="$PWD/assets/textures"
   elif [ -d "$PWD/textures" ]; then
     TARGET_DIR="$PWD/textures"
   elif [ "$(basename "$PWD")" = "textures" ]; then
@@ -35,7 +35,7 @@ if [ -z "$TARGET_DIR" ]; then
   else
     echo "エラー: textures ディレクトリが見つかりませんでした。" >&2
     echo "使用法: $0 [対象ディレクトリパス]" >&2
-    echo "例: $0 public/textures" >&2
+    echo "例: $0 assets/textures" >&2
     exit 1
   fi
 fi

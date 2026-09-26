@@ -82,10 +82,10 @@ Options:
   -h, --help               Show this help message
 
 Examples:
-  node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -o public/animations/ardy_wave.fbx
-  node scripts/ardy-generate.ts -p "A person bows politely" -d 3 -o public/animations/ardy_bow.fbx
-  node scripts/ardy-generate.ts -p "A person gently touches their cheek" --jev --acting-note "shy, soft, brief" --avatar /models/aoi/aoi-school.vrm --contact-profile motion-profiles/aoi.json -o public/animations/ardy_cheek.fbx
-  node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -n 8 --cfg 2,3.5,5 -o public/animations/ardy_wave.fbx
+  node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -o assets/animations/ardy_wave.fbx
+  node scripts/ardy-generate.ts -p "A person bows politely" -d 3 -o assets/animations/ardy_bow.fbx
+  node scripts/ardy-generate.ts -p "A person gently touches their cheek" --jev --acting-note "shy, soft, brief" --avatar /models/aoi/aoi-school.vrm --contact-profile motion-profiles/aoi.json -o assets/animations/ardy_cheek.fbx
+  node scripts/ardy-generate.ts -p "A person raises their right hand and waves" -n 8 --cfg 2,3.5,5 -o assets/animations/ardy_wave.fbx
   node scripts/ardy-generate.ts --batch batch_tasks.json
 `);
 }

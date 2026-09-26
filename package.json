@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "convert:textures": "bash convert_textures.sh",
     "ardy:generate": "node scripts/ardy-generate.ts",
-    "ardy:calibrate": "node scripts/ardy-calibrate.ts"
+    "ardy:calibrate": "node scripts/ardy-calibrate.ts",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p app && npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
@@ -25,5 +27,9 @@
     "ardy-onnxruntime-web": "npm:onnxruntime-web@1.27.0",
     "meyda": "^5.6.3",
     "three": "^0.183.2"
-  }
+  },
+  "workspaces": [
+    "app",
+    "packages/*"
+  ]
 }

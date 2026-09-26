@@ -7,7 +7,7 @@ function vrmModelsPlugin(): Plugin {
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
   function scanModels() {
-    const modelsDir = path.resolve(__dirname, 'public/models');
+    const modelsDir = path.resolve(__dirname, 'assets/models');
     if (!fs.existsSync(modelsDir)) return [];
 
     const iconMap: Record<string, string> = {
@@ -74,7 +74,7 @@ function vrmModelsPlugin(): Plugin {
       }
     },
     configureServer(server) {
-      const modelsDir = path.resolve(__dirname, 'public/models');
+      const modelsDir = path.resolve(__dirname, 'assets/models');
       server.watcher.add(modelsDir);
       server.watcher.on('all', (event, filePath) => {
         if (filePath.startsWith(modelsDir)) {
@@ -114,6 +114,7 @@ function getHtmlInputs() {
 
 export default defineConfig({
   plugins: [vrmModelsPlugin()],
+  publicDir: 'assets',
   worker: { format: 'es' },
   base: '/AnimeVRM/',
   build: {

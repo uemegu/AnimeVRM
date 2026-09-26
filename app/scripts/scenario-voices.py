@@ -14,21 +14,21 @@ import os
 import sys
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-SCEN = os.path.join(REPO, 'app/public/scenarios')
+SCEN = os.path.join(REPO, 'assets/scenarios')
 CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending']
 
 REFS = {
-    'aoi': f'{REPO}/public/voices/001.mp3',
-    'emili': f'{REPO}/public/voices/trio_intro_2.mp3',
-    'shion': f'{REPO}/public/voices/girl4_ref.mp3',
+    'aoi': f'{REPO}/assets/voices/001.mp3',
+    'emili': f'{REPO}/assets/voices/trio_intro_2.mp3',
+    'shion': f'{REPO}/assets/voices/girl4_ref.mp3',
     'god': f'{REPO}/scratch/god_exp_02_god_raw.wav',
-    'teacher': f'{REPO}/public/voices/teacher/sample_03_cool_strict.mp3',
-    'naruse': f'{REPO}/public/voices/naruse_ref.mp3',
-    'yui': f'{REPO}/public/voices/yui_ref.mp3',
-    'kana': f'{REPO}/public/voices/kana_ref.mp3',
-    'sp_leader': f'{REPO}/public/voices/sp_leader_ref.mp3',
-    'sp_member': f'{REPO}/public/voices/sp_member_ref.mp3',
-    'shopkeeper': f'{REPO}/public/voices/shopkeeper_ref.mp3',
+    'teacher': f'{REPO}/assets/voices/teacher/sample_03_cool_strict.mp3',
+    'naruse': f'{REPO}/assets/voices/naruse_ref.mp3',
+    'yui': f'{REPO}/assets/voices/yui_ref.mp3',
+    'kana': f'{REPO}/assets/voices/kana_ref.mp3',
+    'sp_leader': f'{REPO}/assets/voices/sp_leader_ref.mp3',
+    'sp_member': f'{REPO}/assets/voices/sp_member_ref.mp3',
+    'shopkeeper': f'{REPO}/assets/voices/shopkeeper_ref.mp3',
 }
 
 BASE = {

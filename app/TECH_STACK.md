@@ -17,16 +17,18 @@
 
 ## 大まかなディレクトリ構成
 
+静的素材はリポジトリ直下の `assets/` にあり、ルートの Studio と共有する（`vite.config.ts` の `publicDir`）。
+
 ```text
+assets/                 # リポジトリ直下。ルートと共有
+├── assets/
+│   ├── models/
+│   └── backgrounds/
+└── scenarios/
+    └── <category>/<id>/
+        ├── scenario.json
+        └── *.mp3
 app/
-├── public/
-│   ├── assets/
-│   │   ├── models/
-│   │   └── backgrounds/
-│   └── scenarios/
-│       └── <category>/<id>/
-│           ├── scenario.json
-│           └── *.mp3
 └── src/
     ├── pages/
     ├── components/
@@ -46,8 +48,8 @@ app/
 
 | ディレクトリ | 役割 |
 | --- | --- |
-| public/assets/ | VRMモデル・背景などの静的素材 |
-| public/scenarios/ | シナリオ本文（`scenario.json`）とそのボイス。1シナリオ1ディレクトリで、再生直前に遅延ロードする |
+| ../assets/assets/ | VRMモデル・背景などの静的素材 |
+| ../assets/scenarios/ | シナリオ本文（`scenario.json`）とそのボイス。1シナリオ1ディレクトリで、再生直前に遅延ロードする |
 | src/pages/ | ページ単位のレイアウト、画面状態の管理、部品とサービスの接続 |
 | src/components/controls/ | ボタン、選択肢、セーブ操作などの操作部品 |
 | src/components/dialogue/ | 台詞・話者名などの会話表示部品 |
