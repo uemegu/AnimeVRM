@@ -13,7 +13,8 @@
     "ardy:calibrate": "node scripts/ardy-calibrate.ts",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p app && npm run typecheck --workspaces --if-present",
-    "server": "npm run dev -w server"
+    "server": "npm run dev -w server",
+    "studio": "npm run dev -w studio"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
@@ -33,6 +34,7 @@
   "workspaces": [
     "app",
     "packages/*",
-    "server"
+    "server",
+    "studio"
   ]
 }

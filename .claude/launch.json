@@ -13,6 +13,17 @@
       "port": 5190
     },
     {
+      "name": "studio",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "studio"
+      ],
+      "port": 5175
+    },
+    {
       "name": "app",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
