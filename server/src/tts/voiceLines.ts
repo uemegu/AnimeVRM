@@ -1,21 +1,36 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { CallScenario, ScenarioPackage } from '@anime-vrm/scenario';
+import { CharacterBook, type CallScenario, type CharacterVoice, type ScenarioPackage } from '@anime-vrm/scenario';
 import { textOf } from '../scenarioStore.ts';
 
-/** assets/studio/voice-profiles.json */
+/** 音声生成に必要な、キャラクター管理（assets/studio/characters.json）の中身 */
 export interface VoiceProfiles {
-  speakers: Record<string, { ref: string; caption: string; postprocess?: string }>;
+  /** 音声設定のあるキャラ ID → 設定 */
+  speakers: Record<string, CharacterVoice>;
   moods: Record<string, string>;
   whisperCaption: string;
   shoutCaption: string;
-  /** 画面にいない人物の名前 → 話者 ID */
+  /** ID を付けずに書かれた話者名 → キャラ ID */
   speakerNames: Record<string, string>;
 }
 
+export async function loadCharacterBook(assetsDir: string): Promise<CharacterBook> {
+  return CharacterBook.parse(JSON.parse(await fs.readFile(path.join(assetsDir, 'studio', 'characters.json'), 'utf8')));
+}
+
+export function voiceProfilesOf(book: CharacterBook): VoiceProfiles {
+  return {
+    speakers: Object.fromEntries(book.characters.filter((c) => c.voice).map((c) => [c.id, c.voice!])),
+    moods: book.voiceMoods,
+    whisperCaption: book.whisperCaption,
+    shoutCaption: book.shoutCaption,
+    speakerNames: Object.fromEntries(book.characters.flatMap((c) => c.speakerNames.map((n) => [n, c.id]))),
+  };
+}
+
 export async function loadVoiceProfiles(assetsDir: string): Promise<VoiceProfiles> {
-  return JSON.parse(await fs.readFile(path.join(assetsDir, 'studio', 'voice-profiles.json'), 'utf8'));
+  return voiceProfilesOf(await loadCharacterBook(assetsDir));
 }
 
 /** 1セリフ分の音声生成の材料 */
@@ -54,9 +69,10 @@ export function findVoiceLine(
   return null;
 }
 
-/** 声の説明（話者の声質 + 表情に応じた演技 + 囁き・叫び） */
+/** 声の説明（話者の声質 + キャラ固有のボイス指導 + 表情に応じた演技 + 囁き・叫び） */
 export function defaultCaption(line: VoiceLine, profiles: VoiceProfiles): string {
-  const base = line.speaker ? (profiles.speakers[line.speaker]?.caption ?? '') : '';
+  const voice = line.speaker ? profiles.speakers[line.speaker] : undefined;
+  const base = (voice?.caption ?? '') + (voice?.direction ?? '');
   if (line.text.startsWith('（')) return base + profiles.whisperCaption;
   let caption = base + (profiles.moods[line.expression] ?? profiles.moods.neutral ?? '');
   if ((line.text.match(/！/g) ?? []).length >= 2) caption += profiles.shoutCaption;

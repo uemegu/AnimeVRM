@@ -16,7 +16,8 @@ npm run server
 | `GET /api/assets/:kind` | アセットの一覧（models / environments / animations / textures / bgm / se / voices） |
 | `PUT /api/assets/:kind/:name` | アップロード（本文がファイルの中身）。同名があれば `?overwrite=1` のときだけ上書き |
 | `GET /api/studio-data` ・ `GET/PUT /api/studio-data/:name` | Studio が管理する JSON（`assets/studio/<name>.json`） |
-| `GET /api/tts/profiles` | 話者ごとの参照音声・声の説明（`assets/studio/voice-profiles.json`） |
+| `GET /api/characters` ・ `PUT /api/characters` | キャラクター管理（`assets/studio/characters.json`）。名前・モデル・参照音声・ボイス指導・キャラ設定 |
+| `GET /api/characters/:id/usage` | 逆引き。そのキャラが出るシナリオと、セリフ・ボイスの一覧 |
 | `GET /api/tts/lines/:category/:id/:lineId` | セリフから決まる話者・表情・声の説明 |
 | `POST /api/tts/jobs` | 音声生成ジョブ。`{ category, id, lineId, candidates?, speaker?, caption? }` |
 | `GET /api/tts/jobs/:jobId` | ジョブの状態と候補の番号 |
@@ -29,4 +30,4 @@ Irodori-TTS（`.agents/skills/irodori-tts`）を子プロセスで動かす。�
 
 環境変数で場所を変えられる: `IRODORI_TTS_ROOT`（既定 `/Users/ueda/git/practice/tts/Irodori-TTS`）、`IRODORI_TTS_PYTHON`、`IRODORI_TTS_DEVICE`（既定 `mps`）、`FFMPEG`、`STUDIO_SERVER_PORT`。
 
-女神（`god`）の参照音声は `scratch/`（git 管理外）にある。
+話者の参照音声・声質・ボイス指導はキャラクター管理（`characters.json`）の `voice` にある。

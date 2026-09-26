@@ -51,7 +51,7 @@ beforeEach(async () => {
   await copyScenario('ending', 'ending_good');
   await copyScenario('call', 'aoi_call_d14');
   await fs.mkdir(path.join(assetsDir, 'studio'), { recursive: true });
-  await fs.copyFile(path.join(REAL_ASSETS, 'studio', 'voice-profiles.json'), path.join(assetsDir, 'studio', 'voice-profiles.json'));
+  await fs.copyFile(path.join(REAL_ASSETS, 'studio', 'characters.json'), path.join(assetsDir, 'studio', 'characters.json'));
   // 参照音声はパスが存在すればよい
   await fs.mkdir(path.join(root, 'assets', 'voices'), { recursive: true });
   await fs.writeFile(path.join(root, 'assets', 'voices', '001.mp3'), 'ref');
@@ -156,7 +156,7 @@ describe('Studio 用 JSON', () => {
   it('保存して読める。不正な名前は拒否する', async () => {
     expect((await putJson('/api/studio-data/scenes', { a: 1 })).status).toBe(200);
     expect(await json(request('/api/studio-data/scenes'))).toEqual({ a: 1 });
-    expect(await json(request('/api/studio-data'))).toEqual(['scenes', 'voice-profiles']);
+    expect(await json(request('/api/studio-data'))).toEqual(['characters', 'scenes']);
     expect((await putJson('/api/studio-data/..%2Fx', {})).status).toBe(400);
   });
 });
@@ -215,5 +215,47 @@ describe('音声生成', () => {
       body: JSON.stringify({ category: 'ending', id: 'ending_good', lineId: 'nothing' }),
     });
     expect(res.status).toBe(404);
+  });
+});
+
+describe('キャラクター', () => {
+  it('一覧を返し、不正な内容は保存しない', async () => {
+    const book = await json(request('/api/characters'));
+    expect(book.characters.map((c: { id: string }) => c.id)).toContain('aoi');
+    const broken = { ...book, characters: [...book.characters, { ...book.characters[0] }] };
+    const res = await putJson('/api/characters', broken);
+    expect(res.status).toBe(400);
+    expect((await json(res)).issues[0].message).toContain('重複');
+  });
+
+  it('保存できる', async () => {
+    const book = await json(request('/api/characters'));
+    book.characters[0].profile = '書き換えた設定';
+    expect((await putJson('/api/characters', book)).status).toBe(200);
+    expect((await json(request('/api/characters'))).characters[0].profile).toBe('書き換えた設定');
+  });
+
+  it('キャラから登場シナリオ・セリフ・ボイスを逆引きできる', async () => {
+    const usage = await json(request('/api/characters/aoi/usage'));
+    expect(usage.map((u: { id: string }) => u.id)).toEqual(['ending_good', 'aoi_call_d14']);
+    const line = usage[0].lines.find((l: { lineId: string }) => l.lineId === 's1');
+    expect(line.voiceUrl).toBe('/scenarios/ending/ending_good/v_s1_1bf07a6e.mp3');
+    // 話者名だけで書かれたセリフ（「女神の声」）も逆引きできる
+    await putJson('/api/scenarios/special/voice_only', {
+      id: 'voice_only',
+      title: '声だけ',
+      scenes: [{ id: 's1', speaker: '女神の声', text: '聞こえますか', voiceUrl: 'v.mp3' }],
+    });
+    const god = await json(request('/api/characters/god/usage'));
+    expect(god).toEqual([
+      {
+        category: 'special',
+        id: 'voice_only',
+        title: '声だけ',
+        appearances: 1,
+        lines: [{ lineId: 's1', text: '聞こえますか', voiceUrl: '/scenarios/special/voice_only/v.mp3' }],
+      },
+    ]);
+    expect((await request('/api/characters/nobody/usage')).status).toBe(404);
   });
 });
