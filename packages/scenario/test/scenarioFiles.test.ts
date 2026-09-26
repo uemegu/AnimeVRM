@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ScenarioCategory, schemaForCategory } from '../src';
+import { ScenarioCategory, schemaForCategory } from '../src/index.ts';
 
 const SCENARIOS_DIR = path.resolve(import.meta.dirname, '../../../assets/scenarios');
 
