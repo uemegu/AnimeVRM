@@ -143,9 +143,6 @@ export interface Translations {
     fastMotionTitle: string;
     playFastMotion: string;
     fastMotionDesc: string;
-    doorPeepTitle: string;
-    playDoorPeep: string;
-    doorPeepDesc: string;
     privateDateTitle: string;
     playPrivateDate: string;
     privateDateDesc: string;
@@ -292,7 +289,6 @@ export interface Translations {
     trioStarted: string;
     haremStarted: string;
     townWalkStarted: string;
-    doorPeepStarted: string;
     nisaStarted: string;
     fastMotionStarted: string;
     privateDateStarted: string;

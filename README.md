@@ -4,7 +4,6 @@
 
 🌐 **Live Demos & Tools:**
 - **メインビューア (Main Viewer):** [https://uemegu.github.io/AnimeVRM/](https://uemegu.github.io/AnimeVRM/)
-- **シャフト風演出シナリオ「幽霊の質量」:** [https://uemegu.github.io/AnimeVRM/scenarios/ghost-mass.html](https://uemegu.github.io/AnimeVRM/scenarios/ghost-mass.html)
 - **オリジナル短編PV「5秒の告白」:** [https://uemegu.github.io/AnimeVRM/scenarios/five-seconds-pv.html](https://uemegu.github.io/AnimeVRM/scenarios/five-seconds-pv.html)
 
 ---
@@ -129,7 +128,7 @@ npm run server
 | 画面 | ローカル URL | 説明 |
 | :--- | :--- | :--- |
 | **メインビューア** | `http://localhost:5173/AnimeVRM/` | 統合スタジオパネル、3Dシーン、全演出・全シナリオ実行 |
-| **独立シナリオ (例)** | `http://localhost:5173/AnimeVRM/scenarios/ghost-mass.html` | 単独で動作する各ADVシナリオプレイヤー |
+| **独立シナリオ (例)** | `http://localhost:5173/AnimeVRM/scenarios/silver-week.html` | 単独で動作する各ADVシナリオプレイヤー |
 
 ### ビルド & プレビュー
 
@@ -292,8 +291,6 @@ flowchart TD
 | シナリオID | タイトル | 演出ハイライト |
 | :--- | :--- | :--- |
 | **`five-seconds-pv`** | 【PV】5秒の告白 〜5 Seconds Confession〜 | 楽曲完全同期アニメーションPV、タイポグラフィ幕間演出 |
-| **`ghost-mass`** | 👻 幽霊の質量（シャフト風） | シャフト演出、シャフ度、単色化、巨大明朝体タイポグラフィ |
-| **`door-peep`** | 🚪 覗き穴の訪問者〜深夜のヤンデレ〜 | ドアスコープ魚眼レンズ視点、暗転、ヤンデレ闇落ち |
 | **`fast-motion`** | 疾風怒濤！高速アクション特訓 | 残像、スピードリボン、方向性ブラー、集中線 |
 | **`harem`** | 放課後大波乱!? 一体誰が本命なのよ〜！ | 4人のヒロイン勢揃い、修羅場裁判、マルチ選択肢 |
 | **`private-date`** | 休日デート〜私服のエミリと街歩き〜 | 私服エミリとの待ち合わせ、カフェテラスでのひととき |

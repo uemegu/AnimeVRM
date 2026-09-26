@@ -9,9 +9,7 @@ import { getHaremConversationScenario } from './haremScenario';
 import { getTownWalkScenario } from './townWalkScenario';
 import { getNisaScenario } from './nisaScenario';
 import { getFastMotionScenario } from './fastMotionScenario';
-import { getDoorPeepYandereScenario } from './doorPeepYandereScenario';
 import { getPrivateDateScenario } from './privateDateScenario';
-import { GHOST_MASS_SCENARIO } from './ghostMassScenario';
 import { getTeacherGateScenario } from './teacherGateScenario';
 import { getSilverWeekScenario } from './silverWeekScenario';
 import { getGestureBattleScenario } from './gestureBattleScenario';
@@ -136,14 +134,6 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     ogpImage: '/ogp/fast-motion.png',
     getScenario: (lang = 'ja') => getFastMotionScenario(lang),
   },
-  'door-peep': {
-    id: 'door-peep',
-    title: '🚪 覗き穴の訪問者〜深夜のヤンデレ〜',
-    shortTitle: '覗き穴の訪問者',
-    description: '深夜に響くインターホン……ドアスコープを覗くとそこに立っていたのは？魚眼レンズホラー演出。',
-    ogpImage: '/ogp/door-peep.png',
-    getScenario: (lang = 'ja') => getDoorPeepYandereScenario(lang),
-  },
   'private-date': {
     id: 'private-date',
     title: '休日デート〜私服のエミリと街歩き〜',
@@ -151,14 +141,6 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '休日に私服のエミリと待ち合わせ。カフェテラスでの特別なひとときを過ごすデートシナリオ。',
     ogpImage: '/ogp/private-date.png',
     getScenario: (lang = 'ja') => getPrivateDateScenario(lang),
-  },
-  'ghost-mass': {
-    id: 'ghost-mass',
-    title: '👻 幽霊の質量（シャフト風）',
-    shortTitle: '幽霊の質量',
-    description: '単色キャラクター・白輪郭・ローポリ教室・赤緑カットイン・シャフ度を散りばめたシャフト風演出シナリオ。',
-    ogpImage: '/ogp/ghost-mass.png',
-    getScenario: () => GHOST_MASS_SCENARIO,
   },
   'teacher-gate': {
     id: 'teacher-gate',
