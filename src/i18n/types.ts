@@ -250,6 +250,7 @@ export interface Translations {
     night: string;
     bright: string;
     dark: string;
+    dark2: string;
     divine: string;
     backgroundTitle: string;
     backgrounds: {
@@ -261,6 +262,7 @@ export interface Translations {
       nightFestival: string;
       oldPark: string;
       cafe: string;
+      cafeIndoor: string;
       town: string;
       apartmentDoor: string;
       myroom: string;
@@ -287,6 +289,7 @@ export interface Translations {
     presetNightSchoolTip: string;
     presetBrightIndoorTip: string;
     presetDarkIndoorTip: string;
+    presetDarkIndoor2Tip: string;
     presetDivineTip: string;
   };
   render: {
@@ -494,6 +497,7 @@ export interface Translations {
     midZ: string;
     midScale: string;
     midOpacity: string;
+    selectMidImage: string;
     nearFolder: string;
     showNearground: string;
     nearX: string;

@@ -596,7 +596,9 @@ export function applyToonShader(
 
         // Parametric Rim Fresnel Power (High power keeps rim tight on silhouettes only)
         if (typeof params.parametricRimFresnelPowerFactor === 'number') {
-          const power = matKind === 'body' ? Math.max(params.parametricRimFresnelPowerFactor, 4.0) : params.parametricRimFresnelPowerFactor;
+          // MToon computes pow(1 - N·V + lift, power); with power 0 that is pow(0, 0) = NaN on
+          // pixels facing the camera, and bloom spreads one NaN pixel into a black frame.
+          const power = matKind === 'body' ? Math.max(params.parametricRimFresnelPowerFactor, 4.0) : Math.max(params.parametricRimFresnelPowerFactor, 0.001);
           material.parametricRimFresnelPowerFactor = power;
           if (material.uniforms?.parametricRimFresnelPowerFactor) material.uniforms.parametricRimFresnelPowerFactor.value = power;
         }

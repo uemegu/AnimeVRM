@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>図書室の簡易3Dセット | AnimeVRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Kiwi+Maru:wght@400;500&family=Montserrat:wght@300;400;600;800;900&family=Shippori+Mincho:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #eef4fc; background: #b8c3d3; font: 14px/1.6 system-ui, sans-serif; }
+    canvas { width: 100vw; height: 100vh; display: block; }
+    header { position: fixed; top: 20px; left: 24px; padding: 15px 20px; border-radius: 12px; background: #182535df; max-width: calc(100vw - 48px); }
+    h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+    p { margin: 0; color: #bbcbdc; font-size: 12px; }
+    nav span { display: contents; }
+    nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 12px; border-radius: 14px; background: #182535ed; width: max-content; max-width: calc(100vw - 24px); }
+    button, a { border: 1px solid #ffffff26; border-radius: 7px; padding: 9px 14px; color: #e5eef8; background: #ffffff0d; cursor: pointer; text-decoration: none; font: inherit; }
+    button:hover, a:hover { background: #ffffff22; }
+    button[aria-pressed="true"] { background: #d0e5f3; color: #253d54; }
+    button:disabled { opacity: 0.4; cursor: wait; }
+    #shot { position: fixed; top: 24px; right: 24px; background: #182535dd; padding: 7px 15px; border-radius: 20px; }
+    @media (max-width: 700px) { #shot { top: auto; bottom: 160px; } header { left: 12px; top: 12px; max-width: calc(100vw - 24px); } button, a { padding: 7px 9px; font-size: 12px; } }
+  </style>
+  <script type="module" crossorigin src="/AnimeVRM/assets/painted_library-BdrB69MC.js"></script>
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/three-vrm.module-BSB1WpUY.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/path-C-vF2-aM.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/ToonShader-Cj87AYvl.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/FBXLoader-vALk_Imy.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/Avatar-DJzAC5r9.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/SkyBackground-DvC5Gggo.js">
+  <link rel="modulepreload" crossorigin href="/AnimeVRM/assets/PaintedLibrary-BQPpZYfk.js">
+</head>
+<body>
+  <canvas aria-label="画像テクスチャで構成した図書室とシオン"></canvas>
+  <header><h1>図書室 / 簡易3Dセット</h1><p>手前に机、奥にシオン、周りを面ごとの1枚絵とアクスタで組んだ撮影用セット。</p><p id="status" role="status">図書室を読み込み中…</p></header>
+  <div id="shot">向かいの席から</div>
+  <nav aria-label="カメラとシオン">
+    <span id="shots"></span>
+    <span id="poses"><button data-pose="chin" aria-pressed="true">頬杖</button><button data-pose="sit" aria-pressed="false">座り</button><button data-pose="none" aria-pressed="false">無人</button></span>
+    <button id="blockout" aria-pressed="false">ブロックアウト</button><button id="play">カメラを再生</button>
+  </nav>
+</body>
+</html>

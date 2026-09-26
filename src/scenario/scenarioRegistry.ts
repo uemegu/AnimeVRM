@@ -18,6 +18,8 @@ import { getSilverWeekScenario } from './silverWeekScenario';
 import { getGestureBattleScenario } from './gestureBattleScenario';
 import { getCorridorConversationScenario } from './corridorConversationScenario';
 import { getPaintedClassroomScenario } from './paintedClassroomScenario';
+import { getPaintedLibraryScenario } from './paintedLibraryScenario';
+import { getCafeMonitoringScenario } from './cafeMonitoringScenario';
 
 export interface ScenarioMeta {
   id: string;
@@ -34,6 +36,14 @@ export interface ScenarioMeta {
 }
 
 export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
+  'cafe-monitoring': {
+    id: 'cafe-monitoring',
+    title: '窓越しの二重存在 〜カフェ監視任務〜',
+    shortTitle: 'カフェ監視任務',
+    description: '暗いカフェの店内から、日差しの強い外の通りを歩く「もう一人の自分」を監視する日本アニメ映画風の高コントラスト短編シナリオ。',
+    ogpImage: '/textures/cafe_indoor_far.avif',
+    getScenario: getCafeMonitoringScenario,
+  },
   'painted-classroom': {
     id: 'painted-classroom',
     title: '昼休みの教室 — 簡易3Dの教室で会話',
@@ -41,6 +51,14 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '床・壁・天井の1枚絵と机のアクスタで組んだ簡易3Dの昼の教室で、背景モブの生徒たちが談笑する中、アオイとエミリが午後の小テストや放課後の約束を交わす日常シーン。',
     ogpImage: '/textures/school-classroom-far2.avif',
     getScenario: getPaintedClassroomScenario,
+  },
+  'painted-library': {
+    id: 'painted-library',
+    title: '図書室のシオン — 簡易3Dの図書室',
+    shortTitle: '図書室のシオン',
+    description: '床・壁・天井の1枚絵と家具のアクスタで組んだ簡易3Dの図書室。窓際の閲覧机で頬杖をつくシオンを、向かいの席から朝・昼・放課後の光で見る。',
+    ogpImage: '/textures/school-library-far.avif',
+    getScenario: getPaintedLibraryScenario,
   },
   'five-seconds-pv': {
     id: 'five-seconds-pv',

@@ -2,7 +2,7 @@ import { resolveAssetUrl } from '../utils/path';
 import { DEFAULT_PARA_PARAMS } from '../postprocessing/Para';
 import type { AvatarConfig } from '../Config';
 
-export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | 'divine';
+export type TimeOfDayId = 'morning' | 'day' | 'evening' | 'rainy' | 'night' | 'bright_indoor' | 'dark_indoor' | 'dark_indoor_2' | 'divine';
 export type LocationId =
   | 'modern_park'
   | 'school_gate'
@@ -12,6 +12,7 @@ export type LocationId =
   | 'night_festival'
   | 'old_park'
   | 'cafe'
+  | 'cafe_indoor'
   | 'town'
   | 'apartment_door'
   | 'myroom'
@@ -31,6 +32,7 @@ export type ScenePresetId =
   | 'night_school'
   | 'bright_indoor'
   | 'dark_indoor'
+  | 'dark_indoor_2'
   | 'morning_outdoor'
   | 'day_outdoor'
   | 'evening_outdoor'
@@ -51,6 +53,11 @@ export interface TimeOfDayPresetData {
   rain: AvatarConfig['rain'];
   environment?: Partial<AvatarConfig['environment']>;
   eyeGlow?: AvatarConfig['eyeGlow'];
+  bottomGradient?: AvatarConfig['bottomGradient'];
+  hairShadow?: AvatarConfig['hairShadow'];
+  hairRing?: AvatarConfig['hairRing'];
+  faceSdf?: AvatarConfig['faceSdf'];
+  lightWrap?: AvatarConfig['lightWrap'];
 }
 
 export interface LocationPresetData {
@@ -1371,6 +1378,267 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDayId, TimeOfDayPresetData> = {
       splashCount: 110,
     },
   },
+  // 5.1 室内・暗2 (Dark Indoor 2)
+  dark_indoor_2: {
+    id: 'dark_indoor_2',
+    name: '室内・暗2',
+    description: '温かみのあるアンビエントと柔らかな陰影、カフェ店内などのエモーショナルな室内光',
+    materials: {
+      body: {
+        color: '#ffffff',
+        shadeMultiply: '#d49ea3',
+        shadingToonyFactor: 0.991,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#ffffff',
+        parametricRimFresnelPowerFactor: 0,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 0.0,
+        outlineWidthFactor: 0.0016,
+      },
+      hair: {
+        color: '#ffffff',
+        shadeMultiply: '#8474a4',
+        shadingToonyFactor: 0.994,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#ffffff',
+        parametricRimFresnelPowerFactor: 0,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 0.0,
+        outlineWidthFactor: 0.0016,
+      },
+      cloth: {
+        color: '#ffffff',
+        shadeMultiply: '#b8bcd8',
+        shadingToonyFactor: 0.997,
+        shadingShiftFactor: -0.05,
+        giEqualizationFactor: 0.9,
+        matcapEnabled: false,
+        emissiveIntensity: 0,
+        rimEnabled: false,
+        rimColor: '#202942',
+        parametricRimFresnelPowerFactor: 0,
+        parametricRimLiftFactor: 0.0,
+        rimLightingMixFactor: 0.0,
+        outlineWidthFactor: 0.0016,
+      },
+    },
+    outline: {
+      enabled: true,
+      useSmoothNormal: true,
+      screenSpaceWidth: true,
+      autoLineWeight: true,
+      darknessFactor: 0.1,
+      widthFactor: 0.0016,
+      lightingMixFactor: 0,
+    },
+    lighting: {
+      hairRingTint: '#fff8ee',
+      castShadows: false,
+      ambient: {
+        color: '#4a536e',
+        intensity: 0.18,
+      },
+      directional: {
+        color: '#ffffff',
+        intensity: 1.0,
+        posX: 1.1,
+        posY: 2.5,
+        posZ: 2.3,
+      },
+      rim: {
+        enabled: false,
+        color: '#ffebeb',
+        intensity: 0.0,
+        posX: 0,
+        posY: 1.5,
+        posZ: 2.5,
+      },
+      sunShafts: {
+        enabled: false,
+        followDirectionalLight: false,
+        sunPosition: {
+          x: 0,
+          y: 5,
+          z: 0,
+        },
+        exposure: 0,
+        decay: 0.9,
+        density: 0.5,
+        weight: 0.1,
+        color: '#ffffff',
+        shimmer: 0,
+      },
+      lensFlare: {
+        enabled: false,
+        sunSize: 1.05,
+        sunColor: '#ffffff',
+        glowIntensity: 0.5,
+        starburstIntensity: 0.55,
+        anamorphicIntensity: 0.75,
+        ghostIntensity: 0.8,
+        haloIntensity: 0.75,
+      },
+    },
+    environment: {
+      farFogEnabled: true,
+      farFogColor: '#c7b8b8',
+      farFogIntensity: 0.04,
+    },
+    postProcessing: {
+      para: {
+        enabled: true,
+        topOpacity: 0.3,
+        bottomOpacity: 0.05,
+        desaturate: 0.2,
+        tintAmount: 1,
+      },
+      toneMappingMode: 'None',
+      toneMappingExposure: 1,
+      antialiasing: {
+        msaaSamples: 4,
+        smaa: true,
+      },
+      bloom: {
+        enabled: true,
+        strength: 0.2,
+        radius: 0.12,
+        threshold: 0.9,
+      },
+      colorGrading: {
+        enabled: true,
+        shadowTint: '#581818',
+        highlightTint: '#ffffff',
+        strength: 0.88,
+        contrast: 0.31,
+        gamma: 0.82,
+      },
+      saturation: 0.4,
+      brightness: 0,
+      contrast: 0,
+      cinematic: {
+        diffusion: {
+          enabled: true,
+          strength: 0.38,
+          radius: 2,
+        },
+        filmGrain: {
+          enabled: true,
+          strength: 0.01,
+          speed: 0.2,
+        },
+        vignette: {
+          enabled: true,
+          offset: 1.15,
+          darkness: 0.08,
+          color: '#1a1829',
+        },
+        chromaticAberration: {
+          enabled: true,
+          offset: 0.0015,
+        },
+        sharpening: {
+          enabled: false,
+          amount: 0.22,
+        },
+        fisheye: {
+          enabled: false,
+          strength: 0.5,
+          zoom: 1,
+          circular: false,
+        },
+      },
+    },
+    eyeGlow: {
+      enabled: false,
+      intensity: 0.0,
+    },
+    bottomGradient: {
+      enabled: true,
+      startY: 2,
+      endY: 1,
+      intensity: 0.1,
+      shadowWeight: 1,
+      color: '#101018',
+    },
+    hairShadow: {
+      enabled: true,
+      offset: 0.006,
+      downBias: 0.002,
+      strength: 1,
+      depthBias: 0.002,
+      maxDepthDiff: 0.12,
+    },
+    hairRing: {
+      enabled: true,
+      height: 0.07,
+      width: 0.009,
+      softness: 0.0015,
+      facingFade: 0.3,
+      lighten: 0.5,
+      desaturate: 0.1,
+      strength: 0.85,
+      strandJitter: 0.006,
+      headCenterOffset: 0.08,
+      jagAmplitude: 0.012,
+      jagCount: 48,
+      viewShift: 0.01,
+      arc: 0.04,
+      gapCount: 40,
+      gapRate: 0.2,
+    },
+    faceSdf: {
+      enabled: true,
+      softness: 0,
+      noseSize: 0.5,
+      noseStart: 30,
+      skipStart: 45,
+      skipEnd: 135,
+      skipBlend: 4,
+    },
+    lightWrap: {
+      enabled: true,
+      radius: 0.012,
+      strength: 0.4,
+      edgePower: 1.5,
+      bodyStrength: 0.3,
+    },
+    wind: {
+      enabled: false,
+      speed: 0.1,
+      direction: 45,
+      elevation: 5,
+      turbulence: 0.15,
+      gustFrequency: 0.2,
+      gustStrength: 0.15,
+      particles: {
+        enabled: false,
+        count: 160,
+        size: 0.035,
+        color: '#ffd5e5',
+        opacity: 0.85,
+        speedFactor: 1,
+      },
+    },
+    rain: {
+      enabled: false,
+      count: 600,
+      speed: 9.5,
+      length: 0.14,
+      angle: 2,
+      color: '#cce2ff',
+      opacity: 0.45,
+      splashEnabled: false,
+      splashCount: 110,
+    },
+  },
   // 神聖・後光 (Divine Encounter) - 逆光シルエット & 黄金リムライト & 後光薄明光線
   divine: {
     id: 'divine',
@@ -1752,6 +2020,33 @@ export const LOCATION_PRESETS: Record<LocationId, LocationPresetData> = {
       farFogIntensity: 0.0,
     },
   },
+  cafe_indoor: {
+    id: 'cafe_indoor',
+    name: 'カフェ店内',
+    category: 'indoor',
+    environment: {
+      showBackgroundImage: true,
+      backgroundImageUrl: resolveAssetUrl('/textures/cafe_indoor_far.avif'),
+      // 暗い店内に露出を合わせたときの、白く飛んだ日なたの通り
+      backgroundExposure: 1.3,
+      backgroundColor: '#ffffff',
+      showFloor: false,
+      floorColor: '#ffffff',
+      showMidground: true,
+      midgroundImageUrl: resolveAssetUrl('/textures/cafe_indoor_mid.avif'),
+      midgroundPosition: { x: 0, y: 1.35, z: -0.25 },
+      midgroundScale: 1.38,
+      midgroundOpacity: 1.0,
+      showNearground: false,
+      neargroundImageUrl: undefined,
+      neargroundPosition: { x: 0, y: 0, z: 0 },
+      neargroundScale: 1.0,
+      neargroundOpacity: 1.0,
+      farFogEnabled: false,
+      farFogColor: '#808080',
+      farFogIntensity: 0.0,
+    },
+  },
   town: {
     id: 'town',
     name: '街',
@@ -1906,6 +2201,7 @@ export const SCENE_PRESETS: Record<string, ScenePresetData> = {
   rainy_school: buildScenePreset('rainy_school', 'rainy', 'school_gate'),
   bright_indoor: buildScenePreset('bright_indoor', 'bright_indoor', 'cafe'),
   dark_indoor: buildScenePreset('dark_indoor', 'dark_indoor', 'classroom'),
+  dark_indoor_2: buildScenePreset('dark_indoor_2', 'dark_indoor_2', 'cafe_indoor'),
   morning_outdoor: buildScenePreset('morning_outdoor', 'morning', 'modern_park'),
   day_outdoor: buildScenePreset('day_outdoor', 'day', 'modern_park'),
   evening_outdoor: buildScenePreset('evening_outdoor', 'evening', 'modern_park'),
@@ -1941,6 +2237,11 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
   wind: AvatarConfig['wind'];
   rain: AvatarConfig['rain'];
   eyeGlow?: AvatarConfig['eyeGlow'];
+  bottomGradient?: AvatarConfig['bottomGradient'];
+  hairShadow?: AvatarConfig['hairShadow'];
+  hairRing?: AvatarConfig['hairRing'];
+  faceSdf?: AvatarConfig['faceSdf'];
+  lightWrap?: AvatarConfig['lightWrap'];
 } {
   const tod = TIME_OF_DAY_PRESETS[timeOfDayId] || TIME_OF_DAY_PRESETS.morning;
   const loc = LOCATION_PRESETS[locationId] || LOCATION_PRESETS.modern_park;
@@ -1986,7 +2287,7 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
   };
 
   return {
-    environment: JSON.parse(JSON.stringify({ ...loc.environment, ...(tod.environment || {}) })),
+    environment: JSON.parse(JSON.stringify({ backgroundExposure: 1, ...loc.environment, ...(tod.environment || {}) })),
     lighting: JSON.parse(JSON.stringify(tod.lighting)),
     postProcessing: JSON.parse(JSON.stringify(tod.postProcessing)),
     materials: JSON.parse(JSON.stringify(tod.materials)),
@@ -1994,5 +2295,10 @@ export function createCombinedSceneConfig(timeOfDayId: TimeOfDayId, locationId: 
     wind: JSON.parse(JSON.stringify(tod.wind || defaultWind)),
     rain: JSON.parse(JSON.stringify(tod.rain || defaultRain)),
     eyeGlow: tod.eyeGlow ? JSON.parse(JSON.stringify(tod.eyeGlow)) : undefined,
+    bottomGradient: tod.bottomGradient ? JSON.parse(JSON.stringify(tod.bottomGradient)) : undefined,
+    hairShadow: tod.hairShadow ? JSON.parse(JSON.stringify(tod.hairShadow)) : undefined,
+    hairRing: tod.hairRing ? JSON.parse(JSON.stringify(tod.hairRing)) : undefined,
+    faceSdf: tod.faceSdf ? JSON.parse(JSON.stringify(tod.faceSdf)) : undefined,
+    lightWrap: tod.lightWrap ? JSON.parse(JSON.stringify(tod.lightWrap)) : undefined,
   };
 }

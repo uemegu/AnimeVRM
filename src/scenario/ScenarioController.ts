@@ -35,8 +35,10 @@ import { CORRIDOR_CROWD_PRESET } from '../crowd/CorridorCrowdPreset';
 import { MORNING_SCHOOL_GATE_CROWD } from '../crowd/SchoolGateCrowdPreset';
 import { CLASSROOM_CROWD_PRESET } from '../crowd/ClassroomCrowdPreset';
 import { PAINTED_CLASSROOM_CROWD_PRESET } from '../crowd/PaintedClassroomCrowdPreset';
+import { CAFE_STREET_CROWD_PRESET } from '../crowd/CafeStreetCrowdPreset';
 import type { ClassroomStage } from '../scene/ClassroomStage';
 import { PaintedClassroomStage } from '../scene/painted-classroom/PaintedClassroomStage';
+import { loadPaintedLibrary, disposePaintedLibrary } from '../scene/painted-library/PaintedLibrary';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;
@@ -64,6 +66,7 @@ export class ScenarioController {
   private shaftModeController?: ShaftModeController;
   private classroomStage?: ClassroomStage;
   private paintedClassroomStage: PaintedClassroomStage;
+  private paintedLibraryStage: PaintedClassroomStage;
   /** True while the classroom is shown because a scenario asked for it, not the free-roam mode. */
   private isScenarioStageActive = false;
 
@@ -99,6 +102,7 @@ export class ScenarioController {
     this.getConfig = options.getConfig;
     this.onApplyConfig = options.onApplyConfig;
     this.paintedClassroomStage = new PaintedClassroomStage(options);
+    this.paintedLibraryStage = new PaintedClassroomStage(options, { load: loadPaintedLibrary, dispose: disposePaintedLibrary });
     this.onSwitchScenePreset = options.onSwitchScenePreset;
     this.audioLipSync = options.audioLipSync;
     this.masterManager = new MasterDataManager();
@@ -193,6 +197,7 @@ export class ScenarioController {
       onPlayStateChange: () => {
         if (!this.scenarioEngine.isPlaying) {
           this.paintedClassroomStage.exit();
+          this.paintedLibraryStage.exit();
           this.crowdController.setVisible(false);
           this.dialogueCameraController.stop();
           this.scrollingBackgroundManager.hide();
@@ -360,6 +365,7 @@ export class ScenarioController {
       onSwitchScenePreset: (presetId) => {
         this.onSwitchScenePreset(presetId as ScenePresetId);
         this.paintedClassroomStage.hideFlatBackground();
+        this.paintedLibraryStage.hideFlatBackground();
       },
       onApplyFisheye: (fisheyeConfig) => {
         const cfg = this.getConfig();
@@ -405,6 +411,13 @@ export class ScenarioController {
       },
       onSwitchStage: async (stage) => {
         this.paintedClassroomStage.exit();
+        this.paintedLibraryStage.exit();
+        if (stage === 'painted-library') {
+          if (this.isScenarioStageActive) this.classroomStage?.exit();
+          this.isScenarioStageActive = false;
+          await this.paintedLibraryStage.enter();
+          return;
+        }
         if (stage === 'painted-classroom') {
           if (this.isScenarioStageActive) this.classroomStage?.exit();
           this.isScenarioStageActive = false;
@@ -449,7 +462,9 @@ export class ScenarioController {
                 ? PAINTED_CLASSROOM_CROWD_PRESET
                 : presetName === 'classroom'
                   ? CLASSROOM_CROWD_PRESET
-                  : CORRIDOR_CROWD_PRESET;
+                  : presetName === 'cafe_street'
+                    ? CAFE_STREET_CROWD_PRESET
+                    : CORRIDOR_CROWD_PRESET;
           for (const m of members) {
             await this.crowdController.addMember(m);
           }
@@ -595,7 +610,12 @@ export class ScenarioController {
           effectTextManager: this.sharedEffectTextManager,
           renderer: this.avatarManager.renderer ?? undefined,
           hairShadow: this.avatarManager.hairShadow,
+          daylight: placement.daylight,
+          renderOrder: placement.renderOrder,
           onLoaded: (loadedAvatar) => {
+            if (placement.fastMotion !== undefined) {
+              loadedAvatar.fastMotionEffect?.updateConfig({ enabled: placement.fastMotion });
+            }
             this.avatarManager.scenarioAvatars.set(placement.id, loadedAvatar);
             resolve();
           },

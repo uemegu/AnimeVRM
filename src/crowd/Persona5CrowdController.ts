@@ -5,6 +5,7 @@ import { VRM, VRMHumanBones, VRMHumanoid, VRMLoaderPlugin, VRMUtils } from '@pix
 import { loadMixamoAnimation } from '../Avatar';
 import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { resolveAssetUrl } from '../utils/path';
+import { setDaylight } from '../scene/Daylight';
 
 export interface Persona5CrowdStyleOptions {
   opacity?: number;
@@ -28,6 +29,8 @@ export interface CrowdMemberConfig {
     speed: number; // meters per second
     loop?: boolean; // teleport back to start
   };
+  daylight?: number; // 日なたの明るさ（窓の外の通行人など。0 で室内の光のみ、1 を超えるとブルームで白く飛ぶ）
+  renderOrder?: number; // custom renderOrder (e.g. -2 for behind midground)
 }
 
 export interface Persona5CrowdMember {
@@ -416,6 +419,19 @@ export class Persona5CrowdController {
     }
     const scale = config.scale ?? 1.0;
     root.scale.set(scale, scale, scale);
+
+    if (typeof config.daylight === 'number') {
+      setDaylight(root, config.daylight);
+    }
+
+    if (typeof config.renderOrder === 'number') {
+      const targetOrder = config.renderOrder;
+      root.traverse((obj) => {
+        if ((obj as THREE.Mesh).isMesh) {
+          obj.renderOrder = targetOrder;
+        }
+      });
+    }
 
     root.visible = this.isVisible;
     this.scene.add(root);

@@ -250,6 +250,7 @@ export const en: Translations = {
     night: '🏮 Night',
     bright: '💡 Indoor (Bright)',
     dark: '🌙 Indoor (Dark)',
+    dark2: 'Indoor (Dark 2)',
     divine: 'Divine / Backlight',
     backgroundTitle: '🌄 Background',
     backgrounds: {
@@ -261,6 +262,7 @@ export const en: Translations = {
       nightFestival: '🏮 Summer Festival',
       oldPark: '🌲 Classic Park',
       cafe: '☕ Café',
+      cafeIndoor: 'Cafe Indoor',
       town: '🏙️ Town',
       apartmentDoor: '🚪 Apartment Door',
       myroom: '🛏️ My Room',
@@ -287,6 +289,7 @@ export const en: Translations = {
     presetNightSchoolTip: 'Night school gate with ample night illumination',
     presetBrightIndoorTip: 'Bright classroom with soft daylight illumination',
     presetDarkIndoorTip: 'Night classroom with atmospheric ambient lighting',
+    presetDarkIndoor2Tip: 'Café interior with warm ambient and soft highlights',
     presetDivineTip: 'Radiant sun shafts and brilliant golden rim light with deep silhouette',
   },
   render: {
@@ -494,6 +497,7 @@ export const en: Translations = {
     midZ: 'Depth Z',
     midScale: 'Scale',
     midOpacity: 'Opacity',
+    selectMidImage: 'Select Image File (Mid)...',
     nearFolder: '☕ Nearground Layer',
     showNearground: 'Show Nearground',
     nearX: 'Position X',

@@ -44,8 +44,9 @@ export class ScenePresetManager {
       if (tod === 'evening') return 'evening_school';
       if (tod === 'rainy') return 'rainy_school';
       if (tod === 'night') return 'night_school';
-    } else if (loc === 'classroom' || loc === 'cafe' || loc === 'myroom') {
+    } else if (loc === 'classroom' || loc === 'cafe' || loc === 'cafe_indoor' || loc === 'myroom') {
       if (tod === 'dark_indoor') return 'dark_indoor';
+      if (tod === 'dark_indoor_2') return 'dark_indoor_2';
       return 'bright_indoor';
     } else if (loc === 'night_festival') {
       if (tod === 'night') return 'night_festival';
@@ -58,6 +59,7 @@ export class ScenePresetManager {
     if (tod === 'rainy') return 'rainy_park';
     if (tod === 'night') return 'night_park';
     if (tod === 'dark_indoor') return 'dark_indoor';
+    if (tod === 'dark_indoor_2') return 'dark_indoor_2';
     if (tod === 'bright_indoor') return 'bright_indoor';
     return 'day_park';
   }
@@ -89,6 +91,11 @@ export class ScenePresetManager {
     wind: AvatarConfig['wind'];
     rain: AvatarConfig['rain'];
     eyeGlow?: AvatarConfig['eyeGlow'];
+    bottomGradient?: AvatarConfig['bottomGradient'];
+    hairShadow?: AvatarConfig['hairShadow'];
+    hairRing?: AvatarConfig['hairRing'];
+    faceSdf?: AvatarConfig['faceSdf'];
+    lightWrap?: AvatarConfig['lightWrap'];
   }): void {
     deepAssign(this.config.environment, combined.environment);
     deepAssign(this.config.lighting, combined.lighting);
@@ -103,6 +110,26 @@ export class ScenePresetManager {
     if (combined.eyeGlow) {
       if (!this.config.eyeGlow) this.config.eyeGlow = JSON.parse(JSON.stringify(combined.eyeGlow));
       else deepAssign(this.config.eyeGlow, combined.eyeGlow);
+    }
+    if (combined.bottomGradient) {
+      if (!this.config.bottomGradient) this.config.bottomGradient = JSON.parse(JSON.stringify(combined.bottomGradient));
+      else deepAssign(this.config.bottomGradient, combined.bottomGradient);
+    }
+    if (combined.hairShadow) {
+      if (!this.config.hairShadow) this.config.hairShadow = JSON.parse(JSON.stringify(combined.hairShadow));
+      else deepAssign(this.config.hairShadow, combined.hairShadow);
+    }
+    if (combined.hairRing) {
+      if (!this.config.hairRing) this.config.hairRing = JSON.parse(JSON.stringify(combined.hairRing));
+      else deepAssign(this.config.hairRing, combined.hairRing);
+    }
+    if (combined.faceSdf) {
+      if (!this.config.faceSdf) this.config.faceSdf = JSON.parse(JSON.stringify(combined.faceSdf));
+      else deepAssign(this.config.faceSdf, combined.faceSdf);
+    }
+    if (combined.lightWrap) {
+      if (!this.config.lightWrap) this.config.lightWrap = JSON.parse(JSON.stringify(combined.lightWrap));
+      else deepAssign(this.config.lightWrap, combined.lightWrap);
     }
 
     this.onConfigChange(this.config);
@@ -168,6 +195,8 @@ export class ScenePresetManager {
       ? 'bright_indoor'
       : presetId === 'dark_indoor'
       ? 'dark_indoor'
+      : presetId === 'dark_indoor_2'
+      ? 'dark_indoor_2'
       : 'morning') as TimeOfDayId;
 
     const loc = (presetId.includes('school')
@@ -176,6 +205,8 @@ export class ScenePresetManager {
       ? 'night_festival'
       : presetId === 'bright_indoor'
       ? 'cafe'
+      : presetId === 'dark_indoor_2'
+      ? 'cafe_indoor'
       : presetId.includes('indoor')
       ? 'classroom'
       : 'modern_park') as LocationId;

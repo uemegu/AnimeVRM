@@ -12,6 +12,7 @@ export class SkyBackground {
       uTime: { value: 0 },
       uSkyGlow: { value: 0.85 },
       uInteriorShadowStrength: { value: 0 },
+      uExposure: { value: 1 },
       uRepeat: { value: new THREE.Vector2(1, 1) },
       uOffset: { value: new THREE.Vector2() },
       uZenith: { value: new THREE.Color('#078fff') },
@@ -28,7 +29,7 @@ export class SkyBackground {
     `,
     fragmentShader: `
       uniform sampler2D uPainting;
-      uniform float uTime, uSkyGlow, uInteriorShadowStrength;
+      uniform float uTime, uSkyGlow, uInteriorShadowStrength, uExposure;
       uniform vec2 uRepeat, uOffset;
       uniform vec3 uZenith, uHorizon, uCloudLight, uCloudShade;
       varying vec2 vUv;
@@ -73,7 +74,8 @@ export class SkyBackground {
                              1.0 - smoothstep(0.20, 0.48, uv.y));
         float shadow = 1.0 - smoothstep(0.025, 0.40, luminance);
         vec3 room = painting.rgb * (1.0 - uInteriorShadowStrength * interior * shadow);
-        gl_FragColor = vec4(mix(sky, room, painting.a), 1.0);
+        // Values above 1 stay in the half-float target, so bloom can blow out a sunlit view
+        gl_FragColor = vec4(mix(sky, room, painting.a) * uExposure, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }

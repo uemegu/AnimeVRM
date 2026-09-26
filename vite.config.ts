@@ -98,6 +98,7 @@ function getHtmlInputs() {
     quality_calibrate: path.resolve(__dirname, 'quality-calibrate.html'),
     crowd_test: path.resolve(__dirname, 'crowd-test.html'),
     painted_classroom: path.resolve(__dirname, 'painted-classroom.html'),
+    painted_library: path.resolve(__dirname, 'painted-library.html'),
   };
 
   const scenariosDir = path.resolve(__dirname, 'scenarios');

@@ -594,6 +594,7 @@ export class ViewerCore {
       const isCafePainting = /(?:^|\/)cafe_far\.(?:avif|png)(?:[?#]|$)/.test(backgroundUrl);
       this.skyBackground.setTimeOfDay(cfg.activeScene?.timeOfDay);
       this.skyBackground.material.uniforms.uInteriorShadowStrength.value = isCafePainting ? 0.34 : 0;
+      this.skyBackground.material.uniforms.uExposure.value = cfg.environment.backgroundExposure ?? 1;
       if (container) container.style.backgroundColor = '#000000';
       this.loadAtmosphericBackground(
         backgroundUrl,
@@ -637,19 +638,31 @@ export class ViewerCore {
         ctx.drawImage(img, 0, 0);
         const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
         const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const minVal = Math.min(r, g, b);
-          if (minVal >= threshold) {
-            data[i + 3] = 0;
-          } else if (minVal > threshold - feather) {
-            const factor = (threshold - minVal) / feather;
-            data[i + 3] = Math.round(data[i + 3] * factor);
+
+        // If the texture already has transparent pixels, keep native alpha and avoid accidental keying of white parts
+        let hasNativeAlpha = false;
+        for (let i = 3; i < data.length; i += 4) {
+          if (data[i] < 250) {
+            hasNativeAlpha = true;
+            break;
           }
         }
-        ctx.putImageData(imgData, 0, 0);
+
+        if (!hasNativeAlpha) {
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const minVal = Math.min(r, g, b);
+            if (minVal >= threshold) {
+              data[i + 3] = 0;
+            } else if (minVal > threshold - feather) {
+              const factor = (threshold - minVal) / feather;
+              data[i + 3] = Math.round(data[i + 3] * factor);
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
+        }
         const texture = new THREE.CanvasTexture(cvs);
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
@@ -724,15 +737,19 @@ export class ViewerCore {
     const planePos = this.camera.position
       .clone()
       .addScaledVector(forward, baseDist)
-      .addScaledVector(right, offsetX - panDeltaX + panZoomOffsetX * 0.8)
-      .addScaledVector(up, offsetY - panDeltaY + panZoomOffsetY * 0.8);
+      .addScaledVector(right, offsetX + panZoomOffsetX * 0.8)
+      .addScaledVector(up, offsetY + panZoomOffsetY * 0.8);
 
     this.midgroundMesh.position.copy(planePos);
     this.midgroundMesh.quaternion.copy(this.camera.quaternion);
 
     const vFovRad = THREE.MathUtils.degToRad(this.camera.fov);
     const frustumHeight = 2 * baseDist * Math.tan(vFovRad / 2);
-    const finalScale = frustumHeight * scaleMul;
+    const clientWidth = this.renderer.domElement.clientWidth || window.innerWidth;
+    const clientHeight = this.renderer.domElement.clientHeight || window.innerHeight;
+    const aspect = clientWidth / Math.max(clientHeight, 1);
+    const aspectMultiplier = Math.max(1.0, aspect / (16 / 9));
+    const finalScale = frustumHeight * scaleMul * aspectMultiplier;
     this.midgroundMesh.scale.set(finalScale, finalScale, 1);
   }
 
