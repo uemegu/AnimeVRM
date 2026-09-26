@@ -1,4 +1,4 @@
-import type { CharacterBook } from '@anime-vrm/scenario';
+import type { CharacterBook, ScenarioCategory } from '@anime-vrm/scenario';
 
 /** Studio サーバー（server/）の API。開発時は Vite が /api を転送する */
 
@@ -50,7 +50,19 @@ export interface CharacterScenarioUsage {
   lines: CharacterLine[];
 }
 
+export interface ScenarioSummary {
+  category: ScenarioCategory;
+  id: string;
+  kind: 'story' | 'call' | 'mail';
+  title: string;
+  lineCount: number;
+  updatedAt: string;
+}
+
 export const api = {
+  scenarios: () => request<ScenarioSummary[]>('/scenarios'),
+  scenario: (category: string, id: string) => request<unknown>(`/scenarios/${category}/${encodeURIComponent(id)}`),
+  saveScenario: (category: string, id: string, data: unknown) => putJson<{ ok: true }>(`/scenarios/${category}/${encodeURIComponent(id)}`, data),
   characters: () => request<CharacterBook>('/characters'),
   saveCharacters: (book: CharacterBook) => putJson<{ ok: true }>('/characters', book),
   characterUsage: (id: string) => request<CharacterScenarioUsage[]>(`/characters/${encodeURIComponent(id)}/usage`),

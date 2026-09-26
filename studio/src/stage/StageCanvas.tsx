@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CameraShot } from '@anime-vrm/scenario';
+import type { CameraShot, ScrollingBackgroundSettings } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -11,6 +11,8 @@ interface Props {
   cast: StageCastMember[];
   cameraShot: CameraShot;
   focusId: string | null;
+  /** 流れる背景（歩きながらの会話）。null で止める */
+  scrolling?: ScrollingBackgroundSettings | null;
   /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
   onManager?: (manager: StageManager | null) => void;
 }
@@ -18,7 +20,7 @@ interface Props {
 /**
  * app と同じ描画（StageManager）で舞台を表示する。親要素いっぱいに広がる
  */
-export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, focusId, onManager }: Props) {
+export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, focusId, scrolling = null, onManager }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
 
@@ -49,6 +51,12 @@ export function StageCanvas({ presets, timeOfDay, locationId, cast, cameraShot, 
     void managerRef.current?.setCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  const scrollingKey = JSON.stringify(scrolling);
+  useEffect(() => {
+    managerRef.current?.setScrollingBackground(scrolling);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scrollingKey]);
 
   useEffect(() => {
     managerRef.current?.setSpeaker(focusId);

@@ -24,7 +24,7 @@
         "ja": "もしもし、タカシくん……？ 今日は本当に、本当にごめんなさい……！"
       },
       "expression": "sad",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_2",
       "voiceUrl": "v_step_1_a8eb7124.mp3"
     },
@@ -35,7 +35,7 @@
         "ja": "パパのSPの人たち、みんなタカシくんのこと褒めてたよ。「あの少年、我が部隊にスカウトしたい」って。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_3",
       "voiceUrl": "v_step_2_07f19aa6.mp3"
     },
@@ -73,7 +73,7 @@
         "ja": "……タカシくんって、ほんといい人だね。アオイちゃんが惚れるの、わかるなあ。"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_a_c2660226.mp3"
     },
@@ -84,7 +84,7 @@
         "ja": "あはは！ だよね！ ……ほんとにありがと。おやすみ！"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_b_1c1bcee7.mp3"
     }

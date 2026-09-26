@@ -12,6 +12,11 @@ const PATHS = {
   play: 'M8 5.5v13l10.5-6.5z',
   stop: 'M7 7h10v10H7z',
   chevron: 'M9 6l6 6-6 6',
+  copy: 'M9 9h10v10H9zM5 15V5h10',
+  trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
+  upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
+  download: 'M12 4v12M7 11l5 5 5-5M4 20h16',
+  mic: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3ZM5 11a7 7 0 0 0 14 0M12 18v3',
 } as const;
 
 export type IconName = keyof typeof PATHS;

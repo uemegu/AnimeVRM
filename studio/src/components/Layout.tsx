@@ -13,7 +13,7 @@ interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { path: '/viewer', icon: 'viewer', label: (t) => t.nav.viewer, ready: true },
   { path: '/scenes', icon: 'scenes', label: (t) => t.nav.scenes, ready: true },
-  { path: '/scenarios', icon: 'scenarios', label: (t) => t.nav.scenarios, ready: false },
+  { path: '/scenarios', icon: 'scenarios', label: (t) => t.nav.scenarios, ready: true },
   { path: '/player', icon: 'player', label: (t) => t.nav.player, ready: false },
   { path: '/characters', icon: 'characters', label: (t) => t.nav.characters, ready: true },
   { path: '/motions', icon: 'motions', label: (t) => t.nav.motions, ready: false },

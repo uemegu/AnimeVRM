@@ -24,7 +24,7 @@
         "ja": "……もしもし。ごめんね、こんな時間に。なんだか、眠れなくて。"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_2",
       "voiceUrl": "v_step_1_d6bf2539.mp3"
     },
@@ -35,7 +35,7 @@
         "ja": "明日で、私がこの街に戻ってきて、ちょうど3週間なんだよ。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_3",
       "voiceUrl": "v_step_2_8f6c9a8f.mp3"
     },
@@ -46,7 +46,7 @@
         "ja": "ねえ。明日の夕方、あの神社に来てくれない？ 最初の日に、一緒にお参りした神社。"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_4",
       "voiceUrl": "v_step_3_9ced6455.mp3"
     },
@@ -84,7 +84,7 @@
         "ja": "……うん。待ってる。私も、伝えたいことがあるから。"
       },
       "expression": "happy",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": "step_6",
       "voiceUrl": "v_promise_a5624ef7.mp3"
     },
@@ -95,7 +95,7 @@
         "ja": "おやすみ、タカシくん。……明日、ね。"
       },
       "expression": "relaxed",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_step_6_0a53dec2.mp3"
     },
@@ -106,7 +106,7 @@
         "ja": "……そっか。うん、ごめんね、急に。おやすみ。"
       },
       "expression": "sad",
-      "expressionWeight": 1.0,
+      "expressionWeight": 1,
       "nextStepId": null,
       "voiceUrl": "v_busy_b01acb80.mp3"
     }
