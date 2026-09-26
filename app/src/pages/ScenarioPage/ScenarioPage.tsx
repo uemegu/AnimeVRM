@@ -51,6 +51,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           cameraShot={cameraShot}
           scrolling={scrolling}
           speakerId={currentScene?.speakerCharacterId ?? null}
+          cut={currentScene}
         />
       </main>
 

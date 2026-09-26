@@ -43,6 +43,17 @@ export type CameraShot = z.infer<typeof CameraShot>;
 /** 'player' | 'speaker' | 'partner' | 'camera' | 'forward' またはキャラ ID */
 const LookAtTarget = z.string();
 
+/** カメラの位置・注視点・画角を直接指定する（構図の自動決定より優先） */
+export const CameraPose = z.strictObject({
+  position: Vec3,
+  target: Vec3,
+  fov: z.number().min(10).max(90).optional(),
+});
+export type CameraPose = z.infer<typeof CameraPose>;
+
+/** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
+const HeadTurn = z.number().min(0).max(1);
+
 /** セリフ途中のアバター演出（表情・モーション・視線など）。at はボイス再生位置またはシーン経過秒 */
 export const AvatarTransition = z.strictObject({
   at: z.number().nonnegative(),
@@ -55,6 +66,7 @@ export const AvatarTransition = z.strictObject({
   headLookAtCamera: z.boolean().optional(),
   eyeLookAtCamera: z.boolean().optional(),
   lookAtTarget: LookAtTarget.optional(),
+  headTurn: HeadTurn.optional(),
   eyeWander: z.union([z.boolean(), z.number()]).optional(),
   eyeOffset: Vec2.optional(),
   headOffset: Vec2.optional(),
@@ -72,6 +84,10 @@ export const SceneTransition = z.strictObject({
   cameraTransitionDuration: z.number().nonnegative().optional(),
   cameraTransitionEasing: z.string().optional(),
   cameraTarget: z.union([AvatarSlotPosition, Vec3, z.string()]).optional(),
+  /** この時刻から構図を切り替える */
+  camera: CameraShot.optional(),
+  /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
+  cameraPose: CameraPose.optional(),
   background: z.string().optional(),
 });
 export type SceneTransition = z.infer<typeof SceneTransition>;
@@ -90,6 +106,7 @@ export const SceneAvatarConfig = z.strictObject({
   position: z.union([AvatarSlotPosition, Vec3]).optional(),
   rotationY: z.number().optional(),
   lookAtTarget: LookAtTarget.optional(),
+  headTurn: HeadTurn.optional(),
   visible: z.boolean().optional(),
   transitions: z.array(AvatarTransition).optional(),
 });
@@ -143,6 +160,8 @@ export const ScenarioScene = z.strictObject({
   timeOfDay: z.string().optional(),
   transitions: z.array(SceneTransition).optional(),
   camera: CameraShot.optional(),
+  /** カメラを直接指定する（camera の構図より優先。このカットだけに効く） */
+  cameraPose: CameraPose.optional(),
   /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */
   clearCast: z.boolean().optional(),
   /** 以降のシーンに引き継ぐ。false で止めて通常の背景に戻す */

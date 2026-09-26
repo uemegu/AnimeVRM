@@ -302,6 +302,13 @@ export class SoundManager {
   }
 
   /**
+   * ボイスの再生位置（秒）。ボイス再生中でなければ undefined（カット内のタイムラインの時刻に使う）
+   */
+  public getVoiceTime(): number | undefined {
+    return this.voiceAudio?.isPlaying ? this.voiceAudio.audioElement.currentTime : undefined;
+  }
+
+  /**
    * 口パク用の現在の音素。ボイス再生中でなければ undefined
    */
   public getVoicePhoneme(): Phoneme | 'nn' | undefined {

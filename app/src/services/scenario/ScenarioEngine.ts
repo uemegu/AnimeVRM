@@ -11,6 +11,8 @@ import {
   resolveLocalizedText,
   SceneAvatarConfig,
   CameraShot,
+  CameraPose,
+  SceneTransition,
 } from '../../types/scenario';
 
 /** 画面描画用に言語解決済みのシーン情報 */
@@ -37,6 +39,9 @@ export interface ScenarioResolvedScene {
   clearCast?: boolean;
   /** 選択肢の制限時間（秒） */
   choiceTimeLimitSec?: number;
+  /** カメラの直接指定と、カット内のタイムライン（描画に渡す） */
+  cameraPose?: CameraPose;
+  transitions?: SceneTransition[];
 }
 
 export class ScenarioEngine {
@@ -108,6 +113,8 @@ export class ScenarioEngine {
       camera: raw.camera,
       clearCast: raw.clearCast,
       choiceTimeLimitSec: raw.choiceTimeout?.seconds,
+      cameraPose: raw.cameraPose,
+      transitions: raw.transitions,
     };
   }
 
