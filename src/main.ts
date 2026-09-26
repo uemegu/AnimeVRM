@@ -5,22 +5,24 @@ import {
   DEFAULT_CONFIG,
   AvatarConfig,
   cloneConfig,
-} from './Config';
-import { resolveAssetUrl } from './utils/path';
-import { AudioLipSync } from './AudioLipSync';
-import { WindController } from './wind/WindController';
-import { ViewerCore } from './scene/ViewerCore';
+} from '@anime-vrm/engine/Config';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
+import { WindController } from '@anime-vrm/engine/wind/WindController';
+import { ViewerCore } from '@anime-vrm/engine/scene/ViewerCore';
 import { ScenePresetManager } from './scene/ScenePresetManager';
-import { AvatarManager } from './avatar/AvatarManager';
-import { AvatarTransformController } from './avatar/AvatarTransformController';
+import { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
+import { AvatarTransformController } from '@anime-vrm/engine/avatar/AvatarTransformController';
 import { ScenarioController } from './scenario/ScenarioController';
 import { ClassroomExperienceController } from './scenario/ClassroomExperienceController';
-import { ClassroomStage } from './scene/ClassroomStage';
-import { ShaftModeController } from './effects/shaft/ShaftModeController';
+import { ClassroomStage } from '@anime-vrm/engine/scene/ClassroomStage';
+import { ShaftModeController } from '@anime-vrm/engine/effects/shaft/ShaftModeController';
 import { InspectorManager } from './ui/inspector/InspectorManager';
 import { setupUnifiedPanel } from './ui/UnifiedPanel';
+import { showToast } from './ui/components/Toast';
 import {
   syncBgButtons,
+  updateAnimationPlayStateUI,
   updateLipSyncPhonemeDisplay,
   updatePlayStateUI,
   updateAudioTimeUI,
@@ -87,6 +89,31 @@ const avatarManager = new AvatarManager({
     applyConfigToSceneAndRenderer(currentConfig);
     avatarTransformController?.syncInitialTransform();
     shaftModeController?.refreshCurrentAvatar();
+  },
+  onModelLoadProgress: (progress) => {
+    const el = document.getElementById('progress-text');
+    if (el) el.textContent = `${progress.toFixed(0)}%`;
+  },
+  onModelLoaded: (modelUrl) => {
+    const displayName = modelUrl.startsWith('blob:') ? 'ローカルVRM' : modelUrl.split('/').pop();
+    const el = document.getElementById('loading-status');
+    if (el) {
+      el.innerHTML = `<span style="color: #16a34a; font-weight: 600;">✓ ロード完了</span> (${displayName})`;
+    }
+    showToast(`👤 モデルを読み込みました: ${displayName}`);
+    document.querySelectorAll<HTMLButtonElement>('.model-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-model') === modelUrl);
+    });
+  },
+  onModelLoadError: () => {
+    const el = document.getElementById('loading-status');
+    if (el) {
+      el.innerHTML = `<span style="color: #dc2626; font-weight: 600;">✗ ロード失敗</span>`;
+    }
+    showToast('❌ モデルの読み込みに失敗しました');
+  },
+  onAnimationPlayStateChange: (isPlaying) => {
+    updateAnimationPlayStateUI(isPlaying);
   },
 });
 (window as any).avatarManager = avatarManager;

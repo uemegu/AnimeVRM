@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
-import { loadPaintedLibrary, disposePaintedLibrary, SKY_ONLY_BACKGROUND } from './scene/painted-library/PaintedLibrary';
-import { buildLibraryBlockout } from './scene/painted-library/blockout';
-import { AVATAR_POSITION, CHAIR, LIBRARY_SHOTS } from './scene/painted-library/layout';
-import { SkyBackground } from './scene/SkyBackground';
-import { loadMixamoAnimation } from './Avatar';
-import { resolveAssetUrl } from './utils/path';
+import { loadPaintedLibrary, disposePaintedLibrary, SKY_ONLY_BACKGROUND } from '@anime-vrm/engine/scene/painted-library/PaintedLibrary';
+import { buildLibraryBlockout } from '@anime-vrm/engine/scene/painted-library/blockout';
+import { AVATAR_POSITION, CHAIR, LIBRARY_SHOTS } from '@anime-vrm/engine/scene/painted-library/layout';
+import { SkyBackground } from '@anime-vrm/engine/scene/SkyBackground';
+import { loadMixamoAnimation } from '@anime-vrm/engine/Avatar';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas')!;
 const status = document.querySelector<HTMLElement>('#status')!;

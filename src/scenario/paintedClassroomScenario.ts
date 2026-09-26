@@ -1,6 +1,6 @@
 import type { ScenarioPackage, ScenarioSceneAvatarConfig, ScenarioScene } from './types';
-import { PAINTED_CLASSROOM_SHOTS } from '../scene/painted-classroom/PaintedClassroom';
-import { resolveAssetUrl } from '../utils/path';
+import { PAINTED_CLASSROOM_SHOTS } from '@anime-vrm/engine/scene/painted-classroom/PaintedClassroom';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 // The painted set only holds up near its reference camera (the original image's
 // viewpoint). Measured limits: at conversation distance (~1.3 m to the avatars,

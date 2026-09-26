@@ -542,40 +542,25 @@ Blender と連携し、VRoid モデルの目元・アイライン・瞳・眉毛
 
 ```text
 vrm-genshin-like/
-├── assets/
-│   ├── animations/        # 待機・歩行・挨拶・ダンス等の Mixamo FBX アニメーション
-│   ├── bgm/               # シナリオ用 BGM (mp3)
-│   ├── img/               # UI・ダイアログ用キャラクター立ち絵 (AVIF)
-│   ├── models/            # キャラクター別 VRM モデル (aoi, emili, shion, teacher, boy)
-│   ├── ogp/               # 各シナリオ用 OGP サムネイル画像
-│   ├── se/                # 環境音・UI効果音 (蝉の声、決定音、選択ホバー音 等)
-│   ├── textures/          # 多層背景テクスチャ画像 (Far/Mid/Near, AVIF形式)
-│   └── voices/            # シナリオ音声・リップシンク用音声ファイル (WAV形式)
-├── scenarios/             # 独立シナリオ実行 HTML ページ群 (14シナリオ)
-├── src/
+├── assets/                # モデル・モーション・背景・BGM・SE・ボイス・シナリオ（ルートと app で共有）
+│   ├── animations/        # Mixamo 互換 FBX モーション
+│   ├── models/            # キャラクター別 VRM モデル
+│   ├── scenarios/         # app のシナリオ JSON とボイス
+│   ├── textures/          # 多層背景テクスチャ (AVIF)
+│   └── ...
+├── packages/
+│   ├── engine/            # 描画エンジン（ルートと app で共有）
+│   │   └── src/
+│   │       ├── Avatar.ts / ToonShader.ts / Config.ts / AudioLipSync.ts
+│   │       ├── animation/ avatar/ effects/ postprocessing/ presets/ scene/ shader/ wind/ utils/
+│   └── scenario/          # シナリオ JSON のスキーマ (zod) とテスト
+├── app/                   # ギャルゲーアプリ (React)
+├── scenarios/             # 独立シナリオ実行 HTML ページ群
+├── src/                   # 旧ビューア（Studio に置き換え予定。plans/studio/PLAN.md）
 │   ├── ai/motion/         # ardy-mini モーション生成 & 品質補正
-│   ├── animation/         # 演出プレイヤー & メッセージウィンドウ
-│   ├── avatar/            # アバター管理 & トランスフォーム制御 (AvatarTransformController)
-│   ├── effects/           # 漫画調漫符・シャフト演出・高速アクション
-│   │   ├── eye/           # ウルウル瞳エフェクト (WateryEyeEffect)
-│   │   ├── motion/        # 高速アクション演出 (残像、スピードリボン、方向性ブラー)
-│   │   ├── rain/          # 雨天・水滴・地面スプラッシュエフェクト
-│   │   ├── shaft/         # シャフト風演出コントローラー & カットインオーバーレイ
-│   │   ├── sweat/         # 汗・冷や汗エフェクト (fly4 / jito)
-│   │   ├── tears/         # 涙エフェクト
-│   │   └── text/          # 3D 空間オノマトペ・漫符テキスト
-│   ├── i18n/              # 日英バイリンガル多言語辞書
-│   ├── motion/            # モーション合成エンジン & FBX 7.4 Binary エクスポーター（ardy-mini が使用）
-│   ├── postprocessing/    # ポストプロセス シェーダー (Cinematic, GodRays, SunEffect)
-│   ├── presets/           # 時間帯 × ロケーション シーンプリセット
-│   ├── scenario/          # ADVシナリオエンジン、全14シナリオ定義、ダイアログカメラ
-│   ├── scene/             # Three.js コア (ViewerCore, ScrollingBg, SkyBg)
-│   ├── shader/            # スムーズ法線・眼窩法線平坦化 (SmoothNormalHelper)
-│   ├── ui/                # 統合スタジオ UI (UnifiedPanel, インスペクター, 各種オーバーレイ)
-│   ├── AudioLipSync.ts    # Meyda スペクトル解析 & リアルタイムリップシンク
-│   ├── Avatar.ts          # 個別 VRM アバター描画・ヤンデレ・マテリアル制御
-│   ├── Config.ts          # 全パラメータ型定義・デフォルト値
-│   ├── ToonShader.ts      # MToon パラメータ制御・Auto HSV 影色・アウトライン制御
+│   ├── motion/            # モーション合成エンジン & FBX 書き出し（ardy-mini が使用）
+│   ├── scenario/          # ADV シナリオエンジンと TS 製シナリオ
+│   ├── ui/                # 統合パネル UI
 │   ├── main.ts            # メインビューア エントリポイント
 │   └── scenario-player.ts # 独立シナリオ実行用プレイヤー
 ├── tools/

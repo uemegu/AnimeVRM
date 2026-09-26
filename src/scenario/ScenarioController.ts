@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import { Avatar } from '../Avatar';
-import { AvatarConfig } from '../Config';
-import { AudioLipSync } from '../AudioLipSync';
-import { EffectTextManager } from '../effects/text';
+import { Avatar } from '@anime-vrm/engine/Avatar';
+import { AvatarConfig } from '@anime-vrm/engine/Config';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
+import { EffectTextManager } from '@anime-vrm/engine/effects/text/index';
 import { MasterDataManager } from '../master/MasterDataManager';
-import { WindController } from '../wind/WindController';
+import { WindController } from '@anime-vrm/engine/wind/WindController';
 import { DialogueCameraController } from './DialogueCameraController';
 import { ScenarioEngine } from './ScenarioEngine';
 import { ScenarioPlayer, ScenarioStep } from '../animation/ScenarioPlayer';
-import { ScrollingBackgroundManager } from '../scene/ScrollingBackgroundManager';
+import { ScrollingBackgroundManager } from '@anime-vrm/engine/scene/ScrollingBackgroundManager';
 import { InterludeOverlay } from '../ui/InterludeOverlay';
 import {
   ScenarioPackage,
@@ -17,21 +17,21 @@ import {
   AVATAR_POSITION_PRESETS,
   AVATAR_ROTATION_PRESETS,
 } from './types';
-import { ScenePresetId } from '../presets/ScenePresets';
-import { resolveAssetUrl } from '../utils/path';
+import { ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { showToast } from '../ui/components/Toast';
 import {
   updateScenarioPlayStateUI,
   updateScenarioStepUI,
   updateScenarioDebugUI,
 } from '../ui/helpers';
-import { AvatarManager } from '../avatar/AvatarManager';
-import { AnimeDreamBackground } from '../effects/AnimeDreamBackground';
+import { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
+import { AnimeDreamBackground } from '@anime-vrm/engine/effects/AnimeDreamBackground';
 import { PvTitleOverlay } from '../ui/PvTitleOverlay';
-import { ShaftModeController } from '../effects/shaft/ShaftModeController';
-import type { ClassroomStage } from '../scene/ClassroomStage';
-import { PaintedClassroomStage } from '../scene/painted-classroom/PaintedClassroomStage';
-import { loadPaintedLibrary, disposePaintedLibrary } from '../scene/painted-library/PaintedLibrary';
+import { ShaftModeController } from '@anime-vrm/engine/effects/shaft/ShaftModeController';
+import type { ClassroomStage } from '@anime-vrm/engine/scene/ClassroomStage';
+import { PaintedClassroomStage } from '@anime-vrm/engine/scene/painted-classroom/PaintedClassroomStage';
+import { loadPaintedLibrary, disposePaintedLibrary } from '@anime-vrm/engine/scene/painted-library/PaintedLibrary';
 
 export class ScenarioController {
   public dialogueCameraController: DialogueCameraController;

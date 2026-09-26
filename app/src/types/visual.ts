@@ -1,4 +1,4 @@
-import type { ParaParams } from '../services/graphics/postprocessing/Para';
+import type { ParaParams } from '@anime-vrm/engine/postprocessing/Para';
 /**
  * 3D・ビジュアル描画用型定義
  * 時間帯（ライト・ポストプロセス・マテリアル）とロケーション（背景）を直交・独立管理

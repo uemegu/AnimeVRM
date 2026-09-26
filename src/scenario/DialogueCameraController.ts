@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import type { Avatar } from '../Avatar';
+import type { Avatar } from '@anime-vrm/engine/Avatar';
 import {
   ScenarioScene,
   CameraZoomType,
@@ -8,7 +8,7 @@ import {
   AvatarSlotPosition,
   AVATAR_POSITION_PRESETS,
 } from './types';
-import type { CameraPreset, CameraStartAngle } from '../animation/types';
+import type { CameraPreset, CameraStartAngle } from '@anime-vrm/engine/animation/types';
 
 function easeOutExpo(t: number): number {
   return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);

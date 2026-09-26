@@ -1,4 +1,4 @@
-import { Phoneme } from '../AudioLipSync';
+import { Phoneme } from '@anime-vrm/engine/AudioLipSync';
 import { getLanguage, t } from '../i18n';
 
 let panelOpenCallback: (open: boolean) => void = () => {};

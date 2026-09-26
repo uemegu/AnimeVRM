@@ -1,17 +1,17 @@
 import './style.css';
 import * as THREE from 'three';
-import { DEFAULT_CONFIG, AvatarConfig, cloneConfig } from './Config';
-import { resolveAssetUrl } from './utils/path';
-import { AudioLipSync } from './AudioLipSync';
-import { WindController } from './wind/WindController';
-import { ViewerCore } from './scene/ViewerCore';
+import { DEFAULT_CONFIG, AvatarConfig, cloneConfig } from '@anime-vrm/engine/Config';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { AudioLipSync } from '@anime-vrm/engine/AudioLipSync';
+import { WindController } from '@anime-vrm/engine/wind/WindController';
+import { ViewerCore } from '@anime-vrm/engine/scene/ViewerCore';
 import { ScenePresetManager } from './scene/ScenePresetManager';
-import { AvatarManager } from './avatar/AvatarManager';
+import { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
 import { ScenarioController } from './scenario/ScenarioController';
 import { getScenarioMeta, SCENARIO_REGISTRY } from './scenario/scenarioRegistry';
 import { showToast } from './ui/components/Toast';
-import { ShaftModeController } from './effects/shaft/ShaftModeController';
-import { ClassroomStage } from './scene/ClassroomStage';
+import { ShaftModeController } from '@anime-vrm/engine/effects/shaft/ShaftModeController';
+import { ClassroomStage } from '@anime-vrm/engine/scene/ClassroomStage';
 
 // --------------------------------------------------
 // 1. Scenario Identification

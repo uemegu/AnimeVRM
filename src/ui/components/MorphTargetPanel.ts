@@ -1,5 +1,5 @@
-import type { AvatarManager } from '../../avatar/AvatarManager';
-import type { MorphTargetPreview } from '../../avatar/MorphTargetPreview';
+import type { AvatarManager } from '@anime-vrm/engine/avatar/AvatarManager';
+import type { MorphTargetPreview } from '@anime-vrm/engine/avatar/MorphTargetPreview';
 import { t } from '../../i18n';
 
 /** A disposable panel: weights belong to the avatar and survive panel/language rebuilds. */

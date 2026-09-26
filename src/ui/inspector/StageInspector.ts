@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { t } from '../../i18n';
-import { WindController, WIND_PRESETS } from '../../wind/WindController';
-import { DEFAULT_RAIN_CONFIG } from '../../effects/rain';
-import { DEFAULT_CONFIG } from '../../Config';
-import { resolveAssetUrl } from '../../utils/path';
+import { WindController, WIND_PRESETS } from '@anime-vrm/engine/wind/WindController';
+import { DEFAULT_RAIN_CONFIG } from '@anime-vrm/engine/effects/rain/index';
+import { DEFAULT_CONFIG } from '@anime-vrm/engine/Config';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { showToast } from '../components/Toast';
 import { InspectorContext } from './InspectorManager';
 

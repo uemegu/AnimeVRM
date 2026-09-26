@@ -1,4 +1,4 @@
-import { exportConfigJSON, cloneConfig, DEFAULT_CONFIG, deepAssign, AvatarConfig } from '../../Config';
+import { exportConfigJSON, cloneConfig, DEFAULT_CONFIG, deepAssign, AvatarConfig } from '@anime-vrm/engine/Config';
 import { t } from '../../i18n';
 import { showToast } from './Toast';
 

@@ -5,7 +5,7 @@ import { VRMLoaderPlugin, VRMUtils, type VRM, type VRMHumanBoneName } from '@pix
 import { makeContactRig } from './rig';
 import { validateAvatarContactProfile } from './validate';
 import type { Anchor, AvatarContactProfile, HandFrame, Side } from './types';
-import { resolveAssetUrl } from '../../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 type TargetId = 'leftCheek' | 'rightCheek' | 'mouth' | 'chin' | 'prayerCenter' | 'leftPalm' | 'rightPalm';
 const anchorIds: TargetId[] = ['leftCheek', 'rightCheek', 'mouth', 'chin', 'prayerCenter'];

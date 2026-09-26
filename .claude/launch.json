@@ -8,6 +8,18 @@
       "port": 5174
     },
     {
+      "name": "app-verify",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "app", "run", "dev", "--", "--port", "5184", "--strictPort"],
+      "port": 5184
+    },
+    {
+      "name": "root-verify",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "5183", "--strictPort"],
+      "port": 5183
+    },
+    {
       "name": "root",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--", "--port", "5173", "--strictPort"],

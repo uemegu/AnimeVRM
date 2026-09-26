@@ -1,7 +1,7 @@
 import type { ScenarioPackage, ScenarioScene, ScenarioSceneAvatarConfig } from './types';
-import { AVATAR_POSITION, LIBRARY_SHOTS } from '../scene/painted-library/layout';
-import { resolveAssetUrl } from '../utils/path';
-import type { ScenePresetId } from '../presets/ScenePresets';
+import { AVATAR_POSITION, LIBRARY_SHOTS } from '@anime-vrm/engine/scene/painted-library/layout';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import type { ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
 
 // Shion sits across the reading table from the camera (the player's seat). The
 // chin-rest clip has no seat, so its legs are replaced (seated) and the root is

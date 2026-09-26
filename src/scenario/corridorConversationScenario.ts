@@ -1,5 +1,5 @@
 import { ScenarioPackage } from './types';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 // Both stand in the classroom's center aisle (desks start at |x| ≈ 0.5), facing each
 // other across it but opened toward the room, so their faces stay visible; the head

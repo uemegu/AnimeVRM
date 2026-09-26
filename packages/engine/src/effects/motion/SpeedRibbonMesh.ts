@@ -72,8 +72,6 @@ export class SpeedRibbonMesh {
   private _viewVec = new THREE.Vector3();
   private _sideVec = new THREE.Vector3();
   private _pointP = new THREE.Vector3();
-  private _pointPrev = new THREE.Vector3();
-  private _pointNext = new THREE.Vector3();
   private _interpolatedPos = new THREE.Vector3();
   private _strandOffset = new THREE.Vector3();
   private _mainColor = new THREE.Color();

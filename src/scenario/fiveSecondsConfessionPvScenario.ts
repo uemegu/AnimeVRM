@@ -1,5 +1,5 @@
 import { ScenarioPackage } from './types';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /**
  * PV「5秒の告白」シナリオパッケージ

@@ -4,7 +4,6 @@ import { LimbProxyGeometry } from './LimbProxyGeometry';
 
 const BLUR_SUBDIVISIONS = 8;
 const TOTAL_VERTS = (BLUR_SUBDIVISIONS + 1) * 2;
-const TOTAL_INDICES = BLUR_SUBDIVISIONS * 6;
 
 const MASK_VERTEX_SHADER = /* glsl */ `
   void main() {

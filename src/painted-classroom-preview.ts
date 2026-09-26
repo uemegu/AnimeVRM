@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { VRM, VRMLoaderPlugin, VRMUtils } from '@pixiv/three-vrm';
-import { loadPaintedClassroom, disposePaintedClassroom, PAINTED_CLASSROOM_SHOTS, AVATAR_POSITION, SKY_ONLY_BACKGROUND } from './scene/painted-classroom/PaintedClassroom';
-import { SkyBackground } from './scene/SkyBackground';
-import { resolveAssetUrl } from './utils/path';
+import { loadPaintedClassroom, disposePaintedClassroom, PAINTED_CLASSROOM_SHOTS, AVATAR_POSITION, SKY_ONLY_BACKGROUND } from '@anime-vrm/engine/scene/painted-classroom/PaintedClassroom';
+import { SkyBackground } from '@anime-vrm/engine/scene/SkyBackground';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const canvas = document.querySelector<HTMLCanvasElement>('canvas')!;
 const status = document.querySelector<HTMLElement>('#status')!;

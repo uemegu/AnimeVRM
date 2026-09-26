@@ -1,6 +1,6 @@
-import { ScenePresetData, ScenePresetId } from '../presets/ScenePresets';
-import { EffectPresetName } from '../effects/text/types';
-import { CameraPreset, CameraStartAngle } from '../animation/types';
+import { ScenePresetData, ScenePresetId } from '@anime-vrm/engine/presets/ScenePresets';
+import { EffectPresetName } from '@anime-vrm/engine/effects/text/types';
+import { CameraPreset, CameraStartAngle } from '@anime-vrm/engine/animation/types';
 
 export interface CharacterMasterItem {
   id: string;

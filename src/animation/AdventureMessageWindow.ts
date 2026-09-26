@@ -1,6 +1,6 @@
 import { ScenarioChoice } from '../scenario/types';
 import { t } from '../i18n';
-import { resolveAssetUrl } from '../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export interface AdventureMessageWindowOptions {
   container?: HTMLElement | null;
