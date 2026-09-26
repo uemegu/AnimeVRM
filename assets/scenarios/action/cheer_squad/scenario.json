@@ -197,6 +197,7 @@
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……こいつら。ありがとな）"
     }
   ]

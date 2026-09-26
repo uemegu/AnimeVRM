@@ -75,6 +75,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "よし、一緒に探そう。"
     },
     {
@@ -105,6 +106,7 @@
     {
       "id": "s7",
       "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
       "text": "……図書室で、何をしているの？",
       "voiceUrl": "v_s7_ae3c0d7c.mp3"
     },
@@ -167,6 +169,7 @@
     {
       "id": "s13",
       "speaker": "白石先生",
+      "speakerCharacterId": "teacher",
       "text": "……気のせいかしら。",
       "voiceUrl": "v_s13_050e954d.mp3"
     },
@@ -236,6 +239,7 @@
     {
       "id": "s19",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "コ、コンタクトを落としまして！"
     },
     {
@@ -281,6 +285,7 @@
     {
       "id": "s24",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（正直者が馬鹿を見るとは、このことか……）"
     },
     {

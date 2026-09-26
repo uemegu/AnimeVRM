@@ -71,6 +71,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "すごい……お店のみたいだ。"
     },
     {
@@ -95,6 +96,7 @@
     {
       "id": "s7",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ひ、膝枕……！？"
     },
     {
@@ -179,6 +181,7 @@
     {
       "id": "s14",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ぶっっ！？ あ、あれはテンパってて――"
     },
     {

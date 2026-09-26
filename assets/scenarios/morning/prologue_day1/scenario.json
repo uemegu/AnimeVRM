@@ -26,6 +26,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……今日から、アオイと同じ学校か。"
     },
     {
@@ -39,6 +40,7 @@
     {
       "id": "s6",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "『初日は一緒に行こうね』……だったよな。"
     },
     {
@@ -64,6 +66,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "お、おはよう、アオイ。……待たせた？"
     },
     {
@@ -93,6 +96,7 @@
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……アオイの方こそ。息を呑むほど綺麗になってて、正直まともに顔が見られない）"
     },
     {
@@ -106,6 +110,7 @@
     {
       "id": "s15",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（違う、これは再会の感動による視線の揺らぎだ。断じてやましい気持ちでは……）"
     },
     {
@@ -123,6 +128,7 @@
     {
       "id": "s17",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "な、なんでもない！ 行こう、遅刻する！"
     },
     {
@@ -142,6 +148,7 @@
     {
       "id": "s19",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（こんなに可愛い幼馴染が隣にいて……でも俺なんか、昔の友達止まりだよな……）"
     },
     {
@@ -173,6 +180,7 @@
     {
       "id": "s22",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "あ、ああ。そうだな。"
     },
     {
@@ -204,6 +212,7 @@
     {
       "id": "s25",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（俺も……アオイと特別な関係になれますように。……いや、俺なんかじゃ釣り合わないか）"
     },
     {
@@ -213,6 +222,7 @@
     {
       "id": "s27",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "――っ！？ な、なんだ、この光……！？",
       "flashEffect": "white",
       "seUrl": "/se/piano_note.mp3"
@@ -246,6 +256,7 @@
     {
       "id": "s31",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "だ、誰だあんた！？ ここはどこなんだ！？"
     },
     {
@@ -283,6 +294,7 @@
     {
       "id": "s35",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ひ、人の心を勝手に盗み聞きするなよ！"
     },
     {
@@ -316,6 +328,7 @@
     {
       "id": "s39",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ピー音鳴ったぞ今！？ ◯すって言ったのか！？ 女神なのに！？"
     },
     {
@@ -357,6 +370,7 @@
     {
       "id": "s43",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "うわああああっ！？",
       "flashEffect": "white",
       "background": "shrine",
@@ -382,6 +396,7 @@
     {
       "id": "s45",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ハァ……ハァ……ア、アオイ……？ ここは……神社……？"
     },
     {
@@ -399,11 +414,13 @@
     {
       "id": "s47",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（さっきのは幻覚なんかじゃない。あの殺気は……本気だった）"
     },
     {
       "id": "s48",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（21日以内に、アオイとちゃんと結ばれなきゃ……俺は消される！？）"
     },
     {

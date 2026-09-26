@@ -21,6 +21,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（ベンチに座って、女神の期限について考える。……考えても仕方ない。動くしかない）"
     }
   ]

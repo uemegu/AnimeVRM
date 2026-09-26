@@ -35,7 +35,6 @@ function voicePath(category: string, id: string, voiceUrl: string | undefined): 
 export function characterUsage(characterId: string, book: CharacterBook, scenarios: ScenarioRecord[]): CharacterScenarioUsage[] {
   const character = book.characters.find((c) => c.id === characterId);
   if (!character) return [];
-  const names = new Set([character.name.ja, ...character.speakerNames]);
   const result: CharacterScenarioUsage[] = [];
 
   for (const { category, id, data } of scenarios) {
@@ -58,9 +57,7 @@ export function characterUsage(characterId: string, book: CharacterBook, scenari
     } else {
       for (const scene of (data as ScenarioPackage).scenes) {
         const onStage = Object.entries(scene.avatars ?? {}).some(([key, avatar]) => (avatar.characterId ?? key) === characterId);
-        const speaks = scene.speakerCharacterId
-          ? scene.speakerCharacterId === characterId
-          : names.has(textOf(scene.speaker));
+        const speaks = scene.speakerCharacterId === characterId;
         if (onStage || speaks) usage.appearances++;
         if (speaks) usage.lines.push({ lineId: scene.id, text: textOf(scene.text), voiceUrl: voicePath(category, id, scene.voiceUrl) });
       }

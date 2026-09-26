@@ -118,18 +118,11 @@ export function outfitModelUrl(character: CharacterMaster | undefined, phase: Da
 }
 
 /**
- * 画面に出すキャラ。舞台に誰もいなければ話者を中央に出す（旧形式のシナリオ互換）。
+ * 画面に出すキャラ（avatars で登場させたキャラだけ。話者でも登場していなければ声だけ）。
  * 服装はフェーズで決まる（outfitModelUrl）。シーンの modelUrl 指定が優先
  */
-export function resolveCast(
-  stage: StageState,
-  scene: ScenarioResolvedScene | null,
-  phase: DayPhase
-): StageCastMember[] {
+export function resolveCast(stage: StageState, phase: DayPhase): StageCastMember[] {
   const entries = Object.entries(stage.cast);
-  if (entries.length === 0 && scene?.speakerCharacterId && CHARACTERS[scene.speakerCharacterId]) {
-    entries.push([scene.speakerCharacterId, { position: 'center' }]);
-  }
 
   const members: StageCastMember[] = [];
   for (const [key, config] of entries) {

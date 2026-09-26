@@ -100,6 +100,7 @@
     {
       "id": "win",
       "speaker": "商店街のおじさん",
+      "speakerCharacterId": "shopkeeper",
       "text": "大当たりーっ！ 遊園地のペアチケットだよ！",
       "voiceUrl": "v_win_7662de92.mp3"
     },

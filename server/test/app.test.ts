@@ -240,11 +240,11 @@ describe('キャラクター', () => {
     expect(usage.map((u: { id: string }) => u.id)).toEqual(['ending_good', 'aoi_call_d14']);
     const line = usage[0].lines.find((l: { lineId: string }) => l.lineId === 's1');
     expect(line.voiceUrl).toBe('/scenarios/ending/ending_good/v_s1_1bf07a6e.mp3');
-    // 話者名だけで書かれたセリフ（「女神の声」）も逆引きできる
+    // 画面に出ていない声だけのセリフも逆引きできる
     await putJson('/api/scenarios/special/voice_only', {
       id: 'voice_only',
       title: '声だけ',
-      scenes: [{ id: 's1', speaker: '女神の声', text: '聞こえますか', voiceUrl: 'v.mp3' }],
+      scenes: [{ id: 's1', speaker: '女神の声', speakerCharacterId: 'god', text: '聞こえますか', voiceUrl: 'v.mp3' }],
     });
     const god = await json(request('/api/characters/god/usage'));
     expect(god).toEqual([

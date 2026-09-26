@@ -64,12 +64,14 @@
     {
       "id": "s5",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "ターゲット確認！ 胸元に金糸のエンブレム……間違いない、お嬢様だ！",
       "voiceUrl": "v_s5_5bb4f772.mp3"
     },
     {
       "id": "s6",
       "speaker": "黒服たち",
+      "speakerCharacterId": "sp_member",
       "text": "確保せよ！ 保護ネット、展開用意！",
       "voiceUrl": "v_s6_99fbe4ba.mp3"
     },
@@ -89,17 +91,20 @@
     {
       "id": "s8",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "問答無用！ お嬢様、旦那様の命により、ご同行願います！",
       "voiceUrl": "v_s8_8bcb9924.mp3"
     },
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（ヤバい……！ テレビで見る国際シンジケートか何かの誘拐部隊だ！！）"
     },
     {
       "id": "s10",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（アオイが連れて行かれたら……二度と会えなくなるかもしれない！！）"
     },
     {
@@ -147,6 +152,7 @@
     {
       "id": "hand",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アオイ、俺の手を掴め！ 逃げるぞおおおおっ！！"
     },
     {
@@ -157,6 +163,7 @@
     {
       "id": "carry",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アオイ、ちょっとごめん！！"
     },
     {
@@ -198,6 +205,7 @@
     {
       "id": "s20",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "大丈夫だ。俺の後ろに隠れてろ。"
     },
     {
@@ -208,12 +216,14 @@
     {
       "id": "s22",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "少年、そこまでだ。大人しくお嬢様を渡してもらおう。",
       "voiceUrl": "v_s22_83fcb353.mp3"
     },
     {
       "id": "s23",
       "speaker": "黒服A",
+      "speakerCharacterId": "sp_member",
       "text": "保護ネット、発射！",
       "voiceUrl": "v_s23_ec50a45d.mp3"
     },
@@ -224,11 +234,13 @@
     {
       "id": "s25",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（見える……！ アオイの足首の角度、スカートの翻り、ネットの落下軌道……全部がスローモーションに見える……！）"
     },
     {
       "id": "s26",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（この2週間、アオイを観察し続けて鍛え上げた、この変態的動体視力が……！）"
     },
     {
@@ -254,12 +266,14 @@
     {
       "id": "s30",
       "speaker": "黒服B",
+      "speakerCharacterId": "sp_member",
       "text": "ぐわっ！ マ、マットが柔らかすぎて起き上がれん……！",
       "voiceUrl": "v_s30_a03605d8.mp3"
     },
     {
       "id": "s31",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "ええい、ただの高校生がなぜこれほどの身のこなしを……！ 少年、貴様は何者だ！？",
       "voiceUrl": "v_s31_c5227b7b.mp3"
     },
@@ -345,22 +359,26 @@
     {
       "id": "hero",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "俺は……アオイの幼馴染だ！！",
       "camera": "close"
     },
     {
       "id": "s37",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アオイの笑顔も！ 優しい声も！ 教科書を覗き込む時の真剣な横顔も！ 汗を拭う時の首筋も！"
     },
     {
       "id": "s38",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "靴下の境界線も！ 膝裏の聖域も！ 全部、俺が一生守るって決めたんだよおおおおっ！！"
     },
     {
       "id": "s39",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "お前らなんかに、アオイの髪の毛一本触れさせてたまるかああああっっ！！"
     },
     {
@@ -388,6 +406,7 @@
     {
       "id": "brave",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "アオイに……手を出すなああああっ！！",
       "camera": "close"
     },
@@ -415,11 +434,13 @@
     {
       "id": "s47",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "命だけは！ 命だけはお助けを！！ あとアオイも！！"
     },
     {
       "id": "s48",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "……いや、君の命は別に取らないが。",
       "voiceUrl": "v_s48_2a68fde4.mp3"
     },
@@ -438,6 +459,7 @@
     {
       "id": "reveal",
       "speaker": "エミリの声",
+      "speakerCharacterId": "emili",
       "text": "ストーーーーーーーップッッッ！！！！",
       "bgm": "silence",
       "voiceUrl": "v_reveal_f709886b.mp3"
@@ -469,18 +491,21 @@
     {
       "id": "s53",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "な……なんですと！？ エミリお嬢様！？",
       "voiceUrl": "v_s53_0b0d969d.mp3"
     },
     {
       "id": "s54",
       "speaker": "黒服たち",
+      "speakerCharacterId": "sp_member",
       "text": "ええっ！？ 本物のお嬢様はあちら！？",
       "voiceUrl": "v_s54_b83ad308.mp3"
     },
     {
       "id": "s55",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……へ？ パパの……SP部隊……？"
     },
     {
@@ -524,12 +549,14 @@
     {
       "id": "s59",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "……大変な無礼をいたしました。しかし少年、怪我はないか。",
       "voiceUrl": "v_s59_25521315.mp3"
     },
     {
       "id": "s60",
       "speaker": "黒服リーダー",
+      "speakerCharacterId": "sp_leader",
       "text": "マットと跳び箱だけで我々をいなし、身を挺して彼女を守り抜くとは……実に見事だ。感服した！",
       "voiceUrl": "v_s60_3aeac54f.mp3"
     },
@@ -540,6 +567,7 @@
     {
       "id": "s62",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……なんだよそれええええっ！？ 俺、ガチで犯罪組織かと思って、死ぬ気で走ったんだぞおおおっ！？"
     },
     {
@@ -566,6 +594,7 @@
     {
       "id": "s65",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ごめんな、アオイ。俺が勝手に勘違いして、騒ぎ立てて……。"
     },
     {

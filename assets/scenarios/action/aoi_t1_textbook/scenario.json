@@ -67,6 +67,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "お、おう。もちろん。"
     },
     {
@@ -128,6 +129,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（アオイの髪がいい匂いすぎて、自分が何を説明しているのかわからない）"
     },
     {
@@ -170,6 +172,7 @@
     {
       "id": "s13",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "俺はもう予習済みだから！（してない）"
     },
     {
@@ -209,6 +212,7 @@
     {
       "id": "s18",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "はっ！？ い、いや、光の反射角を計算してて！"
     },
     {

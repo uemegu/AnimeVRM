@@ -52,6 +52,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……生きてる。◯されなかった……？）"
     },
     {
@@ -73,6 +74,7 @@
     {
       "id": "s7",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "ごきげんよう、アフロの人の子。",
       "flashEffect": "white",
       "voiceUrl": "v_s7_c6dc5b43.mp3"
@@ -80,6 +82,7 @@
     {
       "id": "s8",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "め、女神……！"
     },
     {
@@ -98,18 +101,21 @@
     {
       "id": "s10",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "◯すのは、やめておきました。あなたの間抜け面、見ていて退屈しませんから。",
       "voiceUrl": "v_s10_364f5438.mp3"
     },
     {
       "id": "s11",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "その代わり……もう一度、Day 1からやり直しです。今度こそ、積み上げてきなさい。",
       "voiceUrl": "v_s11_9fe298fc.mp3"
     },
     {
       "id": "s12",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "そんなあああああああ！！"
     },
     {

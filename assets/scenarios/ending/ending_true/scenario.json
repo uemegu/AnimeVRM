@@ -52,12 +52,14 @@
     {
       "id": "s4",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "まったく……世話の焼ける。",
       "voiceUrl": "v_s4_ec80effe.mp3"
     },
     {
       "id": "s5",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "21日間、積み上げたものはすべて本物でした。……末永く、お幸せに。",
       "voiceUrl": "v_s5_a63078b0.mp3"
     },
@@ -169,6 +171,7 @@
     {
       "id": "s13",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ぶっっっ！？"
     },
     {

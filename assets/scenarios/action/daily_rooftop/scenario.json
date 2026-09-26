@@ -23,17 +23,20 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（空が高い……。女神もこの空のどこかから見てるのか？）"
     },
     {
       "id": "s3",
       "speaker": "女神の声",
+      "speakerCharacterId": "god",
       "text": "……見てますよ。サボってないで、さっさと行動しなさい。",
       "voiceUrl": "v_s3_690ae5fd.mp3"
     },
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "うわっ！？ ……幻聴、だよな……？"
     }
   ]

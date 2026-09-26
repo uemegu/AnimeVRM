@@ -36,6 +36,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "シオン、占いもできるのか。"
     },
     {
@@ -66,6 +67,7 @@
     {
       "id": "s6",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "ずいぶん具体的だな！？"
     }
   ]

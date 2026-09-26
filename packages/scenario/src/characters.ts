@@ -37,8 +37,6 @@ export const Character = z.strictObject({
   themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   models: z.array(CharacterModel),
   voice: CharacterVoice.optional(),
-  /** ID を付けずに話者名だけで書かれたセリフを、このキャラとみなす名前（「女神の声」など） */
-  speakerNames: z.array(z.string()),
   /** キャラ設定（自由記述） */
   profile: z.string(),
 });
@@ -57,17 +55,11 @@ export const CharacterBook = z
   })
   .superRefine((book, ctx) => {
     const ids = new Set<string>();
-    const names = new Map<string, string>();
     book.characters.forEach((c, i) => {
       if (ids.has(c.id)) ctx.addIssue({ code: 'custom', path: ['characters', i, 'id'], message: `id が重複しています: ${c.id}` });
       ids.add(c.id);
       if (c.models.length > 0 && !c.models.some((m) => m.key === 'default')) {
         ctx.addIssue({ code: 'custom', path: ['characters', i, 'models'], message: 'key が default のモデルが必要です' });
-      }
-      for (const name of c.speakerNames) {
-        const owner = names.get(name);
-        if (owner) ctx.addIssue({ code: 'custom', path: ['characters', i, 'speakerNames'], message: `「${name}」は ${owner} と重複しています` });
-        names.set(name, c.id);
       }
     });
   });

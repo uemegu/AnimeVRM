@@ -53,6 +53,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（……噂の足が、また速すぎる）"
     }
   ]

@@ -39,6 +39,7 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……俺です。"
     },
     {
@@ -56,6 +57,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "はい……。"
     },
     {
@@ -98,6 +100,7 @@
     {
       "id": "s9",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "先生……？"
     },
     {

@@ -11,8 +11,6 @@ export interface VoiceProfiles {
   moods: Record<string, string>;
   whisperCaption: string;
   shoutCaption: string;
-  /** ID を付けずに書かれた話者名 → キャラ ID */
-  speakerNames: Record<string, string>;
 }
 
 export async function loadCharacterBook(assetsDir: string): Promise<CharacterBook> {
@@ -25,7 +23,6 @@ export function voiceProfilesOf(book: CharacterBook): VoiceProfiles {
     moods: book.voiceMoods,
     whisperCaption: book.whisperCaption,
     shoutCaption: book.shoutCaption,
-    speakerNames: Object.fromEntries(book.characters.flatMap((c) => c.speakerNames.map((n) => [n, c.id]))),
   };
 }
 
@@ -63,7 +60,7 @@ export function findVoiceLine(
     }
     if (scene.id !== lineId) continue;
     const sid = scene.speakerCharacterId;
-    const speaker = sid && profiles.speakers[sid] ? sid : (profiles.speakerNames[textOf(scene.speaker)] ?? null);
+    const speaker = sid && profiles.speakers[sid] ? sid : null;
     return { lineId, text: textOf(scene.text), speaker, expression: expressions[sid ?? ''] ?? 'neutral' };
   }
   return null;

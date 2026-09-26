@@ -234,6 +234,7 @@
     {
       "id": "s17",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "雨！ 雨を見てた！ 雨粒の、美しさを！"
     },
     {

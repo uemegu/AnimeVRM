@@ -216,7 +216,7 @@ export const App: React.FC = () => {
     selectedLocationId,
   });
   const activeLocationName = getLocationName(activeLocationId, lang);
-  const cast = useMemo(() => resolveCast(stage, currentScene, gameState.phase), [stage, currentScene, gameState.phase]);
+  const cast = useMemo(() => resolveCast(stage, gameState.phase), [stage, gameState.phase]);
   const cameraShot = resolveCameraShot(currentScene, cast);
   const scrolling = useMemo(() => resolveScrollingBackground(stage, activeLocationId), [stage, activeLocationId]);
 

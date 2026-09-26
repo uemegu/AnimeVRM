@@ -63,6 +63,7 @@
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（落ち着け。ここは紳士であるべき場面だ。脳内の変態を今すぐ鎮めろ）"
     },
     {
@@ -146,6 +147,7 @@
     {
       "id": "s11",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（顔に出てたのか……変なこと考えてるの……）",
       "nextSceneId": "end"
     },
@@ -186,6 +188,7 @@
     {
       "id": "s16",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "い、いや、陸上競技における発汗の科学を……"
     },
     {

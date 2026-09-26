@@ -36,11 +36,13 @@
     {
       "id": "s3",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（女神の宣告から一夜。夢であってくれと願ったが、枕元に「残り20日」と書いた紙が置いてあった）"
     },
     {
       "id": "s4",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（あの女神、アナログな脅し方もするのか……）"
     },
     {

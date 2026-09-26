@@ -68,22 +68,23 @@ describe('sceneView', () => {
 
   it('登場キャラは位置とモデルを解決し、休日は私服・朝は通学カバン付き、誰もいなければ話者を出すこと', () => {
     const stage = { cast: { aoi: { position: 'left' as const, expression: 'happy' }, emili: { position: 'right' as const } } };
-    const cast = resolveCast(stage, null, 'lunch_action');
+    const cast = resolveCast(stage, 'lunch_action');
     expect(cast.map((m) => [m.id, m.position[0], m.modelUrl])).toEqual([
       ['aoi', -0.45, '/models/aoi/aoi-school.vrm'],
       ['emili', 0.45, '/models/emili/emili.vrm'],
     ]);
-    expect(resolveCast(stage, null, 'holiday_action')[0].modelUrl).toBe('/models/aoi/aoi-private.vrm');
+    expect(resolveCast(stage, 'holiday_action')[0].modelUrl).toBe('/models/aoi/aoi-private.vrm');
     // 朝の登校中は通学カバンを背負ったモデル
-    expect(resolveCast(stage, null, 'morning').map((m) => m.modelUrl)).toEqual([
+    expect(resolveCast(stage, 'morning').map((m) => m.modelUrl)).toEqual([
       '/models/aoi/aoi-school-with-bag.vrm',
       '/models/emili/emili-school-with-bag.vrm',
     ]);
-    expect(resolveCast(EMPTY_STAGE, scene({ speakerCharacterId: 'shion' }), 'morning').map((m) => m.id)).toEqual(['shion']);
+    // 話者でも avatars で登場させていなければ出さない（声だけのセリフ）
+    expect(resolveCast(EMPTY_STAGE, 'morning')).toEqual([]);
   });
 
   it('カメラは1人なら話者、複数人の会話は話者中心、選択肢は全体になること', () => {
-    const two = resolveCast({ cast: { aoi: { position: 'left' }, emili: { position: 'right' } } }, null, 'lunch_action');
+    const two = resolveCast({ cast: { aoi: { position: 'left' }, emili: { position: 'right' } } }, 'lunch_action');
     expect(resolveCameraShot(scene(), two.slice(0, 1))).toBe('speaker');
     expect(resolveCameraShot(scene({ speakerCharacterId: 'aoi' }), two)).toBe('medium');
     expect(resolveCameraShot(scene({ choices: [] as never }), two)).toBe('wide');

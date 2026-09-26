@@ -32,6 +32,7 @@
     {
       "id": "s2",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……隣に住んでるんだから、自然とそうなるだろ。"
     },
     {
@@ -62,6 +63,7 @@
     {
       "id": "s5",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "……一応聞くけど、その格言の出典は？"
     },
     {
@@ -79,6 +81,7 @@
     {
       "id": "s7",
       "speaker": "タカシ",
+      "speakerCharacterId": "player",
       "text": "（今の俺には、そんな藁にもすがりたい……）"
     }
   ]
