@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import type { z } from 'zod';
-import type { FieldMeta } from '@anime-vrm/scenario';
+import { BUILTIN_ENVIRONMENTS, type FieldMeta } from '@anime-vrm/scenario';
 import { useI18n } from '../i18n';
 import { Icon } from './Icon';
 import './SchemaForm.css';
@@ -17,6 +17,8 @@ interface Context {
   images: string[];
   /** この深さまでのグループを最初から開いておく */
   openDepth: number;
+  /** 3D背景に使える glb（assets/ 基準の URL） */
+  environments: string[];
 }
 
 function kindOf(schema: AnySchema): string {
@@ -56,6 +58,7 @@ export function defaultValue(schema: AnySchema): unknown {
     case 'enum':
       return (inner as unknown as z.ZodEnum).options[0];
     default:
+      if (meta.kind === 'environment') return Object.keys(BUILTIN_ENVIRONMENTS)[0];
       return meta.kind === 'color' ? '#ffffff' : '';
   }
 }
@@ -65,6 +68,7 @@ export function SchemaForm({
   value,
   onChange,
   images,
+  environments = [],
   hidden = ['id'],
   openDepth = 0,
 }: {
@@ -72,6 +76,7 @@ export function SchemaForm({
   value: Record<string, unknown>;
   onChange: (value: Record<string, unknown>) => void;
   images: string[];
+  environments?: string[];
   /** 表示しない項目（ID など、ここでは変えないもの） */
   hidden?: string[];
   /** この深さまでのグループを最初から開いておく（0 は最上位だけ） */
@@ -79,7 +84,7 @@ export function SchemaForm({
 }) {
   return (
     <div className="schema-form">
-      <ObjectFields schema={unwrap(schema)} value={value} onChange={onChange} ctx={{ images, openDepth }} depth={0} skip={hidden} />
+      <ObjectFields schema={unwrap(schema)} value={value} onChange={onChange} ctx={{ images, openDepth, environments }} depth={0} skip={hidden} />
     </div>
   );
 }
@@ -185,10 +190,37 @@ function Field({ schema, value, onChange, ctx, depth }: { schema: AnySchema; val
         <select className="select" value={value as string} onChange={(e) => onChange(e.target.value)}>
           {options.map((o) => (
             <option key={o} value={o}>
-              {o}
+              {meta.options?.[o]?.[language] ?? o}
             </option>
           ))}
         </select>
+      </Row>
+    );
+  }
+
+  // 座標などの数値の組（[x, y, z]）
+  if (kind === 'tuple') {
+    const values = value as number[];
+    const { step = 0.01 } = meta;
+    return (
+      <Row label={label} extra={removeButton}>
+        <div className="schema-tuple">
+          {values.map((v, i) => (
+            <label key={i}>
+              <span>{'XYZW'[i]}</span>
+              <input
+                className="input schema-number"
+                type="number"
+                step={step}
+                value={v}
+                onChange={(e) => {
+                  if (e.target.value === '' || !Number.isFinite(Number(e.target.value))) return;
+                  onChange(values.map((old, j) => (j === i ? Number(e.target.value) : old)));
+                }}
+              />
+            </label>
+          ))}
+        </div>
       </Row>
     );
   }
@@ -216,6 +248,26 @@ function Field({ schema, value, onChange, ctx, depth }: { schema: AnySchema; val
             ))}
           </select>
         </div>
+      </Row>
+    );
+  }
+  if (meta.kind === 'environment') {
+    const builtins = Object.entries(BUILTIN_ENVIRONMENTS);
+    return (
+      <Row label={label} extra={removeButton}>
+        <select className="select" value={text} onChange={(e) => onChange(e.target.value)}>
+          {!text && <option value="" />}
+          {builtins.map(([key, name]) => (
+            <option key={key} value={key}>
+              {name[language]}
+            </option>
+          ))}
+          {ctx.environments.map((url) => (
+            <option key={url} value={url}>
+              {url.replace(/^\/models\//, '')}
+            </option>
+          ))}
+        </select>
       </Row>
     );
   }

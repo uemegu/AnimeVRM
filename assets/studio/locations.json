@@ -250,6 +250,46 @@
           "url": "/textures/aquarium_far.avif"
         }
       }
+    },
+    "painted_classroom": {
+      "id": "painted_classroom",
+      "name": "教室（簡易3D）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-classroom",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.9
+        },
+        "rotationY": 0,
+        "scale": 1
+      }
+    },
+    "painted_library": {
+      "id": "painted_library",
+      "name": "図書室（簡易3D）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-library",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.8
+        },
+        "rotationY": 0,
+        "scale": 1
+      }
     }
   }
 }

@@ -14,7 +14,9 @@ import { Icon } from '../../components/Icon';
 import { SaveBar, saveErrorStatus, type SaveStatus } from '../../components/SaveBar';
 import { SchemaForm, defaultValue } from '../../components/SchemaForm';
 import { useI18n } from '../../i18n';
+import { DirectorView } from '../../stage/DirectorView';
 import { StageCanvas } from '../../stage/StageCanvas';
+import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import './scenes.css';
 
 type Tab = 'time-of-day' | 'locations';
@@ -39,6 +41,7 @@ export function ScenesView() {
   const [locations, setLocations] = useState<LocationFile | null>(null);
   const [book, setBook] = useState<CharacterBook | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const [environments, setEnvironments] = useState<string[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [status, setStatus] = useState<SaveStatus>(null);
   const [newId, setNewId] = useState<string | null>(null);
@@ -48,6 +51,8 @@ export function ScenesView() {
   const [previewLocation, setPreviewLocation] = useState('school_gate');
   const [previewTime, setPreviewTime] = useState<TimeOfDayId>('day');
   const [shot, setShot] = useState<CameraShot>('speaker');
+  const [castCount, setCastCount] = useState<1 | 2 | 3>(1);
+  const [manager, setManager] = useState<StageManager | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -55,13 +60,15 @@ export function ScenesView() {
       api.studioData<LocationFile>('locations'),
       api.characters(),
       api.assets('textures'),
+      api.assets('environments'),
     ])
-      .then(([timeFile, locationFile, characters, textures]) => {
+      .then(([timeFile, locationFile, characters, textures, environmentList]) => {
         setSaved({ time: timeFile, locations: locationFile });
         setTime(structuredClone(timeFile));
         setLocations(structuredClone(locationFile));
         setBook(characters);
         setImages(textures.map((a) => a.url));
+        setEnvironments(environmentList.map((a) => a.url));
       })
       .catch(() => setLoadError(true));
   }, []);
@@ -73,15 +80,23 @@ export function ScenesView() {
   const dirty =
     !!saved && (JSON.stringify(saved.time) !== JSON.stringify(time) || JSON.stringify(saved.locations) !== JSON.stringify(locations));
 
-  const character = book?.characters.find((c) => c.id === previewCharacter);
-  const model = character?.models.find((m) => m.key === 'default');
-  const cast = useMemo<StageCastMember[]>(
-    () =>
-      model
-        ? [{ id: previewCharacter, modelUrl: model.url, position: [0, 0, 0], rotationY: 0, expression: 'neutral', expressionWeight: 1, motionLoop: true }]
-        : [],
-    [previewCharacter, model]
-  );
+  // プレビューに立たせるキャラ（選んだキャラと、ほかのヒロイン）
+  const cast = useMemo<StageCastMember[]>(() => {
+    const withModel = (book?.characters ?? []).filter((c) => c.models.some((m) => m.key === 'default'));
+    const first = withModel.find((c) => c.id === previewCharacter);
+    const others = withModel.filter((c) => c.id !== previewCharacter && c.role === 'heroine');
+    const members = [first, ...others].filter((c) => c !== undefined).slice(0, castCount);
+    const slots: Array<Array<'left' | 'center' | 'right'>> = [['center'], ['left', 'right'], ['left', 'center', 'right']];
+    return members.map((c, i) => ({
+      id: c.id,
+      modelUrl: c.models.find((m) => m.key === 'default')!.url,
+      slot: slots[members.length - 1][i],
+      expression: 'neutral',
+      expressionWeight: 1,
+      motionLoop: true,
+    }));
+  }, [book, previewCharacter, castCount]);
+  const colors = useMemo(() => Object.fromEntries((book?.characters ?? []).map((c) => [c.id, c.themeColor])), [book]);
 
   if (loadError) return <div className="scenes-message">{t.common.loadFailed}</div>;
   if (!time || !locations || !presets || !saved || !book) return null;
@@ -180,6 +195,7 @@ export function ScenesView() {
               value={editing as unknown as Record<string, unknown>}
               onChange={onChange}
               images={images}
+              environments={environments}
               openDepth={tab === 'locations' ? 2 : 0}
             />
           )}
@@ -223,6 +239,16 @@ export function ScenesView() {
               </label>
             )}
             <div className="field">
+              <span className="field-label">{t.scenes.castCount}</span>
+              <div className="segmented">
+                {([1, 2, 3] as const).map((n) => (
+                  <button key={n} type="button" className={n === castCount ? 'active' : ''} onClick={() => setCastCount(n)}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="field">
               <span className="field-label">{t.viewer.camera}</span>
               <div className="segmented">
                 {SHOTS.map((s) => (
@@ -234,8 +260,22 @@ export function ScenesView() {
             </div>
           </div>
           <div className="scenes-frame">
-            <StageCanvas presets={presets} timeOfDay={stageTime} locationId={stageLocation} cast={cast} cameraShot={shot} focusId={previewCharacter} />
+            <StageCanvas
+              presets={presets}
+              timeOfDay={stageTime}
+              locationId={stageLocation}
+              cast={cast}
+              cameraShot={shot}
+              focusId={previewCharacter}
+              onManager={setManager}
+            />
           </div>
+          {tab === 'locations' && (
+            <div className="scenes-director">
+              <span className="scenes-director-label">{t.scenes.director}</span>
+              <DirectorView manager={manager} location={locations.presets[selectedId]} colors={colors} />
+            </div>
+          )}
         </section>
       </div>
     </div>

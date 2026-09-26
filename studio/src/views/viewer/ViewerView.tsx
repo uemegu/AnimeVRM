@@ -56,8 +56,7 @@ export function ViewerView() {
             {
               id: characterId,
               modelUrl: model.url,
-              position: [0, 0, 0],
-              rotationY: 0,
+              slot: 'center',
               expression,
               expressionWeight: 1.0,
               motion,

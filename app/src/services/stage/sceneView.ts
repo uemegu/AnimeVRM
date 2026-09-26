@@ -37,8 +37,6 @@ export interface StageState {
 export type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 
-const SLOT_X: Record<string, number> = { left: -0.45, center: 0, right: 0.45 };
-
 const PHASE_TIME_OF_DAY: Record<DayPhase, TimeOfDayId> = {
   morning: 'morning',
   morning_action: 'day',
@@ -121,15 +119,12 @@ export function resolveCast(stage: StageState, phase: DayPhase): StageCastMember
     const modelUrl = config.modelUrl ?? outfitModelUrl(character, phase);
     if (!modelUrl) continue;
 
-    const position: [number, number, number] = Array.isArray(config.position)
-      ? config.position
-      : [SLOT_X[config.position ?? 'center'] ?? 0, 0, 0];
+    // 立ち位置の名前（left など）は、場所ごとの立ち位置の設定に合わせて描画側で座標にする
     members.push({
       id: key,
       modelUrl,
-      position,
-      // 横に立つ人物は少し内側を向く
-      rotationY: config.rotationY ?? -position[0] * 0.5,
+      ...(Array.isArray(config.position) ? { position: config.position } : { slot: config.position ?? 'center' }),
+      rotationY: config.rotationY,
       expression: config.expression ?? 'neutral',
       expressionWeight: config.expressionWeight ?? 1.0,
       motion: config.motion,

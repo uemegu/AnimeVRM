@@ -13,11 +13,19 @@ import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar } from './StageAvatar';
+import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
 import { HairShadowRenderer } from '../shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader } from '../postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
 import { setHairRingTint } from '../shader/HairRing';
-import type { CameraShot } from '@anime-vrm/scenario';
+import {
+  DEFAULT_BACKDROP,
+  DEFAULT_CAMERA_FOV,
+  DEFAULT_SHOT_RIGS,
+  DEFAULT_SLOT_POSITIONS,
+  type CameraShot,
+  type LocationStage,
+} from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
@@ -79,6 +87,12 @@ export class StageManager {
   private scrollingBackground: ScrollingBackground;
   /** 場所の遠景（流れる背景を止めたときに戻す） */
   private locationBackgroundTexture: THREE.Texture | null = null;
+  /** 3D空間に置く遠景（場所の backdrop.mode が world のとき） */
+  private backdropMesh!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+  /** 場所の3D背景（組み込みのセットや glb） */
+  private environment: { model: string; object: THREE.Object3D | null } | null = null;
+  /** 最後に指定された登場キャラ（場所が変わったら立ち位置を当て直す） */
+  private castMembers: StageCastMember[] = [];
   private sunEffect: SunEffect;
 
   // 多層背景
@@ -91,6 +105,8 @@ export class StageManager {
   /** 登場中のキャラ（表示順） */
   private castIds: string[] = [];
   private castPositions: Map<string, number> = new Map();
+  /** 登場中のキャラの奥行き（立ち位置の z） */
+  private castDepths: Map<string, number> = new Map();
   /** 登場中のキャラの頭の高さ（構図をキャラの背丈に合わせる） */
   private castHeadHeights: Map<string, number> = new Map();
   /** 口パクさせるキャラ */
@@ -255,6 +271,16 @@ export class StageManager {
     this.midgroundMesh.renderOrder = -1;
     this.scene.add(this.midgroundMesh);
 
+    // 3D空間に置く遠景（中景よりさらに奥）
+    this.backdropMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, fog: false, toneMapped: false })
+    );
+    this.backdropMesh.name = 'Backdrop';
+    this.backdropMesh.renderOrder = -2;
+    this.backdropMesh.visible = false;
+    this.scene.add(this.backdropMesh);
+
     // 近景 (renderOrder = 2: アバターの手前)
     const nearMat = new THREE.MeshBasicMaterial({
       transparent: true,
@@ -399,16 +425,21 @@ export class StageManager {
     // 1. 遠景画像 (SkyBackground の前面にアルファカット合成)
     if (locPreset.layers.background.url) {
       this.textureLoader.load(locPreset.layers.background.url, (texture) => {
-        if (this.isDisposed) return;
+        if (this.isDisposed || this.currentLocationId !== locationId) return;
         texture.colorSpace = THREE.SRGBColorSpace;
         this.locationBackgroundTexture = texture;
-        // 流れる背景を出している間は、固定の遠景を重ねない
-        if (!this.scrollingBackground.isVisible) this.skyBackground.setBackgroundTexture(texture);
+        this.applyBackdrop();
       });
     } else {
       this.locationBackgroundTexture = null;
-      this.skyBackground.setBackgroundTexture(null);
+      this.applyBackdrop();
     }
+
+    this.applyEnvironment();
+
+    // 立ち位置・カメラは場所ごとの設定に合わせる
+    this.applyCameraSettings();
+    this.applyCastLayout();
 
     // 2. 中景 (Midground: renderOrder = -1)
     if (this.midgroundMesh) {
@@ -455,6 +486,104 @@ export class StageManager {
         (this.neargroundMesh.material as THREE.MeshBasicMaterial).visible = false;
       }
     }
+  }
+
+  /** Studio の俯瞰表示用：今のカメラ（読み取りだけに使う） */
+  public get viewCamera(): THREE.PerspectiveCamera {
+    return this.camera;
+  }
+
+  /** Studio の俯瞰表示用：登場中のキャラの立ち位置・向き・頭の高さ */
+  public getCastLayout(): Array<{ id: string; position: [number, number, number]; rotationY: number; headHeight: number }> {
+    return this.castIds.flatMap((id) => {
+      const root = this.loadedAvatars.get(id)?.vrm?.scene;
+      if (!root) return [];
+      return [{ id, position: root.position.toArray() as [number, number, number], rotationY: root.rotation.y, headHeight: this.castHeadHeights.get(id) ?? 1.42 }];
+    });
+  }
+
+  /** 今の場所の配置とカメラの設定 */
+  private get locationStage(): LocationStage | undefined {
+    return this.presets.locations[this.currentLocationId]?.stage;
+  }
+
+  /** 遠景を画面に貼るか、3D空間に置くか（流れる背景を出している間はどちらも出さない） */
+  private applyBackdrop(): void {
+    const texture = this.locationBackgroundTexture;
+    const backdrop = { ...DEFAULT_BACKDROP, ...this.locationStage?.backdrop };
+    const inWorld = backdrop.mode === 'world' && texture !== null;
+    const scrolling = this.scrollingBackground.isVisible;
+    this.skyBackground.setBackgroundTexture(scrolling || inWorld ? null : texture);
+    this.backdropMesh.visible = inWorld && !scrolling;
+    if (inWorld) {
+      const image = texture.image as { width?: number; height?: number } | undefined;
+      const aspect = image?.width && image?.height ? image.width / image.height : 16 / 9;
+      this.backdropMesh.material.map = texture;
+      this.backdropMesh.material.needsUpdate = true;
+      this.backdropMesh.position.set(0, backdrop.offsetY, -backdrop.distance);
+      this.backdropMesh.scale.set(backdrop.height * aspect, backdrop.height, 1);
+    }
+  }
+
+  /** 3D背景を読み込んで置く（同じモデルなら置き直すだけ） */
+  private applyEnvironment(): void {
+    const settings = this.presets.locations[this.currentLocationId]?.environment;
+    if (this.environment && this.environment.model !== settings?.model) {
+      if (this.environment.object) {
+        this.scene.remove(this.environment.object);
+        disposeEnvironment(this.environment.model, this.environment.object);
+      }
+      this.environment = null;
+    }
+    if (!settings) return;
+    if (this.environment) {
+      if (this.environment.object) placeEnvironment(this.environment.object, settings);
+      return;
+    }
+    const entry = { model: settings.model, object: null as THREE.Object3D | null };
+    this.environment = entry;
+    loadEnvironment(settings.model)
+      .then((object) => {
+        // 読み込み中に場所が変わった・破棄された
+        if (this.environment !== entry || this.isDisposed) {
+          disposeEnvironment(settings.model, object);
+          return;
+        }
+        entry.object = object;
+        placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
+        this.scene.add(object);
+      })
+      .catch((err) => console.error(`3D背景を読み込めません: ${settings.model}`, err));
+  }
+
+  private applyCameraSettings(): void {
+    const fov = this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
+    if (this.camera.fov !== fov) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
+    this.updateCameraTarget();
+  }
+
+  /** 立ち位置（座標の指定がなければ、場所の設定か既定のスロット位置） */
+  private resolvePosition(member: StageCastMember): [number, number, number] {
+    if (member.position) return member.position;
+    const slot = member.slot ?? 'center';
+    return this.locationStage?.slots?.[slot] ?? DEFAULT_SLOT_POSITIONS[slot];
+  }
+
+  /** 登場中のキャラを立ち位置に置き直す（場所の設定が変わったとき） */
+  private applyCastLayout(): void {
+    for (const member of this.castMembers) {
+      const avatar = this.loadedAvatars.get(member.id);
+      if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
+      const position = this.resolvePosition(member);
+      avatar.vrm.scene.position.set(...position);
+      avatar.vrm.scene.rotation.y = member.rotationY ?? -position[0] * 0.5;
+      this.castPositions.set(member.id, position[0]);
+      this.castDepths.set(member.id, position[2]);
+    }
+    this.updateCameraTarget();
   }
 
   /**
@@ -508,6 +637,7 @@ export class StageManager {
    */
   public async setCast(members: StageCastMember[]): Promise<void> {
     const version = ++this.castVersion;
+    this.castMembers = members;
     const avatars = await Promise.all(
       members.map((member) => this.loadAvatar(member.id, member.modelUrl).catch((err) => {
         console.error(`Failed to load avatar ${member.id}:`, err);
@@ -523,17 +653,20 @@ export class StageManager {
 
     this.castIds = [];
     this.castPositions.clear();
+    this.castDepths.clear();
     this.castHeadHeights.clear();
     members.forEach((member, index) => {
       const avatar = avatars[index];
       if (!avatar?.vrm) return;
-      avatar.vrm.scene.position.set(...member.position);
-      avatar.vrm.scene.rotation.y = member.rotationY;
+      const position = this.resolvePosition(member);
+      avatar.vrm.scene.position.set(...position);
+      avatar.vrm.scene.rotation.y = member.rotationY ?? -position[0] * 0.5;
       avatar.vrm.scene.visible = true;
       avatar.setExpression(member.expression, member.expressionWeight);
       this.playMotion(member.id, avatar, member.motion, member.motionLoop, member.motionCue);
       this.castIds.push(member.id);
-      this.castPositions.set(member.id, member.position[0]);
+      this.castPositions.set(member.id, position[0]);
+      this.castDepths.set(member.id, position[2]);
       this.castHeadHeights.set(member.id, this.getHeadHeight(avatar));
     });
 
@@ -577,7 +710,7 @@ export class StageManager {
   /** 歩きながらの会話などで背景を横に流す（null で止めて場所の遠景に戻す） */
   public setScrollingBackground(settings: ScrollingBackgroundSettings | null): void {
     this.scrollingBackground.set(settings);
-    this.skyBackground.setBackgroundTexture(settings ? null : this.locationBackgroundTexture);
+    this.applyBackdrop();
   }
 
   /** 口パクさせるキャラ（話者） */
@@ -607,36 +740,39 @@ export class StageManager {
       (this.cameraFocusId !== null ? this.castHeadHeights.get(this.cameraFocusId) : undefined) ??
       (heads.length === 1 ? heads[0] : tallest);
 
-    let pose: CameraPose;
+    // 奥行きはキャラの立ち位置に合わせる（カメラは注視点から手前へ distance 離れる）
+    const zs = this.castIds.map((id) => this.castDepths.get(id) ?? 0);
+    const centerZ = zs.length > 0 ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
+    const focusZ = (this.cameraFocusId !== null ? this.castDepths.get(this.cameraFocusId) : undefined) ?? centerZ;
+    const rig = { ...DEFAULT_SHOT_RIGS[this.cameraShot], ...this.locationStage?.camera?.[this.cameraShot] };
+
+    let x: number;
+    let z: number;
+    let head: number;
+    let distance = rig.distance;
     switch (this.cameraShot) {
       case 'wide':
-        pose = {
-          position: new THREE.Vector3(centerX, tallest - 0.22, 2.3 + spread * 0.9),
-          target: new THREE.Vector3(centerX, tallest - 0.37, 0),
-        };
+        // 横に広がるほど引く
+        x = centerX;
+        z = centerZ;
+        head = tallest;
+        distance += spread * 0.9;
         break;
-      case 'medium': {
-        const x = focusX * 0.6 + centerX * 0.4;
-        pose = {
-          position: new THREE.Vector3(x, tallest - 0.2, 2.2),
-          target: new THREE.Vector3(x, tallest - 0.3, 0),
-        };
+      case 'medium':
+        x = focusX * 0.6 + centerX * 0.4;
+        z = focusZ * 0.6 + centerZ * 0.4;
+        head = tallest;
         break;
-      }
-      case 'close':
-        pose = {
-          position: new THREE.Vector3(focusX, focusHead - 0.09, 1.2),
-          target: new THREE.Vector3(focusX, focusHead - 0.14, 0),
-        };
-        break;
-      case 'speaker':
       default:
-        pose = {
-          position: new THREE.Vector3(focusX, focusHead - 0.17, 1.6),
-          target: new THREE.Vector3(focusX, focusHead - 0.27, 0),
-        };
+        x = focusX;
+        z = focusZ;
+        head = focusHead;
         break;
     }
+    const pose: CameraPose = {
+      position: new THREE.Vector3(x, head + rig.height, z + distance),
+      target: new THREE.Vector3(x, head + rig.targetHeight, z),
+    };
 
     if (
       this.hasCameraPose &&
@@ -768,6 +904,8 @@ export class StageManager {
       avatar.dispose();
     });
     this.loadedAvatars.clear();
+    if (this.environment?.object) disposeEnvironment(this.environment.model, this.environment.object);
+    this.environment = null;
     this.scrollingBackground.dispose();
 
     this.composer.renderTarget1?.dispose();
