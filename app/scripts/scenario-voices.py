@@ -17,49 +17,15 @@ REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 SCEN = os.path.join(REPO, 'assets/scenarios')
 CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending']
 
-REFS = {
-    'aoi': f'{REPO}/assets/voices/001.mp3',
-    'emili': f'{REPO}/assets/voices/trio_intro_2.mp3',
-    'shion': f'{REPO}/assets/voices/girl4_ref.mp3',
-    'god': f'{REPO}/scratch/god_exp_02_god_raw.wav',
-    'teacher': f'{REPO}/assets/voices/teacher/sample_03_cool_strict.mp3',
-    'naruse': f'{REPO}/assets/voices/naruse_ref.mp3',
-    'yui': f'{REPO}/assets/voices/yui_ref.mp3',
-    'kana': f'{REPO}/assets/voices/kana_ref.mp3',
-    'sp_leader': f'{REPO}/assets/voices/sp_leader_ref.mp3',
-    'sp_member': f'{REPO}/assets/voices/sp_member_ref.mp3',
-    'shopkeeper': f'{REPO}/assets/voices/shopkeeper_ref.mp3',
-}
-
-BASE = {
-    'aoi': '穏やかで優しい、清楚な幼馴染の女子高校生の声。',
-    'emili': '天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。',
-    'shion': 'ダウナーでクールな、気だるげで低めの女子高校生の声。',
-    'god': '神々しく威厳のある女神の声。理不尽でせっかちな一面もある。',
-    'teacher': 'クールで厳格な、若い女性教師の声。',
-    'naruse': 'お調子者で自信満々な男子高校生の声。',
-    'yui': '噂話が大好きな、はしゃいだ女子高校生の声。',
-    'kana': '少しクールで気だるげな女子高校生の声。',
-    'sp_leader': '低く威厳のある、軍人のようなSP部隊の隊長の声。',
-    'sp_member': '屈強なSP部隊員の、張りのある男性の声。',
-    'shopkeeper': '陽気な商店街のおじさんの声。',
-}
-
-MOOD = {
-    'happy': '明るく嬉しそうに、弾むようなトーンで話す。',
-    'relaxed': '柔らかく穏やかに、少し照れながら親しげに話す。',
-    'sad': '少し寂しそうに、しおらしく弱々しいトーンで話す。',
-    'angry': '語気を強めて、怒ったように話す。',
-    'surprised': '驚いて動揺し、声が上ずる。',
-    'neutral': '自然な会話のトーンで話す。',
-}
-
+# 話者ごとの参照音声・声の説明・表情ごとの演技指示は Studio と共有する JSON にある
+PROFILES = json.load(open(os.path.join(REPO, 'assets/studio/voice-profiles.json')))
+REFS = {k: os.path.join(REPO, v['ref']) for k, v in PROFILES['speakers'].items()}
+BASE = {k: v['caption'] for k, v in PROFILES['speakers'].items()}
+MOOD = PROFILES['moods']
 # 画面にいない人物の名前 → 声
-VOICE_NAMES = {
-    '女神の声': 'god', 'エミリの声': 'emili', '白石先生': 'teacher',
-    '黒服リーダー': 'sp_leader', '黒服の男': 'sp_leader', '黒服たち': 'sp_member',
-    '黒服A': 'sp_member', '黒服B': 'sp_member', '商店街のおじさん': 'shopkeeper',
-}
+VOICE_NAMES = PROFILES['speakerNames']
+WHISPER = PROFILES['whisperCaption']
+SHOUT = PROFILES['shoutCaption']
 
 
 def speaker_of(scene):
@@ -118,31 +84,17 @@ def plan(out_json):
             continue
         caption = BASE[who] + MOOD.get(expression, MOOD['neutral'])
         if text.startswith('（'):
-            caption = BASE[who] + '周りに聞こえないよう、小声で囁くように話す。'
+            caption = BASE[who] + WHISPER
         if text.count('！') >= 2:
-            caption += '感情が高ぶり、大きな声で叫ぶ。'
+            caption += SHOUT
         items.append({'id': fname, 'text': tts_text(text), 'ref_wav': REFS[who], 'caption': caption, 'output': raw})
     json.dump(items, open(out_json, 'w'), ensure_ascii=False, indent=1)
     print(len(items), 'lines to synthesize')
 
 
 def attach():
-    import numpy as np
-    import scipy.signal
-    import soundfile as sf
-
-    def divine_reverb(audio, sr, decay=2.3, wet=0.45):
-        rng = np.random.default_rng(0)
-        n = int(sr * decay)
-        t = np.linspace(0, decay, n, endpoint=False)
-        ir = rng.standard_normal(n) * np.exp(-3.2 * t / decay)
-        for d, g in zip([0.032, 0.058, 0.086, 0.124, 0.168], [0.55, 0.42, 0.32, 0.22, 0.14]):
-            ir[int(d * sr)] += g
-        ir /= np.max(np.abs(ir)) + 1e-9
-        rev = scipy.signal.fftconvolve(audio, ir, mode='full')[: len(audio) + int(sr * 1.4)]
-        mixed = (1 - wet) * np.pad(audio, (0, len(rev) - len(audio))) + wet * rev
-        peak = np.max(np.abs(mixed))
-        return mixed / peak * 0.95 if peak > 0.95 else mixed
+    sys.path.insert(0, os.path.join(REPO, 'server/python'))
+    from voice_effects import apply_file
 
     by_file = {}
     attached = missing = 0
@@ -150,10 +102,7 @@ def attach():
         out = os.path.join(os.path.dirname(path), fname)
         raw = out + '.raw.wav'
         if who == 'god' and os.path.exists(raw) and not os.path.exists(out):
-            audio, sr = sf.read(raw)
-            if audio.ndim > 1:
-                audio = audio.mean(axis=1)
-            sf.write(out, divine_reverb(audio, sr), sr)
+            apply_file('divine_reverb', raw, out)
         if os.path.exists(raw) and os.path.exists(out):
             os.remove(raw)
         # 配信用に mp3（モノラル 96kbps）へ変換する

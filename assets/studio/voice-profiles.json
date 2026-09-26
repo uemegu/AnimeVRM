@@ -1,0 +1,71 @@
+{
+  "description": "音声生成（Irodori-TTS）の話者ごとの設定。ref は参照音声（リポジトリ直下からの相対パス）、caption は声の説明。moods は表情ごとに caption へ足す演技指示",
+  "speakers": {
+    "aoi": {
+      "ref": "assets/voices/001.mp3",
+      "caption": "穏やかで優しい、清楚な幼馴染の女子高校生の声。"
+    },
+    "emili": {
+      "ref": "assets/voices/trio_intro_2.mp3",
+      "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。"
+    },
+    "shion": {
+      "ref": "assets/voices/girl4_ref.mp3",
+      "caption": "ダウナーでクールな、気だるげで低めの女子高校生の声。"
+    },
+    "god": {
+      "ref": "scratch/god_exp_02_god_raw.wav",
+      "caption": "神々しく威厳のある女神の声。理不尽でせっかちな一面もある。",
+      "postprocess": "divine_reverb"
+    },
+    "teacher": {
+      "ref": "assets/voices/teacher/sample_03_cool_strict.mp3",
+      "caption": "クールで厳格な、若い女性教師の声。"
+    },
+    "naruse": {
+      "ref": "assets/voices/naruse_ref.mp3",
+      "caption": "お調子者で自信満々な男子高校生の声。"
+    },
+    "yui": {
+      "ref": "assets/voices/yui_ref.mp3",
+      "caption": "噂話が大好きな、はしゃいだ女子高校生の声。"
+    },
+    "kana": {
+      "ref": "assets/voices/kana_ref.mp3",
+      "caption": "少しクールで気だるげな女子高校生の声。"
+    },
+    "sp_leader": {
+      "ref": "assets/voices/sp_leader_ref.mp3",
+      "caption": "低く威厳のある、軍人のようなSP部隊の隊長の声。"
+    },
+    "sp_member": {
+      "ref": "assets/voices/sp_member_ref.mp3",
+      "caption": "屈強なSP部隊員の、張りのある男性の声。"
+    },
+    "shopkeeper": {
+      "ref": "assets/voices/shopkeeper_ref.mp3",
+      "caption": "陽気な商店街のおじさんの声。"
+    }
+  },
+  "moods": {
+    "happy": "明るく嬉しそうに、弾むようなトーンで話す。",
+    "relaxed": "柔らかく穏やかに、少し照れながら親しげに話す。",
+    "sad": "少し寂しそうに、しおらしく弱々しいトーンで話す。",
+    "angry": "語気を強めて、怒ったように話す。",
+    "surprised": "驚いて動揺し、声が上ずる。",
+    "neutral": "自然な会話のトーンで話す。"
+  },
+  "whisperCaption": "周りに聞こえないよう、小声で囁くように話す。",
+  "shoutCaption": "感情が高ぶり、大きな声で叫ぶ。",
+  "speakerNames": {
+    "女神の声": "god",
+    "エミリの声": "emili",
+    "白石先生": "teacher",
+    "黒服リーダー": "sp_leader",
+    "黒服の男": "sp_leader",
+    "黒服たち": "sp_member",
+    "黒服A": "sp_member",
+    "黒服B": "sp_member",
+    "商店街のおじさん": "shopkeeper"
+  }
+}

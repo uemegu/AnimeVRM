@@ -66,6 +66,22 @@ const LICENSE_FILENAMES = [
 /**
  * 本番依存パッケージのライセンス一覧およびアセットクレジットを収集・生成する
  */
+
+/** generatedAt 以外が同じなら書き込まない（開発サーバーを起動するたびに差分が出ないように） */
+function writeIfChanged(filePath, data, trailingNewline) {
+  if (fs.existsSync(filePath)) {
+    try {
+      const { generatedAt: _previous, ...before } = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const { generatedAt: _next, ...after } = data;
+      if (JSON.stringify(before) === JSON.stringify(after)) return false;
+    } catch {
+      // 読めなければ書き直す
+    }
+  }
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + (trailingNewline ? '\n' : ''), 'utf-8');
+  return true;
+}
+
 export function generateLicenses() {
   const assetCreditsPath = path.join(APP_ROOT, 'src', 'data', 'assetCredits.json');
 
@@ -149,9 +165,8 @@ export function generateLicenses() {
   fs.mkdirSync(path.dirname(outputSrcPath), { recursive: true });
   fs.mkdirSync(path.dirname(outputPublicPath), { recursive: true });
 
-  const formattedJson = JSON.stringify(resultData, null, 2) + '\n';
-  fs.writeFileSync(outputSrcPath, formattedJson, 'utf-8');
-  fs.writeFileSync(outputPublicPath, formattedJson, 'utf-8');
+  writeIfChanged(outputSrcPath, resultData, true);
+  writeIfChanged(outputPublicPath, resultData, true);
 
   return {
     libraryCount: libraries.length,

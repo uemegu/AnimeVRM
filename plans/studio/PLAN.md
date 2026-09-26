@@ -48,7 +48,7 @@ packages/
   engine/     Three.js / VRM の描画、背景（一枚絵・glb・組み込み3D）、演出、シナリオ実行。React 非依存
   motion/     ardy-mini、補正（接触点・手の補正・スコア）、FBX 出力
 studio/       React SPA（Vite）。ローカル開発用
-server/       Node API（Hono 想定）。ファイル保存、アセット一覧、TTS 呼び出し
+server/       Node API（Hono）。ファイル保存、アセット一覧、TTS 呼び出し
 player/       Pages 向けの静的シナリオ再生（studio の再生画面を単独ビルド）
 app/          既存ゲーム。packages/engine と packages/scenario を使う形へ移行
 assets/       モデル・モーション・背景・BGM・SE・ボイスを1か所にまとめる（現状は public/ と app/public/ に重複）。app/ の切り出しは今は考えない
@@ -85,7 +85,7 @@ tools/eye-editor/
 2. **基盤**（2026-09-26 完了）：workspaces を作る。TS / Vite のバージョンをそろえる（ルートは TS7/Vite8、app/ は TS5.7/Vite6）。`packages/scenario` のスキーマを作り、app/ の全82シナリオが検証を通ることを確かめる。アセットを `assets/` に集約する
 3. **engine 統合**（2026-09-26 完了）：ルートの描画コードを `packages/engine` に移し、app/ と中身が同じ・ほぼ同じだったもの（シェーダー、ポストプロセス、空の背景、ToonShader、CinematicAnimeShader など）は app/ も engine の版を使う。違いがあったものはルートの版（機能の多い方）に、app/ の使い方を足して1本にした。統合前後のスクリーンショットで、ルート・app/ とも見た目が変わらないことを確認済み
    - app/ の `Avatar`・`StageManager`・`ScrollingBackground` は作りが別物なので、まだ app/ 側にある。第10段階で engine の `Avatar`・`ViewerCore` に載せ替える。それまでは、この3つに関わる描画の修正は両方に入れる
-4. **サーバー**：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る
+4. **サーバー**（2026-09-26 完了）：ファイル保存、アセット一覧、シナリオ読み書き、TTS の API を作る。`server/README.md`。音声の話者設定は `assets/studio/voice-profiles.json` に移し、`app/scripts/scenario-voices.py` と共有
 5. **Studio の土台とビューア**
 6. **シーン編集**（簡易3D表示とカメラ調整、painted-* の組み込み）
 7. **シナリオ編集**（フロー → カット編集 → タイムライン → プレビュー → インポート・エクスポート）

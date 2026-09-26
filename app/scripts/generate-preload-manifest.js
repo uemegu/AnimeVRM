@@ -54,6 +54,22 @@ function generateLabelFromUrl(url) {
 /**
  * プリロード対象マニフェスト（ファイルサイズ付き）を自動生成する
  */
+
+/** generatedAt 以外が同じなら書き込まない（開発サーバーを起動するたびに差分が出ないように） */
+function writeIfChanged(filePath, data, trailingNewline) {
+  if (fs.existsSync(filePath)) {
+    try {
+      const { generatedAt: _previous, ...before } = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const { generatedAt: _next, ...after } = data;
+      if (JSON.stringify(before) === JSON.stringify(after)) return false;
+    } catch {
+      // 読めなければ書き直す
+    }
+  }
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + (trailingNewline ? '\n' : ''), 'utf-8');
+  return true;
+}
+
 export async function generatePreloadManifest() {
   const targetsModulePath = path.join(APP_ROOT, 'src', 'config', 'preloadTargets.ts');
   const publicDir = path.join(APP_ROOT, '..', 'assets');
@@ -110,7 +126,7 @@ export async function generatePreloadManifest() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2), 'utf-8');
+  writeIfChanged(outputPath, manifest, false);
 
   return manifest;
 }

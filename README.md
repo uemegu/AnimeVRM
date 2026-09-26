@@ -119,6 +119,9 @@ npm install
 
 # 開発サーバー起動
 npm run dev
+
+# Studio 用のローカルサーバー（シナリオ保存・音声生成。server/README.md）
+npm run server
 ```
 
 起動後、ブラウザで以下の URL にアクセスできます：
@@ -554,6 +557,7 @@ vrm-genshin-like/
 │   │       ├── Avatar.ts / ToonShader.ts / Config.ts / AudioLipSync.ts
 │   │       ├── animation/ avatar/ effects/ postprocessing/ presets/ scene/ shader/ wind/ utils/
 │   └── scenario/          # シナリオ JSON のスキーマ (zod) とテスト
+├── server/                # Studio 用ローカルサーバー (Hono)
 ├── app/                   # ギャルゲーアプリ (React)
 ├── scenarios/             # 独立シナリオ実行 HTML ページ群
 ├── src/                   # 旧ビューア（Studio に置き換え予定。plans/studio/PLAN.md）

@@ -1,0 +1,23 @@
+{
+  "name": "@anime-vrm/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Studio 用のローカルサーバー（localhost 限定）。シナリオ・アセットの読み書きと音声生成",
+  "scripts": {
+    "dev": "node --watch src/index.ts",
+    "start": "node src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anime-vrm/scenario": "*",
+    "@hono/node-server": "^2.1.1",
+    "hono": "^4.13.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.6",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
