@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
 import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
@@ -18,6 +19,8 @@ export interface StageViewProps {
   speakerId?: string | null;
   /** 流れる背景（歩きながらの会話）。null なら場所の遠景 */
   scrolling?: ScrollingBackgroundSettings | null;
+  /** 今のカット（カメラの直接指定とカット内のタイムライン） */
+  cut?: ScenarioResolvedScene | null;
   className?: string;
   onLoaded?: () => void;
 }
@@ -29,6 +32,7 @@ export const StageView: React.FC<StageViewProps> = ({
   cameraShot,
   speakerId = null,
   scrolling = null,
+  cut = null,
   className = '',
   onLoaded,
 }) => {
@@ -44,6 +48,8 @@ export const StageView: React.FC<StageViewProps> = ({
       canvas,
       presets: { timeOfDay: TIME_OF_DAY_PRESETS, locations: LOCATION_VISUAL_PRESETS },
       getSpeakerPhoneme: () => soundManager.getVoicePhoneme(),
+      // カット内のタイムラインはボイスの再生位置で進める（ボイスがなければカット開始からの秒数）
+      getCutTime: () => soundManager.getVoiceTime(),
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
     });
@@ -98,6 +104,15 @@ export const StageView: React.FC<StageViewProps> = ({
     stageManagerRef.current?.setScrollingBackground(scrolling);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollingKey]);
+
+  // カットが変わったら、カメラの直接指定とカット内のタイムラインを渡す
+  useEffect(() => {
+    const manager = stageManagerRef.current;
+    if (!manager) return;
+    manager.setCameraPose(cut?.cameraPose ?? null);
+    manager.setCutTimeline(cut ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions } : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cut?.id]);
 
   // 5. 話者とカメラ構図
   useEffect(() => {

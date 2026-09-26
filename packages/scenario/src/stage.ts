@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { CameraShot, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig } from './schema.ts';
+import type { CameraPose, CameraShot, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
@@ -35,6 +35,10 @@ export interface StageCastMember {
   motionLoop: boolean;
   /** モーションを指定したシーン（変わったら同じモーションでも再生し直す） */
   motionCue?: string;
+  /** 視線の先（player / camera / partner / speaker / forward / キャラ ID）。なければ正面のまま */
+  lookAtTarget?: string;
+  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
+  headTurn?: number;
 }
 
 /** 流れる背景（描画に渡す形。省略項目は既定値で埋めたもの） */
@@ -111,6 +115,8 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       motion: config.motion,
       motionLoop: config.motionLoop ?? (config.motion ? options.isLoopingMotion(config.motion) : true),
       motionCue: stage.motionCues?.[key],
+      lookAtTarget: config.lookAtTarget,
+      headTurn: config.headTurn,
     });
   }
   return members;
@@ -170,3 +176,72 @@ export const BgmBook = z.strictObject({
   ),
 });
 export type BgmBook = z.infer<typeof BgmBook>;
+
+/** カット内のある時刻のキャラの状態（タイムラインのキーフレームで上書きされた項目だけ） */
+export interface CutAvatarState {
+  expression?: string;
+  expressionWeight?: number;
+  motion?: string;
+  motionLoop?: boolean;
+  /** 今のモーションを始めた時刻（頭出しでモーションの途中から再生するため） */
+  motionAt?: number;
+  lookAtTarget?: string;
+  headTurn?: number;
+  visible?: boolean;
+}
+
+/** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
+export interface CutCameraState {
+  shot?: CameraShot;
+  pose?: CameraPose;
+  /** 切り替えた時刻と、動かすのにかける秒数 */
+  at?: number;
+  duration?: number;
+}
+
+/**
+ * カットの時刻 t（ボイスの再生位置、なければカット開始からの秒数）での、キーフレームを反映した状態。
+ * キーフレームのない項目は含めない（カットの指定のまま）
+ */
+export function cutStateAt(scene: ScenarioScene, t: number): { avatars: Record<string, CutAvatarState>; camera: CutCameraState } {
+  const avatars: Record<string, CutAvatarState> = {};
+  for (const [id, config] of Object.entries(scene.avatars ?? {})) {
+    const state: CutAvatarState = {};
+    for (const key of [...(config.transitions ?? [])].sort((a, b) => a.at - b.at)) {
+      if (key.at > t) break;
+      if (key.expression !== undefined) {
+        state.expression = key.expression;
+        state.expressionWeight = key.expressionWeight;
+      }
+      if (key.motion !== undefined) {
+        state.motion = key.motion;
+        state.motionLoop = key.motionLoop;
+        state.motionAt = key.at;
+      }
+      if (key.lookAtTarget !== undefined) state.lookAtTarget = key.lookAtTarget;
+      if (key.headTurn !== undefined) state.headTurn = key.headTurn;
+      if (key.visible !== undefined) state.visible = key.visible;
+    }
+    if (Object.keys(state).length) avatars[id] = state;
+  }
+  const camera: CutCameraState = {};
+  for (const key of [...(scene.transitions ?? [])].sort((a, b) => a.at - b.at)) {
+    if (key.at > t) break;
+    if (key.camera !== undefined || key.cameraPose !== undefined) {
+      camera.shot = key.camera;
+      camera.pose = key.cameraPose;
+      camera.at = key.at;
+      camera.duration = key.cameraTransitionDuration;
+    }
+  }
+  return { avatars, camera };
+}
+
+/** カットの最後のキーフレームの時刻（タイムラインの長さの目安） */
+export function lastKeyframeAt(scene: ScenarioScene): number {
+  const times = [
+    ...(scene.transitions ?? []).map((k) => k.at),
+    ...Object.values(scene.avatars ?? {}).flatMap((a) => (a.transitions ?? []).map((k) => k.at)),
+  ];
+  return times.length ? Math.max(...times) : 0;
+}

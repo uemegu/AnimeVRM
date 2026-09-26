@@ -19,12 +19,15 @@ import { CharacterMaskRenderer, LightWrapShader } from '../postprocessing/LightW
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
 import { setHairRingTint } from '../shader/HairRing';
 import {
+  cutStateAt,
   DEFAULT_BACKDROP,
   DEFAULT_CAMERA_FOV,
   DEFAULT_SHOT_RIGS,
   DEFAULT_SLOT_POSITIONS,
+  type CameraPose as CameraPoseSetting,
   type CameraShot,
   type LocationStage,
+  type ScenarioScene,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
 
@@ -52,6 +55,11 @@ export interface StageOptions {
   presets: StagePresets;
   /** 話しているキャラの口の形（音声の解析結果）。なければ口パクしない */
   getSpeakerPhoneme?: () => string | undefined;
+  /**
+   * カット内の時刻（ボイスの再生位置など）。指定すると毎フレームこの時刻でタイムラインを進める。
+   * undefined を返したときはカット開始からの経過秒数を使う（Studio のように自分で setCutTime する場合は指定しない）
+   */
+  getCutTime?: () => number | undefined;
   initialTimeOfDay?: TimeOfDayId;
   initialLocationId?: string;
 }
@@ -60,6 +68,8 @@ export class StageManager {
   private canvas: HTMLCanvasElement;
   private presets: StagePresets;
   private readonly getSpeakerPhoneme?: () => string | undefined;
+  private readonly getCutTime?: () => number | undefined;
+  private cutStartedAt = 0;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
@@ -120,6 +130,21 @@ export class StageManager {
   // カメラ構図の補間
   private cameraShot: CameraShot = 'speaker';
   private cameraFocusId: string | null = null;
+  /** カットで直接指定したカメラ（構図の自動決定より優先） */
+  private basePose: CameraPoseSetting | null = null;
+  /** タイムラインで切り替えた構図・カメラ（カットの指定より優先） */
+  private timelineShot: CameraShot | null = null;
+  private timelinePose: { pose: CameraPoseSetting; duration?: number } | null = null;
+  private cameraTransitionSec = CAMERA_TRANSITION_SEC;
+
+  // カット内のタイムライン（キーフレーム）
+  private cutScene: ScenarioScene | null = null;
+  private cutTime = 0;
+  /** キャラごとに最後に当てた状態（差分だけ当てるため） */
+  private appliedCut = new Map<string, string>();
+  private appliedCutCamera = '';
+  /** キャラごとの視線（キャストの指定をタイムラインで上書きしたもの） */
+  private gaze = new Map<string, { target?: string; headTurn?: number }>();
   private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraTo: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraCurrentTarget = new THREE.Vector3(0, 1.15, 0);
@@ -138,6 +163,7 @@ export class StageManager {
     this.canvas = options.canvas;
     this.presets = options.presets;
     this.getSpeakerPhoneme = options.getSpeakerPhoneme;
+    this.getCutTime = options.getCutTime;
     this.clock = new THREE.Clock();
 
     // 1. シーン初期化
@@ -672,6 +698,9 @@ export class StageManager {
 
     // キャラの位置が決まったので構図を取り直す
     this.updateCameraTarget();
+    // カットのタイムラインを、読み込んだキャラに当て直す（同じモーションは続けて再生する）
+    this.appliedCut.clear();
+    this.applyCutState(false);
   }
 
   /** 頭の高さ（直立時）。取得できなければ標準的な背丈を返す */
@@ -684,7 +713,7 @@ export class StageManager {
   }
 
   /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す */
-  private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = ''): void {
+  private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = '', offsetSec = 0): void {
     const url = motion ? `/animations/${motion}.fbx` : IDLE_ANIMATION_URL;
     // 指定が変わった時だけ再生する（1回きりの身振りが待機に戻った後、同じ指定で再生し直さない）
     const key = `${url}|${loop}|${cue}`;
@@ -696,8 +725,10 @@ export class StageManager {
     this.motionReturnTimers.delete(id);
 
     avatar.playAnimation(url, loop).then((action) => {
+      // 頭出しでは途中から再生する
+      if (action && offsetSec > 0) action.time = loop ? offsetSec % action.getClip().duration : Math.min(offsetSec, action.getClip().duration);
       if (loop || !action || this.isDisposed) return;
-      const durationMs = action.getClip().duration * 1000;
+      const durationMs = Math.max(0, action.getClip().duration - action.time) * 1000;
       const timer = window.setTimeout(() => {
         this.motionReturnTimers.delete(id);
         if (this.avatarMotionUrls.get(id) !== key) return;
@@ -719,6 +750,96 @@ export class StageManager {
   }
 
   /** カメラ構図の指定（focusId は話者など、寄る対象） */
+  /** カットでカメラを直接指定する（null で構図の自動決定に戻す） */
+  public setCameraPose(pose: CameraPoseSetting | null): void {
+    this.basePose = pose;
+    this.updateCameraTarget();
+  }
+
+  /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
+  public setCutTimeline(scene: ScenarioScene | null): void {
+    this.cutScene = scene;
+    this.cutTime = 0;
+    this.cutStartedAt = this.clock.getElapsedTime();
+    this.appliedCut.clear();
+    this.appliedCutCamera = '';
+    this.applyCutState(false);
+  }
+
+  /**
+   * カット内の時刻（ボイスの再生位置、なければカット開始からの秒数）。
+   * seek が true なら、その時刻の状態へ飛ぶ（モーションも途中から）
+   */
+  public setCutTime(time: number, seek = false): void {
+    this.cutTime = time;
+    this.applyCutState(seek);
+  }
+
+  /** カットの指定にタイムラインを重ねた状態を、変わったところだけ当てる */
+  private applyCutState(seek: boolean): void {
+    const state = this.cutScene ? cutStateAt(this.cutScene, this.cutTime) : { avatars: {}, camera: {} };
+    for (const member of this.castMembers) {
+      const avatar = this.loadedAvatars.get(member.id);
+      if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
+      const key = state.avatars[member.id] ?? {};
+      const effective = {
+        expression: key.expression ?? member.expression,
+        expressionWeight: key.expression !== undefined ? (key.expressionWeight ?? 1) : member.expressionWeight,
+        motion: key.motion ?? member.motion,
+        motionLoop: key.motion !== undefined ? (key.motionLoop ?? false) : member.motionLoop,
+        motionCue: key.motionAt !== undefined ? `timeline@${key.motionAt}` : member.motionCue,
+        motionAt: key.motionAt,
+        lookAtTarget: key.lookAtTarget ?? member.lookAtTarget,
+        headTurn: key.headTurn ?? member.headTurn,
+        visible: key.visible ?? true,
+      };
+      const json = JSON.stringify(effective);
+      const previous = this.appliedCut.get(member.id);
+      if (previous === json && !seek) continue;
+      const before = previous ? (JSON.parse(previous) as typeof effective) : null;
+      this.appliedCut.set(member.id, json);
+      if (!before || before.expression !== effective.expression || before.expressionWeight !== effective.expressionWeight) {
+        avatar.setExpression(effective.expression, effective.expressionWeight);
+      }
+      const motionChanged = !before || before.motion !== effective.motion || before.motionCue !== effective.motionCue || before.motionLoop !== effective.motionLoop;
+      if (motionChanged || seek) {
+        const offset = seek && effective.motionAt !== undefined ? this.cutTime - effective.motionAt : 0;
+        // 頭出しのときは同じモーションでも再生し直す
+        if (seek) this.avatarMotionUrls.delete(member.id);
+        this.playMotion(member.id, avatar, effective.motion, effective.motionLoop, effective.motionCue, offset);
+      }
+      avatar.vrm.scene.visible = effective.visible;
+      this.gaze.set(member.id, { target: effective.lookAtTarget, headTurn: effective.headTurn });
+    }
+
+    const camera = state.camera;
+    const cameraJson = JSON.stringify(camera);
+    if (cameraJson !== this.appliedCutCamera || seek) {
+      this.appliedCutCamera = cameraJson;
+      this.timelineShot = camera.pose ? null : (camera.shot ?? null);
+      this.timelinePose = camera.pose ? { pose: camera.pose, duration: seek ? 0 : camera.duration } : null;
+      this.updateCameraTarget();
+    }
+  }
+
+  /** 視線の先のワールド座標（カメラ・話者・相手・キャラ ID） */
+  private gazeTargetFor(id: string, target: string | undefined): THREE.Vector3 | null {
+    if (!target || target === 'forward') return null;
+    if (target === 'camera' || target === 'player') return this.camera.position.clone();
+    const headOf = (otherId: string | null | undefined) => {
+      if (!otherId || otherId === id) return null;
+      const head = this.loadedAvatars.get(otherId)?.vrm?.humanoid?.getNormalizedBoneNode('head');
+      return head && this.castIds.includes(otherId) ? head.getWorldPosition(new THREE.Vector3()) : null;
+    };
+    if (target === 'speaker') return headOf(this.speakerId) ?? this.camera.position.clone();
+    if (target === 'partner') {
+      // 話者でなければ話者を、話者なら一番近い相手を見る
+      const partner = this.speakerId && this.speakerId !== id ? this.speakerId : this.castIds.find((other) => other !== id);
+      return headOf(partner) ?? this.camera.position.clone();
+    }
+    return headOf(target);
+  }
+
   public setCameraShot(shot: CameraShot, focusId: string | null): void {
     this.cameraShot = shot;
     this.cameraFocusId = focusId;
@@ -744,13 +865,14 @@ export class StageManager {
     const zs = this.castIds.map((id) => this.castDepths.get(id) ?? 0);
     const centerZ = zs.length > 0 ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
     const focusZ = (this.cameraFocusId !== null ? this.castDepths.get(this.cameraFocusId) : undefined) ?? centerZ;
-    const rig = { ...DEFAULT_SHOT_RIGS[this.cameraShot], ...this.locationStage?.camera?.[this.cameraShot] };
+    const shotName = this.timelineShot ?? this.cameraShot;
+    const rig = { ...DEFAULT_SHOT_RIGS[shotName], ...this.locationStage?.camera?.[shotName] };
 
     let x: number;
     let z: number;
     let head: number;
     let distance = rig.distance;
-    switch (this.cameraShot) {
+    switch (shotName) {
       case 'wide':
         // 横に広がるほど引く
         x = centerX;
@@ -769,10 +891,20 @@ export class StageManager {
         head = focusHead;
         break;
     }
-    const pose: CameraPose = {
-      position: new THREE.Vector3(x, head + rig.height, z + distance),
-      target: new THREE.Vector3(x, head + rig.targetHeight, z),
-    };
+    // 直接指定（タイムライン → カット）があれば構図より優先する
+    const direct = this.timelinePose?.pose ?? (this.timelineShot ? null : this.basePose);
+    const pose: CameraPose = direct
+      ? { position: new THREE.Vector3(...direct.position), target: new THREE.Vector3(...direct.target) }
+      : {
+          position: new THREE.Vector3(x, head + rig.height, z + distance),
+          target: new THREE.Vector3(x, head + rig.targetHeight, z),
+        };
+    const fov = direct?.fov ?? this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
+    if (this.camera.fov !== fov) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
+    this.cameraTransitionSec = this.timelinePose?.duration ?? CAMERA_TRANSITION_SEC;
 
     if (
       this.hasCameraPose &&
@@ -785,13 +917,14 @@ export class StageManager {
     this.cameraFrom = { position: this.camera.position.clone(), target: this.cameraCurrentTarget.clone() };
     this.cameraTo = pose;
     // 最初の構図は補間せずに合わせる
-    this.cameraElapsed = this.hasCameraPose ? 0 : CAMERA_TRANSITION_SEC;
+    this.cameraElapsed = this.hasCameraPose ? 0 : this.cameraTransitionSec;
     this.hasCameraPose = true;
   }
 
   private updateCamera(delta: number): void {
-    this.cameraElapsed = Math.min(CAMERA_TRANSITION_SEC, this.cameraElapsed + delta);
-    const t = easeInOutCubic(this.cameraElapsed / CAMERA_TRANSITION_SEC);
+    const duration = Math.max(1e-3, this.cameraTransitionSec);
+    this.cameraElapsed = Math.min(duration, this.cameraElapsed + delta);
+    const t = easeInOutCubic(this.cameraElapsed / duration);
     this.camera.position.lerpVectors(this.cameraFrom.position, this.cameraTo.position, t);
     this.cameraCurrentTarget.lerpVectors(this.cameraFrom.target, this.cameraTo.target, t);
     this.camera.lookAt(this.cameraCurrentTarget);
@@ -842,7 +975,11 @@ export class StageManager {
 
       const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
 
-      // 0. カメラ構図の補間と、流れる背景
+      // 0. カット内のタイムライン、カメラ構図の補間と、流れる背景
+      if (this.getCutTime && this.cutScene) {
+        const time = this.getCutTime() ?? elapsed - this.cutStartedAt;
+        if (time !== this.cutTime) this.setCutTime(time);
+      }
       this.updateCamera(delta);
       this.scrollingBackground.update(delta);
 
@@ -852,6 +989,8 @@ export class StageManager {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm || !avatar.vrm.scene.visible) continue;
         avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined);
+        const gaze = this.gaze.get(id);
+        avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
         avatar.update(delta);
         activeMeshes.push(avatar.vrm.scene);
       }

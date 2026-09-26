@@ -183,6 +183,15 @@ export class StageAvatar {
   private currentExpression: string = 'neutral';
   private expressionTransitionDuration: number = 0.25;
 
+  // 視線と顔の向き（ワールド座標の注視点。null なら正面）
+  private gazeTarget: THREE.Vector3 | null = null;
+  private headTurn = 0;
+  private readonly gazeObject = new THREE.Object3D();
+  private headYaw = 0;
+  private headPitch = 0;
+  /** 前のフレームで首・頭に足した回転（モーションが上書きしないボーンでも積み重ならないよう、次のフレームで戻す） */
+  private appliedTurn: Array<{ bone: THREE.Object3D; rotation: THREE.Quaternion }> = [];
+
   public getCurrentExpression(): string {
     return this.currentExpression;
   }
@@ -493,10 +502,15 @@ export class StageAvatar {
   public update(delta: number): void {
     if (!this.vrm) return;
 
-    // 1. モーション再生
+    // 1. モーション再生（前のフレームで足した顔の向きを先に戻す）
+    for (const { bone, rotation } of this.appliedTurn) bone.quaternion.multiply(rotation.invert());
+    this.appliedTurn = [];
     if (this.mixer) {
       this.mixer.update(delta);
     }
+
+    // 1.5 顔を視線の先へ向ける（モーションの姿勢に足す）
+    this.updateHeadTurn(delta);
 
     // 2. 表情クロスフェード
     this.updateExpressions(delta);
@@ -506,6 +520,59 @@ export class StageAvatar {
 
     // 4. VRM SpringBone・Humanoid更新
     this.vrm.update(delta);
+  }
+
+  /**
+   * 視線の先（ワールド座標）。null なら正面を見る。
+   * headTurn は顔も向ける度合い（0 = 目だけ、1 = 顔も大きく向ける）
+   */
+  public setGaze(target: THREE.Vector3 | null, headTurn = 0): void {
+    this.headTurn = target ? THREE.MathUtils.clamp(headTurn, 0, 1) : 0;
+    const lookAt = this.vrm?.lookAt;
+    if (target) {
+      this.gazeTarget = (this.gazeTarget ?? new THREE.Vector3()).copy(target);
+      this.gazeObject.position.copy(target);
+      this.gazeObject.updateMatrixWorld();
+      if (lookAt) lookAt.target = this.gazeObject;
+    } else {
+      this.gazeTarget = null;
+      if (lookAt) {
+        lookAt.target = undefined;
+        lookAt.yaw = 0;
+        lookAt.pitch = 0;
+      }
+    }
+  }
+
+  /** 首と頭を少しずつ注視点へ回す（左右 35°・上下 15° まで × headTurn） */
+  private updateHeadTurn(delta: number): void {
+    const humanoid = this.vrm?.humanoid;
+    const head = humanoid?.getNormalizedBoneNode('head');
+    const neck = humanoid?.getNormalizedBoneNode('neck');
+    if (!this.vrm || !head) return;
+    let yaw = 0;
+    let pitch = 0;
+    if (this.gazeTarget && this.headTurn > 0) {
+      const root = this.vrm.scene;
+      root.updateMatrixWorld();
+      const local = root.worldToLocal(this.gazeTarget.clone());
+      const headPos = root.worldToLocal(head.getWorldPosition(new THREE.Vector3()));
+      const dir = local.sub(headPos);
+      yaw = THREE.MathUtils.clamp(Math.atan2(dir.x, dir.z), -0.61, 0.61) * this.headTurn;
+      pitch = THREE.MathUtils.clamp(Math.atan2(dir.y, Math.hypot(dir.x, dir.z)), -0.26, 0.26) * this.headTurn;
+    }
+    const k = 1 - Math.exp(-delta * 6);
+    this.headYaw += (yaw - this.headYaw) * k;
+    this.headPitch += (pitch - this.headPitch) * k;
+    if (Math.abs(this.headYaw) < 1e-4 && Math.abs(this.headPitch) < 1e-4) return;
+    // 首に4割、頭に6割（上を向くのは X 軸まわりの負の回転）
+    const turn = (bone: THREE.Object3D, share: number) => {
+      const rotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(-this.headPitch * share, this.headYaw * share, 0, 'YXZ'));
+      bone.quaternion.multiply(rotation);
+      this.appliedTurn.push({ bone, rotation });
+    };
+    if (neck) turn(neck, 0.4);
+    turn(head, neck ? 0.6 : 1);
   }
 
   public dispose(): void {

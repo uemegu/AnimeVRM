@@ -36,6 +36,8 @@ export interface AvatarTransition {
   headLookAtCamera?: boolean;
   eyeLookAtCamera?: boolean;
   lookAtTarget?: 'player' | 'speaker' | 'partner' | 'camera' | 'forward' | string;
+  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
+  headTurn?: number;
   eyeWander?: boolean | number;
   eyeOffset?: [number, number];
   headOffset?: [number, number];
@@ -53,7 +55,18 @@ export interface SceneTransition {
   cameraTransitionDuration?: number;
   cameraTransitionEasing?: string;
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
+  /** この時刻から構図を切り替える */
+  camera?: CameraShot;
+  /** この時刻からカメラを直接指定の位置へ動かす（移動の秒数は cameraTransitionDuration） */
+  cameraPose?: CameraPose;
   background?: string;
+}
+
+/** カメラの位置・注視点・画角の直接指定 */
+export interface CameraPose {
+  position: [number, number, number];
+  target: [number, number, number];
+  fov?: number;
 }
 
 /** シーン内のアバター演出指定（前のシーンの指定を引き継ぎ、書いた項目だけ上書きする） */
@@ -71,6 +84,8 @@ export interface SceneAvatarConfig {
   position?: AvatarSlotPosition | [number, number, number];
   rotationY?: number;
   lookAtTarget?: 'player' | 'camera' | 'partner' | string;
+  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
+  headTurn?: number;
   visible?: boolean;
   /** セリフ中の表情・モーション・視線遷移タイムライン（at 昇順で指定） */
   transitions?: AvatarTransition[];
@@ -134,6 +149,8 @@ export interface ScenarioScene {
   transitions?: SceneTransition[];
   /** カメラの構図（省略時は登場人数と話者から自動） */
   camera?: CameraShot;
+  /** カメラの直接指定（camera より優先。このカットだけに効く） */
+  cameraPose?: CameraPose;
   /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */
   clearCast?: boolean;
   /**
