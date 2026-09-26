@@ -83,10 +83,18 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  const initialScenarioParam = useMemo(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('scenario');
+    } catch {
+      return null;
+    }
+  }, []);
+
   // 初回アセット事前読み込み画面フラグ
-  const [isInitialLoading, setIsInitialLoading] = useState(() => !initialPhaseParam);
+  const [isInitialLoading, setIsInitialLoading] = useState(() => !initialPhaseParam && !initialScenarioParam);
   // タイトル画面表示フラグ
-  const [isTitleScreen, setIsTitleScreen] = useState(() => !initialPhaseParam);
+  const [isTitleScreen, setIsTitleScreen] = useState(() => !initialPhaseParam && !initialScenarioParam);
   // セーブデータ存在フラグ
   const [hasSaveData, setHasSaveData] = useState(() => saveService.hasSaveData());
   // ライセンス・クレジットモーダル表示フラグ
@@ -111,6 +119,21 @@ export const App: React.FC = () => {
       initial.day = 6;
       initial.phase = 'holiday_action';
       initial.currentScenarioId = null;
+    }
+    if (initialScenarioParam) {
+      initial.day = 21;
+      initial.phase = 'afterschool_action';
+      initial.flags = {
+        ...initial.flags,
+        aoi_t10_promise: true,
+        confessed: true,
+        confession_sincere: true,
+      };
+      initial.affinities = {
+        ...initial.affinities,
+        aoi: 30,
+      };
+      initial.currentScenarioId = initialScenarioParam;
     }
     return initial;
   });
@@ -268,6 +291,21 @@ export const App: React.FC = () => {
     },
     [startPlayer]
   );
+
+  // URLクエリパラメータ指定による直接シナリオ再生（テスト・検証用）
+  useEffect(() => {
+    if (!initialScenarioParam) return;
+    const entry = scenarioRepository.get(initialScenarioParam);
+    if (!entry) {
+      console.error(`Scenario not found: ${initialScenarioParam}`);
+      return;
+    }
+    loadScenario(entry).then((scenario) => {
+      startScenario(scenario, gameStateRef.current);
+    }).catch((err) => {
+      console.error('Failed to load initial scenario:', err);
+    });
+  }, [initialScenarioParam, loadScenario, startScenario]);
 
   // 行動ターン開始（強制割り込みイベントがあればそれを再生、なければ場所選択へ）
   const proceedToActionPhase = useCallback(
