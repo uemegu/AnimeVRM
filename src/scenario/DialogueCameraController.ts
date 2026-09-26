@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Avatar } from '../Avatar';
-import type { PanoramaBackgroundController } from '../scene/PanoramaBackgroundController';
 import {
   ScenarioScene,
   CameraZoomType,
@@ -103,14 +102,12 @@ export class DialogueCameraController {
   private _tempForward = new THREE.Vector3();
   private _tempRight = new THREE.Vector3();
   private readonly _yAxis = new THREE.Vector3(0, 1, 0);
-  private panoramaController?: PanoramaBackgroundController;
 
-  constructor(options: DialogueCameraControllerOptions & { panoramaController?: PanoramaBackgroundController }) {
+  constructor(options: DialogueCameraControllerOptions) {
     this.camera = options.camera;
     this.controls = options.controls;
     this.getAvatar = options.getAvatar;
     this.getAvatars = options.getAvatars;
-    this.panoramaController = options.panoramaController;
     this.baseFov = this.camera.fov || 30;
   }
 
@@ -144,7 +141,6 @@ export class DialogueCameraController {
     this.currentPose.fov = this.camera.fov;
 
     this.controls.enabled = false;
-    this.panoramaController?.setCameraControlEnabled(false);
   }
 
   public setInstantCutMode(enabled: boolean): void {
@@ -164,8 +160,6 @@ export class DialogueCameraController {
     this.backgroundPanOffset.set(0, 0);
     this.customBackgroundZoom = undefined;
     this.customBackgroundOffset = undefined;
-
-    this.panoramaController?.setCameraControlEnabled(true);
 
     if (instant) {
       this.camera.position.copy(this.baseState.position);
@@ -327,18 +321,16 @@ export class DialogueCameraController {
 
     const angle: CameraStartAngle = scene.cameraStartAngle || 'front';
     const isBehind = speakerWorldPos.z > 0.3;
-    const isPanoramaActive = Boolean(this.panoramaController?.isActive);
-    const hasPanoramaUrl = Boolean(scene.panoramaBackgroundUrl || scene.usePanoramaCamera);
     const isAtPlayerOrigin = Math.abs(this.camera.position.x) < 0.2 && Math.abs(this.camera.position.z) < 0.2;
     const hasFrontAndBack =
       allAvatars.length > 1 &&
       allAvatars.some((a) => (a.vrm?.scene ? a.vrm.scene.position.z > 0.3 : a.initialPosition.z > 0.3)) &&
       allAvatars.some((a) => (a.vrm?.scene ? a.vrm.scene.position.z < -0.3 : a.initialPosition.z < -0.3));
 
-    const isSurrounded = isPanoramaActive || hasPanoramaUrl || hasFrontAndBack || (isMultiCharacter && isAtPlayerOrigin);
+    const isSurrounded = hasFrontAndBack || (isMultiCharacter && isAtPlayerOrigin);
 
     if (isSurrounded) {
-      // In 360 panorama mode or surrounded formation, camera sits at player position (origin [0, 1.15, 0])
+      // In surrounded formation, camera sits at player position (origin [0, 1.15, 0])
       // and turns towards the active speaker. Zoom is performed safely via FOV narrowing to avoid mesh penetration.
       defaultCameraPos.set(0, 1.15, 0);
 

@@ -184,8 +184,6 @@ export interface ScenarioScene {
   background?: string;
   backgroundZoom?: number;        // 背景テクスチャのズーム倍率オーバーライド (1.0 = 引いた等倍全体表示)
   backgroundOffset?: { x?: number; y?: number }; // 背景テクスチャのオフセット微調整
-  panoramaBackgroundUrl?: string; // 360° Equirectangular パノラマ背景URL
-  usePanoramaCamera?: boolean;    // パノラマ用の固定視点カメラ（原点固定・視線回転）
   scenePreset?: ScenePresetId;
   cameraStartAngle?: CameraStartAngle;
   cameraPreset?: CameraPreset;
@@ -195,7 +193,6 @@ export interface ScenarioScene {
   cameraTransitionDuration?: number; // Transition duration in seconds (default 0.7s)
   cameraTransitionEasing?: CameraTransitionEasing; // Transition easing (gyuin / smooth / cut)
   cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
-  live2d?: boolean | { enabled?: boolean; basePath?: string; triggerDistance?: number }; // Live2D近接カットイン表示の有効化/画像パス指定
   cameraPosition?: [number, number, number]; // Direct camera position override (e.g. over-the-shoulder)
   cameraFov?: number; // Direct camera FOV override
   choices?: ScenarioChoice[];
@@ -211,7 +208,6 @@ export interface ScenarioScene {
   shaftCutIn?: 'red_trouble' | 'green_closed' | 'none'; // 赤コマ・緑コマのタイポグラフィカットイン
   shaftCutInDuration?: number; // カットイン表示秒数
   shafudo?: boolean; // エミリ等の「シャフ度」ポーズ
-  crowd?: boolean | ScenarioCrowdConfig; // ペルソナ5風モブ群衆演出
   conditions?: string[];
   goto?: string;
   isEnding?: boolean; // このシーンの終了後にシナリオ全体を終了（リプレイ画面へ遷移）
@@ -219,13 +215,6 @@ export interface ScenarioScene {
   autoNextSec?: number;
   /** セリフ中のカメラ・背景遷移タイムライン（at 昇順で指定） */
   transitions?: SceneTransition[];
-}
-
-export interface ScenarioCrowdConfig {
-  enabled?: boolean;
-  preset?: 'school_gate' | 'corridor' | 'classroom' | 'cafe_street' | string;
-  opacity?: number;
-  tone?: 'p5' | 'monotone';
 }
 
 export interface ScenarioChapter {
@@ -243,7 +232,6 @@ export interface ScenarioPackage {
   title: string;
   stage?: ScenarioStageId; // 3D の舞台（指定時は background 画像ではなく部屋のモデルを表示）
   characters?: ScenarioCharacterPlacement[]; // Placements for multi-character scenarios
-  panoramaBackgroundUrl?: string; // パッケージ全体のデフォルト360°パノラマ背景URL
   bgm?: string;       // Sound Master ID (e.g. 'bgm_main')
   bgmUrl?: string;    // Direct BGM URL (Backward compatibility)
   bgmVolume?: number;

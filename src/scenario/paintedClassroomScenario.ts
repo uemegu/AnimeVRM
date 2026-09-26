@@ -1,4 +1,4 @@
-import type { ScenarioPackage, ScenarioSceneAvatarConfig, ScenarioScene, ScenarioCrowdConfig } from './types';
+import type { ScenarioPackage, ScenarioSceneAvatarConfig, ScenarioScene } from './types';
 import { PAINTED_CLASSROOM_SHOTS } from '../scene/painted-classroom/PaintedClassroom';
 import { resolveAssetUrl } from '../utils/path';
 
@@ -37,21 +37,15 @@ const aoi = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig =>
 const emily = (config: ScenarioSceneAvatarConfig): ScenarioSceneAvatarConfig =>
   ({ visible: true, position: EMILY_POSITION, rotationY: EMILY_ROTATION_Y, ...FACE_PARTNER, ...config });
 
-const CLASSROOM_CROWD: ScenarioCrowdConfig = {
-  enabled: true,
-  preset: 'painted-classroom',
-  opacity: 0.65,
-};
-
 const LOCATION = '昼休みの教室';
-const AOI = { speaker: 'アオイ', speakerCharacterId: 'aoi', dialogueTarget: 'partner', crowd: CLASSROOM_CROWD } as const;
-const EMILY = { speaker: 'エミリ', speakerCharacterId: 'emily', dialogueTarget: 'partner', crowd: CLASSROOM_CROWD } as const;
+const AOI = { speaker: 'アオイ', speakerCharacterId: 'aoi', dialogueTarget: 'partner' } as const;
+const EMILY = { speaker: 'エミリ', speakerCharacterId: 'emily', dialogueTarget: 'partner' } as const;
 
 /** Classroom conversation with background mob and voice acting in the painted 3D set. */
 export function getPaintedClassroomScenario(): ScenarioPackage {
   const scenes: ScenarioScene[] = [
     {
-      id: 'pc_1', location: LOCATION, scenePreset: 'day_school', ...WIDE, ...CUT, crowd: CLASSROOM_CROWD,
+      id: 'pc_1', location: LOCATION, scenePreset: 'day_school', ...WIDE, ...CUT,
       // A slow creep into the painting sells its depth before anyone speaks.
       cameraPreset: 'pushIn', cameraStrength: 0.35,
       text: '昼休みの教室。クラスメイトたちの賑やかな声が響く中、窓際で二人が話していた。',

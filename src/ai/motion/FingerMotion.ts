@@ -3,7 +3,7 @@ import type { VRM, VRMHumanBoneName } from '@pixiv/three-vrm';
 import { basics } from '../../motion/basics';
 import { MotionEngine } from '../../motion/engine';
 
-// Derive choices from the same definitions shown on motion.html.
+// Derive choices from the basic hand poses in motion/basics.
 export const FINGER_MOTION_OPTIONS = Object.entries(basics)
   .filter(([, pose]) => pose.fingers?.side === 'Right')
   .map(([source, pose]) => ({ id: source.slice('@right-'.length), label: pose.label.replace('右手：', '') }));
@@ -61,7 +61,7 @@ export class FingerMotionService {
 
   public async createTargets(selection: FingerMotionSelection, vrm: VRM): Promise<FingerPoseTarget[]> {
     if (!selection.right && !selection.left) return [];
-    // Reuse motion.html's procedural poses and source-rig axes, including thumbs.
+    // Reuse the procedural poses and source-rig axes from motion/basics, including thumbs.
     this.loading ??= this.engine.init().catch(error => { this.loading = null; throw error; });
     await this.loading;
     for (const rest of this.engine.rest.values()) rest.node.quaternion.copy(rest.q);
@@ -79,7 +79,7 @@ export class FingerMotionService {
           const rest = this.engine.rest.get(`${pose.fingers.side}Hand${finger}${joint + 1}`);
           const bone = `${side}${finger === 'Pinky' ? 'Little' : finger}${segments[joint]}` as VRMHumanBoneName;
           if (!rest || !vrm.humanoid.getNormalizedBoneNode(bone)) continue;
-          // Same Mixamo → normalized VRM conversion as motion.html's syncVRMPose.
+          // Mixamo → normalized VRM conversion.
           const rotation = rest.node.quaternion.clone().premultiply(rest.parentWorld).multiply(rest.world.clone().invert());
           if (vrm.meta.metaVersion === '0') { rotation.x *= -1; rotation.z *= -1; }
           targets.push({ bone, rotation: rotation.normalize() });

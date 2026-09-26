@@ -14,7 +14,6 @@ import { getTwoGirlsConversationScenario } from '../scenario/twoGirlsConversatio
 import { getTrioConversationScenario } from '../scenario/trioConversationScenario';
 import { getHaremConversationScenario } from '../scenario/haremScenario';
 import { getTownWalkScenario } from '../scenario/townWalkScenario';
-import { getBehindYouScenario } from '../scenario/behindYouScenario';
 import { getNisaScenario } from '../scenario/nisaScenario';
 import { getFastMotionScenario } from '../scenario/fastMotionScenario';
 import { getDoorPeepYandereScenario } from '../scenario/doorPeepYandereScenario';
@@ -29,11 +28,7 @@ import { getCorridorConversationScenario } from '../scenario/corridorConversatio
 import { getPaintedClassroomScenario } from '../scenario/paintedClassroomScenario';
 import { getPaintedLibraryScenario } from '../scenario/paintedLibraryScenario';
 import { getCafeMonitoringScenario } from '../scenario/cafeMonitoringScenario';
-import { ColorHistogram } from '../histogram/ColorHistogram';
 import { AudioLipSync } from '../AudioLipSync';
-import { GeminiLiveChatController } from '../ai/live/GeminiLiveChatController';
-import { GEMINI_LIVE_VOICES } from '../ai/live/GeminiVoices';
-import { ARDY_MODEL_TERMS_URL } from '../ai/motion/ardy/ArdyMotionService';
 import { ViewerCore } from '../scene/ViewerCore';
 import { ScenePresetManager } from '../scene/ScenePresetManager';
 import { AvatarManager, isMotionLoop } from '../avatar/AvatarManager';
@@ -45,7 +40,6 @@ import { openImportModal } from './components/ImportExportModal';
 import { AvatarTransformController } from '../avatar/AvatarTransformController';
 import { registerPanelOpenCallback, syncBgButtons } from './helpers';
 import type { ShaftModeController } from '../effects/shaft/ShaftModeController';
-import type { Live2DTransitionManager } from '../live2d/Live2DTransitionManager';
 import { FACE_OVERLAY_KINDS, FaceOverlayKind } from '../effects/FaceOverlayEffect';
 import { MorphTargetPanel } from './components/MorphTargetPanel';
 
@@ -58,11 +52,8 @@ export interface UnifiedPanelContext {
   classroomExperienceController?: ClassroomExperienceController;
   inspectorManager: InspectorManager;
   audioLipSync: AudioLipSync;
-  geminiLiveChatController: GeminiLiveChatController;
-  colorHistogram: ColorHistogram;
   avatarTransformController?: AvatarTransformController;
   shaftModeController?: ShaftModeController;
-  live2DTransitionManager?: Live2DTransitionManager;
   onApplyConfig: (cfg: AvatarConfig) => void;
   onResize: () => void;
 }
@@ -77,10 +68,7 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     classroomExperienceController,
     inspectorManager,
     audioLipSync,
-    geminiLiveChatController,
-    colorHistogram,
     shaftModeController,
-    live2DTransitionManager,
     onApplyConfig,
     onResize,
   } = ctx;
@@ -138,10 +126,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     });
   };
   registerPanelOpenCallback(setPanelOpen);
-
-  const captureAndRenderHistogram = () => {
-    viewerCore.captureAndRenderHistogram(colorHistogram, currentConfig);
-  };
 
   const rebuildInspector = () => {
     inspectorManager.setupInspector({
@@ -248,7 +232,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
               <label class="section-label">${tr.character.expression}</label>
               <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-                <button id="live2d-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #064e3b; border: 1px solid #10b981; color: #a7f3d0; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🎨 Live2D</button>
                 <button id="shaft-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #18181b; border: 1px solid #71717a; color: #f4f4f5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖋️ シャフト</button>
                 <button id="blush-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2b1122; border: 1px solid #f43f5e; color: #fbcfe8; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">😳 頬赤らめ</button>
                 <button id="yandere-toggle-btn" style="font-size: 10.5px; padding: 2.5px 8px; background: #2a1118; border: 1px solid #dc2626; color: #fca5a5; border-radius: 4px; cursor: pointer; font-weight: 700; transition: all 0.2s;">🖤 ヤンデレ闇落ち</button>
@@ -573,17 +556,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
             </div>
           </div>
 
-          <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #f97316; padding: 8px; border-radius: 4px;">
-            <label class="section-label" style="color: #fb923c; font-weight: 700;">${tr.scenario.behindYouTitle}</label>
-            <div style="display: flex; gap: 4px; margin-top: 4px;">
-              <button id="scenario-behindyou-btn" class="action-btn primary" style="flex: 1; background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); font-weight: 700; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25); font-size: 12px; padding: 7px;">${tr.scenario.playBehindYou}</button>
-              <button id="scenario-behindyou-stop-btn" class="action-btn">${tr.scenario.stopScenario}</button>
-            </div>
-            <div style="font-size: 10.5px; color: #fed7aa; line-height: 1.4; margin-top: 5px;">
-              ${tr.scenario.behindYouDesc}
-            </div>
-          </div>
-
           <div class="section-box" style="background: #202020; border: 1px solid #333333; border-left: 3px solid #14b8a6; padding: 8px; border-radius: 4px;">
             <label class="section-label" style="color: #2dd4bf; font-weight: 700;">${tr.scenario.nisaTitle}</label>
             <div style="display: flex; gap: 4px; margin-top: 4px;">
@@ -758,107 +730,10 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         <!-- TAB 3: Visual -->
         <div id="tab-pane-visual" class="tab-pane ${currentActiveTab === 'visual' ? 'active' : ''}">
           <div id="gui-mount-point-visual"></div>
-          <div id="histogram-mount-point" style="margin-top: 8px;"></div>
         </div>
 
         <!-- TAB 4: AI & System -->
         <div id="tab-pane-system" class="tab-pane ${currentActiveTab === 'system' ? 'active' : ''}">
-          <!-- AI Avatar Realtime Live Chat (Gemini 3.8 Live) -->
-          <div class="aichat-container" style="border-color: #2e435a; background: #161b22;">
-            <div class="aichat-status-card" style="background: linear-gradient(135deg, #182230 0%, #121820 100%);">
-              <div class="aichat-status-header">
-                <span class="aichat-status-title" style="color: #6ab0f8; font-weight: 600;">${tr.geminiLiveChat.title}</span>
-                <span id="gemini-live-badge" class="aichat-badge">${tr.geminiLiveChat.statusDisconnected}</span>
-              </div>
-              <div id="gemini-live-status-msg" class="aichat-status-detail">${tr.geminiLiveChat.description}</div>
-
-              <!-- API Key input (Password, in-memory only, NOT saved to localStorage) -->
-              <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 6px;">
-                <label style="font-size: 11px; color: #8cb8ff; font-weight: 500;">🔑 ${tr.geminiLiveChat.apiKeyLabel}:</label>
-                <div style="display: flex; gap: 4px;">
-                  <input type="password" id="gemini-live-api-key" class="aichat-input" placeholder="${tr.geminiLiveChat.apiKeyPlaceholder}" style="flex: 1; font-size: 11px;" autocomplete="off" />
-                  <button id="gemini-live-toggle-key" class="action-btn" style="padding: 4px 8px; font-size: 11px;" title="表示切替">👁️</button>
-                </div>
-                <small style="font-size: 9px; color: #888888; line-height: 1.2;">${tr.geminiLiveChat.apiKeyNote}</small>
-              </div>
-
-              <!-- Model & Voice selection -->
-              <div style="display: flex; gap: 6px; margin-top: 6px;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; color: #aaaaaa;">⚡ ${tr.geminiLiveChat.modelLabel}:</label>
-                  <input type="text" id="gemini-live-model-input" list="gemini-live-model-list" class="aichat-input" value="${geminiLiveChatController.getModel()}" style="font-size: 11px;" />
-                  <datalist id="gemini-live-model-list">
-                    <option value="gemini-3.8-live">gemini-3.8-live (最新・標準)</option>
-                    <option value="gemini-3.8-live-extended-thinking">gemini-3.8-live-extended-thinking (高思考)</option>
-                    <option value="gemini-2.0-flash-exp">gemini-2.0-flash-exp (従来モデル)</option>
-                  </datalist>
-                </div>
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <label style="font-size: 11px; color: #aaaaaa;">🗣️ ${tr.geminiLiveChat.voiceLabel}:</label>
-                  <select id="gemini-live-voice-select" style="font-size: 11px; padding: 4px 6px; border-radius: 4px; border: 1px solid #3d3d3d; background: #1e1e1e; color: #ffffff; cursor: pointer;">
-                    <optgroup label="♀ 女性ボイス (Female)">
-                      ${GEMINI_LIVE_VOICES.filter((v) => v.gender === 'female')
-                        .map(
-                          (v) =>
-                            `<option value="${v.name}" ${geminiLiveChatController.getVoice() === v.name ? 'selected' : ''}>${v.name} (${lang === 'ja' ? v.labelJa : v.labelEn})</option>`
-                        )
-                        .join('')}
-                    </optgroup>
-                    <optgroup label="♂ 男性ボイス (Male)">
-                      ${GEMINI_LIVE_VOICES.filter((v) => v.gender === 'male')
-                        .map(
-                          (v) =>
-                            `<option value="${v.name}" ${geminiLiveChatController.getVoice() === v.name ? 'selected' : ''}>${v.name} (${lang === 'ja' ? v.labelJa : v.labelEn})</option>`
-                        )
-                        .join('')}
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-
-              <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 12px; display: flex; gap: 6px; align-items: center;">
-                  <input type="checkbox" id="gemini-ardy-enabled" ${geminiLiveChatController.getArdyEnabled() ? 'checked' : ''} />
-                  ${tr.geminiLiveChat.ardyEnabled}
-                </label>
-                <div id="gemini-ardy-controls" ${geminiLiveChatController.getArdyEnabled() ? '' : 'hidden'}>
-                  <p style="font-size: 11px; color: #aaaaaa; line-height: 1.5; margin: 4px 0;">${tr.geminiLiveChat.ardyNote}
-                    <a href="${ARDY_MODEL_TERMS_URL}" target="_blank" rel="noopener noreferrer" style="color: #93c5fd;">${tr.geminiLiveChat.ardyTerms}</a>
-                  </p>
-                  <label style="font-size: 12px; display: flex; gap: 6px; align-items: center; margin-top: 8px;">
-                    <input type="checkbox" id="gemini-ardy-autonomous" ${geminiLiveChatController.getAutonomousEnabled() ? 'checked' : ''} />
-                    ${tr.geminiLiveChat.ardyAutonomous}
-                  </label>
-                  <p style="font-size: 11px; color: #aaaaaa; line-height: 1.5; margin: 4px 0;">${tr.geminiLiveChat.ardyAutonomousNote}</p>
-                  <label for="gemini-ardy-planner-model" style="font-size: 11px; display: block; margin: 6px 0 4px;">${tr.geminiLiveChat.ardyPlannerModel}</label>
-                  <input id="gemini-ardy-planner-model" class="aichat-input" type="text" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;" />
-                  <button id="gemini-ardy-load" class="action-btn">${tr.geminiLiveChat.ardyLoad}</button>
-                  <div id="gemini-ardy-status" role="status" aria-live="polite" style="font-size: 11px; margin: 6px 0; overflow-wrap: anywhere;"></div>
-                  <label for="gemini-ardy-prompt" style="font-size: 11px; display: block; margin-bottom: 4px;">${tr.geminiLiveChat.ardyPrompt}</label>
-                  <textarea id="gemini-ardy-prompt" class="aichat-input" rows="3" maxlength="512" style="width: 100%; box-sizing: border-box; resize: vertical;">A person stands in place and gently waves their right hand in greeting.</textarea>
-                  <button id="gemini-ardy-preview" class="action-btn" style="margin-top: 6px;" disabled>${tr.geminiLiveChat.ardyPreview}</button>
-                </div>
-              </div>
-
-              <!-- Connect & Mic buttons -->
-              <div style="display: flex; gap: 6px; margin-top: 8px;">
-                <button id="gemini-live-connect-btn" class="aichat-init-btn" style="background: #2563eb; flex: 2;">${tr.geminiLiveChat.startChat}</button>
-                <button id="gemini-live-mic-btn" class="action-btn" style="flex: 1; font-size: 11px; padding: 6px 8px;" disabled>${tr.geminiLiveChat.micOn}</button>
-              </div>
-            </div>
-
-            <!-- Messages Box -->
-            <div id="gemini-live-messages" class="aichat-messages-box">
-              <div id="gemini-live-empty-hint" class="aichat-empty-hint">${tr.geminiLiveChat.emptyHistory}</div>
-            </div>
-
-            <!-- Text Input -->
-            <div class="aichat-input-row">
-              <input type="text" id="gemini-live-text-input" class="aichat-input" placeholder="${tr.geminiLiveChat.textPlaceholder}" />
-              <button id="gemini-live-send-btn" class="aichat-send-btn">${tr.geminiLiveChat.send}</button>
-            </div>
-          </div>
-
           <!-- Performance Monitor Toggle -->
           <div class="section-box" style="margin-top: 8px; background: #202020; border: 1px solid #333333; border-radius: 4px; padding: 10px;">
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -921,19 +796,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
   };
 
   const bindEvents = () => {
-    // Mount Color Histogram
-    const histMount = document.getElementById('histogram-mount-point');
-    if (histMount) {
-      colorHistogram.mount(histMount, () => {
-        captureAndRenderHistogram();
-      });
-      if (currentActiveTab === 'visual') {
-        requestAnimationFrame(() => {
-          captureAndRenderHistogram();
-        });
-      }
-    }
-
     // Language Selector
     const langSelect = document.getElementById('language-select') as HTMLSelectElement | null;
     langSelect?.addEventListener('change', () => {
@@ -957,11 +819,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         tabPanes.forEach((pane) => {
           pane.classList.toggle('active', pane.id === `tab-pane-${target}`);
         });
-        if (target === 'visual') {
-          requestAnimationFrame(() => {
-            captureAndRenderHistogram();
-          });
-        }
       });
     });
 
@@ -978,248 +835,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     };
     scenarioController.masterManager.subscribe(updateMasterCountLabels);
     updateMasterCountLabels();
-
-    // --------------------------------------------------
-    // Gemini Live (Multimodal WebSocket) Chat Binding
-    // --------------------------------------------------
-    const glBadge = document.getElementById('gemini-live-badge');
-    const glStatusMsg = document.getElementById('gemini-live-status-msg');
-    const glApiKeyInput = document.getElementById('gemini-live-api-key') as HTMLInputElement | null;
-    const glToggleKeyBtn = document.getElementById('gemini-live-toggle-key') as HTMLButtonElement | null;
-    const glModelInput = document.getElementById('gemini-live-model-input') as HTMLInputElement | null;
-    const glVoiceSelect = document.getElementById('gemini-live-voice-select') as HTMLSelectElement | null;
-    const glConnectBtn = document.getElementById('gemini-live-connect-btn') as HTMLButtonElement | null;
-    const glMicBtn = document.getElementById('gemini-live-mic-btn') as HTMLButtonElement | null;
-    const glMessages = document.getElementById('gemini-live-messages');
-    const glEmptyHint = document.getElementById('gemini-live-empty-hint');
-    const glTextInput = document.getElementById('gemini-live-text-input') as HTMLInputElement | null;
-    const glSendBtn = document.getElementById('gemini-live-send-btn') as HTMLButtonElement | null;
-    const ardyEnabled = document.getElementById('gemini-ardy-enabled') as HTMLInputElement;
-    const ardyControls = document.getElementById('gemini-ardy-controls')!;
-    const ardyLoad = document.getElementById('gemini-ardy-load') as HTMLButtonElement;
-    const ardyPreview = document.getElementById('gemini-ardy-preview') as HTMLButtonElement;
-    const ardyPrompt = document.getElementById('gemini-ardy-prompt') as HTMLTextAreaElement;
-    const ardyStatus = document.getElementById('gemini-ardy-status')!;
-    const ardyAutonomous = document.getElementById('gemini-ardy-autonomous') as HTMLInputElement;
-    const ardyPlannerModel = document.getElementById('gemini-ardy-planner-model') as HTMLInputElement;
-    ardyPlannerModel.value = geminiLiveChatController.getPlannerModel();
-    ardyAutonomous.addEventListener('change', () => geminiLiveChatController.setAutonomousEnabled(ardyAutonomous.checked));
-    ardyPlannerModel.addEventListener('change', () => geminiLiveChatController.setPlannerModel(ardyPlannerModel.value));
-
-    const renderArdyState = () => {
-      const state = geminiLiveChatController.getArdyState();
-      const chatState = geminiLiveChatController.getState();
-      const chatActive = !['disconnected', 'error'].includes(chatState);
-      const enabled = geminiLiveChatController.getArdyEnabled();
-      ardyEnabled.checked = enabled;
-      ardyEnabled.disabled = chatActive;
-      ardyControls.hidden = !enabled;
-      ardyAutonomous.checked = geminiLiveChatController.getAutonomousEnabled();
-      ardyPlannerModel.disabled = chatActive || !ardyAutonomous.checked;
-      ardyLoad.disabled = chatActive || ['loading', 'ready', 'generating'].includes(state);
-      ardyPreview.disabled = chatActive || state !== 'ready';
-      ardyPrompt.disabled = chatActive || state === 'generating';
-      const detail = geminiLiveChatController.getArdyDetail();
-      ardyStatus.textContent = `${t().geminiLiveChat.ardyStates[state]}${detail ? ` — ${detail}` : ''}`;
-      if (glConnectBtn && !chatActive) glConnectBtn.disabled = enabled && state !== 'ready';
-    };
-
-    const renderLiveState = (state: string, statusText?: string) => {
-      if (!glBadge) return;
-      glBadge.className = `aichat-badge ${state}`;
-
-      const curTr = t().geminiLiveChat;
-      const stateLabels: Record<string, string> = {
-        disconnected: curTr.statusDisconnected,
-        connecting: curTr.statusConnecting,
-        connected: curTr.statusConnected,
-        listening: curTr.statusListening,
-        speaking: curTr.statusSpeaking,
-        error: curTr.statusError,
-      };
-
-      glBadge.textContent = stateLabels[state] || state;
-      if (statusText && glStatusMsg) {
-        glStatusMsg.textContent = statusText;
-      }
-
-      const isConnectedOrActive =
-        state === 'connected' || state === 'listening' || state === 'speaking';
-
-      if (glConnectBtn) {
-        glConnectBtn.textContent = isConnectedOrActive ? curTr.stopChat : curTr.startChat;
-        glConnectBtn.style.background = isConnectedOrActive ? '#dc2626' : '#2563eb';
-        glConnectBtn.disabled = state === 'connecting';
-      }
-
-      if (glMicBtn) {
-        glMicBtn.disabled = !isConnectedOrActive;
-      }
-
-      if (glTextInput && glSendBtn) {
-        glTextInput.disabled = !isConnectedOrActive;
-        glSendBtn.disabled = !isConnectedOrActive;
-      }
-      renderArdyState();
-    };
-
-    const renderMessageItem = (msg: any) => {
-      if (glEmptyHint) glEmptyHint.style.display = 'none';
-      if (!glMessages) return;
-
-      let msgEl = document.getElementById(`msg-${msg.id}`);
-      if (!msgEl) {
-        msgEl = document.createElement('div');
-        msgEl.id = `msg-${msg.id}`;
-        msgEl.className = `aichat-msg ${msg.role}`;
-        glMessages.appendChild(msgEl);
-      }
-
-      msgEl.innerHTML = '';
-      const textEl = document.createElement('div');
-      textEl.textContent = msg.content || (msg.role === 'assistant' && !msg.tools?.length ? '…' : '');
-      msgEl.appendChild(textEl);
-
-      if (msg.tools && msg.tools.length > 0) {
-        const metaEl = document.createElement('div');
-        metaEl.className = 'aichat-msg-meta';
-        for (const tool of msg.tools) {
-          const tag = document.createElement('span');
-          tag.className = 'aichat-tag';
-          tag.textContent = tool.detail;
-          metaEl.appendChild(tag);
-        }
-        msgEl.appendChild(metaEl);
-      }
-
-      glMessages.scrollTop = glMessages.scrollHeight;
-    };
-
-    geminiLiveChatController.setEvents({
-      onArdyStateChange: () => renderArdyState(),
-      onStateChange: (state, statusText) => {
-        renderLiveState(state, statusText);
-      },
-      onMicStateChange: (active) => {
-        if (glMicBtn) {
-          const curTr = t().geminiLiveChat;
-          glMicBtn.textContent = active ? curTr.micOn : curTr.micMuted;
-          glMicBtn.style.background = active ? '#16a34a' : '#4b5563';
-        }
-      },
-      onMessageAdded: (msg) => {
-        renderMessageItem(msg);
-      },
-      onMessageUpdated: (msg) => {
-        renderMessageItem(msg);
-      },
-      onError: (err) => {
-        const msg = typeof err === 'string' ? err : err.message;
-        if (glStatusMsg) glStatusMsg.textContent = msg;
-        renderLiveState('error', msg);
-        showToast(`Gemini Live エラー: ${msg}`);
-      },
-    });
-
-    ardyEnabled.addEventListener('change', () => {
-      try { geminiLiveChatController.setArdyEnabled(ardyEnabled.checked); }
-      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
-      renderArdyState();
-    });
-    ardyLoad.addEventListener('click', async () => {
-      try { await geminiLiveChatController.loadArdyModel(); }
-      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
-    });
-    ardyPreview.addEventListener('click', async () => {
-      try { await geminiLiveChatController.previewArdyMotion(ardyPrompt.value); }
-      catch (error) { showToast(error instanceof Error ? error.message : String(error)); }
-    });
-    geminiLiveChatController.getHistory().forEach(renderMessageItem);
-
-    // API key input (In-memory only, NO localStorage!)
-    glApiKeyInput?.addEventListener('input', () => {
-      if (glApiKeyInput) {
-        geminiLiveChatController.setApiKey(glApiKeyInput.value);
-      }
-    });
-
-    // Toggle key visibility
-    glToggleKeyBtn?.addEventListener('click', () => {
-      if (glApiKeyInput) {
-        glApiKeyInput.type = glApiKeyInput.type === 'password' ? 'text' : 'password';
-      }
-    });
-
-    // Model input
-    glModelInput?.addEventListener('change', () => {
-      if (glModelInput?.value) {
-        geminiLiveChatController.setModel(glModelInput.value);
-      }
-    });
-
-    // Voice select
-    glVoiceSelect?.addEventListener('change', () => {
-      if (glVoiceSelect?.value) {
-        geminiLiveChatController.setVoice(glVoiceSelect.value);
-      }
-    });
-
-    // Connect / Disconnect button
-    glConnectBtn?.addEventListener('click', async () => {
-      if ((audioLipSync as any).audioContext?.state === 'suspended') {
-        await (audioLipSync as any).audioContext.resume();
-      }
-
-      const currentState = geminiLiveChatController.getState();
-      if (currentState === 'disconnected' || currentState === 'error') {
-        if (!geminiLiveChatController.hasApiKey()) {
-          glApiKeyInput?.focus();
-          showToast('Gemini APIキーを入力してください');
-          return;
-        }
-        try {
-          await geminiLiveChatController.connect();
-          showToast('🎙️ Gemini Live に接続しました');
-        } catch (err: any) {
-          showToast(err?.message || '接続に失敗しました');
-        }
-      } else {
-        geminiLiveChatController.disconnect();
-        showToast('Gemini Live を切断しました');
-      }
-    });
-
-    // Mic Toggle button
-    glMicBtn?.addEventListener('click', async () => {
-      try {
-        const active = await geminiLiveChatController.toggleMicrophone();
-        showToast(active ? '🎤 マイクを有効にしました' : '🔇 マイクをミュートしました');
-      } catch (err: any) {
-        showToast(`マイク切り替え失敗: ${err.message || err}`);
-      }
-    });
-
-    // Text Send
-    const handleSendLiveText = () => {
-      if (!glTextInput || !glTextInput.value.trim()) return;
-      const text = glTextInput.value.trim();
-      glTextInput.value = '';
-      try {
-        geminiLiveChatController.sendTextMessage(text);
-      } catch (err: any) {
-        showToast(err?.message || '送信に失敗しました');
-      }
-    };
-
-    glSendBtn?.addEventListener('click', handleSendLiveText);
-    glTextInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.isComposing) {
-        e.preventDefault();
-        handleSendLiveText();
-      }
-    });
-
-    renderLiveState(geminiLiveChatController.getState());
 
     document.getElementById('master-export-json-btn')?.addEventListener('click', () => {
       scenarioController.masterManager.downloadJSON('masters.json');
@@ -1355,9 +970,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       button.disabled = true;
       button.textContent = '教室を準備中…';
       try {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         await classroomExperienceController.start();
         showToast('🏫 教室3D体験を開始しました — WASDでアオイを操作できます');
       } catch (error) {
@@ -1513,38 +1125,12 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       showToast(t().toasts.scenarioStopped);
     });
 
-    // Interactive Behind You Scenario Play/Stop
-    document.getElementById('scenario-behindyou-btn')?.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (scenarioController.scenarioEngine.isPlaying) {
-        scenarioController.scenarioEngine.stop();
-      } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
-        if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
-        if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
-        const scenario = getBehindYouScenario(getLanguage());
-        scenarioController.scenarioEngine.play(scenario);
-        showToast(t().toasts.behindYouStarted);
-      }
-    });
-
-    document.getElementById('scenario-behindyou-stop-btn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      scenarioController.scenarioEngine.stop();
-      showToast(t().toasts.scenarioStopped);
-    });
-
     // Interactive NISA All-Country ETF Scenario Play/Stop
     document.getElementById('scenario-nisa-btn')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getNisaScenario(getLanguage());
@@ -1565,9 +1151,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getFastMotionScenario(getLanguage());
@@ -1588,9 +1171,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getDoorPeepYandereScenario(getLanguage());
@@ -1611,9 +1191,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getPrivateDateScenario(getLanguage());
@@ -1637,9 +1214,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getTeacherGateScenario(getLanguage());
@@ -1663,9 +1237,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getFiveSecondsConfessionPvScenario();
@@ -1690,9 +1261,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         await scenarioController.playWithInterlude(GHOST_MASS_SCENARIO, {
@@ -1715,9 +1283,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getSilverWeekScenario(getLanguage());
@@ -1741,9 +1306,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getGestureBattleScenario(getLanguage());
@@ -1767,9 +1329,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getCorridorConversationScenario();
@@ -1790,9 +1349,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getPaintedClassroomScenario();
@@ -1813,9 +1369,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getPaintedLibraryScenario();
@@ -1836,9 +1389,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
       if (scenarioController.scenarioEngine.isPlaying) {
         scenarioController.scenarioEngine.stop();
       } else {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         if (scenarioController.scenarioPlayer.isPlaying) scenarioController.scenarioPlayer.stop();
         if (avatarManager.animationPlayer.isPlaying) avatarManager.animationPlayer.stop();
         const scenario = getCafeMonitoringScenario(getLanguage());
@@ -1861,9 +1411,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
     bgButtons.forEach((btn) => {
       if (btn.id === 'open-local-bg-btn') return;
       btn.addEventListener('click', () => {
-        if (viewerCore.panoramaController.isActive) {
-          viewerCore.panoramaController.deactivate();
-        }
         const bg = btn.getAttribute('data-bg');
         const mid = btn.getAttribute('data-mid');
         const near = btn.getAttribute('data-near');
@@ -1916,9 +1463,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (file) {
           const blobUrl = URL.createObjectURL(file);
-          if (viewerCore.panoramaController.isActive) {
-            viewerCore.panoramaController.deactivate();
-          }
           currentConfig.environment.showBackgroundImage = true;
           currentConfig.environment.backgroundImageUrl = blobUrl;
           currentConfig.environment.showMidground = false;
@@ -2052,42 +1596,6 @@ export function setupUnifiedPanel(ctx: UnifiedPanelContext): void {
 
     // Expression Buttons
     const exprButtons = document.querySelectorAll<HTMLButtonElement>('.expr-btn');
-
-    // Live2D Mode Toggle Button
-    const live2dToggleBtn = document.getElementById('live2d-toggle-btn') as HTMLButtonElement | null;
-    const updateLive2DButtonUI = (isActive: boolean) => {
-      if (!live2dToggleBtn) return;
-      live2dToggleBtn.style.background = isActive ? '#059669' : '#064e3b';
-      live2dToggleBtn.style.borderColor = isActive ? '#34d399' : '#10b981';
-      live2dToggleBtn.style.color = isActive ? '#ffffff' : '#a7f3d0';
-      live2dToggleBtn.style.boxShadow = isActive ? '0 0 10px rgba(16, 185, 129, 0.6)' : 'none';
-      live2dToggleBtn.textContent = isActive ? '🎨 Live2D中 (解除)' : '🎨 Live2D';
-    };
-
-    if (live2DTransitionManager) {
-      updateLive2DButtonUI(live2DTransitionManager.mode === 'live2d');
-      live2DTransitionManager.onModeChange((mode) => {
-        updateLive2DButtonUI(mode === 'live2d');
-      });
-
-      live2dToggleBtn?.addEventListener('click', async () => {
-        if (!live2DTransitionManager) return;
-        const currentMode = live2DTransitionManager.mode;
-        if (
-          currentMode === 'transitioning_to_live2d' ||
-          currentMode === 'transitioning_to_vrm'
-        ) {
-          return;
-        }
-        const willBeLive2D = currentMode !== 'live2d';
-        await live2DTransitionManager.toggle();
-        if (willBeLive2D) {
-          showToast('🎨 Live2Dモードを発動しました');
-        } else {
-          showToast('✨ VRMモードに戻りました');
-        }
-      });
-    }
 
     // Shaft Mode Toggle Button
     const shaftToggleBtn = document.getElementById('shaft-toggle-btn') as HTMLButtonElement | null;

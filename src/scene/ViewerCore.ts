@@ -20,9 +20,7 @@ import { SunEffect } from '../postprocessing/SunEffect';
 import { WindParticles } from '../wind/WindParticles';
 import { RainEffect } from '../effects/rain';
 import { EffectTextManager } from '../effects/text';
-import { ColorHistogram } from '../histogram/ColorHistogram';
 import { SkyBackground } from './SkyBackground';
-import { PanoramaBackgroundController } from './PanoramaBackgroundController';
 
 export function getToneMappingMode(mode: string): THREE.ToneMapping {
   switch (mode) {
@@ -179,7 +177,6 @@ export class ViewerCore {
   public sharedEffectTextManager: EffectTextManager;
   public skyBackground: SkyBackground;
   private backgroundRequest = 0;
-  public panoramaController: PanoramaBackgroundController;
 
   public windParticles: WindParticles;
   public rainEffect: RainEffect;
@@ -347,27 +344,6 @@ export class ViewerCore {
     this.controls.maxPolarAngle = Math.PI / 2 + 0.1;
     this.camera.lookAt(this.controls.target);
     this.controls.update();
-
-    this.panoramaController = new PanoramaBackgroundController({
-      scene: this.scene,
-      camera: this.camera,
-      controls: this.controls,
-      domElement: this.canvas,
-      onStateChange: (active) => {
-        if (active) {
-          this.backgroundRequest++;
-          this.skyBackground.mesh.visible = false;
-          this.floor.visible = false;
-          this.midgroundMesh.visible = false;
-          this.neargroundMesh.visible = false;
-        } else {
-          this.updateBackgroundDisplay(initialConfig);
-          this.floor.visible = initialConfig.environment.showFloor;
-          this.updateMidgroundDisplay(initialConfig);
-          this.updateNeargroundDisplay(initialConfig);
-        }
-      },
-    });
 
     // 6. Lights
     this.ambientLight = new THREE.AmbientLight(
@@ -585,7 +561,6 @@ export class ViewerCore {
   }
 
   public updateBackgroundDisplay(cfg: AvatarConfig): void {
-    if (this.panoramaController?.isActive) return;
     const request = ++this.backgroundRequest;
     this.skyBackground.mesh.visible = false;
     const container = document.getElementById('viewport-container');
@@ -602,7 +577,7 @@ export class ViewerCore {
         cfg.environment.farFogColor || '#ffffff',
         cfg.environment.farFogIntensity ?? 0.24
       ).then((texture) => {
-        if (request !== this.backgroundRequest || this.panoramaController?.isActive) return;
+        if (request !== this.backgroundRequest) return;
         this.skyBackground.material.uniforms.uPainting.value = texture;
         this.skyBackground.mesh.visible = true;
         this.scene.background = null;
@@ -675,7 +650,6 @@ export class ViewerCore {
   }
 
   public updateBackgroundZoom(dialogueBackgroundTransform?: { zoomScale: number; panOffsetX: number; panOffsetY: number } | null): void {
-    if (this.panoramaController?.isActive) return;
     this.skyBackground.setTransform(dialogueBackgroundTransform);
     if (!this.scene.background || !(this.scene.background instanceof THREE.Texture)) return;
     const bgTex = this.scene.background;
@@ -1143,9 +1117,5 @@ export class ViewerCore {
     if (this.perfBadge) {
       this.perfBadge.style.display = display;
     }
-  }
-
-  public captureAndRenderHistogram(colorHistogram: ColorHistogram, _cfg?: AvatarConfig): void {
-    colorHistogram.computeHistogram(this.canvas);
   }
 }

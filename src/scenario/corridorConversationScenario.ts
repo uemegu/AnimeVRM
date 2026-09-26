@@ -1,4 +1,4 @@
-import { ScenarioPackage, ScenarioCrowdConfig } from './types';
+import { ScenarioPackage } from './types';
 import { resolveAssetUrl } from '../utils/path';
 
 // Both stand in the classroom's center aisle (desks start at |x| ≈ 0.5), facing each
@@ -19,11 +19,6 @@ const AOI_SHOT = { cameraPosition: [-0.68, 1.38, 0.98] as [number, number, numbe
 const AOI_CLOSE_SHOT = { cameraPosition: [-0.31, 1.36, 0.45] as [number, number, number], cameraTarget: 'aoi' };
 const EMILY_SHOT = { cameraPosition: [0.68, 1.38, 0.98] as [number, number, number], cameraTarget: 'emily' };
 
-const CLASSROOM_CROWD: ScenarioCrowdConfig = {
-  enabled: true,
-  preset: 'classroom',
-  opacity: 0.6,
-};
 
 const LOCATION = '2年の教室・休み時間';
 
@@ -63,7 +58,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「アオイ〜！ 聞いて聞いて、次の理科の実験、同じ班になれたよ！」',
           voiceUrl: resolveAssetUrl('/voices/cm_1.mp3'),
-          crowd: CLASSROOM_CROWD,
           cameraZoom: 'wide',
           cameraDistance: 1.1,
           cameraTransitionDuration: 0,
@@ -104,7 +98,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「ほんと！？ よかったぁ……。エミリちゃんと一緒なら心強いな。」',
           voiceUrl: resolveAssetUrl('/voices/cm_2.mp3'),
-          crowd: CLASSROOM_CROWD,
           ...AOI_SHOT,
           cameraTransitionDuration: 0.7,
           cameraTransitionEasing: 'smooth',
@@ -143,7 +136,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「でもさ〜、前回ビーカー割りそうになったの、誰だったっけ？」',
           voiceUrl: resolveAssetUrl('/voices/cm_3.mp3'),
-          crowd: CLASSROOM_CROWD,
           ...EMILY_SHOT,
           cameraTransitionDuration: 0.6,
           cameraTransitionEasing: 'smooth',
@@ -184,7 +176,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「あ、あれはたまたまだってば！ 今日はちゃんと気をつけるもん……。」',
           voiceUrl: resolveAssetUrl('/voices/cm_4.mp3'),
-          crowd: CLASSROOM_CROWD,
           ...AOI_CLOSE_SHOT,
           cameraTransitionDuration: 0.4,
           cameraTransitionEasing: 'gyuin',
@@ -224,7 +215,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「ふふっ、冗談だよ。ほら、チャイム鳴る前に理科室いこ！」',
           voiceUrl: resolveAssetUrl('/voices/cm_5.mp3'),
-          crowd: CLASSROOM_CROWD,
           ...EMILY_SHOT,
           cameraTransitionDuration: 0.6,
           cameraTransitionEasing: 'smooth',
@@ -257,7 +247,6 @@ export const CORRIDOR_CONVERSATION_SCENARIO: ScenarioPackage = {
           location: LOCATION,
           text: '「うん！ ノートと教科書、持った？ ……よし、出発！」',
           voiceUrl: resolveAssetUrl('/voices/cm_6.mp3'),
-          crowd: CLASSROOM_CROWD,
           cameraZoom: 'wide',
           cameraDistance: 1.0,
           cameraTransitionDuration: 0.8,

@@ -458,9 +458,6 @@ export function setupVisualInspector(container: HTMLElement, ctx: InspectorConte
         const file = (e.target as HTMLInputElement).files?.[0];
         if (file) {
           const blobUrl = URL.createObjectURL(file);
-          if (viewerCore.panoramaController.isActive) {
-            viewerCore.panoramaController.deactivate();
-          }
           currentConfig.environment.showBackgroundImage = true;
           currentConfig.environment.backgroundImageUrl = blobUrl;
           currentConfig.environment.showMidground = false;

@@ -7,7 +7,6 @@ import { getTwoGirlsConversationScenario } from './twoGirlsConversationScenario'
 import { getTrioConversationScenario } from './trioConversationScenario';
 import { getHaremConversationScenario } from './haremScenario';
 import { getTownWalkScenario } from './townWalkScenario';
-import { getBehindYouScenario } from './behindYouScenario';
 import { getNisaScenario } from './nisaScenario';
 import { getFastMotionScenario } from './fastMotionScenario';
 import { getDoorPeepYandereScenario } from './doorPeepYandereScenario';
@@ -120,14 +119,6 @@ export const SCENARIO_REGISTRY: Record<string, ScenarioMeta> = {
     description: '放課後の美しい並木道をアオイと一緒に歩く、臨場感あふれるスクロール背景シナリオ。',
     ogpImage: '/ogp/town-walk.png',
     getScenario: (lang = 'ja') => getTownWalkScenario(lang),
-  },
-  'behind-you': {
-    id: 'behind-you',
-    title: '噂話は背後にご注意〜教室の秘密〜',
-    shortTitle: '背後にご注意',
-    description: '放課後の教室で噂話をしていたら……真後ろに気配が！？360度パノラマ視点シナリオ。',
-    ogpImage: '/ogp/behind-you.png',
-    getScenario: (lang = 'ja') => getBehindYouScenario(lang),
   },
   'nisa': {
     id: 'nisa',
