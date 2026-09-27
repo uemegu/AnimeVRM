@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { CameraPose, CameraShot, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig } from './schema.ts';
+import type { CameraPose, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
@@ -39,6 +39,36 @@ export interface StageCastMember {
   lookAtTarget?: string;
   /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
   headTurn?: number;
+  /** 顔・体の演出（指定を変えるまで続く）。省略時は何もしない */
+  look?: AvatarLook;
+}
+
+/** 顔・体の演出の状態 */
+export interface AvatarLook {
+  blush: boolean;
+  anger: boolean;
+  tears: boolean;
+  /** 目が泳ぐ強さ（0 で止まる） */
+  eyeWander: number;
+  fastMotion: boolean;
+  motionSpeed: number;
+}
+
+export const DEFAULT_AVATAR_LOOK: AvatarLook = { blush: false, anger: false, tears: false, eyeWander: 0, fastMotion: false, motionSpeed: 1 };
+
+/** 1回だけ出す演出（文字演出・汗）。key はカット内で同じ演出を二重に出さないための識別子 */
+export interface AvatarOneShot {
+  id: string;
+  at: number;
+  key: string;
+  effectText?: EffectText;
+  sweat?: SweatMode;
+}
+
+/** 目が泳ぐ指定を強さにする */
+export function eyeWanderIntensity(value: boolean | number | undefined): number {
+  if (value === undefined || value === false) return 0;
+  return value === true ? 1 : value;
 }
 
 /** 流れる背景（描画に渡す形。省略項目は既定値で埋めたもの） */
@@ -65,7 +95,10 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
     if (config.visible === false) {
       delete cast[id];
     } else {
-      cast[id] = { ...cast[id], ...config };
+      // 文字演出・汗はそのシーンだけ（次のシーンに引き継がない）
+      const { effectText: _text, sweat: _sweat, ...rest } = config;
+      const { effectText: _prevText, sweat: _prevSweat, ...prev } = cast[id] ?? {};
+      cast[id] = { ...prev, ...rest };
       // モーションを指定したシーンを覚えておく（同じ身振りを別のシーンで指定したら再生し直す）
       if (config.motion !== undefined) motionCues[id] = scene.id;
     }
@@ -117,6 +150,14 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       motionCue: stage.motionCues?.[key],
       lookAtTarget: config.lookAtTarget,
       headTurn: config.headTurn,
+      look: {
+        blush: config.blush ?? false,
+        anger: config.anger ?? false,
+        tears: config.tears ?? false,
+        eyeWander: eyeWanderIntensity(config.eyeWander),
+        fastMotion: config.fastMotion ?? false,
+        motionSpeed: config.motionSpeed ?? 1,
+      },
     });
   }
   return members;
@@ -188,6 +229,11 @@ export interface CutAvatarState {
   lookAtTarget?: string;
   headTurn?: number;
   visible?: boolean;
+  blush?: boolean;
+  anger?: boolean;
+  tears?: boolean;
+  eyeWander?: number;
+  motionSpeed?: number;
 }
 
 /** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
@@ -199,15 +245,32 @@ export interface CutCameraState {
   duration?: number;
 }
 
+/** カットに書いた文字演出・汗を出すまでの秒数（カメラが落ち着いてから出す） */
+export const CUT_ONE_SHOT_DELAY = 0.5;
+
+/** カット内のある時刻の状態 */
+export interface CutState {
+  avatars: Record<string, CutAvatarState>;
+  camera: CutCameraState;
+  focusLines: boolean;
+  /** 時刻 t までに出す1回きりの演出（カットの指定は at 0） */
+  oneShots: AvatarOneShot[];
+}
+
 /**
  * カットの時刻 t（ボイスの再生位置、なければカット開始からの秒数）での、キーフレームを反映した状態。
  * キーフレームのない項目は含めない（カットの指定のまま）
  */
-export function cutStateAt(scene: ScenarioScene, t: number): { avatars: Record<string, CutAvatarState>; camera: CutCameraState } {
+export function cutStateAt(scene: ScenarioScene, t: number): CutState {
   const avatars: Record<string, CutAvatarState> = {};
+  const oneShots: AvatarOneShot[] = [];
   for (const [id, config] of Object.entries(scene.avatars ?? {})) {
     const state: CutAvatarState = {};
-    for (const key of [...(config.transitions ?? [])].sort((a, b) => a.at - b.at)) {
+    if ((config.effectText !== undefined || config.sweat !== undefined) && t >= CUT_ONE_SHOT_DELAY) {
+      oneShots.push({ id, at: CUT_ONE_SHOT_DELAY, key: `${id}@cut`, effectText: config.effectText, sweat: config.sweat });
+    }
+    const keys = (config.transitions ?? []).map((key, index) => ({ key, index })).sort((a, b) => a.key.at - b.key.at);
+    for (const { key, index } of keys) {
       if (key.at > t) break;
       if (key.expression !== undefined) {
         state.expression = key.expression;
@@ -221,12 +284,22 @@ export function cutStateAt(scene: ScenarioScene, t: number): { avatars: Record<s
       if (key.lookAtTarget !== undefined) state.lookAtTarget = key.lookAtTarget;
       if (key.headTurn !== undefined) state.headTurn = key.headTurn;
       if (key.visible !== undefined) state.visible = key.visible;
+      if (key.blush !== undefined) state.blush = key.blush;
+      if (key.anger !== undefined) state.anger = key.anger;
+      if (key.tears !== undefined) state.tears = key.tears;
+      if (key.eyeWander !== undefined) state.eyeWander = eyeWanderIntensity(key.eyeWander);
+      if (key.motionSpeed !== undefined) state.motionSpeed = key.motionSpeed;
+      if (key.effectText !== undefined || key.sweat !== undefined) {
+        oneShots.push({ id, at: key.at, key: `${id}@${index}`, effectText: key.effectText, sweat: key.sweat });
+      }
     }
     if (Object.keys(state).length) avatars[id] = state;
   }
   const camera: CutCameraState = {};
+  let focusLines = scene.focusLines ?? false;
   for (const key of [...(scene.transitions ?? [])].sort((a, b) => a.at - b.at)) {
     if (key.at > t) break;
+    if (key.focusLines !== undefined) focusLines = key.focusLines;
     if (key.camera !== undefined || key.cameraPose !== undefined) {
       camera.shot = key.camera;
       camera.pose = key.cameraPose;
@@ -234,7 +307,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): { avatars: Record<s
       camera.duration = key.cameraTransitionDuration;
     }
   }
-  return { avatars, camera };
+  return { avatars, camera, focusLines, oneShots };
 }
 
 /** カットの最後のキーフレームの時刻（タイムラインの長さの目安） */

@@ -37,12 +37,14 @@ export class FocusLinesOverlay {
   private initCanvas(): void {
     if (this.canvas) return;
 
+    // body に置くときは画面全体、それ以外は置いた要素いっぱいに広げる
+    const fullWindow = this.container === document.body;
     this.canvas = document.createElement('canvas');
     this.canvas.className = 'focus-lines-overlay';
-    this.canvas.style.position = 'fixed';
+    this.canvas.style.position = fullWindow ? 'fixed' : 'absolute';
     this.canvas.style.inset = '0';
-    this.canvas.style.width = '100vw';
-    this.canvas.style.height = '100vh';
+    this.canvas.style.width = fullWindow ? '100vw' : '100%';
+    this.canvas.style.height = fullWindow ? '100vh' : '100%';
     this.canvas.style.pointerEvents = 'none';
     this.canvas.style.zIndex = '45'; // Above 3D viewer, below dialogue window
     this.canvas.style.opacity = '0';
@@ -61,11 +63,12 @@ export class FocusLinesOverlay {
     }
   };
 
-  private resize(): void {
+  public resize(): void {
     if (!this.canvas) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const fullWindow = this.container === document.body;
+    const width = fullWindow ? window.innerWidth : this.container.clientWidth;
+    const height = fullWindow ? window.innerHeight : this.container.clientHeight;
     this.canvas.width = Math.floor(width * dpr);
     this.canvas.height = Math.floor(height * dpr);
   }

@@ -23,73 +23,28 @@ export function resolveLocalizedText(text: TextContent | undefined, lang: Suppor
 /** キャラクター立ち位置スロット */
 export type AvatarSlotPosition = 'left' | 'right' | 'center';
 
-/** セリフ途中のアバター演出遷移キーフレーム（表情・モーション・視線等） */
-export interface AvatarTransition {
-  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
-  at: number;
-  expression?: string;
-  expressionWeight?: number;
-  motion?: string;
-  motionLoop?: boolean;
-  motionSpeed?: number;
-  lookAtCamera?: boolean;
-  headLookAtCamera?: boolean;
-  eyeLookAtCamera?: boolean;
-  lookAtTarget?: 'player' | 'speaker' | 'partner' | 'camera' | 'forward' | string;
-  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
-  headTurn?: number;
-  eyeWander?: boolean | number;
-  eyeOffset?: [number, number];
-  headOffset?: [number, number];
-  faceTexture?: string;
-  tears?: boolean;
-  visible?: boolean;
-}
-
-/** セリフ途中のシーン全体遷移キーフレーム（カメラ・背景等） */
-export interface SceneTransition {
-  /** 発火タイミング（秒）- ボイス再生位置 or シーン経過時間 */
-  at: number;
-  cameraZoom?: string;
-  cameraDistance?: number;
-  cameraTransitionDuration?: number;
-  cameraTransitionEasing?: string;
-  cameraTarget?: AvatarSlotPosition | [number, number, number] | string;
-  /** この時刻から構図を切り替える */
-  camera?: CameraShot;
-  /** この時刻からカメラを直接指定の位置へ動かす（移動の秒数は cameraTransitionDuration） */
-  cameraPose?: CameraPose;
-  background?: string;
-}
-
-/** カメラの位置・注視点・画角の直接指定 */
-export interface CameraPose {
-  position: [number, number, number];
-  target: [number, number, number];
-  fov?: number;
-}
-
-/** シーン内のアバター演出指定（前のシーンの指定を引き継ぎ、書いた項目だけ上書きする） */
-export interface SceneAvatarConfig {
-  /** 省略時はキー名をキャラIDとして使う */
-  characterId?: string;
-  /** assets/animations/<motion>.fbx */
-  motion?: string;
-  /** モーションをループするか（省略時は data/motions.ts の設定。false なら1回再生して待機モーションに戻る） */
-  motionLoop?: boolean;
-  /** モデルを差し替える（省略時はキャラの既定モデル。休日は私服） */
-  modelUrl?: string;
-  expression?: string;
-  expressionWeight?: number; // 原則 1.0 または 0.0
-  position?: AvatarSlotPosition | [number, number, number];
-  rotationY?: number;
-  lookAtTarget?: 'player' | 'camera' | 'partner' | string;
-  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
-  headTurn?: number;
-  visible?: boolean;
-  /** セリフ中の表情・モーション・視線遷移タイムライン（at 昇順で指定） */
-  transitions?: AvatarTransition[];
-}
+/**
+ * シーンの演出（アバター・カメラ・タイムライン・画面演出）の型は共有スキーマ（packages/scenario）の定義を使う
+ */
+export type {
+  AvatarTransition,
+  CameraPose,
+  CameraShot,
+  EffectText,
+  SceneAvatarConfig,
+  SceneTransition,
+  ScreenTransition,
+  ScrollingBackgroundConfig,
+  SweatMode,
+} from '@anime-vrm/scenario';
+import type {
+  CameraPose,
+  CameraShot,
+  SceneAvatarConfig,
+  SceneTransition,
+  ScreenTransition,
+  ScrollingBackgroundConfig,
+} from '@anime-vrm/scenario';
 
 /** 選択肢定義 */
 export interface ScenarioChoice {
@@ -141,6 +96,10 @@ export interface ScenarioScene {
   setFlags?: Record<string, boolean | number | string>;
   /** 画面フラッシュ演出 ('white' 等) */
   flashEffect?: 'white' | 'none';
+  /** このカットの画面の切り替え演出（暗転・瞼を閉じる・まばたき） */
+  screenTransition?: ScreenTransition;
+  /** このカットの間、集中線を出す */
+  focusLines?: boolean;
   /** AUTOモード時のシーン送り待機秒数（未指定時はボイス長またはテキスト長から自動算出） */
   autoNextSec?: number;
   /** 時間帯指定（'day' | 'evening' | 'night' | 'divine' 等） */
@@ -165,29 +124,6 @@ export interface ScenarioScene {
     setFlags?: Record<string, boolean | number | string>;
   };
 }
-
-/** 流れる背景の指定（省略した項目は既定値） */
-export interface ScrollingBackgroundConfig {
-  /** 流す画像（省略時はその時の場所の遠景） */
-  textureUrl?: string;
-  /** 流れる速さ（既定 0.65。0 で止まる） */
-  speed?: number;
-  /** ぼかし 0.0〜1.0（既定 1.0。キャラに視線を集める） */
-  blur?: number;
-  /** 流れる向き（既定 left） */
-  direction?: 'left' | 'right';
-  /** つなぎ目をぼかす幅（既定 0.2） */
-  featherWidth?: number;
-}
-
-/**
- * カメラの構図。極端な接写は禁止（開発ルール）なので close でもバストアップまで
- * - wide: 登場キャラ全員が入る引き
- * - medium: 話者を中心に隣の人物も入る会話ショット
- * - speaker: 話者のウェストアップ（1人の場面の既定）
- * - close: 話者のバストアップ（感情の強調）
- */
-export type CameraShot = 'wide' | 'medium' | 'speaker' | 'close';
 
 import { ActionLocationId, DayPhase } from './game';
 

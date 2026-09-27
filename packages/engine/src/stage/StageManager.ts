@@ -13,6 +13,8 @@ import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar } from './StageAvatar';
+import { ScreenEffects } from './ScreenEffects';
+import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
 import { HairShadowRenderer } from '../shader/HairShadow';
 import { CharacterMaskRenderer, LightWrapShader } from '../postprocessing/LightWrap';
@@ -20,6 +22,7 @@ import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocess
 import { setHairRingTint } from '../shader/HairRing';
 import {
   cutStateAt,
+  DEFAULT_AVATAR_LOOK,
   DEFAULT_BACKDROP,
   DEFAULT_CAMERA_FOV,
   DEFAULT_SHOT_RIGS,
@@ -27,7 +30,10 @@ import {
   type CameraPose as CameraPoseSetting,
   type CameraShot,
   type LocationStage,
+  type AvatarOneShot,
+  type CutState,
   type ScenarioScene,
+  type TextContent,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
 
@@ -62,6 +68,8 @@ export interface StageOptions {
   getCutTime?: () => number | undefined;
   initialTimeOfDay?: TimeOfDayId;
   initialLocationId?: string;
+  /** 文字演出などの言語（既定 ja） */
+  language?: 'ja' | 'en';
 }
 
 export class StageManager {
@@ -147,6 +155,11 @@ export class StageManager {
   private appliedCutCamera = '';
   /** キャラごとの視線（キャストの指定をタイムラインで上書きしたもの） */
   private gaze = new Map<string, { target?: string; headTurn?: number }>();
+  /** カット内で出し終えた1回きりの演出 */
+  private firedOneShots = new Set<string>();
+  /** 集中線・瞼・暗転（canvas の親要素に重ねる） */
+  private screenEffects: ScreenEffects | null = null;
+  private language: 'ja' | 'en';
   private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraTo: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraCurrentTarget = new THREE.Vector3(0, 1.15, 0);
@@ -166,7 +179,9 @@ export class StageManager {
     this.presets = options.presets;
     this.getSpeakerPhoneme = options.getSpeakerPhoneme;
     this.getCutTime = options.getCutTime;
+    this.language = options.language ?? 'ja';
     this.clock = new THREE.Clock();
+    if (this.canvas.parentElement) this.screenEffects = new ScreenEffects(this.canvas.parentElement);
 
     // 1. シーン初期化
     this.scene = new THREE.Scene();
@@ -676,7 +691,10 @@ export class StageManager {
 
     const ids = new Set(members.map((member) => member.id));
     this.loadedAvatars.forEach((avatar, id) => {
-      if (!ids.has(id) && avatar.vrm) avatar.vrm.scene.visible = false;
+      if (!ids.has(id) && avatar.vrm) {
+        avatar.vrm.scene.visible = false;
+        avatar.effects?.clearOneShots();
+      }
     });
 
     this.castIds = [];
@@ -784,7 +802,21 @@ export class StageManager {
     this.cutStartedAt = this.clock.getElapsedTime();
     this.appliedCut.clear();
     this.appliedCutCamera = '';
+    // 前のカットの文字演出・汗は消す
+    this.firedOneShots.clear();
+    this.loadedAvatars.forEach((avatar) => avatar.effects?.clearOneShots());
+    this.screenEffects?.playTransition(scene?.screenTransition ?? null);
     this.applyCutState(false);
+  }
+
+  /** カットの切り替え演出（暗転・瞼）をもう一度見せる（Studio で先頭から再生したとき） */
+  public replayScreenTransition(): void {
+    this.screenEffects?.playTransition(this.cutScene?.screenTransition ?? null);
+  }
+
+  /** 文字演出などの言語 */
+  public setLanguage(language: 'ja' | 'en'): void {
+    this.language = language;
   }
 
   /**
@@ -798,11 +830,12 @@ export class StageManager {
 
   /** カットの指定にタイムラインを重ねた状態を、変わったところだけ当てる */
   private applyCutState(seek: boolean): void {
-    const state = this.cutScene ? cutStateAt(this.cutScene, this.cutTime) : { avatars: {}, camera: {} };
+    const state: CutState = this.cutScene ? cutStateAt(this.cutScene, this.cutTime) : { avatars: {}, camera: {}, focusLines: false, oneShots: [] };
     for (const member of this.castMembers) {
       const avatar = this.loadedAvatars.get(member.id);
       if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
       const key = state.avatars[member.id] ?? {};
+      const look = member.look ?? DEFAULT_AVATAR_LOOK;
       const effective = {
         expression: key.expression ?? member.expression,
         expressionWeight: key.expression !== undefined ? (key.expressionWeight ?? 1) : member.expressionWeight,
@@ -813,6 +846,12 @@ export class StageManager {
         lookAtTarget: key.lookAtTarget ?? member.lookAtTarget,
         headTurn: key.headTurn ?? member.headTurn,
         visible: key.visible ?? true,
+        blush: key.blush ?? look.blush,
+        anger: key.anger ?? look.anger,
+        tears: key.tears ?? look.tears,
+        eyeWander: key.eyeWander ?? look.eyeWander,
+        fastMotion: look.fastMotion,
+        motionSpeed: key.motionSpeed ?? look.motionSpeed,
       };
       const json = JSON.stringify(effective);
       const previous = this.appliedCut.get(member.id);
@@ -831,7 +870,19 @@ export class StageManager {
       }
       avatar.vrm.scene.visible = effective.visible;
       this.gaze.set(member.id, { target: effective.lookAtTarget, headTurn: effective.headTurn });
+      if (!before || before.motionSpeed !== effective.motionSpeed) avatar.setMotionSpeed(effective.motionSpeed);
+      const effects = avatar.effects;
+      if (effects) {
+        effects.setBlush(effective.blush);
+        effects.setAnger(effective.anger);
+        effects.setTears(effective.tears);
+        effects.setEyeWander(effective.eyeWander);
+        effects.setFastMotion(effective.fastMotion);
+      }
     }
+
+    this.screenEffects?.setFocusLines(state.focusLines);
+    this.fireOneShots(state.oneShots, seek);
 
     const camera = state.camera;
     const cameraJson = JSON.stringify(camera);
@@ -841,6 +892,34 @@ export class StageManager {
       this.timelinePose = camera.pose ? { pose: camera.pose, duration: seek ? 0 : camera.duration } : null;
       this.updateCameraTarget();
     }
+  }
+
+  /**
+   * 時刻が来た文字演出・汗を出す（読み込み中のキャラは読み込み後に出す）。
+   * 頭出しのときは直前（1秒以内）のものだけ出し直す
+   */
+  private fireOneShots(shots: AvatarOneShot[], seek: boolean): void {
+    if (seek) {
+      this.firedOneShots.clear();
+      this.loadedAvatars.forEach((avatar) => avatar.effects?.clearOneShots());
+    }
+    for (const shot of shots) {
+      if (this.firedOneShots.has(shot.key)) continue;
+      const avatar = this.loadedAvatars.get(shot.id);
+      if (!avatar?.effects || !this.castIds.includes(shot.id)) continue;
+      this.firedOneShots.add(shot.key);
+      if (seek && this.cutTime - shot.at > 1) continue;
+      if (shot.effectText) {
+        const spec = typeof shot.effectText === 'string' ? { preset: shot.effectText } : shot.effectText;
+        avatar.effects.showText(spec.preset as EffectPresetName, this.localize(spec.text), spec.duration);
+      }
+      if (shot.sweat) avatar.effects.showSweat(shot.sweat);
+    }
+  }
+
+  private localize(text: TextContent | undefined): string | undefined {
+    if (text === undefined || typeof text === 'string') return text;
+    return (this.language === 'en' ? text.en : undefined) ?? text.ja;
   }
 
   /** 視線の先のワールド座標（カメラ・話者・相手・キャラ ID） */
@@ -981,6 +1060,7 @@ export class StageManager {
     this.hairShadow.setSize(targetW, targetH);
     this.characterMask.setSize(targetW, targetH);
     this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
+    this.screenEffects?.resize();
   }
 
   /**
@@ -1012,7 +1092,7 @@ export class StageManager {
         avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
-        avatar.update(delta);
+        avatar.update(delta, { elapsed, camera: this.camera, renderer: this.renderer });
         activeMeshes.push(avatar.vrm.scene);
       }
 
@@ -1054,6 +1134,7 @@ export class StageManager {
 
   public dispose(): void {
     this.isDisposed = true;
+    this.screenEffects?.dispose();
     this.motionReturnTimers.forEach((timer) => window.clearTimeout(timer));
     this.motionReturnTimers.clear();
     if (this.animationFrameId !== null) {

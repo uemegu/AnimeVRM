@@ -8,18 +8,21 @@ import {
   type ScenarioPackage,
   type ScenarioScene,
   type SceneAvatarConfig,
+  type ScreenTransition,
 } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
 import { cutWarnings, makeText, textEn, textJa } from './scenarioEdit';
 import { VoicePanel } from './VoicePanel';
+import { EffectFields } from './EffectFields';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
 const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
+const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'eyelid_close', 'eyelid_blink'];
 
 /** 音声生成に必要な、シナリオの場所と保存状態 */
 export interface VoiceContext {
@@ -199,6 +202,21 @@ function StageTab({ scenario, index, data, set }: { scenario: ScenarioPackage; i
         <input type="checkbox" checked={!!scene.clearCast} onChange={(e) => set('clearCast', e.target.checked || undefined)} />
         {t.scenarios.clearCast}
       </label>
+      <label className="field">
+        <span className="field-label">{t.scenarios.screenTransition}</span>
+        <select className="select" value={scene.screenTransition ?? ''} onChange={(e) => set('screenTransition', (e.target.value || undefined) as ScreenTransition | undefined)}>
+          <option value="">{t.scenarios.screenTransitions.none}</option>
+          {SCREEN_TRANSITIONS.map((kind) => (
+            <option key={kind} value={kind}>
+              {t.scenarios.screenTransitions[kind]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="inspector-check">
+        <input type="checkbox" checked={!!scene.focusLines} onChange={(e) => set('focusLines', e.target.checked || undefined)} />
+        {t.scenarios.focusLines}
+      </label>
       <label className="inspector-check">
         <input type="checkbox" checked={scene.flashEffect === 'white'} onChange={(e) => set('flashEffect', e.target.checked ? 'white' : undefined)} />
         {t.scenarios.flash}
@@ -355,6 +373,17 @@ function CastTab({ scenario, index, data, set }: { scenario: ScenarioPackage; in
                     ))}
                   </select>
                 </label>
+                <div className="cast-span cast-subhead">{t.scenarios.effects.title}</div>
+                <EffectFields
+                  value={own}
+                  withFastMotion
+                  unsetLabel={(key) => {
+                    const value = prev[key];
+                    if (typeof value === 'boolean' && key !== 'eyeWander') return inherit(value ? t.scenarios.effects.on : t.scenarios.effects.off);
+                    return inherit(value === undefined ? undefined : String(value));
+                  }}
+                  onChange={(key, value) => update(key, value)}
+                />
               </div>
             )}
           </section>

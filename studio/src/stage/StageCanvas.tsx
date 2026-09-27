@@ -4,6 +4,7 @@ import type { CameraPose, CameraShot, ScenarioScene, ScrollingBackgroundSettings
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
+import { useI18n } from '../i18n';
 
 interface Props {
   presets: StagePresets;
@@ -47,10 +48,11 @@ export function StageCanvas({
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
+  const { language } = useI18n();
 
   useEffect(() => {
     const canvas = canvasRef.current!;
-    const manager = new StageManager({ canvas, presets, initialTimeOfDay: timeOfDay, initialLocationId: locationId });
+    const manager = new StageManager({ canvas, presets, initialTimeOfDay: timeOfDay, initialLocationId: locationId, language });
     managerRef.current = manager;
     onManager?.(manager);
     const observer = new ResizeObserver(([entry]) => manager.resize(entry.contentRect.width, entry.contentRect.height));
@@ -88,7 +90,9 @@ export function StageCanvas({
   }, [cameraShot, focusId]);
 
   // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
-  const cutKey = JSON.stringify(cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id } : null);
+  const cutKey = JSON.stringify(
+    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines } : null
+  );
   useEffect(() => {
     const manager = managerRef.current;
     if (!manager) return;
@@ -101,6 +105,16 @@ export function StageCanvas({
   useEffect(() => {
     managerRef.current?.setCutTime(cutTime, !playing);
   }, [cutTime, playing]);
+
+  // 先頭から再生したら、カットの切り替え演出（暗転など）も見せる
+  useEffect(() => {
+    if (playing && cutTime < 0.05) managerRef.current?.replayScreenTransition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing]);
+
+  useEffect(() => {
+    managerRef.current?.setLanguage(language);
+  }, [language]);
 
   // カメラを手で動かす
   const onCameraPoseRef = useRef(onCameraPose);
@@ -139,5 +153,10 @@ export function StageCanvas({
     };
   }, [freeCamera]);
 
-  return <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined }} />;
+  // 画面演出（集中線・瞼・暗転）はこの枠の中に重なる。枠の外のセリフ表示などはその上に出る
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', isolation: 'isolate' }}>
+      <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined }} />
+    </div>
+  );
 }

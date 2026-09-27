@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DecorationType, EffectTextStyle } from './types';
+import { EffectTextStyle } from './types';
 
 interface CachedTexture {
   texture: THREE.CanvasTexture;
@@ -65,14 +65,6 @@ function drawAngerMark(ctx: CanvasRenderingContext2D, cx: number, cy: number, si
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  const r = size * 0.6;
-  const curves = [
-    // Top-left to top-right curved cross
-    [[-r, -r * 0.3], [-r * 0.3, -r], [r * 0.3, -r], [r, -r * 0.3]],
-    [[r, -r * 0.3], [r * 0.3, 0], [r * 0.3, 0], [r, r * 0.3]],
-    [[r, r * 0.3], [r * 0.3, r], [-r * 0.3, r], [-r, r * 0.3]],
-    [[-r, r * 0.3], [-r * 0.3, 0], [-r * 0.3, 0], [-r, -r * 0.3]],
-  ];
 
   ctx.beginPath();
   // Draw classic 4-arc cross

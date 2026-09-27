@@ -54,6 +54,52 @@ export type CameraPose = z.infer<typeof CameraPose>;
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
 const HeadTurn = z.number().min(0).max(1);
 
+/** 漫画風の文字演出のプリセット */
+export const EffectTextPreset = z.enum(['doki', 'kirakira', 'yatta', 'iraira', 'gaan', 'wanawana', 'shiin', 'biku', 'nima', 'asease']);
+export type EffectTextPreset = z.infer<typeof EffectTextPreset>;
+
+/** 文字演出（プリセット名、または文字・表示秒数の指定つき） */
+export const EffectText = z.union([
+  EffectTextPreset,
+  z.strictObject({
+    preset: EffectTextPreset,
+    /** 省略時はプリセットの文字 */
+    text: TextContent.optional(),
+    duration: z.number().positive().optional(),
+  }),
+]);
+export type EffectText = z.infer<typeof EffectText>;
+
+/** 汗の演出（fly4 = 汗が飛ぶ、jito = じわっとにじむ） */
+export const SweatMode = z.enum(['fly4', 'jito']);
+export type SweatMode = z.infer<typeof SweatMode>;
+
+/** 目が泳ぐ（true または強さ 0〜2。false・0 で止める） */
+const EyeWander = z.union([z.boolean(), z.number().min(0).max(2)]);
+
+/**
+ * 顔・体の演出。一度指定すると、次に指定を変えるまで続く
+ */
+const AvatarLookFields = {
+  /** 頬を赤らめる（目も潤む） */
+  blush: z.boolean().optional(),
+  /** 怒りマーク */
+  anger: z.boolean().optional(),
+  /** 涙を流す */
+  tears: z.boolean().optional(),
+  eyeWander: EyeWander.optional(),
+  /** モーションの再生速度（1 が通常） */
+  motionSpeed: z.number().positive().max(4).optional(),
+};
+
+/** そのカット（キー）で1回だけ出す演出 */
+const AvatarOneShotFields = {
+  /** 漫画風の文字演出 */
+  effectText: EffectText.optional(),
+  /** 汗の演出 */
+  sweat: SweatMode.optional(),
+};
+
 /** セリフ途中のアバター演出（表情・モーション・視線など）。at はボイス再生位置またはシーン経過秒 */
 export const AvatarTransition = z.strictObject({
   at: z.number().nonnegative(),
@@ -61,38 +107,28 @@ export const AvatarTransition = z.strictObject({
   expressionWeight: z.number().min(0).max(1).optional(),
   motion: z.string().optional(),
   motionLoop: z.boolean().optional(),
-  motionSpeed: z.number().positive().optional(),
-  lookAtCamera: z.boolean().optional(),
-  headLookAtCamera: z.boolean().optional(),
-  eyeLookAtCamera: z.boolean().optional(),
   lookAtTarget: LookAtTarget.optional(),
   headTurn: HeadTurn.optional(),
-  eyeWander: z.union([z.boolean(), z.number()]).optional(),
-  eyeOffset: Vec2.optional(),
-  headOffset: Vec2.optional(),
-  faceTexture: z.string().optional(),
-  tears: z.boolean().optional(),
   visible: z.boolean().optional(),
+  ...AvatarLookFields,
+  ...AvatarOneShotFields,
 });
 export type AvatarTransition = z.infer<typeof AvatarTransition>;
 
-/** セリフ途中のシーン全体の演出（カメラ・背景） */
+/** セリフ途中のシーン全体の演出（カメラ・集中線） */
 export const SceneTransition = z.strictObject({
   at: z.number().nonnegative(),
-  cameraZoom: z.string().optional(),
-  cameraDistance: z.number().optional(),
-  cameraTransitionDuration: z.number().nonnegative().optional(),
-  cameraTransitionEasing: z.string().optional(),
-  cameraTarget: z.union([AvatarSlotPosition, Vec3, z.string()]).optional(),
   /** この時刻から構図を切り替える */
   camera: CameraShot.optional(),
   /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
   cameraPose: CameraPose.optional(),
-  background: z.string().optional(),
+  cameraTransitionDuration: z.number().nonnegative().optional(),
+  /** この時刻から集中線を出す・消す */
+  focusLines: z.boolean().optional(),
 });
 export type SceneTransition = z.infer<typeof SceneTransition>;
 
-/** シーン内のアバター指定。前のシーンの指定を引き継ぎ、書いた項目だけ上書きする */
+/** シーン内のアバター指定。前のシーンの指定を引き継ぎ、書いた項目だけ上書きする（effectText・sweat はそのシーンだけ） */
 export const SceneAvatarConfig = z.strictObject({
   /** 省略時はキー名をキャラ ID として使う */
   characterId: z.string().optional(),
@@ -108,9 +144,17 @@ export const SceneAvatarConfig = z.strictObject({
   lookAtTarget: LookAtTarget.optional(),
   headTurn: HeadTurn.optional(),
   visible: z.boolean().optional(),
+  /** 速い動きに残像とスピード線をつける */
+  fastMotion: z.boolean().optional(),
+  ...AvatarLookFields,
+  ...AvatarOneShotFields,
   transitions: z.array(AvatarTransition).optional(),
 });
 export type SceneAvatarConfig = z.infer<typeof SceneAvatarConfig>;
+
+/** 画面の切り替え演出（fade_black = 暗転してから映す、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
+export const ScreenTransition = z.enum(['fade_black', 'eyelid_close', 'eyelid_blink']);
+export type ScreenTransition = z.infer<typeof ScreenTransition>;
 
 export const ScenarioChoice = z.strictObject({
   /** 履歴条件から参照する ID（省略時は goto 先のシーン ID） */
@@ -156,6 +200,10 @@ export const ScenarioScene = z.strictObject({
   choices: z.array(ScenarioChoice).optional(),
   setFlags: FlagMap.optional(),
   flashEffect: z.enum(['white', 'none']).optional(),
+  /** このカットの画面の切り替え演出 */
+  screenTransition: ScreenTransition.optional(),
+  /** このカットの間、集中線を出す */
+  focusLines: z.boolean().optional(),
   autoNextSec: z.number().nonnegative().optional(),
   timeOfDay: z.string().optional(),
   transitions: z.array(SceneTransition).optional(),

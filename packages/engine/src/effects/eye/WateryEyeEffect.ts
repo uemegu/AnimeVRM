@@ -48,7 +48,6 @@ export class WateryEyeEffect {
 
   private elapsedTime = 0.0;
   private currentIntensity = 0.0; // フェードイン/アウト用
-  private attachedToEyeBones = false;
 
   constructor(vrm: VRM, config?: Partial<WateryEyeConfig>) {
     this.vrm = vrm;
@@ -246,14 +245,12 @@ export class WateryEyeEffect {
 
     // Eyeボーンへの接続 (優先) または Headボーンへのフォールバック接続
     if (this.leftEyeBone && this.rightEyeBone) {
-      this.attachedToEyeBones = true;
       // Eyeボーンの子として追加 (瞳の前方にわずかにオフセット)
       this.leftEyeMesh.position.set(0, 0, 0.016);
       this.rightEyeMesh.position.set(0, 0, 0.016);
       this.leftEyeBone.add(this.leftEyeMesh);
       this.rightEyeBone.add(this.rightEyeMesh);
     } else if (this.headBone) {
-      this.attachedToEyeBones = false;
       const lx = this.config.leftEyeOffset.x;
       const ly = this.config.leftEyeOffset.y;
       const lz = this.config.leftEyeOffset.z;
