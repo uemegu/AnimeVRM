@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "id": "park_confession",
+  "title": {
+    "ja": "夕暮れの公園と放課後の期待",
+    "en": "Twilight Park & After-School Anticipation"
+  },
+  "location": "modern_park",
+  "bgm": "/bgm/bgm.mp3",
+  "ambience": "/se/large_brown_cicada.mp3",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "intro_1",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あ、来てくれたんだ……！ 急にこんな公園に呼び出したりして、ごめんね」",
+        "en": "\"Ah, you came...! Sorry for calling you out to this park so suddenly.\""
+      },
+      "voiceUrl": "/voices/confess_intro_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "Standing Greeting",
+          "expression": "neutral",
+          "lookAtTarget": "camera",
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_2",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あのね……ずっと前から、あなたに伝えたいことがあって……」",
+        "en": "\"Um, you know... there's something I've been meaning to tell you for a long time...\""
+      },
+      "voiceUrl": "/voices/confess_intro_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_confess_hesitant",
+          "expression": "neutral",
+          "blush": true,
+          "effectText": "doki"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "intro_3",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「私のこと……どう思ってる……？」",
+        "en": "\"How... how do you feel about me...?\""
+      },
+      "voiceUrl": "/voices/confess_intro_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "neutral",
+          "effectText": "doki"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "intro_3_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "confess_love",
+          "text": {
+            "ja": "「俺もずっと好きだった！付き合ってください！」",
+            "en": "\"I've always loved you too! Please go out with me!\""
+          },
+          "goto": "route_love_1",
+          "setFlags": {
+            "confess_love": true
+          }
+        },
+        {
+          "id": "ask_money",
+          "text": {
+            "ja": "「先週貸した500円、返してほしいんだけど」",
+            "en": "\"Can I have back the 500 yen I lent you last week?\""
+          },
+          "goto": "route_money_1",
+          "setFlags": {
+            "ask_money": true
+          }
+        },
+        {
+          "id": "silent_stare",
+          "text": {
+            "ja": "（何も言わずにじっと見つめる）",
+            "en": "(Stare at her silently without saying a word)"
+          },
+          "goto": "route_silent_1",
+          "setFlags": {
+            "silent_stare": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "route_love_1",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「やったーっ！ え……！？ ほんとに……！？ 夢じゃないよね……！？」",
+        "en": "\"Yay!! Wait... really!? You mean it!? This isn't a dream, right...!?\""
+      },
+      "voiceUrl": "/voices/confess_love_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_confess_joy",
+          "expression": "happy",
+          "effectText": "yatta"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "route_love_2",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「すっごく嬉しい……！ 私、ずっとあなたのことばかり考えてたの……っ！」",
+        "en": "\"I'm so happy...! I've been thinking about you non-stop all this time...!\""
+      },
+      "voiceUrl": "/voices/confess_love_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_confess_heart",
+          "expression": "relaxed",
+          "effectText": {
+            "preset": "doki",
+            "text": "ドキドキ♡"
+          }
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "route_love_3",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ねぇ...これって夢じゃないよね？ぎゅ〜ってしてくれる？」",
+        "en": "\"Hey... this isn't a dream, right? Will you give me a hug...?\""
+      },
+      "voiceUrl": "/voices/confess_love_hug.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_confess_hug",
+          "expression": "relaxed",
+          "effectText": {
+            "preset": "doki",
+            "text": "ドキドキ…♡"
+          }
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "route_love_4",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ずっと...そばにいてね...」",
+        "en": "\"Stay... by my side forever...\""
+      },
+      "voiceUrl": "/voices/asmr_tuned2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "effectText": {
+            "preset": "doki",
+            "text": "ドキドキ…♡"
+          }
+        }
+      },
+      "camera": "close",
+      "screenTransition": "eyelid_close",
+      "nextSceneId": "ending_common"
+    },
+    {
+      "id": "route_money_1",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「え……？ ご、500えん……？」",
+        "en": "\"Huh...? F-Five hundred yen...?\""
+      },
+      "voiceUrl": "/voices/confess_money_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Dismissing Gesture",
+          "expression": "surprised",
+          "blush": false,
+          "effectText": "gaan"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "route_money_2",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「そ、そんな理由でこんな呼び出しに応じたの……！？ 私の心の準備とドキドキを返してよー！！」",
+        "en": "\"Is that why you showed up today...!? Give me back my heartfelt anticipation and racing heart!!\""
+      },
+      "voiceUrl": "/voices/confess_money_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Angry",
+          "expression": "angry",
+          "effectText": "iraira"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "route_money_3",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ほら！ 500円！ これで文句ないでしょ！ もうっ、鈍感バカーッ！」",
+        "en": "\"Here! Take your 500 yen! Happy now?! Geez, you dense idiot!\""
+      },
+      "voiceUrl": "/voices/confess_money_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Angry",
+          "expression": "angry",
+          "effectText": "wanawana"
+        }
+      },
+      "camera": "wide",
+      "nextSceneId": "ending_common"
+    },
+    {
+      "id": "route_silent_1",
+      "text": {
+        "ja": "（…………静寂が流れる…………）",
+        "en": "(...... An awkward silence settles in ......)"
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "neutral",
+          "effectText": "shiin"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "route_silent_2",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ちょ、ちょっと……なんで何も言わないの……！？ 気まずいから何か言ってよ〜っ！」",
+        "en": "\"W-Wait... why aren't you saying anything...!? This is so awkward, say something already~!\""
+      },
+      "voiceUrl": "/voices/confess_silent_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Acknowledging",
+          "expression": "surprised",
+          "effectText": "biku"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "route_silent_3",
+      "speaker": {
+        "ja": "女の子",
+        "en": "Girl"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「うぅ……からかわないでよね……。もう一回、ちゃんと最初からやり直してあげるからね！」",
+        "en": "\"Ugh... don't tease me like that... Fine, I'll let you start over properly from the beginning!\""
+      },
+      "voiceUrl": "/voices/confess_silent_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "ending_common",
+      "text": {
+        "ja": "―― 夕暮れの公園での出来事は、こうして幕を閉じた。 【シナリオ終了】",
+        "en": "— And so, the after-school moment in the twilight park drew to a close. [Scenario End]"
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

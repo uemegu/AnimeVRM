@@ -22,6 +22,8 @@ const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
 const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
+/** 次のカットの選択肢で「ここで終わる」を表す値 */
+const END = '__end__';
 const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'eyelid_close', 'eyelid_blink'];
 
 /** 音声生成に必要な、シナリオの場所と保存状態 */
@@ -76,7 +78,7 @@ export function CutInspector({ scenario, index, data, voice, onChange }: Props) 
         {tab === 'line' && <LineTab scene={scene} data={data} voice={voice} set={set} onChange={onChange} />}
         {tab === 'stage' && <StageTab scenario={scenario} index={index} data={data} set={set} />}
         {tab === 'cast' && <CastTab scenario={scenario} index={index} data={data} set={set} />}
-        {tab === 'flow' && <FlowTab scenario={scenario} index={index} set={set} />}
+        {tab === 'flow' && <FlowTab scenario={scenario} index={index} set={set} onChange={onChange} />}
         {tab === 'json' && <JsonTab scene={scene} onChange={onChange} />}
       </div>
     </div>
@@ -427,7 +429,7 @@ function textToFlags(text: string): Record<string, boolean | number | string> | 
   return entries.length ? Object.fromEntries(entries) : undefined;
 }
 
-function FlowTab({ scenario, index, set }: { scenario: ScenarioPackage; index: number; set: Setter }) {
+function FlowTab({ scenario, index, set, onChange }: { scenario: ScenarioPackage; index: number; set: Setter; onChange: (s: ScenarioScene) => void }) {
   const { t } = useI18n();
   const scene = scenario.scenes[index];
   const ids = scenario.scenes.map((s) => s.id);
@@ -445,8 +447,17 @@ function FlowTab({ scenario, index, set }: { scenario: ScenarioPackage; index: n
     <div className="inspector-form">
       <label className="field">
         <span className="field-label">{t.scenarios.next}</span>
-        <select className="select" value={scene.nextSceneId ?? ''} onChange={(e) => set('nextSceneId', e.target.value || undefined)}>
+        <select
+          className="select"
+          value={scene.end ? END : (scene.nextSceneId ?? '')}
+          onChange={(e) => {
+            const { nextSceneId: _next, end: _end, ...rest } = scene;
+            const v = e.target.value;
+            onChange(v === END ? { ...rest, end: true } : v ? { ...rest, nextSceneId: v } : rest);
+          }}
+        >
           <option value="">{nextRow ? format(t.scenarios.nextAuto, { id: nextRow }) : t.scenarios.nextEnd}</option>
+          {nextRow && <option value={END}>{t.scenarios.endHere}</option>}
           {ids.map((id) => (
             <option key={id} value={id}>
               {id}

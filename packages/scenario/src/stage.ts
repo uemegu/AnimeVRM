@@ -12,6 +12,8 @@ export interface StageState {
   timeOfDay?: TimeOfDayId;
   /** BGM の ID または URL。'silence' で無音 */
   bgm?: string;
+  /** 環境音（ループ）の URL。なければ鳴らさない */
+  ambience?: string;
   /** 登場中のキャラ（キー: キャラID） */
   cast: Record<string, SceneAvatarConfig>;
   /** キャラごとに、モーションを最後に指定したシーンID */
@@ -83,8 +85,8 @@ export interface ScrollingBackgroundSettings {
 export const EMPTY_STAGE: StageState = { cast: {} };
 
 /** シナリオ開始時の舞台 */
-export function initialStageState(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay'>): StageState {
-  return { bgm: scenario.bgm, timeOfDay: scenario.timeOfDay as TimeOfDayId | undefined, cast: {} };
+export function initialStageState(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience'>): StageState {
+  return { bgm: scenario.bgm, ambience: scenario.ambience, timeOfDay: scenario.timeOfDay as TimeOfDayId | undefined, cast: {} };
 }
 
 /** シーンの指定を舞台に反映する（キャラは項目ごとに上書き、visible: false で退場） */
@@ -107,6 +109,7 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
     background: scene.background ?? prev.background,
     timeOfDay: (scene.timeOfDay as TimeOfDayId | undefined) ?? prev.timeOfDay,
     bgm: scene.bgm ?? scene.bgmUrl ?? prev.bgm,
+    ambience: scene.ambience === undefined ? prev.ambience : scene.ambience || undefined,
     cast,
     motionCues,
     scrolling: scene.scrollingBackground === undefined ? prev.scrolling : scene.scrollingBackground || null,
@@ -114,7 +117,7 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
 }
 
 /** シナリオの先頭から指定シーンまでを順にたどった舞台（Studio で途中のカットを表示するため） */
-export function stageAtScene(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'scenes'>, sceneIndex: number): StageState {
+export function stageAtScene(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience' | 'scenes'>, sceneIndex: number): StageState {
   let stage = initialStageState(scenario);
   for (const scene of scenario.scenes.slice(0, sceneIndex + 1)) stage = mergeStageState(stage, scene);
   return stage;

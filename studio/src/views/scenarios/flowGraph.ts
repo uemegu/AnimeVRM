@@ -29,6 +29,7 @@ export function buildFlowEdges(scenario: ScenarioPackage): FlowEdge[] {
       }
       return;
     }
+    if (scene.end) return;
     if (scene.nextSceneId) {
       edges.push({ id: `${scene.id}-j`, from: scene.id, to: scene.nextSceneId, kind: 'jump' });
       return;

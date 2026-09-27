@@ -496,11 +496,7 @@ export class StageManager {
           mat.opacity = mid.opacity ?? 1.0;
           mat.needsUpdate = true;
           mat.visible = true;
-
-          const pos = mid.position ?? { x: 0, y: 1.35, z: -0.25 };
-          this.midgroundMesh.position.set(pos.x, pos.y, pos.z);
-          const scale = mid.scale ?? 1.0;
-          this.midgroundMesh.scale.set(scale, scale, 1);
+          this.updateLayerPlacement();
         });
       } else {
         (this.midgroundMesh.material as THREE.MeshBasicMaterial).visible = false;
@@ -519,11 +515,7 @@ export class StageManager {
           mat.opacity = near.opacity ?? 1.0;
           mat.needsUpdate = true;
           mat.visible = true;
-
-          const pos = near.position ?? { x: 0, y: 0.8, z: 0.6 };
-          this.neargroundMesh.position.set(pos.x, pos.y, pos.z);
-          const scale = near.scale ?? 1.0;
-          this.neargroundMesh.scale.set(scale, scale, 1);
+          this.updateLayerPlacement();
         });
       } else {
         (this.neargroundMesh.material as THREE.MeshBasicMaterial).visible = false;
@@ -565,6 +557,71 @@ export class StageManager {
       this.backdropMesh.material.needsUpdate = true;
       this.backdropMesh.position.set(0, backdrop.offsetY, -backdrop.distance);
       this.backdropMesh.scale.set(backdrop.height * aspect, backdrop.height, 1);
+    }
+  }
+
+  /**
+   * 遠景を画面に貼るときは、中景・近景もカメラの前に貼り付ける（旧ルートと同じ置き方。
+   * 中景は注視点の少し奥、近景は手前に置き、画面の高さに合わせて大きさを決める）。
+   * 3D空間に置くときは場所の設定の座標に置く
+   */
+  private updateLayerPlacement(): void {
+    const location = this.presets.locations[this.currentLocationId];
+    if (!location) return;
+    const backdrop = { ...DEFAULT_BACKDROP, ...this.locationStage?.backdrop };
+    const onScreen = backdrop.mode !== 'world';
+    const forward = new THREE.Vector3();
+    this.camera.getWorldDirection(forward);
+    const right = new THREE.Vector3().crossVectors(forward, this.camera.up).normalize();
+    const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+    const targetDist = this.camera.position.distanceTo(this.cameraCurrentTarget);
+    const frustumHeightAt = (dist: number) => 2 * dist * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2);
+    const aspectMultiplier = Math.max(1, this.camera.aspect / (16 / 9));
+    // 平面の元の大きさ（initLayeredMeshes の PlaneGeometry）
+    const baseW = 3;
+    const baseH = 2;
+
+    const mid = location.layers.midground;
+    if (this.midgroundMesh && mid?.url) {
+      if (onScreen) {
+        const dist = Math.max(targetDist + 0.3, 2.1);
+        const height = frustumHeightAt(dist) * (mid.scale ?? 1.15) * aspectMultiplier;
+        this.midgroundMesh.position
+          .copy(this.camera.position)
+          .addScaledVector(forward, dist)
+          .addScaledVector(right, mid.position?.x ?? 0)
+          .addScaledVector(up, (mid.position?.y ?? 1.35) - 1.35);
+        this.midgroundMesh.quaternion.copy(this.camera.quaternion);
+        this.midgroundMesh.scale.set((height * 16) / 9 / baseW, height / baseH, 1);
+      } else {
+        const pos = mid.position ?? { x: 0, y: 1.35, z: -0.25 };
+        this.midgroundMesh.position.set(pos.x, pos.y, pos.z);
+        this.midgroundMesh.quaternion.identity();
+        this.midgroundMesh.scale.set(mid.scale ?? 1, mid.scale ?? 1, 1);
+      }
+    }
+
+    const near = location.layers.nearground;
+    if (this.neargroundMesh && near?.url) {
+      if (onScreen) {
+        const dist = Math.max(targetDist * 0.65, 0.4);
+        const frustumHeight = frustumHeightAt(dist);
+        const image = (this.neargroundMesh.material as THREE.MeshBasicMaterial).map?.image as { width?: number; height?: number } | undefined;
+        const imageAspect = image?.width && image?.height ? image.width / image.height : 4 / 3;
+        const width = ((frustumHeight * 16) / 9) * (near.scale ?? 1);
+        this.neargroundMesh.position
+          .copy(this.camera.position)
+          .addScaledVector(forward, dist)
+          .addScaledVector(right, near.position?.x ?? 0)
+          .addScaledVector(up, -0.0852 * frustumHeight + (near.position?.y ?? 0));
+        this.neargroundMesh.quaternion.copy(this.camera.quaternion);
+        this.neargroundMesh.scale.set(width / baseW, width / imageAspect / baseH, 1);
+      } else {
+        const pos = near.position ?? { x: 0, y: 0.8, z: 0.6 };
+        this.neargroundMesh.position.set(pos.x, pos.y, pos.z);
+        this.neargroundMesh.quaternion.identity();
+        this.neargroundMesh.scale.set(near.scale ?? 1, near.scale ?? 1, 1);
+      }
     }
   }
 
@@ -1082,6 +1139,7 @@ export class StageManager {
         if (time !== this.cutTime) this.setCutTime(time);
       }
       if (!this.freeCamera) this.updateCamera(delta);
+      this.updateLayerPlacement();
       this.scrollingBackground.update(delta);
 
       // 1. 登場中のアバターの更新（口パクは話者だけ）

@@ -10,9 +10,12 @@ const HEROINE_IDS = ['aoi', 'emili', 'shion'];
 const PUBLIC_DIR = path.resolve(__dirname, '../../../../../assets');
 const SCENARIOS_DIR = path.join(PUBLIC_DIR, 'scenarios');
 
-/** assets/scenarios/<category>/<id>/scenario.json の一覧 */
+/** ゲーム本編に出さない種類（演出の見本。目次に載せない） */
+const DEMO_CATEGORY = 'demo';
+
+/** assets/scenarios/<category>/<id>/scenario.json の一覧（demo を除く） */
 function listScenarioDirs(): Array<{ category: string; id: string }> {
-  return fs.readdirSync(SCENARIOS_DIR).flatMap((category) =>
+  return fs.readdirSync(SCENARIOS_DIR).filter((category) => category !== DEMO_CATEGORY).flatMap((category) =>
     fs
       .readdirSync(path.join(SCENARIOS_DIR, category))
       .filter((id) => fs.existsSync(path.join(SCENARIOS_DIR, category, id, 'scenario.json')))
@@ -25,6 +28,15 @@ describe('シナリオファイル（assets/scenarios）', () => {
     const indexed = scenarioIndex.map((entry) => `${entry.category}/${entry.id}`).sort();
     const onDisk = listScenarioDirs().map(({ category, id }) => `${category}/${id}`).sort();
     expect(indexed).toEqual(onDisk);
+  });
+
+  it('演出の見本（demo）も分岐のつながりと選択肢の決まりを守っていること', () => {
+    const dir = path.join(SCENARIOS_DIR, DEMO_CATEGORY);
+    for (const id of fs.readdirSync(dir)) {
+      const scenario = JSON.parse(fs.readFileSync(path.join(dir, id, 'scenario.json'), 'utf8'));
+      const result = validateScenario(scenario);
+      expect([id, result.errors, result.warnings]).toEqual([id, [], []]);
+    }
   });
 
   const storyEntries = diskScenarioRepository.list().filter((e) => e.category !== 'call' && e.category !== 'mail');

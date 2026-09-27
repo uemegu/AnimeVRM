@@ -1,0 +1,711 @@
+{
+  "schemaVersion": 1,
+  "id": "harem",
+  "title": "放課後大波乱!? 一体誰が本命なのよ〜！",
+  "location": "corridor",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "harem_intro_1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「ねえ……今日こそ、ちゃんとハッキリさせてほしいの。」",
+      "voiceUrl": "/voices/harem_intro_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.65,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.22,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "player"
+        },
+        "shion": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "aoi"
+        },
+        "emili": {
+          "position": [
+            0.65,
+            0,
+            -0.45
+          ],
+          "rotationY": -0.22,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "aoi"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.4,
+          1.35,
+          0.65
+        ],
+        "target": [
+          -0.65,
+          1.35,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "harem_intro_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「そうよ！ 誰にでも思わせぶりな態度取って……一体誰が本命なのよ〜！」",
+      "voiceUrl": "/voices/harem_intro_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "emili"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "motion": "Angry",
+          "expression": "angry",
+          "lookAtTarget": "player",
+          "effectText": "iraira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.3,
+          0.65
+        ],
+        "target": [
+          0.65,
+          1.3,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "harem_intro_3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……はぁ。めんどくさ。私まで巻き込まないでほしいんだけど。……で？ 誰なわけ？」",
+      "voiceUrl": "/voices/harem_intro_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "shion"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "shion"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "harem_intro_4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「私達3人の中で、あなたの本当の気持ち……教えて？」",
+      "voiceUrl": "/voices/harem_intro_4.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player",
+          "effectText": "doki"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.2,
+          1.85
+        ],
+        "target": [
+          0,
+          1.2,
+          -0.4
+        ]
+      }
+    },
+    {
+      "id": "harem_choice",
+      "speaker": "3人",
+      "speakerCharacterId": "aoi",
+      "text": "（3人からの視線が突き刺さる……！ 一体誰を選ぶ！？）",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "angry"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.2,
+          1.95
+        ],
+        "target": [
+          0,
+          1.2,
+          -0.4
+        ]
+      }
+    },
+    {
+      "id": "harem_choice_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "choice_aoi",
+          "text": "💙 アオイが本命だよ！",
+          "goto": "route_aoi_1",
+          "setFlags": {
+            "choice_aoi": true
+          }
+        },
+        {
+          "id": "choice_emily",
+          "text": "💛 エミリが本命だよ！",
+          "goto": "route_emily_1",
+          "setFlags": {
+            "choice_emily": true
+          }
+        },
+        {
+          "id": "choice_shion",
+          "text": "🖤 シオンが本命だよ！",
+          "goto": "route_shion_1",
+          "setFlags": {
+            "choice_shion": true
+          }
+        },
+        {
+          "id": "choice_all",
+          "text": "💥 3人とも大好きだーっ！！（選べない）",
+          "goto": "route_all_1",
+          "setFlags": {
+            "choice_all": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "route_aoi_1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「えっ……！？ ほ、本当に私……！？ 夢じゃないよね……っ！？」",
+      "voiceUrl": "/voices/harem_aoi_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Excited",
+          "expression": "happy",
+          "effectText": "doki"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "aoi"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "aoi"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.4,
+          1.35,
+          0.65
+        ],
+        "target": [
+          -0.65,
+          1.35,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "route_aoi_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ちょっとー！ なんでアオイなのよー！ 私のほうが絶対カワイイのにー！」",
+      "voiceUrl": "/voices/harem_aoi_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "emili"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "motion": "Angry",
+          "expression": "angry",
+          "lookAtTarget": "player",
+          "effectText": "iraira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.3,
+          0.65
+        ],
+        "target": [
+          0.65,
+          1.3,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "route_aoi_3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「ふぁ……。あっそ。お熱いことで。じゃ、決まったなら私帰って寝るね。」",
+      "voiceUrl": "/voices/harem_aoi_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "shion"
+        },
+        "shion": {
+          "motion": "Dismissing Gesture",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "angry",
+          "lookAtTarget": "shion"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      },
+      "nextSceneId": "harem_ending"
+    },
+    {
+      "id": "route_emily_1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「やったーっ！ やっぱり私が一番でしょ♪ 見たかアオイ〜！」",
+      "voiceUrl": "/voices/harem_emily_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "emili"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "motion": "Excited",
+          "expression": "happy",
+          "lookAtTarget": "player",
+          "effectText": "yatta"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.3,
+          0.65
+        ],
+        "target": [
+          0.65,
+          1.3,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "route_emily_2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「うそ……っ！ 私じゃなかったの……！？ もう、バカバカ、知らないっ！」",
+      "voiceUrl": "/voices/harem_emily_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Angry",
+          "expression": "angry",
+          "lookAtTarget": "player",
+          "effectText": "iraira"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "aoi"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "aoi"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.4,
+          1.35,
+          0.65
+        ],
+        "target": [
+          -0.65,
+          1.35,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "route_emily_3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……はいはい。お似合いなんじゃない？ 騒がしいカップルの誕生だね。」",
+      "voiceUrl": "/voices/harem_emily_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "angry",
+          "lookAtTarget": "shion"
+        },
+        "shion": {
+          "motion": "Dismissing Gesture",
+          "expression": "relaxed",
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "shion"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      },
+      "nextSceneId": "harem_ending"
+    },
+    {
+      "id": "route_shion_1",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……は？ ……え、な、何言ってんの……？ 私なんか選んで……後悔しても知らないから……っ。」",
+      "voiceUrl": "/voices/harem_shion_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "surprised",
+          "lookAtTarget": "player",
+          "blush": true,
+          "effectText": "doki"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.7
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "route_shion_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ええええーっ！？ まさかのシオン！？ なんでよーっ！？」",
+      "voiceUrl": "/voices/harem_shion_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "emili"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "blush": false
+        },
+        "emili": {
+          "motion": "Angry",
+          "expression": "angry",
+          "effectText": "iraira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.3,
+          0.65
+        ],
+        "target": [
+          0.65,
+          1.3,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "route_shion_3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「し、シオンだったの……？ でも……シオン、すっごく顔真っ赤だよ……？」",
+      "voiceUrl": "/voices/harem_shion_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "shion",
+          "effectText": "doki"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "surprised"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.4,
+          1.35,
+          0.65
+        ],
+        "target": [
+          -0.65,
+          1.35,
+          -0.45
+        ]
+      },
+      "nextSceneId": "harem_ending"
+    },
+    {
+      "id": "route_all_1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「はあぁぁ！？ 一番言っちゃいけない最低なセリフ出たー！！」",
+      "voiceUrl": "/voices/harem_all_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "angry",
+          "lookAtTarget": "player"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "angry"
+        },
+        "emili": {
+          "motion": "Angry",
+          "expression": "angry",
+          "lookAtTarget": "player",
+          "effectText": "iraira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.3,
+          0.65
+        ],
+        "target": [
+          0.65,
+          1.3,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "route_all_2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「サイテー……。本当に反省してよね！ もうみんなで絶交だから！」",
+      "voiceUrl": "/voices/harem_all_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Punching",
+          "expression": "angry",
+          "effectText": "iraira"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "angry"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "angry"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.4,
+          1.35,
+          0.65
+        ],
+        "target": [
+          -0.65,
+          1.35,
+          -0.45
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "route_all_3",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……救いようがないね。エナドリ奢ってもらっても……許さないから。」",
+      "voiceUrl": "/voices/harem_all_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "angry"
+        },
+        "shion": {
+          "motion": "Dismissing Gesture",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "angry"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "harem_ending",
+      "text": "こうして、放課後のドタバタ本命裁判は幕を閉じた……（？） あなたと3人の騒がしい青春はまだまだ続きそうだ。",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.2,
+          1.95
+        ],
+        "target": [
+          0,
+          1.2,
+          -0.4
+        ]
+      }
+    }
+  ]
+}
