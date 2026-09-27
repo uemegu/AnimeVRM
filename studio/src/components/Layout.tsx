@@ -17,7 +17,6 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/player', icon: 'player', label: (t) => t.nav.player, ready: true },
   { path: '/characters', icon: 'characters', label: (t) => t.nav.characters, ready: true },
   { path: '/motions', icon: 'motions', label: (t) => t.nav.motions, ready: false },
-  { path: '/tools', icon: 'tools', label: (t) => t.nav.tools, ready: false },
 ];
 
 export function Layout() {

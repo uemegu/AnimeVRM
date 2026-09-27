@@ -31,7 +31,7 @@
 - ardy-mini 本体と品質補正（`src/ai/motion/ardy`、`src/ai/motion/quality`）。`ardy-onnxruntime-web` と `@huggingface/tokenizers` は ardy が使うので残す
 - `quality-calibrate.html` の中身：ardy の補正に使う VRM 接触点の校正なので、Studio のモーション画面へ移す
 - `cli-runner.html` の中身：`scripts/ardy-generate.ts`（CLI でのモーション生成）が使う headless 実行口。Studio のモーション機能に置き換えたうえで、CLI 用の入口として残す
-- Eye Atelier（`tools/eye-editor`）
+- Eye Atelier（`tools/eye-editor`）。モデルを作るときだけ使うので Studio には入れず、単独のツールのまま残す（2026-09-27 決定）
 - 簡易3Dの教室・図書室（`src/scene/painted-*`）。Studio の背景の種類の1つにする
 - `blender/`（gitignore 済み）、`assembly/`（WASM。追跡されているが今回は触らない）
 
@@ -68,7 +68,7 @@ tools/eye-editor/
    - JSON のインポート・エクスポート、app/public/scenarios の直接読み書き
 4. **シナリオ再生**：これまで作ったシナリオの一覧と再生（Pages 版と同じ部品）
 5. **モーション**：英語プロンプトから ardy-mini で複数候補を補正込みで生成し、並べて比較して採用する。接触点の校正もここで行う
-6. **ツール**：MorphTarget 調整、Eye Atelier、音声生成（Irodori-TTS をサーバー経由で呼ぶ）
+6. ~~**ツール**~~（2026-09-27 取りやめ）：音声生成はキャラクター管理とシナリオ編集に入れた。MorphTarget 調整はバックログ、Eye Atelier は単独のツールのまま使う
 7. **キャラクター管理**：ID・名前・関連アバター（制服・私服など）・音声生成の参照音声とボイス指導・キャラ設定を編集する。キャラから登場シナリオ・セリフ・ボイスを逆引きできる。データは `assets/studio/characters.json`。セリフの話者は必ず `speakerCharacterId` で指定する（画面に出ない声だけの話者も。主人公は `player`）
 
 ## シナリオ形式の拡張方針
@@ -97,8 +97,12 @@ tools/eye-editor/
    - ルートのシナリオを JSON に移す（2026-09-27 完了。5秒告白PVは対象外）：`assets/scenarios/demo/`（ゲーム本編の目次には載せない）。場所がなかった公園（並木）・カフェ・カフェ店内・海の見える公園・夏祭りを場所設定に追加。中景・近景は旧ルートと同じく画面に貼り付く置き方にした。カフェ監視の暗い店内（時間帯 `indoor_dark`）と窓の外の明るさ（遠景の露出・キャラの `daylight`）も移した。移せなかったもの：カメラの動き（寄り・回り込みなど）、夢のような背景、魚眼、座り姿勢（図書室）、3Dの教室とモブ（休み時間の教室は2Dの教室で代用）、ステレオの左右。旧ルートの時間帯「室内・明」は不要（昼で代用）
    - 再生と Pages（2026-09-27 完了）：Studio の「シナリオ再生」で保存済みのシナリオを分岐・ボイス・BGM・演出つきで通して再生できる（`studio/src/player/`）。同じ部品で Pages 用の静的版（`studio/pages/`、`npm run build:pages`）を作り、`docs/` を差し替えた。素材は再生するシナリオが使うものだけをコピーする（約180MB。以前は約700MB）。旧 Pages の各シナリオの URL は、共有カード（OGP）を残したまま新しい再生画面へ転送する
    - 再生の口パクは声の大きさだけで動かす（母音の解析はしない）
-9. **モーション・音声・ツール**：ardy の複数候補生成、接触点の校正、TTS、MorphTarget、Eye Atelier
+9. **モーション**：ardy の複数候補生成（補正込み・比較して採用）、接触点の校正（`quality-calibrate.html` の中身）。音声生成は済み
 10. **app/ を engine に載せ替え**、旧 `src/`・HTML 群・旧 vite 設定を削除する
+
+## バックログ
+
+- **MorphTarget 調整**（2026-09-27 バックログへ。あまり使っていないため）：旧ルートの `src/ui/components/MorphTargetPanel.ts` と `packages/engine/src/avatar/MorphTargetPreview.ts`。第10段階で旧ルートと一緒に消すので、必要になったらコミット `dc8bfa5` 時点のコードを参考に Studio へ作り直す
 
 ## 未確定・要検証
 

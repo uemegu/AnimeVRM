@@ -9,7 +9,6 @@ export const en: Dictionary = {
     player: 'Playback',
     characters: 'Characters',
     motions: 'Motions',
-    tools: 'Tools',
     comingSoon: 'Soon',
   },
   common: {

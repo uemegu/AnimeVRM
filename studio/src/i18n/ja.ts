@@ -7,7 +7,6 @@ export const ja = {
     player: 'シナリオ再生',
     characters: 'キャラクター',
     motions: 'モーション',
-    tools: 'ツール',
     comingSoon: '準備中',
   },
   common: {
