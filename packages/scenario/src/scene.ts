@@ -30,7 +30,8 @@ const group = <T extends z.core.$ZodLooseShape>(ja: string, en: string, shape: T
 const vec3 = (ja: string, en: string, min: number, max: number, step: number) =>
   group(ja, en, { x: num('X', 'X', min, max, step), y: num('Y', 'Y', min, max, step), z: num('Z', 'Z', min, max, step) });
 
-export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'divine'] as const;
+/** 時間帯（光の設定）。indoor_dark は暗い店内など、外の明るさとの対比を見せる室内 */
+export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'divine', 'indoor_dark'] as const;
 export const TimeOfDayId = z.enum(TIME_OF_DAY_IDS);
 export type TimeOfDayId = z.infer<typeof TimeOfDayId>;
 
@@ -264,6 +265,8 @@ export const LocationVisualPreset = z.strictObject({
     background: group('遠景', 'Background', {
       url: z.string().meta({ ...label('画像', 'Image'), kind: 'image' }).optional(),
       color: color('単色', 'Solid color').optional(),
+      /** 暗い室内から見た明るい屋外のように、遠景だけ明るくする */
+      exposure: num('明るさ', 'Exposure', 0.2, 3, 0.05, 1).optional(),
     }),
     midground: group('中景（キャラの奥）', 'Midground (behind characters)', {
       url: z.string().meta({ ...label('画像', 'Image'), kind: 'image' }).optional(),

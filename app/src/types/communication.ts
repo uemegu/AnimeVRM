@@ -2,6 +2,7 @@
  * コミュニケーション機能（TV電話・LINE風メール）の型定義
  */
 
+import type { Expression } from '@anime-vrm/scenario';
 import { LocalizedString, ScenarioAvailability } from './scenario';
 
 export type HeroineId = 'aoi' | 'emili' | 'shion';
@@ -20,7 +21,7 @@ export interface CallSceneStep {
   id: string;
   speaker: LocalizedString;
   text: LocalizedString;
-  expression?: string;
+  expression?: Expression;
   expressionWeight?: number;
   motion?: string;
   choices?: CallChoice[];

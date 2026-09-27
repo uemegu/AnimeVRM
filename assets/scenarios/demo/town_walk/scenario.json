@@ -37,7 +37,7 @@
           ],
           "rotationY": -0.22,
           "motion": "Walking",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "camera"
         }
       },
@@ -91,7 +91,7 @@
           ],
           "rotationY": -0.25,
           "motion": "Walking",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "camera",
           "blush": true
         }

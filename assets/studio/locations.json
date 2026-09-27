@@ -357,7 +357,8 @@
       "isIndoor": true,
       "layers": {
         "background": {
-          "url": "/textures/cafe_indoor_far.avif"
+          "url": "/textures/cafe_indoor_far.avif",
+          "exposure": 1.3
         },
         "midground": {
           "url": "/textures/cafe_indoor_mid.avif",

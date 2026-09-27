@@ -48,7 +48,7 @@ describe('舞台の状態', () => {
 });
 
 describe('カット内のタイムライン', () => {
-  const scene = {
+  const scene: ScenarioScene = {
     id: 's1',
     text: '',
     avatars: {

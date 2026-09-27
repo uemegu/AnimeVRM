@@ -34,7 +34,7 @@
           ],
           "rotationY": -0.22,
           "motion": "Walking",
-          "expression": "sleepy",
+          "expression": "relaxed",
           "lookAtTarget": "player"
         }
       },
@@ -58,7 +58,7 @@
           ],
           "rotationY": -0.22,
           "motion": "Walking",
-          "expression": "sleepy"
+          "expression": "relaxed"
         }
       },
       "camera": "close"
@@ -75,7 +75,7 @@
           ],
           "rotationY": -0.22,
           "motion": "Walking",
-          "expression": "sleepy"
+          "expression": "relaxed"
         }
       },
       "camera": "close",
@@ -173,7 +173,7 @@
           ],
           "rotationY": -0.3,
           "motion": "Standing Idle",
-          "expression": "sleepy",
+          "expression": "relaxed",
           "lookAtTarget": "speaker"
         },
         "teacher": {
@@ -468,7 +468,7 @@
           ],
           "rotationY": -0.3,
           "motion": "Standing Idle",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "speaker"
         },
         "teacher": {
@@ -503,7 +503,7 @@
           ],
           "rotationY": -0.3,
           "motion": "Standing Idle",
-          "expression": "relax"
+          "expression": "relaxed"
         },
         "teacher": {
           "position": [

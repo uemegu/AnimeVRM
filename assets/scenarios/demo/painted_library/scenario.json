@@ -155,7 +155,7 @@
           ],
           "rotationY": 0,
           "motion": "chin_rest",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "player"
         }
       },
@@ -254,7 +254,7 @@
           ],
           "rotationY": 0,
           "motion": "chin_rest",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "player"
         }
       },

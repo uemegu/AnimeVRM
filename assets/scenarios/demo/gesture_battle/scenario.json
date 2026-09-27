@@ -98,7 +98,7 @@
             },
             {
               "at": 5.5,
-              "expression": "relax",
+              "expression": "relaxed",
               "motion": "ardy_troubled",
               "motionLoop": false,
               "lookAtTarget": "partner"
@@ -133,7 +133,7 @@
           "transitions": [
             {
               "at": 4,
-              "expression": "relax",
+              "expression": "relaxed",
               "motion": "ardy_shrug",
               "motionLoop": false
             },
@@ -267,7 +267,7 @@
           "transitions": [
             {
               "at": 3.2,
-              "expression": "relax",
+              "expression": "relaxed",
               "motion": "ardy_stretch",
               "motionLoop": false
             }

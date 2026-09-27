@@ -280,7 +280,7 @@
           ],
           "rotationY": -0.55,
           "motion": "Standing Idle",
-          "expression": "relax"
+          "expression": "relaxed"
         },
         "emili": {
           "position": [
@@ -332,7 +332,7 @@
           ],
           "rotationY": 0.55,
           "motion": "Acknowledging",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "forward"
         }
       },

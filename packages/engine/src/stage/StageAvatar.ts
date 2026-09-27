@@ -10,6 +10,7 @@ import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
 import { AvatarEffects } from './AvatarEffects';
 import { resolveAssetUrl } from '../utils/path';
+import { setDaylight } from '../scene/Daylight';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -325,6 +326,11 @@ export class StageAvatar {
       console.error(`Failed to play animation ${url}:`, err);
       return null;
     }
+  }
+
+  /** 日なたの明るさ（暗い室内から見た窓の外の人物など。0 で場の光だけ） */
+  public setDaylight(amount: number): void {
+    if (this.vrm) setDaylight(this.vrm.scene, amount);
   }
 
   /** モーションの再生速度（1 が通常） */
