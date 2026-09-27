@@ -200,7 +200,8 @@ export const DEFAULT_SLOT_POSITIONS: Record<'left' | 'center' | 'right', [number
   center: [0, 0, 0],
   right: [0.45, 0, 0],
 };
-export const DEFAULT_BACKDROP = { mode: 'screen' as const, distance: 8, height: 7.5, offsetY: 1.0 };
+/** 遠景の既定は3D空間に置く（旧ルートと同じく、カメラの動きで背景の見え方も変わる） */
+export const DEFAULT_BACKDROP: { mode: 'screen' | 'world'; distance: number; height: number; offsetY: number } = { mode: 'world', distance: 8, height: 7.5, offsetY: 1.0 };
 
 const shotRig = (ja: string, en: string, def: ShotRig) =>
   group(ja, en, {

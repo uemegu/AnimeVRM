@@ -27,13 +27,15 @@
           "position": "left",
           "motion": "Standing Idle",
           "expression": "happy",
-          "lookAtTarget": "partner"
+          "lookAtTarget": "partner",
+          "fastMotion": true
         },
         "emili": {
           "position": "right",
           "motion": "Standing Idle",
           "expression": "neutral",
-          "lookAtTarget": "speaker"
+          "lookAtTarget": "speaker",
+          "fastMotion": true
         }
       },
       "camera": "speaker"
@@ -79,6 +81,7 @@
       "avatars": {
         "aoi": {
           "motion": "Dismissing Gesture",
+          "motionSpeed": 1,
           "expression": "neutral",
           "lookAtTarget": "speaker"
         },
@@ -138,6 +141,7 @@
         },
         "emili": {
           "motion": "Salute",
+          "motionSpeed": 1,
           "expression": "happy",
           "lookAtTarget": "speaker"
         }
