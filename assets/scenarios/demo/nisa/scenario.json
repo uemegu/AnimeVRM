@@ -172,7 +172,8 @@
             "choice_reva": true
           }
         }
-      ]
+      ],
+      "camera": "speaker"
     },
     {
       "id": "route_hold_1",

@@ -128,7 +128,8 @@
             "choice_park": true
           }
         }
-      ]
+      ],
+      "camera": "wide"
     },
     {
       "id": "route_cafe_1",

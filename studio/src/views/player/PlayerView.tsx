@@ -42,8 +42,15 @@ export function PlayerView() {
       list
         .filter((s) => ORDER.includes(s.category))
         .sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category) || a.id.localeCompare(b.id))
-        .map((s) => ({ key: `${s.category}/${s.id}`, title: s.title, label: `${t.scenarios.categories[s.category]} ・ ${s.id}` })),
-    [list, t]
+        .map((s) => ({
+          key: `${s.category}/${s.id}`,
+          title: s.title,
+          label: `${t.scenarios.categories[s.category]} ・ ${s.id}`,
+          description: s.description,
+          // 舞台の場所の遠景をサムネイルにする
+          image: s.location ? data?.locations[s.location]?.layers.background.url : undefined,
+        })),
+    [list, t, data]
   );
 
   if (error) return <div className="view-empty">{t.player.loadFailed}</div>;

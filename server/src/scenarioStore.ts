@@ -13,6 +13,9 @@ export interface ScenarioSummary {
   /** シーン（電話はステップ、メールはメッセージ）の数 */
   lineCount: number;
   updatedAt: string;
+  /** 舞台の場所（一覧のサムネイルに使う） */
+  location?: string;
+  description?: string;
 }
 
 export interface ValidationIssue {
@@ -69,7 +72,11 @@ export class ScenarioStore {
         const kind = kindOf(category);
         const lineCount =
           kind === 'call' ? Object.keys(data.steps ?? {}).length : kind === 'mail' ? (data.messages ?? []).length : (data.scenes ?? []).length;
-        result.push({ category, id, kind, title: textOf(data.title), lineCount, updatedAt: stat.mtime.toISOString() });
+        result.push({
+          category, id, kind, title: textOf(data.title), lineCount, updatedAt: stat.mtime.toISOString(),
+          ...(typeof data.location === 'string' ? { location: data.location } : {}),
+          ...(data.description !== undefined ? { description: textOf(data.description) } : {}),
+        });
       }
     }
     return result;

@@ -114,7 +114,8 @@
             "silent_stare": true
           }
         }
-      ]
+      ],
+      "camera": "medium"
     },
     {
       "id": "route_love_1",
