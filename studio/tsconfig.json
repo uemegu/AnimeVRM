@@ -27,6 +27,7 @@
   "include": [
     "src",
     "pages",
-    "vite.pages.config.ts"
+    "vite.pages.config.ts",
+    "../packages/motion/src/ardy/ort-alias.d.ts"
   ]
 }

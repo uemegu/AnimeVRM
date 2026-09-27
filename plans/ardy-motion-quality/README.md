@@ -1,5 +1,7 @@
 # ardy-mini motion quality: implementation handoff
 
+> 2026-09-27：コードは `packages/motion/src/`（`ardy/`・`quality/`・`rig/`）に移り、校正は Studio のモーション画面になった。以下のパスは当時のもの。
+
 This folder is the low-cost-AI handoff for the motion-quality work. The core implementation is now in the repository; do not start again from task 01 or replace working code just to match the original design notes. First inspect the code and tests below. Implement only a concrete missing item, keep the contact geometry deterministic, and send API keys only from Node.
 
 ## Give this prompt to a low-cost coding AI

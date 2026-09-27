@@ -10,7 +10,7 @@
 
 ## 📖 目次
 
-**モーション生成:** [ardy-mini](src/ai/motion/ardy/README.md) で英語の動作説明からモーションを生成できます（CLI）。
+**モーション生成:** [ardy-mini](packages/motion/src/ardy/README.md) で英語の動作説明からモーションを生成できます（Studio のモーション画面、または CLI）。
 
 - [✨ 特徴](#-特徴)
 - [🚀 クイックスタート](#-クイックスタート)

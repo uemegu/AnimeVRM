@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@anime-vrm/engine": "*",
+    "@anime-vrm/motion": "*",
     "@anime-vrm/scenario": "*",
     "@dagrejs/dagre": "^3.1.1",
     "@pixiv/three-vrm": "^3.5.5",

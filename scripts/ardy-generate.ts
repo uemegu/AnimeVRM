@@ -4,7 +4,7 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { chromium, type Browser, type Page } from '@playwright/test';
 import { createJevMotionPlan } from './lib/jev-motion-plan.ts';
-import { validateAvatarContactProfile, validateMotionQualityPlan } from '../src/ai/motion/quality/validate.ts';
+import { validateAvatarContactProfile, validateMotionQualityPlan } from '../packages/motion/src/quality/validate.ts';
 
 interface BatchItem {
   prompt: string;
@@ -24,6 +24,20 @@ interface BatchItem {
   lockLegs?: boolean;
   amplitude?: number;
   loop?: boolean;
+  /** 指の形（例 { "right": "peace" }） */
+  fingers?: { left?: string; right?: string };
+}
+
+/** --fingers right=peace,left=open を { right: 'peace', left: 'open' } にする */
+function parseFingers(spec: string | undefined): { left?: string; right?: string } | undefined {
+  if (!spec) return undefined;
+  const result: { left?: string; right?: string } = {};
+  for (const part of spec.split(',')) {
+    const [side, shape] = part.split('=').map((v) => v.trim());
+    if ((side !== 'left' && side !== 'right') || !shape) throw new Error(`--fingers: "${part}" は right=peace のように書いてください`);
+    result[side] = shape;
+  }
+  return result;
 }
 
 const optionsConfig = {
@@ -44,6 +58,7 @@ const optionsConfig = {
   'fit-hands': { type: 'boolean' as const, default: true },
   'lock-legs': { type: 'boolean' as const, default: false },
   loop: { type: 'boolean' as const, default: false },
+  fingers: { type: 'string' as const },
   amplitude: { type: 'string' as const },
   batch: { type: 'string' as const, short: 'b' },
   headed: { type: 'boolean' as const, default: false },
@@ -76,9 +91,10 @@ Options:
       --lock-legs          With --avatar, hold the legs and hips height at the first frame (gestures in place)
       --amplitude <a>      With --avatar, scale the motion toward an upright arms-down pose (0.3 to 1.5, default 1)
       --loop               Ease the last 0.5 s into the first pose, for motions played on repeat
+      --fingers <spec>     With --avatar, hold a finger shape per hand: right=peace,left=open (index, peace, thumb, fist, open, three)
   -b, --batch <file>       JSON array of tasks; each may also set candidates, seed, cfg, keep, preview, lockLegs, amplitude, loop
       --headed             Run browser in headed (visible) mode
-      --port <port>        Vite dev server port (default: Vite's default, 5173)
+      --port <port>        Studio の開発サーバーのポート（省略時は Studio の設定 5175、使用中なら空きポート）
   -h, --help               Show this help message
 
 Examples:
@@ -216,13 +232,17 @@ async function main() {
     const serverOptions = requestedPort === undefined
       ? { host: '127.0.0.1' }
       : { host: '127.0.0.1', port: requestedPort };
+    // Studio の開発サーバーで studio/cli-runner.html を開く（素材は assets/ を配信する）
+    const studioRoot = path.resolve(import.meta.dirname, '../studio');
     viteServer = await createServer({
+      root: studioRoot,
+      configFile: path.join(studioRoot, 'vite.config.ts'),
       server: serverOptions,
     });
     await viteServer.listen();
     const address = viteServer.httpServer?.address();
     if (!address || typeof address === 'string') throw new Error('Vite did not report its listening port.');
-    baseUrl = `http://127.0.0.1:${address.port}/AnimeVRM/`;
+    baseUrl = `http://127.0.0.1:${address.port}/`;
     console.log(`[Vite] Server listening at ${baseUrl}`);
   } catch (error) {
     if (viteServer) await viteServer.close();
@@ -319,6 +339,7 @@ async function main() {
         preview: task.preview ?? values.preview,
         fitHands: values['fit-hands'],
         loop: task.loop ?? values.loop,
+        ...((task.fingers ?? parseFingers(values.fingers)) ? { fingers: task.fingers ?? parseFingers(values.fingers) } : {}),
         style: {
           lockLegs: task.lockLegs ?? values['lock-legs'],
           ...(task.amplitude ?? values.amplitude) === undefined ? {} : { amplitude: Number(task.amplitude ?? values.amplitude) },

@@ -797,7 +797,8 @@ export class StageManager {
 
   /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す */
   private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = '', offsetSec = 0): void {
-    const url = motion ? `/animations/${motion}.fbx` : IDLE_ANIMATION_URL;
+    // モーション名（assets/animations/<名前>.fbx）のほか、URL（Studio で生成した直後の FBX など）も受け付ける
+    const url = !motion ? IDLE_ANIMATION_URL : /^(blob:|data:|https?:|\/)/.test(motion) ? motion : `/animations/${motion}.fbx`;
     // 指定が変わった時だけ再生する（1回きりの身振りが待機に戻った後、同じ指定で再生し直さない）
     const key = `${url}|${loop}|${cue}`;
     if (this.avatarMotionUrls.get(id) === key) return;

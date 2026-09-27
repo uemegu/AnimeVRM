@@ -1,0 +1,32 @@
+{
+  "name": "@anime-vrm/motion",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ardy-mini によるモーション生成、体型への補正、接触点の補正、FBX 書き出し",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@huggingface/tokenizers": "0.1.3",
+    "ardy-onnxruntime-web": "npm:onnxruntime-web@1.27.0"
+  },
+  "peerDependencies": {
+    "@anime-vrm/engine": "*",
+    "@pixiv/three-vrm": "^3.5.5",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@anime-vrm/engine": "*",
+    "@pixiv/three-vrm": "^3.5.5",
+    "@types/three": "^0.185.4",
+    "three": "^0.183.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.3",
+    "vitest": "^5.0.1"
+  }
+}

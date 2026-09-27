@@ -89,6 +89,9 @@ export const api = {
   saveCharacters: (book: CharacterBook) => putJson<{ ok: true }>('/characters', book),
   characterUsage: (id: string) => request<CharacterScenarioUsage[]>(`/characters/${encodeURIComponent(id)}/usage`),
   assets: (kind: AssetKind) => request<AssetEntry[]>(`/assets/${kind}`),
+  saveMotion: (body: { name: string; fbx: string; candidates?: unknown; loop?: boolean; overwrite?: boolean }) =>
+    fetch('/api/motions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
+  saveMotionProfile: (path: string, profile: unknown) => putJson<{ ok: true }>(`/motions/profiles/${path}`, profile),
   studioData: <T>(name: string) => request<T>(`/studio-data/${encodeURIComponent(name)}`),
   saveStudioData: (name: string, data: unknown) => putJson<{ ok: true }>(`/studio-data/${encodeURIComponent(name)}`, data),
 };

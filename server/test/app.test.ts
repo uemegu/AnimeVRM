@@ -267,3 +267,41 @@ describe('キャラクター', () => {
     expect((await request('/api/characters/nobody/usage')).status).toBe(404);
   });
 });
+
+describe('モーション（/api/motions）', () => {
+  const fbx = Buffer.from('Kaydara FBX Binary  \0motion').toString('base64');
+  const post = (body: unknown) => request('/api/motions', { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } });
+
+  beforeEach(async () => {
+    await fs.mkdir(path.join(assetsDir, 'animations'), { recursive: true });
+    await fs.writeFile(path.join(assetsDir, 'studio', 'motions.json'), JSON.stringify({ motions: { Idle: { loop: true } } }));
+  });
+
+  it('採用したモーションと候補の情報を保存し、ループの指定を motions.json に書く', async () => {
+    const res = await post({ name: 'ardy_test', fbx, candidates: { seed: 'a' }, loop: true });
+    expect(await json(res)).toEqual({ ok: true, url: '/animations/ardy_test.fbx' });
+    expect((await fs.readFile(path.join(assetsDir, 'animations', 'ardy_test.fbx'))).toString('latin1')).toContain('Kaydara');
+    expect(JSON.parse(await fs.readFile(path.join(assetsDir, 'animations', 'ardy_test.candidates.json'), 'utf8'))).toEqual({ seed: 'a' });
+    expect(JSON.parse(await fs.readFile(path.join(assetsDir, 'studio', 'motions.json'), 'utf8')).motions.ardy_test).toEqual({ loop: true });
+  });
+
+  it('同じ名前は上書きの指定がなければ断り、名前と中身を確かめる', async () => {
+    await post({ name: 'ardy_test', fbx });
+    expect((await post({ name: 'ardy_test', fbx })).status).toBe(409);
+    expect((await post({ name: 'ardy_test', fbx, overwrite: true })).status).toBe(200);
+    expect((await post({ name: '../evil', fbx })).status).toBe(400);
+    expect((await post({ name: 'Ardy', fbx })).status).toBe(400);
+    expect((await post({ name: 'ardy_x', fbx: Buffer.from('not fbx').toString('base64') })).status).toBe(400);
+  });
+
+  it('接触点の校正結果を保存する', async () => {
+    const profile = { version: 1, avatarSha256: 'a'.repeat(64), calibrated: true, anchors: {}, hands: {} };
+    expect((await putJson('/api/motions/profiles/aoi/aoi-school.json', profile)).status).toBe(200);
+    expect(JSON.parse(await fs.readFile(path.join(assetsDir, 'motion-profiles', 'aoi', 'aoi-school.json'), 'utf8'))).toEqual(profile);
+    expect((await putJson('/api/motions/profiles/aoi/aoi-school.json', { version: 2 })).status).toBe(400);
+    // ../ は URL の段階で正規化される。どちらにしても校正結果の外には書かない
+    expect((await putJson('/api/motions/profiles/../x.json', profile)).ok).toBe(false);
+    expect((await putJson('/api/motions/profiles/%2E%2E/x.json', profile)).ok).toBe(false);
+    await expect(fs.stat(path.join(assetsDir, 'x.json'))).rejects.toThrow();
+  });
+});

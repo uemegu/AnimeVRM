@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   publicDir: '../assets',
+  // ardy-mini の推論ワーカーは ES モジュール
+  worker: { format: 'es' },
+  // 生成のページを開いた途中で依存の前処理が走って読み直しにならないよう、起動時に済ませる
+  optimizeDeps: { include: ['@huggingface/tokenizers', 'ardy-onnxruntime-web/webgpu'] },
   server: {
     port: 5175,
     proxy: {
