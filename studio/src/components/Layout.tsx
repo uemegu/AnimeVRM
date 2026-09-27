@@ -25,8 +25,32 @@ export function Layout() {
     <div className="studio">
       <aside className="studio-sidebar">
         <div className="studio-brand">
-          <span className="studio-brand-mark" aria-hidden="true" />
-          <span>{t.appName}</span>
+          <div className="studio-brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" className="studio-brand-svg">
+              <defs>
+                <linearGradient id="studio-brand-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="45%" stopColor="#3b82f6" />
+                  <stop offset="100%" stopColor="#6366f1" />
+                </linearGradient>
+                <filter id="studio-brand-glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#2563eb" floodOpacity="0.25" />
+                </filter>
+              </defs>
+              <path
+                d="M 8.5 27 L 17.2 6.8 C 17.6 5.8 18.4 5.8 18.8 6.8 L 27.2 24.8 C 27.8 26.2 26.8 27.6 25 27.6 C 23.8 27.6 22.8 26.6 22 25 L 19 19.5 L 13.5 19.5"
+                stroke="url(#studio-brand-gradient)"
+                strokeWidth="4.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#studio-brand-glow)"
+              />
+            </svg>
+          </div>
+          <div className="studio-brand-text">
+            <span className="studio-brand-title">AnimeVRM</span>
+            <span className="studio-brand-sub">Studio</span>
+          </div>
         </div>
         <nav className="studio-nav">
           {NAV_ITEMS.map((item) => (
