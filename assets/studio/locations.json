@@ -370,6 +370,15 @@
           "scale": 1.38,
           "opacity": 1
         }
+      },
+      "stage": {
+        "camera": {},
+        "backdrop": {
+          "mode": "world",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
       }
     }
   }
