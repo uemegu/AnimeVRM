@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "id": "nisa",
+  "title": {
+    "ja": "夕暮れの校門とオルカンの憂鬱",
+    "en": "Sunset at School Gate: The All-Country ETF Anxiety"
+  },
+  "location": "school_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "ambience": "/se/large_brown_cicada.mp3",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "intro_1",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あ、来てくれたんだ……！ 放課後に校門の前で待っててなんて言って、急にごめんね。」",
+        "en": "\"Ah, you came...! Sorry for asking you out to the school gate after class out of nowhere.\""
+      },
+      "voiceUrl": "/voices/nisa_01.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "Standing Greeting",
+          "expression": "neutral",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_2",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あのね……ずっと一人で悩んでて、誰にも言えなかったんだけど……あなたにだけは、正直に相談したくて……。」",
+        "en": "\"The truth is... I've been agonizing over this alone, but you're the only one I can truly confide in...\""
+      },
+      "voiceUrl": "/voices/nisa_02.mp3",
+      "avatars": {
+        "aoi": {
+          "expression": "sorrow",
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_3",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「私ね……今年から新NISA、始めたんだ……。」",
+        "en": "\"I... I opened a new NISA account and started investing this year...\""
+      },
+      "voiceUrl": "/voices/nisa_03.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Acknowledging",
+          "expression": "happy",
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_4",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ネットのみんなはさ、『思考停止でオルカン一本買っとけば20年後には勝てる』って言うでしょ……？」",
+        "en": "\"Everyone online says, 'Just buy All-Country index and sleep for 20 years and you win', right...?\""
+      },
+      "voiceUrl": "/voices/nisa_04.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "angry"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_5",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「でも……もしこれから世界的な大恐慌が来たらどうするの……っ！？ 人口動態とか地政学リスクとか……本当に全世界株式一本で大丈夫なの……っ！？」",
+        "en": "\"But... what if the whole world economy enters a Great Depression...?! What about demographics and geopolitical risks... Is All-Country really foolproof...?!"
+      },
+      "voiceUrl": "/voices/nisa_05.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "sorrow",
+          "tears": true
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_6",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「私……毎月の積立日になるたびに胃が痛くて……っ。ねえ、私どうしたらいいと思う……？」",
+        "en": "\"My stomach hurts every month when auto-invest triggers...! What do you think I should do...?\""
+      },
+      "voiceUrl": "/voices/nisa_06.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "sorrow"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "intro_6_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "choice_hold",
+          "text": {
+            "ja": "「世界の成長を信じて気絶ホールド一択だよ」",
+            "en": "\"Trust global growth and knock yourself out holding.\""
+          },
+          "goto": "route_hold_1",
+          "setFlags": {
+            "choice_hold": true
+          }
+        },
+        {
+          "id": "choice_cash",
+          "text": {
+            "ja": "「不安なら少し現金比率を高めようか」",
+            "en": "\"If you're worried, just raise your cash ratio.\""
+          },
+          "goto": "route_cash_1",
+          "setFlags": {
+            "choice_cash": true
+          }
+        },
+        {
+          "id": "choice_reva",
+          "text": {
+            "ja": "「全財産をレバナスにぶち込めば悩みも消えるよ」",
+            "en": "\"Dump all your life savings into Leveraged NASDAQ.\""
+          },
+          "goto": "route_reva_1",
+          "setFlags": {
+            "choice_reva": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "route_hold_1",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「気絶ホールド……！ そっか、アプリを消して20年間寝てればいいんだね……！ なんだか少し心が軽くなったかも……ありがとう……！」",
+        "en": "\"Knock myself out holding...! You're right, just delete the app and hibernate for 20 years...! I feel so much lighter... Thank you...!\""
+      },
+      "voiceUrl": "/voices/nisa_hold_01.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "effectText": "yatta"
+        }
+      },
+      "camera": "speaker",
+      "nextSceneId": "epilogue_1"
+    },
+    {
+      "id": "route_cash_1",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「現金比率……！ そうだよね、無リスク資産でリスク許容度を整えるのが基本だった……！ 冷静になれたよ、ありがとう……！」",
+        "en": "\"Cash ratio...! That's true, keeping risk-free assets to balance risk tolerance is the golden rule...! I feel calm now, thank you...!\""
+      },
+      "voiceUrl": "/voices/nisa_cash_01.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "effectText": "kirakira"
+        }
+      },
+      "camera": "speaker",
+      "nextSceneId": "epilogue_1"
+    },
+    {
+      "id": "route_reva_1",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「えっ、全財産レバナス……！？ それ、不安どころか破滅に向かってない……！？ もう、バカぁ……っ！」",
+        "en": "\"Wait, 100% Leveraged NASDAQ...?! That's not solving anxiety, that's a speedrun to financial ruin...! Dummy...!\""
+      },
+      "voiceUrl": "/voices/nisa_reva_01.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "angry",
+          "effectText": "iraira"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "epilogue_1",
+      "speaker": {
+        "ja": "葵",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ふふっ、あなたに相談してよかった。……じゃあ、一緒にアイスでも食べて帰ろ？ 私のNISA口座から出すわけにはいかないから、割り勘ね！」",
+        "en": "\"Hehe, I'm so glad I talked to you. Let's get some ice cream on the way home! We're splitting the bill though, can't touch my NISA funds!\""
+      },
+      "voiceUrl": "/voices/nisa_epilogue_01.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "effectText": "kirakira"
+        }
+      },
+      "camera": "speaker"
+    }
+  ]
+}

@@ -90,6 +90,8 @@ export interface ScenarioScene {
   avatars?: Record<string, SceneAvatarConfig>;
   /** 次のシーンID（未指定の場合は配列の次シーンへ自動進行） */
   nextSceneId?: string;
+  /** true ならこのシーンのあとシナリオを終える */
+  end?: true;
   /** 選択肢（※選択肢がある場合は text を空にするのがプロジェクトルール） */
   choices?: ScenarioChoice[];
   /** シーン突入時のフラグ更新 */

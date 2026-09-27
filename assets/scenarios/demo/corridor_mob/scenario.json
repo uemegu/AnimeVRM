@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "id": "corridor_mob",
+  "title": "休み時間の教室 〜アオイとエミリ、同じ班になれたね〜",
+  "location": "classroom",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "cm_1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「アオイ〜！ 聞いて聞いて、次の理科の実験、同じ班になれたよ！」",
+      "voiceUrl": "/voices/cm_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            -0.45
+          ],
+          "rotationY": -0.9,
+          "motion": "Idle",
+          "expression": "surprised",
+          "lookAtTarget": "partner"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.9,
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "partner",
+          "transitions": [
+            {
+              "at": 3.9,
+              "motion": "Excited",
+              "motionLoop": false,
+              "effectText": "yatta"
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "cm_2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「ほんと！？ よかったぁ……。エミリちゃんと一緒なら心強いな。」",
+      "voiceUrl": "/voices/cm_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "surprised",
+          "transitions": [
+            {
+              "at": 1.7,
+              "expression": "happy",
+              "motion": "Acknowledging",
+              "motionLoop": false
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Idle",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.68,
+          1.38,
+          0.98
+        ],
+        "target": [
+          0.32,
+          1.25,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "cm_3",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「でもさ〜、前回ビーカー割りそうになったの、誰だったっけ？」",
+      "voiceUrl": "/voices/cm_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 3.9,
+              "expression": "surprised"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Idle",
+          "expression": "relaxed",
+          "transitions": [
+            {
+              "at": 3.7,
+              "expression": "happy"
+            }
+          ]
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.68,
+          1.38,
+          0.98
+        ],
+        "target": [
+          -0.32,
+          1.25,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "cm_4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「あ、あれはたまたまだってば！ 今日はちゃんと気をつけるもん……。」",
+      "voiceUrl": "/voices/cm_4.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Dismissing Gesture",
+          "expression": "surprised",
+          "sweat": "fly4",
+          "transitions": [
+            {
+              "at": 3.5,
+              "expression": "angry"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Idle",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.31,
+          1.36,
+          0.45
+        ],
+        "target": [
+          0.32,
+          1.25,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "cm_5",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ふふっ、冗談だよ。ほら、チャイム鳴る前に理科室いこ！」",
+      "voiceUrl": "/voices/cm_5.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "angry",
+          "transitions": [
+            {
+              "at": 2,
+              "expression": "happy"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Idle",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.68,
+          1.38,
+          0.98
+        ],
+        "target": [
+          -0.32,
+          1.25,
+          -0.45
+        ]
+      }
+    },
+    {
+      "id": "cm_6",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「うん！ ノートと教科書、持った？ ……よし、出発！」",
+      "voiceUrl": "/voices/cm_6.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 4.4,
+              "motion": "Salute",
+              "motionLoop": false
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 4.6,
+              "motion": "Excited",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

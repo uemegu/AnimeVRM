@@ -290,6 +290,86 @@
         "rotationY": 0,
         "scale": 1
       }
+    },
+    "modern_park": {
+      "id": "modern_park",
+      "name": "公園（並木）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/modern-park-far.avif"
+        },
+        "midground": {
+          "url": "/textures/modern-park-mid.avif",
+          "position": {
+            "x": 0,
+            "y": 1.35,
+            "z": -0.25
+          },
+          "scale": 1.15,
+          "opacity": 1
+        }
+      }
+    },
+    "park_with_sea": {
+      "id": "park_with_sea",
+      "name": "海の見える公園",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/park-with-sea-far.avif"
+        }
+      }
+    },
+    "night_festival": {
+      "id": "night_festival",
+      "name": "夏祭り",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/night-festival-far.avif"
+        }
+      }
+    },
+    "cafe": {
+      "id": "cafe",
+      "name": "カフェ",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/cafe_far.avif"
+        },
+        "nearground": {
+          "url": "/textures/cafe_near.avif",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 1,
+          "opacity": 1
+        }
+      }
+    },
+    "cafe_indoor": {
+      "id": "cafe_indoor",
+      "name": "カフェ店内",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/cafe_indoor_far.avif"
+        },
+        "midground": {
+          "url": "/textures/cafe_indoor_mid.avif",
+          "position": {
+            "x": 0,
+            "y": 1.35,
+            "z": -0.25
+          },
+          "scale": 1.38,
+          "opacity": 1
+        }
+      }
     }
   }
 }

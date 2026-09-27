@@ -193,10 +193,15 @@ export const ScenarioScene = z.strictObject({
   bgm: z.string().optional(),
   /** @deprecated bgm を使う */
   bgmUrl: z.string().optional(),
+  /** シーンの始めに1回鳴らす効果音 */
   seUrl: z.string().optional(),
+  /** 環境音（ループ。セミの声・足音など）。以降のシーンに引き継ぎ、false で止める */
+  ambience: z.union([z.string(), z.literal(false)]).optional(),
   avatars: z.record(z.string(), SceneAvatarConfig).optional(),
   /** 省略時は配列の次のシーンへ進む */
   nextSceneId: z.string().optional(),
+  /** true ならこのシーンのあとシナリオを終える（分岐したルートの最後など） */
+  end: z.literal(true).optional(),
   choices: z.array(ScenarioChoice).optional(),
   setFlags: FlagMap.optional(),
   flashEffect: z.enum(['white', 'none']).optional(),
@@ -286,6 +291,8 @@ export const ScenarioPackage = z.strictObject({
   actionHints: z.array(ActionLocationHint).optional(),
   /** 開始時の BGM（ID または URL。'silence' で無音） */
   bgm: z.string().optional(),
+  /** 開始時の環境音（ループ） */
+  ambience: z.string().optional(),
   timeOfDay: z.string().optional(),
   characters: z
     .array(
@@ -369,8 +376,8 @@ export const MailScenario = z.strictObject({
 });
 export type MailScenario = z.infer<typeof MailScenario>;
 
-/** シナリオの種類（assets/scenarios/<category>/ のディレクトリ名） */
-export const ScenarioCategory = z.enum(['morning', 'action', 'holiday', 'forced', 'ending', 'special', 'call', 'mail']);
+/** シナリオの種類（assets/scenarios/<category>/ のディレクトリ名）。demo はゲーム本編に出ない演出の見本（Pages で再生する） */
+export const ScenarioCategory = z.enum(['morning', 'action', 'holiday', 'forced', 'ending', 'special', 'call', 'mail', 'demo']);
 export type ScenarioCategory = z.infer<typeof ScenarioCategory>;
 
 /** 種類に応じたスキーマ */

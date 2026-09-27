@@ -11,6 +11,8 @@ const OUTPUT_PATH = path.join(APP_ROOT, 'src', 'data', 'scenarioIndex.json');
 
 /** 目次の並び順（同じ優先度のシナリオはこの順→ディレクトリ名順で選ばれる） */
 const CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending', 'special', 'call', 'mail'];
+/** ゲーム本編に出さない種類（demo は演出の見本。Pages で再生する） */
+const SKIPPED_CATEGORIES = ['demo'];
 
 /** 目次に載せるメタ情報（本文のシーン等は遅延ロード時に読む） */
 const META_KEYS = [
@@ -38,7 +40,7 @@ export function generateScenarioIndex() {
 
   for (const category of fs.readdirSync(SCENARIOS_DIR).sort()) {
     const categoryDir = path.join(SCENARIOS_DIR, category);
-    if (!fs.statSync(categoryDir).isDirectory()) continue;
+    if (!fs.statSync(categoryDir).isDirectory() || SKIPPED_CATEGORIES.includes(category)) continue;
     if (!CATEGORIES.includes(category)) {
       throw new Error(`[scenario-index] Unknown category directory: ${category} (expected one of ${CATEGORIES.join(', ')})`);
     }

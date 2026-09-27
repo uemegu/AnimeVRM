@@ -163,6 +163,12 @@ export class ScenarioEngine {
       return true;
     }
 
+    // このシーンで終わる指定
+    if (current.end) {
+      this.finished = true;
+      return true;
+    }
+
     // 明示的な nextSceneId がある場合はそのIDのシーンへジャンプ
     if (current.nextSceneId) {
       const targetIndex = this.package.scenes.findIndex((s) => s.id === current.nextSceneId);
