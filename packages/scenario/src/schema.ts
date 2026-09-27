@@ -279,6 +279,8 @@ export const ScenarioPackage = z.strictObject({
   schemaVersion: z.literal(1).optional(),
   id: z.string().min(1),
   title: TextContent,
+  /** 一覧に出す紹介文 */
+  description: TextContent.optional(),
   /** 舞台の場所。場所選択を経ずに始まるシナリオの背景に使う */
   location: z.string().optional(),
   /** 条件に合うシナリオが他にないときだけ選ばれる汎用シナリオ */

@@ -13,6 +13,7 @@ import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar } from './StageAvatar';
+import { resolveAssetUrl } from '../utils/path';
 import { ScreenEffects } from './ScreenEffects';
 import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
@@ -467,7 +468,7 @@ export class StageManager {
 
     // 1. 遠景画像 (SkyBackground の前面にアルファカット合成)
     if (locPreset.layers.background.url) {
-      this.textureLoader.load(locPreset.layers.background.url, (texture) => {
+      this.textureLoader.load(resolveAssetUrl(locPreset.layers.background.url), (texture) => {
         if (this.isDisposed || this.currentLocationId !== locationId) return;
         texture.colorSpace = THREE.SRGBColorSpace;
         this.locationBackgroundTexture = texture;
@@ -488,7 +489,7 @@ export class StageManager {
     if (this.midgroundMesh) {
       const mid = locPreset.layers.midground;
       if (mid && mid.url) {
-        this.textureLoader.load(mid.url, (texture) => {
+        this.textureLoader.load(resolveAssetUrl(mid.url), (texture) => {
           if (this.isDisposed || !this.midgroundMesh) return;
           texture.colorSpace = THREE.SRGBColorSpace;
           const mat = this.midgroundMesh.material as THREE.MeshBasicMaterial;
@@ -507,7 +508,7 @@ export class StageManager {
     if (this.neargroundMesh) {
       const near = locPreset.layers.nearground;
       if (near && near.url) {
-        this.textureLoader.load(near.url, (texture) => {
+        this.textureLoader.load(resolveAssetUrl(near.url), (texture) => {
           if (this.isDisposed || !this.neargroundMesh) return;
           texture.colorSpace = THREE.SRGBColorSpace;
           const mat = this.neargroundMesh.material as THREE.MeshBasicMaterial;

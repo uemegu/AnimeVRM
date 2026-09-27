@@ -121,7 +121,8 @@ export default defineConfig({
     rollupOptions: {
       input: getHtmlInputs(),
     },
-    outDir: 'docs',
+    // docs/ は Pages（studio/vite.pages.config.ts の再生だけの静的版）が使う。旧ルートは dist/ に出す
+    outDir: 'dist',
     emptyOutDir: true,
   },
 });

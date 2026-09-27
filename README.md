@@ -133,11 +133,11 @@ npm run server
 ### ビルド & プレビュー
 
 ```bash
-# プロダクションビルド (docs/ ディレクトリに出力)
-npm run build
+# GitHub Pages（シナリオ再生だけの静的版）を docs/ に書き出す。素材は再生するシナリオが使うものだけをコピーする
+npm run build:pages
 
-# ビルド成果物のローカルプレビュー
-npm run preview
+# 旧ビューアのビルド（dist/ に出力。Studio へ移行が済んだら消す）
+npm run build
 
 # 背景・テクスチャ画像の AVIF 一括変換
 npm run convert:textures

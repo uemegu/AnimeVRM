@@ -5,6 +5,7 @@
     "ja": "夕暮れの公園と放課後の期待",
     "en": "Twilight Park & After-School Anticipation"
   },
+  "description": "夕暮れの公園に呼び出されたあなた。茜色に染まる並木道で、アオイが伝えたかった想いとは――。",
   "location": "modern_park",
   "bgm": "/bgm/bgm.mp3",
   "ambience": "/se/large_brown_cicada.mp3",

@@ -5,6 +5,7 @@
     "ja": "放課後の寄り道〜アオイとエミリ〜",
     "en": "After-School Hangout ~Aoi & Emiri~"
   },
+  "description": "アオイとエミリの放課後カフェトーク。2人の掛け合いを楽しめるインタラクティブシナリオ。",
   "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "morning",

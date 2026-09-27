@@ -5,6 +5,7 @@
     "ja": "校門の邂逅 〜シオンと桐島先生の秘密の推し〜",
     "en": "Encounter at the School Gate ~Shion and Ms. Kirishima~"
   },
+  "description": "眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？",
   "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "ambience": "/se/walking.mp3",

@@ -5,6 +5,7 @@
     "ja": "疾風怒濤！高速アクション特訓",
     "en": "Fast Action Motion Effects Showcase"
   },
+  "description": "アニメ作画風の残像やスピードリボン、ダイナミックブラーを駆使した高速アクション演出。",
   "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "day",

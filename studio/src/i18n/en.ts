@@ -241,4 +241,18 @@ export const en: Dictionary = {
     idTaken: 'This ID is already used',
     idInvalid: 'Start with a lowercase letter; use lowercase letters, digits and _ only',
   },
+  player: {
+    back: 'List',
+    auto: 'Auto',
+    sound: 'Sound',
+    muted: 'Muted',
+    start: 'Start',
+    end: 'The End',
+    replay: 'Play again',
+    backToList: 'Back to list',
+    listTitle: 'Scenario Player',
+    listLead: 'Short scenes acted by 3D characters. Click or press Space to advance.',
+    categoryAll: 'All',
+    loadFailed: 'Could not load',
+  },
 };

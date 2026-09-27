@@ -1,0 +1,286 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  resolveCameraShot,
+  resolveCast,
+  resolveScrollingBackground,
+  ScenarioRunner,
+  type ScenarioPackage,
+  type TextContent,
+  type TimeOfDayId,
+} from '@anime-vrm/scenario';
+import type { StagePresets } from '@anime-vrm/engine/stage/StageManager';
+import { Icon } from '../components/Icon';
+import { useI18n, type Language } from '../i18n';
+import { PlayerAudio } from './PlayerAudio';
+import { PlayerStage } from './PlayerStage';
+import type { PlayerData } from './playerData';
+import './player.css';
+
+const TYPE_SPEED = 40; // 1秒に出す文字数
+const AUTO_WAIT_MS = 1200;
+
+function localize(text: TextContent | undefined, language: Language): string {
+  if (text === undefined) return '';
+  if (typeof text === 'string') return text;
+  return (language === 'en' ? text.en : undefined) ?? text.ja;
+}
+
+interface Props {
+  scenario: ScenarioPackage;
+  /** ボイスの相対パスの基準（/scenarios/<category>/<id>/） */
+  baseUrl: string;
+  data: PlayerData;
+  /** 一覧へ戻る（なければボタンを出さない） */
+  onExit?: () => void;
+}
+
+type Phase = 'title' | 'playing' | 'ended';
+
+/**
+ * シナリオの再生（分岐・ボイス・BGM・演出つき）。Studio の再生画面と Pages で使う
+ */
+export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
+  const { t, language, setLanguage } = useI18n();
+  const tp = t.player;
+  const runnerRef = useRef<ScenarioRunner>(new ScenarioRunner(scenario));
+  const audioRef = useRef<PlayerAudio | null>(null);
+  audioRef.current ??= new PlayerAudio();
+  const [phase, setPhase] = useState<Phase>('title');
+  const [step, setStep] = useState(0);
+  const [typed, setTyped] = useState(0);
+  const [voiceDone, setVoiceDone] = useState(true);
+  const [auto, setAuto] = useState(false);
+  const [muted, setMuted] = useState(audioRef.current.muted);
+  const [flash, setFlash] = useState(0);
+  const [remaining, setRemaining] = useState<number | null>(null);
+
+  const runner = runnerRef.current;
+  const audio = audioRef.current;
+  const scene = runner.scene;
+  const stage = runner.stage;
+  const text = localize(scene.text, language);
+  const speakerName = localize(scene.speaker, language);
+  const speakerColor = data.characters.characters.find((c) => c.id === scene.speakerCharacterId)?.themeColor;
+  const choices = runner.choices;
+  const textDone = typed >= text.length;
+
+  useEffect(() => () => audio.dispose(), [audio]);
+
+  // シナリオが変わったら最初から
+  useEffect(() => {
+    runnerRef.current = new ScenarioRunner(scenario);
+    audio.stopVoice();
+    setPhase('title');
+    setStep((s) => s + 1);
+  }, [scenario, audio]);
+
+  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
+  const cast = useMemo(
+    () =>
+      resolveCast(stage, {
+        modelUrlFor: (id) => data.characters.characters.find((c) => c.id === id)?.models[0]?.url,
+        isLoopingMotion: (motion) => !!data.motions[motion]?.loop,
+      }),
+    [stage, data]
+  );
+  const locationId = stage.background ?? scenario.location ?? 'classroom';
+  const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
+  const shot = resolveCameraShot(scene, cast);
+  const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
+
+  // シーンに入ったとき：音と文字送りを始める
+  useEffect(() => {
+    if (phase !== 'playing') return;
+    const bgm = stage.bgm && stage.bgm !== 'silence' ? (data.bgm[stage.bgm] ?? { url: stage.bgm, volumeScale: 1 }) : null;
+    audio.playBgm(bgm?.url ?? null, bgm?.volumeScale ?? 1);
+    audio.playAmbience(stage.ambience ?? null);
+    if (scene.seUrl) audio.playSe(scene.seUrl);
+    const voice = scene.voiceUrl ? (scene.voiceUrl.startsWith('/') ? scene.voiceUrl : `${baseUrl}${scene.voiceUrl}`) : null;
+    setVoiceDone(!voice);
+    audio.playVoice(voice, () => setVoiceDone(true));
+    setTyped(0);
+    if (scene.flashEffect === 'white') setFlash((f) => f + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, step]);
+
+  // 文字送り
+  useEffect(() => {
+    if (phase !== 'playing' || textDone) return;
+    const timer = window.setTimeout(() => setTyped((n) => n + 1), 1000 / TYPE_SPEED);
+    return () => window.clearTimeout(timer);
+  }, [phase, typed, textDone]);
+
+  const advance = useCallback(() => {
+    if (phase === 'title') {
+      setPhase('playing');
+      return;
+    }
+    if (phase !== 'playing') return;
+    if (!textDone) {
+      setTyped(text.length);
+      return;
+    }
+    if (runner.choices.length > 0) return;
+    if (runner.next()) {
+      audio.stopVoice();
+      setPhase('ended');
+      return;
+    }
+    setStep((s) => s + 1);
+  }, [phase, textDone, text.length, runner, audio]);
+
+  const choose = (index: number) => {
+    if (runner.choose(index)) {
+      audio.stopVoice();
+      setPhase('ended');
+      return;
+    }
+    setStep((s) => s + 1);
+  };
+
+  // オート：文字とボイスが終わったら少し待って進める
+  useEffect(() => {
+    if (!auto || phase !== 'playing' || !textDone || !voiceDone || choices.length > 0) return;
+    const wait = scene.autoNextSec !== undefined ? scene.autoNextSec * 1000 : AUTO_WAIT_MS;
+    const timer = window.setTimeout(advance, wait);
+    return () => window.clearTimeout(timer);
+  }, [auto, phase, textDone, voiceDone, choices.length, scene, advance]);
+
+  // 選択肢の制限時間（指定があるときだけ）
+  useEffect(() => {
+    const seconds = scene.choiceTimeout?.seconds;
+    if (phase !== 'playing' || !seconds || choices.length === 0) {
+      setRemaining(null);
+      return;
+    }
+    const startedAt = performance.now();
+    setRemaining(seconds);
+    const timer = window.setInterval(() => {
+      const left = seconds - (performance.now() - startedAt) / 1000;
+      if (left > 0) {
+        setRemaining(left);
+        return;
+      }
+      window.clearInterval(timer);
+      if (runner.timeout()) setPhase('ended');
+      else setStep((s) => s + 1);
+    }, 100);
+    return () => window.clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, step]);
+
+  // キーボード（スペース・Enter で送る）
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== ' ' && e.key !== 'Enter') return;
+      if ((e.target as HTMLElement | null)?.closest('button, input, textarea, select')) return;
+      e.preventDefault();
+      advance();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [advance]);
+
+  const restart = () => {
+    runnerRef.current = new ScenarioRunner(scenario);
+    setPhase('playing');
+    setStep((s) => s + 1);
+  };
+
+  const toggleMute = () => {
+    audio.setMuted(!muted);
+    setMuted(!muted);
+  };
+
+  return (
+    <div className="player">
+      <PlayerStage
+        presets={presets}
+        timeOfDay={timeOfDay}
+        locationId={locationId}
+        cast={cast}
+        cameraShot={shot}
+        speakerId={scene.speakerCharacterId ?? null}
+        scrolling={scrolling}
+        cut={phase === 'playing' ? scene : null}
+        language={language}
+        getCutTime={() => audio.getVoiceTime()}
+        getSpeakerPhoneme={() => audio.getPhoneme()}
+      />
+      {flash > 0 && <div key={flash} className="player-flash" />}
+
+      <header className="player-header">
+        {onExit && (
+          <button type="button" className="player-button" onClick={onExit}>
+            <Icon name="back" size={14} />
+            {tp.back}
+          </button>
+        )}
+        <span className="player-title">{localize(scenario.title, language)}</span>
+        <span className="player-spacer" />
+        <button type="button" className={`player-button${auto ? ' active' : ''}`} aria-pressed={auto} onClick={() => setAuto(!auto)}>
+          <Icon name="play" size={14} />
+          {tp.auto}
+        </button>
+        <button type="button" className={`player-button${muted ? ' active' : ''}`} aria-pressed={muted} onClick={toggleMute}>
+          <Icon name={muted ? 'soundOff' : 'soundOn'} size={14} />
+          {muted ? tp.muted : tp.sound}
+        </button>
+        <button type="button" className="player-button" onClick={() => setLanguage(language === 'ja' ? 'en' : 'ja')}>
+          {language === 'ja' ? 'EN' : 'JA'}
+        </button>
+      </header>
+
+      {phase === 'title' && (
+        <button type="button" className="player-cover" onClick={advance}>
+          <span className="player-cover-title">{localize(scenario.title, language)}</span>
+          {scenario.description && <span className="player-cover-desc">{localize(scenario.description, language)}</span>}
+          <span className="player-cover-start">
+            <Icon name="play" size={16} />
+            {tp.start}
+          </span>
+        </button>
+      )}
+
+      {phase === 'playing' && choices.length > 0 && (
+        <div className="player-choices">
+          {remaining !== null && <div className="player-timer" style={{ width: `${(remaining / (scene.choiceTimeout?.seconds ?? 1)) * 100}%` }} />}
+          {choices.map((choice, i) => (
+            <button key={i} type="button" className="player-choice" onClick={() => choose(i)}>
+              {localize(choice.text, language)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {phase === 'playing' && text && (
+        <div className="player-message" onClick={advance} role="button" tabIndex={-1}>
+          {speakerName && (
+            <div className="player-speaker" style={speakerColor ? { borderColor: speakerColor } : undefined}>
+              {speakerName}
+            </div>
+          )}
+          <p className="player-text">{text.slice(0, typed)}</p>
+          {textDone && choices.length === 0 && <span className="player-next" aria-hidden="true" />}
+        </div>
+      )}
+      {phase === 'playing' && choices.length === 0 && <div className="player-click" onClick={advance} />}
+
+      {phase === 'ended' && (
+        <div className="player-cover ended">
+          <span className="player-cover-title">{tp.end}</span>
+          <span className="player-end-actions">
+            <button type="button" className="player-button large" onClick={restart}>
+              {tp.replay}
+            </button>
+            {onExit && (
+              <button type="button" className="player-button large" onClick={onExit}>
+                {tp.backToList}
+              </button>
+            )}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}

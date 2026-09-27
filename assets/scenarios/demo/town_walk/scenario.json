@@ -5,6 +5,7 @@
     "ja": "放課後の並木道 〜君と歩く帰り道〜",
     "en": "Walking with Aoi on the Avenue"
   },
+  "description": "放課後の美しい並木道をアオイと一緒に歩く、臨場感あふれるスクロール背景シナリオ。",
   "location": "town",
   "bgm": "/bgm/bgm.mp3",
   "ambience": "/se/walking.mp3",

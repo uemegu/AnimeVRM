@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev:pages": "vite --config vite.pages.config.ts",
+    "build:pages": "tsc --noEmit && vite build --config vite.pages.config.ts"
   },
   "dependencies": {
     "@anime-vrm/engine": "*",
