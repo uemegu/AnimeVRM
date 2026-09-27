@@ -1,24 +1,22 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ESNext",
     "useDefineForClassFields": true,
+    "module": "ESNext",
     "lib": [
-      "ES2022",
+      "ESNext",
       "DOM",
       "DOM.Iterable"
     ],
-    "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "types": [
       "vite/client",
       "node"
@@ -26,8 +24,6 @@
   },
   "include": [
     "src",
-    "pages",
-    "vite.pages.config.ts",
-    "../packages/motion/src/ardy/ort-alias.d.ts"
+    "test"
   ]
 }

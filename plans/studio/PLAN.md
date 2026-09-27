@@ -28,9 +28,9 @@
 
 ### 残すもの（削除候補から外したもの）
 
-- ardy-mini 本体と品質補正（`src/ai/motion/ardy`、`src/ai/motion/quality`）。`ardy-onnxruntime-web` と `@huggingface/tokenizers` は ardy が使うので残す
-- `quality-calibrate.html` の中身：ardy の補正に使う VRM 接触点の校正なので、Studio のモーション画面へ移す
-- `cli-runner.html` の中身：`scripts/ardy-generate.ts`（CLI でのモーション生成）が使う headless 実行口。Studio のモーション機能に置き換えたうえで、CLI 用の入口として残す
+- ardy-mini 本体と品質補正。`packages/motion/` に移した（2026-09-27）。`ardy-onnxruntime-web` と `@huggingface/tokenizers` は ardy が使うので残す
+- `quality-calibrate.html` の中身：ardy の補正に使う VRM 接触点の校正。Studio のモーション画面へ移した（2026-09-27）
+- `cli-runner.html` の中身：`scripts/ardy-generate.ts`（CLI でのモーション生成）が使う headless 実行口。`studio/cli-runner.html` に移し、Studio の開発サーバーで動かす（2026-09-27）
 - Eye Atelier（`tools/eye-editor`）。モデルを作るときだけ使うので Studio には入れず、単独のツールのまま残す（2026-09-27 決定）
 - 簡易3Dの教室・図書室（`src/scene/painted-*`）。Studio の背景の種類の1つにする
 - `blender/`（gitignore 済み）、`assembly/`（WASM。追跡されているが今回は触らない）
@@ -97,7 +97,8 @@ tools/eye-editor/
    - ルートのシナリオを JSON に移す（2026-09-27 完了。5秒告白PVは対象外）：`assets/scenarios/demo/`（ゲーム本編の目次には載せない）。場所がなかった公園（並木）・カフェ・カフェ店内・海の見える公園・夏祭りを場所設定に追加。中景・近景は旧ルートと同じく画面に貼り付く置き方にした。カフェ監視の暗い店内（時間帯 `indoor_dark`）と窓の外の明るさ（遠景の露出・キャラの `daylight`）も移した。移せなかったもの：カメラの動き（寄り・回り込みなど）、夢のような背景、魚眼、座り姿勢（図書室）、3Dの教室とモブ（休み時間の教室は2Dの教室で代用）、ステレオの左右。旧ルートの時間帯「室内・明」は不要（昼で代用）
    - 再生と Pages（2026-09-27 完了）：Studio の「シナリオ再生」で保存済みのシナリオを分岐・ボイス・BGM・演出つきで通して再生できる（`studio/src/player/`）。同じ部品で Pages 用の静的版（`studio/pages/`、`npm run build:pages`）を作り、`docs/` を差し替えた。素材は再生するシナリオが使うものだけをコピーする（約180MB。以前は約700MB）。旧 Pages の各シナリオの URL は、共有カード（OGP）を残したまま新しい再生画面へ転送する
    - 再生の口パクは声の大きさだけで動かす（母音の解析はしない）
-9. **モーション**：ardy の複数候補生成（補正込み・比較して採用）、接触点の校正（`quality-calibrate.html` の中身）。音声生成は済み
+9. **モーション**（2026-09-27 完了）：ardy まわりを `packages/motion/` に移し、Studio のモーション画面で候補の生成・比較・採用（体型への合わせ込み・指の形・接触の補正つき）、モーション一覧（ループの指定）、接触点の校正ができる。CLI は Studio の開発サーバーで動く。テストは vitest に移し、削除済み機能（Gemini 連携・Motion Mixer）のテストは消した
+   - app と Studio のモーションの読み込みが指のボーンを移していなかったので、旧ルートと同じく移すようにした
 10. **app/ を engine に載せ替え**、旧 `src/`・HTML 群・旧 vite 設定を削除する
 
 ## バックログ

@@ -16,6 +16,7 @@ const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
 
 export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.AnimationClip> {
+  url = resolveAssetUrl(url);
   const cacheKey = `${url}:${vrm.scene.uuid}`;
   if (animationClipCache.has(cacheKey)) {
     return animationClipCache.get(cacheKey)!;
@@ -24,7 +25,7 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   let asset = animationAssetCache.get(url);
   if (!asset) {
     const loader = new FBXLoader();
-    asset = await loader.loadAsync(resolveAssetUrl(url));
+    asset = await loader.loadAsync(url);
     animationAssetCache.set(url, asset);
   }
 
@@ -91,6 +92,37 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
     mixamorigRightLeg: 'rightLowerLeg',
     mixamorigRightFoot: 'rightFoot',
     mixamorigRightToeBase: 'rightToes',
+    // 指（旧ルートと同じ。FBX の指の動きも移す）
+    mixamorigLeftHandThumb1: 'leftThumbMetacarpal',
+    mixamorigLeftHandThumb2: 'leftThumbProximal',
+    mixamorigLeftHandThumb3: 'leftThumbDistal',
+    mixamorigLeftHandIndex1: 'leftIndexProximal',
+    mixamorigLeftHandIndex2: 'leftIndexIntermediate',
+    mixamorigLeftHandIndex3: 'leftIndexDistal',
+    mixamorigLeftHandMiddle1: 'leftMiddleProximal',
+    mixamorigLeftHandMiddle2: 'leftMiddleIntermediate',
+    mixamorigLeftHandMiddle3: 'leftMiddleDistal',
+    mixamorigLeftHandRing1: 'leftRingProximal',
+    mixamorigLeftHandRing2: 'leftRingIntermediate',
+    mixamorigLeftHandRing3: 'leftRingDistal',
+    mixamorigLeftHandPinky1: 'leftLittleProximal',
+    mixamorigLeftHandPinky2: 'leftLittleIntermediate',
+    mixamorigLeftHandPinky3: 'leftLittleDistal',
+    mixamorigRightHandThumb1: 'rightThumbMetacarpal',
+    mixamorigRightHandThumb2: 'rightThumbProximal',
+    mixamorigRightHandThumb3: 'rightThumbDistal',
+    mixamorigRightHandIndex1: 'rightIndexProximal',
+    mixamorigRightHandIndex2: 'rightIndexIntermediate',
+    mixamorigRightHandIndex3: 'rightIndexDistal',
+    mixamorigRightHandMiddle1: 'rightMiddleProximal',
+    mixamorigRightHandMiddle2: 'rightMiddleIntermediate',
+    mixamorigRightHandMiddle3: 'rightMiddleDistal',
+    mixamorigRightHandRing1: 'rightRingProximal',
+    mixamorigRightHandRing2: 'rightRingIntermediate',
+    mixamorigRightHandRing3: 'rightRingDistal',
+    mixamorigRightHandPinky1: 'rightLittleProximal',
+    mixamorigRightHandPinky2: 'rightLittleIntermediate',
+    mixamorigRightHandPinky3: 'rightLittleDistal',
   };
 
   clip.tracks.forEach((track) => {
@@ -140,6 +172,13 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   const resultClip = new THREE.AnimationClip('vrmAnimation', clip.duration, tracks);
   animationClipCache.set(cacheKey, resultClip);
   return resultClip;
+}
+
+/** 読み込んだモーションのキャッシュを捨てる（書き出したばかりの FBX を読み直して確かめたあとなど） */
+export function releaseMixamoAnimation(url: string, vrm: VRM): void {
+  const resolved = resolveAssetUrl(url);
+  animationClipCache.delete(`${resolved}:${vrm.scene.uuid}`);
+  animationAssetCache.delete(resolved);
 }
 
 export interface StageAvatarOptions {

@@ -19,9 +19,10 @@ async function staticJson<T>(name: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function useStudioData(): { data: StudioData | null; error: boolean } {
+export function useStudioData(): { data: StudioData | null; error: boolean; reload: () => void } {
   const [data, setData] = useState<StudioData | null>(null);
   const [error, setError] = useState(false);
+  const [version, setVersion] = useState(0);
   useEffect(() => {
     Promise.all([
       api.characters(),
@@ -42,6 +43,6 @@ export function useStudioData(): { data: StudioData | null; error: boolean } {
         })
       )
       .catch(() => setError(true));
-  }, []);
-  return { data, error };
+  }, [version]);
+  return { data, error, reload: () => setVersion((v) => v + 1) };
 }

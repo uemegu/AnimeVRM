@@ -9,6 +9,7 @@ import { ViewerView } from './views/viewer/ViewerView';
 import { ScenesView } from './views/scenes/ScenesView';
 import { ScenariosView } from './views/scenarios/ScenariosView';
 import { PlayerView } from './views/player/PlayerView';
+import { MotionsView } from './views/motions/MotionsView';
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       { path: 'scenes/:tab?/:id?', element: <ScenesView /> },
       { path: 'scenarios/:category?/:id?/:cut?', element: <ScenariosView /> },
       { path: 'player/:category?/:id?', element: <PlayerView /> },
+      { path: 'motions/:tab?', element: <MotionsView /> },
       ...NAV_ITEMS.filter((item) => !item.ready).map((item) => ({ path: item.path.slice(1), element: <ComingSoon /> })),
     ],
   },
