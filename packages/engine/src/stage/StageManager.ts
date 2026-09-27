@@ -550,6 +550,10 @@ export class StageManager {
     const inWorld = backdrop.mode === 'world' && texture !== null;
     const scrolling = this.scrollingBackground.isVisible;
     this.skyBackground.setBackgroundTexture(scrolling || inWorld ? null : texture);
+    // 遠景だけの明るさ（暗い室内から見た屋外など）
+    const exposure = this.presets.locations[this.currentLocationId]?.layers.background.exposure ?? 1;
+    this.skyBackground.material.uniforms.uExposure.value = exposure;
+    this.backdropMesh.material.color.setScalar(exposure);
     this.backdropMesh.visible = inWorld && !scrolling;
     if (inWorld) {
       const image = texture.image as { width?: number; height?: number } | undefined;
@@ -766,6 +770,7 @@ export class StageManager {
       avatar.vrm.scene.position.set(...position);
       avatar.vrm.scene.rotation.y = member.rotationY ?? -position[0] * 0.5;
       avatar.vrm.scene.visible = true;
+      avatar.setDaylight(member.daylight ?? 0);
       avatar.setExpression(member.expression, member.expressionWeight);
       this.playMotion(member.id, avatar, member.motion, member.motionLoop, member.motionCue);
       this.castIds.push(member.id);

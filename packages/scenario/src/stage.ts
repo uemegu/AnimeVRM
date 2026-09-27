@@ -43,6 +43,8 @@ export interface StageCastMember {
   headTurn?: number;
   /** 顔・体の演出（指定を変えるまで続く）。省略時は何もしない */
   look?: AvatarLook;
+  /** 日なたの明るさ（窓の外の人物など） */
+  daylight?: number;
 }
 
 /** 顔・体の演出の状態 */
@@ -153,6 +155,7 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       motionCue: stage.motionCues?.[key],
       lookAtTarget: config.lookAtTarget,
       headTurn: config.headTurn,
+      ...(config.daylight !== undefined ? { daylight: config.daylight } : {}),
       look: {
         blush: config.blush ?? false,
         anger: config.anger ?? false,

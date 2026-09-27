@@ -51,6 +51,10 @@ export const CameraPose = z.strictObject({
 });
 export type CameraPose = z.infer<typeof CameraPose>;
 
+/** 表情（VRM の標準の表情） */
+export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised']);
+export type Expression = z.infer<typeof Expression>;
+
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
 const HeadTurn = z.number().min(0).max(1);
 
@@ -103,7 +107,7 @@ const AvatarOneShotFields = {
 /** セリフ途中のアバター演出（表情・モーション・視線など）。at はボイス再生位置またはシーン経過秒 */
 export const AvatarTransition = z.strictObject({
   at: z.number().nonnegative(),
-  expression: z.string().optional(),
+  expression: Expression.optional(),
   expressionWeight: z.number().min(0).max(1).optional(),
   motion: z.string().optional(),
   motionLoop: z.boolean().optional(),
@@ -136,7 +140,7 @@ export const SceneAvatarConfig = z.strictObject({
   motion: z.string().optional(),
   motionLoop: z.boolean().optional(),
   modelUrl: z.string().optional(),
-  expression: z.string().optional(),
+  expression: Expression.optional(),
   /** 原則 1.0 または 0.0 */
   expressionWeight: z.number().min(0).max(1).optional(),
   position: z.union([AvatarSlotPosition, Vec3]).optional(),
@@ -146,6 +150,8 @@ export const SceneAvatarConfig = z.strictObject({
   visible: z.boolean().optional(),
   /** 速い動きに残像とスピード線をつける */
   fastMotion: z.boolean().optional(),
+  /** 日なたの明るさ（暗い店内から見た窓の外の人物など。0 で室内の光だけ、1 を超えると白く飛ぶ） */
+  daylight: z.number().min(0).max(3).optional(),
   ...AvatarLookFields,
   ...AvatarOneShotFields,
   transitions: z.array(AvatarTransition).optional(),
@@ -332,7 +338,7 @@ export const CallSceneStep = z.strictObject({
   id: z.string(),
   speaker: TextContent,
   text: TextContent,
-  expression: z.string().optional(),
+  expression: Expression.optional(),
   expressionWeight: z.number().min(0).max(1).optional(),
   motion: z.string().optional(),
   choices: z.array(CallChoice).optional(),

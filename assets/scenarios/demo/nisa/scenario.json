@@ -47,7 +47,7 @@
       "voiceUrl": "/voices/nisa_02.mp3",
       "avatars": {
         "aoi": {
-          "expression": "sorrow",
+          "expression": "sad",
           "effectText": "doki"
         }
       },
@@ -109,7 +109,7 @@
       "avatars": {
         "aoi": {
           "motion": "Idle",
-          "expression": "sorrow",
+          "expression": "sad",
           "tears": true
         }
       },
@@ -130,7 +130,7 @@
       "avatars": {
         "aoi": {
           "motion": "Idle",
-          "expression": "sorrow"
+          "expression": "sad"
         }
       },
       "camera": "speaker"

@@ -18,7 +18,7 @@
           "position": "left",
           "modelUrl": "/models/aoi/aoi-private.vrm",
           "motion": "Standing Idle",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "partner",
           "transitions": [
             {
@@ -55,7 +55,7 @@
       "avatars": {
         "aoi": {
           "motion": "Standing Idle",
-          "expression": "relax"
+          "expression": "relaxed"
         },
         "emili": {
           "motion": "Standing Idle",
@@ -92,7 +92,7 @@
           "transitions": [
             {
               "at": 2.5,
-              "expression": "relax",
+              "expression": "relaxed",
               "motion": "ardy_shrug",
               "motionLoop": false,
               "effectText": "kirakira"
@@ -195,7 +195,7 @@
       "avatars": {
         "aoi": {
           "motion": "Standing Idle",
-          "expression": "relax",
+          "expression": "relaxed",
           "transitions": [
             {
               "at": 1.6,

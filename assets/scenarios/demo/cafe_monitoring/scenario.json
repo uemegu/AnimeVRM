@@ -8,7 +8,7 @@
   "description": "暗いカフェの店内から、日差しの強い外の通りを歩く「もう一人の自分」を監視する日本アニメ映画風の高コントラスト短編シナリオ。",
   "location": "cafe_indoor",
   "bgm": "/bgm/bgm.mp3",
-  "timeOfDay": "day",
+  "timeOfDay": "indoor_dark",
   "scenes": [
     {
       "id": "scene_01",
@@ -26,7 +26,7 @@
           "rotationY": -0.35,
           "modelUrl": "/models/emili/emili-private.vrm",
           "motion": "Standing Idle",
-          "expression": "relax",
+          "expression": "relaxed",
           "lookAtTarget": "player"
         },
         "aoi": {
@@ -37,6 +37,7 @@
           ],
           "rotationY": 1.5707963267948966,
           "modelUrl": "/models/aoi/aoi-private.vrm",
+          "daylight": 0.6,
           "motion": "Walking",
           "expression": "neutral",
           "lookAtTarget": "speaker"

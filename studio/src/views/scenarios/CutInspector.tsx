@@ -8,6 +8,7 @@ import {
   type ScenarioPackage,
   type ScenarioScene,
   type SceneAvatarConfig,
+  type Expression,
   type ScreenTransition,
 } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
@@ -304,7 +305,7 @@ function CastTab({ scenario, index, data, set }: { scenario: ScenarioPackage; in
                 </label>
                 <label className="field">
                   <span className="field-label">{t.scenarios.expression}</span>
-                  <select className="select" value={own.expression ?? ''} onChange={(e) => update('expression', e.target.value || undefined)}>
+                  <select className="select" value={own.expression ?? ''} onChange={(e) => update('expression', (e.target.value || undefined) as Expression | undefined)}>
                     <option value="">{inherit(prev.expression && t.viewer.expressions[prev.expression as (typeof EXPRESSIONS)[number]])}</option>
                     {EXPRESSIONS.map((ex) => (
                       <option key={ex} value={ex}>
