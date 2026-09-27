@@ -21,9 +21,11 @@
 
 ## 多層背景設計 (Background / Midground / Nearground)
 
-- **遠景 (Background)**: `scene.background` に設定。画面全体に広がる背景。
-- **中景 (Midground)**: `ViewerCore.midgroundMesh`。アバターより奥（`renderOrder = -1`）に配置される環境オブジェクト（公園の樹木など）。
-- **近景 (Nearground)**: `ViewerCore.neargroundMesh`。アバターより手前（`renderOrder = 2`）に配置される前景オブジェクト（カフェのテーブルなど）。アバターを挟み込むことで「座っている」「奥に立っている」シチュエーションを表現する。
+場所ごとの設定（`assets/studio/locations.json` の `layers`、Studio のシーン設定で編集）で指定し、描画は `packages/engine/src/stage/StageManager.ts` が行う。
+
+- **遠景 (Background)**: 画面全体に広がる背景。
+- **中景 (Midground)**: アバターより奥（`renderOrder = -1`）に配置される環境オブジェクト（公園の樹木など）。
+- **近景 (Nearground)**: アバターより手前（`renderOrder = 2`）に配置される前景オブジェクト（カフェのテーブルなど）。アバターを挟み込むことで「座っている」「奥に立っている」シチュエーションを表現する。
 
 ---
 
@@ -39,7 +41,8 @@ AIエージェントによるデバッグ・動作確認では、BGM・SE・ボ�
 - **Playwright**: ブラウザ起動時に `--mute-audio` を付ける（例: `chromium.launch({ args: ['--mute-audio'] })`）。
 - **アプリ内ブラウザ等、ブラウザ側でミュートできない場合**:
   - `app/` はページ読み込み前に `localStorage.setItem('galgame_audio_muted', 'true')` を設定してミュート状態で起動し、検証中にミュートを解除しない。
-  - ルート (`src/`) は全体のミュート手段がないため、音が出る操作の検証は Playwright で行う。
+  - Studio の再生画面と Pages 版は、ページ読み込み前に `localStorage.setItem('player_audio_muted', 'true')` を設定してミュート状態で起動する。
+  - Studio のそれ以外の画面（ボイスの試聴など）は全体のミュート手段がないため、音が出る操作の検証は Playwright で行う。
 - **音の再生を確かめたいとき**は、実際に鳴らさず `HTMLMediaElement.prototype.play` などを差し替えて呼び出しの有無・回数で判定する。
 
 ---
