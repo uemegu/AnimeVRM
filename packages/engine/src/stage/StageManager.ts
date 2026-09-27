@@ -555,6 +555,8 @@ export class StageManager {
     this.skyBackground.material.uniforms.uExposure.value = exposure;
     this.backdropMesh.material.color.setScalar(exposure);
     this.backdropMesh.visible = inWorld && !scrolling;
+    // 背景を流している間は中景も出さない（旧ルートと同じ。流れる背景の手前に止まった中景が残らないように）
+    if (this.midgroundMesh) this.midgroundMesh.visible = !scrolling;
     if (inWorld) {
       const image = texture.image as { width?: number; height?: number } | undefined;
       const aspect = image?.width && image?.height ? image.width / image.height : 16 / 9;
@@ -566,15 +568,12 @@ export class StageManager {
   }
 
   /**
-   * 遠景を画面に貼るときは、中景・近景もカメラの前に貼り付ける（旧ルートと同じ置き方。
-   * 中景は注視点の少し奥、近景は手前に置き、画面の高さに合わせて大きさを決める）。
-   * 3D空間に置くときは場所の設定の座標に置く
+   * 中景・近景はカメラの前に貼り付ける（旧ルートと同じ置き方。中景は注視点の少し奥、近景は手前に置き、
+   * 画面の高さに合わせて大きさを決める。位置は画面上のずれ）
    */
   private updateLayerPlacement(): void {
     const location = this.presets.locations[this.currentLocationId];
     if (!location) return;
-    const backdrop = { ...DEFAULT_BACKDROP, ...this.locationStage?.backdrop };
-    const onScreen = backdrop.mode !== 'world';
     const forward = new THREE.Vector3();
     this.camera.getWorldDirection(forward);
     const right = new THREE.Vector3().crossVectors(forward, this.camera.up).normalize();
@@ -588,45 +587,31 @@ export class StageManager {
 
     const mid = location.layers.midground;
     if (this.midgroundMesh && mid?.url) {
-      if (onScreen) {
-        const dist = Math.max(targetDist + 0.3, 2.1);
-        const height = frustumHeightAt(dist) * (mid.scale ?? 1.15) * aspectMultiplier;
-        this.midgroundMesh.position
-          .copy(this.camera.position)
-          .addScaledVector(forward, dist)
-          .addScaledVector(right, mid.position?.x ?? 0)
-          .addScaledVector(up, (mid.position?.y ?? 1.35) - 1.35);
-        this.midgroundMesh.quaternion.copy(this.camera.quaternion);
-        this.midgroundMesh.scale.set((height * 16) / 9 / baseW, height / baseH, 1);
-      } else {
-        const pos = mid.position ?? { x: 0, y: 1.35, z: -0.25 };
-        this.midgroundMesh.position.set(pos.x, pos.y, pos.z);
-        this.midgroundMesh.quaternion.identity();
-        this.midgroundMesh.scale.set(mid.scale ?? 1, mid.scale ?? 1, 1);
-      }
+      const dist = Math.max(targetDist + 0.3, 2.1);
+      const height = frustumHeightAt(dist) * (mid.scale ?? 1.15) * aspectMultiplier;
+      this.midgroundMesh.position
+        .copy(this.camera.position)
+        .addScaledVector(forward, dist)
+        .addScaledVector(right, mid.position?.x ?? 0)
+        .addScaledVector(up, (mid.position?.y ?? 1.35) - 1.35);
+      this.midgroundMesh.quaternion.copy(this.camera.quaternion);
+      this.midgroundMesh.scale.set((height * 16) / 9 / baseW, height / baseH, 1);
     }
 
     const near = location.layers.nearground;
     if (this.neargroundMesh && near?.url) {
-      if (onScreen) {
-        const dist = Math.max(targetDist * 0.65, 0.4);
-        const frustumHeight = frustumHeightAt(dist);
-        const image = (this.neargroundMesh.material as THREE.MeshBasicMaterial).map?.image as { width?: number; height?: number } | undefined;
-        const imageAspect = image?.width && image?.height ? image.width / image.height : 4 / 3;
-        const width = ((frustumHeight * 16) / 9) * (near.scale ?? 1);
-        this.neargroundMesh.position
-          .copy(this.camera.position)
-          .addScaledVector(forward, dist)
-          .addScaledVector(right, near.position?.x ?? 0)
-          .addScaledVector(up, -0.0852 * frustumHeight + (near.position?.y ?? 0));
-        this.neargroundMesh.quaternion.copy(this.camera.quaternion);
-        this.neargroundMesh.scale.set(width / baseW, width / imageAspect / baseH, 1);
-      } else {
-        const pos = near.position ?? { x: 0, y: 0.8, z: 0.6 };
-        this.neargroundMesh.position.set(pos.x, pos.y, pos.z);
-        this.neargroundMesh.quaternion.identity();
-        this.neargroundMesh.scale.set(near.scale ?? 1, near.scale ?? 1, 1);
-      }
+      const dist = Math.max(targetDist * 0.65, 0.4);
+      const frustumHeight = frustumHeightAt(dist);
+      const image = (this.neargroundMesh.material as THREE.MeshBasicMaterial).map?.image as { width?: number; height?: number } | undefined;
+      const imageAspect = image?.width && image?.height ? image.width / image.height : 4 / 3;
+      const width = ((frustumHeight * 16) / 9) * (near.scale ?? 1);
+      this.neargroundMesh.position
+        .copy(this.camera.position)
+        .addScaledVector(forward, dist)
+        .addScaledVector(right, near.position?.x ?? 0)
+        .addScaledVector(up, -0.0852 * frustumHeight + (near.position?.y ?? 0));
+      this.neargroundMesh.quaternion.copy(this.camera.quaternion);
+      this.neargroundMesh.scale.set(width / baseW, width / imageAspect / baseH, 1);
     }
   }
 

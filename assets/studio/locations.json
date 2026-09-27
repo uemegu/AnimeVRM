@@ -269,6 +269,14 @@
         },
         "rotationY": 0,
         "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
       }
     },
     "painted_library": {
@@ -289,6 +297,14 @@
         },
         "rotationY": 0,
         "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
       }
     },
     "modern_park": {

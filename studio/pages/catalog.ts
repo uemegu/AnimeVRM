@@ -11,7 +11,6 @@ export interface PagesEntry {
 
 export const PAGES_ENTRIES: PagesEntry[] = [
   { id: 'park_confession', slug: 'park-confession', ogp: '/ogp/park-confession.png' },
-  { id: 'rooftop_nap', slug: 'rooftop-nap', ogp: '/ogp/rooftop-nap.png' },
   { id: 'two_girls', slug: 'two-girls', ogp: '/ogp/two-girls.png' },
   { id: 'trio', slug: 'trio', ogp: '/ogp/trio.png' },
   { id: 'harem', slug: 'harem', ogp: '/ogp/harem.png' },
@@ -22,7 +21,6 @@ export const PAGES_ENTRIES: PagesEntry[] = [
   { id: 'nisa', slug: 'nisa', ogp: '/ogp/nisa.png' },
   { id: 'fast_motion', slug: 'fast-motion', ogp: '/ogp/fast-motion.png' },
   { id: 'gesture_battle', slug: 'gesture-battle' },
-  { id: 'corridor_mob', slug: 'corridor-mob' },
   { id: 'painted_classroom', slug: 'painted-classroom' },
   { id: 'painted_library', slug: 'painted-library' },
   { id: 'cafe_monitoring', slug: 'cafe-monitoring' },

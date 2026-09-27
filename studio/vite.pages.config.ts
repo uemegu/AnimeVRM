@@ -15,7 +15,7 @@ const OUT = process.env.PAGES_OUT_DIR ? path.resolve(process.env.PAGES_OUT_DIR) 
 const BASE = '/AnimeVRM/';
 
 /** 旧 Pages にあって、今はないシナリオ（共有されたリンクは一覧へ転送する） */
-const REMOVED_SLUGS = ['behind-you', 'door-peep', 'ghost-mass', 'five-seconds-pv'];
+const REMOVED_SLUGS = ['behind-you', 'door-peep', 'ghost-mass', 'five-seconds-pv', 'corridor-mob', 'rooftop-nap'];
 
 const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 const ja = (value: unknown) => (typeof value === 'string' ? value : ((value as { ja?: string } | undefined)?.ja ?? ''));

@@ -41,7 +41,19 @@
           "lookAtTarget": "camera"
         }
       },
-      "camera": "close"
+      "cameraPose": {
+        "position": [
+          -1.024,
+          1.25,
+          0.0
+        ],
+        "target": [
+          0,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      }
     },
     {
       "id": "walk_2",
@@ -68,7 +80,19 @@
           "lookAtTarget": "forward"
         }
       },
-      "camera": "close"
+      "cameraPose": {
+        "position": [
+          -1.024,
+          1.25,
+          0.0
+        ],
+        "target": [
+          0,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      }
     },
     {
       "id": "walk_3",
@@ -96,7 +120,19 @@
           "blush": true
         }
       },
-      "camera": "close"
+      "cameraPose": {
+        "position": [
+          -1.024,
+          1.25,
+          0.0
+        ],
+        "target": [
+          0,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      }
     },
     {
       "id": "walk_3_choice",
@@ -152,7 +188,19 @@
           "effectText": "doki"
         }
       },
-      "camera": "close",
+      "cameraPose": {
+        "position": [
+          -1.024,
+          1.25,
+          0.0
+        ],
+        "target": [
+          0,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      },
       "nextSceneId": "walk_transition_stop"
     },
     {
@@ -180,7 +228,19 @@
           "blush": false
         }
       },
-      "camera": "close"
+      "cameraPose": {
+        "position": [
+          -1.024,
+          1.25,
+          0.0
+        ],
+        "target": [
+          0,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      }
     },
     {
       "id": "walk_transition_stop",
