@@ -2,8 +2,8 @@
 
 床・壁・天井を面ごとに生成した1枚絵で貼り、机と椅子を段ごとの透過画像（アクスタ）として並べた撮影用セット。窓の外の空は絵に描かず透過にし、ビューアの空（SkyBackground）を透明な背景画像 `sky-only.png` 経由で後ろに描く。ライト・ポストプロセスはシーンプリセット（`day_school`）のまま使い、ステージ独自の設定は持たない。自由に歩き回る用途ではなく、会話シナリオのカメラワーク（教室後方からの引き・2ショット・通路からの切り返し）に耐えることが目的。
 
-- 確認ページ: `/AnimeVRM/painted-classroom.html`
-- シナリオ: `/AnimeVRM/scenarios/painted-classroom.html`（`stage: 'painted-classroom'`）
+- 場所: `painted_classroom`（`assets/studio/locations.json` の組み込み3D背景 `builtin:painted-classroom`）。Studio のシーン設定で見え方を確認できる
+- シナリオ: `assets/scenarios/demo/painted_classroom/`
 - 素材: `assets/textures/painted-classroom/*.avif`
 
 ## 構成
@@ -16,7 +16,7 @@
 
 ## 机の段の作り方
 
-生成した絵の遠近をセットの遠近と一致させるため、下書きの上に描かせて、同じカメラから投影し直す。
+生成した絵の遠近をセットの遠近と一致させるため、下書きの上に描かせて、同じカメラから投影し直す。下書きのページ（`*-blockout.html`・`blockout.ts`）と確認ページは、2026-09-27 に旧ルートと一緒に消した。作り直すときはコミット `a582c47` 時点のものを戻して使う。
 
 1. `/AnimeVRM/painted-classroom-blockout.html?row=N` が、灰色の箱で作った N 段目だけを段専用カメラ（基準カメラを `setViewOffset` でその段に切り出したもの、3:1）で描画する。
 2. その画像を下書きとして、codex CLI の画像生成で「位置・遠近はそのままに本物の机と椅子として描き直し、背景は透過」で生成。

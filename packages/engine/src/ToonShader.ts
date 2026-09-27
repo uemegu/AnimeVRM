@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
-import type { AvatarConfig, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig } from './Config';
+import type { MaterialSet, MaterialStyleParams, EyeGlowConfig, BottomGradientConfig, OutlineStyle } from './Config';
 
-/** ToonShader が使う設定。ルートは AvatarConfig 全体、app は必要な部分だけを渡す */
+/** ToonShader が使う設定 */
 export interface ToonShaderAvatarConfig {
-  materials?: Partial<AvatarConfig['materials']>;
-  outline?: AvatarConfig['outline'];
+  materials?: Partial<MaterialSet>;
+  outline?: OutlineStyle;
   eyeGlow?: EyeGlowConfig;
   bottomGradient?: BottomGradientConfig;
 }
@@ -31,7 +31,7 @@ export type ToonShaderController = {
   dispose: () => void;
   patched: ReadonlyArray<string>;
   updateMaterialStyle: (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => void;
-  updateOutline: (params: Partial<AvatarConfig['outline']>) => void;
+  updateOutline: (params: Partial<OutlineStyle>) => void;
   updateEyeGlow: (cfg?: EyeGlowConfig) => void;
   updateBottomGradient: (cfg?: Partial<BottomGradientConfig>) => void;
   applyFullConfig: (config: ToonShaderAvatarConfig) => void;
@@ -662,7 +662,7 @@ export function applyToonShader(
   };
 
   // Apply outline params directly to outline uniform values
-  const applyOutline = (outlineCfg: Partial<AvatarConfig['outline']>) => {
+  const applyOutline = (outlineCfg: Partial<OutlineStyle>) => {
     // Dynamic smooth normal toggle on VRM scene hierarchy
     if (typeof outlineCfg.useSmoothNormal === 'boolean') {
       toggleSmoothNormalsInHierarchy(vrm.scene, outlineCfg.useSmoothNormal);

@@ -1,33 +1,24 @@
 {
-  "name": "vrm-toon-viewer",
+  "name": "anime-vrm",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "studio": "npm run dev -w studio",
+    "server": "npm run dev -w server",
+    "app": "npm run dev -w app",
+    "build:pages": "npm run build:pages -w studio",
     "build:wasm": "asc assembly/index.ts --config asconfig.json",
-    "build": "npm run build:wasm && tsc --noEmit && vite build",
-    "preview": "vite preview",
     "convert:textures": "bash convert_textures.sh",
     "ardy:generate": "node scripts/ardy-generate.ts",
     "test": "npm run test --workspaces --if-present",
-    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p app && npm run typecheck --workspaces --if-present",
-    "server": "npm run dev -w server",
-    "studio": "npm run dev -w studio",
-    "build:pages": "npm run build:pages -w studio"
+    "typecheck": "tsc --noEmit -p app && npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
-    "@types/three": "^0.185.4",
     "assemblyscript": "^0.28.20",
     "typescript": "^7.0.2",
     "vite": "^8.0.1"
-  },
-  "dependencies": {
-    "@anime-vrm/engine": "*",
-    "@pixiv/three-vrm": "^3.5.5",
-    "meyda": "^5.6.3",
-    "three": "^0.183.2"
   },
   "workspaces": [
     "app",
