@@ -2,6 +2,7 @@ import type { AvatarTransition, CameraPose, CameraShot, SceneTransition } from '
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n';
+import { EffectFields } from './EffectFields';
 
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
@@ -90,6 +91,14 @@ export function KeyEditor({ kind, value, data, castIds, currentPose, onChange, o
             onChange={(e) => set('cameraTransitionDuration', e.target.value === '' ? undefined : Number(e.target.value))}
           />
         </label>
+        <label className="field">
+          <span className="field-label">{t.scenarios.focusLines}</span>
+          <select className="select" value={key.focusLines === undefined ? '' : key.focusLines ? 'on' : 'off'} onChange={(e) => set('focusLines', e.target.value === '' ? undefined : e.target.value === 'on')}>
+            <option value="">{tl.none}</option>
+            <option value="on">{tl.show}</option>
+            <option value="off">{tl.hide}</option>
+          </select>
+        </label>
         <DeleteButton onDelete={onDelete} />
       </div>
     );
@@ -160,6 +169,7 @@ export function KeyEditor({ kind, value, data, castIds, currentPose, onChange, o
           <option value="hide">{tl.hide}</option>
         </select>
       </label>
+      <EffectFields value={key} unsetLabel={() => tl.none} onChange={set} />
       <DeleteButton onDelete={onDelete} />
     </div>
   );

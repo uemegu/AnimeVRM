@@ -8,6 +8,7 @@ import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from './visual';
 import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
+import { AvatarEffects } from './AvatarEffects';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -161,6 +162,9 @@ export class StageAvatar {
   private hairShadow: HairShadowUniforms | undefined;
   public mixer: THREE.AnimationMixer | null = null;
   public shaderController: ToonShaderController | null = null;
+  /** 感情演出（頬赤・涙・汗・文字演出など）。モデルの読み込み後に作る */
+  public effects: AvatarEffects | null = null;
+  private motionSpeed = 1;
 
   private currentAction: THREE.AnimationAction | null = null;
   private currentAnimationUrl: string | null = null;
@@ -262,6 +266,7 @@ export class StageAvatar {
 
           // 4. アニメーションミキサー初期化
           this.mixer = new THREE.AnimationMixer(vrm.scene);
+          this.effects = new AvatarEffects(vrm, this.scene);
 
           // 5. 初期待機モーション再生
           try {
@@ -306,6 +311,7 @@ export class StageAvatar {
       }
 
       action.reset();
+      action.timeScale = this.motionSpeed;
       if (this.currentAction && this.currentAction !== action) {
         action.crossFadeFrom(this.currentAction, crossFadeDuration, false);
       }
@@ -318,6 +324,16 @@ export class StageAvatar {
       console.error(`Failed to play animation ${url}:`, err);
       return null;
     }
+  }
+
+  /** モーションの再生速度（1 が通常） */
+  public setMotionSpeed(speed: number): void {
+    this.motionSpeed = speed;
+    if (this.currentAction) this.currentAction.timeScale = speed;
+  }
+
+  public getMotionSpeed(): number {
+    return this.motionSpeed;
   }
 
   /**
@@ -499,7 +515,8 @@ export class StageAvatar {
     this.isLipSyncActive = false;
   }
 
-  public update(delta: number): void {
+  /** frame は感情演出の描画に使う（文字演出はカメラへ向ける・残像はレンダラーを使う） */
+  public update(delta: number, frame?: { elapsed: number; camera: THREE.Camera; renderer: THREE.WebGLRenderer }): void {
     if (!this.vrm) return;
 
     // 1. モーション再生（前のフレームで足した顔の向きを先に戻す）
@@ -518,8 +535,17 @@ export class StageAvatar {
     // 3. まばたき
     this.updateBlink(delta);
 
+    // 3.5 目が泳ぐ（視線にずれを足す）
+    this.effects?.applyEyeWander(delta, this.gazeTarget);
+
     // 4. VRM SpringBone・Humanoid更新
     this.vrm.update(delta);
+
+    // 5. 感情演出
+    if (frame) {
+      const blink = this.vrm.expressionManager?.getValue('blink') ?? 0;
+      this.effects?.update(delta, frame.elapsed, frame.camera, frame.renderer, blink);
+    }
   }
 
   /**
@@ -576,6 +602,8 @@ export class StageAvatar {
   }
 
   public dispose(): void {
+    this.effects?.dispose();
+    this.effects = null;
     if (this.vrm) {
       VRMUtils.deepDispose(this.vrm.scene);
       this.scene.remove(this.vrm.scene);

@@ -8,6 +8,7 @@ import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface StageViewProps {
   timeOfDay: TimeOfDayId;
@@ -38,6 +39,7 @@ export const StageView: React.FC<StageViewProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageManagerRef = useRef<StageManager | null>(null);
+  const { lang } = useLanguage();
 
   // 1. StageManager初期化とリサイズ監視
   useEffect(() => {
@@ -52,6 +54,7 @@ export const StageView: React.FC<StageViewProps> = ({
       getCutTime: () => soundManager.getVoiceTime(),
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
+      language: lang,
     });
     stageManagerRef.current = manager;
 
@@ -110,9 +113,17 @@ export const StageView: React.FC<StageViewProps> = ({
     const manager = stageManagerRef.current;
     if (!manager) return;
     manager.setCameraPose(cut?.cameraPose ?? null);
-    manager.setCutTimeline(cut ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions } : null);
+    manager.setCutTimeline(
+      cut
+        ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions, screenTransition: cut.screenTransition, focusLines: cut.focusLines }
+        : null
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cut?.id]);
+
+  useEffect(() => {
+    stageManagerRef.current?.setLanguage(lang);
+  }, [lang]);
 
   // 5. 話者とカメラ構図
   useEffect(() => {

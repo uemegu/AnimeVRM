@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { EffectPresetName, EffectTextPreset, ShowEffectTextOptions, StreamConfig } from './types';
+import { EffectTextPreset, ShowEffectTextOptions, StreamConfig } from './types';
 import { EffectTextInstance } from './EffectTextInstance';
 import { EFFECT_TEXT_PRESETS } from './presets';
 import { clearEffectTextTextureCache } from './textureGenerator';

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BgmBook, cutStateAt, lastKeyframeAt, MotionBook, resolveCast, stageAtScene, type ScenarioPackage } from '../src/index.ts';
+import { BgmBook, CUT_ONE_SHOT_DELAY, cutStateAt, lastKeyframeAt, mergeStageState, MotionBook, resolveCast, stageAtScene, type ScenarioPackage, type ScenarioScene } from '../src/index.ts';
 
 const STUDIO = path.resolve(import.meta.dirname, '../../../assets/studio');
 
@@ -68,11 +68,41 @@ describe('カット内のタイムライン', () => {
   };
 
   it('時刻までのキーフレームを順に重ねる', () => {
-    expect(cutStateAt(scene, 0.5)).toEqual({ avatars: {}, camera: {} });
+    expect(cutStateAt(scene, 0.5)).toEqual({ avatars: {}, camera: {}, focusLines: false, oneShots: [] });
     expect(cutStateAt(scene, 2.5).avatars.aoi).toEqual({ expression: 'happy', expressionWeight: 1, motion: 'Wave', motionLoop: undefined, motionAt: 2 });
     expect(cutStateAt(scene, 2.5).camera).toEqual({ shot: 'close', pose: undefined, at: 1.5, duration: undefined });
     expect(cutStateAt(scene, 5).avatars.aoi.lookAtTarget).toBe('camera');
     expect(cutStateAt(scene, 5).camera.pose?.position).toEqual([0, 1.4, 1.5]);
     expect(lastKeyframeAt(scene)).toBe(4);
+  });
+});
+
+describe('感情演出', () => {
+  const noCast = { modelUrlFor: () => '/models/a.vrm', isLoopingMotion: () => false };
+
+  it('頬赤などは次のシーンに引き継ぎ、文字演出・汗はそのシーンだけ', () => {
+    const first: ScenarioScene = { id: 's1', text: '', avatars: { aoi: { blush: true, eyeWander: true, effectText: 'doki', sweat: 'fly4' } } };
+    const second: ScenarioScene = { id: 's2', text: '', avatars: { aoi: { anger: true } } };
+    const stage = mergeStageState(mergeStageState({ cast: {} }, first), second);
+    expect(stage.cast.aoi).toEqual({ blush: true, eyeWander: true, anger: true });
+    const [aoi] = resolveCast(stage, noCast);
+    expect(aoi.look).toEqual({ blush: true, anger: true, tears: false, eyeWander: 1, fastMotion: false, motionSpeed: 1 });
+  });
+
+  it('カットの文字演出は少し待ってから、キーの演出は時刻が来たら出す', () => {
+    const scene: ScenarioScene = {
+      id: 'c',
+      text: '',
+      focusLines: true,
+      avatars: { aoi: { effectText: 'gaan', transitions: [{ at: 2, sweat: 'jito', tears: true }] } },
+      transitions: [{ at: 3, focusLines: false }],
+    };
+    expect(cutStateAt(scene, 0).oneShots).toEqual([]);
+    expect(cutStateAt(scene, CUT_ONE_SHOT_DELAY).oneShots.map((s) => s.key)).toEqual(['aoi@cut']);
+    const later = cutStateAt(scene, 2.5);
+    expect(later.oneShots.map((s) => [s.key, s.sweat])).toEqual([['aoi@cut', undefined], ['aoi@0', 'jito']]);
+    expect(later.avatars.aoi.tears).toBe(true);
+    expect(later.focusLines).toBe(true);
+    expect(cutStateAt(scene, 3).focusLines).toBe(false);
   });
 });

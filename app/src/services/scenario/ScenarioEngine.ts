@@ -13,6 +13,7 @@ import {
   CameraShot,
   CameraPose,
   SceneTransition,
+  ScreenTransition,
 } from '../../types/scenario';
 
 /** 画面描画用に言語解決済みのシーン情報 */
@@ -42,6 +43,9 @@ export interface ScenarioResolvedScene {
   /** カメラの直接指定と、カット内のタイムライン（描画に渡す） */
   cameraPose?: CameraPose;
   transitions?: SceneTransition[];
+  /** 画面の切り替え演出と集中線（描画に渡す） */
+  screenTransition?: ScreenTransition;
+  focusLines?: boolean;
 }
 
 export class ScenarioEngine {
@@ -115,6 +119,8 @@ export class ScenarioEngine {
       choiceTimeLimitSec: raw.choiceTimeout?.seconds,
       cameraPose: raw.cameraPose,
       transitions: raw.transitions,
+      screenTransition: raw.screenTransition,
+      focusLines: raw.focusLines,
     };
   }
 

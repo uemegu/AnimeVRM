@@ -10,6 +10,7 @@ const KIND_COLORS: Record<string, string> = {
   gaze: '#10b981',
   visible: '#64748b',
   camera: '#db2777',
+  effect: '#8b5cf6',
 };
 
 interface Props {
