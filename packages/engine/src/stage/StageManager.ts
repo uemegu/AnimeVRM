@@ -1044,10 +1044,16 @@ export class StageManager {
     const direct = this.timelinePose?.pose ?? (this.timelineShot ? null : this.basePose);
     const pose: CameraPose = direct
       ? { position: new THREE.Vector3(...direct.position), target: new THREE.Vector3(...direct.target) }
-      : {
-          position: new THREE.Vector3(x, head + rig.height, z + distance),
-          target: new THREE.Vector3(x, head + rig.targetHeight, z),
-        };
+      : shotName === 'side'
+        ? {
+            // 横から：カメラを話者の左横・少し手前に置き、話者の少し前を見る（話者は画面の左寄りに横向きで映る）
+            position: new THREE.Vector3(x - distance, head + rig.height, z + 0.25),
+            target: new THREE.Vector3(x - 0.12, head + rig.targetHeight, z + 0.25),
+          }
+        : {
+            position: new THREE.Vector3(x, head + rig.height, z + distance),
+            target: new THREE.Vector3(x, head + rig.targetHeight, z),
+          };
     const fov = direct?.fov ?? this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;
