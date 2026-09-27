@@ -33,7 +33,7 @@ export const ja = {
     location: '場所',
     timeOfDay: '時間帯',
     camera: 'カメラ',
-    shots: { wide: '引き', medium: '会話', speaker: '話者', close: 'アップ' },
+    shots: { wide: '引き', medium: '会話', speaker: '話者', close: 'アップ', side: '横から（並んで歩く）' },
     expression: '表情',
     expressions: { neutral: '通常', happy: '笑顔', relaxed: '穏やか', sad: '悲しい', angry: '怒り', surprised: '驚き' },
     motion: 'モーション',

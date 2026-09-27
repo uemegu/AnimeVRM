@@ -9,7 +9,7 @@ import { useStagePresets } from '../../stage/useStagePresets';
 import './viewer.css';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'divine'];
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
 const IDLE = 'Standing Idle';
 

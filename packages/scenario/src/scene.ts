@@ -180,7 +180,7 @@ export type TimeOfDayPreset = z.infer<typeof TimeOfDayPreset>;
 
 const layerPosition = (ja: string, en: string) => vec3(ja, en, -5, 5, 0.05);
 
-/** カメラ構図ごとの置き方（高さは登場キャラの頭の高さからの差） */
+/** カメラ構図ごとの置き方（高さは登場キャラの頭の高さからの差。side の distance は横の距離） */
 export interface ShotRig {
   distance: number;
   height: number;
@@ -188,11 +188,13 @@ export interface ShotRig {
 }
 
 /** 構図の既定値（場所で指定がなければこれを使う） */
-export const DEFAULT_SHOT_RIGS: Record<'wide' | 'medium' | 'speaker' | 'close', ShotRig> = {
+export const DEFAULT_SHOT_RIGS: Record<'wide' | 'medium' | 'speaker' | 'close' | 'side', ShotRig> = {
   wide: { distance: 2.3, height: -0.22, targetHeight: -0.37 },
   medium: { distance: 2.2, height: -0.2, targetHeight: -0.3 },
   speaker: { distance: 1.6, height: -0.17, targetHeight: -0.27 },
   close: { distance: 1.2, height: -0.09, targetHeight: -0.14 },
+  // 歩きながらの会話（カメラを話者の左横・少し手前に置き、話者が画面の左から3割ほどに横向きで映る）
+  side: { distance: 1.3, height: -0.17, targetHeight: -0.12 },
 };
 export const DEFAULT_CAMERA_FOV = 32;
 export const DEFAULT_SLOT_POSITIONS: Record<'left' | 'center' | 'right', [number, number, number]> = {
@@ -227,6 +229,7 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
     medium: shotRig('会話', 'Two-shot', DEFAULT_SHOT_RIGS.medium).optional(),
     speaker: shotRig('話者', 'Speaker', DEFAULT_SHOT_RIGS.speaker).optional(),
     close: shotRig('アップ', 'Close', DEFAULT_SHOT_RIGS.close).optional(),
+    side: shotRig('横から', 'From the side', DEFAULT_SHOT_RIGS.side).optional(),
   }).optional(),
   backdrop: group('遠景の置き方', 'Backdrop placement', {
     mode: z.enum(['screen', 'world']).meta({

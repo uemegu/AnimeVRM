@@ -19,7 +19,7 @@ import { VoicePanel } from './VoicePanel';
 import { EffectFields } from './EffectFields';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;

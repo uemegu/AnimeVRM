@@ -35,7 +35,7 @@ export const en: Dictionary = {
     location: 'Location',
     timeOfDay: 'Time of day',
     camera: 'Camera',
-    shots: { wide: 'Wide', medium: 'Two-shot', speaker: 'Speaker', close: 'Close' },
+    shots: { wide: 'Wide', medium: 'Two-shot', speaker: 'Speaker', close: 'Close', side: 'From the side (walking)' },
     expression: 'Expression',
     expressions: { neutral: 'Neutral', happy: 'Happy', relaxed: 'Relaxed', sad: 'Sad', angry: 'Angry', surprised: 'Surprised' },
     motion: 'Motion',

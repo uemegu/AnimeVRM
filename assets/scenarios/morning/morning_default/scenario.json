@@ -10,6 +10,7 @@
     {
       "id": "s1",
       "text": "いつもの通学路。今日もアオイと並んで歩く。",
+      "camera": "side",
       "background": "town",
       "scrollingBackground": {},
       "timeOfDay": "morning",
@@ -26,13 +27,15 @@
       "speaker": "アオイ",
       "speakerCharacterId": "aoi",
       "text": "ねえタカシくん、今日のお昼どうする？",
+      "camera": "side",
       "voiceUrl": "v_s2_f6c911f1.mp3"
     },
     {
       "id": "s3",
       "speaker": "タカシ",
       "speakerCharacterId": "player",
-      "text": "（女神のタイムリミットは、刻一刻と迫っている。……今日も、できることをやるしかない）"
+      "text": "（女神のタイムリミットは、刻一刻と迫っている。……今日も、できることをやるしかない）",
+      "camera": "side"
     }
   ]
 }

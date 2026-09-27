@@ -27,7 +27,7 @@ interface PresetFile<T> {
 type TimeFile = PresetFile<TimeOfDayPreset>;
 type LocationFile = PresetFile<LocationVisualPreset>;
 
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 export function ScenesView() {

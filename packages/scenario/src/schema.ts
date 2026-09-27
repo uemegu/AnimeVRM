@@ -36,8 +36,9 @@ export type AvatarSlotPosition = z.infer<typeof AvatarSlotPosition>;
  * - medium: 話者を中心に隣の人物も入る会話ショット
  * - speaker: 話者のウェストアップ（1人の場面の既定）
  * - close: 話者のバストアップ（感情の強調）
+ * - side: 話者を横から（並んで歩きながらの会話。話者は画面の左寄りに横向きで映る）
  */
-export const CameraShot = z.enum(['wide', 'medium', 'speaker', 'close']);
+export const CameraShot = z.enum(['wide', 'medium', 'speaker', 'close', 'side']);
 export type CameraShot = z.infer<typeof CameraShot>;
 
 /** 'player' | 'speaker' | 'partner' | 'camera' | 'forward' またはキャラ ID */

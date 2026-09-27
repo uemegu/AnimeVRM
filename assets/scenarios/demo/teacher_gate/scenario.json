@@ -38,19 +38,7 @@
           "lookAtTarget": "player"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_2",
@@ -73,19 +61,7 @@
           "expression": "relaxed"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_choice",
@@ -102,19 +78,7 @@
           "expression": "relaxed"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      },
+      "camera": "side",
       "choices": [
         {
           "id": "choice_scold",
@@ -162,19 +126,7 @@
           "lookAtTarget": "camera"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      },
+      "camera": "side",
       "nextSceneId": "gate_arrive"
     },
     {
@@ -198,19 +150,7 @@
           "expression": "neutral"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "gate_arrive",

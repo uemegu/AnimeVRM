@@ -41,19 +41,7 @@
           "lookAtTarget": "camera"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_2",
@@ -80,19 +68,7 @@
           "lookAtTarget": "forward"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_3",
@@ -120,19 +96,7 @@
           "blush": true
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_3_choice",
@@ -161,19 +125,7 @@
           }
         }
       ],
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_route_admire",
@@ -201,19 +153,7 @@
           "effectText": "doki"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      },
+      "camera": "side",
       "nextSceneId": "walk_transition_stop"
     },
     {
@@ -241,19 +181,7 @@
           "blush": false
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_transition_stop",

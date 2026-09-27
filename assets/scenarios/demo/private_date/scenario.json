@@ -271,19 +271,7 @@
           "expression": "relaxed"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_2",
@@ -309,19 +297,7 @@
           "expression": "happy"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "walk_3",
@@ -350,19 +326,7 @@
           "effectText": "doki"
         }
       },
-      "cameraPose": {
-        "position": [
-          -1.024,
-          1.25,
-          0.0
-        ],
-        "target": [
-          0,
-          1.3,
-          0.0
-        ],
-        "fov": 34
-      }
+      "camera": "side"
     },
     {
       "id": "shion_1",
