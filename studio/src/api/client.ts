@@ -57,6 +57,8 @@ export interface ScenarioSummary {
   title: string;
   lineCount: number;
   updatedAt: string;
+  location?: string;
+  description?: string;
 }
 
 export interface TtsLine {

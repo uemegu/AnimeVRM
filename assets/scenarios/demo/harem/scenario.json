@@ -239,7 +239,19 @@
             "choice_all": true
           }
         }
-      ]
+      ],
+      "cameraPose": {
+        "position": [
+          0,
+          1.2,
+          1.95
+        ],
+        "target": [
+          0,
+          1.2,
+          -0.4
+        ]
+      }
     },
     {
       "id": "route_aoi_1",
