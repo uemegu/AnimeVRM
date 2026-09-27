@@ -5,6 +5,7 @@
     "ja": "放課後トライアングル〜アオイとエミリとあなた〜",
     "en": "After-School Triangle: Aoi, Emiri, and You"
   },
+  "description": "アオイとエミリとあなたの3人。放課後どこに行くかをめぐるドキドキ作戦会議！",
   "location": "corridor",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "day",

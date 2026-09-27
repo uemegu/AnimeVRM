@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "id": "rooftop_nap",
   "title": "屋上の昼寝と、覗き込みハプニング",
+  "description": "ぽかぽか陽気の屋上で居眠りしていたら……？アオイの覗き込みドキドキショートストーリー。",
   "location": "rooftop",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "day",

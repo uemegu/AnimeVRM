@@ -9,6 +9,7 @@ import type { MaterialStyleParams, OutlineConfig } from './visual';
 import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
 import { AvatarEffects } from './AvatarEffects';
+import { resolveAssetUrl } from '../utils/path';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 const animationClipCache = new Map<string, THREE.AnimationClip>();
@@ -22,7 +23,7 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   let asset = animationAssetCache.get(url);
   if (!asset) {
     const loader = new FBXLoader();
-    asset = await loader.loadAsync(url);
+    asset = await loader.loadAsync(resolveAssetUrl(url));
     animationAssetCache.set(url, asset);
   }
 
@@ -233,7 +234,7 @@ export class StageAvatar {
 
     return new Promise((resolve, reject) => {
       loader.load(
-        modelUrl,
+        resolveAssetUrl(modelUrl),
         async (gltf) => {
           const vrm = gltf.userData.vrm as VRM;
           if (!vrm) {

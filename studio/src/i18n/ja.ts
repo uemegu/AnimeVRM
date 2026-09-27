@@ -239,6 +239,20 @@ export const ja = {
     idTaken: 'この ID は使われています',
     idInvalid: '英小文字で始まり、英小文字・数字・_ だけにしてください',
   },
+  player: {
+    back: '一覧',
+    auto: 'オート',
+    sound: '音あり',
+    muted: 'ミュート',
+    start: 'はじめる',
+    end: 'おわり',
+    replay: 'もう一度',
+    backToList: '一覧へ戻る',
+    listTitle: 'シナリオ再生',
+    listLead: '3D のキャラクターで演じるショートシナリオ。クリックまたはスペースキーで進みます。',
+    categoryAll: 'すべて',
+    loadFailed: '読み込めませんでした',
+  },
 };
 
 export type Dictionary = typeof ja;

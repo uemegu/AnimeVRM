@@ -1,0 +1,41 @@
+{
+  "description": "モーション（assets/animations/<名前>.fbx）の情報。loop は待機・歩行など繰り返して自然なもの（指定のないモーションは1回再生して待機に戻る）",
+  "motions": {
+    "Standing Idle": {
+      "loop": true
+    },
+    "Idle": {
+      "loop": true
+    },
+    "Walking": {
+      "loop": true
+    },
+    "Jogging": {
+      "loop": true
+    },
+    "chin_rest": {
+      "loop": true
+    },
+    "clasp_hands_front": {
+      "loop": true
+    },
+    "mob_chat_gesture": {
+      "loop": true
+    },
+    "mob_listen_nod": {
+      "loop": true
+    },
+    "ardy_pray": {
+      "loop": true
+    },
+    "ardy_shiver": {
+      "loop": true
+    },
+    "ardy_fan": {
+      "loop": true
+    },
+    "ardy_shy_cover": {
+      "loop": true
+    }
+  }
+}

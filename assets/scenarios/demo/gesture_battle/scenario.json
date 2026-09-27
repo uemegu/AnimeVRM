@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "id": "gesture_battle",
   "title": "放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜",
+  "description": "アオイとエミリが昼の校門前で全身ジェスチャー対決！ひらめき、歓喜、おねだり、ツッコミが炸裂する多彩なモーションシナリオ。",
   "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "day",

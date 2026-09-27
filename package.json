@@ -14,7 +14,8 @@
     "test": "npm run test --workspaces --if-present",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p app && npm run typecheck --workspaces --if-present",
     "server": "npm run dev -w server",
-    "studio": "npm run dev -w studio"
+    "studio": "npm run dev -w studio",
+    "build:pages": "npm run build:pages -w studio"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
