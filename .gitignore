@@ -27,6 +27,7 @@ dist-ssr
 /scripts/*
 !/scripts/ardy-generate.ts
 !/scripts/validate.ts
+!/scripts/shot.ts
 # ardy-generate.ts が読み込む
 !/scripts/lib/
 /blender
