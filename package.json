@@ -11,6 +11,7 @@
     "build:wasm": "asc assembly/index.ts --config asconfig.json",
     "convert:textures": "bash convert_textures.sh",
     "ardy:generate": "node scripts/ardy-generate.ts",
+    "validate": "node scripts/validate.ts",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "tsc --noEmit -p app && npm run typecheck --workspaces --if-present"
   },

@@ -36,6 +36,13 @@ const META_KEYS = [
  * 内容が変わらない場合は書き込まない（開発サーバーの無駄な再読み込みを防ぐ）。
  */
 export function generateScenarioIndex() {
+  const { json, current, count } = buildScenarioIndex();
+  if (current !== json) fs.writeFileSync(OUTPUT_PATH, json);
+  return { count, changed: current !== json };
+}
+
+/** 書き込まずに、作り直した目次と今の目次を返す（検証 CLI で古くなっていないか調べる） */
+export function buildScenarioIndex() {
   const entries = [];
 
   for (const category of fs.readdirSync(SCENARIOS_DIR).sort()) {
@@ -72,9 +79,7 @@ export function generateScenarioIndex() {
 
   const json = JSON.stringify(entries, null, 2) + '\n';
   const current = fs.existsSync(OUTPUT_PATH) ? fs.readFileSync(OUTPUT_PATH, 'utf8') : '';
-  if (current !== json) fs.writeFileSync(OUTPUT_PATH, json);
-
-  return { count: entries.length, changed: current !== json };
+  return { json, current, count: entries.length, outputPath: OUTPUT_PATH };
 }
 
 // CLI 実行時

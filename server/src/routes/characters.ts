@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Hono } from 'hono';
 import { CharacterBook } from '@anime-vrm/scenario';
+import { checkStudioDataInWorkspace } from '@anime-vrm/scenario/node';
 import type { ServerConfig } from '../config.ts';
 import { characterUsage, type ScenarioRecord } from '../characterUsage.ts';
 import type { ScenarioStore } from '../scenarioStore.ts';
@@ -25,10 +26,15 @@ export function characterRoutes(config: ServerConfig, store: ScenarioStore) {
         400
       );
     }
+    // 参照先（モデル・参照音声のファイル）の問題は problems で返す。?strict=1 ならエラーがあるとき保存しない
+    const problems = checkStudioDataInWorkspace(config, 'characters', body);
+    if (c.req.query('strict') === '1' && problems.some((p) => p.severity === 'error')) {
+      return c.json({ error: '参照先に問題があります', issues: problems.filter((p) => p.severity === 'error'), problems }, 400);
+    }
     const tmp = `${file()}.tmp`;
     await fs.writeFile(tmp, JSON.stringify(body, null, 2) + '\n');
     await fs.rename(tmp, file());
-    return c.json({ ok: true });
+    return c.json({ ok: true, problems });
   });
 
   app.get('/:id/usage', async (c) => {
