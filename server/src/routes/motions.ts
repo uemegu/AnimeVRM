@@ -5,8 +5,8 @@ import { MotionBook } from '@anime-vrm/scenario';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
 
-/** 生成したモーションの名前（assets/animations/<name>.fbx） */
-const MOTION_NAME = /^[a-z][a-z0-9_]{1,47}$/;
+/** モーションの名前（assets/animations/<name>.fbx）。Mixamo の「Standing Idle」のような名前も通す */
+const MOTION_NAME = /^[A-Za-z0-9](?:[A-Za-z0-9 _-]{0,62}[A-Za-z0-9])?$/;
 const MAX_FBX_BYTES = 20 * 1024 * 1024;
 
 function isFbx(bytes: Buffer): boolean {
@@ -29,13 +29,13 @@ function isContactProfile(value: unknown): boolean {
 }
 
 /**
- * モーション画面の保存。Studio で生成して採用したモーションと、接触点の校正結果
+ * モーション画面の保存。FBX の登録（生成して採用したもの・手元のファイル）と、接触点の校正結果
  */
 export function motionRoutes(config: ServerConfig) {
   const app = new Hono();
   const animations = () => path.join(config.assetsDir, 'animations');
 
-  // 採用したモーションを保存する（同じ名前があれば overwrite のときだけ上書き）
+  // モーションを保存する（同じ名前があれば overwrite のときだけ上書き）
   app.post('/', async (c) => {
     let body: { name?: unknown; fbx?: unknown; candidates?: unknown; loop?: unknown; overwrite?: unknown };
     try {
@@ -44,17 +44,18 @@ export function motionRoutes(config: ServerConfig) {
       return c.json({ error: 'JSON として読めません' }, 400);
     }
     const name = typeof body.name === 'string' ? body.name : '';
-    if (!MOTION_NAME.test(name)) return c.json({ error: '名前は英小文字で始め、英小文字・数字・_ で2〜48文字にしてください' }, 400);
+    if (!MOTION_NAME.test(name)) return c.json({ error: '名前は英数字・空白・_・- で64文字以内にしてください（先頭と末尾は英数字）' }, 400);
     if (typeof body.fbx !== 'string') return c.json({ error: 'FBX がありません' }, 400);
     const bytes = Buffer.from(body.fbx, 'base64');
     if (bytes.length === 0 || bytes.length > MAX_FBX_BYTES || !isFbx(bytes)) return c.json({ error: 'FBX として読めません' }, 400);
-    const file = resolveInside(animations(), `${name}.fbx`)!;
+    // 名前は MOTION_NAME で区切り文字や . を含まないことを確かめ済み（空白を通すので resolveInside は使わない）
+    const file = path.join(animations(), `${name}.fbx`);
     const exists = await fs.stat(file).then(() => true, () => false);
     if (exists && body.overwrite !== true) return c.json({ error: '同じ名前のモーションがあります', exists: true }, 409);
 
     await fs.writeFile(file, bytes);
     if (body.candidates !== undefined) {
-      await fs.writeFile(resolveInside(animations(), `${name}.candidates.json`)!, JSON.stringify(body.candidates, null, 2) + '\n');
+      await fs.writeFile(path.join(animations(), `${name}.candidates.json`), JSON.stringify(body.candidates, null, 2) + '\n');
     }
     // ループするモーションは motions.json に載せる（シナリオで指定がなければ繰り返す）
     if (typeof body.loop === 'boolean') {

@@ -22,6 +22,8 @@ interface Props {
   playing?: boolean;
   /** カメラを手で動かす（ドラッグで回転・右ドラッグで移動・ホイールで前後） */
   freeCamera?: boolean;
+  /** 変わるたびに、手で動かした視点を構図の位置へ戻す */
+  viewResetKey?: number;
   /** 手で動かしたカメラの位置が変わったとき */
   onCameraPose?: (pose: CameraPose) => void;
   /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
@@ -43,6 +45,7 @@ export function StageCanvas({
   cutTime = 0,
   playing = false,
   freeCamera = false,
+  viewResetKey = 0,
   onCameraPose,
   onManager,
 }: Props) {
@@ -116,7 +119,8 @@ export function StageCanvas({
     managerRef.current?.setLanguage(language);
   }, [language]);
 
-  // カメラを手で動かす
+  // カメラを手で動かす。触るまでは構図（読み込み後の位置合わせも含む）に従い、触ったら手動に切り替える
+  const controlsRef = useRef<{ release: () => void } | null>(null);
   const onCameraPoseRef = useRef(onCameraPose);
   onCameraPoseRef.current = onCameraPose;
   useEffect(() => {
@@ -124,11 +128,16 @@ export function StageCanvas({
     const canvas = canvasRef.current;
     if (!manager || !canvas || !freeCamera) return;
     const camera = manager.viewCamera;
-    manager.setFreeCamera(true);
     const controls = new OrbitControls(camera, canvas);
     controls.target.copy(manager.viewTarget);
     controls.enableDamping = true;
-    controls.update();
+    let taken = false;
+    const take = () => {
+      if (taken) return;
+      taken = true;
+      controls.target.copy(manager.viewTarget);
+      manager.setFreeCamera(true);
+    };
     const report = () => {
       manager.setFreeCameraTarget(controls.target);
       onCameraPoseRef.current?.({
@@ -137,21 +146,39 @@ export function StageCanvas({
         fov: camera.fov,
       });
     };
+    controls.addEventListener('start', take);
     controls.addEventListener('change', report);
     report();
+    controlsRef.current = {
+      // 構図へ戻す（慣性の残りを消してから、構図の位置へ補間させる）
+      release: () => {
+        if (!taken) return;
+        controls.enableDamping = false;
+        controls.update();
+        controls.enableDamping = true;
+        taken = false;
+        manager.setFreeCamera(false);
+      },
+    };
     let frame = 0;
     const tick = () => {
       frame = requestAnimationFrame(tick);
-      controls.update();
+      if (taken) controls.update();
     };
     tick();
     return () => {
       cancelAnimationFrame(frame);
+      controls.removeEventListener('start', take);
       controls.removeEventListener('change', report);
       controls.dispose();
+      controlsRef.current = null;
       manager.setFreeCamera(false);
     };
   }, [freeCamera]);
+
+  useEffect(() => {
+    if (viewResetKey !== 0) controlsRef.current?.release();
+  }, [viewResetKey]);
 
   // 画面演出（集中線・瞼・暗転）はこの枠の中に重なる。枠の外のセリフ表示などはその上に出る
   return (

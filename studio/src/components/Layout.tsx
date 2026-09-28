@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router';
 import { useI18n, type Language } from '../i18n';
 import { Icon, type IconName } from './Icon';
+import { ToastProvider } from './Toast';
 import './Layout.css';
 
 interface NavItem {
@@ -77,7 +78,9 @@ export function Layout() {
         </div>
       </aside>
       <main className="studio-main">
-        <Outlet />
+        <ToastProvider>
+          <Outlet />
+        </ToastProvider>
       </main>
     </div>
   );
