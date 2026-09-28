@@ -32,6 +32,7 @@ export interface AssetEntry {
   url: string;
   size: number;
   updatedAt: string;
+  thumbnailUrl?: string;
 }
 
 export type AssetKind = 'models' | 'environments' | 'animations' | 'textures' | 'bgm' | 'se' | 'voices';

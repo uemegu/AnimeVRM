@@ -23,6 +23,7 @@ export function ViewerView() {
   const { presets, error } = useStagePresets();
   const [book, setBook] = useState<CharacterBook | null>(null);
   const [motions, setMotions] = useState<AssetEntry[]>([]);
+  const [models, setModels] = useState<AssetEntry[]>([]);
   const [loadError, setLoadError] = useState(false);
 
   const [characterId, setCharacterId] = useState('aoi');
@@ -37,10 +38,11 @@ export function ViewerView() {
   const [motionFilter, setMotionFilter] = useState('');
 
   useEffect(() => {
-    Promise.all([api.characters(), api.assets('animations')])
-      .then(([characters, animationList]) => {
+    Promise.all([api.characters(), api.assets('animations'), api.assets('models')])
+      .then(([characters, animationList, modelList]) => {
         setBook(characters);
         setMotions(animationList);
+        setModels(modelList);
       })
       .catch(() => setLoadError(true));
   }, []);
@@ -78,6 +80,8 @@ export function ViewerView() {
     setMotionCue((n) => n + 1);
   };
 
+  const currentBgUrl = presets.locations[locationId]?.layers?.background?.url;
+
   return (
     <div className="viewer">
       <aside className="viewer-panel">
@@ -88,20 +92,32 @@ export function ViewerView() {
           <section className="viewer-section">
             <h2>{t.viewer.character}</h2>
             <div className="viewer-character-grid">
-              {characters.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  className={`viewer-character${c.id === characterId ? ' active' : ''}`}
-                  onClick={() => {
-                    setCharacterId(c.id);
-                    setModelKey('default');
-                  }}
-                >
-                  <span className="viewer-swatch" style={{ background: c.themeColor }} />
-                  {c.name.ja}
-                </button>
-              ))}
+              {characters.map((c) => {
+                const defaultModel = c.models.find((m) => m.key === 'default') ?? c.models[0];
+                const thumbUrl = models.find((entry) => entry.url === defaultModel?.url)?.thumbnailUrl;
+                const isActive = c.id === characterId;
+
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`viewer-character-thumb${isActive ? ' active' : ''}`}
+                    title={c.name.ja}
+                    onClick={() => {
+                      setCharacterId(c.id);
+                      setModelKey('default');
+                    }}
+                  >
+                    {thumbUrl ? (
+                      <img src={thumbUrl} alt={c.name.ja} loading="lazy" />
+                    ) : (
+                      <div className="viewer-character-thumb-fallback">{c.name.ja}</div>
+                    )}
+                    <span className="viewer-character-thumb-theme" style={{ background: c.themeColor }} />
+                    <span className="viewer-character-thumb-name">{c.name.ja}</span>
+                  </button>
+                );
+              })}
             </div>
             {character && character.models.length > 1 && (
               <div className="segmented">
@@ -112,41 +128,6 @@ export function ViewerView() {
                 ))}
               </div>
             )}
-          </section>
-
-          <section className="viewer-section">
-            <h2>{t.viewer.scene}</h2>
-            <label className="field">
-              <span className="field-label">{t.viewer.location}</span>
-              <select className="select" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-                {Object.values(presets.locations).map((loc) => (
-                  <option key={loc.id} value={loc.id}>
-                    {loc.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="field">
-              <span className="field-label">{t.viewer.timeOfDay}</span>
-              <div className="segmented five">
-                {TIMES.map((time) => (
-                  <button key={time} type="button" className={time === timeOfDay ? 'active' : ''} onClick={() => setTimeOfDay(time)}>
-                    {presets.timeOfDay[time]?.name ?? time}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="viewer-section">
-            <h2>{t.viewer.camera}</h2>
-            <div className="segmented four">
-              {SHOTS.map((s) => (
-                <button key={s} type="button" className={s === shot ? 'active' : ''} onClick={() => setShot(s)}>
-                  {t.viewer.shots[s]}
-                </button>
-              ))}
-            </div>
           </section>
 
           <section className="viewer-section">
@@ -185,13 +166,66 @@ export function ViewerView() {
         </div>
       </aside>
 
-      <section className="viewer-stage">
+      <section
+        className="viewer-stage"
+        style={currentBgUrl ? ({ '--stage-bg-url': `url("${currentBgUrl}")` } as React.CSSProperties) : undefined}
+      >
+        <div className="viewer-stage-top">
+          <div className="segmented five">
+            {TIMES.map((time) => (
+              <button key={time} type="button" className={time === timeOfDay ? 'active' : ''} onClick={() => setTimeOfDay(time)}>
+                {presets.timeOfDay[time]?.name ?? time}
+              </button>
+            ))}
+          </div>
+          <div className="segmented five">
+            {SHOTS.map((s) => (
+              <button key={s} type="button" className={s === shot ? 'active' : ''} onClick={() => setShot(s)}>
+                {t.viewer.shots[s]}
+              </button>
+            ))}
+          </div>
+          <select className="select viewer-location-select" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
+            {Object.values(presets.locations).map((loc) => (
+              <option key={loc.id} value={loc.id}>
+                {loc.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="viewer-frame">
           <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} />
         </div>
+
         <p className="viewer-caption">
           {character?.name.ja} ・ {model?.label.ja} ／ {presets.locations[locationId]?.name} ・ {presets.timeOfDay[timeOfDay]?.name} ／ {motion}
         </p>
+
+        <div className="viewer-stage-bottom">
+          <div className="viewer-location-grid">
+            {Object.values(presets.locations).map((loc) => {
+              const bgUrl = loc.layers?.background?.url;
+              const isActive = loc.id === locationId;
+              return (
+                <button
+                  key={loc.id}
+                  type="button"
+                  className={`viewer-location-thumb${isActive ? ' active' : ''}`}
+                  title={loc.name}
+                  onClick={() => setLocationId(loc.id)}
+                >
+                  {bgUrl ? (
+                    <img src={bgUrl} alt={loc.name} loading="lazy" />
+                  ) : (
+                    <div className="viewer-location-thumb-fallback">{loc.name}</div>
+                  )}
+                  <span className="viewer-location-thumb-name">{loc.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </section>
     </div>
   );

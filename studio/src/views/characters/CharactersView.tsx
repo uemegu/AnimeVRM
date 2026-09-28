@@ -113,18 +113,29 @@ export function CharactersView() {
             return (
               <div key={role} className="characters-group">
                 <h2>{t.characters.roles[role]}</h2>
-                {members.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    className={`characters-item${c.id === characterId ? ' active' : ''}`}
-                    onClick={() => navigate(`/characters/${c.id}`)}
-                  >
-                    <span className="characters-swatch" style={{ background: c.themeColor }} />
-                    <span className="characters-item-name">{c.name.ja}</span>
-                    <span className="characters-item-id">{c.id}</span>
-                  </button>
-                ))}
+                {members.map((c) => {
+                  const defaultModel = c.models.find((m) => m.key === 'default') ?? c.models[0];
+                  const thumbUrl = models.find((m) => m.url === defaultModel?.url)?.thumbnailUrl;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className={`characters-item${c.id === characterId ? ' active' : ''}`}
+                      onClick={() => navigate(`/characters/${c.id}`)}
+                    >
+                      {thumbUrl ? (
+                        <span className="characters-item-thumb">
+                          <img src={thumbUrl} alt={c.name.ja} loading="lazy" />
+                          <span className="characters-swatch mini" style={{ background: c.themeColor }} />
+                        </span>
+                      ) : (
+                        <span className="characters-swatch" style={{ background: c.themeColor }} />
+                      )}
+                      <span className="characters-item-name">{c.name.ja}</span>
+                      <span className="characters-item-id">{c.id}</span>
+                    </button>
+                  );
+                })}
               </div>
             );
           })}

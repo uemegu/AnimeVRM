@@ -3,15 +3,20 @@ import { serve } from '@hono/node-server';
 import { createApp } from './app.ts';
 import { DEFAULT_PORT, REPO_ROOT } from './config.ts';
 import { createVoiceTools } from './tts/voiceTools.ts';
+import { ensureVrmThumbnails } from './vrmThumbnail.ts';
 // app のシナリオ目次（scenarioIndex.json）を、シナリオ保存のたびに作り直す
 import { generateScenarioIndex } from '../../app/scripts/generate-scenario-index.js';
 
 const port = Number(process.env.STUDIO_SERVER_PORT ?? DEFAULT_PORT);
 const irodoriRoot = process.env.IRODORI_TTS_ROOT ?? '/Users/ueda/git/practice/tts/Irodori-TTS';
+const assetsDir = path.join(REPO_ROOT, 'assets');
+
+// 未作成のサムネイルがあれば抽出しておく（既存のものはスキップ）
+await ensureVrmThumbnails(assetsDir);
 
 const app = createApp({
   repoRoot: REPO_ROOT,
-  assetsDir: path.join(REPO_ROOT, 'assets'),
+  assetsDir,
   workDir: path.join(REPO_ROOT, 'scratch', 'studio-tts'),
   onScenarioSaved: () => {
     generateScenarioIndex();
