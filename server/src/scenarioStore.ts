@@ -92,10 +92,9 @@ export class ScenarioStore {
     return text === null ? null : JSON.parse(text);
   }
 
-  /** スキーマで検証してから書く。ID はパスと一致していること */
-  async write(category: string, id: string, data: unknown): Promise<void> {
-    const file = this.filePath(category, id);
-    if (!file) throw new ScenarioValidationError([{ path: '', message: 'カテゴリまたは ID が不正です' }]);
+  /** スキーマで検証する。ID はパスと一致していること。問題があれば ScenarioValidationError を投げる */
+  validate(category: string, id: string, data: unknown): void {
+    if (!this.filePath(category, id)) throw new ScenarioValidationError([{ path: '', message: 'カテゴリまたは ID が不正です' }]);
     const parsed = schemaForCategory(category as ScenarioCategory).safeParse(data);
     if (!parsed.success) {
       throw new ScenarioValidationError(
@@ -105,6 +104,12 @@ export class ScenarioStore {
     if ((data as { id?: unknown }).id !== id) {
       throw new ScenarioValidationError([{ path: 'id', message: `id はディレクトリ名（${id}）と同じにしてください` }]);
     }
+  }
+
+  /** スキーマで検証してから書く */
+  async write(category: string, id: string, data: unknown): Promise<void> {
+    this.validate(category, id, data);
+    const file = this.filePath(category, id)!;
     await fs.mkdir(path.dirname(file), { recursive: true });
     // 受け取った JSON をそのまま書く（スキーマの既定値などで中身を変えない）
     const tmp = `${file}.tmp`;

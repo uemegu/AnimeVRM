@@ -122,6 +122,19 @@ describe('シナリオ', () => {
     expect(onScenarioSaved).not.toHaveBeenCalled();
   });
 
+  it('参照先の問題は problems で返し、strict=1 なら保存しない', async () => {
+    const data = { id: 'refs', title: '参照', scenes: [{ id: 's1', text: 'x', speakerCharacterId: 'nobody', nextSceneId: 'gone' }] };
+    const res = await putJson('/api/scenarios/action/refs', data);
+    expect(res.status).toBe(200);
+    const paths = (await json(res)).problems.map((p: { path: string }) => p.path);
+    expect(paths).toEqual(['scenes.0.nextSceneId', 'scenes.0.speakerCharacterId']);
+
+    const strict = await putJson('/api/scenarios/action/refs2?strict=1', { ...data, id: 'refs2' });
+    expect(strict.status).toBe(400);
+    expect((await json(strict)).issues).toHaveLength(2);
+    expect((await request('/api/scenarios/action/refs2')).status).toBe(404);
+  });
+
   it('id がディレクトリ名と違えば保存しない', async () => {
     const data = await json(request('/api/scenarios/ending/ending_good'));
     const res = await putJson('/api/scenarios/ending/ending_good', { ...data, id: 'other' });

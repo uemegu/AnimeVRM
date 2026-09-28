@@ -1,20 +1,9 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Hono } from 'hono';
-import type { z } from 'zod';
-import { BgmBook, CharacterBook, LocationFile, MotionBook, ProjectBook, TimeOfDayFile } from '@anime-vrm/scenario';
+import { checkStudioDataInWorkspace, STUDIO_DATA_SCHEMAS } from '@anime-vrm/scenario/node';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
-
-/** 形式が決まっているファイルは保存前に検証する */
-const SCHEMAS: Record<string, z.ZodType> = {
-  'time-of-day': TimeOfDayFile,
-  locations: LocationFile,
-  characters: CharacterBook,
-  motions: MotionBook,
-  bgm: BgmBook,
-  projects: ProjectBook,
-};
 
 /**
  * Studio が管理する JSON（assets/studio/<name>.json）。シーン設定やキャラクター管理など
@@ -45,7 +34,8 @@ export function studioDataRoutes(config: ServerConfig) {
     } catch {
       return c.json({ error: 'JSON として読めません' }, 400);
     }
-    const schema = SCHEMAS[c.req.param('name')];
+    const name = c.req.param('name');
+    const schema = STUDIO_DATA_SCHEMAS[name];
     const parsed = schema?.safeParse(body);
     if (parsed && !parsed.success) {
       return c.json(
@@ -53,9 +43,14 @@ export function studioDataRoutes(config: ServerConfig) {
         400
       );
     }
+    // 参照先（ファイルなど）の問題は problems で返す。?strict=1 ならエラーがあるとき保存しない
+    const problems = schema ? checkStudioDataInWorkspace(config, name, body) : [];
+    if (c.req.query('strict') === '1' && problems.some((p) => p.severity === 'error')) {
+      return c.json({ error: '参照先に問題があります', issues: problems.filter((p) => p.severity === 'error'), problems }, 400);
+    }
     await fs.mkdir(path.dirname(file), { recursive: true });
     await fs.writeFile(file, JSON.stringify(body, null, 2) + '\n');
-    return c.json({ ok: true });
+    return c.json({ ok: true, problems });
   });
 
   return app;
