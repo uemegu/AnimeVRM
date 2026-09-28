@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ScenarioCategory, schemaForCategory, type ScenarioPackage, type ScenarioScene } from '@anime-vrm/scenario';
+import { ScenarioCategory, projectOfCategory, schemaForCategory, type ScenarioPackage, type ScenarioScene } from '@anime-vrm/scenario';
 import { api, type ScenarioSummary } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { SaveBar, saveErrorStatus, type SaveStatus } from '../../components/SaveBar';
+import { useProjects } from '../../data/useProjects';
 import { useStudioData } from '../../data/useStudioData';
 import { format, useI18n } from '../../i18n';
 import { CutInspector } from './CutInspector';
@@ -11,6 +12,7 @@ import { CutList } from './CutList';
 import type { Outfit } from './CutPreview';
 import { CutWorkbench } from './CutWorkbench';
 import { FlowChart } from './FlowChart';
+import { ProjectChart } from './ProjectChart';
 import { JsonDocumentEditor, ScenarioSettings } from './ScenarioSettings';
 import { duplicateScene, insertScene, moveScene, referencesTo, removeScene, replaceScene, textJa } from './scenarioEdit';
 import './scenarios.css';
@@ -18,10 +20,11 @@ import './scenarios.css';
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 export function ScenariosView() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
   const { category, id, cut } = useParams();
   const { data, error: dataError } = useStudioData();
+  const { projects, current: project, select: selectProject, error: projectsError } = useProjects();
   const [list, setList] = useState<ScenarioSummary[] | null>(null);
   const [search, setSearch] = useState('');
   const [saved, setSaved] = useState<unknown>(null);
@@ -35,6 +38,13 @@ export function ScenariosView() {
   const [listOpen, setListOpen] = useState(!id);
   const [creating, setCreating] = useState<{ category: ScenarioCategory; id: string } | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
+
+  // 開いたシナリオのプロジェクトに一覧を合わせる
+  useEffect(() => {
+    const owner = category && projects ? projectOfCategory({ projects }, category) : undefined;
+    if (owner && owner.id !== project?.id) selectProject(owner.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, projects]);
 
   const refreshList = () => api.scenarios().then(setList).catch(() => setLoadError(true));
   useEffect(() => {
@@ -68,13 +78,14 @@ export function ScenariosView() {
   const cutIndex = story ? Math.max(0, Math.min(story.scenes.length - 1, story.scenes.findIndex((s) => s.id === cut))) : 0;
   const dirty = JSON.stringify(saved) !== JSON.stringify(draft);
 
+  const inProject = useMemo(() => (list ?? []).filter((s) => project?.categories.includes(s.category)), [list, project]);
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return (list ?? []).filter((s) => !q || s.id.toLowerCase().includes(q) || s.title.toLowerCase().includes(q));
-  }, [list, search]);
+    return inProject.filter((s) => !q || s.id.toLowerCase().includes(q) || s.title.toLowerCase().includes(q));
+  }, [inProject, search]);
 
-  if (dataError || loadError) return <div className="scenarios-message">{t.common.loadFailed}</div>;
-  if (!data || !list) return null;
+  if (dataError || loadError || projectsError) return <div className="scenarios-message">{t.common.loadFailed}</div>;
+  if (!data || !list || !projects || !project) return null;
 
   const updateStory = (next: ScenarioPackage) => {
     setDraft(next);
@@ -143,14 +154,35 @@ export function ScenariosView() {
   };
   const selectCutOf = (scenario: ScenarioPackage, index: number) => navigate(`/scenarios/${category}/${id}/${scenario.scenes[index].id}`, { replace: true });
 
-  const categories = ScenarioCategory.options;
+  const categories = project.categories;
 
   return (
     <div className={`scenarios${listOpen ? '' : ' list-collapsed'}`}>
       <aside className="scenario-list">
+        <div className="scenario-project-bar">
+          <select
+            className="select"
+            aria-label={t.scenarios.project}
+            value={project.id}
+            onChange={(e) => {
+              selectProject(e.target.value);
+              setCreating(null);
+              navigate('/scenarios');
+            }}
+          >
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name[language] ?? p.name.ja}
+              </option>
+            ))}
+          </select>
+          <button type="button" className={`btn${id ? '' : ' primary'}`} onClick={() => navigate('/scenarios')}>
+            {t.scenarios.showChart}
+          </button>
+        </div>
         <header className="scenario-list-header">
           <input className="input" placeholder={t.scenarios.search} value={search} onChange={(e) => setSearch(e.target.value)} />
-          <button type="button" className="btn icon" title={t.scenarios.newScenario} onClick={() => setCreating(creating ? null : { category: 'action', id: '' })}>
+          <button type="button" className="btn icon" title={t.scenarios.newScenario} onClick={() => setCreating(creating ? null : { category: categories[0], id: '' })}>
             <Icon name={creating ? 'close' : 'plus'} size={16} />
           </button>
         </header>
@@ -326,7 +358,15 @@ export function ScenariosView() {
           )}
         </section>
       ) : (
-        <div className="scenarios-message">{t.scenarios.title}</div>
+        <ProjectChart
+          project={project}
+          scenarios={inProject}
+          onOpen={(s) => {
+            navigate(`/scenarios/${s.category}/${s.id}`);
+            setListOpen(false);
+          }}
+          onPlay={(s) => navigate(`/player/${s.category}/${s.id}`)}
+        />
       )}
     </div>
   );

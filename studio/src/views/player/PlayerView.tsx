@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ScenarioPackage, type ScenarioCategory } from '@anime-vrm/scenario';
+import { ScenarioPackage } from '@anime-vrm/scenario';
 import { api, type ScenarioSummary } from '../../api/client';
+import { useProjects } from '../../data/useProjects';
 import { useI18n } from '../../i18n';
 import { ScenarioPlayer } from '../../player/ScenarioPlayer';
 import { ScenarioCatalog } from '../../player/ScenarioCatalog';
 import { loadPlayerData, type PlayerData } from '../../player/playerData';
 import '../../player/player.css';
 
-/** 演出の見本を先に、電話・メールは除く */
-const ORDER: ScenarioCategory[] = ['demo', 'morning', 'action', 'holiday', 'forced', 'special', 'ending'];
-
 /**
  * シナリオ再生（Studio）。保存済みのシナリオを、分岐・ボイス・演出つきで通して再生する
  */
 export function PlayerView() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const { projects, current: project, select: selectProject, error: projectsError } = useProjects();
   const { category, id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState<PlayerData | null>(null);
@@ -37,23 +36,23 @@ export function PlayerView() {
       .catch(() => setError(true));
   }, [category, id]);
 
-  const entries = useMemo(
-    () =>
-      list
-        .filter((s) => ORDER.includes(s.category))
-        .sort((a, b) => ORDER.indexOf(a.category) - ORDER.indexOf(b.category) || a.id.localeCompare(b.id))
-        .map((s) => ({
-          key: `${s.category}/${s.id}`,
-          title: s.title,
-          label: `${t.scenarios.categories[s.category]} ・ ${s.id}`,
-          description: s.description,
-          // 舞台の場所の遠景をサムネイルにする
-          image: s.location ? data?.locations[s.location]?.layers.background.url : undefined,
-        })),
-    [list, t, data]
-  );
+  // 選んだプロジェクトのシナリオを種類の順に並べる。電話・メールは再生できないので除く
+  const entries = useMemo(() => {
+    const order = project?.categories ?? [];
+    return list
+      .filter((s) => s.kind === 'story' && order.includes(s.category))
+      .sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category) || a.id.localeCompare(b.id))
+      .map((s) => ({
+        key: `${s.category}/${s.id}`,
+        title: s.title,
+        label: `${t.scenarios.categories[s.category]} ・ ${s.id}`,
+        description: s.description,
+        // 舞台の場所の遠景をサムネイルにする
+        image: s.location ? data?.locations[s.location]?.layers.background.url : undefined,
+      }));
+  }, [list, t, data, project]);
 
-  if (error) return <div className="view-empty">{t.player.loadFailed}</div>;
+  if (error || projectsError) return <div className="view-empty">{t.player.loadFailed}</div>;
   if (category && id) {
     return (
       <div className="player-view">
@@ -65,7 +64,18 @@ export function PlayerView() {
   }
   return (
     <div className="player-list">
-      <h1>{t.player.listTitle}</h1>
+      <div className="player-list-head">
+        <h1>{t.player.listTitle}</h1>
+        {projects && project && (
+          <select className="select" aria-label={t.scenarios.project} value={project.id} onChange={(e) => selectProject(e.target.value)}>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name[language] ?? p.name.ja}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
       <ScenarioCatalog entries={entries} onSelect={(key) => navigate(`/player/${key}`)} />
     </div>
   );

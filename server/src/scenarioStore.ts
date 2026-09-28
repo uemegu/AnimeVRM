@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { ScenarioCategory, schemaForCategory, type TextContent } from '@anime-vrm/scenario';
+import { ScenarioCategory, scenarioLinks, schemaForCategory, type ScenarioLinks, type TextContent } from '@anime-vrm/scenario';
 import { isSafeSegment } from './safePath.ts';
 
 export type ScenarioKind = 'story' | 'call' | 'mail';
@@ -16,6 +16,8 @@ export interface ScenarioSummary {
   /** 舞台の場所（一覧のサムネイルに使う） */
   location?: string;
   description?: string;
+  /** フラグと先行シナリオによる、ほかのシナリオとのつながり（プロジェクトのチャートに使う） */
+  links: ScenarioLinks;
 }
 
 export interface ValidationIssue {
@@ -76,6 +78,7 @@ export class ScenarioStore {
           category, id, kind, title: textOf(data.title), lineCount, updatedAt: stat.mtime.toISOString(),
           ...(typeof data.location === 'string' ? { location: data.location } : {}),
           ...(data.description !== undefined ? { description: textOf(data.description) } : {}),
+          links: scenarioLinks(data),
         });
       }
     }
