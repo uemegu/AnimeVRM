@@ -304,7 +304,9 @@ describe('モーション（/api/motions）', () => {
     expect((await post({ name: 'ardy_test', fbx })).status).toBe(409);
     expect((await post({ name: 'ardy_test', fbx, overwrite: true })).status).toBe(200);
     expect((await post({ name: '../evil', fbx })).status).toBe(400);
-    expect((await post({ name: 'Ardy', fbx })).status).toBe(400);
+    expect((await post({ name: 'x.cand2', fbx })).status).toBe(400);
+    expect((await post({ name: ' Idle', fbx })).status).toBe(400);
+    expect((await post({ name: 'Standing Wave', fbx })).status).toBe(200);
     expect((await post({ name: 'ardy_x', fbx: Buffer.from('not fbx').toString('base64') })).status).toBe(400);
   });
 

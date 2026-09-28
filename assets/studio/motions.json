@@ -1,5 +1,4 @@
 {
-  "description": "モーション（assets/animations/<名前>.fbx）の情報。loop は待機・歩行など繰り返して自然なもの（指定のないモーションは1回再生して待機に戻る）",
   "motions": {
     "Standing Idle": {
       "loop": true

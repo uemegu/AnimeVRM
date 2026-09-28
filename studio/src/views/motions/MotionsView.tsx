@@ -6,16 +6,16 @@ import { GeneratePanel } from './GeneratePanel';
 import { MotionLibrary } from './MotionLibrary';
 import './motions.css';
 
-const TABS = ['generate', 'library', 'calibrate'] as const;
+const TABS = ['library', 'generate', 'calibrate'] as const;
 type Tab = (typeof TABS)[number];
 
 /**
- * モーション：ardy-mini での生成（候補の比較・採用）、登録済みモーションの一覧、接触点の校正
+ * モーション：登録済みモーションの一覧（FBX の登録）、ardy-mini での生成（候補の比較・採用）、接触点の校正
  */
 export function MotionsView() {
   const { t } = useI18n();
   const { tab } = useParams();
-  const current: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : 'generate';
+  const current: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : 'library';
   const { data, error, reload } = useStudioData();
 
   return (
