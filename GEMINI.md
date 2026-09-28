@@ -47,6 +47,12 @@ AIエージェントによるデバッグ・動作確認では、BGM・SE・ボ�
 
 ---
 
+## シナリオ・Studio データの編集手順
+
+シナリオ（`assets/scenarios/`）や Studio データ（`assets/studio/`）を作る・直すときは、`.agents/skills/scenario-authoring/SKILL.md` の手順（JSON を直接編集 → `npm run validate` → `npm run shot` で撮影して確認）に従う。
+
+---
+
 ## シナリオ設計規則 (Scenario Design Guidelines)
 
 - **選択肢シーンにおけるセリフ・ナレーションの完全排除**:
