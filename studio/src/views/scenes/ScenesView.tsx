@@ -177,11 +177,30 @@ export function ScenesView() {
             </div>
           )}
           {ids.map((id) => {
-            const name = tab === 'time-of-day' ? time.presets[id]?.name : locations.presets[id]?.name;
+            const isLocation = tab === 'locations';
+            const name = isLocation ? locations.presets[id]?.name : time.presets[id]?.name;
+            const bgUrl = isLocation ? locations.presets[id]?.layers?.background?.url : undefined;
             return (
-              <button key={id} type="button" className={`scenes-item${id === selectedId ? ' active' : ''}`} onClick={() => navigate(`/scenes/${tab}/${id}`)}>
-                <span className="scenes-item-name">{name}</span>
-                <span className="scenes-item-id">{id}</span>
+              <button
+                key={id}
+                type="button"
+                className={`scenes-item${id === selectedId ? ' active' : ''}${isLocation ? ' has-thumb' : ''}`}
+                onClick={() => navigate(`/scenes/${tab}/${id}`)}
+              >
+                <div className="scenes-item-text">
+                  <span className="scenes-item-name">{name}</span>
+                  <span className="scenes-item-id">{id}</span>
+                </div>
+                {isLocation && (
+                  <div className="scenes-item-thumb">
+                    {bgUrl ? (
+                      <img src={bgUrl} alt="" loading="lazy" />
+                    ) : (
+                      <div className="scenes-item-thumb-fallback" />
+                    )}
+                    <div className="scenes-item-thumb-fade" />
+                  </div>
+                )}
               </button>
             );
           })}
@@ -227,16 +246,21 @@ export function ScenesView() {
                 </select>
               </label>
             ) : (
-              <label className="field">
+              <div className="field wide">
                 <span className="field-label">{t.scenes.previewTimeOfDay}</span>
-                <select className="select" value={previewTime} onChange={(e) => setPreviewTime(e.target.value as TimeOfDayId)}>
+                <div className="segmented six">
                   {TIME_OF_DAY_IDS.map((id) => (
-                    <option key={id} value={id}>
+                    <button
+                      key={id}
+                      type="button"
+                      className={id === previewTime ? 'active' : ''}
+                      onClick={() => setPreviewTime(id as TimeOfDayId)}
+                    >
                       {time.presets[id]?.name ?? id}
-                    </option>
+                    </button>
                   ))}
-                </select>
-              </label>
+                </div>
+              </div>
             )}
             <div className="field">
               <span className="field-label">{t.scenes.castCount}</span>
@@ -248,7 +272,7 @@ export function ScenesView() {
                 ))}
               </div>
             </div>
-            <div className="field">
+            <div className="field wide">
               <span className="field-label">{t.viewer.camera}</span>
               <div className="segmented">
                 {SHOTS.map((s) => (
@@ -274,6 +298,32 @@ export function ScenesView() {
             <div className="scenes-director">
               <span className="scenes-director-label">{t.scenes.director}</span>
               <DirectorView manager={manager} location={locations.presets[selectedId]} colors={colors} />
+            </div>
+          )}
+          {tab === 'time-of-day' && (
+            <div className="scenes-locations-panel">
+              <div className="scenes-locations-grid">
+                {Object.values(locations.presets).map((loc) => {
+                  const bgUrl = loc.layers?.background?.url;
+                  const isActive = loc.id === previewLocation;
+                  return (
+                    <button
+                      key={loc.id}
+                      type="button"
+                      className={`viewer-location-thumb${isActive ? ' active' : ''}`}
+                      title={loc.name}
+                      onClick={() => setPreviewLocation(loc.id)}
+                    >
+                      {bgUrl ? (
+                        <img src={bgUrl} alt={loc.name} loading="lazy" />
+                      ) : (
+                        <div className="viewer-location-thumb-fallback">{loc.name}</div>
+                      )}
+                      <span className="viewer-location-thumb-name">{loc.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </section>
