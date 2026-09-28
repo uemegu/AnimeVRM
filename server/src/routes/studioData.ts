@@ -35,16 +35,18 @@ export function studioDataRoutes(config: ServerConfig) {
       return c.json({ error: 'JSON として読めません' }, 400);
     }
     const name = c.req.param('name');
-    const schema = STUDIO_DATA_SCHEMAS[name];
-    const parsed = schema?.safeParse(body);
-    if (parsed && !parsed.success) {
+    // 形式の決まっていない名前は断る（綴り間違いで使われないファイルが増えるのを防ぐ）
+    const schema = Object.hasOwn(STUDIO_DATA_SCHEMAS, name) ? STUDIO_DATA_SCHEMAS[name] : undefined;
+    if (!schema) return c.json({ error: `保存できるのは ${Object.keys(STUDIO_DATA_SCHEMAS).join(' / ')} だけです` }, 400);
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
       return c.json(
         { error: '形式が正しくありません', issues: parsed.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) },
         400
       );
     }
     // 参照先（ファイルなど）の問題は problems で返す。?strict=1 ならエラーがあるとき保存しない
-    const problems = schema ? checkStudioDataInWorkspace(config, name, body) : [];
+    const problems = checkStudioDataInWorkspace(config, name, body);
     if (c.req.query('strict') === '1' && problems.some((p) => p.severity === 'error')) {
       return c.json({ error: '参照先に問題があります', issues: problems.filter((p) => p.severity === 'error'), problems }, 400);
     }

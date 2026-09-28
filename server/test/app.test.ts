@@ -166,10 +166,11 @@ describe('アセット', () => {
 });
 
 describe('Studio 用 JSON', () => {
-  it('保存して読める。不正な名前は拒否する', async () => {
-    expect((await putJson('/api/studio-data/scenes', { a: 1 })).status).toBe(200);
-    expect(await json(request('/api/studio-data/scenes'))).toEqual({ a: 1 });
-    expect(await json(request('/api/studio-data'))).toEqual(['characters', 'scenes']);
+  it('保存して読める。不正な名前・形式の決まっていない名前は拒否する', async () => {
+    expect((await putJson('/api/studio-data/motions', { motions: {} })).status).toBe(200);
+    expect(await json(request('/api/studio-data/motions'))).toEqual({ motions: {} });
+    expect(await json(request('/api/studio-data'))).toEqual(['characters', 'motions']);
+    expect((await putJson('/api/studio-data/scenes', { a: 1 })).status).toBe(400);
     expect((await putJson('/api/studio-data/..%2Fx', {})).status).toBe(400);
   });
 
