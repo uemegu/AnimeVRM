@@ -356,3 +356,15 @@
   padding: 48px;
   color: #64748b;
 }
+.player-list-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.player-list-head h1 {
+  margin: 0;
+}
+.player-list-head .select {
+  width: 200px;
+}

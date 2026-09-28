@@ -1,0 +1,17 @@
+{
+  "description": "シナリオのプロジェクト。シナリオの種類（assets/scenarios/<種類>/）でどのプロジェクトに入るかを決める",
+  "projects": [
+    {
+      "id": "app",
+      "name": { "ja": "本編（app）", "en": "Main game (app)" },
+      "description": "app のゲーム本編。目次（scenarioIndex.json）に載る",
+      "categories": ["morning", "action", "holiday", "forced", "special", "ending", "call", "mail"]
+    },
+    {
+      "id": "demo",
+      "name": { "ja": "デモ", "en": "Demo" },
+      "description": "演出の見本。Pages で再生する",
+      "categories": ["demo"]
+    }
+  ]
+}

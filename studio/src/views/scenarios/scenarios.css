@@ -42,6 +42,18 @@
 .scenario-create .field-hint {
   margin: 0;
 }
+.scenario-project-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: center;
+  padding: 10px 10px 0;
+}
+.scenario-project-bar .btn {
+  height: var(--control-height);
+  box-sizing: border-box;
+  justify-content: center;
+}
 .scenario-groups {
   flex: 1;
   overflow-y: auto;
@@ -845,4 +857,175 @@
 .voice-candidates li span {
   flex: 1;
   font-size: 13px;
+}
+
+/* プロジェクトのチャート */
+.project-chart {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.project-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--header-height);
+  box-sizing: border-box;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.project-chart-header h1 {
+  margin: 0;
+  font-size: 16px;
+}
+.project-chart-header p {
+  margin: 2px 0 0;
+  font-size: 12px;
+}
+.project-chart-header > .muted {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.project-chart-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  min-height: 0;
+}
+.project-chart-canvas {
+  position: relative;
+  min-width: 0;
+}
+.project-chart-side {
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  background: var(--bg-subtle);
+  padding: 4px 8px 16px;
+}
+.project-node {
+  width: 200px;
+  height: 54px;
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-left: 4px solid;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  cursor: pointer;
+  overflow: hidden;
+  transition: opacity 0.15s;
+}
+.project-node.selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.project-node.dim {
+  opacity: 0.25;
+}
+.project-node-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.project-node-meta {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.project-chip {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.project-side-section h2,
+.project-detail h2 {
+  margin: 14px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.project-side-section .field-hint {
+  margin: 0 8px 6px;
+}
+.project-side-section.warn h2 {
+  color: var(--danger);
+}
+.project-missing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.project-isolated-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 8px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+.project-detail {
+  padding: 8px;
+}
+.project-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.project-detail-head .btn {
+  margin-left: auto;
+}
+.project-detail h2 {
+  margin: 6px 0 4px;
+  overflow-wrap: anywhere;
+  font-size: 15px;
+  letter-spacing: 0;
+  color: var(--text);
+}
+.project-detail > p {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+.project-detail-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.project-detail-actions .btn {
+  height: var(--control-height);
+  box-sizing: border-box;
+  justify-content: center;
+}
+.project-flags {
+  margin-bottom: 10px;
+}
+.project-flags > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.project-flags code,
+.project-missing code {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 11px;
 }

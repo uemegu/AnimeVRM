@@ -1,4 +1,4 @@
-import type { CharacterBook, ScenarioCategory } from '@anime-vrm/scenario';
+import type { CharacterBook, ScenarioCategory, ScenarioLinks } from '@anime-vrm/scenario';
 
 /** Studio サーバー（server/）の API。開発時は Vite が /api を転送する */
 
@@ -60,6 +60,7 @@ export interface ScenarioSummary {
   updatedAt: string;
   location?: string;
   description?: string;
+  links: ScenarioLinks;
 }
 
 export interface TtsLine {
