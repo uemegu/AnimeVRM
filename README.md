@@ -54,6 +54,22 @@ npm test
 
 `assets/scenarios/<種類>/<ID>/scenario.json`。形式は `packages/scenario/src/schema.ts` が正で、書き方は [app/FEATURES.md](app/FEATURES.md) にあります。`demo/` は演出の見本（Pages で再生する。ゲーム本編の目次には載らない）です。
 
+### サーバーなしで確かめる（AI での編集向け）
+
+JSON を直接編集したあとは、検証と撮影で確かめます。どちらもサーバー・Studio を起動しなくても動きます。
+
+```bash
+# スキーマ・参照先（シーン・キャラ・場所・モーション・ファイルなど）・app の目次を検証する。エラーがあれば終了コード 1
+npm run validate
+npm run validate -- demo/trio --json
+
+# カットを Studio のプレビューと同じ描画で撮影する（既定は scratch/shots/<種類>/<ID>/。音は鳴らさない）
+npm run shot -- demo/trio
+npm run shot -- demo/trio --scene trio_choice --time 2 -o out.png
+```
+
+オプションは `scripts/validate.ts`・`scripts/shot.ts` の先頭に書いてあります。サーバーの API で保存するときは `?strict=1` を付けると、参照先にエラーがあれば保存しません（[server/README.md](server/README.md)）。
+
 ## 描画
 
 - **トゥーンシェーディング**（`ToonShader.ts`）：肌・髪・服を自動で分けて MToon の値を当てる。影の乗算色、顔の SDF 陰影、天使の輪、前髪の影、足元のグラデーション
