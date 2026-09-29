@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>水上ヒップアタック相撲 - あおい vs えみり</title>
+    <script type="module" crossorigin src="/AnimeVRM/pool/assets/index-D5dtBAag.js"></script>
+    <link rel="stylesheet" crossorigin href="/AnimeVRM/pool/assets/index-CVgZTGyI.css">
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- ゲーム開始オーバーレイ（ブラウザ音声ロック解除 & ゲーム開始） -->
+      <div class="start-overlay" id="start-overlay">
+        <div class="start-card">
+          <div class="start-tag">PREDICTION BATTLE</div>
+          <h2 class="start-title">水上ヒップアタック相撲</h2>
+          <p class="start-subtitle">あおい vs えみり 勝者予想バトル</p>
+          <div class="start-rule-box">
+            どちらが勝つかを予想して応援しよう！
+          </div>
+          <button class="start-btn" id="btn-start" type="button">
+            <span>START GAME</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- HUD UI (Liquid Glassmorphism & Light Minimalist) -->
+      <header class="hud-header">
+        <div class="hud-liquid-card hud-title-box">
+          <span class="hud-sub">Mini Game</span>
+          <h1 class="hud-title">水上ヒップアタック相撲</h1>
+        </div>
+
+        <div class="hud-score-board">
+          <div class="hud-fighter aoi-theme">
+            <span class="fighter-tag aoi-tag">AOI</span>
+            <span class="fighter-name">アオイ</span>
+            <span class="fighter-score" id="score-aoi">0</span>
+          </div>
+          <div class="hud-vs">VS</div>
+          <div class="hud-fighter emili-theme">
+            <span class="fighter-score" id="score-emili">0</span>
+            <span class="fighter-name">エミリ</span>
+            <span class="fighter-tag emili-tag">EMILI</span>
+          </div>
+        </div>
+
+        <div class="hud-status-box">
+          <div class="hud-prediction-badge hidden" id="user-prediction-badge">
+            <span class="badge-label">予想</span>
+            <span class="badge-value" id="user-prediction-name">未選択</span>
+          </div>
+          <span class="status-badge" id="match-status">予想フェーズ</span>
+          <div class="hud-actions">
+            <button class="hud-btn" id="btn-restart" type="button">リセット</button>
+            <button class="hud-btn" id="btn-camera" type="button">カメラ切替</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- 勝者予想デッキ (Liquid Winner Prediction Deck) -->
+      <section class="prediction-deck" id="prediction-deck">
+        <!-- キャラクター意気込み吹き出し (Speech Bubble) -->
+        <div class="deck-speech-bubble" id="deck-speech-bubble">
+          <span class="bubble-speaker-tag aoi" id="bubble-speaker">アオイ</span>
+          <span class="bubble-text" id="bubble-text">どちらが勝つか予想してキャラクターに注目してみましょう</span>
+        </div>
+
+        <div class="prediction-deck-header">
+          <div class="header-titles">
+            <span class="deck-tag">WINNER PREDICTION</span>
+            <h2 class="deck-title">勝者を予想しよう</h2>
+          </div>
+          <!-- 予想戦績統計ピル -->
+          <div class="prediction-stats-pill">
+            <div class="stat-item">
+              <span class="stat-name">的中</span>
+              <span class="stat-val" id="stat-correct">0</span>
+            </div>
+            <div class="stat-sep">/</div>
+            <div class="stat-item">
+              <span class="stat-name">総試合</span>
+              <span class="stat-val" id="stat-total">0</span>
+            </div>
+            <div class="stat-sep">/</div>
+            <div class="stat-item">
+              <span class="stat-name">連勝</span>
+              <span class="stat-val" id="stat-streak">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="prediction-cards-container">
+          <!-- アオイの予想カード -->
+          <div class="prediction-card aoi-card" id="card-aoi" data-fighter="aoi" tabindex="0">
+            <div class="card-glass-gloss"></div>
+            <div class="card-header">
+              <div class="card-name-group">
+                <span class="fighter-tag aoi-tag">AOI</span>
+                <h3 class="card-fighter-name">アオイ</h3>
+              </div>
+              <span class="card-style-badge">スピード重視</span>
+            </div>
+            <p class="card-fighter-catch">素早い突きと軽快なフットワークで隙を突く！</p>
+            <button class="predict-action-btn aoi-btn" id="btn-predict-aoi" type="button">
+              アオイの勝利を予想
+            </button>
+          </div>
+
+          <!-- VS インジケーター -->
+          <div class="deck-vs-divider">
+            <span class="divider-text">VS</span>
+          </div>
+
+          <!-- エミリの予想カード -->
+          <div class="prediction-card emili-card" id="card-emili" data-fighter="emili" tabindex="0">
+            <div class="card-glass-gloss"></div>
+            <div class="card-header">
+              <div class="card-name-group">
+                <span class="fighter-tag emili-tag">EMILI</span>
+                <h3 class="card-fighter-name">エミリ</h3>
+              </div>
+              <span class="card-style-badge">パワー重視</span>
+            </div>
+            <p class="card-fighter-catch">強烈なタメ突きと重量級ヒップで豪快に吹っ飛ばす！</p>
+            <button class="predict-action-btn emili-btn" id="btn-predict-emili" type="button">
+              エミリの勝利を予想
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 予想結果モーダル (Liquid Result Card) -->
+      <div class="result-modal-overlay hidden" id="result-modal">
+        <div class="result-modal-card">
+          <div class="result-gloss"></div>
+          <span class="result-sub-badge" id="result-badge">MATCH RESULT</span>
+          <h2 class="result-title" id="result-title">予想的中！</h2>
+          <p class="result-message" id="result-message">見事な洞察力！アオイがプールを制覇しました。</p>
+
+          <div class="result-stats-row">
+            <div class="result-stat-box">
+              <span class="rs-label">勝者</span>
+              <span class="rs-val" id="rs-winner">アオイ</span>
+            </div>
+            <div class="result-stat-box">
+              <span class="rs-label">あなたの予想</span>
+              <span class="rs-val" id="rs-predicted">アオイ</span>
+            </div>
+            <div class="result-stat-box">
+              <span class="rs-label">連勝記録</span>
+              <span class="rs-val" id="rs-streak">1</span>
+            </div>
+          </div>
+
+          <div class="result-actions">
+            <button class="liquid-primary-btn" id="btn-next-match" type="button">
+              次の勝負を予想する
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中央の演出・アナウンス -->
+      <div class="center-banner" id="center-banner">
+        <div class="banner-content" id="banner-text">READY...</div>
+      </div>
+
+      <!-- 下部コントロールパネル -->
+      <footer class="hud-footer">
+        <div class="island-status-pill">
+          <span class="pill-label">島の揺れ</span>
+          <div class="tilt-bar-bg">
+            <div class="tilt-bar-fill" id="tilt-bar"></div>
+          </div>
+        </div>
+        <div class="subtitle-box" id="subtitle-box">
+          <span class="speaker-name" id="speaker-name"></span>
+          <span class="speech-text" id="speech-text">どちらが勝つか予想してキャラクターに注目してみましょう</span>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
