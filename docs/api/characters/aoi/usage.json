@@ -1,0 +1,454 @@
+[
+  {
+    "category": "demo",
+    "id": "cafe_monitoring",
+    "title": "窓越しの二重存在 〜カフェ監視任務〜",
+    "appearances": 4,
+    "lines": []
+  },
+  {
+    "category": "demo",
+    "id": "fast_motion",
+    "title": "疾風怒濤！高速アクション特訓",
+    "appearances": 6,
+    "lines": [
+      {
+        "lineId": "motion_intro",
+        "text": "「エミリちゃん！アニメの格闘シーンみたいに、腕を高速で動かしたときのスピード線や残像エフェクトを試してみようよ！」",
+        "voiceUrl": "/voices/fastmotion_01_aoi.mp3"
+      },
+      {
+        "lineId": "motion_waving",
+        "text": "「まずは高速手振り！ブンブン振ると、手首や肘の軌道に沿ってスピード線と残像がシュババッと走るよ！」",
+        "voiceUrl": "/voices/fastmotion_02_aoi.mp3"
+      },
+      {
+        "lineId": "motion_praise",
+        "text": "「すごーい！全身のモーションブラーじゃなくて、動いた腕の周辺だけにピタッと追従して超カッコいい作画になってる！」",
+        "voiceUrl": "/voices/fastmotion_05_aoi.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "gesture_battle",
+    "title": "放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜",
+    "appearances": 9,
+    "lines": [
+      {
+        "lineId": "gb_1",
+        "text": "「ねえエミリちゃん！ 放課後の表現力勝負、どっちが全身で気持ちを伝えられるかバトルしよ！」",
+        "voiceUrl": "/voices/gb_1.mp3"
+      },
+      {
+        "lineId": "gb_3",
+        "text": "「じゃあ行くよ！ どうしても宿題を教えてほしい時のお願い……からの、断られた時の顔！」",
+        "voiceUrl": "/voices/gb_3.mp3"
+      },
+      {
+        "lineId": "gb_5",
+        "text": "「どうかな？ どっちの全身ジェスチャーがより気持ちが伝わってきた？」",
+        "voiceUrl": "/voices/gb_5.mp3"
+      },
+      {
+        "lineId": "gb_reaction_aoi",
+        "text": "「やったー！ 私の勝ちだね！ エミリちゃん、放課後アイス奢ってね〜！」",
+        "voiceUrl": "/voices/gb_reaction_aoi.mp3"
+      },
+      {
+        "lineId": "gb_end",
+        "text": "「また放課後にいろんな動きで遊ぼうね！ 今日は付き合ってくれてありがとう！」",
+        "voiceUrl": "/voices/gb_end.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "harem",
+    "title": "放課後大波乱!? 一体誰が本命なのよ〜！",
+    "appearances": 18,
+    "lines": [
+      {
+        "lineId": "harem_intro_1",
+        "text": "「ねえ……今日こそ、ちゃんとハッキリさせてほしいの。」",
+        "voiceUrl": "/voices/harem_intro_1.mp3"
+      },
+      {
+        "lineId": "harem_intro_4",
+        "text": "「私達3人の中で、あなたの本当の気持ち……教えて？」",
+        "voiceUrl": "/voices/harem_intro_4.mp3"
+      },
+      {
+        "lineId": "harem_choice",
+        "text": "（3人からの視線が突き刺さる……！ 一体誰を選ぶ！？）"
+      },
+      {
+        "lineId": "route_aoi_1",
+        "text": "「えっ……！？ ほ、本当に私……！？ 夢じゃないよね……っ！？」",
+        "voiceUrl": "/voices/harem_aoi_1.mp3"
+      },
+      {
+        "lineId": "route_emily_2",
+        "text": "「うそ……っ！ 私じゃなかったの……！？ もう、バカバカ、知らないっ！」",
+        "voiceUrl": "/voices/harem_emily_2.mp3"
+      },
+      {
+        "lineId": "route_shion_3",
+        "text": "「し、シオンだったの……？ でも……シオン、すっごく顔真っ赤だよ……？」",
+        "voiceUrl": "/voices/harem_shion_3.mp3"
+      },
+      {
+        "lineId": "route_all_2",
+        "text": "「サイテー……。本当に反省してよね！ もうみんなで絶交だから！」",
+        "voiceUrl": "/voices/harem_all_2.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "nisa",
+    "title": "夕暮れの校門とオルカンの憂鬱",
+    "appearances": 10,
+    "lines": [
+      {
+        "lineId": "intro_1",
+        "text": "「あ、来てくれたんだ……！ 放課後に校門の前で待っててなんて言って、急にごめんね。」",
+        "voiceUrl": "/voices/nisa_01.mp3"
+      },
+      {
+        "lineId": "intro_2",
+        "text": "「あのね……ずっと一人で悩んでて、誰にも言えなかったんだけど……あなたにだけは、正直に相談したくて……。」",
+        "voiceUrl": "/voices/nisa_02.mp3"
+      },
+      {
+        "lineId": "intro_3",
+        "text": "「私ね……今年から新NISA、始めたんだ……。」",
+        "voiceUrl": "/voices/nisa_03.mp3"
+      },
+      {
+        "lineId": "intro_4",
+        "text": "「ネットのみんなはさ、『思考停止でオルカン一本買っとけば20年後には勝てる』って言うでしょ……？」",
+        "voiceUrl": "/voices/nisa_04.mp3"
+      },
+      {
+        "lineId": "intro_5",
+        "text": "「でも……もしこれから世界的な大恐慌が来たらどうするの……っ！？ 人口動態とか地政学リスクとか……本当に全世界株式一本で大丈夫なの……っ！？」",
+        "voiceUrl": "/voices/nisa_05.mp3"
+      },
+      {
+        "lineId": "intro_6",
+        "text": "「私……毎月の積立日になるたびに胃が痛くて……っ。ねえ、私どうしたらいいと思う……？」",
+        "voiceUrl": "/voices/nisa_06.mp3"
+      },
+      {
+        "lineId": "route_hold_1",
+        "text": "「気絶ホールド……！ そっか、アプリを消して20年間寝てればいいんだね……！ なんだか少し心が軽くなったかも……ありがとう……！」",
+        "voiceUrl": "/voices/nisa_hold_01.mp3"
+      },
+      {
+        "lineId": "route_cash_1",
+        "text": "「現金比率……！ そうだよね、無リスク資産でリスク許容度を整えるのが基本だった……！ 冷静になれたよ、ありがとう……！」",
+        "voiceUrl": "/voices/nisa_cash_01.mp3"
+      },
+      {
+        "lineId": "route_reva_1",
+        "text": "「えっ、全財産レバナス……！？ それ、不安どころか破滅に向かってない……！？ もう、バカぁ……っ！」",
+        "voiceUrl": "/voices/nisa_reva_01.mp3"
+      },
+      {
+        "lineId": "epilogue_1",
+        "text": "「ふふっ、あなたに相談してよかった。……じゃあ、一緒にアイスでも食べて帰ろ？ 私のNISA口座から出すわけにはいかないから、割り勘ね！」",
+        "voiceUrl": "/voices/nisa_epilogue_01.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_classroom",
+    "title": "昼休みの教室 — 簡易3Dの教室で会話",
+    "appearances": 9,
+    "lines": [
+      {
+        "lineId": "pc_3",
+        "text": "「ふふ、大丈夫だよエミリちゃん。大事なところ、後で一緒におさらいしよっか」",
+        "voiceUrl": "/voices/pc_3.mp3"
+      },
+      {
+        "lineId": "pc_5",
+        "text": "「もう、大げさなんだから。その代わり、今日の放課後は購買のパン、付き合ってね？」",
+        "voiceUrl": "/voices/pc_5.mp3"
+      },
+      {
+        "lineId": "pc_7",
+        "text": "「うん、約束ね。……ふふっ、エミリちゃんといると、何気ない時間もすごく楽しいな」",
+        "voiceUrl": "/voices/pc_7.mp3"
+      },
+      {
+        "lineId": "pc_9",
+        "text": "「さ、予習しよっか。午後の授業も一緒に頑張ろうね！」",
+        "voiceUrl": "/voices/pc_9.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "park_confession",
+    "title": "夕暮れの公園と放課後の期待",
+    "appearances": 14,
+    "lines": [
+      {
+        "lineId": "intro_1",
+        "text": "「あ、来てくれたんだ……！ 急にこんな公園に呼び出したりして、ごめんね」",
+        "voiceUrl": "/voices/confess_intro_1.mp3"
+      },
+      {
+        "lineId": "intro_2",
+        "text": "「あのね……ずっと前から、あなたに伝えたいことがあって……」",
+        "voiceUrl": "/voices/confess_intro_2.mp3"
+      },
+      {
+        "lineId": "intro_3",
+        "text": "「私のこと……どう思ってる……？」",
+        "voiceUrl": "/voices/confess_intro_3.mp3"
+      },
+      {
+        "lineId": "route_love_1",
+        "text": "「やったーっ！ え……！？ ほんとに……！？ 夢じゃないよね……！？」",
+        "voiceUrl": "/voices/confess_love_1.mp3"
+      },
+      {
+        "lineId": "route_love_2",
+        "text": "「すっごく嬉しい……！ 私、ずっとあなたのことばかり考えてたの……っ！」",
+        "voiceUrl": "/voices/confess_love_2.mp3"
+      },
+      {
+        "lineId": "route_love_3",
+        "text": "「ねぇ...これって夢じゃないよね？ぎゅ〜ってしてくれる？」",
+        "voiceUrl": "/voices/confess_love_hug.mp3"
+      },
+      {
+        "lineId": "route_love_4",
+        "text": "「ずっと...そばにいてね...」",
+        "voiceUrl": "/voices/asmr_tuned2.mp3"
+      },
+      {
+        "lineId": "route_money_1",
+        "text": "「え……？ ご、500えん……？」",
+        "voiceUrl": "/voices/confess_money_1.mp3"
+      },
+      {
+        "lineId": "route_money_2",
+        "text": "「そ、そんな理由でこんな呼び出しに応じたの……！？ 私の心の準備とドキドキを返してよー！！」",
+        "voiceUrl": "/voices/confess_money_2.mp3"
+      },
+      {
+        "lineId": "route_money_3",
+        "text": "「ほら！ 500円！ これで文句ないでしょ！ もうっ、鈍感バカーッ！」",
+        "voiceUrl": "/voices/confess_money_3.mp3"
+      },
+      {
+        "lineId": "route_silent_2",
+        "text": "「ちょ、ちょっと……なんで何も言わないの……！？ 気まずいから何か言ってよ〜っ！」",
+        "voiceUrl": "/voices/confess_silent_2.mp3"
+      },
+      {
+        "lineId": "route_silent_3",
+        "text": "「うぅ……からかわないでよね……。もう一回、ちゃんと最初からやり直してあげるからね！」",
+        "voiceUrl": "/voices/confess_silent_3.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "private_date",
+    "title": "休日デート〜私服のエミリと街歩き〜",
+    "appearances": 6,
+    "lines": [
+      {
+        "lineId": "cafe_1",
+        "text": "「あ……！ ふたりとも、こんにちは！ こんな素敵なカフェで会うなんて、すごい偶然だね！」",
+        "voiceUrl": "/voices/date_aoi_01.mp3"
+      },
+      {
+        "lineId": "cafe_3",
+        "text": "「ありがとうエミリ！ エミリのワンピースもすごくお洒落だよ。……ふたりで、お出かけ中だったんだ？」",
+        "voiceUrl": "/voices/date_aoi_02.mp3"
+      },
+      {
+        "lineId": "cafe_5",
+        "text": "「ふふ、誘ってくれてありがとう。でも私はこれから約束があるから……ふたりでゆっくり楽しんできてね？」",
+        "voiceUrl": "/voices/date_aoi_03.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "silver_week",
+    "title": "シルバーウィークの黄昏 〜アオイとエミリの帰り道〜",
+    "appearances": 8,
+    "lines": [
+      {
+        "lineId": "sw_1",
+        "text": "「ふあぁ……楽しかったシルバーウィークも、とうとう今日で終わっちゃうね……」",
+        "voiceUrl": "/voices/sw_1.mp3"
+      },
+      {
+        "lineId": "sw_3",
+        "text": "「うん！ エミリちゃんのおかげで、毎日すっごく笑ってた気がするな〜」",
+        "voiceUrl": "/voices/sw_3.mp3"
+      },
+      {
+        "lineId": "sw_reaction_together",
+        "text": "「賛成！ じゃあ明日の朝、いつもの交差点で待ち合わせね！」",
+        "voiceUrl": "/voices/sw_reaction_together.mp3"
+      },
+      {
+        "lineId": "sw_end",
+        "text": "「それじゃあ、また明日ね！ 気をつけて帰ってね〜！」",
+        "voiceUrl": "/voices/sw_end.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "town_walk",
+    "title": "放課後の並木道 〜君と歩く帰り道〜",
+    "appearances": 11,
+    "lines": [
+      {
+        "lineId": "walk_1",
+        "text": "「放課後、こうして一緒に並んで歩いて帰るの……なんだか久しぶりだね！」",
+        "voiceUrl": "/voices/town_walk_1.mp3"
+      },
+      {
+        "lineId": "walk_2",
+        "text": "「この並木道、街並みも綺麗だし、風がふわっと抜けてすごく気持ちいいな〜」",
+        "voiceUrl": "/voices/town_walk_2.mp3"
+      },
+      {
+        "lineId": "walk_3",
+        "text": "「ねえ、聞いてる？ ……ふふっ、私の横顔ばっかり見て、どうしたの？」",
+        "voiceUrl": "/voices/town_walk_3.mp3"
+      },
+      {
+        "lineId": "walk_route_admire",
+        "text": "「も、もう〜！ 急にそういうこと言うんだから……ちょっと照れるじゃん」",
+        "voiceUrl": "/voices/town_walk_admire.mp3"
+      },
+      {
+        "lineId": "walk_route_shop",
+        "text": "「あ、知ってた！？ 私もちょうどその話しようと思ってたんだよね！」",
+        "voiceUrl": "/voices/town_walk_shop.mp3"
+      },
+      {
+        "lineId": "walk_transition_stop",
+        "text": "「あっ、見て見て！ ほら、あそこの看板……ちょっと止まって！」",
+        "voiceUrl": "/voices/town_walk_stop.mp3"
+      },
+      {
+        "lineId": "stop_talk_1",
+        "text": "「ここだよ！ ねこちゃんの看板のカフェ！ ここのアップルパイ、すっごく評判なんだって〜」",
+        "voiceUrl": "/voices/town_walk_cafe_1.mp3"
+      },
+      {
+        "lineId": "stop_talk_2",
+        "text": "「もし急ぎの用事がないなら……ちょっと寄っていかない？ 一緒に食べよ！」",
+        "voiceUrl": "/voices/town_walk_cafe_2.mp3"
+      },
+      {
+        "lineId": "stop_route_treat",
+        "text": "「わぁ、本当！？ やったぁ〜！ ありがとう、優しい〜！ じゃあ一番大きいやつ頼んじゃお♪ 行こ！」",
+        "voiceUrl": "/voices/town_walk_treat.mp3"
+      },
+      {
+        "lineId": "stop_route_ask",
+        "text": "「えーっ！？ なんで私が奢る前提なの〜！？ ……まぁ、半分こならいいけどねっ♪ 行こ！」",
+        "voiceUrl": "/voices/town_walk_ask.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "trio",
+    "title": "放課後トライアングル〜アオイとエミリとあなた〜",
+    "appearances": 15,
+    "lines": [
+      {
+        "lineId": "trio_intro_1",
+        "text": "「ねえ……ちょっといいかな？ 放課後、急に引き留めちゃってごめんね」",
+        "voiceUrl": "/voices/trio_intro_1.mp3"
+      },
+      {
+        "lineId": "trio_intro_3",
+        "text": "「ち、違うよエミリ！ 内緒話なんかじゃないってば。今度の週末、3人でどこか出かけないかって相談しようと思って……」",
+        "voiceUrl": "/voices/trio_intro_3.mp3"
+      },
+      {
+        "lineId": "trio_choice",
+        "text": "「どこに行きたい？ 3人で一緒に決めよっ！」",
+        "voiceUrl": "/voices/trio_choice.mp3"
+      },
+      {
+        "lineId": "route_cafe_2",
+        "text": "「もう、エミリはいつも甘いものばかり……でも、私もあそこの紅茶気になってたんだよね」",
+        "voiceUrl": "/voices/trio_cafe_2.mp3"
+      },
+      {
+        "lineId": "route_picnic_1",
+        "text": "「海辺の公園……！ すごく素敵。潮風を浴びながらおしゃべりするの、楽しみだな」",
+        "voiceUrl": "/voices/trio_picnic_1.mp3"
+      },
+      {
+        "lineId": "route_picnic_3",
+        "text": "「ふふっ、エミリのサンドイッチ、味見ならいつでも手伝うよ？ 一緒に作ろうか」",
+        "voiceUrl": "/voices/trio_picnic_3.mp3"
+      },
+      {
+        "lineId": "route_anywhere_1",
+        "text": "「そんな風に言ってもらえるなんて……ふふっ、ありがとう。私もあなたと一緒ならどこでも嬉しいな」",
+        "voiceUrl": "/voices/trio_anywhere_1.mp3"
+      },
+      {
+        "lineId": "route_anywhere_3",
+        "text": "「も、もうっ、からかわないでよエミリ！ ……でも、本当に嬉しいな」",
+        "voiceUrl": "/voices/trio_anywhere_3.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "two_girls",
+    "title": "放課後の寄り道〜アオイとエミリ〜",
+    "appearances": 10,
+    "lines": [
+      {
+        "lineId": "chat_intro_1",
+        "text": "「エミリちゃん！ 今日の放課後、もし予定なかったら一緒にどこか寄っていかない？」",
+        "voiceUrl": "/voices/chat_intro_1.mp3"
+      },
+      {
+        "lineId": "chat_choice",
+        "text": "「どこに行こうか？ 一緒に決めよっ！」"
+      },
+      {
+        "lineId": "route_cafe_2",
+        "text": "「ふふっ、エミリちゃん本当にスイーツ大好きだよね。私も写真いっぱい撮っちゃお♪」",
+        "voiceUrl": "/voices/chat_cafe_2.mp3"
+      },
+      {
+        "lineId": "route_study_2",
+        "text": "「大丈夫、1時間だけ集中して終わったら美味しいジュースおごってあげるから！」",
+        "voiceUrl": "/voices/chat_study_2.mp3"
+      },
+      {
+        "lineId": "route_park_1",
+        "text": "「夕方の風が気持ちいいね。たまにはこうやってのんびり歩くのもいいかも」",
+        "voiceUrl": "/voices/chat_park_1.mp3"
+      },
+      {
+        "lineId": "ending_chat",
+        "text": "「「それじゃあ、行こっか！」」 ―― 2人の楽しい放課後が始まった。【シナリオ終了】"
+      }
+    ]
+  }
+]

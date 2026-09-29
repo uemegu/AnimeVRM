@@ -50,17 +50,6 @@
       "port": 5184
     },
     {
-      "name": "pages-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "dev:pages",
-        "-w",
-        "studio"
-      ],
-      "port": 5176
-    },
-    {
       "name": "pages-preview",
       "runtimeExecutable": "npx",
       "runtimeArgs": [

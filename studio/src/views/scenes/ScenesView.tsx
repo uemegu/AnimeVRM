@@ -18,6 +18,7 @@ import { DirectorView } from '../../stage/DirectorView';
 import { StageCanvas } from '../../stage/StageCanvas';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import './scenes.css';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 type Tab = 'time-of-day' | 'locations';
 interface PresetFile<T> {
@@ -194,7 +195,7 @@ export function ScenesView() {
                 {isLocation && (
                   <div className="scenes-item-thumb">
                     {bgUrl ? (
-                      <img src={bgUrl} alt="" loading="lazy" />
+                      <img src={resolveAssetUrl(bgUrl)} alt="" loading="lazy" />
                     ) : (
                       <div className="scenes-item-thumb-fallback" />
                     )}
@@ -315,7 +316,7 @@ export function ScenesView() {
                       onClick={() => setPreviewLocation(loc.id)}
                     >
                       {bgUrl ? (
-                        <img src={bgUrl} alt={loc.name} loading="lazy" />
+                        <img src={resolveAssetUrl(bgUrl)} alt={loc.name} loading="lazy" />
                       ) : (
                         <div className="viewer-location-thumb-fallback">{loc.name}</div>
                       )}

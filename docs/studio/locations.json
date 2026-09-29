@@ -1,16 +1,6 @@
 {
   "description": "場所ごとの背景（遠景・中景・近景）。シーンの background / シナリオの location から参照する",
   "presets": {
-    "classroom": {
-      "id": "classroom",
-      "name": "教室",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/school_classroom_far.avif"
-        }
-      }
-    },
     "corridor": {
       "id": "corridor",
       "name": "廊下",
@@ -18,56 +8,6 @@
       "layers": {
         "background": {
           "url": "/textures/school-corridor-far.avif"
-        }
-      }
-    },
-    "courtyard": {
-      "id": "courtyard",
-      "name": "中庭",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/school-courtyard-far.avif"
-        }
-      }
-    },
-    "rooftop": {
-      "id": "rooftop",
-      "name": "屋上",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/school-rooftop-far.avif"
-        }
-      }
-    },
-    "library": {
-      "id": "library",
-      "name": "図書室",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/school-library-far.avif"
-        }
-      }
-    },
-    "sports_ground": {
-      "id": "sports_ground",
-      "name": "運動場",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/school-ground-far.avif"
-        }
-      }
-    },
-    "cafeteria": {
-      "id": "cafeteria",
-      "name": "購買・学食",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/school-cafeteria-far.avif"
         }
       }
     },
@@ -101,26 +41,6 @@
         }
       }
     },
-    "shrine": {
-      "id": "shrine",
-      "name": "神社",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/shrine_far.avif"
-        }
-      }
-    },
-    "god_realm": {
-      "id": "god_realm",
-      "name": "神界",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/white_far.avif"
-        }
-      }
-    },
     "apartment_door": {
       "id": "apartment_door",
       "name": "マンションの玄関前",
@@ -131,96 +51,6 @@
         }
       }
     },
-    "gym": {
-      "id": "gym",
-      "name": "体育館",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/gym_far.avif"
-        }
-      }
-    },
-    "staff_room": {
-      "id": "staff_room",
-      "name": "職員室",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/staff_room_far.avif"
-        }
-      }
-    },
-    "gate_ambush": {
-      "id": "gate_ambush",
-      "name": "校門前",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/gate_ambush_far.avif"
-        }
-      }
-    },
-    "shrine_rain": {
-      "id": "shrine_rain",
-      "name": "神社",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/shrine_rain_far.avif"
-        }
-      }
-    },
-    "hospital": {
-      "id": "hospital",
-      "name": "病室",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/hospital_far.avif"
-        }
-      }
-    },
-    "park": {
-      "id": "park",
-      "name": "公園",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/park-background.avif"
-        }
-      }
-    },
-    "shopping_street": {
-      "id": "shopping_street",
-      "name": "商店街",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/town2_far.avif"
-        }
-      }
-    },
-    "cinema": {
-      "id": "cinema",
-      "name": "映画館",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/cinema_far.avif"
-        }
-      }
-    },
-    "aoi_house": {
-      "id": "aoi_house",
-      "name": "アオイの部屋",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/aoi_room_far.avif"
-        }
-      }
-    },
     "home": {
       "id": "home",
       "name": "自宅",
@@ -228,26 +58,6 @@
       "layers": {
         "background": {
           "url": "/textures/myroom_far.avif"
-        }
-      }
-    },
-    "amusement_park": {
-      "id": "amusement_park",
-      "name": "遊園地",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/amusement_park_far.avif"
-        }
-      }
-    },
-    "aquarium": {
-      "id": "aquarium",
-      "name": "水族館",
-      "isIndoor": true,
-      "layers": {
-        "background": {
-          "url": "/textures/aquarium_far.avif"
         }
       }
     },
@@ -324,26 +134,6 @@
           },
           "scale": 1.15,
           "opacity": 1
-        }
-      }
-    },
-    "park_with_sea": {
-      "id": "park_with_sea",
-      "name": "海の見える公園",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/park-with-sea-far.avif"
-        }
-      }
-    },
-    "night_festival": {
-      "id": "night_festival",
-      "name": "夏祭り",
-      "isIndoor": false,
-      "layers": {
-        "background": {
-          "url": "/textures/night-festival-far.avif"
         }
       }
     },

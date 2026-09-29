@@ -1,7 +1,7 @@
 import './styles/global.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { createBrowserRouter, createHashRouter, Navigate, RouterProvider } from 'react-router';
 import { ComingSoon, Layout, NAV_ITEMS } from './components/Layout';
 import { LanguageProvider } from './i18n';
 import { CharactersView } from './views/characters/CharactersView';
@@ -11,7 +11,9 @@ import { ScenariosView } from './views/scenarios/ScenariosView';
 import { PlayerView } from './views/player/PlayerView';
 import { MotionsView } from './views/motions/MotionsView';
 
-const router = createBrowserRouter([
+// 本番（GitHub Pages）は直リンクの 404 を返すので、URL は #/ 形式にする
+const createRouter = import.meta.env.PROD ? createHashRouter : createBrowserRouter;
+const router = createRouter([
   {
     path: '/',
     element: <Layout />,

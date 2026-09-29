@@ -1,0 +1,4 @@
+{
+  "description": "BGM（シナリオの bgm から ID で参照する）。volumeScale は既定の音量の倍率。night_room は夜の自室の落ち着いた雰囲気のため音量を下げている",
+  "bgm": {}
+}

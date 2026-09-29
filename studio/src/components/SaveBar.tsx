@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n';
-import { ApiError } from '../api/client';
+import { ApiError, READ_ONLY } from '../api/client';
 import './SaveBar.css';
 
 export type SaveStatus = { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message?: string } | null;
@@ -31,7 +31,7 @@ export function SaveBar({ dirty, status, onRevert, onSave }: { dirty: boolean; s
       <button type="button" className="btn" disabled={!dirty} onClick={onRevert}>
         {t.common.revert}
       </button>
-      <button type="button" className="btn primary" disabled={!dirty || status?.kind === 'saving'} onClick={onSave}>
+      <button type="button" className="btn primary" disabled={READ_ONLY || !dirty || status?.kind === 'saving'} title={READ_ONLY ? t.common.readOnly : undefined} onClick={onSave}>
         {t.common.save}
       </button>
     </div>

@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_classroom",
+  "title": {
+    "ja": "昼休みの教室 — 簡易3Dの教室で会話",
+    "en": "昼休みの教室（簡易3D日常会話）"
+  },
+  "description": "床・壁・天井の1枚絵と机のアクスタで組んだ簡易3Dの昼の教室で、背景モブの生徒たちが談笑する中、アオイとエミリが午後の小テストや放課後の約束を交わす日常シーン。",
+  "location": "painted_classroom",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "pc_1",
+      "text": "昼休みの教室。クラスメイトたちの賑やかな声が響く中、窓際で二人が話していた。",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "forward"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Idle",
+          "expression": "neutral",
+          "lookAtTarget": "partner"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          1.9
+        ],
+        "target": [
+          0,
+          1.19,
+          0.9
+        ],
+        "fov": 50
+      }
+    },
+    {
+      "id": "pc_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「アオイ、午後の小テストの範囲、もう見直した？ 古典の文法が全然頭に入らなくて……！」",
+      "voiceUrl": "/voices/pc_2.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "partner"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "mob_chat_gesture",
+          "motionLoop": false,
+          "expression": "surprised"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.32,
+          1.25
+        ],
+        "target": [
+          -0.12,
+          1.28,
+          0
+        ],
+        "fov": 28
+      }
+    },
+    {
+      "id": "pc_3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「ふふ、大丈夫だよエミリちゃん。大事なところ、後で一緒におさらいしよっか」",
+      "voiceUrl": "/voices/pc_3.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "clasp_hands_front",
+          "motionLoop": false,
+          "expression": "happy"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Idle",
+          "expression": "neutral"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.36,
+          1.32,
+          1.25
+        ],
+        "target": [
+          0.26,
+          1.28,
+          0
+        ],
+        "fov": 30
+      }
+    },
+    {
+      "id": "pc_4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ほんと！？ さすがアオイ、頼りになる〜！ 助かったぁ……！」",
+      "voiceUrl": "/voices/pc_4.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "clasp_hands_front",
+          "motionLoop": false,
+          "expression": "happy"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "ardy_laugh",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          1.35
+        ],
+        "target": [
+          0,
+          1.22,
+          0
+        ],
+        "fov": 40
+      }
+    },
+    {
+      "id": "pc_5",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「もう、大げさなんだから。その代わり、今日の放課後は購買のパン、付き合ってね？」",
+      "voiceUrl": "/voices/pc_5.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Dismissing Gesture",
+          "expression": "happy"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Idle",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.36,
+          1.32,
+          1.25
+        ],
+        "target": [
+          0.26,
+          1.28,
+          0
+        ],
+        "fov": 30
+      }
+    },
+    {
+      "id": "pc_6",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「もちろん！ 新作のいちごデニッシュ、半分こしよ！」",
+      "voiceUrl": "/voices/pc_6.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Standing Idle",
+          "expression": "neutral"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Standing Greeting",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.32,
+          1.25
+        ],
+        "target": [
+          -0.12,
+          1.28,
+          0
+        ],
+        "fov": 28
+      }
+    },
+    {
+      "id": "pc_7",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「うん、約束ね。……ふふっ、エミリちゃんといると、何気ない時間もすごく楽しいな」",
+      "voiceUrl": "/voices/pc_7.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Idle",
+          "expression": "neutral"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.22,
+          1.37,
+          0.95
+        ],
+        "target": [
+          0.3,
+          1.31,
+          0
+        ],
+        "fov": 28
+      }
+    },
+    {
+      "id": "pc_8",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「……なに急に、照れるじゃん。でも……私もだよ！」",
+      "voiceUrl": "/voices/pc_8.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "Standing Idle",
+          "expression": "happy"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Acknowledging",
+          "expression": "relaxed",
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          1.35
+        ],
+        "target": [
+          0,
+          1.22,
+          0
+        ],
+        "fov": 40
+      }
+    },
+    {
+      "id": "pc_9",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「さ、予習しよっか。午後の授業も一緒に頑張ろうね！」",
+      "voiceUrl": "/voices/pc_9.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.32,
+            0,
+            0
+          ],
+          "rotationY": -0.55,
+          "motion": "ardy_wave",
+          "expression": "happy"
+        },
+        "emili": {
+          "position": [
+            -0.32,
+            0,
+            0
+          ],
+          "rotationY": 0.55,
+          "motion": "Idle",
+          "expression": "happy",
+          "lookAtTarget": "partner"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          1.9
+        ],
+        "target": [
+          0,
+          1.19,
+          0.9
+        ],
+        "fov": 50
+      }
+    }
+  ]
+}

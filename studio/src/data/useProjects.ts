@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ProjectBook, type ScenarioProject } from '@anime-vrm/scenario';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const STORAGE_KEY = 'studio_project';
 
@@ -21,7 +22,7 @@ export function useProjects(): { projects: ScenarioProject[] | null; current: Sc
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch('/studio/projects.json', { cache: 'no-store' })
+    fetch(resolveAssetUrl('/studio/projects.json'), { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error('projects.json を読めません'))))
       .then((json) => setProjects(ProjectBook.parse(json).projects))
       .catch(() => setError(true));

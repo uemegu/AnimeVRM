@@ -7,6 +7,7 @@ import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n';
 import { CharacterEditor } from './CharacterEditor';
 import './characters.css';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const ROLE_ORDER: CharacterRole[] = ['heroine', 'sub', 'player', 'mob'];
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
@@ -125,7 +126,7 @@ export function CharactersView() {
                     >
                       {thumbUrl ? (
                         <span className="characters-item-thumb">
-                          <img src={thumbUrl} alt={c.name.ja} loading="lazy" />
+                          <img src={resolveAssetUrl(thumbUrl)} alt={c.name.ja} loading="lazy" />
                           <span className="characters-swatch mini" style={{ background: c.themeColor }} />
                         </span>
                       ) : (

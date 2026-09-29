@@ -6,8 +6,8 @@ import { PAGES_ENTRIES, SITE_NAME, SITE_URL } from './pages/catalog';
 import { collectPagesAssets } from './pages/collectAssets';
 
 /**
- * GitHub Pages 用の再生だけの静的版（studio/pages/）。ビルドはリポジトリ直下の docs/ に書き出す。
- * 素材は assets/ から再生するシナリオが使うものだけをコピーする
+ * GitHub Pages 用の本番ビルド。Studio 本体を読み取り専用（サーバーなし）で出す。ビルドはリポジトリ直下の docs/ に書き出す。
+ * 素材は assets/ から Pages に出すデモのシナリオが使うものだけをコピーし、API は bakeApi.ts が JSON にする（npm run build:pages）
  */
 const ASSETS = path.resolve(__dirname, '../assets');
 // 確認用に別の場所へ書き出すときは PAGES_OUT_DIR を指定する
@@ -69,7 +69,7 @@ function pagesOutput(): Plugin {
         const scenario = JSON.parse(fs.readFileSync(path.join(ASSETS, 'scenarios/demo', entry.id, 'scenario.json'), 'utf8'));
         const locations = JSON.parse(fs.readFileSync(path.join(ASSETS, 'studio/locations.json'), 'utf8')).presets;
         const image = entry.ogp ?? locations[scenario.location]?.layers.background.url ?? '/ogp/park-confession.png';
-        const html = redirectPage(`../#/${entry.id}`, { title: ja(scenario.title), description: ja(scenario.description), image, slug: entry.slug });
+        const html = redirectPage(`../#/player/demo/${entry.id}`, { title: ja(scenario.title), description: ja(scenario.description), image, slug: entry.slug });
         fs.writeFileSync(path.join(OUT, 'scenarios', `${entry.slug}.html`), html);
       }
       for (const slug of REMOVED_SLUGS) fs.writeFileSync(path.join(OUT, 'scenarios', `${slug}.html`), redirectPage('../'));
@@ -81,14 +81,14 @@ function pagesOutput(): Plugin {
 }
 
 export default defineConfig(({ command, isPreview }) => ({
-  root: path.resolve(__dirname, 'pages'),
   // ビルドと、ビルド結果の確認（vite preview）は Pages と同じサブパスで配信する
   base: command === 'build' || isPreview ? BASE : '/',
-  // 開発中は assets/ をそのまま配信する。ビルドでは使う素材だけをコピーする
-  publicDir: command === 'build' ? false : ASSETS,
+  // ビルドでは使う素材だけをコピーする（pagesOutput）
+  publicDir: false,
   plugins: [react(), pagesOutput()],
-  server: { port: 5176 },
   preview: { port: 5177 },
+  // ardy-mini の推論ワーカーは ES モジュール
+  worker: { format: 'es' },
   build: {
     outDir: OUT,
     emptyOutDir: true,

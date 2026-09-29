@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "id": "silver_week",
+  "title": "シルバーウィークの黄昏 〜アオイとエミリの帰り道〜",
+  "description": "連休最終日の夕暮れ。私服のアオイとエミリが街を歩きながら、名残惜しそうに語り合うショートシナリオ。",
+  "location": "town",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "sw_1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「ふあぁ……楽しかったシルバーウィークも、とうとう今日で終わっちゃうね……」",
+      "voiceUrl": "/voices/sw_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "modelUrl": "/models/aoi/aoi-private.vrm",
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "partner",
+          "transitions": [
+            {
+              "at": 1.5,
+              "expression": "sad",
+              "motion": "ardy_stretch",
+              "motionLoop": false
+            },
+            {
+              "at": 4,
+              "expression": "neutral",
+              "motion": "ardy_shrug",
+              "motionLoop": false,
+              "lookAtTarget": "partner"
+            }
+          ]
+        },
+        "emili": {
+          "position": "right",
+          "modelUrl": "/models/emili/emili-private.vrm",
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "sw_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ほんと、あっという間だったよね！ でもアオイとショッピングもカフェも行けて、最高に充実してたよ！」",
+      "voiceUrl": "/voices/sw_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1.8,
+              "expression": "happy",
+              "motion": "ardy_proud",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            },
+            {
+              "at": 4.5,
+              "expression": "happy",
+              "motion": "ardy_wave",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "sw_3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「うん！ エミリちゃんのおかげで、毎日すっごく笑ってた気がするな〜」",
+      "voiceUrl": "/voices/sw_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Acknowledging",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 2.5,
+              "expression": "relaxed",
+              "motion": "ardy_shrug",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "sw_4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ねえ、明日からまた学校だけど……放課後の約束、どうする？」",
+      "voiceUrl": "/voices/sw_4.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "player"
+        },
+        "emili": {
+          "motion": "ardy_proud",
+          "expression": "happy",
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "sw_choice",
+      "text": "",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide",
+      "choices": [
+        {
+          "text": "明日、みんなで一緒に登校しよう！",
+          "goto": "sw_reaction_together"
+        },
+        {
+          "text": "次の連休も、また一緒に遊びに行こう！",
+          "goto": "sw_reaction_next_trip"
+        }
+      ]
+    },
+    {
+      "id": "sw_reaction_together",
+      "speaker": "アオイ & エミリ",
+      "speakerCharacterId": "aoi",
+      "text": "「賛成！ じゃあ明日の朝、いつもの交差点で待ち合わせね！」",
+      "voiceUrl": "/voices/sw_reaction_together.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1.5,
+              "expression": "happy",
+              "motion": "ardy_wave",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1.8,
+              "expression": "happy",
+              "motion": "ardy_proud",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "sw_reaction_next_trip",
+      "speaker": "エミリ & アオイ",
+      "speakerCharacterId": "emili",
+      "text": "「やったー！ 約束だよ！ 次はもっと遠くまでお出かけしちゃおう！」",
+      "voiceUrl": "/voices/sw_reaction_next_trip.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "transitions": [
+            {
+              "at": 1.6,
+              "expression": "happy",
+              "motion": "ardy_stretch",
+              "motionLoop": false
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1.5,
+              "expression": "happy",
+              "motion": "ardy_wave",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "sw_end",
+      "speaker": "アオイ & エミリ",
+      "speakerCharacterId": "aoi",
+      "text": "「それじゃあ、また明日ね！ 気をつけて帰ってね〜！」",
+      "voiceUrl": "/voices/sw_end.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_wave",
+          "expression": "happy"
+        },
+        "emili": {
+          "motion": "ardy_wave",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "id": "gesture_battle",
+  "title": "放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜",
+  "description": "アオイとエミリが昼の校門前で全身ジェスチャー対決！ひらめき、歓喜、おねだり、ツッコミが炸裂する多彩なモーションシナリオ。",
+  "location": "school_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "gb_1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「ねえエミリちゃん！ 放課後の表現力勝負、どっちが全身で気持ちを伝えられるかバトルしよ！」",
+      "voiceUrl": "/voices/gb_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "partner",
+          "transitions": [
+            {
+              "at": 1.8,
+              "expression": "happy",
+              "motion": "ardy_idea",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            },
+            {
+              "at": 5,
+              "expression": "happy",
+              "motion": "ardy_point",
+              "motionLoop": false,
+              "lookAtTarget": "partner"
+            }
+          ]
+        },
+        "emili": {
+          "position": "right",
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "gb_2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「望むところだよアオイ！ 私の全力のリアクション、甘く見ないでよね！」",
+      "voiceUrl": "/voices/gb_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1,
+              "expression": "happy",
+              "motion": "ardy_proud",
+              "motionLoop": false
+            },
+            {
+              "at": 3.2,
+              "expression": "happy",
+              "motion": "ardy_victory",
+              "motionLoop": false,
+              "effectText": "yatta"
+            }
+          ]
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "gb_3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「じゃあ行くよ！ どうしても宿題を教えてほしい時のお願い……からの、断られた時の顔！」",
+      "voiceUrl": "/voices/gb_3.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "transitions": [
+            {
+              "at": 1.2,
+              "expression": "sad",
+              "motion": "ardy_beg",
+              "motionLoop": false,
+              "lookAtTarget": "partner"
+            },
+            {
+              "at": 5.5,
+              "expression": "relaxed",
+              "motion": "ardy_troubled",
+              "motionLoop": false,
+              "lookAtTarget": "partner"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 6,
+              "expression": "happy",
+              "motion": "ardy_laugh",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "gb_4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「ふふん、まだまだね！ 私ならこう！ 限定スイーツをゲットできた歓喜……と、一口取られた怒り！」",
+      "voiceUrl": "/voices/gb_4.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 4,
+              "expression": "relaxed",
+              "motion": "ardy_shrug",
+              "motionLoop": false
+            },
+            {
+              "at": 7.2,
+              "expression": "happy",
+              "motion": "ardy_laugh",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 1,
+              "expression": "happy",
+              "motion": "ardy_proud",
+              "motionLoop": false
+            },
+            {
+              "at": 3.5,
+              "expression": "happy",
+              "motion": "ardy_cheer",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            },
+            {
+              "at": 6.8,
+              "expression": "angry",
+              "motion": "ardy_pout",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "gb_5",
+      "speaker": "アオイ & エミリ",
+      "speakerCharacterId": "aoi",
+      "text": "「どうかな？ どっちの全身ジェスチャーがより気持ちが伝わってきた？」",
+      "voiceUrl": "/voices/gb_5.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_shrug",
+          "expression": "happy",
+          "lookAtTarget": "player"
+        },
+        "emili": {
+          "motion": "ardy_proud",
+          "expression": "happy",
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gb_choice",
+      "text": "",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_beg",
+          "expression": "happy"
+        },
+        "emili": {
+          "motion": "ardy_victory",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide",
+      "choices": [
+        {
+          "text": "アオイの『必死なお願い』がめちゃくちゃ可愛かった！",
+          "goto": "gb_reaction_aoi"
+        },
+        {
+          "text": "エミリの『スイーツ歓喜ジャンプ』が全力すぎて最高だった！",
+          "goto": "gb_reaction_emili"
+        }
+      ]
+    },
+    {
+      "id": "gb_reaction_aoi",
+      "speaker": "アオイ & エミリ",
+      "speakerCharacterId": "aoi",
+      "text": "「やったー！ 私の勝ちだね！ エミリちゃん、放課後アイス奢ってね〜！」",
+      "voiceUrl": "/voices/gb_reaction_aoi.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_victory",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 3.5,
+              "expression": "happy",
+              "motion": "ardy_wave",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        },
+        "emili": {
+          "motion": "ardy_troubled",
+          "expression": "sad",
+          "transitions": [
+            {
+              "at": 3.5,
+              "expression": "angry",
+              "motion": "ardy_pout",
+              "motionLoop": false
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gb_reaction_emili",
+      "speaker": "エミリ & アオイ",
+      "speakerCharacterId": "emili",
+      "text": "「よっしゃー！ やっぱり私の表現力は最強でしょ！ 次も勝っちゃうもんね！」",
+      "voiceUrl": "/voices/gb_reaction_emili.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_laugh",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 3.2,
+              "expression": "relaxed",
+              "motion": "ardy_stretch",
+              "motionLoop": false
+            }
+          ]
+        },
+        "emili": {
+          "motion": "ardy_cheer",
+          "expression": "happy",
+          "transitions": [
+            {
+              "at": 3.2,
+              "expression": "happy",
+              "motion": "ardy_proud",
+              "motionLoop": false,
+              "effectText": "kirakira"
+            }
+          ]
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gb_end",
+      "speaker": "アオイ & エミリ",
+      "speakerCharacterId": "aoi",
+      "text": "「また放課後にいろんな動きで遊ぼうね！ 今日は付き合ってくれてありがとう！」",
+      "voiceUrl": "/voices/gb_end.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "ardy_wave",
+          "expression": "happy"
+        },
+        "emili": {
+          "motion": "ardy_wave",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

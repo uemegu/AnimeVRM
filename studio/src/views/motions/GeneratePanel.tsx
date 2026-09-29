@@ -3,7 +3,7 @@ import { validateMotionQualityPlan } from '@anime-vrm/motion/quality/validate';
 import type { AvatarContactProfile, Contact, MotionQualityPlan, Style } from '@anime-vrm/motion/quality/types';
 import type { GenerateResult } from '@anime-vrm/motion/ardy/generator';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
-import { api } from '../../api/client';
+import { api, READ_ONLY } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import type { StudioData } from '../../data/useStudioData';
 import { format, useI18n } from '../../i18n';
@@ -320,7 +320,7 @@ export function GeneratePanel({ data, onSaved }: { data: StudioData; onSaved: ()
                     <input type="checkbox" checked={loopFlag} onChange={(e) => setLoopFlag(e.target.checked)} />
                     {tm.loopFlag}
                   </label>
-                  <button type="button" className="btn primary" disabled={!/^[a-z][a-z0-9_]{1,47}$/.test(name)} onClick={() => save()}>
+                  <button type="button" className="btn primary" disabled={READ_ONLY || !/^[a-z][a-z0-9_]{1,47}$/.test(name)} title={READ_ONLY ? t.common.readOnly : undefined} onClick={() => save()}>
                     {tm.adopt}
                   </button>
                   {message && <span className="field-hint">{message}</span>}

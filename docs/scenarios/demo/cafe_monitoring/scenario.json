@@ -1,0 +1,277 @@
+{
+  "schemaVersion": 1,
+  "id": "cafe_monitoring",
+  "title": {
+    "ja": "窓越しの二重存在 〜カフェ監視任務〜",
+    "en": "窓越しの観測者 〜アオイの休日〜"
+  },
+  "description": "暗いカフェの店内から、日差しの強い外の通りを歩く「もう一人の自分」を監視する日本アニメ映画風の高コントラスト短編シナリオ。",
+  "location": "cafe_indoor",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "indoor_dark",
+  "scenes": [
+    {
+      "id": "scene_01",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「……ふぅ。ここのお店、落ち着いてていいね。外の光も綺麗だし……たまにはこういう静かな場所も悪くないかも。」",
+      "voiceUrl": "/voices/cafe_mon_01.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.35,
+          "modelUrl": "/models/emili/emili-private.vrm",
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        },
+        "aoi": {
+          "position": [
+            -1.4,
+            0,
+            -2.9
+          ],
+          "rotationY": 1.5707963267948966,
+          "modelUrl": "/models/aoi/aoi-private.vrm",
+          "daylight": 0.6,
+          "motion": "Walking",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.12,
+          1.15,
+          1.55
+        ],
+        "target": [
+          0.08,
+          1.15,
+          -1.0
+        ]
+      }
+    },
+    {
+      "id": "scene_02",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「……ん？ 待って。あの水色のカーディガン……あそこ歩いてるの、アオイじゃない？」",
+      "voiceUrl": "/voices/cafe_mon_02.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.35,
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        },
+        "aoi": {
+          "motion": "Walking",
+          "expression": "neutral"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.12,
+          1.14,
+          1.55
+        ],
+        "target": [
+          -0.1,
+          1.14,
+          -1.1
+        ]
+      }
+    },
+    {
+      "id": "scene_03",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「誰か探してるみたい……待ち合わせかな。あんなにキョロキョロしてたら、すぐ迷子になっちゃいそうだけど。」",
+      "voiceUrl": "/voices/cafe_mon_03.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.35,
+          "motion": "Standing Idle",
+          "expression": "neutral"
+        },
+        "aoi": {
+          "position": [
+            -0.75,
+            0,
+            -2.9
+          ],
+          "rotationY": 1.0995574287564276,
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.12,
+          1.15,
+          1.55
+        ],
+        "target": [
+          -0.12,
+          1.15,
+          -1.1
+        ]
+      }
+    },
+    {
+      "id": "scene_04",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「……って、ちょっと！ 私といるのに、そんなにアオイのことばっかり凝視しないでよ。」",
+      "voiceUrl": "/voices/cafe_mon_04.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.15,
+          "motion": "Standing Idle",
+          "expression": "angry",
+          "lookAtTarget": "camera",
+          "headTurn": 0.8,
+          "anger": true
+        },
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      }
+    },
+    {
+      "id": "scene_05_choice",
+      "text": "",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.15,
+          "motion": "Standing Idle",
+          "expression": "angry"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
+      "choices": [
+        {
+          "text": "「アオイを呼んで一緒に合流する？」",
+          "goto": "scene_06a"
+        },
+        {
+          "text": "「今はエミリと二人の時間だからさ」",
+          "goto": "scene_06b"
+        }
+      ]
+    },
+    {
+      "id": "scene_06a",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「まったく……お人好しなんだから。ほら、手振ったら気づくかもよ？ ……しょうがないなぁ。」",
+      "voiceUrl": "/voices/cafe_mon_06a.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.15,
+          "motion": "Standing Idle",
+          "expression": "sad",
+          "anger": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
+      "end": true
+    },
+    {
+      "id": "scene_06b",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": "「……っ！ な、何よ急に真面目な顔して……バカ。……じゃあ、もうちょっとだけ、ここで二人で休んでいこっか。」",
+      "voiceUrl": "/voices/cafe_mon_06b.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.15,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "blush": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.22,
+          1.16,
+          1.3
+        ],
+        "target": [
+          0.29,
+          1.15,
+          0.45
+        ]
+      },
+      "end": true
+    }
+  ]
+}

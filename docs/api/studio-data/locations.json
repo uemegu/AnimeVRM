@@ -1,0 +1,191 @@
+{
+  "description": "場所ごとの背景（遠景・中景・近景）。シーンの background / シナリオの location から参照する",
+  "presets": {
+    "corridor": {
+      "id": "corridor",
+      "name": "廊下",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/school-corridor-far.avif"
+        }
+      }
+    },
+    "school_gate": {
+      "id": "school_gate",
+      "name": "校門",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/school-gate-far.avif"
+        }
+      }
+    },
+    "myroom": {
+      "id": "myroom",
+      "name": "自室",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/myroom_far.avif"
+        }
+      }
+    },
+    "town": {
+      "id": "town",
+      "name": "通学路",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/town_far.avif"
+        }
+      }
+    },
+    "apartment_door": {
+      "id": "apartment_door",
+      "name": "マンションの玄関前",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/apartment_door_far.avif"
+        }
+      }
+    },
+    "home": {
+      "id": "home",
+      "name": "自宅",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/myroom_far.avif"
+        }
+      }
+    },
+    "painted_classroom": {
+      "id": "painted_classroom",
+      "name": "教室（簡易3D）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-classroom",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.9
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
+    "painted_library": {
+      "id": "painted_library",
+      "name": "図書室（簡易3D）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-library",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.8
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
+    "modern_park": {
+      "id": "modern_park",
+      "name": "公園（並木）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/modern-park-far.avif"
+        },
+        "midground": {
+          "url": "/textures/modern-park-mid.avif",
+          "position": {
+            "x": 0,
+            "y": 1.35,
+            "z": -0.25
+          },
+          "scale": 1.15,
+          "opacity": 1
+        }
+      }
+    },
+    "cafe": {
+      "id": "cafe",
+      "name": "カフェ",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/cafe_far.avif"
+        },
+        "nearground": {
+          "url": "/textures/cafe_near.avif",
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 1,
+          "opacity": 1
+        }
+      }
+    },
+    "cafe_indoor": {
+      "id": "cafe_indoor",
+      "name": "カフェ店内",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/cafe_indoor_far.avif",
+          "exposure": 1.3
+        },
+        "midground": {
+          "url": "/textures/cafe_indoor_mid.avif",
+          "position": {
+            "x": 0,
+            "y": 1.35,
+            "z": -0.25
+          },
+          "scale": 1.38,
+          "opacity": 1
+        }
+      },
+      "stage": {
+        "camera": {},
+        "backdrop": {
+          "mode": "world",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    }
+  }
+}

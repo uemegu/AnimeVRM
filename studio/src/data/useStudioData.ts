@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { BgmBook, CharacterBook, LocationVisualPreset, MotionBook, TimeOfDayPreset } from '@anime-vrm/scenario';
 import { api } from '../api/client';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /** シナリオ編集などで使うマスターデータ一式（assets/studio/*.json とアセット一覧） */
 export interface StudioData {
@@ -14,7 +15,7 @@ export interface StudioData {
 }
 
 async function staticJson<T>(name: string): Promise<T> {
-  const res = await fetch(`/studio/${name}.json`, { cache: 'no-store' });
+  const res = await fetch(resolveAssetUrl(`/studio/${name}.json`), { cache: 'no-store' });
   if (!res.ok) throw new Error(`${name}.json を読めません`);
   return res.json() as Promise<T>;
 }

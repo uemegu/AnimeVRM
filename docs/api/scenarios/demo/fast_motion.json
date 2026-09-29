@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "id": "fast_motion",
+  "title": {
+    "ja": "疾風怒濤！高速アクション特訓",
+    "en": "Fast Action Motion Effects Showcase"
+  },
+  "description": "アニメ作画風の残像やスピードリボン、ダイナミックブラーを駆使した高速アクション演出。",
+  "location": "school_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "motion_intro",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「エミリちゃん！アニメの格闘シーンみたいに、腕を高速で動かしたときのスピード線や残像エフェクトを試してみようよ！」",
+        "en": "\"Emily! Let's test out anime-style speed lines and afterimage effects when moving arms at high speed!\""
+      },
+      "voiceUrl": "/voices/fastmotion_01_aoi.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "partner",
+          "fastMotion": true
+        },
+        "emili": {
+          "position": "right",
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker",
+          "fastMotion": true
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "motion_waving",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「まずは高速手振り！ブンブン振ると、手首や肘の軌道に沿ってスピード線と残像がシュババッと走るよ！」",
+        "en": "\"First, rapid hand waving! Speed lines and afterimages instantly emerge along the wrist trajectory!\""
+      },
+      "voiceUrl": "/voices/fastmotion_02_aoi.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Greeting",
+          "motionSpeed": 2,
+          "expression": "happy",
+          "effectText": "kirakira"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "motion_emily_ready",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ふふっ、甘いわねアオイ。スピード線の本気を見たいなら、私の鋭いストレートパンチを見てなさい！」",
+        "en": "\"Hehe, not bad Aoi! But if you want to see true action velocity, watch my rapid punches!\""
+      },
+      "voiceUrl": "/voices/fastmotion_03_emily.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Dismissing Gesture",
+          "motionSpeed": 1,
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "motion_emily_punch",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「せいっ！やあっ！――腕の軌跡に沿うスピード線、背後に残る残像、そして逆方向に伸びるぼかしアウトライン！」",
+        "en": "\"Take that! Sharp tapered speed lines, ghost afterimages behind the arm, and directional trailing blur outline!\""
+      },
+      "voiceUrl": "/voices/fastmotion_04_emily.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "effectText": "biku"
+        },
+        "emili": {
+          "motion": "Punching",
+          "motionSpeed": 1.4,
+          "expression": "angry",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "motion_praise",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「すごーい！全身のモーションブラーじゃなくて、動いた腕の周辺だけにピタッと追従して超カッコいい作画になってる！」",
+        "en": "\"Incredible! Instead of whole-screen blur, it perfectly pinpoints the moving arms and looks like hand-drawn anime sakuga!\""
+      },
+      "voiceUrl": "/voices/fastmotion_05_aoi.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Excited",
+          "expression": "happy",
+          "lookAtTarget": "partner",
+          "effectText": "kirakira"
+        },
+        "emili": {
+          "motion": "Salute",
+          "motionSpeed": 1,
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "motion_outro",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「腕も脚も、一定以上の速度で振り抜いた瞬間だけ自動発生するわ。これぞアニメ作画の真骨頂ね！」",
+        "en": "\"Both arms and legs trigger dynamically whenever swinging past threshold speeds. Anime motion at its finest!\""
+      },
+      "voiceUrl": "/voices/fastmotion_06_emily.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Acknowledging",
+          "expression": "relaxed",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium"
+    }
+  ]
+}

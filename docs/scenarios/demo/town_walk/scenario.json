@@ -1,0 +1,374 @@
+{
+  "schemaVersion": 1,
+  "id": "town_walk",
+  "title": {
+    "ja": "放課後の並木道 〜君と歩く帰り道〜",
+    "en": "Walking with Aoi on the Avenue"
+  },
+  "description": "放課後の美しい並木道をアオイと一緒に歩く、臨場感あふれるスクロール背景シナリオ。",
+  "location": "town",
+  "bgm": "/bgm/bgm.mp3",
+  "ambience": "/se/walking.mp3",
+  "scenes": [
+    {
+      "id": "walk_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「放課後、こうして一緒に並んで歩いて帰るの……なんだか久しぶりだね！」",
+        "en": "\"Walking home together side by side like this... it has been quite a while, hasn't it?\""
+      },
+      "voiceUrl": "/voices/town_walk_1.mp3",
+      "scrollingBackground": {
+        "textureUrl": "/textures/town_far.avif",
+        "speed": 0.65,
+        "blur": 1,
+        "direction": "left"
+      },
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "relaxed",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「この並木道、街並みも綺麗だし、風がふわっと抜けてすごく気持ちいいな〜」",
+        "en": "\"This avenue has such lovely town scenery, and the gentle breeze feels so refreshing!\""
+      },
+      "voiceUrl": "/voices/town_walk_2.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "happy",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_3",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ねえ、聞いてる？ ……ふふっ、私の横顔ばっかり見て、どうしたの？」",
+        "en": "\"Hey, are you listening? ...Hehe, why are you staring at my face like that?\""
+      },
+      "voiceUrl": "/voices/town_walk_3.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.25,
+          "motion": "Walking",
+          "expression": "relaxed",
+          "lookAtTarget": "camera",
+          "blush": true
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_3_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "admire_her",
+          "text": {
+            "ja": "「アオイが楽しそうだったから、つい見とれてた」",
+            "en": "\"You looked so cheerful, I couldn't help but admire you.\""
+          },
+          "goto": "walk_route_admire",
+          "setFlags": {
+            "admire_her": true
+          }
+        },
+        {
+          "id": "talk_shop",
+          "text": {
+            "ja": "「この先に新しくできたお店の話を思い出してさ」",
+            "en": "\"I just remembered that a new cafe opened up ahead.\""
+          },
+          "goto": "walk_route_shop",
+          "setFlags": {
+            "talk_shop": true
+          }
+        }
+      ],
+      "camera": "side"
+    },
+    {
+      "id": "walk_route_admire",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「も、もう〜！ 急にそういうこと言うんだから……ちょっと照れるじゃん」",
+        "en": "\"Come on! Saying something like that out of nowhere... you're making me blush!\""
+      },
+      "voiceUrl": "/voices/town_walk_admire.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "happy",
+          "headTurn": 0.8,
+          "effectText": "doki"
+        }
+      },
+      "camera": "side",
+      "nextSceneId": "walk_transition_stop"
+    },
+    {
+      "id": "walk_route_shop",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あ、知ってた！？ 私もちょうどその話しようと思ってたんだよね！」",
+        "en": "\"Oh, you knew about it too?! I was just about to bring that up!\""
+      },
+      "voiceUrl": "/voices/town_walk_shop.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "happy",
+          "blush": false
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_transition_stop",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あっ、見て見て！ ほら、あそこの看板……ちょっと止まって！」",
+        "en": "\"Look, look! Over there, that cute cat signboard... wait, let's stop here!\""
+      },
+      "voiceUrl": "/voices/town_walk_stop.mp3",
+      "ambience": false,
+      "scrollingBackground": false,
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Greeting",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "stop_talk_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ここだよ！ ねこちゃんの看板のカフェ！ ここのアップルパイ、すっごく評判なんだって〜」",
+        "en": "\"Right here! The cafe with the cat signboard! Their apple pie is supposedly super delicious!\""
+      },
+      "voiceUrl": "/voices/town_walk_cafe_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Excited",
+          "expression": "relaxed",
+          "effectText": "kirakira"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "stop_talk_2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「もし急ぎの用事がないなら……ちょっと寄っていかない？ 一緒に食べよ！」",
+        "en": "\"If you're not in a hurry... want to drop by? Let's eat together!\""
+      },
+      "voiceUrl": "/voices/town_walk_cafe_2.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Acknowledging",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "stop_talk_2_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "choice_treat",
+          "text": {
+            "ja": "「いいね、行こう！ 今日は俺がごちそうするよ」",
+            "en": "\"Sounds great, let's go! My treat today.\""
+          },
+          "goto": "stop_route_treat",
+          "setFlags": {
+            "choice_treat": true
+          }
+        },
+        {
+          "id": "choice_ask",
+          "text": {
+            "ja": "「もちろん！ アオイのおごりなら喜んで！」",
+            "en": "\"Sure! As long as you're paying, Aoi!\""
+          },
+          "goto": "stop_route_ask",
+          "setFlags": {
+            "choice_ask": true
+          }
+        }
+      ],
+      "camera": "speaker"
+    },
+    {
+      "id": "stop_route_treat",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「わぁ、本当！？ やったぁ〜！ ありがとう、優しい〜！ じゃあ一番大きいやつ頼んじゃお♪ 行こ！」",
+        "en": "\"Really?! Yay! Thank you, you're so sweet! I'm ordering the biggest slice! Let's go!\""
+      },
+      "voiceUrl": "/voices/town_walk_treat.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Excited",
+          "expression": "happy",
+          "blush": true,
+          "effectText": "yatta"
+        }
+      },
+      "camera": "speaker",
+      "nextSceneId": "ending_walk"
+    },
+    {
+      "id": "stop_route_ask",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「えーっ！？ なんで私が奢る前提なの〜！？ ……まぁ、半分こならいいけどねっ♪ 行こ！」",
+        "en": "\"What?! Why are you assuming I'm treating?! ...Well, I guess going half-and-half is fine! Let's go!\""
+      },
+      "voiceUrl": "/voices/town_walk_ask.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Dismissing Gesture",
+          "expression": "relaxed",
+          "blush": false,
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "ending_walk",
+      "text": {
+        "ja": "―― 爽やかな風が吹き抜ける放課後の並木道。二人は並んでカフェの扉を開けた。 【シナリオ終了】",
+        "en": "--- Under the gentle breeze of the after-school avenue, the two opened the cafe door side by side. [Scenario End]"
+      },
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}
