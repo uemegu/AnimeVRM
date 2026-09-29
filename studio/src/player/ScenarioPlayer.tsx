@@ -83,6 +83,11 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
       }),
     [stage, data]
   );
+  // 「はじめる」を押すまでは1カット目のモーションを始めない
+  const stageCast = useMemo(
+    () => (phase === 'title' ? cast.map(({ motion: _motion, motionCue: _cue, ...rest }) => rest) : cast),
+    [cast, phase]
+  );
   const locationId = stage.background ?? scenario.location ?? 'classroom';
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
   const shot = resolveCameraShot(scene, cast);
@@ -198,7 +203,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
         presets={presets}
         timeOfDay={timeOfDay}
         locationId={locationId}
-        cast={cast}
+        cast={stageCast}
         cameraShot={shot}
         speakerId={scene.speakerCharacterId ?? null}
         scrolling={scrolling}
