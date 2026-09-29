@@ -103,7 +103,6 @@
     {
       "id": "door_choice",
       "text": "",
-      "background": "modern_park",
       "avatars": {
         "emili": {
           "position": [
@@ -242,6 +241,7 @@
     },
     {
       "id": "walk_1",
+      "background": "modern_park",
       "speaker": {
         "ja": "エミリ",
         "en": "Emily"
