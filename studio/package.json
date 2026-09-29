@@ -6,11 +6,9 @@
   "description": "シナリオ・シーン・キャラクターを作る Studio（ローカル専用）",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "dev:pages": "vite --config vite.pages.config.ts",
-    "build:pages": "tsc --noEmit && vite build --config vite.pages.config.ts"
+    "build:pages": "tsc --noEmit && vite build --config vite.pages.config.ts && node pages/bakeApi.ts \"${PAGES_OUT_DIR:-../docs}\""
   },
   "dependencies": {
     "@anime-vrm/engine": "*",

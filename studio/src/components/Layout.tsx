@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router';
+import { READ_ONLY } from '../api/client';
 import { useI18n, type Language } from '../i18n';
 import { Icon, type IconName } from './Icon';
 import { ToastProvider } from './Toast';
@@ -63,6 +64,7 @@ export function Layout() {
           ))}
         </nav>
         <div className="studio-sidebar-footer">
+          {READ_ONLY && <p className="studio-readonly">{t.common.readOnly}</p>}
           <div className="studio-lang" role="group" aria-label="Language">
             {(['ja', 'en'] as Language[]).map((lang) => (
               <button

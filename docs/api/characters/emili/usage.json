@@ -1,0 +1,339 @@
+[
+  {
+    "category": "demo",
+    "id": "cafe_monitoring",
+    "title": "窓越しの二重存在 〜カフェ監視任務〜",
+    "appearances": 7,
+    "lines": [
+      {
+        "lineId": "scene_01",
+        "text": "「……ふぅ。ここのお店、落ち着いてていいね。外の光も綺麗だし……たまにはこういう静かな場所も悪くないかも。」",
+        "voiceUrl": "/voices/cafe_mon_01.mp3"
+      },
+      {
+        "lineId": "scene_02",
+        "text": "「……ん？ 待って。あの水色のカーディガン……あそこ歩いてるの、アオイじゃない？」",
+        "voiceUrl": "/voices/cafe_mon_02.mp3"
+      },
+      {
+        "lineId": "scene_03",
+        "text": "「誰か探してるみたい……待ち合わせかな。あんなにキョロキョロしてたら、すぐ迷子になっちゃいそうだけど。」",
+        "voiceUrl": "/voices/cafe_mon_03.mp3"
+      },
+      {
+        "lineId": "scene_04",
+        "text": "「……って、ちょっと！ 私といるのに、そんなにアオイのことばっかり凝視しないでよ。」",
+        "voiceUrl": "/voices/cafe_mon_04.mp3"
+      },
+      {
+        "lineId": "scene_06a",
+        "text": "「まったく……お人好しなんだから。ほら、手振ったら気づくかもよ？ ……しょうがないなぁ。」",
+        "voiceUrl": "/voices/cafe_mon_06a.mp3"
+      },
+      {
+        "lineId": "scene_06b",
+        "text": "「……っ！ な、何よ急に真面目な顔して……バカ。……じゃあ、もうちょっとだけ、ここで二人で休んでいこっか。」",
+        "voiceUrl": "/voices/cafe_mon_06b.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "fast_motion",
+    "title": "疾風怒濤！高速アクション特訓",
+    "appearances": 6,
+    "lines": [
+      {
+        "lineId": "motion_emily_ready",
+        "text": "「ふふっ、甘いわねアオイ。スピード線の本気を見たいなら、私の鋭いストレートパンチを見てなさい！」",
+        "voiceUrl": "/voices/fastmotion_03_emily.mp3"
+      },
+      {
+        "lineId": "motion_emily_punch",
+        "text": "「せいっ！やあっ！――腕の軌跡に沿うスピード線、背後に残る残像、そして逆方向に伸びるぼかしアウトライン！」",
+        "voiceUrl": "/voices/fastmotion_04_emily.mp3"
+      },
+      {
+        "lineId": "motion_outro",
+        "text": "「腕も脚も、一定以上の速度で振り抜いた瞬間だけ自動発生するわ。これぞアニメ作画の真骨頂ね！」",
+        "voiceUrl": "/voices/fastmotion_06_emily.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "gesture_battle",
+    "title": "放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜",
+    "appearances": 9,
+    "lines": [
+      {
+        "lineId": "gb_2",
+        "text": "「望むところだよアオイ！ 私の全力のリアクション、甘く見ないでよね！」",
+        "voiceUrl": "/voices/gb_2.mp3"
+      },
+      {
+        "lineId": "gb_4",
+        "text": "「ふふん、まだまだね！ 私ならこう！ 限定スイーツをゲットできた歓喜……と、一口取られた怒り！」",
+        "voiceUrl": "/voices/gb_4.mp3"
+      },
+      {
+        "lineId": "gb_reaction_emili",
+        "text": "「よっしゃー！ やっぱり私の表現力は最強でしょ！ 次も勝っちゃうもんね！」",
+        "voiceUrl": "/voices/gb_reaction_emili.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "harem",
+    "title": "放課後大波乱!? 一体誰が本命なのよ〜！",
+    "appearances": 18,
+    "lines": [
+      {
+        "lineId": "harem_intro_2",
+        "text": "「そうよ！ 誰にでも思わせぶりな態度取って……一体誰が本命なのよ〜！」",
+        "voiceUrl": "/voices/harem_intro_2.mp3"
+      },
+      {
+        "lineId": "route_aoi_2",
+        "text": "「ちょっとー！ なんでアオイなのよー！ 私のほうが絶対カワイイのにー！」",
+        "voiceUrl": "/voices/harem_aoi_2.mp3"
+      },
+      {
+        "lineId": "route_emily_1",
+        "text": "「やったーっ！ やっぱり私が一番でしょ♪ 見たかアオイ〜！」",
+        "voiceUrl": "/voices/harem_emily_1.mp3"
+      },
+      {
+        "lineId": "route_shion_2",
+        "text": "「ええええーっ！？ まさかのシオン！？ なんでよーっ！？」",
+        "voiceUrl": "/voices/harem_shion_2.mp3"
+      },
+      {
+        "lineId": "route_all_1",
+        "text": "「はあぁぁ！？ 一番言っちゃいけない最低なセリフ出たー！！」",
+        "voiceUrl": "/voices/harem_all_1.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_classroom",
+    "title": "昼休みの教室 — 簡易3Dの教室で会話",
+    "appearances": 9,
+    "lines": [
+      {
+        "lineId": "pc_2",
+        "text": "「アオイ、午後の小テストの範囲、もう見直した？ 古典の文法が全然頭に入らなくて……！」",
+        "voiceUrl": "/voices/pc_2.mp3"
+      },
+      {
+        "lineId": "pc_4",
+        "text": "「ほんと！？ さすがアオイ、頼りになる〜！ 助かったぁ……！」",
+        "voiceUrl": "/voices/pc_4.mp3"
+      },
+      {
+        "lineId": "pc_6",
+        "text": "「もちろん！ 新作のいちごデニッシュ、半分こしよ！」",
+        "voiceUrl": "/voices/pc_6.mp3"
+      },
+      {
+        "lineId": "pc_8",
+        "text": "「……なに急に、照れるじゃん。でも……私もだよ！」",
+        "voiceUrl": "/voices/pc_8.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "private_date",
+    "title": "休日デート〜私服のエミリと街歩き〜",
+    "appearances": 25,
+    "lines": [
+      {
+        "lineId": "door_1",
+        "text": "「おはよー！ 待たせちゃった？ 今日の私服……どうかな、似合ってる？」",
+        "voiceUrl": "/voices/date_emili_01.mp3"
+      },
+      {
+        "lineId": "door_choice_1",
+        "text": "「ほんと！？ えへへ……嬉しいな！ 実は今日のために色々悩んで選んだんだ♪」",
+        "voiceUrl": "/voices/date_emili_02a.mp3"
+      },
+      {
+        "lineId": "door_choice_2",
+        "text": "「大人っぽい！？ ……そ、そうかな？ えへへ、ちょっと照れちゃうけど嬉しい♪」",
+        "voiceUrl": "/voices/date_emili_02b.mp3"
+      },
+      {
+        "lineId": "door_depart",
+        "text": "「それじゃ、今日のデート……しゅっぱーつ！」",
+        "voiceUrl": "/voices/date_emili_03.mp3"
+      },
+      {
+        "lineId": "walk_1",
+        "text": "「こうして並んで歩くの、なんだかドキドキしちゃうね……！ お天気も最高だし♪」",
+        "voiceUrl": "/voices/date_emili_04.mp3"
+      },
+      {
+        "lineId": "walk_2",
+        "text": "「ねえねえ、まずはどこから行く？ 行きたいお店、いっぱいチェックしてきたんだ〜！」",
+        "voiceUrl": "/voices/date_emili_05.mp3"
+      },
+      {
+        "lineId": "walk_3",
+        "text": "「……ふふっ、私の横顔ばっかり見てどうしたの？ 照れちゃうじゃん！」",
+        "voiceUrl": "/voices/date_emili_06.mp3"
+      },
+      {
+        "lineId": "shion_2",
+        "text": "「シ、シオン！？ なんでこんなところに……！ べ、別にデートじゃないし……あ、いやデートだけど！」",
+        "voiceUrl": "/voices/date_emili_07.mp3"
+      },
+      {
+        "lineId": "shion_4",
+        "text": "「もーっ！ シオンったら急に現れてからかうんだから！ ……ふぅ、びっくりした。気を取り直して行こっ！」",
+        "voiceUrl": "/voices/date_emili_08.mp3"
+      },
+      {
+        "lineId": "cafe_2",
+        "text": "「アオイ！ アオイも私服でお買い物？ すっごく似合ってて可愛い〜！」",
+        "voiceUrl": "/voices/date_emili_09.mp3"
+      },
+      {
+        "lineId": "cafe_4",
+        "text": "「うん！ ちょっと休憩にお茶しよって話してて。アオイも一緒にどう？」",
+        "voiceUrl": "/voices/date_emili_10.mp3"
+      },
+      {
+        "lineId": "cafe_6",
+        "text": "「そっか、残念！ また学校でゆっくりお話しよ！」",
+        "voiceUrl": "/voices/date_emili_11.mp3"
+      },
+      {
+        "lineId": "park_1",
+        "text": "「ふぅ……！ 今日一日、すっごく楽しかったな。あっという間に夕方になっちゃったね。」",
+        "voiceUrl": "/voices/date_emili_12.mp3"
+      },
+      {
+        "lineId": "park_2",
+        "text": "「街でシオンにからかわれたり、カフェでアオイに会ったり……賑やかだったけど……」",
+        "voiceUrl": "/voices/date_emili_13.mp3"
+      },
+      {
+        "lineId": "park_3",
+        "text": "「でもね……あなたと過ごした今日の時間、私にとってすごく特別だったよ。」",
+        "voiceUrl": "/voices/date_emili_14.mp3"
+      },
+      {
+        "lineId": "park_choice_1",
+        "text": "「えへへ、そう言ってもらえて幸せだな……♪」",
+        "voiceUrl": "/voices/date_emili_15a.mp3"
+      },
+      {
+        "lineId": "park_choice_2",
+        "text": "「うんっ……！ 絶対、またデートしてね。約束だよ♪」",
+        "voiceUrl": "/voices/date_emili_15b.mp3"
+      },
+      {
+        "lineId": "park_ending",
+        "text": "「今日は本当にありがとう！ 来週も……楽しみにしてるね！」",
+        "voiceUrl": "/voices/date_emili_16.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "silver_week",
+    "title": "シルバーウィークの黄昏 〜アオイとエミリの帰り道〜",
+    "appearances": 8,
+    "lines": [
+      {
+        "lineId": "sw_2",
+        "text": "「ほんと、あっという間だったよね！ でもアオイとショッピングもカフェも行けて、最高に充実してたよ！」",
+        "voiceUrl": "/voices/sw_2.mp3"
+      },
+      {
+        "lineId": "sw_4",
+        "text": "「ねえ、明日からまた学校だけど……放課後の約束、どうする？」",
+        "voiceUrl": "/voices/sw_4.mp3"
+      },
+      {
+        "lineId": "sw_reaction_next_trip",
+        "text": "「やったー！ 約束だよ！ 次はもっと遠くまでお出かけしちゃおう！」",
+        "voiceUrl": "/voices/sw_reaction_next_trip.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "trio",
+    "title": "放課後トライアングル〜アオイとエミリとあなた〜",
+    "appearances": 15,
+    "lines": [
+      {
+        "lineId": "trio_intro_2",
+        "text": "「あーっ！ アオイずるい！ 私を置いて2人だけで内緒話しようとしてたでしょ〜！」",
+        "voiceUrl": "/voices/trio_intro_2.mp3"
+      },
+      {
+        "lineId": "trio_intro_4",
+        "text": "「えっ、3人でお出かけ！？ やったぁ！ ……ねえねえ、あなたはどう？ 私たち2人と一緒に行くの、嫌じゃない？」",
+        "voiceUrl": "/voices/trio_intro_4.mp3"
+      },
+      {
+        "lineId": "route_cafe_1",
+        "text": "「わぁっ、大賛成！ 駅前にできたカフェ、季節限定のいちごタルトがすっごく美味しいんだって！」",
+        "voiceUrl": "/voices/trio_cafe_1.mp3"
+      },
+      {
+        "lineId": "route_cafe_3",
+        "text": "「えへへ、じゃあ決まりね！ アオイにも半分分けてあげるから！」",
+        "voiceUrl": "/voices/trio_cafe_3.mp3"
+      },
+      {
+        "lineId": "route_picnic_2",
+        "text": "「いいねいいね！ 私、お弁当にサンドイッチ作って持っていっちゃおうかな〜！」",
+        "voiceUrl": "/voices/trio_picnic_2.mp3"
+      },
+      {
+        "lineId": "route_anywhere_2",
+        "text": "「きゃーっ！ さらっとそういうこと言っちゃうんだから〜！ アオイ、顔真っ赤になってるよ！」",
+        "voiceUrl": "/voices/trio_anywhere_2.mp3"
+      },
+      {
+        "lineId": "trio_ending",
+        "text": "「「それじゃあ今週末、楽しみにしてるね！ 約束だよ！」」 ―― 3人の特別な放課後会議が幕を閉じた。【シナリオ終了】",
+        "voiceUrl": "/voices/trio_ending.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "two_girls",
+    "title": "放課後の寄り道〜アオイとエミリ〜",
+    "appearances": 10,
+    "lines": [
+      {
+        "lineId": "chat_intro_2",
+        "text": "「あ、アオイ！ ちょうど声かけようと思ってたの！ 駅前に新しくできたカフェ、行ってみない？」",
+        "voiceUrl": "/voices/chat_intro_2.mp3"
+      },
+      {
+        "lineId": "route_cafe_1",
+        "text": "「やったぁ！ 期間限定の特製ストロベリーパフェがあるんだって！ 楽しみ〜！」",
+        "voiceUrl": "/voices/chat_cafe_1.mp3"
+      },
+      {
+        "lineId": "route_study_1",
+        "text": "「えぇ〜っ！？ 放課後なのに勉強〜！？ アオイ、真面目すぎるよ〜っ！」",
+        "voiceUrl": "/voices/chat_study_1.mp3"
+      },
+      {
+        "lineId": "route_park_2",
+        "text": "「うん！ 綺麗な夕焼けだね。アオイとおしゃべりしながら歩くの大好き♪」",
+        "voiceUrl": "/voices/chat_park_2.mp3"
+      }
+    ]
+  }
+]

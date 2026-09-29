@@ -1,0 +1,932 @@
+{
+  "schemaVersion": 1,
+  "id": "private_date",
+  "title": {
+    "ja": "休日デート〜私服のエミリと街歩き〜",
+    "en": "Holiday Date: A Walk in Town with Casual Emily"
+  },
+  "description": "休日に私服のエミリと待ち合わせ。カフェテラスでの特別なひとときを過ごすデートシナリオ。",
+  "location": "home",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "prep_1",
+      "speaker": {
+        "ja": "あなた",
+        "en": "You"
+      },
+      "speakerCharacterId": "player",
+      "text": {
+        "ja": "（よし、準備完了！ エミリとの初めての休日デート……なんだかソワソワするな。）",
+        "en": "(All right, all set! My first casual holiday date with Emily... I can't help feeling nervous.)"
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          1.1
+        ],
+        "target": [
+          0,
+          1.2,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "prep_2",
+      "speaker": {
+        "ja": "あなた",
+        "en": "You"
+      },
+      "speakerCharacterId": "player",
+      "text": {
+        "ja": "（ピンポーン♪ ……あっ、呼び鈴だ！ エミリが玄関まで迎えに来てくれたみたいだ！）",
+        "en": "(Ding-dong♪ ...Ah, the doorbell! Looks like Emily came to pick me up at my front door!)"
+      },
+      "seUrl": "/se/door_chime.mp3",
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          1.1
+        ],
+        "target": [
+          0,
+          1.2,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "door_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「おはよー！ 待たせちゃった？ 今日の私服……どうかな、似合ってる？」",
+        "en": "\"Good morning! Did I keep you waiting? What do you think of my casual outfit today... does it look good on me?\""
+      },
+      "voiceUrl": "/voices/date_emili_01.mp3",
+      "background": "apartment_door",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "modelUrl": "/models/emili/emili-private.vrm",
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "player",
+          "effectText": "kirakira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.72
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "door_choice",
+      "text": "",
+      "background": "modern_park",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.72
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      },
+      "choices": [
+        {
+          "text": {
+            "ja": "すっごく似合ってるよ、可愛い！",
+            "en": "It looks amazing on you, so cute!"
+          },
+          "goto": "door_choice_1"
+        },
+        {
+          "text": {
+            "ja": "いつもと違って大人っぽいね",
+            "en": "It's different from usual, looks very mature."
+          },
+          "goto": "door_choice_2"
+        }
+      ]
+    },
+    {
+      "id": "door_choice_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ほんと！？ えへへ……嬉しいな！ 実は今日のために色々悩んで選んだんだ♪」",
+        "en": "\"Really!? Hehe... I'm so glad! I actually spent a lot of time trying to pick the right outfit for today♪\""
+      },
+      "voiceUrl": "/voices/date_emili_02a.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Excited",
+          "expression": "happy",
+          "effectText": "doki"
+        }
+      },
+      "camera": "close",
+      "nextSceneId": "door_depart"
+    },
+    {
+      "id": "door_choice_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「大人っぽい！？ ……そ、そうかな？ えへへ、ちょっと照れちゃうけど嬉しい♪」",
+        "en": "\"Mature!? ...R-Really? Hehe, that makes me a little shy, but I'm really happy♪\""
+      },
+      "voiceUrl": "/voices/date_emili_02b.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "blush": true
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "door_depart",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「それじゃ、今日のデート……しゅっぱーつ！」",
+        "en": "\"Well then, off we go on our date today!\""
+      },
+      "voiceUrl": "/voices/date_emili_03.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Dismissing Gesture",
+          "expression": "happy",
+          "blush": false,
+          "effectText": "yatta"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.85
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      },
+      "screenTransition": "fade_black"
+    },
+    {
+      "id": "walk_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「こうして並んで歩くの、なんだかドキドキしちゃうね……！ お天気も最高だし♪」",
+        "en": "\"Walking side by side like this makes my heart race a little...! And the weather is just wonderful, too♪\""
+      },
+      "voiceUrl": "/voices/date_emili_04.mp3",
+      "ambience": "/se/walking.mp3",
+      "scrollingBackground": {
+        "textureUrl": "/textures/town_far.avif",
+        "speed": 0.65,
+        "blur": 1,
+        "direction": "left"
+      },
+      "avatars": {
+        "emili": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ねえねえ、まずはどこから行く？ 行きたいお店、いっぱいチェックしてきたんだ〜！」",
+        "en": "\"Hey hey, where should we head first? I checked out so many cute shops I wanted to visit~!\""
+      },
+      "voiceUrl": "/voices/date_emili_05.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "happy"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_3",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「……ふふっ、私の横顔ばっかり見てどうしたの？ 照れちゃうじゃん！」",
+        "en": "\"...Hehe, why do you keep staring at my face? You're going to make me blush!\""
+      },
+      "voiceUrl": "/voices/date_emili_06.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.25,
+          "motion": "Walking",
+          "expression": "relaxed",
+          "lookAtTarget": "camera",
+          "blush": true,
+          "effectText": "doki"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "shion_1",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「……ん？ あんた達、こんなところで何してんの。……あー、デート？ ふーん。」",
+        "en": "\"...Hm? What are you two doing around here? ...Ah, a date? Hmph.\""
+      },
+      "voiceUrl": "/voices/date_shion_01.mp3",
+      "background": "town",
+      "ambience": false,
+      "scrollingBackground": false,
+      "avatars": {
+        "emili": {
+          "position": [
+            -0.38,
+            -0.1,
+            -1.15
+          ],
+          "rotationY": 0.22,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "shion",
+          "blush": false
+        },
+        "shion": {
+          "position": [
+            0.38,
+            -0.1,
+            -1.15
+          ],
+          "rotationY": -0.22,
+          "modelUrl": "/models/shion/shion-private.vrm",
+          "motion": "Idle",
+          "expression": "neutral",
+          "lookAtTarget": "emili"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "shion_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「シ、シオン！？ なんでこんなところに……！ べ、別にデートじゃないし……あ、いやデートだけど！」",
+        "en": "\"Sh-Shion!? What are you doing here...?! I-It's not like it's a date or anything... wait, no, it IS a date, but!\""
+      },
+      "voiceUrl": "/voices/date_emili_07.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "expression": "angry",
+          "effectText": "wanawana"
+        },
+        "shion": {
+          "motion": "Idle",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          -0.38,
+          1.25,
+          -1.15
+        ]
+      },
+      "focusLines": true
+    },
+    {
+      "id": "shion_3",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「別に邪魔する気はないよ。私、そこの本屋行くだけだし。私服……ふたりとも気合い入ってんね。じゃ、お邪魔虫は退散しまーす。」",
+        "en": "\"I don't plan to get in your way. I'm just heading to the bookstore over there. Casual clothes... looks like you both went all out. Well, the third wheel will take her leave~\""
+      },
+      "voiceUrl": "/voices/date_shion_02.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        },
+        "shion": {
+          "motion": "Dismissing Gesture",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "shion_4",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「もーっ！ シオンったら急に現れてからかうんだから！ ……ふぅ、びっくりした。気を取り直して行こっ！」",
+        "en": "\"Geez! Shion just popping in out of nowhere to tease us! ...Whew, that took me by surprise. Let's shake it off and keep going!\""
+      },
+      "voiceUrl": "/voices/date_emili_08.mp3",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        },
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.7
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "cafe_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あ……！ ふたりとも、こんにちは！ こんな素敵なカフェで会うなんて、すごい偶然だね！」",
+        "en": "\"Ah...! Hello, both of you! What a coincidence bumping into you at such a lovely cafe!\""
+      },
+      "voiceUrl": "/voices/date_aoi_01.mp3",
+      "background": "cafe",
+      "avatars": {
+        "emili": {
+          "position": [
+            -0.38,
+            -0.1,
+            -1.15
+          ],
+          "rotationY": 0.22,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "aoi"
+        },
+        "aoi": {
+          "position": [
+            0.38,
+            -0.1,
+            -1.15
+          ],
+          "rotationY": -0.22,
+          "modelUrl": "/models/aoi/aoi-private.vrm",
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "emili"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "cafe_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「アオイ！ アオイも私服でお買い物？ すっごく似合ってて可愛い〜！」",
+        "en": "\"Aoi! Are you out shopping in casual clothes too? That outfit suits you so well, it's adorable~!\""
+      },
+      "voiceUrl": "/voices/date_emili_09.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "expression": "happy",
+          "effectText": "kirakira"
+        },
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          -0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "cafe_3",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ありがとうエミリ！ エミリのワンピースもすごくお洒落だよ。……ふたりで、お出かけ中だったんだ？」",
+        "en": "\"Thank you, Emily! Your dress is super stylish, too. ...Were the two of you spending the day out together?\""
+      },
+      "voiceUrl": "/voices/date_aoi_02.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy"
+        },
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "blush": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "cafe_4",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「うん！ ちょっと休憩にお茶しよって話してて。アオイも一緒にどう？」",
+        "en": "\"Yeah! We were just talking about having some tea to take a break. Would you like to join us, Aoi?\""
+      },
+      "voiceUrl": "/voices/date_emili_10.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Greeting",
+          "expression": "happy"
+        },
+        "aoi": {
+          "blush": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          -0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "cafe_5",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ふふ、誘ってくれてありがとう。でも私はこれから約束があるから……ふたりでゆっくり楽しんできてね？」",
+        "en": "\"Hehe, thanks for inviting me. But I have plans with someone soon... so you two go ahead and enjoy your time together, okay?\""
+      },
+      "voiceUrl": "/voices/date_aoi_03.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        },
+        "aoi": {
+          "motion": "Dismissing Gesture",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          0.38,
+          1.25,
+          -1.15
+        ]
+      }
+    },
+    {
+      "id": "cafe_6",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「そっか、残念！ また学校でゆっくりお話しよ！」",
+        "en": "\"Aww, too bad! Let's chat all about it at school next week, then!\""
+      },
+      "voiceUrl": "/voices/date_emili_11.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Greeting",
+          "expression": "happy"
+        },
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.38,
+          1.25,
+          -0.48
+        ],
+        "target": [
+          -0.38,
+          1.25,
+          -1.15
+        ]
+      },
+      "screenTransition": "fade_black"
+    },
+    {
+      "id": "park_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ふぅ……！ 今日一日、すっごく楽しかったな。あっという間に夕方になっちゃったね。」",
+        "en": "\"Phew...! Today was so much fun. The evening crept up on us before I even noticed.\""
+      },
+      "voiceUrl": "/voices/date_emili_12.mp3",
+      "background": "modern_park",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": [
+            0,
+            0,
+            -0.3
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "park_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「街でシオンにからかわれたり、カフェでアオイに会ったり……賑やかだったけど……」",
+        "en": "\"Being teased by Shion in town, bumping into Aoi at the cafe... it was quite an eventful day, but...\""
+      },
+      "voiceUrl": "/voices/date_emili_13.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "park_3",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「でもね……あなたと過ごした今日の時間、私にとってすごく特別だったよ。」",
+        "en": "\"You know... every single moment I spent with you today was truly special to me.\""
+      },
+      "voiceUrl": "/voices/date_emili_14.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "blush": true,
+          "effectText": "doki"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.28,
+          0.62
+        ],
+        "target": [
+          0,
+          1.28,
+          -0.3
+        ]
+      }
+    },
+    {
+      "id": "park_choice",
+      "text": "",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.28,
+          0.62
+        ],
+        "target": [
+          0,
+          1.28,
+          -0.3
+        ]
+      },
+      "choices": [
+        {
+          "text": {
+            "ja": "俺もすごく楽しかった、ありがとう",
+            "en": "I had so much fun too, thank you."
+          },
+          "goto": "park_choice_1"
+        },
+        {
+          "text": {
+            "ja": "また二人でデートしようね",
+            "en": "Let's go on another date together soon."
+          },
+          "goto": "park_choice_2"
+        }
+      ]
+    },
+    {
+      "id": "park_choice_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「えへへ、そう言ってもらえて幸せだな……♪」",
+        "en": "\"Hehe, hearing you say that makes me so incredibly happy...♪\""
+      },
+      "voiceUrl": "/voices/date_emili_15a.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "blush": false,
+          "effectText": "kirakira"
+        }
+      },
+      "camera": "close",
+      "nextSceneId": "park_ending"
+    },
+    {
+      "id": "park_choice_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「うんっ……！ 絶対、またデートしてね。約束だよ♪」",
+        "en": "\"Yeah...! You definitely have to take me on another date. It's a promise♪\""
+      },
+      "voiceUrl": "/voices/date_emili_15b.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "expression": "happy",
+          "effectText": "yatta"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "park_ending",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emily"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「今日は本当にありがとう！ 来週も……楽しみにしてるね！」",
+        "en": "\"Thank you so much for today! I'll be looking forward to... next week too!\""
+      },
+      "voiceUrl": "/voices/date_emili_16.mp3",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Greeting",
+          "expression": "happy"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          0.75
+        ],
+        "target": [
+          0,
+          1.25,
+          -0.3
+        ]
+      }
+    }
+  ]
+}

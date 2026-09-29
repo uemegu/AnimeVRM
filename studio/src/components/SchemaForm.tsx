@@ -4,6 +4,7 @@ import { BUILTIN_ENVIRONMENTS, type FieldMeta } from '@anime-vrm/scenario';
 import { useI18n } from '../i18n';
 import { Icon } from './Icon';
 import './SchemaForm.css';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /**
  * zod スキーマ（packages/scenario）から編集フォームを組み立てる。
@@ -238,7 +239,7 @@ function Field({ schema, value, onChange, ctx, depth }: { schema: AnySchema; val
     return (
       <Row label={label} extra={removeButton} tall>
         <div className="schema-image">
-          {text && <img src={text} alt="" />}
+          {text && <img src={resolveAssetUrl(text)} alt="" />}
           <select className="select" value={text} onChange={(e) => onChange(e.target.value)}>
             {!ctx.images.includes(text) && <option value={text}>{text}</option>}
             {ctx.images.map((url) => (

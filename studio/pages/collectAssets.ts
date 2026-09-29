@@ -15,6 +15,7 @@ const ALWAYS = [
   'studio/time-of-day.json',
   'studio/bgm.json',
   'studio/motions.json',
+  'studio/projects.json',
   'textures/girl_face_blush.png',
   'textures/girl_face_anger.png',
   'textures/girl_face_sweat.png',
@@ -61,6 +62,7 @@ export function collectPagesAssets(assetsDir: string, scenarioIds: string[], ext
 
   for (const id of scenarioIds) {
     const base = `scenarios/demo/${id}/`;
+    found.add(`${base}scenario.json`);
     const scenario = readJson(path.join(assetsDir, base, 'scenario.json'));
     addBgm(scenario.bgm);
     addUrl(scenario.ambience);
@@ -86,6 +88,15 @@ export function collectPagesAssets(assetsDir: string, scenarioIds: string[], ext
         addMotion(avatar.motion);
         for (const k of avatar.transitions ?? []) addMotion(k.motion);
       }
+    }
+  }
+
+  // VRM のサムネイル（キャラクター・ビューアの一覧で使う）
+  for (const file of [...found]) {
+    if (!file.startsWith('models/') || !file.endsWith('.vrm')) continue;
+    const stem = file.slice('models/'.length, -'.vrm'.length);
+    for (const ext of ['.png', '.jpg', '.jpeg', '.webp']) {
+      if (fs.existsSync(path.join(assetsDir, 'thumbnails', `${stem}${ext}`))) found.add(`thumbnails/${stem}${ext}`);
     }
   }
 

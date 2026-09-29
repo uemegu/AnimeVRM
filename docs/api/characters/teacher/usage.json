@@ -1,0 +1,45 @@
+[
+  {
+    "category": "demo",
+    "id": "teacher_gate",
+    "title": "校門の邂逅 〜シオンと桐島先生の秘密の推し〜",
+    "appearances": 14,
+    "lines": [
+      {
+        "lineId": "gate_arrive",
+        "text": "「おはよう、二人とも。……あら、シオンさん？ また随分と眠そうな顔をして……」",
+        "voiceUrl": "/voices/teacher/walk_teacher_greeting.mp3"
+      },
+      {
+        "lineId": "gate_teacher_notice",
+        "text": "「ふふ、遅刻ギリギリセーフですよ。……ん？ ちょっと待って。あなたのその鞄のストラップ……」",
+        "voiceUrl": "/voices/teacher/walk_teacher_notice.mp3"
+      },
+      {
+        "lineId": "gate_teacher_discover",
+        "text": "「……これ、まさかハルキゲニアの最新復元モデル！？ 背中のトゲの角度からして、最新論文準拠の造形じゃない！」",
+        "voiceUrl": "/voices/teacher/walk_teacher_discover.mp3"
+      },
+      {
+        "lineId": "gate_teacher_geek",
+        "text": "「当たり前でしょう！ あの奇妙極まりない歩行器官と、頭部特定で覆された学説史……あの時代の狂気とロマン、最高に美しいわよね！」",
+        "voiceUrl": "/voices/teacher/walk_teacher_geek.mp3"
+      },
+      {
+        "lineId": "gate_teacher_calmdown",
+        "text": "「コホン……！ い、いけないわね。教師たるもの、校門で熱弁を振るうところだったわ」",
+        "voiceUrl": "/voices/teacher/walk_teacher_calmdown.mp3"
+      },
+      {
+        "lineId": "gate_teacher_invite",
+        "text": "「シオンさん。続きは放課後、準備室でじっくり語り合いましょう。私の秘蔵の化石レプリカ、見せてあげるわ」",
+        "voiceUrl": "/voices/teacher/walk_teacher_invite.mp3"
+      },
+      {
+        "lineId": "gate_teacher_condition",
+        "text": "「ふふ。その代わり、今日の小テストで赤点を取ったら準備室立ち入り禁止ですからね？」",
+        "voiceUrl": "/voices/teacher/walk_teacher_condition.mp3"
+      }
+    ]
+  }
+]

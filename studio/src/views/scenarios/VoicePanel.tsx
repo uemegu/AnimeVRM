@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { api, type TtsJob, type TtsLine } from '../../api/client';
+import { api, READ_ONLY, type TtsJob, type TtsLine } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
 import { useAudioPreview } from '../characters/useAudioPreview';
@@ -50,7 +50,7 @@ export function VoicePanel({ category, scenarioId, lineId, voiceUrl, baseUrl, di
   }, [job]);
 
   const current = voiceUrl ? (voiceUrl.startsWith('/') ? voiceUrl : `${baseUrl}${voiceUrl}`) : null;
-  const canGenerate = !dirty && !!line?.speaker && (!job || job.status === 'done' || job.status === 'error');
+  const canGenerate = !READ_ONLY && !dirty && !!line?.speaker && (!job || job.status === 'done' || job.status === 'error');
 
   const generate = async () => {
     setMessage(null);

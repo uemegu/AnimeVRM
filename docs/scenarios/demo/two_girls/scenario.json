@@ -1,0 +1,327 @@
+{
+  "schemaVersion": 1,
+  "id": "two_girls",
+  "title": {
+    "ja": "放課後の寄り道〜アオイとエミリ〜",
+    "en": "After-School Hangout ~Aoi & Emiri~"
+  },
+  "description": "アオイとエミリの放課後カフェトーク。2人の掛け合いを楽しめるインタラクティブシナリオ。",
+  "location": "school_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "morning",
+  "scenes": [
+    {
+      "id": "chat_intro_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「エミリちゃん！ 今日の放課後、もし予定なかったら一緒にどこか寄っていかない？」",
+        "en": "\"Emiri! If you have no plans after school, want to hang out somewhere together?\""
+      },
+      "voiceUrl": "/voices/chat_intro_1.mp3",
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "motion": "Dismissing Gesture",
+          "expression": "neutral",
+          "lookAtTarget": "partner",
+          "effectText": "doki"
+        },
+        "emili": {
+          "position": "right",
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "chat_intro_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emiri"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「あ、アオイ！ ちょうど声かけようと思ってたの！ 駅前に新しくできたカフェ、行ってみない？」",
+        "en": "\"Ah, Aoi! I was just about to ask you! Want to check out the new cafe in front of the station?\""
+      },
+      "voiceUrl": "/voices/chat_intro_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Excited",
+          "expression": "neutral",
+          "lookAtTarget": "partner",
+          "effectText": "kirakira"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "chat_choice",
+      "speaker": {
+        "ja": "アオイ & エミリ",
+        "en": "Aoi & Emiri"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「どこに行こうか？ 一緒に決めよっ！」",
+        "en": "\"Where should we go? Let's decide together!\""
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Greeting",
+          "expression": "neutral",
+          "lookAtTarget": "player"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "chat_choice_choice",
+      "text": "",
+      "choices": [
+        {
+          "id": "choice_cafe",
+          "text": {
+            "ja": "🍰 新作スイーツがあるカフェに行こう！",
+            "en": "🍰 Let's go to the cafe for seasonal sweets!"
+          },
+          "goto": "route_cafe_1",
+          "setFlags": {
+            "choice_cafe": true
+          }
+        },
+        {
+          "id": "choice_study",
+          "text": {
+            "ja": "📚 明日の小テストに向けて図書館で勉強しよう！",
+            "en": "📚 Let's study at the library for tomorrow's quiz!"
+          },
+          "goto": "route_study_1",
+          "setFlags": {
+            "choice_study": true
+          }
+        },
+        {
+          "id": "choice_park",
+          "text": {
+            "ja": "🍃 夕暮れの公園でゆっくりおしゃべりしよう",
+            "en": "🍃 Let's take a relaxing walk in the twilight park"
+          },
+          "goto": "route_park_1",
+          "setFlags": {
+            "choice_park": true
+          }
+        }
+      ],
+      "camera": "wide"
+    },
+    {
+      "id": "route_cafe_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emiri"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「やったぁ！ 期間限定の特製ストロベリーパフェがあるんだって！ 楽しみ〜！」",
+        "en": "\"Yay! I heard they have a limited strawberry parfait! Can't wait~!\""
+      },
+      "voiceUrl": "/voices/chat_cafe_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Excited",
+          "expression": "neutral",
+          "lookAtTarget": "player",
+          "effectText": "yatta"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "route_cafe_2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ふふっ、エミリちゃん本当にスイーツ大好きだよね。私も写真いっぱい撮っちゃお♪」",
+        "en": "\"Hehe, Emiri really loves sweets. I'm definitely taking lots of photos♪\""
+      },
+      "voiceUrl": "/voices/chat_cafe_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Quick Formal Bow",
+          "expression": "happy",
+          "lookAtTarget": "partner",
+          "effectText": "kirakira"
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "speaker",
+      "nextSceneId": "ending_chat"
+    },
+    {
+      "id": "route_study_1",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emiri"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「えぇ〜っ！？ 放課後なのに勉強〜！？ アオイ、真面目すぎるよ〜っ！」",
+        "en": "\"Whaaat!? Studying after school!? Aoi, you're way too serious~!\""
+      },
+      "voiceUrl": "/voices/chat_study_1.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Angry",
+          "expression": "surprised",
+          "lookAtTarget": "partner",
+          "effectText": "gaan"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "route_study_2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「大丈夫、1時間だけ集中して終わったら美味しいジュースおごってあげるから！」",
+        "en": "\"It's okay, just 1 hour of focus and I'll buy you a delicious drink afterwards!\""
+      },
+      "voiceUrl": "/voices/chat_study_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Acknowledging",
+          "expression": "relaxed",
+          "lookAtTarget": "partner",
+          "effectText": "doki"
+        },
+        "emili": {
+          "motion": "Dismissing Gesture",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "speaker",
+      "nextSceneId": "ending_chat"
+    },
+    {
+      "id": "route_park_1",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「夕方の風が気持ちいいね。たまにはこうやってのんびり歩くのもいいかも」",
+        "en": "\"The evening breeze feels so nice. It's great to just take a relaxing walk like this once in a while.\""
+      },
+      "voiceUrl": "/voices/chat_park_1.mp3",
+      "background": "modern_park",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "player",
+          "effectText": "kirakira"
+        },
+        "emili": {
+          "motion": "Walking",
+          "expression": "neutral"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "route_park_2",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emiri"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「うん！ 綺麗な夕焼けだね。アオイとおしゃべりしながら歩くの大好き♪」",
+        "en": "\"Yeah! The sunset is so pretty. I love chatting with you while we walk, Aoi♪\""
+      },
+      "voiceUrl": "/voices/chat_park_2.mp3",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        },
+        "emili": {
+          "motion": "Quick Formal Bow",
+          "expression": "neutral",
+          "lookAtTarget": "partner",
+          "effectText": "doki"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "ending_chat",
+      "speaker": {
+        "ja": "アオイ & エミリ",
+        "en": "Aoi & Emiri"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「「それじゃあ、行こっか！」」 ―― 2人の楽しい放課後が始まった。【シナリオ終了】",
+        "en": "\"\\\"Well then, let's go!\\\"\" — And so began their delightful after-school time. [Scenario End]"
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "player",
+          "effectText": "kirakira"
+        },
+        "emili": {
+          "motion": "Standing Greeting",
+          "expression": "neutral",
+          "lookAtTarget": "speaker",
+          "effectText": "yatta"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

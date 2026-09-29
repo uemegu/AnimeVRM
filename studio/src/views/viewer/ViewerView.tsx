@@ -7,6 +7,7 @@ import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
 import { useStagePresets } from '../../stage/useStagePresets';
 import './viewer.css';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'divine'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
@@ -109,7 +110,7 @@ export function ViewerView() {
                     }}
                   >
                     {thumbUrl ? (
-                      <img src={thumbUrl} alt={c.name.ja} loading="lazy" />
+                      <img src={resolveAssetUrl(thumbUrl)} alt={c.name.ja} loading="lazy" />
                     ) : (
                       <div className="viewer-character-thumb-fallback">{c.name.ja}</div>
                     )}
@@ -168,7 +169,7 @@ export function ViewerView() {
 
       <section
         className="viewer-stage"
-        style={currentBgUrl ? ({ '--stage-bg-url': `url("${currentBgUrl}")` } as React.CSSProperties) : undefined}
+        style={currentBgUrl ? ({ '--stage-bg-url': `url("${resolveAssetUrl(currentBgUrl)}")` } as React.CSSProperties) : undefined}
       >
         <div className="viewer-stage-top">
           <div className="segmented five">
@@ -216,7 +217,7 @@ export function ViewerView() {
                   onClick={() => setLocationId(loc.id)}
                 >
                   {bgUrl ? (
-                    <img src={bgUrl} alt={loc.name} loading="lazy" />
+                    <img src={resolveAssetUrl(bgUrl)} alt={loc.name} loading="lazy" />
                   ) : (
                     <div className="viewer-location-thumb-fallback">{loc.name}</div>
                   )}

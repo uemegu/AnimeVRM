@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import type { StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { LocationVisualPreset, TimeOfDayPreset } from '@anime-vrm/engine/stage/visual';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 interface PresetFile<T> {
   presets: Record<string, T>;
 }
 
 async function load<T>(name: string): Promise<Record<string, T>> {
-  const res = await fetch(`/studio/${name}.json`, { cache: 'no-store' });
+  const res = await fetch(resolveAssetUrl(`/studio/${name}.json`), { cache: 'no-store' });
   if (!res.ok) throw new Error(`${name}.json を読めません`);
   return ((await res.json()) as PresetFile<T>).presets;
 }

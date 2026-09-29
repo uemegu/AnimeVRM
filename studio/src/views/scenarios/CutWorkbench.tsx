@@ -7,6 +7,7 @@ import { CutPreview, type Outfit } from './CutPreview';
 import { KeyEditor } from './KeyEditor';
 import { Timeline } from './Timeline';
 import { addKey, laneKeys, removeKey, updateKey, type KeyRef, type LaneId } from './timelineEdit';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 interface Props {
   scenario: ScenarioPackage;
@@ -52,7 +53,7 @@ export function CutWorkbench({ scenario, index, baseUrl, data, outfit, onChangeS
       audioRef.current = null;
       return;
     }
-    const audio = new Audio(voiceUrl);
+    const audio = new Audio(resolveAssetUrl(voiceUrl));
     audio.preload = 'metadata';
     audio.onloadedmetadata = () => setVoiceDuration(audio.duration);
     audioRef.current = audio;

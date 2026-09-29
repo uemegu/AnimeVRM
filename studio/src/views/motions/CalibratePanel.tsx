@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CALIBRATION_TARGETS, ContactCalibrator, type CalibrationState, type CalibrationTarget } from '@anime-vrm/motion/quality/calibrator';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
-import { api } from '../../api/client';
+import { api, READ_ONLY } from '../../api/client';
 import type { StudioData } from '../../data/useStudioData';
 import { format, useI18n } from '../../i18n';
 import { profilePathFor } from './GeneratePanel';
@@ -104,7 +104,7 @@ export function CalibratePanel({ data }: { data: StudioData }) {
           </label>
         </div>
         <div className="motion-row">
-          <button type="button" className="btn primary" disabled={state.recorded.length !== CALIBRATION_TARGETS.length} onClick={save}>
+          <button type="button" className="btn primary" disabled={READ_ONLY || state.recorded.length !== CALIBRATION_TARGETS.length} title={READ_ONLY ? t.common.readOnly : undefined} onClick={save}>
             {tm.calibrateSave}
           </button>
           <button type="button" className="btn" onClick={() => calibratorRef.current?.clear()}>

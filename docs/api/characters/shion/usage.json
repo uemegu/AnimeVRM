@@ -1,0 +1,144 @@
+[
+  {
+    "category": "demo",
+    "id": "harem",
+    "title": "放課後大波乱!? 一体誰が本命なのよ〜！",
+    "appearances": 18,
+    "lines": [
+      {
+        "lineId": "harem_intro_3",
+        "text": "「……はぁ。めんどくさ。私まで巻き込まないでほしいんだけど。……で？ 誰なわけ？」",
+        "voiceUrl": "/voices/harem_intro_3.mp3"
+      },
+      {
+        "lineId": "route_aoi_3",
+        "text": "「ふぁ……。あっそ。お熱いことで。じゃ、決まったなら私帰って寝るね。」",
+        "voiceUrl": "/voices/harem_aoi_3.mp3"
+      },
+      {
+        "lineId": "route_emily_3",
+        "text": "「……はいはい。お似合いなんじゃない？ 騒がしいカップルの誕生だね。」",
+        "voiceUrl": "/voices/harem_emily_3.mp3"
+      },
+      {
+        "lineId": "route_shion_1",
+        "text": "「……は？ ……え、な、何言ってんの……？ 私なんか選んで……後悔しても知らないから……っ。」",
+        "voiceUrl": "/voices/harem_shion_1.mp3"
+      },
+      {
+        "lineId": "route_all_3",
+        "text": "「……救いようがないね。エナドリ奢ってもらっても……許さないから。」",
+        "voiceUrl": "/voices/harem_all_3.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_library",
+    "title": "図書室のシオン — 簡易3Dの図書室",
+    "appearances": 9,
+    "lines": [
+      {
+        "lineId": "morning_2",
+        "text": "「……おはよう。朝から図書室なんて、珍しいのね」",
+        "voiceUrl": "/voices/pl_morning_2.mp3"
+      },
+      {
+        "lineId": "morning_3",
+        "text": "「……用がないなら、静かにしてて」",
+        "voiceUrl": "/voices/pl_morning_3.mp3"
+      },
+      {
+        "lineId": "day_2",
+        "text": "「また来たの？ ……別に、嫌とは言ってない」",
+        "voiceUrl": "/voices/pl_day_2.mp3"
+      },
+      {
+        "lineId": "day_3",
+        "text": "「……用がないなら、静かにしてて」",
+        "voiceUrl": "/voices/pl_day_3.mp3"
+      },
+      {
+        "lineId": "evening_2",
+        "text": "「もうこんな時間。……あなたといると、読むのが進まない」",
+        "voiceUrl": "/voices/pl_evening_2.mp3"
+      },
+      {
+        "lineId": "evening_3",
+        "text": "「……用がないなら、静かにしてて」",
+        "voiceUrl": "/voices/pl_evening_3.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "private_date",
+    "title": "休日デート〜私服のエミリと街歩き〜",
+    "appearances": 4,
+    "lines": [
+      {
+        "lineId": "shion_1",
+        "text": "「……ん？ あんた達、こんなところで何してんの。……あー、デート？ ふーん。」",
+        "voiceUrl": "/voices/date_shion_01.mp3"
+      },
+      {
+        "lineId": "shion_3",
+        "text": "「別に邪魔する気はないよ。私、そこの本屋行くだけだし。私服……ふたりとも気合い入ってんね。じゃ、お邪魔虫は退散しまーす。」",
+        "voiceUrl": "/voices/date_shion_02.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "teacher_gate",
+    "title": "校門の邂逅 〜シオンと桐島先生の秘密の推し〜",
+    "appearances": 19,
+    "lines": [
+      {
+        "lineId": "walk_1",
+        "text": "「ふぁあ……おはよ……。朝って、なんでこんなに光合成しづらい空気なんだろ……」",
+        "voiceUrl": "/voices/teacher/walk_shion_1.mp3"
+      },
+      {
+        "lineId": "walk_2",
+        "text": "「昨日も……気づいたら朝の四時まで、海外の古生物学会の論文読んでて……」",
+        "voiceUrl": "/voices/teacher/walk_shion_2.mp3"
+      },
+      {
+        "lineId": "walk_route_scold",
+        "text": "「う……桐島先生、普段は落ち着いてるけど指導は鋭いから……見つかったら怒られちゃう……」",
+        "voiceUrl": "/voices/teacher/walk_shion_scold.mp3"
+      },
+      {
+        "lineId": "walk_route_maniac",
+        "text": "「マニアックじゃないよ……。カンブリア紀の不条理な生態系こそ、世界の真理なんだから……」",
+        "voiceUrl": "/voices/teacher/walk_shion_maniac.mp3"
+      },
+      {
+        "lineId": "gate_shion_reply",
+        "text": "「う……桐島先生……お、おはようございます……」",
+        "voiceUrl": "/voices/teacher/walk_shion_gate.mp3"
+      },
+      {
+        "lineId": "gate_shion_shock",
+        "text": "「えっ……！？ せ、先生……これ、わかるの……！？ イカの足だと思って誰も相手にしてくれなかったのに……！」",
+        "voiceUrl": "/voices/teacher/walk_shion_shock.mp3"
+      },
+      {
+        "lineId": "gate_shion_passion",
+        "text": "「そう……！ 化石の上下が逆さまだったところから、電子顕微鏡で単眼が見つかった瞬間が一番熱い……！」",
+        "voiceUrl": "/voices/teacher/walk_shion_passion.mp3"
+      },
+      {
+        "lineId": "gate_shion_excited",
+        "text": "「……！ 放課後……絶対行く……！ 先生、最高……」",
+        "voiceUrl": "/voices/teacher/walk_shion_excited.mp3"
+      },
+      {
+        "lineId": "gate_shion_promise",
+        "text": "「……っ、頑張る……！ 今日のテスト、絶対満点取ってみせる……！」",
+        "voiceUrl": "/voices/teacher/walk_shion_promise.mp3"
+      }
+    ]
+  }
+]

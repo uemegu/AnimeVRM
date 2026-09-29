@@ -1,0 +1,969 @@
+{
+  "description": "時間帯ごとの見た目（ライト・ポストプロセス・マテリアル・空）。シーンの timeOfDay から参照する",
+  "presets": {
+    "morning": {
+      "id": "morning",
+      "name": "朝",
+      "description": "澄んだ朝陽と淡い光条、透明感あふれるブルー・バイオレットのグラデーション",
+      "lighting": {
+        "hairRingTint": "#f2f5ff",
+        "directional": {
+          "color": "#ffffff",
+          "intensity": 3.2,
+          "position": {
+            "x": 1.1,
+            "y": 2.5,
+            "z": 2.3
+          }
+        },
+        "ambient": {
+          "color": "#c379a8",
+          "intensity": 0.35
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#dde8ff",
+          "intensity": 0.05,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": true,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 3.2,
+            "y": 4.3,
+            "z": -3.8
+          },
+          "exposure": 0.24,
+          "decay": 0.82,
+          "density": 0.35,
+          "weight": 0.14,
+          "color": "#dcdbff",
+          "shimmer": 0.4
+        },
+        "lensFlare": {
+          "enabled": true,
+          "sunSize": 1.25,
+          "sunColor": "#fff8ee",
+          "glowIntensity": 1.15,
+          "starburstIntensity": 0.05,
+          "anamorphicIntensity": 1.1,
+          "ghostIntensity": 0.3,
+          "haloIntensity": 0.5
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.07,
+          "radius": 0.7,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.12,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#3d61ff",
+            "highlightTint": "#99c0ff",
+            "strength": 0.28,
+            "contrast": 0.31,
+            "gamma": 0.84
+          },
+          "adjustments": {
+            "saturation": 0.26,
+            "brightness": 0,
+            "contrast": 0
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.08,
+            "color": "#1a1829"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0015
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.9895,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.2,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.997,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 4,
+          "parametricRimLiftFactor": 0.02,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#d4e4ff",
+        "density": 0.015
+      }
+    },
+    "day": {
+      "id": "day",
+      "name": "昼",
+      "description": "明るく抜けの良い日中光と強い太陽光条",
+      "lighting": {
+        "hairRingTint": "#f2f5ff",
+        "directional": {
+          "color": "#ffffff",
+          "intensity": 3.2,
+          "position": {
+            "x": -1.9,
+            "y": 1.5,
+            "z": 2.6
+          }
+        },
+        "ambient": {
+          "color": "#776e74",
+          "intensity": 1
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#dde8ff",
+          "intensity": 0.05,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": true,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 3.2,
+            "y": 4.3,
+            "z": -3.8
+          },
+          "exposure": 0.22,
+          "decay": 0.83,
+          "density": 0.35,
+          "weight": 0.08,
+          "color": "#fff2db",
+          "shimmer": 0.25
+        },
+        "lensFlare": {
+          "enabled": true,
+          "sunSize": 1.3,
+          "sunColor": "#fffbf5",
+          "glowIntensity": 0.95,
+          "starburstIntensity": 0.05,
+          "anamorphicIntensity": 1.15,
+          "ghostIntensity": 0.35,
+          "haloIntensity": 0.5
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.07,
+          "radius": 0.7,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.12,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#0b1b60",
+            "highlightTint": "#9a8518",
+            "strength": 0.5,
+            "contrast": 0.13,
+            "gamma": 1
+          },
+          "adjustments": {
+            "saturation": 0.26,
+            "brightness": 0,
+            "contrast": 0
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.08,
+            "color": "#1a1829"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0015
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.9895,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.2,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.997,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 4,
+          "parametricRimLiftFactor": 0.02,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#e2f0ff",
+        "density": 0.01
+      }
+    },
+    "evening": {
+      "id": "evening",
+      "name": "夕方",
+      "description": "茜色の夕焼け、低い西日と黄金フレア、赤紫の陰影",
+      "lighting": {
+        "hairRingTint": "#ffc58a",
+        "directional": {
+          "color": "#fffbf0",
+          "intensity": 1.8,
+          "position": {
+            "x": -2.2,
+            "y": 0.2,
+            "z": 1.3
+          }
+        },
+        "ambient": {
+          "color": "#3e407a",
+          "intensity": 0.5
+        },
+        "rim": {
+          "enabled": true,
+          "color": "#ffaa60",
+          "intensity": 0.3,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": true,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": -5.5,
+            "y": 1.6,
+            "z": -3.5
+          },
+          "exposure": 0.56,
+          "decay": 0.885,
+          "density": 0.25,
+          "weight": 0.2,
+          "color": "#ff7826",
+          "shimmer": 0.3
+        },
+        "lensFlare": {
+          "enabled": true,
+          "sunSize": 1.05,
+          "sunColor": "#ff6222",
+          "glowIntensity": 1.15,
+          "starburstIntensity": 1.05,
+          "anamorphicIntensity": 0.95,
+          "ghostIntensity": 0.95,
+          "haloIntensity": 0.3
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.07,
+          "radius": 0.7,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.12,
+            "radius": 1.8
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#11103b",
+            "highlightTint": "#fa6600",
+            "strength": 0.44,
+            "contrast": 0.15,
+            "gamma": 0.95
+          },
+          "adjustments": {
+            "saturation": 0.35,
+            "brightness": 0,
+            "contrast": 0.05
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.12,
+            "color": "#2a1418"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.002
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.985,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.991,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.2,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.9955,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 4,
+          "parametricRimLiftFactor": 0.02,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#ffe5e5",
+        "density": 0.02
+      }
+    },
+    "night": {
+      "id": "night",
+      "name": "夜",
+      "description": "静寂の夜空、淡い月明かり、深いコントラスト",
+      "lighting": {
+        "hairRingTint": "#b8c4ff",
+        "directional": {
+          "color": "#fffcf5",
+          "intensity": 2.7,
+          "position": {
+            "x": 0.5,
+            "y": 2,
+            "z": 1.5
+          }
+        },
+        "ambient": {
+          "color": "#f0f1ff",
+          "intensity": 2
+        },
+        "sunShafts": {
+          "enabled": false,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 0,
+            "y": 5,
+            "z": 0
+          },
+          "exposure": 0,
+          "decay": 0.9,
+          "density": 0.5,
+          "weight": 0.1,
+          "color": "#ffffff",
+          "shimmer": 0
+        },
+        "lensFlare": {
+          "enabled": false,
+          "sunSize": 0.8,
+          "sunColor": "#ffffff",
+          "glowIntensity": 0,
+          "starburstIntensity": 0,
+          "anamorphicIntensity": 0,
+          "ghostIntensity": 0,
+          "haloIntensity": 0
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#ffffff",
+          "intensity": 0,
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": false,
+          "strength": 0.05,
+          "radius": 0.12,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.28,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#000000",
+            "highlightTint": "#635e87",
+            "strength": 0.5,
+            "contrast": 0.09,
+            "gamma": 0.9
+          },
+          "adjustments": {
+            "saturation": 0.2,
+            "brightness": -0.02,
+            "contrast": -0.05
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.15,
+            "color": "#101220"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0018
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.2
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#d0d8ff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.991,
+          "shadingShiftFactor": -0.08,
+          "giEqualizationFactor": 0.85,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#8ba6ff",
+          "parametricRimFresnelPowerFactor": 3.5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.3,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#d0d8ff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.08,
+          "giEqualizationFactor": 0.85,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#8ba6ff",
+          "parametricRimFresnelPowerFactor": 3.5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.3,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#d0d8ff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.9955,
+          "shadingShiftFactor": -0.08,
+          "giEqualizationFactor": 0.85,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#6577a3",
+          "parametricRimFresnelPowerFactor": 3.5,
+          "parametricRimLiftFactor": 0.05,
+          "rimLightingMixFactor": 0.4,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.15,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#292843",
+        "density": 0.03
+      }
+    },
+    "divine": {
+      "id": "divine",
+      "name": "神聖・後光",
+      "description": "逆光シルエット & 黄金リムライト & 後光薄明光線",
+      "lighting": {
+        "hairRingTint": "#ffffff",
+        "directional": {
+          "color": "#fff5dc",
+          "intensity": 2,
+          "position": {
+            "x": 0,
+            "y": 1.75,
+            "z": -3
+          }
+        },
+        "ambient": {
+          "color": "#05070d",
+          "intensity": 0.02
+        },
+        "rim": {
+          "enabled": true,
+          "color": "#ffeab0",
+          "intensity": 7.5,
+          "position": {
+            "x": 0,
+            "y": 1.7,
+            "z": -2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": true,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 0,
+            "y": 1.58,
+            "z": -2.2
+          },
+          "exposure": 0.42,
+          "decay": 0.9,
+          "density": 0.38,
+          "weight": 0.22,
+          "color": "#fff4db",
+          "shimmer": 0.2
+        },
+        "lensFlare": {
+          "enabled": true,
+          "sunSize": 0.6,
+          "sunColor": "#fff9eb",
+          "glowIntensity": 0.45,
+          "starburstIntensity": 0.8,
+          "anamorphicIntensity": 0.5,
+          "ghostIntensity": 0.1,
+          "haloIntensity": 0.6
+        }
+      },
+      "postProcessing": {
+        "para": {
+          "enabled": false
+        },
+        "bloom": {
+          "enabled": true,
+          "strength": 0.08,
+          "radius": 0.08,
+          "threshold": 0.6
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.25,
+            "radius": 1.8
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#0a0d18",
+            "highlightTint": "#ffecc4",
+            "strength": 0.4,
+            "contrast": 0.25,
+            "gamma": 0.9
+          },
+          "adjustments": {
+            "saturation": 0.1,
+            "brightness": 0,
+            "contrast": 0.1
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.2,
+            "darkness": 0.25,
+            "color": "#05070e"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0018
+          },
+          "sharpen": {
+            "enabled": true,
+            "amount": 0.15
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#080a12",
+          "shadeMultiply": "#0d0608",
+          "shadingToonyFactor": 1,
+          "shadingShiftFactor": -1,
+          "giEqualizationFactor": 0,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": true,
+          "rimColor": "#ffea9f",
+          "parametricRimFresnelPowerFactor": 4.2,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#080a12",
+          "shadeMultiply": "#0d0608",
+          "shadingToonyFactor": 1,
+          "shadingShiftFactor": -1,
+          "giEqualizationFactor": 0,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": true,
+          "rimColor": "#ffea9f",
+          "parametricRimFresnelPowerFactor": 4.2,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#080a12",
+          "shadeMultiply": "#0d0608",
+          "shadingToonyFactor": 1,
+          "shadingShiftFactor": -1,
+          "giEqualizationFactor": 0,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": true,
+          "rimColor": "#ffea9f",
+          "parametricRimFresnelPowerFactor": 4.2,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0,
+        "widthFactor": 0.001,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": false,
+        "color": "#ffffff",
+        "density": 0
+      }
+    },
+    "indoor_dark": {
+      "id": "indoor_dark",
+      "name": "室内・暗",
+      "description": "暗い店内の柔らかな陰影。窓の外の明るい通りとのコントラストを見せる（旧ルートの「室内・暗2」）",
+      "lighting": {
+        "hairRingTint": "#fff8ee",
+        "directional": {
+          "color": "#ffffff",
+          "intensity": 1,
+          "position": {
+            "x": 2.5,
+            "y": 1.9,
+            "z": -3
+          }
+        },
+        "ambient": {
+          "color": "#4a536e",
+          "intensity": 0.18
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#ffebeb",
+          "intensity": 0,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": false,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 0,
+            "y": 5,
+            "z": 0
+          },
+          "exposure": 0,
+          "decay": 0.9,
+          "density": 0.5,
+          "weight": 0.1,
+          "color": "#ffffff",
+          "shimmer": 0
+        },
+        "lensFlare": {
+          "enabled": false,
+          "sunSize": 1.05,
+          "sunColor": "#ffffff",
+          "glowIntensity": 0.5,
+          "starburstIntensity": 0.55,
+          "anamorphicIntensity": 0.75,
+          "ghostIntensity": 0.8,
+          "haloIntensity": 0.75
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.2,
+          "radius": 0.12,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.38,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#581818",
+            "highlightTint": "#ffffff",
+            "strength": 0.88,
+            "contrast": 0.31,
+            "gamma": 0.82
+          },
+          "adjustments": {
+            "saturation": 0.4,
+            "brightness": 0,
+            "contrast": 0
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.08,
+            "color": "#1a1829"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0015
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        },
+        "para": {
+          "enabled": true,
+          "topOpacity": 0.3,
+          "bottomOpacity": 0.05,
+          "desaturate": 0.2,
+          "tintAmount": 1
+        }
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#c7b8b8",
+        "density": 0.003
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.991,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 0,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 0,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.997,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0,
+          "rimLightingMixFactor": 0,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      }
+    }
+  }
+}

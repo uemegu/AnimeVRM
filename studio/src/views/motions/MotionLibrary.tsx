@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { StudioData } from '../../data/useStudioData';
-import { api } from '../../api/client';
+import { api, READ_ONLY } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { useToast } from '../../components/Toast';
 import { format, useI18n } from '../../i18n';
@@ -110,7 +110,7 @@ export function MotionLibrary({ data, onChanged }: { data: StudioData; onChanged
         <p className="field-hint">{tm.libraryHint}</p>
         <div className="motion-list-head">
           <input className="input" placeholder={tm.search} value={query} onChange={(e) => setQuery(e.target.value)} />
-          <button type="button" className={`btn icon${registering ? ' active' : ''}`} onClick={startRegister} title={tm.register} aria-label={tm.register}>
+          <button type="button" className={`btn icon${registering ? ' active' : ''}`} onClick={startRegister} disabled={READ_ONLY} title={READ_ONLY ? t.common.readOnly : tm.register} aria-label={tm.register}>
             <Icon name="plus" />
           </button>
         </div>
@@ -138,7 +138,7 @@ export function MotionLibrary({ data, onChanged }: { data: StudioData; onChanged
                   </button>
                 </td>
                 <td className="motion-loop">
-                  <input type="checkbox" checked={!!data.motions[n]?.loop} onChange={(e) => saveLoop(n, e.target.checked)} aria-label={tm.loopColumn} />
+                  <input type="checkbox" checked={!!data.motions[n]?.loop} onChange={(e) => saveLoop(n, e.target.checked)} disabled={READ_ONLY} aria-label={tm.loopColumn} />
                 </td>
               </tr>
             ))}

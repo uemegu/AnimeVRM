@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /** 試聴用。同時に鳴るのは1つだけ */
 export function useAudioPreview() {
@@ -18,7 +19,7 @@ export function useAudioPreview() {
         return;
       }
       audioRef.current?.pause();
-      const audio = new Audio(url);
+      const audio = new Audio(resolveAssetUrl(url));
       audio.onended = () => setPlayingUrl((current) => (current === url ? null : current));
       audioRef.current = audio;
       setPlayingUrl(url);

@@ -12,6 +12,7 @@ export const en: Dictionary = {
     comingSoon: 'Soon',
   },
   common: {
+    readOnly: 'This public version is read-only (saving and generation are available in the local Studio)',
     save: 'Save',
     revert: 'Revert',
     add: 'Add',

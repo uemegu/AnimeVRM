@@ -10,6 +10,7 @@ export const ja = {
     comingSoon: '準備中',
   },
   common: {
+    readOnly: 'この公開版は閲覧専用です（保存・生成はローカルの Studio で行えます）',
     save: '保存',
     revert: '元に戻す',
     add: '追加',

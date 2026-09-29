@@ -1,0 +1,658 @@
+{
+  "schemaVersion": 1,
+  "id": "teacher_gate",
+  "title": {
+    "ja": "校門の邂逅 〜シオンと桐島先生の秘密の推し〜",
+    "en": "Encounter at the School Gate ~Shion and Ms. Kirishima~"
+  },
+  "description": "眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？",
+  "location": "school_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "ambience": "/se/walking.mp3",
+  "scenes": [
+    {
+      "id": "walk_1",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「ふぁあ……おはよ……。朝って、なんでこんなに光合成しづらい空気なんだろ……」",
+        "en": "Yaaawn... morning... Why does the morning air feel so hard to photosynthesize in..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_1.mp3",
+      "scrollingBackground": {
+        "textureUrl": "/textures/town_far.avif",
+        "speed": 0.65,
+        "blur": 1,
+        "direction": "left"
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "relaxed",
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「昨日も……気づいたら朝の四時まで、海外の古生物学会の論文読んでて……」",
+        "en": "Yesterday too... before I knew it, it was 4 AM while reading paleontology papers..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_2.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "walk_choice",
+      "text": "",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "side",
+      "choices": [
+        {
+          "id": "choice_scold",
+          "text": {
+            "ja": "「夜更かししすぎ！ 授業中寝たら桐島先生に怒られるぞ」",
+            "en": "Staying up too late! Ms. Kirishima will scold you if you fall asleep."
+          },
+          "goto": "walk_route_scold",
+          "setFlags": {
+            "choice_scold": true
+          }
+        },
+        {
+          "id": "choice_maniac",
+          "text": {
+            "ja": "「古生物……？ 相変わらずマニアックなこと調べてるな」",
+            "en": "Paleontology...? Researching niche things as always, huh."
+          },
+          "goto": "walk_route_maniac",
+          "setFlags": {
+            "choice_maniac": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "walk_route_scold",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「う……桐島先生、普段は落ち着いてるけど指導は鋭いから……見つかったら怒られちゃう……」",
+        "en": "Ugh... Ms. Kirishima is usually calm, but her discipline is sharp... I'll get scolded if she catches me..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_scold.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "sad",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "side",
+      "nextSceneId": "gate_arrive"
+    },
+    {
+      "id": "walk_route_maniac",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「マニアックじゃないよ……。カンブリア紀の不条理な生態系こそ、世界の真理なんだから……」",
+        "en": "It's not niche...! The absurd ecosystem of the Cambrian period is the true essence of the world..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_maniac.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "neutral"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "gate_arrive",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「おはよう、二人とも。……あら、シオンさん？ また随分と眠そうな顔をして……」",
+        "en": "Good morning, both of you. ...Oh? Shion, looking quite sleepy again, aren't you?"
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_greeting.mp3",
+      "timeOfDay": "morning",
+      "ambience": false,
+      "scrollingBackground": false,
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "speaker"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gate_shion_reply",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「う……桐島先生……お、おはようございます……」",
+        "en": "Ugh... Ms. Kirishima... g-good morning..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_gate.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Quick Formal Bow",
+          "expression": "sad",
+          "lookAtTarget": "partner"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_teacher_notice",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「ふふ、遅刻ギリギリセーフですよ。……ん？ ちょっと待って。あなたのその鞄のストラップ……」",
+        "en": "Fufu, barely on time. ...Wait, that strap on your school bag..."
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_notice.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "speaker"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Acknowledging",
+          "expression": "surprised",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_teacher_discover",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「……これ、まさかハルキゲニアの最新復元モデル！？ 背中のトゲの角度からして、最新論文準拠の造形じゃない！」",
+        "en": "...Could this be the latest reconstruction model of Hallucigenia!? Look at the angle of those dorsal spines!"
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_discover.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "surprised"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gate_shion_shock",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「えっ……！？ せ、先生……これ、わかるの……！？ イカの足だと思って誰も相手にしてくれなかったのに……！」",
+        "en": "Eh...!? M-Ms. Kirishima... you know about this...!? Everyone else just called it squid legs...!"
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_shock.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Excited",
+          "expression": "happy",
+          "lookAtTarget": "camera"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_teacher_geek",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「当たり前でしょう！ あの奇妙極まりない歩行器官と、頭部特定で覆された学説史……あの時代の狂気とロマン、最高に美しいわよね！」",
+        "en": "Of course I do! Those bizarre locomotory organs, the overturned hypotheses... the sheer madness and romance of that era!"
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_geek.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_shion_passion",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「そう……！ 化石の上下が逆さまだったところから、電子顕微鏡で単眼が見つかった瞬間が一番熱い……！」",
+        "en": "Exactly...! Going from upside-down fossils to finding simple eyes under electron microscopy is the peak hype...!"
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_passion.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Excited",
+          "expression": "happy",
+          "lookAtTarget": "partner"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gate_choice",
+      "text": "",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "happy"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.45
+          ],
+          "rotationY": 0.35,
+          "motion": "Standing Idle",
+          "expression": "happy"
+        }
+      },
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "world_in",
+          "text": {
+            "ja": "「（……二人とも、完全に自分の世界に入り込んでる……）」",
+            "en": "(...Both of them are completely lost in their own world...)"
+          },
+          "goto": "gate_teacher_calmdown",
+          "setFlags": {
+            "world_in": true
+          }
+        },
+        {
+          "id": "point_out",
+          "text": {
+            "ja": "「先生……それ、生徒を生活指導する顔じゃないですよ」",
+            "en": "Sensei... that's not the face of a teacher giving morning discipline."
+          },
+          "goto": "gate_teacher_calmdown",
+          "setFlags": {
+            "point_out": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "gate_teacher_calmdown",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「コホン……！ い、いけないわね。教師たるもの、校門で熱弁を振るうところだったわ」",
+        "en": "Ahem...! Oh my, excuse me. As an educator, I almost gave a full lecture at the front gate."
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_calmdown.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "lookAtTarget": "speaker"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Dismissing Gesture",
+          "expression": "happy",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_teacher_invite",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「シオンさん。続きは放課後、準備室でじっくり語り合いましょう。私の秘蔵の化石レプリカ、見せてあげるわ」",
+        "en": "Shion. Let's discuss this thoroughly after school in the science prep room. I'll show you my treasured fossil replicas."
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_invite.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "partner"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "gate_shion_excited",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「……！ 放課後……絶対行く……！ 先生、最高……」",
+        "en": "...! After school... I'm definitely going...! Sensei, you're the best..."
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_excited.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Excited",
+          "expression": "happy",
+          "lookAtTarget": "camera"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_teacher_condition",
+      "speaker": "桐島先生",
+      "speakerCharacterId": "teacher",
+      "text": {
+        "ja": "「ふふ。その代わり、今日の小テストで赤点を取ったら準備室立ち入り禁止ですからね？」",
+        "en": "Fufu. However, if you fail today's quiz, you're banned from the prep room, understand?"
+      },
+      "voiceUrl": "/voices/teacher/walk_teacher_condition.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "lookAtTarget": "speaker"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Greeting",
+          "expression": "happy",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "gate_shion_promise",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「……っ、頑張る……！ 今日のテスト、絶対満点取ってみせる……！」",
+        "en": "...I will try my best...! I'm getting a perfect score on today's test...!"
+      },
+      "voiceUrl": "/voices/teacher/walk_shion_promise.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.3,
+          "motion": "Punching",
+          "expression": "angry",
+          "lookAtTarget": "camera"
+        },
+        "teacher": {
+          "position": [
+            -0.45,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.3,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "lookAtTarget": "speaker"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "ending_scene",
+      "text": {
+        "ja": "――普段はやる気ゼロのシオンが、まさかの古生物オタク仲間を得て情熱に燃え上がった朝。放課後の準備室は、きっと熱い議論で盛り上がることだろう。[シナリオ完]",
+        "en": "--- And so, the normally unmotivated Shion found an unexpected fossil-nerd ally and reignited her passion. [Scenario End]"
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0.35,
+            0,
+            -0.5
+          ],
+          "rotationY": -0.2,
+          "motion": "Standing Idle",
+          "expression": "happy"
+        },
+        "teacher": {
+          "position": [
+            -0.35,
+            0,
+            -0.5
+          ],
+          "rotationY": 0.2,
+          "motion": "Standing Idle",
+          "expression": "relaxed"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

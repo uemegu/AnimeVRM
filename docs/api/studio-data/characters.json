@@ -1,0 +1,139 @@
+{
+  "description": "キャラクター管理（Studio）。シナリオからは id で参照する（speakerCharacterId・avatars のキー・電話やメールの characterId）。voice は音声生成の設定で、ref は参照音声（リポジトリ直下からの相対パス）、caption は声質、direction はキャラ固有のボイス指導（声の説明に足す）",
+  "characters": [
+    {
+      "id": "aoi",
+      "name": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "role": "heroine",
+      "themeColor": "#eab308",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/aoi/aoi-school.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/aoi/aoi-private.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/001.mp3",
+        "caption": "穏やかで優しい、清楚な幼馴染の女子高校生の声。",
+        "direction": ""
+      },
+      "profile": "穏やかで優しい聖母。黒服騒動で自分を命がけで守ってくれた主人公にガチ惚れ。以降は「タカシくんは私のヒーロー」「一生お世話してあげる」と、穏やかな笑顔のまま愛が重くなる。"
+    },
+    {
+      "id": "emili",
+      "name": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "role": "heroine",
+      "themeColor": "#ef4444",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/emili/emili.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/emili/emili-private.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/trio_intro_2.mp3",
+        "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
+        "direction": ""
+      },
+      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。"
+    },
+    {
+      "id": "shion",
+      "name": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "role": "heroine",
+      "themeColor": "#3b82f6",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/shion/shion-school.vrm"
+        },
+        {
+          "key": "private",
+          "label": {
+            "ja": "私服",
+            "en": "Casual"
+          },
+          "url": "/models/shion/shion-private.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/girl4_ref.mp3",
+        "caption": "ダウナーでクールな、気だるげで低めの女子高校生の声。",
+        "direction": ""
+      },
+      "profile": "ダウナー系・文武両道。体育館のキャットウォークから騒動を高みの見物。「……アクション映画の撮影かしら。怪我人が出ないなら好きにしなさい」とクールに見届ける。"
+    },
+    {
+      "id": "teacher",
+      "name": {
+        "ja": "白石先生",
+        "en": "Ms. Shiraishi"
+      },
+      "role": "sub",
+      "themeColor": "#64748b",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/teacher/teacher.vrm"
+        }
+      ],
+      "voice": {
+        "ref": "assets/voices/teacher/sample_03_cool_strict.mp3",
+        "caption": "クールで厳格な、若い女性教師の声。",
+        "direction": ""
+      },
+      "profile": "担任。クールで厳しいが、少女漫画と恋バナに目がない。"
+    }
+  ],
+  "voiceMoods": {
+    "happy": "明るく嬉しそうに、弾むようなトーンで話す。",
+    "relaxed": "柔らかく穏やかに、少し照れながら親しげに話す。",
+    "sad": "少し寂しそうに、しおらしく弱々しいトーンで話す。",
+    "angry": "語気を強めて、怒ったように話す。",
+    "surprised": "驚いて動揺し、声が上ずる。",
+    "neutral": "自然な会話のトーンで話す。"
+  },
+  "whisperCaption": "周りに聞こえないよう、小声で囁くように話す。",
+  "shoutCaption": "感情が高ぶり、大きな声で叫ぶ。"
+}
