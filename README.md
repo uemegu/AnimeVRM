@@ -16,8 +16,9 @@ npm workspaces のモノレポです。
 | `packages/engine/` | 描画（Three.js / VRM）。舞台（`stage/`）、トゥーンシェーダー、ポストプロセス、感情演出 |
 | `packages/scenario/` | シナリオ・シーン設定・キャラクターの形式（zod スキーマ）と、舞台の状態を決める処理・分岐の進行 |
 | `packages/motion/` | ardy-mini によるモーション生成、体型への合わせ込み、接触の補正、FBX 書き出し。[README](packages/motion/src/ardy/README.md) |
+| `mini-game/pool/` | ミニゲーム「水上ヒップアタック相撲」（プール）。浮島の上で 2 人がお尻で押し合う勝者予想ゲーム。水面・しぶき・レンズの水滴、押し合いの物理、BGM・SE。`assets/` に専用のモーション・ボイス・BGM・SE。`scripts/` に Playwright の動作確認 |
 | `assets/` | 素材（モデル・モーション・背景・BGM・SE・ボイス・シナリオ）。`assets/studio/*.json` は Studio で編集する設定（場所・時間帯・キャラクター・モーション・BGM） |
-| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない） |
+| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない）。`docs/pool/` はプールのビルド |
 | `tools/eye-editor/` | Eye Atelier（モデルを作るときに使う、目元の調整ツール。Blender 連携） |
 | `assembly/` | app の口パク解析の WASM（`npm run build:wasm`） |
 | `plans/` | 計画と決定事項 |
@@ -34,8 +35,14 @@ npm run studio
 # app（ギャルゲー）
 npm run app
 
-# Pages 版を docs/ に書き出す（再生するシナリオが使う素材だけをコピーする）
+# ミニゲーム（プール。http://localhost:5178）
+npm run pool
+
+# Pages 版を docs/ に書き出す（再生するシナリオが使う素材だけをコピーする。プールも docs/pool/ に出す）
 npm run build:pages
+
+# プールだけをビルドする（docs/pool/。Pages では /AnimeVRM/pool/）
+npm run build:pool
 
 npm run typecheck
 npm test

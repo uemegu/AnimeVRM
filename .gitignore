@@ -38,3 +38,4 @@ dist-ssr
 .env
 /test
 /assets/thumbnails
+/mini-game/pool/test-output

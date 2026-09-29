@@ -1,0 +1,30 @@
+[
+  {
+    "id": "aoi_ready_1",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "text": "私を選んでくれるの？絶対に負けないから見ててね！",
+    "caption": "明るく元気で前向きな少女の声。自信に満ちて微笑みながら呼びかけるトーン",
+    "output": "mini-game/pool/assets/voices/aoi_ready_1.wav"
+  },
+  {
+    "id": "aoi_ready_2",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "text": "応援よろしくね！えいっと一気に押し出しちゃうよ！",
+    "caption": "元気いっぱいな少女の声。気合が入っており楽しそうに笑うトーン",
+    "output": "mini-game/pool/assets/voices/aoi_ready_2.wav"
+  },
+  {
+    "id": "emili_ready_1",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "text": "ふふん、見る目があるじゃない！わたくしの華麗なヒップアタックをお見せしますわ！",
+    "caption": "少し高飛車でお嬢様口調な少女の声。自信満々にふふんと微笑みながら誇らしげに話すトーン",
+    "output": "mini-game/pool/assets/voices/emili_ready_1.wav"
+  },
+  {
+    "id": "emili_ready_2",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "text": "わたくしに賭けるのね？後悔させませんことよ、覚悟なさい！",
+    "caption": "自信に満ち溢れた強気なお嬢様の声。勝気で挑発的な微笑みのトーン",
+    "output": "mini-game/pool/assets/voices/emili_ready_2.wav"
+  }
+]
