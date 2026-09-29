@@ -1,0 +1,62 @@
+[
+  {
+    "text": "えいっ！",
+    "caption": "穏やかな幼馴染の少女。気合を入れてお尻でアタックする掛け声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_attack_1.wav"
+  },
+  {
+    "text": "負けないよ！",
+    "caption": "穏やかな幼馴染の少女。負けじと声を張る元気な掛け声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_attack_2.wav"
+  },
+  {
+    "text": "きゃっ！",
+    "caption": "穏やかな幼馴染の少女。衝撃を受けて思わず驚く短い悲鳴。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_hit.wav"
+  },
+  {
+    "text": "冷たーいっ！落ちちゃった…！",
+    "caption": "穏やかな幼馴染の少女。プールに落ちてしまい、冷たさに驚きつつ悔しがる声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_fall.wav"
+  },
+  {
+    "text": "ふふっ、私の勝ちだね！",
+    "caption": "穏やかな幼馴染の少女。嬉しそうに穏やかに微笑みながら勝利を喜ぶ声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_win.wav"
+  },
+  {
+    "text": "とーっ！",
+    "caption": "元気いっぱいで天真爛漫なお嬢様。勢いよくお尻をぶつける元気な掛け声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_attack_1.wav"
+  },
+  {
+    "text": "吹っ飛びなさい！",
+    "caption": "強気でお転婆なお嬢様。自信満々に相手を弾き飛ばそうとする掛け声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_attack_2.wav"
+  },
+  {
+    "text": "きゃあっ！",
+    "caption": "天真爛漫なお嬢様。お尻をぶつけられてよろめき叫ぶ声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_hit.wav"
+  },
+  {
+    "text": "あーん、落とされたーっ！冷たい〜！",
+    "caption": "お嬢様女子高生。プールにドボンと落ちて手足をジタバタさせながら叫ぶ悔しがり声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_fall.wav"
+  },
+  {
+    "text": "わーい、私の勝ち〜！楽勝ね！",
+    "caption": "天真爛漫なお嬢様。高らかに笑って得意げに勝利をアピールする声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_win.wav"
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "prompt": "A person is hit from behind, stumbles forward off balance waving their arms to keep balance, then recovers",
+    "duration": 2.5,
+    "output": "mini-game/pool/assets/motions/hit_stumble.fbx"
+  },
+  {
+    "prompt": "A person loses balance and falls over backwards flailing arms, plunging down",
+    "duration": 3.0,
+    "output": "mini-game/pool/assets/motions/fall_water.fbx"
+  },
+  {
+    "prompt": "A person in a butt battle stance, slightly squatting with back turned, bouncing on toes playfully",
+    "duration": 3.0,
+    "loop": true,
+    "output": "mini-game/pool/assets/motions/hip_ready.fbx"
+  }
+]

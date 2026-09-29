@@ -1,0 +1,32 @@
+[
+  {
+    "prompt": "A person winds up with a deep stance and violently slams their hips backward in a massive powerful hip attack strike, recovering to stance",
+    "duration": 3.0,
+    "output": "mini-game/pool/assets/motions/hip_attack_heavy.fbx"
+  },
+  {
+    "prompt": "A person hops backward into the air and thrusts hips back in a mid-air flying hip attack, landing on feet",
+    "duration": 2.5,
+    "output": "mini-game/pool/assets/motions/hip_attack_jump.fbx"
+  },
+  {
+    "prompt": "A person delivers a swift agile hip bump strike backward with rapid hip sway and quick recovery",
+    "duration": 2.0,
+    "output": "mini-game/pool/assets/motions/hip_attack_quick.fbx"
+  },
+  {
+    "prompt": "A person takes a heavy impact from behind, stumbles forward several steps flailing arms wildly, barely regaining balance",
+    "duration": 3.0,
+    "output": "mini-game/pool/assets/motions/hit_heavy.fbx"
+  },
+  {
+    "prompt": "A person gets hit from behind off-center, spins around half a turn while staggering and trying to stay upright",
+    "duration": 2.5,
+    "output": "mini-game/pool/assets/motions/hit_spin.fbx"
+  },
+  {
+    "prompt": "A person receives a light bump from behind, jolts forward one step with a surprised hop, quickly recovering",
+    "duration": 1.8,
+    "output": "mini-game/pool/assets/motions/hit_light.fbx"
+  }
+]

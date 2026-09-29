@@ -1,0 +1,74 @@
+[
+  {
+    "text": "ヒップアタック！",
+    "caption": "清楚な女子高生。少し照れつつも技名を叫ぶ元気な掛け声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_attack_5.wav"
+  },
+  {
+    "text": "痛っ…！強い…！",
+    "caption": "穏やかな少女。強い衝撃に耐えながら悔しそうに声を漏らす。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_hit_2.wav"
+  },
+  {
+    "text": "押されちゃう…！",
+    "caption": "穏やかな少女。島の端へ追い詰められて焦る声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_hit_3.wav"
+  },
+  {
+    "text": "あぁ〜っ！水が〜！",
+    "caption": "穏やかな少女。プールにダイブして驚いて叫ぶ声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_fall_2.wav"
+  },
+  {
+    "text": "えへへ、私の勝ちだね！",
+    "caption": "清楚で愛らしい少女。嬉しそうに照れ笑いしながら喜ぶ声。",
+    "ref_wav": "mini-game/pool/assets/voices/aoi_ref.wav",
+    "output": "mini-game/pool/assets/voices/aoi_win_2.wav"
+  },
+  {
+    "text": "ヒップ・インパクトぉー！",
+    "caption": "高飛車で元気なお嬢様。必殺技のように叫ぶテンションの高い声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_attack_3.wav"
+  },
+  {
+    "text": "遠慮はいらないわよね！",
+    "caption": "強気なお嬢様。不敵に微笑んで強気に出る声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_attack_4.wav"
+  },
+  {
+    "text": "わたくしの本気、受けてみなさい！",
+    "caption": "お嬢様女子高生。自信満々に堂々と宣言する声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_attack_5.wav"
+  },
+  {
+    "text": "ひゃあっ！？な、何よ今の…！",
+    "caption": "お嬢様。強烈な一撃を食らって驚き焦る声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_hit_2.wav"
+  },
+  {
+    "text": "わたくしが押されるなんて…！",
+    "caption": "プライドの高いお嬢様。押し出されそうになり悔しがる声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_hit_3.wav"
+  },
+  {
+    "text": "きゃーっ！濡れちゃうーっ！",
+    "caption": "お嬢様。プールに落ちて服が濡れることに悲鳴をあげる声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_fall_2.wav"
+  },
+  {
+    "text": "おーほほほ！わたくしに敵うはずがないでしょ！",
+    "caption": "天真爛漫なお嬢様。高笑いして満面の笑顔で勝利を誇る声。",
+    "ref_wav": "mini-game/pool/assets/voices/emili_ref.wav",
+    "output": "mini-game/pool/assets/voices/emili_win_2.wav"
+  }
+]
