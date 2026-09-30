@@ -935,6 +935,7 @@ export class StageManager {
         blush: key.blush ?? look.blush,
         anger: key.anger ?? look.anger,
         tears: key.tears ?? look.tears,
+        faceSweat: look.faceSweat ?? false,
         eyeWander: key.eyeWander ?? look.eyeWander,
         fastMotion: look.fastMotion,
         motionSpeed: key.motionSpeed ?? look.motionSpeed,
@@ -962,6 +963,7 @@ export class StageManager {
         effects.setBlush(effective.blush);
         effects.setAnger(effective.anger);
         effects.setTears(effective.tears);
+        effects.setFaceSweat(effective.faceSweat);
         effects.setEyeWander(effective.eyeWander);
         effects.setFastMotion(effective.fastMotion);
       }
@@ -995,12 +997,19 @@ export class StageManager {
       if (!avatar?.effects || !this.castIds.includes(shot.id)) continue;
       this.firedOneShots.add(shot.key);
       if (seek && this.cutTime - shot.at > 1) continue;
-      if (shot.effectText) {
-        const spec = typeof shot.effectText === 'string' ? { preset: shot.effectText } : shot.effectText;
-        avatar.effects.showText(spec.preset as EffectPresetName, this.localize(spec.text), spec.duration);
-      }
-      if (shot.sweat) avatar.effects.showSweat(shot.sweat);
+      this.showOneShot(shot.id, shot);
     }
+  }
+
+  /** 文字演出・汗をその場で1回出す（ビューアの試し出しなど、カットの指定によらないとき） */
+  public showOneShot(id: string, shot: Pick<AvatarOneShot, 'effectText' | 'sweat'>): void {
+    const effects = this.loadedAvatars.get(id)?.effects;
+    if (!effects || !this.castIds.includes(id)) return;
+    if (shot.effectText) {
+      const spec = typeof shot.effectText === 'string' ? { preset: shot.effectText } : shot.effectText;
+      effects.showText(spec.preset as EffectPresetName, this.localize(spec.text), spec.duration);
+    }
+    if (shot.sweat) effects.showSweat(shot.sweat);
   }
 
   private localize(text: TextContent | undefined): string | undefined {

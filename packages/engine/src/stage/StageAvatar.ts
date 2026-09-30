@@ -8,6 +8,7 @@ import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from './visual';
 import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
+import { registerShapeKeyExpressions } from '../avatar/shapeKeyExpressions';
 import { addHandColliders } from '../avatar/handColliders';
 import { HandClearance, type HandClearanceMode } from '../avatar/handClearance';
 import { ClothDent } from '../avatar/clothDent';
@@ -300,6 +301,7 @@ export class StageAvatar {
           this.vrm = vrm;
           VRMUtils.rotateVRM0(vrm);
           replaceHappyWithEyesOnly(vrm);
+          registerShapeKeyExpressions(vrm);
           addHandColliders(vrm);
           this.handClearance = HandClearance.create(vrm, this.handClearanceMode);
           this.clothDent = ClothDent.create(vrm, this.clothDentEnabled);

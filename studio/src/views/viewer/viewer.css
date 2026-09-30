@@ -36,6 +36,28 @@
   overflow-y: auto;
 }
 
+.viewer-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.viewer-tab {
+  flex: 1;
+  height: 38px;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.viewer-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 .viewer-section {
   display: flex;
   flex-direction: column;
@@ -222,6 +244,11 @@
 }
 .viewer-chip {
   height: 30px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);

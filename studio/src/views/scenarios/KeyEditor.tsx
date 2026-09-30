@@ -5,7 +5,7 @@ import { useI18n } from '../../i18n';
 import { EffectFields } from './EffectFields';
 
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
-const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
+const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 
 /** 値が undefined なら項目ごと消す */

@@ -44,6 +44,7 @@ export class AvatarEffects {
 
   private blush = false;
   private anger = false;
+  private faceSweat = false;
   private tearsOn = false;
   private highlights: EyeMaterialBackup[] = [];
   private irises: EyeMaterialBackup[] = [];
@@ -79,6 +80,13 @@ export class AvatarEffects {
     if (this.anger === enabled) return;
     this.anger = enabled;
     void this.faceOverlay.setEnabled('anger', enabled).catch((err) => console.warn('Failed to show anger mark:', err));
+  }
+
+  /** 顔に汗のテクスチャを重ねる */
+  public setFaceSweat(enabled: boolean): void {
+    if (this.faceSweat === enabled) return;
+    this.faceSweat = enabled;
+    void this.faceOverlay.setEnabled('sweat', enabled).catch((err) => console.warn('Failed to show face sweat:', err));
   }
 
   public setTears(enabled: boolean): void {
