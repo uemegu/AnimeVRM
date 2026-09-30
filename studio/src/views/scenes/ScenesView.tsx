@@ -4,7 +4,9 @@ import {
   LocationVisualPreset,
   TimeOfDayPreset,
   TIME_OF_DAY_IDS,
+  DEFAULT_SHOT_RIGS,
   type CameraShot,
+  type ShotRig,
   type CharacterBook,
   type TimeOfDayId,
 } from '@anime-vrm/scenario';
@@ -13,10 +15,12 @@ import { api } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { SaveBar, saveErrorStatus, type SaveStatus } from '../../components/SaveBar';
 import { SchemaForm, defaultValue } from '../../components/SchemaForm';
-import { useI18n } from '../../i18n';
+import { format, useI18n } from '../../i18n';
 import { DirectorView } from '../../stage/DirectorView';
 import { StageCanvas } from '../../stage/StageCanvas';
+import { CameraAdjust } from '../../stage/CameraAdjust';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
+import { useBackdrop } from '../../components/Backdrop';
 import './scenes.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -30,6 +34,13 @@ type LocationFile = PresetFile<LocationVisualPreset>;
 
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+/** 構図の値をフォームの範囲に収める（scene.ts の shotRig と同じ範囲） */
+const clampRig = (rig: ShotRig): ShotRig => ({
+  distance: clamp(rig.distance, 0.6, 6),
+  height: clamp(rig.height, -1.2, 1),
+  targetHeight: clamp(rig.targetHeight, -1.2, 1),
+});
 
 export function ScenesView() {
   const { t } = useI18n();
@@ -54,6 +65,14 @@ export function ScenesView() {
   const [shot, setShot] = useState<CameraShot>('speaker');
   const [castCount, setCastCount] = useState<1 | 2 | 3>(1);
   const [manager, setManager] = useState<StageManager | null>(null);
+  // プレビュー上で構図を調整する（場所タブのみ）
+  const [adjusting, setAdjusting] = useState(false);
+  const [liveRig, setLiveRig] = useState<ShotRig | null>(null);
+  const [viewResetKey, setViewResetKey] = useState(0);
+  useEffect(() => {
+    setLiveRig(null);
+    setViewResetKey((k) => k + 1);
+  }, [tab, params.id]);
 
   useEffect(() => {
     Promise.all([
@@ -97,6 +116,8 @@ export function ScenesView() {
       motionLoop: true,
     }));
   }, [book, previewCharacter, castCount]);
+  // 画面の背面には、プレビュー中の場所の遠景を敷く
+  useBackdrop(locations?.presets[tab === 'locations' ? selectedId : previewLocation]?.layers.background.url);
   const colors = useMemo(() => Object.fromEntries((book?.characters ?? []).map((c) => [c.id, c.themeColor])), [book]);
 
   if (loadError) return <div className="scenes-message">{t.common.loadFailed}</div>;
@@ -134,6 +155,21 @@ export function ScenesView() {
     setStatus(null);
     if (tab === 'time-of-day') setTime({ ...time, presets: { ...time.presets, [selectedId]: value as TimeOfDayPreset } });
     else setLocations({ ...locations, presets: { ...locations.presets, [selectedId]: value as LocationVisualPreset } });
+  };
+
+  // 構図・場所・人数を変えたら、調整中のカメラをその構図の位置へ戻す
+  const resetView = () => {
+    setLiveRig(null);
+    setViewResetKey((k) => k + 1);
+  };
+  const editingLocation = tab === 'locations' ? locations.presets[selectedId] : undefined;
+  const storedRig: ShotRig = { ...DEFAULT_SHOT_RIGS[shot], ...editingLocation?.stage?.camera?.[shot] };
+  const shownRig = liveRig ?? storedRig;
+  const writeRig = (target: CameraShot, rig: ShotRig | undefined) => {
+    if (!editingLocation) return;
+    const { [target]: _old, ...otherShots } = editingLocation.stage?.camera ?? {};
+    const camera = rig ? { ...otherShots, [target]: clampRig(rig) } : otherShots;
+    onChange({ ...editingLocation, stage: { ...editingLocation.stage, camera } } as unknown as Record<string, unknown>);
   };
 
   const stageTime = (tab === 'time-of-day' ? selectedId : previewTime) as TimeOfDayId;
@@ -267,7 +303,15 @@ export function ScenesView() {
               <span className="field-label">{t.scenes.castCount}</span>
               <div className="segmented">
                 {([1, 2, 3] as const).map((n) => (
-                  <button key={n} type="button" className={n === castCount ? 'active' : ''} onClick={() => setCastCount(n)}>
+                  <button
+                    key={n}
+                    type="button"
+                    className={n === castCount ? 'active' : ''}
+                    onClick={() => {
+                      setCastCount(n);
+                      resetView();
+                    }}
+                  >
                     {n}
                   </button>
                 ))}
@@ -277,7 +321,15 @@ export function ScenesView() {
               <span className="field-label">{t.viewer.camera}</span>
               <div className="segmented">
                 {SHOTS.map((s) => (
-                  <button key={s} type="button" className={s === shot ? 'active' : ''} onClick={() => setShot(s)}>
+                  <button
+                    key={s}
+                    type="button"
+                    className={s === shot ? 'active' : ''}
+                    onClick={() => {
+                      setShot(s);
+                      resetView();
+                    }}
+                  >
                     {t.viewer.shots[s]}
                   </button>
                 ))}
@@ -293,7 +345,45 @@ export function ScenesView() {
               cameraShot={shot}
               focusId={previewCharacter}
               onManager={setManager}
+              freeCamera={tab === 'locations' && adjusting}
+              shotRigMode
+              viewResetKey={viewResetKey}
+              onShotRig={(target, rig, done) => {
+                if (target !== shot) return;
+                setLiveRig(done ? null : rig);
+                if (!done) return;
+                writeRig(target, rig);
+                // フォームの範囲で切った値と見た目がずれないよう、保存した構図の位置へ合わせ直す
+                setViewResetKey((k) => k + 1);
+              }}
             />
+            {tab === 'locations' && (
+              <CameraAdjust
+                active={adjusting}
+                onToggle={(active) => {
+                  setAdjusting(active);
+                  setLiveRig(null);
+                }}
+                hint={format(t.cameraAdjust.rigHint, { shot: t.viewer.shots[shot] })}
+                readout={[
+                  [t.cameraAdjust.distance, shownRig.distance.toFixed(2)],
+                  [t.cameraAdjust.height, shownRig.height.toFixed(2)],
+                  [t.cameraAdjust.targetHeight, shownRig.targetHeight.toFixed(2)],
+                ]}
+              >
+                <button
+                  type="button"
+                  className="btn"
+                  disabled={!editingLocation?.stage?.camera?.[shot]}
+                  onClick={() => {
+                    writeRig(shot, undefined);
+                    resetView();
+                  }}
+                >
+                  {t.cameraAdjust.resetRig}
+                </button>
+              </CameraAdjust>
+            )}
           </div>
           {tab === 'locations' && (
             <div className="scenes-director">

@@ -32,8 +32,19 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body as T;
 }
 
+/** ファイルの中身をそのまま送る（音声などの登録） */
+function putFile<T>(path: string, file: Blob): Promise<T> {
+  return request<T>(path, { method: 'PUT', headers: { 'content-type': file.type || 'application/octet-stream' }, body: file });
+}
+
 function putJson<T>(path: string, data: unknown): Promise<T> {
   return request<T>(path, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data) });
+}
+
+/** ファイル名の拡張子（小文字、. つき） */
+export function extensionOf(name: string): string {
+  const dot = name.lastIndexOf('.');
+  return dot < 0 ? '' : name.slice(dot).toLowerCase();
 }
 
 export interface AssetEntry {
@@ -94,6 +105,12 @@ export const api = {
   ttsJob: (jobId: string) => request<TtsJob>(`/tts/jobs/${jobId}`),
   ttsAdopt: (jobId: string, index: number) =>
     request<{ ok: true; voiceUrl: string }>(`/tts/jobs/${jobId}/adopt`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ index }) }),
+  /** 手元の音声ファイルをセリフのボイスにする（シナリオのディレクトリに置き、voiceUrl を書き換える） */
+  uploadVoice: (category: string, id: string, lineId: string, file: File) =>
+    putFile<{ ok: true; voiceUrl: string }>(
+      `/tts/lines/${category}/${encodeURIComponent(id)}/${encodeURIComponent(lineId)}/upload?ext=${encodeURIComponent(extensionOf(file.name))}`,
+      file
+    ),
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   scenario: (category: string, id: string) => request<unknown>(`/scenarios/${category}/${encodeURIComponent(id)}`),
   saveScenario: (category: string, id: string, data: unknown) => putJson<{ ok: true }>(`/scenarios/${category}/${encodeURIComponent(id)}`, data),
@@ -101,6 +118,9 @@ export const api = {
   saveCharacters: (book: CharacterBook) => putJson<{ ok: true }>('/characters', book),
   characterUsage: (id: string) => request<CharacterScenarioUsage[]>(`/characters/${encodeURIComponent(id)}/usage`),
   assets: (kind: AssetKind) => request<AssetEntry[]>(`/assets/${kind}`),
+  /** アセットを登録する（name は assets/<種類>/ からの相対パス。同じ名前があれば overwrite のときだけ上書き） */
+  uploadAsset: (kind: AssetKind, name: string, file: Blob, overwrite = false) =>
+    putFile<{ ok: true; url: string }>(`/assets/${kind}/${name.split('/').map(encodeURIComponent).join('/')}${overwrite ? '?overwrite=1' : ''}`, file),
   saveMotion: (body: { name: string; fbx: string; candidates?: unknown; loop?: boolean; overwrite?: boolean }) =>
     fetch('/api/motions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
   saveMotionProfile: (path: string, profile: unknown) => putJson<{ ok: true }>(`/motions/profiles/${path}`, profile),

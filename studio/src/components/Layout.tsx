@@ -3,6 +3,7 @@ import { READ_ONLY } from '../api/client';
 import { useI18n, type Language } from '../i18n';
 import { Icon, type IconName } from './Icon';
 import { ToastProvider } from './Toast';
+import { BackdropLayer, useBackdropActive } from './Backdrop';
 import './Layout.css';
 
 interface NavItem {
@@ -23,6 +24,7 @@ export const NAV_ITEMS: NavItem[] = [
 
 export function Layout() {
   const { t, language, setLanguage } = useI18n();
+  const backdrop = useBackdropActive();
   return (
     <div className="studio">
       <aside className="studio-sidebar">
@@ -79,10 +81,13 @@ export function Layout() {
           </div>
         </div>
       </aside>
-      <main className="studio-main">
-        <ToastProvider>
-          <Outlet />
-        </ToastProvider>
+      <main className={`studio-main${backdrop ? ' has-backdrop' : ''}`}>
+        <BackdropLayer />
+        <div className="studio-page">
+          <ToastProvider>
+            <Outlet />
+          </ToastProvider>
+        </div>
       </main>
     </div>
   );

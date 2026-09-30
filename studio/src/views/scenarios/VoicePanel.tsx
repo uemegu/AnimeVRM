@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api, READ_ONLY, type TtsJob, type TtsLine } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
@@ -28,6 +28,8 @@ export function VoicePanel({ category, scenarioId, lineId, voiceUrl, baseUrl, di
   const [count, setCount] = useState(2);
   const [job, setJob] = useState<TtsJob | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // セリフから決まる既定の話者・声の説明（保存済みの内容）
   useEffect(() => {
@@ -61,6 +63,23 @@ export function VoicePanel({ category, scenarioId, lineId, voiceUrl, baseUrl, di
     }
   };
 
+  // 手元の音声ファイルをこのセリフのボイスにする
+  const upload = async (file: File) => {
+    setMessage(null);
+    setUploading(true);
+    try {
+      await api.uploadVoice(category, scenarioId, lineId, file);
+      audio.stop();
+      setJob(null);
+      setMessage(tt.uploaded);
+      onAdopted();
+    } catch (err) {
+      setMessage(`${tt.uploadFailed}: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const adopt = async (index: number) => {
     if (!job) return;
     try {
@@ -84,6 +103,27 @@ export function VoicePanel({ category, scenarioId, lineId, voiceUrl, baseUrl, di
           </button>
         )}
       </div>
+
+      {!READ_ONLY && (
+        <div className="voice-upload">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".mp3,.ogg,.wav,audio/mpeg,audio/ogg,audio/wav"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (file) void upload(file);
+            }}
+          />
+          <button type="button" className="btn" disabled={dirty || uploading} onClick={() => fileRef.current?.click()}>
+            <Icon name="upload" size={14} />
+            {uploading ? tt.uploading : tt.upload}
+          </button>
+          <span className="field-hint">{tt.uploadHint}</span>
+        </div>
+      )}
 
       {dirty ? (
         <p className="field-hint">{tt.saveFirst}</p>

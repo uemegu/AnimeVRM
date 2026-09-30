@@ -3,6 +3,7 @@ import { lastKeyframeAt, stageAtScene, type CameraPose, type ScenarioPackage, ty
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n';
+import { CameraAdjustToggle } from '../../stage/CameraAdjust';
 import { CutPreview, type Outfit } from './CutPreview';
 import { KeyEditor } from './KeyEditor';
 import { Timeline } from './Timeline';
@@ -32,6 +33,7 @@ export function CutWorkbench({ scenario, index, baseUrl, data, outfit, onChangeS
   const [selected, setSelected] = useState<KeyRef | null>(null);
   const [freeCamera, setFreeCamera] = useState(false);
   const [pose, setPose] = useState<CameraPose | null>(null);
+  const [viewResetKey, setViewResetKey] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const voiceUrl = scene.voiceUrl ? (scene.voiceUrl.startsWith('/') ? scene.voiceUrl : `${baseUrl}${scene.voiceUrl}`) : null;
@@ -114,25 +116,22 @@ export function CutWorkbench({ scenario, index, baseUrl, data, outfit, onChangeS
           playing={playing}
           freeCamera={freeCamera}
           onCameraPose={setPose}
+          viewResetKey={viewResetKey}
         />
+        <CameraAdjustToggle active={freeCamera} onToggle={setFreeCamera} />
       </div>
 
-      <div className="workbench-bar">
-        <button type="button" className="btn" onClick={() => (playing ? setPlaying(false) : (time >= duration && setTime(0), setPlaying(true)))}>
-          <Icon name={playing ? 'stop' : 'play'} size={14} />
-          {playing ? tl.pause : tl.play}
-        </button>
-        <span className="workbench-time">
-          {time.toFixed(2)} / {duration.toFixed(2)}s
-        </span>
-        <span className="workbench-spacer" />
-        <label className="inspector-check compact" title={tl.freeCameraHint}>
-          <input type="checkbox" checked={freeCamera} onChange={(e) => setFreeCamera(e.target.checked)} />
-          {tl.freeCamera}
-        </label>
-        {freeCamera && (
-          <>
-            <button type="button" className="btn" disabled={!pose} onClick={() => pose && onChangeScene({ ...scene, cameraPose: pose })}>
+      {/* プレビューを動かしたカメラを、カットやキーに記録する */}
+      {freeCamera && (
+        <div className="workbench-camera">
+          <p className="camera-adjust-hint">{t.cameraAdjust.poseHint}</p>
+          {pose && (
+            <span className="workbench-camera-pose">
+              {t.cameraAdjust.position} {pose.position.map((v) => v.toFixed(2)).join(', ')} ／ {t.cameraAdjust.target} {pose.target.map((v) => v.toFixed(2)).join(', ')}
+            </span>
+          )}
+          <div className="workbench-camera-actions">
+            <button type="button" className="btn primary" disabled={!pose} onClick={() => pose && onChangeScene({ ...scene, cameraPose: pose })}>
               {tl.useForCut}
             </button>
             <button
@@ -148,8 +147,22 @@ export function CutWorkbench({ scenario, index, baseUrl, data, outfit, onChangeS
             >
               {tl.addCameraKey}
             </button>
-          </>
-        )}
+            <button type="button" className="btn" onClick={() => setViewResetKey((k) => k + 1)}>
+              {t.cameraAdjust.backToShot}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="workbench-bar">
+        <button type="button" className="btn" onClick={() => (playing ? setPlaying(false) : (time >= duration && setTime(0), setPlaying(true)))}>
+          <Icon name={playing ? 'stop' : 'play'} size={14} />
+          {playing ? tl.pause : tl.play}
+        </button>
+        <span className="workbench-time">
+          {time.toFixed(2)} / {duration.toFixed(2)}s
+        </span>
+        <span className="workbench-spacer" />
         {scene.cameraPose && (
           <button
             type="button"

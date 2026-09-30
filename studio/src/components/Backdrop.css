@@ -1,0 +1,112 @@
+/* すりガラス越しの背景。強くぼかした遠景に、白の光と細かな粒を重ねる */
+.studio-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #eef2f7;
+}
+
+.studio-backdrop-image {
+  position: absolute;
+  inset: -80px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(40px) saturate(1.45) brightness(1.06);
+}
+.studio-backdrop-image.entering {
+  animation: studio-backdrop-in 0.6s ease both;
+}
+@keyframes studio-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 光の当たり方（左上が明るい）と、白の薄いにじみ */
+.studio-backdrop-wash {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 60%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.24) 50%, rgba(241, 245, 249, 0.42) 100%);
+}
+
+/* ガラスの細かな凹凸 */
+.studio-backdrop-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* 背景の上に載る画面 */
+.studio-page {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+/* 背景を敷いている画面では、面を半透明の白にして背景を透かす */
+.has-backdrop {
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 255, 255, 0.74);
+  --glass-border: rgba(255, 255, 255, 0.7);
+}
+
+.has-backdrop .viewer-panel,
+.has-backdrop .scenes-list,
+.has-backdrop .motion-form,
+.has-backdrop .motion-list {
+  background: var(--glass);
+  border-right-color: var(--glass-border);
+}
+.has-backdrop .scenes-form {
+  background: var(--glass-strong);
+  border-right-color: var(--glass-border);
+}
+.has-backdrop .scenes-header,
+.has-backdrop .motions-tabs {
+  background: var(--glass-strong);
+  border-bottom-color: var(--glass-border);
+}
+.has-backdrop .viewer-panel-header,
+.has-backdrop .viewer-section {
+  border-color: rgba(226, 232, 240, 0.7);
+}
+
+/* ビューアは画面全体に背景が敷かれるので、舞台だけのぼかしは使わない */
+.has-backdrop .viewer-stage::before,
+.has-backdrop .viewer-stage::after {
+  display: none;
+}
+
+.has-backdrop .viewer-location-grid,
+.has-backdrop .scenes-locations-grid {
+  background: rgba(255, 255, 255, 0.42);
+  border-color: var(--glass-border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.has-backdrop .scenes-director {
+  border-color: var(--glass-border);
+}
+
+.has-backdrop .motion-canvas {
+  background: transparent;
+}
+.has-backdrop .motion-results {
+  background: var(--glass);
+  border-top-color: var(--glass-border);
+}
+
+.has-backdrop .catalog-card {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: var(--glass-border);
+}
