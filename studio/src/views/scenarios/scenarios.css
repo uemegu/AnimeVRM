@@ -54,6 +54,23 @@
   box-sizing: border-box;
   justify-content: center;
 }
+.scenario-project-bar .btn.chart-toggle {
+  min-width: 0;
+  padding: 0 12px;
+  border-color: transparent;
+  background: var(--bg-muted);
+  color: var(--text-sub);
+}
+.scenario-project-bar .btn.chart-toggle:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.09);
+  color: var(--accent);
+}
+.scenario-project-bar .btn.chart-toggle.active {
+  background: var(--accent-soft);
+  border-color: rgba(37, 99, 235, 0.25);
+  color: var(--accent);
+  font-weight: 600;
+}
 .scenario-groups {
   flex: 1;
   overflow-y: auto;

@@ -176,7 +176,8 @@ export function ScenariosView() {
               </option>
             ))}
           </select>
-          <button type="button" className={`btn${id ? '' : ' primary'}`} onClick={() => navigate('/scenarios')}>
+          <button type="button" className={`btn chart-toggle${id ? '' : ' active'}`} onClick={() => navigate('/scenarios')}>
+            <Icon name="chart" size={15} />
             {t.scenarios.showChart}
           </button>
         </div>

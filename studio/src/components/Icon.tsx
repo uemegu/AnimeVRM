@@ -20,6 +20,7 @@ const PATHS = {
   soundOff: 'M4 9h4l5-4v14l-5-4H4zM17 9l5 6M22 9l-5 6',
   camera: 'M4 8h3l2-3h6l2 3h3v11H4zM12 16.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z',
   mic: 'M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3ZM5 11a7 7 0 0 0 14 0M12 18v3',
+  chart: 'M6 6.5a2 2 0 1 0 0 .01ZM18 6.5a2 2 0 1 0 0 .01ZM12 18a2 2 0 1 0 0 .01ZM7.6 8l3.5 8M16.4 8l-3.5 8M8 6.5h8',
 } as const;
 
 export type IconName = keyof typeof PATHS;
