@@ -51,6 +51,8 @@ export const en: Dictionary = {
     voiceUploadFailed: 'Upload failed',
     voiceOverwrite: '{name} already exists. Overwrite?',
     noVoices: 'No voices',
+    whisper: 'Whisper',
+    whisperHint: 'Preview as a whisper with a smaller mouth (not saved; in scenarios, set it per line)',
   },
   cameraAdjust: {
     start: 'Adjust camera',
@@ -118,6 +120,7 @@ export const en: Dictionary = {
     camera: 'Camera',
     auto: 'Auto',
     clearCast: 'Remove everyone from the previous cut',
+    voiceWhisper: 'Whisper (open the mouth less)',
     flash: 'White flash',
     autoNextSec: 'AUTO wait (s)',
     addCharacter: 'Bring on a character',

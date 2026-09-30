@@ -80,10 +80,17 @@ export interface StageOptions {
   quality?: StageQualityLevel | Partial<StageQuality>;
 }
 
+/** 口パクで口を開く大きさ（普通の声） */
+export const LIP_SYNC_GAIN = 0.7;
+/** 囁き声の口の開き（普通の声に対する倍率） */
+export const WHISPER_MOUTH_SCALE = 0.4;
+
 export class StageManager {
   private canvas: HTMLCanvasElement;
   private presets: StagePresets;
   private readonly getSpeakerPhoneme?: () => string | undefined;
+  /** 話者の口の開きの倍率（囁き声は小さくする）。カットの voiceWhisper から決める */
+  private speakerMouthScale = 1;
   private readonly getCutTime?: () => number | undefined;
   private cutStartedAt = 0;
   private scene: THREE.Scene;
@@ -825,6 +832,11 @@ export class StageManager {
   }
 
   /** 口パクさせるキャラ（話者） */
+  /** 話者の口の開きの倍率。1 が普通の声、囁き声は WHISPER_MOUTH_SCALE（カットを渡すと voiceWhisper で上書きされる） */
+  public setSpeakerMouthScale(scale: number): void {
+    this.speakerMouthScale = scale;
+  }
+
   public setSpeaker(id: string | null): void {
     this.speakerId = id;
   }
@@ -858,6 +870,7 @@ export class StageManager {
   /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
   public setCutTimeline(scene: ScenarioScene | null): void {
     this.cutScene = scene;
+    this.speakerMouthScale = scene?.voiceWhisper ? WHISPER_MOUTH_SCALE : 1;
     this.cutTime = 0;
     this.cutStartedAt = this.clock.getElapsedTime();
     this.appliedCut.clear();
@@ -1190,7 +1203,7 @@ export class StageManager {
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm || !avatar.vrm.scene.visible) continue;
-        avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined);
+        avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined, LIP_SYNC_GAIN * this.speakerMouthScale);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
         avatar.update(delta, { elapsed, camera: this.camera, renderer: this.renderer });

@@ -11,6 +11,9 @@ export function voiceName(url: string): string {
 interface Props {
   voices: AssetEntry[];
   playingUrl: string | null;
+  /** 囁き声として試聴するボイス（URL → 囁きか） */
+  whispers: Record<string, boolean>;
+  onWhisperChange: (url: string, whisper: boolean) => void;
   muted: boolean;
   onToggle: (url: string) => void;
   onToggleMute: () => void;
@@ -21,7 +24,7 @@ interface Props {
 /**
  * ボイスの一覧（assets/voices）。再生するとアバターが口を動かす。手元の音声ファイルを登録できる
  */
-export function VoiceLibrary({ voices, playingUrl, muted, onToggle, onToggleMute, onUploaded }: Props) {
+export function VoiceLibrary({ voices, playingUrl, whispers, onWhisperChange, muted, onToggle, onToggleMute, onUploaded }: Props) {
   const { t } = useI18n();
   const tv = t.viewer;
   const [filter, setFilter] = useState('');
@@ -104,6 +107,14 @@ export function VoiceLibrary({ voices, playingUrl, muted, onToggle, onToggleMute
                 </span>
                 <span className="viewer-voice-name">{voiceName(v.url)}</span>
               </button>
+              <label className="viewer-voice-whisper" title={tv.whisperHint}>
+                <input
+                  type="checkbox"
+                  checked={whispers[v.url] === true}
+                  onChange={(e) => onWhisperChange(v.url, e.target.checked)}
+                />
+                {tv.whisper}
+              </label>
             </li>
           );
         })}

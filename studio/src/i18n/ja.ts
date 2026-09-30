@@ -49,6 +49,8 @@ export const ja = {
     voiceUploadFailed: '登録できませんでした',
     voiceOverwrite: '{name} は既にあります。上書きしますか？',
     noVoices: 'ボイスがありません',
+    whisper: '囁き',
+    whisperHint: '囁き声として口の開きを小さくして試聴します（保存はされません。シナリオではセリフごとに指定します）',
   },
   cameraAdjust: {
     start: 'カメラを調整',
@@ -116,6 +118,7 @@ export const ja = {
     camera: 'カメラ',
     auto: '自動',
     clearCast: '前のカットの登場キャラを全員下げる',
+    voiceWhisper: '囁き声（口の開きを小さくする）',
     flash: '白フラッシュ',
     autoNextSec: 'AUTO の待ち秒数',
     addCharacter: 'キャラを登場させる',
