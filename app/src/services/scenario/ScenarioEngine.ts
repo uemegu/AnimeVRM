@@ -23,6 +23,7 @@ export interface ScenarioResolvedScene {
   speakerCharacterId?: string;
   text: string;
   voiceUrl?: string;
+  voiceWhisper?: boolean;
   background?: string;
   bgm?: string;
   bgmUrl?: string;
@@ -105,6 +106,7 @@ export class ScenarioEngine {
       speakerCharacterId: raw.speakerCharacterId,
       text: resolveLocalizedText(raw.text, this.language),
       voiceUrl: raw.voiceUrl,
+      voiceWhisper: raw.voiceWhisper,
       background: raw.background,
       bgm: raw.bgm || raw.bgmUrl,
       bgmUrl: raw.bgmUrl || raw.bgm,

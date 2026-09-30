@@ -37,6 +37,8 @@ interface Props {
   onManager?: (manager: StageManager | null) => void;
   /** 話者（focusId）の口の形。ボイスを鳴らしている間だけ返す */
   getSpeakerPhoneme?: () => string | undefined;
+  /** 話者の口の開きの倍率（囁き声は小さくする）。カットを渡すときは不要（カットの voiceWhisper で決まる） */
+  mouthScale?: number;
 }
 
 /**
@@ -60,6 +62,7 @@ export function StageCanvas({
   onShotRig,
   onManager,
   getSpeakerPhoneme,
+  mouthScale,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
@@ -95,6 +98,9 @@ export function StageCanvas({
   useEffect(() => managerRef.current?.setPresets(presets), [presets]);
   useEffect(() => managerRef.current?.setTimeOfDay(timeOfDay), [timeOfDay]);
   useEffect(() => managerRef.current?.setLocation(locationId), [locationId]);
+  useEffect(() => {
+    if (mouthScale !== undefined) managerRef.current?.setSpeakerMouthScale(mouthScale);
+  }, [mouthScale]);
 
   const castKey = JSON.stringify(cast);
   useEffect(() => {
@@ -115,7 +121,7 @@ export function StageCanvas({
 
   // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
   const cutKey = JSON.stringify(
-    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines } : null
+    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceWhisper: cut.voiceWhisper } : null
   );
   useEffect(() => {
     const manager = managerRef.current;

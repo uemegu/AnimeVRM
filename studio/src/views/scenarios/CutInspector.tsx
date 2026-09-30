@@ -144,6 +144,10 @@ function LineTab({ scene, data, voice, set, onChange }: { scene: ScenarioScene; 
           dirty={voice.dirty}
           onAdopted={voice.onReload}
         />
+        <label className="inspector-check">
+          <input type="checkbox" checked={!!scene.voiceWhisper} onChange={(e) => set('voiceWhisper', e.target.checked || undefined)} />
+          {t.scenarios.voiceWhisper}
+        </label>
       </div>
     </div>
   );

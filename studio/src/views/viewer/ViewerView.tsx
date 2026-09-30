@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CameraShot, CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
+import { WHISPER_MOUTH_SCALE } from '@anime-vrm/engine/stage/StageManager';
 import { api, type AssetEntry } from '../../api/client';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
@@ -84,6 +85,11 @@ export function ViewerView() {
     setMuted(audio.muted);
   };
   const getPhoneme = useCallback(() => audioRef.current?.getPhoneme(), []);
+
+  // 囁き声として試聴するボイス（口を小さく開く）。試聴用なので保存しない。シナリオではセリフの voiceWhisper で指定する
+  const [whispers, setWhispers] = useState<Record<string, boolean>>({});
+  const setWhisper = (url: string, whisper: boolean) => setWhispers((current) => ({ ...current, [url]: whisper }));
+  const mouthScale = playingVoice && whispers[playingVoice] ? WHISPER_MOUTH_SCALE : 1;
 
   const characters = book?.characters.filter((c) => c.models.length > 0) ?? [];
   const character = characters.find((c) => c.id === characterId);
@@ -207,6 +213,8 @@ export function ViewerView() {
           <VoiceLibrary
             voices={voices}
             playingUrl={playingVoice}
+            whispers={whispers}
+            onWhisperChange={setWhisper}
             muted={muted}
             onToggle={toggleVoice}
             onToggleMute={toggleMute}
@@ -244,7 +252,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} />
         </div>
 
         <p className="viewer-caption">

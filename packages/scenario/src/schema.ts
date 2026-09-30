@@ -194,6 +194,8 @@ export const ScenarioScene = z.strictObject({
   text: TextContent,
   /** '/' で始まらなければシナリオのディレクトリからの相対パス */
   voiceUrl: z.string().optional(),
+  /** ボイスが囁き声（口の開きを小さくする） */
+  voiceWhisper: z.boolean().optional(),
   /** 場所のプリセット ID または画像 URL */
   background: z.string().optional(),
   /** BGM の ID または URL */
@@ -346,6 +348,8 @@ export const CallSceneStep = z.strictObject({
   /** null なら通話終了 */
   nextStepId: z.string().nullable().optional(),
   voiceUrl: z.string().optional(),
+  /** ボイスが囁き声（口の開きを小さくする） */
+  voiceWhisper: z.boolean().optional(),
 });
 
 /** 夜の TV 電話 */
