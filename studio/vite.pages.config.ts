@@ -55,7 +55,10 @@ function pagesOutput(): Plugin {
     apply: 'build',
     closeBundle() {
       const ids = PAGES_ENTRIES.map((e) => e.id);
-      const files = collectPagesAssets(ASSETS, ids, PAGES_ENTRIES.flatMap((e) => (e.ogp ? [e.ogp] : [])));
+      const files = collectPagesAssets(ASSETS, ids, [
+        '/ogp/studio.png',
+        ...PAGES_ENTRIES.flatMap((e) => (e.ogp ? [e.ogp] : [])),
+      ]);
       let bytes = 0;
       for (const file of files) {
         const from = path.join(ASSETS, file);
@@ -68,7 +71,7 @@ function pagesOutput(): Plugin {
       for (const entry of PAGES_ENTRIES) {
         const scenario = JSON.parse(fs.readFileSync(path.join(ASSETS, 'scenarios/demo', entry.id, 'scenario.json'), 'utf8'));
         const locations = JSON.parse(fs.readFileSync(path.join(ASSETS, 'studio/locations.json'), 'utf8')).presets;
-        const image = entry.ogp ?? locations[scenario.location]?.layers.background.url ?? '/ogp/park-confession.png';
+        const image = entry.ogp ?? locations[scenario.location]?.layers.background.url ?? '/ogp/studio.png';
         const html = redirectPage(`../#/player/demo/${entry.id}`, { title: ja(scenario.title), description: ja(scenario.description), image, slug: entry.slug });
         fs.writeFileSync(path.join(OUT, 'scenarios', `${entry.slug}.html`), html);
       }

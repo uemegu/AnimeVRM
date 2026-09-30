@@ -45,8 +45,11 @@
 }
 .viewer-section.grow {
   flex: 1;
-  min-height: 280px;
+  min-height: 260px;
   border-bottom: none;
+}
+.viewer-section.grow + .viewer-section.grow {
+  border-top: 1px solid var(--border);
 }
 .viewer-section h2 {
   margin: 0;
@@ -60,6 +63,51 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.viewer-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 見出し横の小さなボタン（高さをそろえる） */
+.viewer-mini-btn {
+  height: 26px;
+  min-width: 26px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  cursor: pointer;
+}
+.viewer-mini-btn.wide {
+  min-width: 64px;
+}
+.viewer-mini-btn:hover:not(:disabled) {
+  background: var(--bg-muted);
+}
+.viewer-mini-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.viewer-mini-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.viewer-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .viewer-character-grid {
@@ -230,6 +278,38 @@
   background: var(--accent-soft);
   color: var(--accent);
   font-weight: 600;
+}
+
+.viewer-voice-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.viewer-voice-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-muted);
+  color: var(--text-sub);
+}
+.viewer-voice-list button.active .viewer-voice-icon {
+  background: var(--accent);
+  color: #ffffff;
+}
+.viewer-voice-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.viewer-empty {
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* 右: 舞台（16:9） */

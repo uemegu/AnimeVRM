@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CameraShot, CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -6,6 +6,9 @@ import { api, type AssetEntry } from '../../api/client';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
 import { useStagePresets } from '../../stage/useStagePresets';
+import { PlayerAudio } from '../../player/PlayerAudio';
+import { VoiceLibrary } from './VoiceLibrary';
+import { useBackdrop } from '../../components/Backdrop';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -25,6 +28,7 @@ export function ViewerView() {
   const [book, setBook] = useState<CharacterBook | null>(null);
   const [motions, setMotions] = useState<AssetEntry[]>([]);
   const [models, setModels] = useState<AssetEntry[]>([]);
+  const [voices, setVoices] = useState<AssetEntry[]>([]);
   const [loadError, setLoadError] = useState(false);
 
   const [characterId, setCharacterId] = useState('aoi');
@@ -39,14 +43,47 @@ export function ViewerView() {
   const [motionFilter, setMotionFilter] = useState('');
 
   useEffect(() => {
-    Promise.all([api.characters(), api.assets('animations'), api.assets('models')])
-      .then(([characters, animationList, modelList]) => {
+    Promise.all([api.characters(), api.assets('animations'), api.assets('models'), api.assets('voices')])
+      .then(([characters, animationList, modelList, voiceList]) => {
         setBook(characters);
         setMotions(animationList);
         setModels(modelList);
+        setVoices(voiceList);
       })
       .catch(() => setLoadError(true));
   }, []);
+
+  // ボイスの試聴（再生中は表示中のキャラが口を動かす）
+  const audioRef = useRef<PlayerAudio | null>(null);
+  const [playingVoice, setPlayingVoice] = useState<string | null>(null);
+  const [muted, setMuted] = useState(false);
+  useEffect(() => {
+    const audio = new PlayerAudio();
+    audioRef.current = audio;
+    setMuted(audio.muted);
+    return () => {
+      audio.dispose();
+      audioRef.current = null;
+    };
+  }, []);
+  const toggleVoice = (url: string) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (playingVoice === url) {
+      audio.stopVoice();
+      setPlayingVoice(null);
+      return;
+    }
+    setPlayingVoice(url);
+    audio.playVoice(url, () => setPlayingVoice((current) => (current === url ? null : current)));
+  };
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.setMuted(!audio.muted);
+    setMuted(audio.muted);
+  };
+  const getPhoneme = useCallback(() => audioRef.current?.getPhoneme(), []);
 
   const characters = book?.characters.filter((c) => c.models.length > 0) ?? [];
   const character = characters.find((c) => c.id === characterId);
@@ -70,6 +107,8 @@ export function ViewerView() {
         : [],
     [characterId, model, expression, motion, motionLoop, motionCue]
   );
+
+  useBackdrop(presets?.locations[locationId]?.layers?.background?.url);
 
   const filteredMotions = motions.filter((m) => motionName(m.url).toLowerCase().includes(motionFilter.toLowerCase()));
 
@@ -164,6 +203,15 @@ export function ViewerView() {
               })}
             </ul>
           </section>
+
+          <VoiceLibrary
+            voices={voices}
+            playingUrl={playingVoice}
+            muted={muted}
+            onToggle={toggleVoice}
+            onToggleMute={toggleMute}
+            onUploaded={() => api.assets('voices').then(setVoices, () => {})}
+          />
         </div>
       </aside>
 
@@ -196,7 +244,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} />
         </div>
 
         <p className="viewer-caption">

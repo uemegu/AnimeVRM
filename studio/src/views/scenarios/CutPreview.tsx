@@ -28,12 +28,14 @@ interface Props {
   playing: boolean;
   freeCamera: boolean;
   onCameraPose: (pose: CameraPose) => void;
+  /** 変わるたびに、手で動かしたカメラを構図の位置へ戻す */
+  viewResetKey?: number;
 }
 
 /**
  * カットの見え方（app と同じ描画）。先頭からこのカットまでの指定を引き継いだ舞台を映す
  */
-export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose }: Props) {
+export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose, viewResetKey }: Props) {
   const { t } = useI18n();
   const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
   const scene = scenario.scenes[index];
@@ -72,6 +74,7 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
         playing={playing}
         freeCamera={freeCamera}
         onCameraPose={onCameraPose}
+        viewResetKey={viewResetKey}
       />
       {scene && (textJa(scene.text) || scene.choices?.length) ? (
         <div className="cut-dialogue">

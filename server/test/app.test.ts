@@ -231,6 +231,31 @@ describe('音声生成', () => {
     expect(onScenarioSaved).toHaveBeenCalled();
   });
 
+  it('手元の音声ファイルを登録すると、ファイルが置かれ voiceUrl が変わる', async () => {
+    const dir = path.join(assetsDir, 'scenarios/ending/ending_good');
+    const scenarioFile = path.join(dir, 'scenario.json');
+    const oldVoice = JSON.parse(await fs.readFile(scenarioFile, 'utf8')).scenes[0].voiceUrl as string;
+    const wav = Buffer.concat([Buffer.from('RIFF\0\0\0\0WAVEfmt '), Buffer.alloc(32)]);
+
+    const res = await request('/api/tts/lines/ending/ending_good/s1/upload?ext=.wav', { method: 'PUT', body: wav });
+    expect(res.status).toBe(200);
+    const { voiceUrl } = await json(res);
+    expect(voiceUrl).toMatch(/^u_s1_[0-9a-f]{8}\.wav$/);
+    expect(await fs.readFile(path.join(dir, voiceUrl))).toEqual(wav);
+    expect(JSON.parse(await fs.readFile(scenarioFile, 'utf8')).scenes[0].voiceUrl).toBe(voiceUrl);
+    await expect(fs.stat(path.join(dir, oldVoice))).rejects.toThrow();
+    expect(onScenarioSaved).toHaveBeenCalled();
+  });
+
+  it('音声でないファイルや知らないセリフは登録しない', async () => {
+    const text = await request('/api/tts/lines/ending/ending_good/s1/upload?ext=.mp3', { method: 'PUT', body: 'これは音声ではありません' });
+    expect(text.status).toBe(400);
+    const exe = await request('/api/tts/lines/ending/ending_good/s1/upload?ext=.exe', { method: 'PUT', body: 'ID3xxxxxxxxxxxx' });
+    expect(exe.status).toBe(400);
+    const missing = await request('/api/tts/lines/ending/ending_good/nothing/upload?ext=.mp3', { method: 'PUT', body: 'ID3xxxxxxxxxxxx' });
+    expect(missing.status).toBe(404);
+  });
+
   it('話者が決まらないセリフは断る', async () => {
     const res = await request('/api/tts/jobs', {
       method: 'POST',

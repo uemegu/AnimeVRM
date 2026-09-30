@@ -3,6 +3,7 @@ import type { StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StudioData } from '../../data/useStudioData';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
+import { useBackdrop } from '../../components/Backdrop';
 
 const LOCATION_KEY = 'studio_motion_preview_location';
 
@@ -32,6 +33,7 @@ export function MotionPreview({ data, avatarUrl, motion, cue }: Props) {
   const [stored, setStored] = useState(storedLocation);
   const locationId = data.locations[stored] ? stored : (Object.keys(data.locations)[0] ?? 'classroom');
   const [viewResetKey, setViewResetKey] = useState(0);
+  useBackdrop(data.locations[locationId]?.layers.background.url);
   const changeLocation = (id: string) => {
     setStored(id);
     try {

@@ -4,6 +4,7 @@ import { useI18n } from '../../i18n';
 import { CalibratePanel } from './CalibratePanel';
 import { GeneratePanel } from './GeneratePanel';
 import { MotionLibrary } from './MotionLibrary';
+import { useBackdrop } from '../../components/Backdrop';
 import './motions.css';
 
 const TABS = ['library', 'generate', 'calibrate'] as const;
@@ -17,6 +18,7 @@ export function MotionsView() {
   const { tab } = useParams();
   const current: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : 'library';
   const { data, error, reload } = useStudioData();
+  useBackdrop();
 
   return (
     <div className="motions-view">

@@ -31,6 +31,7 @@ import {
   type CameraPose as CameraPoseSetting,
   type CameraShot,
   type LocationStage,
+  type ShotRig,
   type AvatarOneShot,
   type CutState,
   type ScenarioScene,
@@ -41,6 +42,9 @@ import { resolveStageQuality, type StageQuality, type StageQualityLevel } from '
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 const CAMERA_TRANSITION_SEC = 0.6;
+/** 横からの構図：カメラと注視点を話者より少し手前に、注視点を話者の少し前（左）に置く */
+const SIDE_SHOT_FORWARD = 0.25;
+const SIDE_SHOT_LEAD = 0.12;
 
 interface CameraPose {
   position: THREE.Vector3;
@@ -1015,8 +1019,11 @@ export class StageManager {
     this.updateCameraTarget();
   }
 
-  /** 構図と登場キャラの位置から、カメラの目標位置を決めて補間を始める */
-  private updateCameraTarget(): void {
+  /**
+   * 今の構図の基準。構図の値（距離・高さ）はここからの差で、x・z は寄る位置、head は合わせる頭の高さ、
+   * extraDistance は横に広がった分だけ足す距離
+   */
+  private shotFrame(): { shot: CameraShot; rig: ShotRig; x: number; z: number; head: number; extraDistance: number } {
     const xs = this.castIds.map((id) => this.castPositions.get(id) ?? 0);
     const focusX =
       (this.cameraFocusId !== null ? this.castPositions.get(this.cameraFocusId) : undefined) ??
@@ -1034,46 +1041,64 @@ export class StageManager {
     const zs = this.castIds.map((id) => this.castDepths.get(id) ?? 0);
     const centerZ = zs.length > 0 ? (Math.min(...zs) + Math.max(...zs)) / 2 : 0;
     const focusZ = (this.cameraFocusId !== null ? this.castDepths.get(this.cameraFocusId) : undefined) ?? centerZ;
-    const shotName = this.timelineShot ?? this.cameraShot;
-    const rig = { ...DEFAULT_SHOT_RIGS[shotName], ...this.locationStage?.camera?.[shotName] };
+    const shot = this.timelineShot ?? this.cameraShot;
+    const rig = { ...DEFAULT_SHOT_RIGS[shot], ...this.locationStage?.camera?.[shot] };
 
-    let x: number;
-    let z: number;
-    let head: number;
-    let distance = rig.distance;
-    switch (shotName) {
+    switch (shot) {
       case 'wide':
         // 横に広がるほど引く
-        x = centerX;
-        z = centerZ;
-        head = tallest;
-        distance += spread * 0.9;
-        break;
+        return { shot, rig, x: centerX, z: centerZ, head: tallest, extraDistance: spread * 0.9 };
       case 'medium':
-        x = focusX * 0.6 + centerX * 0.4;
-        z = focusZ * 0.6 + centerZ * 0.4;
-        head = tallest;
-        break;
+        return { shot, rig, x: focusX * 0.6 + centerX * 0.4, z: focusZ * 0.6 + centerZ * 0.4, head: tallest, extraDistance: 0 };
       default:
-        x = focusX;
-        z = focusZ;
-        head = focusHead;
-        break;
+        return { shot, rig, x: focusX, z: focusZ, head: focusHead, extraDistance: 0 };
     }
+  }
+
+  /** 構図の値からカメラの位置と注視点を決める */
+  private shotPose(frame: ReturnType<StageManager['shotFrame']>): CameraPose {
+    const { rig, x, z, head } = frame;
+    const distance = rig.distance + frame.extraDistance;
+    return frame.shot === 'side'
+      ? {
+          // 横から：カメラを話者の左横・少し手前に置き、話者の少し前を見る（話者は画面の左寄りに横向きで映る）
+          position: new THREE.Vector3(x - distance, head + rig.height, z + SIDE_SHOT_FORWARD),
+          target: new THREE.Vector3(x - SIDE_SHOT_LEAD, head + rig.targetHeight, z + SIDE_SHOT_FORWARD),
+        }
+      : {
+          position: new THREE.Vector3(x, head + rig.height, z + distance),
+          target: new THREE.Vector3(x, head + rig.targetHeight, z),
+        };
+  }
+
+  /**
+   * Studio 用：構図の値を手で調整するときに、カメラが動ける面。注視点の水平位置は固定し、
+   * カメラは構図の向き（azimuth。OrbitControls と同じ、+z から +x へ回る角度）からだけ見る
+   */
+  public getShotRigPlane(): { shot: CameraShot; targetX: number; targetZ: number; azimuth: number } {
+    const frame = this.shotFrame();
+    const { target } = this.shotPose(frame);
+    return { shot: frame.shot, targetX: target.x, targetZ: target.z, azimuth: frame.shot === 'side' ? -Math.PI / 2 : 0 };
+  }
+
+  /** Studio 用：カメラの位置と注視点から、今の構図の値（距離・カメラの高さ・注視点の高さ）を逆算する */
+  public shotRigFromPose(position: THREE.Vector3, target: THREE.Vector3): { shot: CameraShot; rig: ShotRig } {
+    const frame = this.shotFrame();
+    const distance = frame.shot === 'side' ? frame.x - position.x : position.z - frame.z;
+    return {
+      shot: frame.shot,
+      rig: { distance: distance - frame.extraDistance, height: position.y - frame.head, targetHeight: target.y - frame.head },
+    };
+  }
+
+  /** 構図と登場キャラの位置から、カメラの目標位置を決めて補間を始める */
+  private updateCameraTarget(): void {
+    const frame = this.shotFrame();
     // 直接指定（タイムライン → カット）があれば構図より優先する
     const direct = this.timelinePose?.pose ?? (this.timelineShot ? null : this.basePose);
     const pose: CameraPose = direct
       ? { position: new THREE.Vector3(...direct.position), target: new THREE.Vector3(...direct.target) }
-      : shotName === 'side'
-        ? {
-            // 横から：カメラを話者の左横・少し手前に置き、話者の少し前を見る（話者は画面の左寄りに横向きで映る）
-            position: new THREE.Vector3(x - distance, head + rig.height, z + 0.25),
-            target: new THREE.Vector3(x - 0.12, head + rig.targetHeight, z + 0.25),
-          }
-        : {
-            position: new THREE.Vector3(x, head + rig.height, z + distance),
-            target: new THREE.Vector3(x, head + rig.targetHeight, z),
-          };
+      : this.shotPose(frame);
     const fov = direct?.fov ?? this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;

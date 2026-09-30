@@ -1,0 +1,87 @@
+/* プレビュー右上のカメラ調整 */
+.camera-adjust-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  height: 28px;
+  min-width: 132px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--text-sub);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+.camera-adjust-toggle:hover {
+  background: #ffffff;
+}
+.camera-adjust-toggle.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.camera-adjust-panel {
+  position: absolute;
+  top: 46px;
+  right: 10px;
+  z-index: 5;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.camera-adjust-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.camera-adjust-readout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin: 0;
+}
+.camera-adjust-readout > div {
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--bg-muted);
+}
+.camera-adjust-readout dt {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.camera-adjust-readout dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.camera-adjust-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.camera-adjust-actions .btn {
+  width: 100%;
+}

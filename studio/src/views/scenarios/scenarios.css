@@ -299,6 +299,7 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 .scenario-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 10px;
@@ -661,6 +662,28 @@
   flex-direction: column;
   gap: 10px;
 }
+.workbench-camera {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+.workbench-camera-pose {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-sub);
+}
+.workbench-camera-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.workbench-camera-actions .btn {
+  flex: 1 1 auto;
+}
 .workbench-bar {
   display: flex;
   align-items: center;
@@ -832,6 +855,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+.voice-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.voice-upload .field-hint {
+  margin: 0;
 }
 .voice-generate {
   display: flex;

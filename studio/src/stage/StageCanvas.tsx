@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { CameraPose, CameraShot, ScenarioScene, ScrollingBackgroundSettings } from '@anime-vrm/scenario';
+import type { CameraPose, CameraShot, ScenarioScene, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -26,8 +26,17 @@ interface Props {
   viewResetKey?: number;
   /** 手で動かしたカメラの位置が変わったとき */
   onCameraPose?: (pose: CameraPose) => void;
+  /**
+   * freeCamera のとき、構図（cameraShot）の値を調整する動かし方にする。カメラは構図の向きのまま、
+   * ドラッグで上下の角度・右ドラッグで上下の移動・ホイールで距離だけを変える
+   */
+  shotRigMode?: boolean;
+  /** shotRigMode で動かしたときの構図の値（done は操作を終えたとき） */
+  onShotRig?: (shot: CameraShot, rig: ShotRig, done: boolean) => void;
   /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
   onManager?: (manager: StageManager | null) => void;
+  /** 話者（focusId）の口の形。ボイスを鳴らしている間だけ返す */
+  getSpeakerPhoneme?: () => string | undefined;
 }
 
 /**
@@ -47,15 +56,27 @@ export function StageCanvas({
   freeCamera = false,
   viewResetKey = 0,
   onCameraPose,
+  shotRigMode = false,
+  onShotRig,
   onManager,
+  getSpeakerPhoneme,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { language } = useI18n();
+  const phonemeRef = useRef(getSpeakerPhoneme);
+  phonemeRef.current = getSpeakerPhoneme;
 
   useEffect(() => {
     const canvas = canvasRef.current!;
-    const manager = new StageManager({ canvas, presets, initialTimeOfDay: timeOfDay, initialLocationId: locationId, language });
+    const manager = new StageManager({
+      canvas,
+      presets,
+      initialTimeOfDay: timeOfDay,
+      initialLocationId: locationId,
+      language,
+      getSpeakerPhoneme: () => phonemeRef.current?.(),
+    });
     managerRef.current = manager;
     onManager?.(manager);
     const observer = new ResizeObserver(([entry]) => manager.resize(entry.contentRect.width, entry.contentRect.height));
@@ -123,6 +144,8 @@ export function StageCanvas({
   const controlsRef = useRef<{ release: () => void } | null>(null);
   const onCameraPoseRef = useRef(onCameraPose);
   onCameraPoseRef.current = onCameraPose;
+  const onShotRigRef = useRef(onShotRig);
+  onShotRigRef.current = onShotRig;
   useEffect(() => {
     const manager = managerRef.current;
     const canvas = canvasRef.current;
@@ -130,15 +153,48 @@ export function StageCanvas({
     const camera = manager.viewCamera;
     const controls = new OrbitControls(camera, canvas);
     controls.target.copy(manager.viewTarget);
-    controls.enableDamping = true;
+    // 構図の調整は、離したところで止まるように慣性をつけない
+    const damping = !shotRigMode;
+    controls.enableDamping = damping;
+    if (shotRigMode) {
+      // 小さなプレビューでも細かく合わせられるよう、ゆっくり動かし、見上げ・見下ろしすぎないようにする
+      controls.rotateSpeed = 0.35;
+      controls.zoomSpeed = 0.5;
+      controls.minPolarAngle = Math.PI * 0.3;
+      controls.maxPolarAngle = Math.PI * 0.62;
+    }
     let taken = false;
+    let plane: ReturnType<StageManager['getShotRigPlane']> | null = null;
     const take = () => {
+      if (shotRigMode) {
+        // 構図の向きからだけ見る（左右には回さない）。右ドラッグの移動は画面の上下に効かせる
+        plane = manager.getShotRigPlane();
+        controls.minAzimuthAngle = plane.azimuth;
+        controls.maxAzimuthAngle = plane.azimuth;
+        controls.screenSpacePanning = true;
+      }
       if (taken) return;
       taken = true;
       controls.target.copy(manager.viewTarget);
       manager.setFreeCamera(true);
     };
+    const round = (v: number) => Math.round(v * 100) / 100;
+    const reportRig = (done: boolean) => {
+      if (!shotRigMode || !taken) return;
+      const { shot, rig } = manager.shotRigFromPose(camera.position, controls.target);
+      onShotRigRef.current?.(shot, { distance: round(rig.distance), height: round(rig.height), targetHeight: round(rig.targetHeight) }, done);
+    };
     const report = () => {
+      // 構図の調整では、注視点を構図の位置から左右・前後にずらさない
+      if (plane) {
+        const dx = plane.targetX - controls.target.x;
+        const dz = plane.targetZ - controls.target.z;
+        controls.target.x += dx;
+        controls.target.z += dz;
+        camera.position.x += dx;
+        camera.position.z += dz;
+      }
+      reportRig(false);
       manager.setFreeCameraTarget(controls.target);
       onCameraPoseRef.current?.({
         position: camera.position.toArray().map((v) => Math.round(v * 1000) / 1000) as [number, number, number],
@@ -146,8 +202,10 @@ export function StageCanvas({
         fov: camera.fov,
       });
     };
+    const end = () => reportRig(true);
     controls.addEventListener('start', take);
     controls.addEventListener('change', report);
+    controls.addEventListener('end', end);
     report();
     controlsRef.current = {
       // 構図へ戻す（慣性の残りを消してから、構図の位置へ補間させる）
@@ -155,7 +213,7 @@ export function StageCanvas({
         if (!taken) return;
         controls.enableDamping = false;
         controls.update();
-        controls.enableDamping = true;
+        controls.enableDamping = damping;
         taken = false;
         manager.setFreeCamera(false);
       },
@@ -170,11 +228,12 @@ export function StageCanvas({
       cancelAnimationFrame(frame);
       controls.removeEventListener('start', take);
       controls.removeEventListener('change', report);
+      controls.removeEventListener('end', end);
       controls.dispose();
       controlsRef.current = null;
       manager.setFreeCamera(false);
     };
-  }, [freeCamera]);
+  }, [freeCamera, shotRigMode]);
 
   useEffect(() => {
     if (viewResetKey !== 0) controlsRef.current?.release();

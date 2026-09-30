@@ -208,6 +208,7 @@
   }
 }
 .scenes-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 10px;
