@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CameraShot, CharacterBook } from '@anime-vrm/scenario';
+import { DEFAULT_AVATAR_LOOK, EffectTextPreset, SweatMode, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
-import { WHISPER_MOUTH_SCALE } from '@anime-vrm/engine/stage/StageManager';
+import { WHISPER_MOUTH_SCALE, type StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { api, type AssetEntry } from '../../api/client';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
@@ -15,7 +15,11 @@ import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'divine'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
-const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised'] as const;
+const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
+const FACE_EFFECTS = ['blush', 'anger', 'tears', 'faceSweat'] as const;
+type FaceEffect = (typeof FACE_EFFECTS)[number];
+const TABS = ['expression', 'motion', 'voice'] as const;
+type Tab = (typeof TABS)[number];
 const IDLE = 'Standing Idle';
 
 /** assets/animations/<name>.fbx の name */
@@ -38,10 +42,18 @@ export function ViewerView() {
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDayId>('day');
   const [shot, setShot] = useState<CameraShot>('speaker');
   const [expression, setExpression] = useState<string>('neutral');
+  const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
   const [motionLoop, setMotionLoop] = useState(true);
   const [motionCue, setMotionCue] = useState(0);
   const [motionFilter, setMotionFilter] = useState('');
+  const [tab, setTab] = useState<Tab>('expression');
+
+  // 汗・文字演出は1回きりなので、押したときに直接出す
+  const managerRef = useRef<StageManager | null>(null);
+  const onManager = useCallback((manager: StageManager | null) => {
+    managerRef.current = manager;
+  }, []);
 
   useEffect(() => {
     Promise.all([api.characters(), api.assets('animations'), api.assets('models'), api.assets('voices')])
@@ -108,10 +120,11 @@ export function ViewerView() {
               motion,
               motionLoop,
               motionCue: String(motionCue),
+              look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects },
             },
           ]
         : [],
-    [characterId, model, expression, motion, motionLoop, motionCue]
+    [characterId, model, expression, motion, motionLoop, motionCue, faceEffects]
   );
 
   useBackdrop(presets?.locations[locationId]?.layers?.background?.url);
@@ -176,50 +189,105 @@ export function ViewerView() {
             )}
           </section>
 
-          <section className="viewer-section">
-            <h2>{t.viewer.expression}</h2>
-            <div className="viewer-chip-grid">
-              {EXPRESSIONS.map((e) => (
-                <button key={e} type="button" className={`viewer-chip${e === expression ? ' active' : ''}`} onClick={() => setExpression(e)}>
-                  {t.viewer.expressions[e]}
-                </button>
-              ))}
-            </div>
-          </section>
+          <div className="viewer-tabs" role="tablist">
+            {TABS.map((key) => (
+              <button key={key} type="button" role="tab" aria-selected={tab === key} className={`viewer-tab${tab === key ? ' active' : ''}`} onClick={() => setTab(key)}>
+                {t.viewer.tabs[key]}
+              </button>
+            ))}
+          </div>
 
-          <section className="viewer-section grow">
-            <div className="viewer-section-title">
-              <h2>{t.viewer.motion}</h2>
-              <label className="viewer-toggle">
-                <input type="checkbox" checked={motionLoop} onChange={(e) => setMotionLoop(e.target.checked)} />
-                {t.viewer.loop}
-              </label>
-            </div>
-            <input className="input" placeholder={t.viewer.searchMotion} value={motionFilter} onChange={(e) => setMotionFilter(e.target.value)} />
-            <ul className="viewer-motion-list">
-              {filteredMotions.map((m) => {
-                const name = motionName(m.url);
-                return (
-                  <li key={m.url}>
-                    <button type="button" className={name === motion ? 'active' : ''} onClick={() => playMotion(name)}>
-                      {name}
+          {tab === 'expression' && (
+            <>
+              <section className="viewer-section">
+                <h2>{t.viewer.expression}</h2>
+                <div className="viewer-chip-grid">
+                  {EXPRESSIONS.map((e) => (
+                    <button key={e} type="button" className={`viewer-chip${e === expression ? ' active' : ''}`} onClick={() => setExpression(e)}>
+                      {t.viewer.expressions[e]}
                     </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
+                  ))}
+                </div>
+              </section>
 
-          <VoiceLibrary
-            voices={voices}
-            playingUrl={playingVoice}
-            whispers={whispers}
-            onWhisperChange={setWhisper}
-            muted={muted}
-            onToggle={toggleVoice}
-            onToggleMute={toggleMute}
-            onUploaded={() => api.assets('voices').then(setVoices, () => {})}
-          />
+              <section className="viewer-section">
+                <h2>{t.viewer.faceEffects}</h2>
+                <div className="viewer-chip-grid">
+                  {FACE_EFFECTS.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`viewer-chip${faceEffects[key] ? ' active' : ''}`}
+                      aria-pressed={faceEffects[key]}
+                      onClick={() => setFaceEffects((current) => ({ ...current, [key]: !current[key] }))}
+                    >
+                      {key === 'faceSweat' ? t.viewer.faceSweat : t.scenarios.effects[key]}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="viewer-section">
+                <h2>{t.viewer.sweat}</h2>
+                <div className="viewer-chip-grid">
+                  {SweatMode.options.map((mode) => (
+                    <button key={mode} type="button" className="viewer-chip" onClick={() => managerRef.current?.showOneShot(characterId, { sweat: mode })}>
+                      {t.scenarios.effects.sweatModes[mode]}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="viewer-section">
+                <h2>{t.viewer.effectText}</h2>
+                <div className="viewer-chip-grid">
+                  {EffectTextPreset.options.map((preset) => (
+                    <button key={preset} type="button" className="viewer-chip" onClick={() => managerRef.current?.showOneShot(characterId, { effectText: preset })}>
+                      {t.scenarios.effects.presets[preset]}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+
+          {tab === 'motion' && (
+            <section className="viewer-section grow">
+              <div className="viewer-section-title">
+                <h2>{t.viewer.motion}</h2>
+                <label className="viewer-toggle">
+                  <input type="checkbox" checked={motionLoop} onChange={(e) => setMotionLoop(e.target.checked)} />
+                  {t.viewer.loop}
+                </label>
+              </div>
+              <input className="input" placeholder={t.viewer.searchMotion} value={motionFilter} onChange={(e) => setMotionFilter(e.target.value)} />
+              <ul className="viewer-motion-list">
+                {filteredMotions.map((m) => {
+                  const name = motionName(m.url);
+                  return (
+                    <li key={m.url}>
+                      <button type="button" className={name === motion ? 'active' : ''} onClick={() => playMotion(name)}>
+                        {name}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          )}
+
+          {tab === 'voice' && (
+            <VoiceLibrary
+              voices={voices}
+              playingUrl={playingVoice}
+              whispers={whispers}
+              onWhisperChange={setWhisper}
+              muted={muted}
+              onToggle={toggleVoice}
+              onToggleMute={toggleMute}
+              onUploaded={() => api.assets('voices').then(setVoices, () => {})}
+            />
+          )}
         </div>
       </aside>
 
@@ -252,7 +320,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} onManager={onManager} />
         </div>
 
         <p className="viewer-caption">

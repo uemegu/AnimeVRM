@@ -53,7 +53,7 @@ export const CameraPose = z.strictObject({
 export type CameraPose = z.infer<typeof CameraPose>;
 
 /** 表情（VRM の標準の表情） */
-export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised']);
+export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima']);
 export type Expression = z.infer<typeof Expression>;
 
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */

@@ -52,6 +52,8 @@ export interface AvatarLook {
   blush: boolean;
   anger: boolean;
   tears: boolean;
+  /** 顔に汗のテクスチャを重ねる（今はビューアの試し用で、シナリオからは指定できない） */
+  faceSweat?: boolean;
   /** 目が泳ぐ強さ（0 で止まる） */
   eyeWander: number;
   fastMotion: boolean;
