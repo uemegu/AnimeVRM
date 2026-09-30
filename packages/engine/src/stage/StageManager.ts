@@ -37,6 +37,7 @@ import {
   type TextContent,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
+import { resolveStageQuality, type StageQuality, type StageQualityLevel } from './quality';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 const CAMERA_TRANSITION_SEC = 0.6;
@@ -71,6 +72,8 @@ export interface StageOptions {
   initialLocationId?: string;
   /** 文字演出などの言語（既定 ja） */
   language?: 'ja' | 'en';
+  /** 描画・計算の重さ。段階名か項目ごとの上書き。省略時は端末から決める（stage/quality.ts） */
+  quality?: StageQualityLevel | Partial<StageQuality>;
 }
 
 export class StageManager {
@@ -161,6 +164,7 @@ export class StageManager {
   /** 集中線・瞼・暗転（canvas の親要素に重ねる） */
   private screenEffects: ScreenEffects | null = null;
   private language: 'ja' | 'en';
+  private quality: StageQuality;
   private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraTo: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraCurrentTarget = new THREE.Vector3(0, 1.15, 0);
@@ -181,6 +185,7 @@ export class StageManager {
     this.getSpeakerPhoneme = options.getSpeakerPhoneme;
     this.getCutTime = options.getCutTime;
     this.language = options.language ?? 'ja';
+    this.quality = resolveStageQuality(options.quality);
     this.clock = new THREE.Clock();
     if (this.canvas.parentElement) this.screenEffects = new ScreenEffects(this.canvas.parentElement);
 
@@ -709,6 +714,8 @@ export class StageManager {
       scene: this.scene,
       camera: this.camera,
       hairShadow: this.hairShadow.uniforms,
+      handClearance: this.quality.handClearance,
+      clothDent: this.quality.clothDent,
     });
 
     await avatar.load(modelUrl);
@@ -866,6 +873,19 @@ export class StageManager {
   /** 文字演出などの言語 */
   public setLanguage(language: 'ja' | 'en'): void {
     this.language = language;
+  }
+
+  /** 描画・計算の重さを切り替える（段階名か項目ごとの上書き） */
+  public setQuality(quality: StageQualityLevel | Partial<StageQuality>): void {
+    this.quality = resolveStageQuality(quality);
+    for (const avatar of this.loadedAvatars.values()) {
+      avatar.setHandClearance(this.quality.handClearance);
+      avatar.setClothDent(this.quality.clothDent);
+    }
+  }
+
+  public getQuality(): StageQuality {
+    return { ...this.quality };
   }
 
   /**

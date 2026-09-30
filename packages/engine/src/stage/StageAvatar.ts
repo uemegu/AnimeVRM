@@ -8,6 +8,9 @@ import { applySmoothNormalsToHierarchy } from '../shader/SmoothNormalHelper';
 import type { MaterialStyleParams, OutlineConfig } from './visual';
 import { getSeamlessLoopClip } from '../animation/seamlessLoop';
 import { replaceHappyWithEyesOnly } from '../avatar/happyEyesOnly';
+import { addHandColliders } from '../avatar/handColliders';
+import { HandClearance, type HandClearanceMode } from '../avatar/handClearance';
+import { ClothDent } from '../avatar/clothDent';
 import { AvatarEffects } from './AvatarEffects';
 import { resolveAssetUrl } from '../utils/path';
 import { setDaylight } from '../scene/Daylight';
@@ -191,6 +194,10 @@ export interface StageAvatarOptions {
   hairShadow?: HairShadowUniforms;
   defaultAnimationUrl?: string;
   initialPosition?: THREE.Vector3;
+  /** 手が肌（頭・太もも）で止まる処理の精度（既定 precise） */
+  handClearance?: HandClearanceMode;
+  /** 手に押されてスカートがへこむ（既定 true） */
+  clothDent?: boolean;
 }
 
 export class StageAvatar {
@@ -202,6 +209,12 @@ export class StageAvatar {
   private camera: THREE.Camera | undefined;
   private hairShadow: HairShadowUniforms | undefined;
   public mixer: THREE.AnimationMixer | null = null;
+  /** 手が肌（頭・太もも）に入らないよう腕をずらす（モーションの姿勢に足す） */
+  private handClearance: HandClearance | null = null;
+  private handClearanceMode: HandClearanceMode;
+  /** 手に押されてスカートがへこむ */
+  private clothDent: ClothDent | null = null;
+  private clothDentEnabled: boolean;
   public shaderController: ToonShaderController | null = null;
   /** 感情演出（頬赤・涙・汗・文字演出など）。モデルの読み込み後に作る */
   public effects: AvatarEffects | null = null;
@@ -266,6 +279,8 @@ export class StageAvatar {
     this.scene = options.scene;
     this.camera = options.camera;
     this.hairShadow = options.hairShadow;
+    this.handClearanceMode = options.handClearance ?? 'precise';
+    this.clothDentEnabled = options.clothDent ?? true;
   }
 
   public async load(modelUrl: string, defaultAnimationUrl = '/animations/Standing Idle.fbx'): Promise<VRM> {
@@ -285,6 +300,9 @@ export class StageAvatar {
           this.vrm = vrm;
           VRMUtils.rotateVRM0(vrm);
           replaceHappyWithEyesOnly(vrm);
+          addHandColliders(vrm);
+          this.handClearance = HandClearance.create(vrm, this.handClearanceMode);
+          this.clothDent = ClothDent.create(vrm, this.clothDentEnabled);
 
           // 1. スムース法線の事前計算（綺麗なアニメアウトライン用）
           applySmoothNormalsToHierarchy(vrm.scene);
@@ -373,6 +391,18 @@ export class StageAvatar {
   }
 
   /** モーションの再生速度（1 が通常） */
+  /** 手が肌で止まる処理の精度を切り替える */
+  public setHandClearance(mode: HandClearanceMode): void {
+    this.handClearanceMode = mode;
+    this.handClearance?.setMode(mode);
+  }
+
+  /** 手に押されてスカートがへこむかを切り替える */
+  public setClothDent(enabled: boolean): void {
+    this.clothDentEnabled = enabled;
+    this.clothDent?.setEnabled(enabled);
+  }
+
   public setMotionSpeed(speed: number): void {
     this.motionSpeed = speed;
     if (this.currentAction) this.currentAction.timeScale = speed;
@@ -568,12 +598,16 @@ export class StageAvatar {
     // 1. モーション再生（前のフレームで足した顔の向きを先に戻す）
     for (const { bone, rotation } of this.appliedTurn) bone.quaternion.multiply(rotation.invert());
     this.appliedTurn = [];
+    this.handClearance?.restore();
     if (this.mixer) {
       this.mixer.update(delta);
     }
 
     // 1.5 顔を視線の先へ向ける（モーションの姿勢に足す）
     this.updateHeadTurn(delta);
+
+    // 1.6 手が肌（頭・太もも）に入っていたら外へ出す（頭の向きが決まってから）
+    this.handClearance?.apply();
 
     // 2. 表情クロスフェード
     this.updateExpressions(delta);
@@ -586,6 +620,9 @@ export class StageAvatar {
 
     // 4. VRM SpringBone・Humanoid更新
     this.vrm.update(delta);
+
+    // 4.5 手に押されてスカートがへこむ（腕と揺れものが決まってから）
+    this.clothDent?.update();
 
     // 5. 感情演出
     if (frame) {
