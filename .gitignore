@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 /samples
 /scratch
+# Local video production files and generated artifacts
+/local-artifacts/
 /scripts/*
 !/scripts/ardy-generate.ts
 !/scripts/validate.ts
@@ -36,6 +38,10 @@ dist-ssr
 /tests
 /test-results
 .env
-/test
 /assets/thumbnails
 /mini-game/pool/test-output
+# app/scripts の使い捨て撮影・検証スクリプト
+/app/scripts/*
+!/app/scripts/generate-*.js
+!/app/scripts/scenario-voices.py
+/trash
