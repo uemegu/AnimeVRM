@@ -36,6 +36,10 @@ export function ScenariosView() {
   const [center, setCenter] = useState<'preview' | 'flow'>('preview');
   // シナリオを開いたら一覧はたたんで、プレビューを広く取る
   const [listOpen, setListOpen] = useState(!id);
+  // 全体図へ戻ったら（サイドバーのシナリオなど）一覧を開く。閉じたままだと全体図だけになる
+  useEffect(() => {
+    if (!id) setListOpen(true);
+  }, [id]);
   const [creating, setCreating] = useState<{ category: ScenarioCategory; id: string } | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
 

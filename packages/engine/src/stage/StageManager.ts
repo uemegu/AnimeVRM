@@ -1014,6 +1014,11 @@ export class StageManager {
     if (shot.sweat) effects.showSweat(shot.sweat);
   }
 
+  /** 出ている文字演出を消す（ビューアの OFF ボタン） */
+  public clearEffectText(id: string): void {
+    this.loadedAvatars.get(id)?.effects?.clearText();
+  }
+
   private localize(text: TextContent | undefined): string | undefined {
     if (text === undefined || typeof text === 'string') return text;
     return (this.language === 'en' ? text.en : undefined) ?? text.ja;

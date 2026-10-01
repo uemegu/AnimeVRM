@@ -98,10 +98,9 @@ export function ViewerView() {
   };
   const getPhoneme = useCallback(() => audioRef.current?.getPhoneme(), []);
 
-  // 囁き声として試聴するボイス（口を小さく開く）。試聴用なので保存しない。シナリオではセリフの voiceWhisper で指定する
-  const [whispers, setWhispers] = useState<Record<string, boolean>>({});
-  const setWhisper = (url: string, whisper: boolean) => setWhispers((current) => ({ ...current, [url]: whisper }));
-  const mouthScale = playingVoice && whispers[playingVoice] ? WHISPER_MOUTH_SCALE : 1;
+  // 囁き声として試聴するか（口を小さく開く）。試聴用なので保存しない。シナリオではセリフの voiceWhisper で指定する
+  const [whisper, setWhisper] = useState(false);
+  const mouthScale = playingVoice && whisper ? WHISPER_MOUTH_SCALE : 1;
 
   const characters = book?.characters.filter((c) => c.models.length > 0) ?? [];
   const character = characters.find((c) => c.id === characterId);
@@ -246,6 +245,9 @@ export function ViewerView() {
                       {t.scenarios.effects.presets[preset]}
                     </button>
                   ))}
+                  <button type="button" className="viewer-chip" onClick={() => managerRef.current?.clearEffectText(characterId)}>
+                    {t.viewer.effectTextOff}
+                  </button>
                 </div>
               </section>
             </>
@@ -280,8 +282,8 @@ export function ViewerView() {
             <VoiceLibrary
               voices={voices}
               playingUrl={playingVoice}
-              whispers={whispers}
-              onWhisperChange={setWhisper}
+              whisper={whisper}
+              onToggleWhisper={() => setWhisper((current) => !current)}
               muted={muted}
               onToggle={toggleVoice}
               onToggleMute={toggleMute}
