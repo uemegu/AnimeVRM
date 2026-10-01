@@ -29,6 +29,11 @@ class LoopTrack {
     if (this.audio) this.audio.muted = muted;
   }
 
+  /** 鳴らしたまま音量の倍率を変える */
+  setScale(scale: number): void {
+    if (this.audio) this.audio.volume = this.volume * scale;
+  }
+
   stop(): void {
     this.audio?.pause();
     this.audio = null;
@@ -82,6 +87,11 @@ export class PlayerAudio {
   /** BGM（URL と音量の倍率。null で止める） */
   playBgm(url: string | null, volumeScale = 1): void {
     this.bgm.play(url, this.mutedState, volumeScale);
+  }
+
+  /** 鳴っている BGM の音量の倍率を変える（試聴しながら調整するため） */
+  setBgmVolumeScale(volumeScale: number): void {
+    this.bgm.setScale(volumeScale);
   }
 
   playAmbience(url: string | null): void {
