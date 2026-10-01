@@ -30,6 +30,7 @@ dist-ssr
 !/scripts/ardy-generate.ts
 !/scripts/validate.ts
 !/scripts/shot.ts
+!/scripts/transplant-vrm-meshes.ts
 # ardy-generate.ts が読み込む
 !/scripts/lib/
 /blender
