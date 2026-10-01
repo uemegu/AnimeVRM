@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-26T11:21:03.860Z",
+  "generatedAt": "2026-10-01T16:12:39.340Z",
   "itemCount": 14,
-  "totalBytes": 176297845,
-  "totalMb": 168.1,
+  "totalBytes": 179543185,
+  "totalMb": 171.2,
   "items": [
     {
       "id": "aoi_school",
@@ -41,7 +41,7 @@
         "ja": "アオイ（制服・リュック付き）",
         "en": "Aoi (School with Bag)"
       },
-      "sizeBytes": 19220548,
+      "sizeBytes": 20443916,
       "type": "vrm"
     },
     {
@@ -51,7 +51,7 @@
         "ja": "エミリ（制服・リュック付き）",
         "en": "Emili (School with Bag)"
       },
-      "sizeBytes": 18332268,
+      "sizeBytes": 19627812,
       "type": "vrm"
     },
     {
@@ -91,7 +91,7 @@
         "ja": "シオン（私服モデル）",
         "en": "Shion (Private)"
       },
-      "sizeBytes": 14684944,
+      "sizeBytes": 15411372,
       "type": "vrm"
     },
     {
