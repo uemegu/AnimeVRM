@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_gate",
+  "title": {
+    "ja": "校門のシオン — 簡易3Dの校門",
+    "en": "Shion at the gate (painted 3D)"
+  },
+  "description": "下書きの上に描いた1枚絵を箱に投影した簡易3Dの校門。門の前に立つシオンを、朝・昼・放課後の光で見る。",
+  "location": "painted_gate",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "morning",
+  "scenes": [
+    {
+      "id": "morning_1",
+      "text": "登校時間の校門。開いた門の前で、シオンが立っている。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.5,
+          4.2
+        ],
+        "target": [
+          0,
+          1.1,
+          -2
+        ],
+        "fov": 50
+      },
+      "autoNextSec": 2.2
+    },
+    {
+      "id": "morning_2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……おはよう。門の前で待ってたわけじゃないから」",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.35,
+          2.2
+        ],
+        "target": [
+          0,
+          1.15,
+          0
+        ],
+        "fov": 44
+      }
+    },
+    {
+      "id": "day_1",
+      "timeOfDay": "day",
+      "text": "昼休み。門の前の広場は人がまばらで、風が木の葉を揺らしている。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.8,
+          1.35,
+          2.4
+        ],
+        "target": [
+          0,
+          1.1,
+          -0.5
+        ],
+        "fov": 46
+      },
+      "autoNextSec": 2.2
+    },
+    {
+      "id": "day_2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「外に出るの？　先生に見つかっても知らないわよ」",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.1,
+          1.3,
+          1.6
+        ],
+        "target": [
+          0,
+          1.25,
+          0
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "evening_1",
+      "timeOfDay": "evening",
+      "text": "放課後。夕日が門柱を長く照らしている。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.5,
+          4.2
+        ],
+        "target": [
+          0,
+          1.1,
+          -2
+        ],
+        "fov": 50
+      },
+      "autoNextSec": 2.2
+    },
+    {
+      "id": "evening_2",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……帰るなら、途中まで一緒に行ってあげてもいいけど」",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.35,
+          2.2
+        ],
+        "target": [
+          0,
+          1.15,
+          0
+        ],
+        "fov": 44
+      }
+    }
+  ]
+}
