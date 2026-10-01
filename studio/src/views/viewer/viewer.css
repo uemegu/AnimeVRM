@@ -318,16 +318,6 @@
   align-items: center;
   gap: 8px;
 }
-.viewer-voice-whisper {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 10px 0 6px;
-  font-size: 12px;
-  color: var(--text-sub);
-  cursor: pointer;
-}
 .viewer-voice-icon {
   width: 20px;
   height: 20px;

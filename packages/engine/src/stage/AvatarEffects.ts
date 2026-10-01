@@ -116,6 +116,11 @@ export class AvatarEffects {
     this.texts.show({ target: this.vrm, stylePreset: preset, text, duration });
   }
 
+  /** 文字演出を消す */
+  public clearText(): void {
+    this.texts.clear();
+  }
+
   /** 1回きりの演出（文字・汗）を消す（カットが変わったとき） */
   public clearOneShots(): void {
     this.texts.clear();

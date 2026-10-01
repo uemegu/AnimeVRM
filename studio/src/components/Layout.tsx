@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { READ_ONLY } from '../api/client';
 import { useI18n, type Language } from '../i18n';
@@ -22,11 +23,33 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/motions', icon: 'motions', label: (t) => t.nav.motions, ready: true },
 ];
 
+const COLLAPSED_KEY = 'studio_sidebar_collapsed';
+
+/** 閉じているか。決めていなければ iPad など狭い画面では閉じておく */
+function initialCollapsed(): boolean {
+  try {
+    const stored = localStorage.getItem(COLLAPSED_KEY);
+    if (stored !== null) return stored === 'true';
+  } catch {
+    // 保存できない環境では画面幅で決める
+  }
+  return window.innerWidth < 1200;
+}
+
 export function Layout() {
   const { t, language, setLanguage } = useI18n();
   const backdrop = useBackdropActive();
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+    try {
+      localStorage.setItem(COLLAPSED_KEY, String(!collapsed));
+    } catch {
+      // 覚えられなくても開閉はできる
+    }
+  };
   return (
-    <div className="studio">
+    <div className={`studio${collapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="studio-sidebar">
         <div className="studio-brand">
           <div className="studio-brand-logo" aria-hidden="true">
@@ -55,10 +78,20 @@ export function Layout() {
             <span className="studio-brand-title">AnimeVRM</span>
             <span className="studio-brand-sub">Studio</span>
           </div>
+          <button
+            type="button"
+            className="studio-sidebar-toggle"
+            title={collapsed ? t.nav.expand : t.nav.collapse}
+            aria-label={collapsed ? t.nav.expand : t.nav.collapse}
+            aria-expanded={!collapsed}
+            onClick={toggleCollapsed}
+          >
+            <Icon name="sidebar" size={16} />
+          </button>
         </div>
         <nav className="studio-nav">
           {NAV_ITEMS.map((item) => (
-            <NavLink key={item.path} to={item.path} className={({ isActive }) => `studio-nav-item${isActive ? ' active' : ''}`}>
+            <NavLink key={item.path} to={item.path} title={collapsed ? item.label(t) : undefined} className={({ isActive }) => `studio-nav-item${isActive ? ' active' : ''}`}>
               <Icon name={item.icon} />
               <span className="studio-nav-label">{item.label(t)}</span>
               {!item.ready && <span className="studio-nav-badge">{t.nav.comingSoon}</span>}
@@ -67,6 +100,9 @@ export function Layout() {
         </nav>
         <div className="studio-sidebar-footer">
           {READ_ONLY && <p className="studio-readonly">{t.common.readOnly}</p>}
+          <button type="button" className="studio-lang-compact" title={language === 'ja' ? 'English' : '日本語'} onClick={() => setLanguage(language === 'ja' ? 'en' : 'ja')}>
+            {language === 'ja' ? 'JA' : 'EN'}
+          </button>
           <div className="studio-lang" role="group" aria-label="Language">
             {(['ja', 'en'] as Language[]).map((lang) => (
               <button

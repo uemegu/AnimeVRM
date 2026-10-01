@@ -11,6 +11,7 @@ const PATHS = {
   play: 'M8 5.5v13l10.5-6.5z',
   stop: 'M7 7h10v10H7z',
   chevron: 'M9 6l6 6-6 6',
+  sidebar: 'M4 5h16v14H4zM9.5 5v14',
   copy: 'M9 9h10v10H9zM5 15V5h10',
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
   upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
