@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
-import { extractThumbnailForVrm, findThumbnail } from '../vrmThumbnail.ts';
+import { ensureVrmThumbnail, extractThumbnailForVrm } from '../vrmThumbnail.ts';
 
 const AUDIO = ['.mp3', '.ogg', '.wav'];
 const IMAGE = ['.avif', '.png', '.jpg', '.jpeg', '.webp'];
@@ -98,9 +98,10 @@ export function assetRoutes(config: ServerConfig) {
         if (kind === 'models' && path.extname(f).toLowerCase() === '.vrm') {
           const relToModels = path.relative(base, f);
           const relWithoutExt = relToModels.slice(0, -path.extname(relToModels).length);
-          const thumb = await findThumbnail(path.join(config.assetsDir, 'thumbnails'), relWithoutExt);
+          // モデルが差し替えられていれば取り出し直す。ブラウザが前の画像を使わないよう、URL に更新時刻を付ける
+          const thumb = await ensureVrmThumbnail(f, path.join(config.assetsDir, 'thumbnails'), relWithoutExt);
           if (thumb) {
-            entry.thumbnailUrl = '/api/assets/thumbnails/' + thumb.fileName.split(path.sep).join('/');
+            entry.thumbnailUrl = `/api/assets/thumbnails/${thumb.fileName.split(path.sep).join('/')}?v=${Math.floor(thumb.updatedAt)}`;
           }
         }
 

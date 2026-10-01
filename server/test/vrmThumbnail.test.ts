@@ -129,6 +129,22 @@ describe('vrmThumbnail', () => {
     expect(afterCheck.equals(modifiedContent)).toBe(true);
   });
 
+  it('ensureVrmThumbnails: モデルがサムネイルより新しければ取り出し直す', async () => {
+    const vrmPath = path.join(assetsDir, 'models', 'chara', 'test.vrm');
+    const thumbPath = path.join(assetsDir, 'thumbnails', 'chara', 'test.png');
+    await fs.writeFile(vrmPath, createFakeVRM({ imageBuffer: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x01]) }));
+    await ensureVrmThumbnails(assetsDir);
+
+    // モデルを差し替える（サムネイルより新しい時刻にする）
+    const replaced = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x02]);
+    await fs.writeFile(vrmPath, createFakeVRM({ imageBuffer: replaced }));
+    const later = new Date(Date.now() + 60_000);
+    await fs.utimes(vrmPath, later, later);
+
+    expect(await ensureVrmThumbnails(assetsDir)).toBe(1);
+    expect((await fs.readFile(thumbPath)).subarray(0, replaced.length).equals(replaced)).toBe(true);
+  });
+
   it('API 経由でサムネイル画像を取得でき、models 一覧に thumbnailUrl が含まれる', async () => {
     const vrmPath = path.join(assetsDir, 'models', 'chara', 'test.vrm');
     const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -156,7 +172,7 @@ describe('vrmThumbnail', () => {
     const models = (await modelsRes.json()) as any[];
     expect(models).toHaveLength(1);
     expect(models[0].url).toBe('/models/chara/test.vrm');
-    expect(models[0].thumbnailUrl).toBe('/api/assets/thumbnails/chara/test.png');
+    expect(models[0].thumbnailUrl).toMatch(/^\/api\/assets\/thumbnails\/chara\/test\.png\?v=\d+$/);
 
     // 2. GET /api/assets/thumbnails/chara/test.png で画像バイナリが返る
     const thumbRes = await app.request('/api/assets/thumbnails/chara/test.png', {
