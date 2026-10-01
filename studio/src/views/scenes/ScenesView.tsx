@@ -216,7 +216,8 @@ export function ScenesView() {
           {ids.map((id) => {
             const isLocation = tab === 'locations';
             const name = isLocation ? locations.presets[id]?.name : time.presets[id]?.name;
-            const bgUrl = isLocation ? locations.presets[id]?.layers?.background?.url : undefined;
+            const loc = isLocation ? locations.presets[id] : undefined;
+            const bgUrl = loc?.thumbnail ?? loc?.layers?.background?.url;
             return (
               <button
                 key={id}
@@ -395,7 +396,7 @@ export function ScenesView() {
             <div className="scenes-locations-panel">
               <div className="scenes-locations-grid">
                 {Object.values(locations.presets).map((loc) => {
-                  const bgUrl = loc.layers?.background?.url;
+                  const bgUrl = loc.thumbnail ?? loc.layers?.background?.url;
                   const isActive = loc.id === previewLocation;
                   return (
                     <button

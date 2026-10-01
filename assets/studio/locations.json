@@ -255,6 +255,7 @@
       "id": "painted_classroom",
       "name": "教室（簡易3D）",
       "isIndoor": true,
+      "thumbnail": "/textures/painted-classroom/thumb-classroom.avif",
       "layers": {
         "background": {
           "url": "/textures/painted-classroom/sky-only.png"
@@ -283,6 +284,7 @@
       "id": "painted_library",
       "name": "図書室（簡易3D）",
       "isIndoor": true,
+      "thumbnail": "/textures/painted-classroom/thumb-library.avif",
       "layers": {
         "background": {
           "url": "/textures/painted-classroom/sky-only.png"
@@ -311,6 +313,7 @@
       "id": "painted_gate",
       "name": "校門（簡易3D）",
       "isIndoor": false,
+      "thumbnail": "/textures/painted-classroom/thumb-gate.avif",
       "layers": {
         "background": {
           "url": "/textures/painted-classroom/sky-only.png"

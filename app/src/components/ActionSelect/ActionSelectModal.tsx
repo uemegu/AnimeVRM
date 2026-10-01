@@ -284,7 +284,8 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
               ? opt.hintText[lang] || opt.hintText.ja
               : null;
             const isHighlighted = activeId === opt.id;
-            const thumbnailUrl = LOCATION_VISUAL_PRESETS[opt.id]?.layers.background?.url;
+            const preset = LOCATION_VISUAL_PRESETS[opt.id];
+            const thumbnailUrl = preset?.thumbnail ?? preset?.layers.background?.url;
 
             return (
               <button

@@ -266,6 +266,8 @@ export const LocationVisualPreset = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
   name: z.string().meta(label('名前', 'Name')),
   isIndoor: bool('屋内', 'Indoor').optional(),
+  /** 一覧に出すサムネイル。なければ遠景の画像を使う（3D背景の場所は遠景が空だけなので、撮影した画像を置く） */
+  thumbnail: z.string().meta({ ...label('サムネイル', 'Thumbnail'), kind: 'image' }).optional(),
   layers: group('背景', 'Backdrop', {
     background: group('遠景', 'Background', {
       url: z.string().meta({ ...label('画像', 'Image'), kind: 'image' }).optional(),
