@@ -34,6 +34,26 @@
   },
   {
     "category": "demo",
+    "id": "painted_gate",
+    "title": "校門のシオン — 簡易3Dの校門",
+    "appearances": 6,
+    "lines": [
+      {
+        "lineId": "morning_2",
+        "text": "「……おはよう。門の前で待ってたわけじゃないから」"
+      },
+      {
+        "lineId": "day_2",
+        "text": "「外に出るの？　先生に見つかっても知らないわよ」"
+      },
+      {
+        "lineId": "evening_2",
+        "text": "「……帰るなら、途中まで一緒に行ってあげてもいいけど」"
+      }
+    ]
+  },
+  {
+    "category": "demo",
     "id": "painted_library",
     "title": "図書室のシオン — 簡易3Dの図書室",
     "appearances": 9,

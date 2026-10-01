@@ -2,43 +2,43 @@
   {
     "url": "/models/aoi/aoi-private.vrm",
     "size": 22489724,
-    "updatedAt": "2026-09-30T13:29:39.582Z",
-    "thumbnailUrl": "/thumbnails/aoi/aoi-private.png"
+    "updatedAt": "2026-10-01T16:59:00.699Z",
+    "thumbnailUrl": "/thumbnails/aoi/aoi-private.png?v=1790873940863"
   },
   {
     "url": "/models/aoi/aoi-school.vrm",
     "size": 18319628,
-    "updatedAt": "2026-09-30T13:29:39.664Z",
-    "thumbnailUrl": "/thumbnails/aoi/aoi-school.png"
+    "updatedAt": "2026-10-01T16:59:00.720Z",
+    "thumbnailUrl": "/thumbnails/aoi/aoi-school.png?v=1790873940869"
   },
   {
     "url": "/models/emili/emili-private.vrm",
     "size": 17528012,
-    "updatedAt": "2026-09-30T13:29:39.979Z",
-    "thumbnailUrl": "/thumbnails/emili/emili-private.png"
+    "updatedAt": "2026-10-01T16:59:00.739Z",
+    "thumbnailUrl": "/thumbnails/emili/emili-private.png?v=1790873940871"
   },
   {
     "url": "/models/emili/emili.vrm",
     "size": 17182712,
-    "updatedAt": "2026-09-30T13:29:40.032Z",
-    "thumbnailUrl": "/thumbnails/emili/emili.png"
+    "updatedAt": "2026-10-01T16:59:00.753Z",
+    "thumbnailUrl": "/thumbnails/emili/emili.png?v=1790873940876"
   },
   {
     "url": "/models/shion/shion-private.vrm",
-    "size": 14684944,
-    "updatedAt": "2026-09-30T13:29:40.069Z",
-    "thumbnailUrl": "/thumbnails/shion/shion-private.png"
+    "size": 15654832,
+    "updatedAt": "2026-10-01T16:59:00.772Z",
+    "thumbnailUrl": "/thumbnails/shion/shion-private.png?v=1790873940879"
   },
   {
     "url": "/models/shion/shion-school.vrm",
-    "size": 14305108,
-    "updatedAt": "2026-09-30T13:29:40.105Z",
-    "thumbnailUrl": "/thumbnails/shion/shion-school.png"
+    "size": 15912404,
+    "updatedAt": "2026-10-01T16:59:00.788Z",
+    "thumbnailUrl": "/thumbnails/shion/shion-school.png?v=1790873940883"
   },
   {
     "url": "/models/teacher/teacher.vrm",
     "size": 14706628,
-    "updatedAt": "2026-09-30T13:29:40.140Z",
-    "thumbnailUrl": "/thumbnails/teacher/teacher.png"
+    "updatedAt": "2026-10-01T16:59:00.804Z",
+    "thumbnailUrl": "/thumbnails/teacher/teacher.png?v=1790873940885"
   }
 ]
