@@ -329,7 +329,26 @@
         "rotationY": 0,
         "scale": 1
       },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#526690",
+          "opacity": 0.8,
+          "softness": 4
+        }
+      },
       "stage": {
+        "camera": {
+          "depthOfField": {
+            "aperture": 0.02,
+            "maxBlur": 0.01,
+            "sharpRange": 4
+          }
+        },
         "backdrop": {
           "mode": "screen",
           "distance": 8,

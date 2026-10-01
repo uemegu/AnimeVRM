@@ -9,6 +9,7 @@ import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import type { LocationVisualPreset, TimeOfDayId, TimeOfDayPreset } from './visual';
 import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
+import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
@@ -26,6 +27,7 @@ import {
   DEFAULT_AVATAR_LOOK,
   DEFAULT_BACKDROP,
   DEFAULT_CAMERA_FOV,
+  DEFAULT_DEPTH_OF_FIELD,
   DEFAULT_SHOT_RIGS,
   DEFAULT_SLOT_POSITIONS,
   type CameraPose as CameraPoseSetting,
@@ -100,6 +102,7 @@ export class StageManager {
 
   // ポストプロセスパス群
   private renderPass: RenderPass;
+  private depthOfFieldPass: DepthOfFieldPass;
   private lightWrapPass: ShaderPass;
   private paraPass: ShaderPass;
   private bloomPass: UnrealBloomPass;
@@ -115,6 +118,8 @@ export class StageManager {
   // 光源・環境・空
   private directionalLight: THREE.DirectionalLight;
   private rimLight: THREE.DirectionalLight;
+  /** 平行光が落とすキャラの影を受ける地面（場所の light.shadow があるときだけ出す） */
+  private groundShadow: THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial>;
   private ambientLight: THREE.AmbientLight;
   private skyBackground: SkyBackground;
   private scrollingBackground: ScrollingBackground;
@@ -224,6 +229,9 @@ export class StageManager {
     this.renderer.setSize(initialWidth, initialHeight, false);
     this.renderer.setPixelRatio(pixelRatio);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // 影を落とすのは場所の light.shadow があるときだけ（平行光の castShadow で切り替える）
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
     // 4. 空と雲の描画システム (SkyBackground)
     this.skyBackground = new SkyBackground(this.scene, { visible: true });
@@ -233,6 +241,24 @@ export class StageManager {
     this.directionalLight = new THREE.DirectionalLight('#ffffff', 3.2);
     this.directionalLight.position.set(-1.9, 1.5, 2.6);
     this.scene.add(this.directionalLight);
+    // 位置は向きとして使っている（注視点は原点）。影のカメラは原点の周りを囲み、手前側にも伸ばす
+    const shadow = this.directionalLight.shadow;
+    shadow.mapSize.setScalar(this.quality.shadowMapSize);
+    Object.assign(shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: -20, far: 20 });
+    shadow.camera.updateProjectionMatrix();
+    shadow.bias = -0.0005;
+    shadow.normalBias = 0.02;
+
+    this.groundShadow = new THREE.Mesh(
+      new THREE.PlaneGeometry(40, 40),
+      new THREE.ShadowMaterial({ transparent: true, depthWrite: false })
+    );
+    this.groundShadow.name = 'Ground shadow';
+    this.groundShadow.rotation.x = -Math.PI / 2;
+    this.groundShadow.position.y = 0.002;
+    this.groundShadow.receiveShadow = true;
+    this.groundShadow.visible = false;
+    this.scene.add(this.groundShadow);
 
     this.ambientLight = new THREE.AmbientLight('#776e74', 0.8);
     this.scene.add(this.ambientLight);
@@ -256,6 +282,8 @@ export class StageManager {
         type: THREE.HalfFloatType,
         format: THREE.RGBAFormat,
         samples: 4,
+        // 背景ぼかしで本描画の深度を読む
+        depthTexture: new THREE.DepthTexture(targetW, targetH),
       }
     );
     this.composer = new EffectComposer(this.renderer, composerRenderTarget);
@@ -263,6 +291,11 @@ export class StageManager {
 
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
+
+    // 背景ぼかし（本描画の深度を読むので RenderPass の直後に置く）
+    this.depthOfFieldPass = new DepthOfFieldPass();
+    this.depthOfFieldPass.enabled = false;
+    this.composer.addPass(this.depthOfFieldPass);
 
     // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
     this.characterMask = new CharacterMaskRenderer(targetW, targetH);
@@ -379,14 +412,10 @@ export class StageManager {
     this.currentTimeOfDay = todId;
     const preset = this.presets.timeOfDay[todId] || this.presets.timeOfDay.day;
 
-    // 1. 平行光
+    // 1. 平行光（向きは場所の絵の光を優先する）
     this.directionalLight.color.set(preset.lighting.directional.color);
     this.directionalLight.intensity = preset.lighting.directional.intensity;
-    this.directionalLight.position.set(
-      preset.lighting.directional.position.x,
-      preset.lighting.directional.position.y,
-      preset.lighting.directional.position.z
-    );
+    this.applyKeyLight();
 
     // 2. 環境光
     this.ambientLight.color.set(preset.lighting.ambient.color);
@@ -496,6 +525,7 @@ export class StageManager {
     }
 
     this.applyEnvironment();
+    this.applyKeyLight();
 
     // 立ち位置・カメラは場所ごとの設定に合わせる
     this.applyCameraSettings();
@@ -631,6 +661,33 @@ export class StageManager {
     }
   }
 
+  /**
+   * キャラを照らす平行光の向きと、地面に落とす影。3D背景の絵に光が描き込んである場所は
+   * その光の向き（場所の light）に合わせ、なければ時間帯の設定を使う
+   */
+  private applyKeyLight(): void {
+    const directional = (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).lighting.directional;
+    const light = this.presets.locations[this.currentLocationId]?.light;
+    const direction = light?.direction ?? directional.position;
+    this.directionalLight.position.set(direction.x, direction.y, direction.z);
+
+    const shadow = light?.shadow;
+    // castShadow を切り替えるとシェーダーが作り直されるので、変わるときだけ触る
+    if (this.directionalLight.castShadow !== !!shadow) this.directionalLight.castShadow = !!shadow;
+    this.groundShadow.visible = !!shadow;
+    if (shadow) {
+      this.groundShadow.material.color.set(shadow.color);
+      this.groundShadow.material.opacity = shadow.opacity;
+      this.directionalLight.shadow.radius = shadow.softness;
+    }
+  }
+
+  /** 背景ぼかしは場所のカメラ設定にあるときだけ（重いので品質 low では切る） */
+  private applyDepthOfField(): void {
+    const settings = this.locationStage?.camera?.depthOfField;
+    this.depthOfFieldPass.setParams(settings && this.quality.depthOfField ? { ...DEFAULT_DEPTH_OF_FIELD, ...settings } : null);
+  }
+
   /** 3D背景を読み込んで置く（同じモデルなら置き直すだけ） */
   private applyEnvironment(): void {
     const settings = this.presets.locations[this.currentLocationId]?.environment;
@@ -665,6 +722,7 @@ export class StageManager {
   }
 
   private applyCameraSettings(): void {
+    this.applyDepthOfField();
     const fov = this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;
@@ -900,6 +958,14 @@ export class StageManager {
     for (const avatar of this.loadedAvatars.values()) {
       avatar.setHandClearance(this.quality.handClearance);
       avatar.setClothDent(this.quality.clothDent);
+    }
+    this.applyDepthOfField();
+    const shadow = this.directionalLight.shadow;
+    if (shadow.mapSize.x !== this.quality.shadowMapSize) {
+      shadow.mapSize.setScalar(this.quality.shadowMapSize);
+      // 次に影を描くときに作り直される
+      shadow.map?.dispose();
+      shadow.map = null;
     }
   }
 
@@ -1212,6 +1278,12 @@ export class StageManager {
       }
       if (!this.freeCamera) this.updateCamera(delta);
       this.updateLayerPlacement();
+      if (this.depthOfFieldPass.enabled) {
+        // ピントは注視点（話者の顔あたり）。カメラの向きに沿った奥行きで測る
+        const forward = this.camera.getWorldDirection(new THREE.Vector3());
+        const focus = new THREE.Vector3().subVectors(this.cameraCurrentTarget, this.camera.position).dot(forward);
+        this.depthOfFieldPass.setFocus(this.camera, focus);
+      }
       this.scrollingBackground.update(delta);
 
       // 1. 登場中のアバターの更新（口パクは話者だけ）
@@ -1285,6 +1357,9 @@ export class StageManager {
     this.composer.renderTarget2?.dispose();
     this.hairShadow.dispose();
     this.characterMask.dispose();
+    this.depthOfFieldPass.dispose();
+    this.groundShadow.geometry.dispose();
+    this.groundShadow.material.dispose();
     this.renderer.dispose();
   }
 }

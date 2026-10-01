@@ -11,13 +11,17 @@ export interface StageQuality {
   handClearance: HandClearanceMode;
   /** 手に押されてスカートがへこむ（avatar/clothDent.ts）。頂点シェーダーで行うので軽い */
   clothDent: boolean;
+  /** 背景ぼかし（postprocessing/DepthOfField.ts）。画面の全画素で40回ずつ読むので重い */
+  depthOfField: boolean;
+  /** キャラが地面に落とす影の解像度 */
+  shadowMapSize: number;
 }
 
 export type StageQualityLevel = 'high' | 'low';
 
 export const STAGE_QUALITY_PRESETS: Record<StageQualityLevel, StageQuality> = {
-  high: { handClearance: 'precise', clothDent: true },
-  low: { handClearance: 'simple', clothDent: true },
+  high: { handClearance: 'precise', clothDent: true, depthOfField: true, shadowMapSize: 2048 },
+  low: { handClearance: 'simple', clothDent: true, depthOfField: false, shadowMapSize: 1024 },
 };
 
 /** 段階の手動指定。URL の ?quality=low か、localStorage の stage_quality（検証・切り替え用） */

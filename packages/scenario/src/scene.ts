@@ -202,6 +202,7 @@ export const DEFAULT_SLOT_POSITIONS: Record<'left' | 'center' | 'right', [number
   center: [0, 0, 0],
   right: [0.45, 0, 0],
 };
+export const DEFAULT_DEPTH_OF_FIELD = { aperture: 0.03, maxBlur: 0.012, sharpRange: 0 } as const;
 /** 遠景の既定は3D空間に置く（旧ルートと同じく、カメラの動きで背景の見え方も変わる） */
 export const DEFAULT_BACKDROP: { mode: 'screen' | 'world'; distance: number; height: number; offsetY: number } = { mode: 'world', distance: 8, height: 7.5, offsetY: 1.0 };
 
@@ -230,6 +231,13 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
     speaker: shotRig('話者', 'Speaker', DEFAULT_SHOT_RIGS.speaker).optional(),
     close: shotRig('アップ', 'Close', DEFAULT_SHOT_RIGS.close).optional(),
     side: shotRig('横から', 'From the side', DEFAULT_SHOT_RIGS.side).optional(),
+    /** 注視点（話者の顔あたり）にピントを合わせ、離れた物を距離に応じてぼかす。なければぼかさない */
+    depthOfField: group('背景ぼかし', 'Depth of field', {
+      aperture: num('ぼけの強さ（レンズの口径 m）', 'Aperture (m)', 0, 0.2, 0.005, DEFAULT_DEPTH_OF_FIELD.aperture),
+      maxBlur: num('ぼけの上限（画面の高さに対する割合）', 'Max blur (of screen height)', 0, 0.05, 0.001, DEFAULT_DEPTH_OF_FIELD.maxBlur),
+      /** ピントより奥でもぼかさない幅。キャラのすぐ後ろの物（門など）はくっきり見せ、遠景だけぼかす */
+      sharpRange: num('ピントの奥でぼかさない幅（m）', 'Sharp range behind focus (m)', 0, 20, 0.1, DEFAULT_DEPTH_OF_FIELD.sharpRange).optional(),
+    }).optional(),
   }).optional(),
   backdrop: group('遠景の置き方', 'Backdrop placement', {
     mode: z.enum(['screen', 'world']).meta({
@@ -262,6 +270,20 @@ export const LocationEnvironment = group('3D背景', '3D set', {
 });
 export type LocationEnvironment = z.infer<typeof LocationEnvironment>;
 
+/**
+ * 3D背景の絵に描き込んである光。絵の光は時間帯で変わらないので、キャラを照らす光の向きを
+ * 時間帯の設定より優先してこれに合わせ、キャラの影を地面に落とす（光の色は時間帯のまま）
+ */
+export const LocationLight = group('絵の光', 'Painted light', {
+  direction: vec3('光の来る向き', 'Direction to the light', -5, 5, 0.05),
+  shadow: group('地面に落とすキャラの影', 'Character shadow on the ground', {
+    color: color('色', 'Color'),
+    opacity: num('濃さ', 'Opacity', 0, 1, 0.05, 0.4),
+    softness: num('ぼかし', 'Softness', 0, 12, 0.5, 4),
+  }).optional(),
+});
+export type LocationLight = z.infer<typeof LocationLight>;
+
 export const LocationVisualPreset = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
   name: z.string().meta(label('名前', 'Name')),
@@ -289,6 +311,7 @@ export const LocationVisualPreset = z.strictObject({
     }).optional(),
   }),
   environment: LocationEnvironment.optional(),
+  light: LocationLight.optional(),
   stage: LocationStage.optional(),
 });
 export type LocationVisualPreset = z.infer<typeof LocationVisualPreset>;
