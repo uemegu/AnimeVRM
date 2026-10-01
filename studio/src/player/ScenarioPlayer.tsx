@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
   movieCutDuration,
   resolveCameraShot,
@@ -289,14 +289,18 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
       )}
 
       {!movie && phase === 'playing' && text && (
-        <div className="player-message" onClick={advance} role="button" tabIndex={-1}>
-          {speakerName && (
-            <div className="player-speaker" style={speakerColor ? { borderColor: speakerColor } : undefined}>
-              {speakerName}
-            </div>
-          )}
-          <p className="player-text">{text.slice(0, typed)}</p>
-          {textDone && choices.length === 0 && <span className="player-next" aria-hidden="true" />}
+        <div
+          className="player-message"
+          style={speakerColor ? ({ '--speaker-color': speakerColor } as CSSProperties) : undefined}
+          onClick={advance}
+          role="button"
+          tabIndex={-1}
+        >
+          <div className="player-message-inner">
+            {speakerName && <div className="player-speaker">{speakerName}</div>}
+            <p className="player-text">{text.slice(0, typed)}</p>
+            {textDone && choices.length === 0 && <span className="player-next" aria-hidden="true" />}
+          </div>
         </div>
       )}
       {!movie && phase === 'playing' && choices.length === 0 && <div className="player-click" onClick={advance} />}
