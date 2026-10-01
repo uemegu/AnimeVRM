@@ -261,6 +261,14 @@ export function applyToonShader(
   const allMToonMaterials: Array<{ material: MToonLikeMaterial; kind: StyleKind | 'other' }> = [];
   const processedMaterials = new Set<THREE.Material>();
   const originalBaseColors = new Map<MToonLikeMaterial, THREE.Color>();
+  // 逆光シルエットで黒く塗る目・眉・まつ毛の元の値（別の時間帯へ移るときに戻す）
+  const originalFeatureStates = new Map<MToonLikeMaterial, {
+    shadeColor?: THREE.Color;
+    shadingShift?: number;
+    rimColor?: THREE.Color;
+    outlineColor?: THREE.Color;
+  }>();
+  let silhouetteApplied = false;
 
   // Traverse and register materials
   vrm.scene.traverse((object) => {
@@ -291,6 +299,14 @@ export function applyToonShader(
       const material = sourceMaterial as MToonLikeMaterial;
       if (!material.isMToonMaterial) return;
       originalBaseColors.set(material, (material.color ?? material.uniforms?.litFactor?.value ?? new THREE.Color(1, 1, 1)).clone());
+      if (isEyeMaterial(material.name || '') || isFaceFeatureMaterial(material.name || '')) {
+        originalFeatureStates.set(material, {
+          shadeColor: (material.shadeColorFactor ?? material.uniforms?.shadeColorFactor?.value)?.clone(),
+          shadingShift: material.shadingShiftFactor ?? material.uniforms?.shadingShiftFactor?.value,
+          rimColor: (material.parametricRimColorFactor ?? material.uniforms?.parametricRimColorFactor?.value)?.clone(),
+          outlineColor: (material.outlineColorFactor ?? material.uniforms?.outlineColorFactor?.value)?.clone(),
+        });
+      }
 
       const styleKind = classifyStyleMaterial(material, mesh, bodyPattern, hairPattern, clothPattern);
       const kind: StyleKind | 'other' = styleKind ?? 'other';
@@ -517,6 +533,34 @@ export function applyToonShader(
     });
   };
 
+  // シルエットで塗った目・眉・まつ毛を元の色へ戻す（目はこのあと setupEyeMaterials で陰影なしにする）
+  const restoreFeatureMaterials = () => {
+    originalFeatureStates.forEach((state, material) => {
+      const color = originalBaseColors.get(material);
+      if (color) {
+        if (material.color) material.color.copy(color);
+        if (material.uniforms?.litFactor?.value) material.uniforms.litFactor.value.copy(color);
+      }
+      if (state.shadeColor) {
+        if (material.shadeColorFactor) material.shadeColorFactor.copy(state.shadeColor);
+        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(state.shadeColor);
+      }
+      if (typeof state.shadingShift === 'number') {
+        material.shadingShiftFactor = state.shadingShift;
+        if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = state.shadingShift;
+      }
+      if (state.rimColor) {
+        if (material.parametricRimColorFactor) material.parametricRimColorFactor.copy(state.rimColor);
+        if (material.uniforms?.parametricRimColorFactor?.value) material.uniforms.parametricRimColorFactor.value.copy(state.rimColor);
+      }
+      if (state.outlineColor) {
+        if (material.outlineColorFactor) material.outlineColorFactor.copy(state.outlineColor);
+        if (material.uniforms?.outlineColorFactor?.value) material.uniforms.outlineColorFactor.value.copy(state.outlineColor);
+      }
+      material.needsUpdate = true;
+    });
+  };
+
   // Apply material params directly to MToon parameters
   const applyMaterialStyle = (kind: 'body' | 'hair' | 'cloth', params: Partial<MaterialStyleParams>) => {
 
@@ -542,7 +586,12 @@ export function applyToonShader(
             material.needsUpdate = true;
           }
         });
+        silhouetteApplied = true;
       } else {
+        if (silhouetteApplied) {
+          restoreFeatureMaterials();
+          silhouetteApplied = false;
+        }
         setupEyeMaterials();
       }
     }
