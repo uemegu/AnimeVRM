@@ -1227,13 +1227,15 @@ export class StageManager {
       }
 
       // 2. 太陽・レンズフレア・オクルージョン計算
+      const location = this.presets.locations[this.currentLocationId];
       const sunInfo = this.sunEffect.update(
         this.camera,
         delta,
         elapsed,
         { lighting: currentPreset.lighting },
         this.directionalLight,
-        activeMeshes
+        activeMeshes,
+        !!location?.environment && !location.isIndoor
       );
 
       // 3. ゴッドレイ（サンシャフト）のユニフォーム更新
