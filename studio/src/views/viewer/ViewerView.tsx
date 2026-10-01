@@ -9,6 +9,7 @@ import { StageCanvas } from '../../stage/StageCanvas';
 import { useStagePresets } from '../../stage/useStagePresets';
 import { PlayerAudio } from '../../player/PlayerAudio';
 import { VoiceLibrary } from './VoiceLibrary';
+import { BgmLibrary } from './BgmLibrary';
 import { useBackdrop } from '../../components/Backdrop';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
@@ -18,7 +19,7 @@ const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
 const FACE_EFFECTS = ['blush', 'anger', 'tears', 'faceSweat'] as const;
 type FaceEffect = (typeof FACE_EFFECTS)[number];
-const TABS = ['expression', 'motion', 'voice'] as const;
+const TABS = ['expression', 'motion', 'voice', 'bgm'] as const;
 type Tab = (typeof TABS)[number];
 const IDLE = 'Standing Idle';
 
@@ -89,6 +90,18 @@ export function ViewerView() {
     }
     setPlayingVoice(url);
     audio.playVoice(url, () => setPlayingVoice((current) => (current === url ? null : current)));
+  };
+  // BGM の試聴（ボイスと重ねて鳴らせる）
+  const [playingBgm, setPlayingBgm] = useState<string | null>(null);
+  const toggleBgm = (url: string, volumeScale: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const next = playingBgm === url ? null : url;
+    audio.playBgm(next, volumeScale);
+    setPlayingBgm(next);
+  };
+  const changeBgmVolume = (url: string, volumeScale: number) => {
+    if (playingBgm === url) audioRef.current?.setBgmVolumeScale(volumeScale);
   };
   const toggleMute = () => {
     const audio = audioRef.current;
@@ -289,6 +302,10 @@ export function ViewerView() {
               onToggleMute={toggleMute}
               onUploaded={() => api.assets('voices').then(setVoices, () => {})}
             />
+          )}
+
+          {tab === 'bgm' && (
+            <BgmLibrary playingUrl={playingBgm} muted={muted} onToggle={toggleBgm} onVolume={changeBgmVolume} onToggleMute={toggleMute} />
           )}
         </div>
       </aside>
