@@ -218,7 +218,10 @@ export const ScenarioScene = z.strictObject({
   screenTransition: ScreenTransition.optional(),
   /** このカットの間、集中線を出す */
   focusLines: z.boolean().optional(),
+  /** オートで進むまでの待ち秒数。ムービーではボイス・最後のキーが終わってから次のカットまでの間 */
   autoNextSec: z.number().nonnegative().optional(),
+  /** ムービーでのカットの長さ（秒）。指定するとボイスやキーを待たずにこの秒数で次へ進む */
+  duration: z.number().positive().optional(),
   timeOfDay: z.string().optional(),
   transitions: z.array(SceneTransition).optional(),
   camera: CameraShot.optional(),
@@ -282,12 +285,22 @@ export const ActionLocationHint = z.strictObject({
   phases: z.array(z.string()).optional(),
 });
 
+/**
+ * 再生のしかた
+ * - game: メッセージウィンドウつき。クリックで進み、選択肢を選ぶ
+ * - movie: メッセージウィンドウを出さず、カットが自動で進む（選択肢は出さず、時間切れと同じ扱いで進む）
+ */
+export const PlayMode = z.enum(['game', 'movie']);
+export type PlayMode = z.infer<typeof PlayMode>;
+
 /** 通常シナリオ（scenario.json の中身） */
 export const ScenarioPackage = z.strictObject({
   /** 形式の版。省略時は 1 */
   schemaVersion: z.literal(1).optional(),
   id: z.string().min(1),
   title: TextContent,
+  /** 省略時は game */
+  playMode: PlayMode.optional(),
   /** 一覧に出す紹介文 */
   description: TextContent.optional(),
   /** 舞台の場所。場所選択を経ずに始まるシナリオの背景に使う */

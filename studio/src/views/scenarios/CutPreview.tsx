@@ -76,7 +76,7 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
         onCameraPose={onCameraPose}
         viewResetKey={viewResetKey}
       />
-      {scene && (textJa(scene.text) || scene.choices?.length) ? (
+      {scene && scenario.playMode !== 'movie' && (textJa(scene.text) || scene.choices?.length) ? (
         <div className="cut-dialogue">
           {speaker && <div className="cut-dialogue-speaker">{speaker}</div>}
           {textJa(scene.text) && <div className="cut-dialogue-text">{textJa(scene.text)}</div>}

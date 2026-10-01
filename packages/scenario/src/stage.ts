@@ -326,3 +326,19 @@ export function lastKeyframeAt(scene: ScenarioScene): number {
   ];
   return times.length ? Math.max(...times) : 0;
 }
+
+/** ムービーで、ボイスもキーもないカットの長さ（秒） */
+export const MOVIE_STILL_CUT_SEC = 3;
+/** ムービーで、ボイス・最後のキーが終わってから次のカットまでの既定の間（秒） */
+export const MOVIE_CUT_GAP_SEC = 0.6;
+
+/**
+ * ムービーでのカットの長さ（秒）。duration があればそれ、なければボイスと最後のキーの遅い方に間を足す。
+ * voiceSec はボイスの長さ（ボイスがなければ 0）
+ */
+export function movieCutDuration(scene: ScenarioScene, voiceSec: number): number {
+  if (scene.duration !== undefined) return scene.duration;
+  const body = Math.max(voiceSec, lastKeyframeAt(scene));
+  if (body === 0) return scene.autoNextSec ?? MOVIE_STILL_CUT_SEC;
+  return body + (scene.autoNextSec ?? MOVIE_CUT_GAP_SEC);
+}

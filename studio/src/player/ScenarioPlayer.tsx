@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  movieCutDuration,
   resolveCameraShot,
   resolveCast,
   resolveScrollingBackground,
@@ -53,6 +54,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
   const [muted, setMuted] = useState(audioRef.current.muted);
   const [flash, setFlash] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
+  /** 今のカットに入った時刻（ムービーの尺の計算に使う） */
+  const cutStartRef = useRef(0);
 
   const runner = runnerRef.current;
   const audio = audioRef.current;
@@ -63,6 +66,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
   const speakerColor = data.characters.characters.find((c) => c.id === scene.speakerCharacterId)?.themeColor;
   const choices = runner.choices;
   const textDone = typed >= text.length;
+  // ムービー：メッセージウィンドウを出さず、カットが自動で進む
+  const movie = scenario.playMode === 'movie';
 
   useEffect(() => () => audio.dispose(), [audio]);
 
@@ -104,6 +109,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
     setVoiceDone(!voice);
     audio.playVoice(voice, () => setVoiceDone(true));
     setTyped(0);
+    cutStartRef.current = performance.now();
     if (scene.flashEffect === 'white') setFlash((f) => f + 1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, step]);
@@ -143,18 +149,38 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
     setStep((s) => s + 1);
   };
 
+  // ムービー：ボイスが終わったら、カットの尺の残りを待って進める（選択肢は時間切れと同じ扱い）
+  useEffect(() => {
+    if (!movie || phase !== 'playing') return;
+    if (scene.duration === undefined && !voiceDone) return;
+    const elapsed = (performance.now() - cutStartRef.current) / 1000;
+    const voiceSec = scene.voiceUrl ? elapsed : 0;
+    const wait = Math.max(0, movieCutDuration(scene, voiceSec) - elapsed);
+    const timer = window.setTimeout(() => {
+      const done = runner.choices.length > 0 ? runner.timeout() : runner.next();
+      if (done) {
+        audio.stopVoice();
+        setPhase('ended');
+        return;
+      }
+      setStep((s) => s + 1);
+    }, wait * 1000);
+    return () => window.clearTimeout(timer);
+  }, [movie, phase, step, voiceDone, scene, runner, audio]);
+
   // オート：文字とボイスが終わったら少し待って進める
   useEffect(() => {
+    if (movie) return;
     if (!auto || phase !== 'playing' || !textDone || !voiceDone || choices.length > 0) return;
     const wait = scene.autoNextSec !== undefined ? scene.autoNextSec * 1000 : AUTO_WAIT_MS;
     const timer = window.setTimeout(advance, wait);
     return () => window.clearTimeout(timer);
-  }, [auto, phase, textDone, voiceDone, choices.length, scene, advance]);
+  }, [movie, auto, phase, textDone, voiceDone, choices.length, scene, advance]);
 
   // 選択肢の制限時間（指定があるときだけ）
   useEffect(() => {
     const seconds = scene.choiceTimeout?.seconds;
-    if (phase !== 'playing' || !seconds || choices.length === 0) {
+    if (movie || phase !== 'playing' || !seconds || choices.length === 0) {
       setRemaining(null);
       return;
     }
@@ -178,13 +204,15 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== ' ' && e.key !== 'Enter') return;
+      // ムービーは再生中に送らない（はじめる・もう一度はボタンで押す）
+      if (movie && phase !== 'title') return;
       if ((e.target as HTMLElement | null)?.closest('button, input, textarea, select')) return;
       e.preventDefault();
       advance();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [advance]);
+  }, [advance, movie, phase]);
 
   const restart = () => {
     runnerRef.current = new ScenarioRunner(scenario);
@@ -198,7 +226,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
   };
 
   return (
-    <div className="player">
+    <div className={`player${movie ? ' movie' : ''}${movie && phase === 'playing' ? ' movie-playing' : ''}`}>
       <PlayerStage
         presets={presets}
         timeOfDay={timeOfDay}
@@ -223,10 +251,12 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
         )}
         <span className="player-title">{localize(scenario.title, language)}</span>
         <span className="player-spacer" />
-        <button type="button" className={`player-button${auto ? ' active' : ''}`} aria-pressed={auto} onClick={() => setAuto(!auto)}>
-          <Icon name="play" size={14} />
-          {tp.auto}
-        </button>
+        {!movie && (
+          <button type="button" className={`player-button${auto ? ' active' : ''}`} aria-pressed={auto} onClick={() => setAuto(!auto)}>
+            <Icon name="play" size={14} />
+            {tp.auto}
+          </button>
+        )}
         <button type="button" className={`player-button${muted ? ' active' : ''}`} aria-pressed={muted} onClick={toggleMute}>
           <Icon name={muted ? 'soundOff' : 'soundOn'} size={14} />
           {muted ? tp.muted : tp.sound}
@@ -247,7 +277,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
         </button>
       )}
 
-      {phase === 'playing' && choices.length > 0 && (
+      {!movie && phase === 'playing' && choices.length > 0 && (
         <div className="player-choices">
           {remaining !== null && <div className="player-timer" style={{ width: `${(remaining / (scene.choiceTimeout?.seconds ?? 1)) * 100}%` }} />}
           {choices.map((choice, i) => (
@@ -258,7 +288,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
         </div>
       )}
 
-      {phase === 'playing' && text && (
+      {!movie && phase === 'playing' && text && (
         <div className="player-message" onClick={advance} role="button" tabIndex={-1}>
           {speakerName && (
             <div className="player-speaker" style={speakerColor ? { borderColor: speakerColor } : undefined}>
@@ -269,7 +299,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
           {textDone && choices.length === 0 && <span className="player-next" aria-hidden="true" />}
         </div>
       )}
-      {phase === 'playing' && choices.length === 0 && <div className="player-click" onClick={advance} />}
+      {!movie && phase === 'playing' && choices.length === 0 && <div className="player-click" onClick={advance} />}
 
       {phase === 'ended' && (
         <div className="player-cover ended">

@@ -41,6 +41,15 @@
 .player-header > * {
   pointer-events: auto;
 }
+/* ムービーの再生中は画面に何も重ねない（ヘッダーはポインタを乗せたときだけ出す） */
+.player.movie-playing .player-header {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.player.movie-playing .player-header:hover,
+.player.movie-playing .player-header:focus-within {
+  opacity: 1;
+}
 .player-title {
   height: 32px;
   box-sizing: border-box;

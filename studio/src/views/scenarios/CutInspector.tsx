@@ -228,8 +228,22 @@ function StageTab({ scenario, index, data, set }: { scenario: ScenarioPackage; i
         <input type="checkbox" checked={scene.flashEffect === 'white'} onChange={(e) => set('flashEffect', e.target.checked ? 'white' : undefined)} />
         {t.scenarios.flash}
       </label>
+      {scenario.playMode === 'movie' && (
+        <label className="field narrow">
+          <span className="field-label">{t.scenarios.movieDuration}</span>
+          <input
+            className="input"
+            type="number"
+            min={0.1}
+            step={0.5}
+            value={scene.duration ?? ''}
+            onChange={(e) => set('duration', e.target.value === '' || Number(e.target.value) <= 0 ? undefined : Number(e.target.value))}
+          />
+          <span className="field-hint">{t.scenarios.movieTimingHint}</span>
+        </label>
+      )}
       <label className="field narrow">
-        <span className="field-label">{t.scenarios.autoNextSec}</span>
+        <span className="field-label">{scenario.playMode === 'movie' ? t.scenarios.movieAutoNextSec : t.scenarios.autoNextSec}</span>
         <input
           className="input"
           type="number"
