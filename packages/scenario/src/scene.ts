@@ -140,6 +140,10 @@ export const MaterialStyleParams = z.strictObject({
   shadeMultiply: color('影の乗算色', 'Shade multiply'),
   shadingToonyFactor: num('影の硬さ', 'Toony factor', 0, 1, 0.001),
   shadingShiftFactor: num('影のずれ', 'Shading shift', -1, 1, 0.01),
+  /** 暗い色の光が当たる側を明るくする量（影の側はテクスチャの色のまま）。濃紺の服などで明暗が見えるようにする */
+  darkLitLift: num('暗い色の明るい側の持ち上げ', 'Dark color lit lift', 0, 4, 0.1, 0).optional(),
+  /** 白に近い色の光が当たる側に掛ける倍率（1 でそのまま）。白いシャツが光って見えないように抑える */
+  brightLitScale: num('白に近い色の明るい側の倍率', 'Bright color lit scale', 0.5, 1, 0.01, 1).optional(),
   giEqualizationFactor: num('環境光のならし', 'GI equalization', 0, 1, 0.01),
   matcapEnabled: bool('マットキャップ', 'Matcap'),
   emissiveIntensity: num('発光', 'Emissive', 0, 5, 0.1),
