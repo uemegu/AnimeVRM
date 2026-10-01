@@ -9,6 +9,11 @@ export interface MaterialStyleParams {
   shadeMultiply: string;
   shadingToonyFactor: number;
   shadingShiftFactor: number;
+  // 暗い色（濃紺のブレザーなど）の光が当たる側を明るくする量。影の側はテクスチャの色のままなので、
+  // 暗い服でも明暗の差が見える（アニメで濃い色の服を明るめに塗り、影で締めるのと同じ）
+  darkLitLift?: number;
+  // 白に近い色の光が当たる側に掛ける倍率（1 でそのまま）。白いシャツが光って見えないように抑える
+  brightLitScale?: number;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;

@@ -385,6 +385,12 @@ export function applyToonShader(
         material.needsUpdate = true;
       }
 
+      // 光が当たる側の明るさの調整（applyMaterialStyle で値を入れる）
+      const darkLitLift = { value: 0 };
+      const brightLitScale = { value: 1 };
+      material.userData.darkLitLift = darkLitLift;
+      material.userData.brightLitScale = brightLitScale;
+
       // Inject Bottom Gradient (Vertical Shading / Grounding shadow) into fragment shader for ALL MToon materials
       const prevOnBeforeCompile = material.onBeforeCompile;
       material.onBeforeCompile = (shader, renderer) => {
@@ -399,6 +405,30 @@ export function applyToonShader(
         shader.uniforms.uBottomGradientShadowWeight = bottomGradientUniforms.uBottomGradientShadowWeight;
         shader.uniforms.uBottomGradientColor = bottomGradientUniforms.uBottomGradientColor;
         shader.uniforms.uCameraMatrixWorld = bottomGradientUniforms.uCameraMatrixWorld;
+
+        // 光が当たる側の明るさだけ変える（影の側はテクスチャの色のまま）。
+        // 暗い色は決まった明るさまで持ち上げ（元の色が違っても同じくらいの明るさにそろう。倍率の上限が uDarkLitLift + 1）、
+        // 白に近い色は抑える（白いシャツが表示できる明るさを超えて光って見えないように）
+        shader.uniforms.uDarkLitLift = darkLitLift;
+        shader.uniforms.uBrightLitScale = brightLitScale;
+        shader.fragmentShader = shader.fragmentShader
+          .replace(
+            'uniform vec3 litFactor;',
+            /* glsl */ `uniform vec3 litFactor;
+          uniform float uDarkLitLift;
+          uniform float uBrightLitScale;
+          const float DARK_LIT_TARGET = 0.03;
+          vec3 mtoonLitTone( const in vec3 albedo ) {
+            float luma = dot( albedo, vec3( 0.2126, 0.7152, 0.0722 ) );
+            float lift = 1.0 + min( uDarkLitLift, max( DARK_LIT_TARGET / max( luma, 1e-4 ) - 1.0, 0.0 ) );
+            float dim = mix( 1.0, uBrightLitScale, smoothstep( 0.4, 0.85, luma ) );
+            return albedo * lift * dim;
+          }`
+          )
+          .replace(
+            'mix( material.shadeColor, material.diffuseColor, shading )',
+            'mix( material.shadeColor, mtoonLitTone( material.diffuseColor ), shading )'
+          );
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
         injectHairRing(shader, hairRingTarget, hairRingHeadFrame);
@@ -646,6 +676,11 @@ export function applyToonShader(
           material.shadingShiftFactor = shift;
           if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = shift;
         }
+
+        const lift = material.userData.darkLitLift as { value: number } | undefined;
+        if (lift) lift.value = params.darkLitLift ?? 0;
+        const dim = material.userData.brightLitScale as { value: number } | undefined;
+        if (dim) dim.value = params.brightLitScale ?? 1;
 
         // GI Equalization
         if (typeof params.giEqualizationFactor === 'number') {
