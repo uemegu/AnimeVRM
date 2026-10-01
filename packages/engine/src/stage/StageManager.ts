@@ -656,6 +656,8 @@ export class StageManager {
           return;
         }
         entry.object = object;
+        // 3D背景に入っている空は使わず、時間帯で変わる空（SkyBackground）を描く
+        object.traverse((child) => { if (child.userData.setSky) child.visible = false; });
         placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
         this.scene.add(object);
       })

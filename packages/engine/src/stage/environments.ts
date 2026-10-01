@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
+import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
 import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
 import { resolveAssetUrl } from '../utils/path';
 
@@ -8,6 +9,7 @@ import { resolveAssetUrl } from '../utils/path';
 const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (group: THREE.Group) => void }> = {
   'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
   'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
+  'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
 };
 
 /** 場所の3D背景を読み込む。model は builtin:<名前> か glb の URL */
