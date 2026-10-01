@@ -173,12 +173,38 @@ export async function extractThumbnailForVrm(
 
     const outPath = path.join(thumbnailsDir, `${relWithoutExt}${extracted.ext}`);
     await fs.mkdir(path.dirname(outPath), { recursive: true });
+    // 画像の形式が変わったときに前の形式のファイルが残ると、そちらが見つかってしまう
+    for (const ext of SUPPORTED_IMAGE_EXTS) {
+      if (ext !== extracted.ext) await fs.rm(path.join(thumbnailsDir, `${relWithoutExt}${ext}`), { force: true });
+    }
     await fs.writeFile(outPath, extracted.buffer);
     return `${relWithoutExt}${extracted.ext}`;
   } catch (err) {
     console.error(`[vrmThumbnail] Failed to extract thumbnail for ${relWithoutExt}:`, err);
     return null;
   }
+}
+
+/**
+ * モデルのサムネイルを用意する。まだないか、モデルのほうが新しい（差し替えられた）ときは取り出し直す。
+ * 返すのはサムネイルのファイル名（thumbnailsDir 基準）と更新時刻。取り出せなければ前のものか null
+ */
+export async function ensureVrmThumbnail(
+  vrmPath: string,
+  thumbnailsDir: string,
+  relWithoutExt: string
+): Promise<{ fileName: string; updatedAt: number; extracted: boolean } | null> {
+  const existing = await findThumbnail(thumbnailsDir, relWithoutExt);
+  const vrmTime = (await fs.stat(vrmPath)).mtimeMs;
+  if (existing) {
+    const thumbTime = (await fs.stat(existing.fullPath)).mtimeMs;
+    if (thumbTime >= vrmTime) return { fileName: existing.fileName, updatedAt: thumbTime, extracted: false };
+  }
+  const saved = await extractThumbnailForVrm(vrmPath, thumbnailsDir, relWithoutExt);
+  const fileName = saved ?? existing?.fileName;
+  if (!fileName) return null;
+  const updatedAt = (await fs.stat(path.join(thumbnailsDir, fileName))).mtimeMs;
+  return { fileName, updatedAt, extracted: saved !== null };
 }
 
 async function walk(dir: string): Promise<string[]> {
@@ -193,8 +219,7 @@ async function walk(dir: string): Promise<string[]> {
 
 /**
  * サーバー起動時などに assets/models/ 以下の全 VRM を走査し、
- * サムネイルが未作成のモデルのみ抽出して assets/thumbnails/ に保存する。
- * すでにサムネイルが存在するモデルはスキップする。
+ * サムネイルが未作成か、モデルより古いものだけ抽出して assets/thumbnails/ に保存する。
  */
 export async function ensureVrmThumbnails(assetsDir: string): Promise<number> {
   const modelsDir = path.join(assetsDir, 'models');
@@ -208,16 +233,9 @@ export async function ensureVrmThumbnails(assetsDir: string): Promise<number> {
     const relToModels = path.relative(modelsDir, vrmFile);
     const relWithoutExt = relToModels.slice(0, -path.extname(relToModels).length);
 
-    // 既にサムネイルが存在する場合はスキップ
-    const existing = await findThumbnail(thumbnailsDir, relWithoutExt);
-    if (existing) {
-      continue;
-    }
-
-    const saved = await extractThumbnailForVrm(vrmFile, thumbnailsDir, relWithoutExt);
-    if (saved) {
-      extractedCount++;
-    }
+    // サムネイルがモデルより新しければスキップ
+    const result = await ensureVrmThumbnail(vrmFile, thumbnailsDir, relWithoutExt);
+    if (result?.extracted) extractedCount++;
   }
 
   return extractedCount;
