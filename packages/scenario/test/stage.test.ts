@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BgmBook, CUT_ONE_SHOT_DELAY, cutStateAt, lastKeyframeAt, mergeStageState, MotionBook, resolveCast, stageAtScene, type ScenarioPackage, type ScenarioScene } from '../src/index.ts';
+import { BgmBook, CUT_ONE_SHOT_DELAY, cutStateAt, lastKeyframeAt, mergeStageState, movieCutDuration, MotionBook, resolveCast, stageAtScene, type ScenarioPackage, type ScenarioScene } from '../src/index.ts';
 
 const STUDIO = path.resolve(import.meta.dirname, '../../../assets/studio');
 
@@ -104,5 +104,19 @@ describe('感情演出', () => {
     expect(later.avatars.aoi.tears).toBe(true);
     expect(later.focusLines).toBe(true);
     expect(cutStateAt(scene, 3).focusLines).toBe(false);
+  });
+});
+
+describe('ムービーのカットの長さ', () => {
+  it('duration があればボイスやキーを待たない', () => {
+    expect(movieCutDuration({ id: 'a', text: '', duration: 2, transitions: [{ at: 5 }] }, 4)).toBe(2);
+  });
+  it('ボイスと最後のキーの遅い方に間を足す', () => {
+    expect(movieCutDuration({ id: 'a', text: '', transitions: [{ at: 5 }] }, 4)).toBeCloseTo(5.6);
+    expect(movieCutDuration({ id: 'a', text: '', autoNextSec: 1 }, 4)).toBe(5);
+  });
+  it('ボイスもキーもなければ既定の長さ', () => {
+    expect(movieCutDuration({ id: 'a', text: '' }, 0)).toBe(3);
+    expect(movieCutDuration({ id: 'a', text: '', autoNextSec: 1.5 }, 0)).toBe(1.5);
   });
 });

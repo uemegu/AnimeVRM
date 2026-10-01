@@ -210,8 +210,11 @@ function checkStory(c: Checker, data: ScenarioPackage) {
     if (id !== undefined && !sceneIndex.has(id)) c.error(path, `シーン "${id}" がありません`);
   };
 
+  const movie = data.playMode === 'movie';
   data.scenes.forEach((scene, i) => {
     const at = ['scenes', i];
+    if (movie && scene.choices?.length) c.warn([...at, 'choices'], 'ムービーでは選択肢を出しません（時間切れの飛び先、なければ1番目へ進みます）');
+    if (!movie && scene.duration !== undefined) c.warn([...at, 'duration'], 'duration はムービー（playMode: movie）でだけ使います');
     sceneRef([...at, 'nextSceneId'], scene.nextSceneId);
     sceneRef([...at, 'choiceTimeout', 'goto'], scene.choiceTimeout?.goto);
     scene.choices?.forEach((choice, j) => {

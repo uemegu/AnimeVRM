@@ -52,6 +52,7 @@
 - 感情の演出は `avatars` に書きます。`blush`（頬を赤らめる・目が潤む）、`anger`（怒りマーク）、`tears`（涙）、`eyeWander`（目が泳ぐ。`true` または強さ 0〜2）、`motionSpeed`（モーションの速さ）、`fastMotion`（速い動きに残像）は、変えるまで以降のシーンに引き継がれます。`effectText`（漫画風の文字。`doki`・`iraira`・`gaan` などのプリセット名、または `{ "preset", "text" }`）と `sweat`（`fly4` 汗が飛ぶ / `jito` にじむ）はそのシーンで1回だけ出ます。
 - シーンの `screenTransition` で画面の切り替え（`fade_black` 暗転、`eyelid_close` 瞼を閉じる、`eyelid_blink` まばたき）、`focusLines: true` で集中線を出します。どちらもそのシーンだけです。セリフ途中で変えたいときは `transitions` のキーに同じ項目を書きます（Studio のタイムラインで編集できます）。
 - 選択肢の制限時間は `choiceTimeout`（`seconds`、時間切れの分岐先 `goto`、`setFlags`）。省略時は10秒で1番目を選びます。
+- シナリオに `"playMode": "movie"` を付けるとムービーになり、メッセージウィンドウを出さずにカットが自動で進みます（Studio の再生と Pages だけ。app のゲーム本編は未対応）。カットの長さは、ボイスと最後のキーの遅い方に `autoNextSec`（既定 0.6 秒）を足したもので、どちらもなければ3秒です。シーンの `duration` で秒数を直接決められます。選択肢は出さず、時間切れの飛び先、なければ1番目へ進みます。
 - 強制イベント（`forced`）に `"consumesTurn": true` を付けると、終わった後に場所選択へ戻らず次の時間帯へ進みます。
 
 ## エンディング

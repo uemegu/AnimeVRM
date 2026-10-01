@@ -43,6 +43,14 @@ export function ScenarioSettings({ scenario, data, onChange }: { scenario: Scena
         <input className="input" value={textEn(scenario.title)} onChange={(e) => set('title', makeText(textJa(scenario.title), e.target.value))} />
       </label>
       <label className="field">
+        <span className="field-label">{t.scenarios.meta.playMode}</span>
+        <select className="select" value={scenario.playMode ?? 'game'} onChange={(e) => set('playMode', e.target.value === 'movie' ? 'movie' : undefined)}>
+          <option value="game">{t.scenarios.playModes.game}</option>
+          <option value="movie">{t.scenarios.playModes.movie}</option>
+        </select>
+        {scenario.playMode === 'movie' && <span className="field-hint">{t.scenarios.movieHint}</span>}
+      </label>
+      <label className="field">
         <span className="field-label">{t.scenarios.meta.location}</span>
         <select className="select" value={scenario.location ?? ''} onChange={(e) => set('location', e.target.value || undefined)}>
           <option value="">—</option>
