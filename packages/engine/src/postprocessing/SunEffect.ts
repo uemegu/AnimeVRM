@@ -357,7 +357,8 @@ export class SunEffect {
     elapsed: number,
     config: { lighting: { sunShafts?: SunShaftsConfig; lensFlare?: LensFlareConfig } },
     dirLight: THREE.DirectionalLight,
-    vrmMeshes?: THREE.Object3D[]
+    vrmMeshes?: THREE.Object3D[],
+    distantSun = false
   ): {
     sunScreenPosition: THREE.Vector2;
     sunVisibility: number;
@@ -390,6 +391,9 @@ export class SunEffect {
         sunCfg.sunPosition.z
       );
     }
+    // 屋外の3D背景では太陽は遠くにあるものとして、位置をカメラからの向きとして扱う。
+    // 原点基準のままだと太陽が奥の建物より手前に来て、カメラによっては画面内に入ってしまう
+    if (distantSun) this.sunWorldPosition.add(camera.position);
 
     this.sunGroup.position.copy(this.sunWorldPosition);
 
