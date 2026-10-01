@@ -53,7 +53,7 @@ export function PlayerView() {
         label: `${t.scenarios.categories[s.category]} ・ ${s.id}`,
         description: s.description,
         // 舞台の場所の遠景をサムネイルにする
-        image: s.location ? data?.locations[s.location]?.layers.background.url : undefined,
+        image: s.location ? (data?.locations[s.location]?.thumbnail ?? data?.locations[s.location]?.layers.background.url) : undefined,
       }));
   }, [list, t, data, project]);
 

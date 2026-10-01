@@ -332,7 +332,7 @@ export function ViewerView() {
         <div className="viewer-stage-bottom">
           <div className="viewer-location-grid">
             {Object.values(presets.locations).map((loc) => {
-              const bgUrl = loc.layers?.background?.url;
+              const bgUrl = loc.thumbnail ?? loc.layers?.background?.url;
               const isActive = loc.id === locationId;
               return (
                 <button
