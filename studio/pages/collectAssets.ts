@@ -26,6 +26,7 @@ const ALWAYS = [
 const BUILTIN_ENVIRONMENTS: Record<string, string> = {
   'builtin:painted-classroom': 'textures/painted-classroom',
   'builtin:painted-library': 'textures/painted-library',
+  'builtin:painted-gate': 'textures/painted-gate',
 };
 
 const readJson = (file: string): Json => JSON.parse(fs.readFileSync(file, 'utf8'));

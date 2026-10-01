@@ -23,6 +23,7 @@ export const PAGES_ENTRIES: PagesEntry[] = [
   { id: 'gesture_battle', slug: 'gesture-battle' },
   { id: 'painted_classroom', slug: 'painted-classroom' },
   { id: 'painted_library', slug: 'painted-library' },
+  { id: 'painted_gate', slug: 'painted-gate' },
   { id: 'cafe_monitoring', slug: 'cafe-monitoring' },
 ];
 

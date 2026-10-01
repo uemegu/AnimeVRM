@@ -307,6 +307,34 @@
         }
       }
     },
+    "painted_gate": {
+      "id": "painted_gate",
+      "name": "校門（簡易3D）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gate",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
     "modern_park": {
       "id": "modern_park",
       "name": "公園（並木）",

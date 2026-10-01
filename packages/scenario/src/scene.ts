@@ -250,6 +250,7 @@ export type LocationStage = z.infer<typeof LocationStage>;
 export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
+  'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
 } as const;
 
 export const LocationEnvironment = group('3D背景', '3D set', {
