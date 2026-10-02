@@ -20,6 +20,10 @@ const ALWAYS = [
   'textures/girl_face_anger.png',
   'textures/girl_face_sweat.png',
   'animations/Standing Idle.fbx',
+  // 場所の選択で選べる海の見える公園（簡易3D）。どのシナリオからも参照されないため固定で入れる
+  'textures/painted-seaside',
+  'textures/painted-classroom/sky-only.png',
+  'textures/painted-classroom/thumb-seaside.avif',
 ];
 
 /** 組み込みの3D背景が読むテクスチャのディレクトリ */
