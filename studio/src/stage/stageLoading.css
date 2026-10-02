@@ -1,0 +1,44 @@
+.stage-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.stage-loading.is-on {
+  opacity: 1;
+}
+.stage-loading-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.15);
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+.stage-loading-spinner {
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 2px solid #bfdbfe;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: stage-loading-spin 0.8s linear infinite;
+}
+@keyframes stage-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
