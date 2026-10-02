@@ -10,6 +10,7 @@ import type { LocationVisualPreset, TimeOfDayId, TimeOfDayPreset } from './visua
 import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
 import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
+import { OverlayPass } from '../postprocessing/OverlayPass';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
@@ -322,6 +323,8 @@ export class StageManager {
     this.depthOfFieldPass = new DepthOfFieldPass();
     this.depthOfFieldPass.enabled = false;
     this.composer.addPass(this.depthOfFieldPass);
+    // 文字演出・汗は、ぼかしのあとに重ねる（ぼかしの対象にしない）
+    this.composer.addPass(new OverlayPass(this.scene, this.camera));
 
     // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
     this.characterMask = new CharacterMaskRenderer(targetW, targetH);
