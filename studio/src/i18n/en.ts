@@ -14,6 +14,7 @@ export const en: Dictionary = {
     expand: 'Expand sidebar',
   },
   common: {
+    loading: 'Loading…',
     readOnly: 'This public version is read-only (saving and generation are available in the local Studio)',
     save: 'Save',
     revert: 'Revert',

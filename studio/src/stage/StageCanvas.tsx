@@ -5,6 +5,7 @@ import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageMa
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import { useI18n } from '../i18n';
+import { StageLoading, useCastLoading } from './StageLoading';
 
 interface Props {
   presets: StagePresets;
@@ -70,6 +71,7 @@ export function StageCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { language } = useI18n();
+  const { loading, run: runSetCast } = useCastLoading(managerRef);
   const phonemeRef = useRef(getSpeakerPhoneme);
   phonemeRef.current = getSpeakerPhoneme;
 
@@ -107,7 +109,7 @@ export function StageCanvas({
 
   const castKey = JSON.stringify(cast);
   useEffect(() => {
-    void managerRef.current?.setCast(cast);
+    runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
 
@@ -256,6 +258,7 @@ export function StageCanvas({
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', isolation: 'isolate' }}>
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined }} />
+      <StageLoading show={loading} />
     </div>
   );
 }

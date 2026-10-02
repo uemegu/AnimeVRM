@@ -12,6 +12,7 @@ export const ja = {
     expand: 'サイドバーを開く',
   },
   common: {
+    loading: '読み込み中…',
     readOnly: 'この公開版は閲覧専用です（保存・生成はローカルの Studio で行えます）',
     save: '保存',
     revert: '元に戻す',

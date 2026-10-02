@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CameraShot, ScenarioScene, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
+import { StageLoading, useCastLoading } from '../stage/StageLoading';
 
 interface Props {
   presets: StagePresets;
@@ -25,6 +26,7 @@ interface Props {
 export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, cut, language, getCutTime, getSpeakerPhoneme, onCanvas }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
+  const { loading, run: runSetCast } = useCastLoading(managerRef);
   const timeRef = useRef(getCutTime);
   const phonemeRef = useRef(getSpeakerPhoneme);
   timeRef.current = getCutTime;
@@ -64,7 +66,7 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
 
   const castKey = JSON.stringify(cast);
   useEffect(() => {
-    void managerRef.current?.setCast(cast);
+    runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
 
@@ -95,6 +97,7 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
   return (
     <div className="player-stage">
       <canvas ref={canvasRef} />
+      <StageLoading show={loading} />
     </div>
   );
 }
