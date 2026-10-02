@@ -3,6 +3,7 @@ import type { VRM, VRMHumanBoneName } from '@pixiv/three-vrm';
 import { EffectAnimationType, EffectAnchor, EffectTextPreset, ShowEffectTextOptions } from './types';
 import { createEffectTextTexture } from './textureGenerator';
 import { EFFECT_TEXT_PRESETS } from './presets';
+import { OVERLAY_LAYER } from '../overlayLayer';
 
 const _worldPos = new THREE.Vector3();
 
@@ -87,6 +88,7 @@ export class EffectTextInstance {
     // Create Sprite (Anchor point is center (0.5, 0.5) by default)
     this.sprite = new THREE.Sprite(this.material);
     this.sprite.renderOrder = 10000;
+    this.sprite.layers.set(OVERLAY_LAYER);
 
     // Set initial transform
     this.updateSpriteTransform(0);

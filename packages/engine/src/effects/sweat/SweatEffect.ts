@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { VRM } from '@pixiv/three-vrm';
+import { OVERLAY_LAYER } from '../overlayLayer';
 
 export type SweatMode = 'fly4' | 'jito';
 
@@ -292,6 +293,7 @@ export class SweatEffect {
     });
     this.jitoRightSprite = new THREE.Sprite(this.jitoRightMaterial);
     this.jitoRightSprite.renderOrder = 999;
+    this.jitoRightSprite.layers.set(OVERLAY_LAYER);
     this.jitoRightSprite.scale.set(this.config.jitoScale, this.config.jitoScale, 1);
     this.jitoRightSprite.position.set(
       this.config.jitoRightOffset.x,
@@ -310,6 +312,7 @@ export class SweatEffect {
     });
     this.jitoLeftSprite = new THREE.Sprite(this.jitoLeftMaterial);
     this.jitoLeftSprite.renderOrder = 999;
+    this.jitoLeftSprite.layers.set(OVERLAY_LAYER);
     this.jitoLeftSprite.scale.set(-this.config.jitoScale, this.config.jitoScale, 1);
     this.jitoLeftSprite.position.set(
       this.config.jitoLeftOffset.x,
@@ -372,6 +375,7 @@ export class SweatEffect {
 
       const sprite = new THREE.Sprite(mat);
       sprite.renderOrder = 999;
+      sprite.layers.set(OVERLAY_LAYER);
       sprite.scale.set(0, 0, 1);
       sprite.position.copy(origin);
 
