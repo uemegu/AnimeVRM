@@ -12,6 +12,7 @@ import { registerShapeKeyExpressions } from '../avatar/shapeKeyExpressions';
 import { addHandColliders } from '../avatar/handColliders';
 import { HandClearance, type HandClearanceMode } from '../avatar/handClearance';
 import { ClothDent } from '../avatar/clothDent';
+import { SpringWind, type WindSettings } from '../avatar/springWind';
 import { AvatarEffects } from './AvatarEffects';
 import { resolveAssetUrl } from '../utils/path';
 import { setDaylight } from '../scene/Daylight';
@@ -216,6 +217,9 @@ export class StageAvatar {
   /** 手に押されてスカートがへこむ */
   private clothDent: ClothDent | null = null;
   private clothDentEnabled: boolean;
+  /** 風で髪とスカートを揺らす */
+  private springWind: SpringWind | null = null;
+  private wind: WindSettings | null = null;
   public shaderController: ToonShaderController | null = null;
   /** 感情演出（頬赤・涙・汗・文字演出など）。モデルの読み込み後に作る */
   public effects: AvatarEffects | null = null;
@@ -305,6 +309,7 @@ export class StageAvatar {
           addHandColliders(vrm);
           this.handClearance = HandClearance.create(vrm, this.handClearanceMode);
           this.clothDent = ClothDent.create(vrm, this.clothDentEnabled);
+          this.springWind = SpringWind.create(vrm);
 
           // 1. スムース法線の事前計算（綺麗なアニメアウトライン用）
           applySmoothNormalsToHierarchy(vrm.scene);
@@ -388,6 +393,11 @@ export class StageAvatar {
   }
 
   /** 日なたの明るさ（暗い室内から見た窓の外の人物など。0 で場の光だけ） */
+  /** 髪とスカートを揺らす風（場所の wind）。null で止む */
+  public setWind(wind: WindSettings | null | undefined): void {
+    this.wind = wind ?? null;
+  }
+
   public setDaylight(amount: number): void {
     if (this.vrm) setDaylight(this.vrm.scene, amount);
   }
@@ -620,7 +630,8 @@ export class StageAvatar {
     // 3.5 目が泳ぐ（視線にずれを足す）
     this.effects?.applyEyeWander(delta, this.gazeTarget);
 
-    // 4. VRM SpringBone・Humanoid更新
+    // 4. VRM SpringBone・Humanoid更新（風は揺れものの重力に足す）
+    this.springWind?.update(delta, this.wind);
     this.vrm.update(delta);
 
     // 4.5 手に押されてスカートがへこむ（腕と揺れものが決まってから）

@@ -263,6 +263,7 @@ export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
   'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
+  'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },
 } as const;
 
 export const LocationEnvironment = group('3D背景', '3D set', {
@@ -287,6 +288,17 @@ export const LocationLight = group('絵の光', 'Painted light', {
   }).optional(),
 });
 export type LocationLight = z.infer<typeof LocationLight>;
+
+/**
+ * 髪とスカートを揺らす風（揺れものの重力に足す）。揺れものは簡単なバネなので、強いと髪が頭に入ったり
+ * 形が崩れたりする。そよ風（強さ 0.1 前後まで）に留めること
+ */
+export const LocationWind = group('風', 'Wind', {
+  direction: vec3('風の吹いていく向き', 'Direction the wind blows to', -1, 1, 0.05),
+  strength: num('強さ', 'Strength', 0, 0.3, 0.01, 0.06),
+  gust: num('強弱の揺らぎ', 'Gustiness', 0, 1, 0.05, 0.6).optional(),
+});
+export type LocationWind = z.infer<typeof LocationWind>;
 
 export const LocationVisualPreset = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
@@ -316,6 +328,7 @@ export const LocationVisualPreset = z.strictObject({
   }),
   environment: LocationEnvironment.optional(),
   light: LocationLight.optional(),
+  wind: LocationWind.optional(),
   stage: LocationStage.optional(),
 });
 export type LocationVisualPreset = z.infer<typeof LocationVisualPreset>;

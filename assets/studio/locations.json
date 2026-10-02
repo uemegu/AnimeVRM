@@ -389,6 +389,15 @@
           "softness": 4
         }
       },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.6
+        },
+        "strength": 0.06,
+        "gust": 0.6
+      },
       "stage": {
         "camera": {
           "depthOfField": {
