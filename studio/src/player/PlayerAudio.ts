@@ -1,3 +1,4 @@
+import type { AudioPan } from '@anime-vrm/scenario';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const BGM_VOLUME = 0.35;
@@ -6,37 +7,106 @@ const SE_VOLUME = 0.7;
 const VOICE_VOLUME = 1;
 const MUTE_KEY = 'player_audio_muted';
 
-/** ループ再生する音（BGM・環境音）。同じ URL なら鳴らし続ける */
-class LoopTrack {
-  private audio: HTMLAudioElement | null = null;
-  private url: string | null = null;
-  constructor(private readonly volume: number) {}
+/** 音量の倍率とチャネル（シナリオのカットで指定する） */
+export interface AudioMix {
+  /** 既定の音量に掛ける倍率（省略時 1） */
+  volume?: number;
+  /** 省略時は stereo */
+  pan?: AudioPan;
+}
 
-  play(url: string | null, muted: boolean, scale = 1): void {
-    if (url === this.url) return;
+const PAN_VALUE: Record<AudioPan, number> = { stereo: 0, left: -1, right: 1 };
+
+/**
+ * 音声要素の出口。音声要素 → （解析など）→ 左右 → 音量 → スピーカーとつなぐ。
+ * Web Audio が使えなければ音声要素の音量だけで鳴らす（チャネルは効かない）
+ */
+class Output {
+  private gain: GainNode | null = null;
+  private panner: StereoPannerNode | null = null;
+
+  constructor(
+    readonly audio: HTMLAudioElement,
+    context: AudioContext | null,
+    private readonly base: number,
+    /** 左右・音量の前に挟むノード（ボイスの解析用） */
+    insert?: AudioNode
+  ) {
+    if (!context) return;
+    try {
+      const source = context.createMediaElementSource(audio);
+      this.panner = context.createStereoPanner();
+      this.gain = context.createGain();
+      if (insert) {
+        source.connect(insert);
+        insert.connect(this.panner);
+      } else {
+        source.connect(this.panner);
+      }
+      this.panner.connect(this.gain);
+      this.gain.connect(context.destination);
+    } catch {
+      this.panner = null;
+      this.gain = null;
+    }
+  }
+
+  get routed(): boolean {
+    return this.gain !== null;
+  }
+
+  /** ミュートは音量を 0 にする（音声要素を muted にすると解析にも音が来なくなるため） */
+  apply(mix: AudioMix, muted: boolean): void {
+    const volume = this.base * (mix.volume ?? 1);
+    if (this.gain && this.panner) {
+      this.gain.gain.value = muted ? 0 : volume;
+      this.panner.pan.value = PAN_VALUE[mix.pan ?? 'stereo'];
+    } else {
+      this.audio.volume = Math.min(1, volume);
+      this.audio.muted = muted;
+    }
+  }
+}
+
+/** ループ再生する音（BGM・環境音）。同じ URL なら鳴らし続け、音量・チャネルだけ変える */
+class LoopTrack {
+  private output: Output | null = null;
+  private url: string | null = null;
+  private mix: AudioMix = {};
+  constructor(
+    private readonly volume: number,
+    private readonly context: () => AudioContext | null
+  ) {}
+
+  play(url: string | null, muted: boolean, mix: AudioMix = {}): void {
+    this.mix = mix;
+    if (url === this.url) {
+      this.output?.apply(mix, muted);
+      return;
+    }
     this.stop();
     this.url = url;
     if (!url) return;
     const audio = new Audio(resolveAssetUrl(url));
     audio.loop = true;
-    audio.volume = this.volume * scale;
-    audio.muted = muted;
+    this.output = new Output(audio, this.context(), this.volume);
+    this.output.apply(mix, muted);
     void audio.play().catch(() => {});
-    this.audio = audio;
   }
 
   setMuted(muted: boolean): void {
-    if (this.audio) this.audio.muted = muted;
+    this.output?.apply(this.mix, muted);
   }
 
-  /** 鳴らしたまま音量の倍率を変える */
-  setScale(scale: number): void {
-    if (this.audio) this.audio.volume = this.volume * scale;
+  /** 鳴らしたまま音量・チャネルを変える */
+  setMix(mix: AudioMix, muted: boolean): void {
+    this.mix = mix;
+    this.output?.apply(mix, muted);
   }
 
   stop(): void {
-    this.audio?.pause();
-    this.audio = null;
+    this.output?.audio.pause();
+    this.output = null;
     this.url = null;
   }
 }
@@ -46,13 +116,14 @@ class LoopTrack {
  * カット内のタイムラインの時刻と口パクの形を返す
  */
 export class PlayerAudio {
-  private readonly bgm = new LoopTrack(BGM_VOLUME);
-  private readonly ambience = new LoopTrack(AMBIENCE_VOLUME);
-  private voice: HTMLAudioElement | null = null;
   private context: AudioContext | null = null;
+  private readonly bgm = new LoopTrack(BGM_VOLUME, () => this.audioContext());
+  private readonly ambience = new LoopTrack(AMBIENCE_VOLUME, () => this.audioContext());
+  /** 鳴っている効果音（ミュートの切り替えを反映するため） */
+  private readonly ses = new Map<Output, AudioMix>();
+  private voice: Output | null = null;
+  private voiceMix: AudioMix = {};
   private analyser: AnalyserNode | null = null;
-  /** ボイスの音量（ミュートはここで絞る。音声要素を muted にすると口パク用の解析にも音が来なくなる） */
-  private voiceGain: GainNode | null = null;
   private samples: Float32Array<ArrayBuffer> | null = null;
   private mutedState: boolean;
   private onVoiceEnd: (() => void) | null = null;
@@ -80,58 +151,68 @@ export class PlayerAudio {
     }
     this.bgm.setMuted(muted);
     this.ambience.setMuted(muted);
-    if (this.voiceGain) this.voiceGain.gain.value = muted ? 0 : 1;
-    else if (this.voice) this.voice.muted = muted;
+    for (const [output, mix] of this.ses) output.apply(mix, muted);
+    this.voice?.apply(this.voiceMix, muted);
   }
 
-  /** BGM（URL と音量の倍率。null で止める） */
-  playBgm(url: string | null, volumeScale = 1): void {
-    this.bgm.play(url, this.mutedState, volumeScale);
+  /** BGM（URL と音量・チャネル。null で止める）。音量は bgm.json の volumeScale を掛けたものを渡す */
+  playBgm(url: string | null, mix: AudioMix = {}): void {
+    this.bgm.play(url, this.mutedState, mix);
   }
 
-  /** 鳴っている BGM の音量の倍率を変える（試聴しながら調整するため） */
-  setBgmVolumeScale(volumeScale: number): void {
-    this.bgm.setScale(volumeScale);
+  /** 鳴っている BGM の音量・チャネルを変える（試聴しながら調整するため） */
+  setBgmMix(mix: AudioMix): void {
+    this.bgm.setMix(mix, this.mutedState);
   }
 
   playAmbience(url: string | null): void {
     this.ambience.play(url, this.mutedState);
   }
 
-  playSe(url: string): void {
+  /** 効果音を1回鳴らす。止めたいときのために音声要素を返す */
+  playSe(url: string, mix: AudioMix = {}): HTMLAudioElement {
     const audio = new Audio(resolveAssetUrl(url));
-    audio.volume = SE_VOLUME;
-    audio.muted = this.mutedState;
-    void audio.play().catch(() => {});
+    const output = new Output(audio, this.audioContext(), SE_VOLUME);
+    output.apply(mix, this.mutedState);
+    this.ses.set(output, mix);
+    const done = () => this.ses.delete(output);
+    audio.addEventListener('ended', done);
+    audio.addEventListener('pause', done);
+    void audio.play().catch(done);
+    return audio;
   }
 
   /** ボイスを鳴らす（前のボイスは止める）。終わったら onEnd を呼ぶ */
-  playVoice(url: string | null, onEnd?: () => void): void {
+  playVoice(url: string | null, onEnd?: () => void, mix: AudioMix = {}): void {
     this.stopVoice();
     if (!url) return;
     const audio = new Audio(resolveAssetUrl(url));
-    audio.volume = VOICE_VOLUME;
+    const context = this.audioContext();
+    const analyser = context ? this.createAnalyser(context) : null;
+    const output = new Output(audio, context, VOICE_VOLUME, analyser ?? undefined);
+    this.analyser = output.routed ? analyser : null;
+    this.voice = output;
+    this.voiceMix = mix;
+    output.apply(mix, this.mutedState);
     this.onVoiceEnd = onEnd ?? null;
     audio.addEventListener('ended', () => {
-      if (this.voice === audio) this.onVoiceEnd?.();
+      if (this.voice === output) this.onVoiceEnd?.();
     });
-    if (!this.connectAnalyser(audio)) audio.muted = this.mutedState;
     void audio.play().catch(() => {
       // 再生できなければ（自動再生の制限など）、終わったものとして扱う
-      if (this.voice === audio) this.onVoiceEnd?.();
+      if (this.voice === output) this.onVoiceEnd?.();
     });
-    this.voice = audio;
   }
 
   stopVoice(): void {
     this.onVoiceEnd = null;
-    this.voice?.pause();
+    this.voice?.audio.pause();
     this.voice = null;
   }
 
   /** ボイスの再生位置（再生していなければ undefined） */
   getVoiceTime(): number | undefined {
-    const voice = this.voice;
+    const voice = this.voice?.audio;
     return voice && !voice.paused && !voice.ended ? voice.currentTime : undefined;
   }
 
@@ -148,30 +229,27 @@ export class PlayerAudio {
     return shapes[Math.floor(performance.now() / 110) % shapes.length];
   }
 
-  /** ボイス → 解析 → 音量 → 出力 とつなぐ。つなげなければ false */
-  private connectAnalyser(audio: HTMLAudioElement): boolean {
+  /** 共有の AudioContext（作れなければ null）。再生の操作のたびに呼び、止まっていれば再開する */
+  private audioContext(): AudioContext | null {
     try {
       this.context ??= new AudioContext();
       void this.context.resume();
-      const source = this.context.createMediaElementSource(audio);
-      this.analyser = this.context.createAnalyser();
-      this.analyser.fftSize = 1024;
-      this.samples = new Float32Array(this.analyser.fftSize);
-      this.voiceGain = this.context.createGain();
-      this.voiceGain.gain.value = this.mutedState ? 0 : 1;
-      source.connect(this.analyser);
-      this.analyser.connect(this.voiceGain);
-      this.voiceGain.connect(this.context.destination);
-      return true;
+      return this.context;
     } catch {
-      this.analyser = null;
-      this.voiceGain = null;
-      return false;
+      return null;
     }
+  }
+
+  private createAnalyser(context: AudioContext): AnalyserNode {
+    const analyser = context.createAnalyser();
+    analyser.fftSize = 1024;
+    this.samples = new Float32Array(analyser.fftSize);
+    return analyser;
   }
 
   dispose(): void {
     this.stopVoice();
+    for (const output of [...this.ses.keys()]) output.audio.pause();
     this.bgm.stop();
     this.ambience.stop();
     void this.context?.close();

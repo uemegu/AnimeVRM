@@ -10,6 +10,7 @@ import { useStagePresets } from '../../stage/useStagePresets';
 import { PlayerAudio } from '../../player/PlayerAudio';
 import { VoiceLibrary } from './VoiceLibrary';
 import { BgmLibrary } from './BgmLibrary';
+import { SeLibrary } from './SeLibrary';
 import { useBackdrop } from '../../components/Backdrop';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
@@ -19,7 +20,8 @@ const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
 const FACE_EFFECTS = ['blush', 'anger', 'tears', 'faceSweat'] as const;
 type FaceEffect = (typeof FACE_EFFECTS)[number];
-const TABS = ['expression', 'motion', 'voice', 'bgm'] as const;
+const TABS = ['expression', 'motion', 'voice', 'sound'] as const;
+const SOUND_KINDS = ['bgm', 'se'] as const;
 type Tab = (typeof TABS)[number];
 const IDLE = 'Standing Idle';
 
@@ -91,18 +93,44 @@ export function ViewerView() {
     setPlayingVoice(url);
     audio.playVoice(url, () => setPlayingVoice((current) => (current === url ? null : current)));
   };
-  // BGM の試聴（ボイスと重ねて鳴らせる）
+  // サウンド（BGM・効果音）の試聴。ボイスと重ねて鳴らせる
+  const [soundKind, setSoundKind] = useState<(typeof SOUND_KINDS)[number]>('bgm');
   const [playingBgm, setPlayingBgm] = useState<string | null>(null);
   const toggleBgm = (url: string, volumeScale: number) => {
     const audio = audioRef.current;
     if (!audio) return;
     const next = playingBgm === url ? null : url;
-    audio.playBgm(next, volumeScale);
+    audio.playBgm(next, { volume: volumeScale });
     setPlayingBgm(next);
   };
   const changeBgmVolume = (url: string, volumeScale: number) => {
-    if (playingBgm === url) audioRef.current?.setBgmVolumeScale(volumeScale);
+    if (playingBgm === url) audioRef.current?.setBgmMix({ volume: volumeScale });
   };
+  const seRef = useRef<HTMLAudioElement | null>(null);
+  const [playingSe, setPlayingSe] = useState<string | null>(null);
+  const toggleSe = (url: string) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    seRef.current?.pause();
+    seRef.current = null;
+    if (playingSe === url) {
+      setPlayingSe(null);
+      return;
+    }
+    const element = audio.playSe(url);
+    element.addEventListener('ended', () => setPlayingSe((current) => (current === url ? null : current)));
+    seRef.current = element;
+    setPlayingSe(url);
+  };
+  const soundSwitch = (
+    <div className="segmented viewer-sound-switch" role="tablist">
+      {SOUND_KINDS.map((kind) => (
+        <button key={kind} type="button" role="tab" aria-selected={soundKind === kind} className={soundKind === kind ? 'active' : ''} onClick={() => setSoundKind(kind)}>
+          {t.viewer.soundKinds[kind]}
+        </button>
+      ))}
+    </div>
+  );
   const toggleMute = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -304,9 +332,10 @@ export function ViewerView() {
             />
           )}
 
-          {tab === 'bgm' && (
-            <BgmLibrary playingUrl={playingBgm} muted={muted} onToggle={toggleBgm} onVolume={changeBgmVolume} onToggleMute={toggleMute} />
+          {tab === 'sound' && soundKind === 'bgm' && (
+            <BgmLibrary heading={soundSwitch} playingUrl={playingBgm} muted={muted} onToggle={toggleBgm} onVolume={changeBgmVolume} onToggleMute={toggleMute} />
           )}
+          {tab === 'sound' && soundKind === 'se' && <SeLibrary heading={soundSwitch} playingUrl={playingSe} muted={muted} onToggle={toggleSe} onToggleMute={toggleMute} />}
         </div>
       </aside>
 

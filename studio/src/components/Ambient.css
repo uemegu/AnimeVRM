@@ -1,0 +1,37 @@
+/* サイドメニューの裏ににじむ舞台の光 */
+.studio-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.studio-ambient canvas {
+  position: absolute;
+  inset: -60px;
+  width: calc(100% + 120px);
+  height: calc(100% + 120px);
+  filter: blur(28px) saturate(1.4);
+  animation: studio-ambient-in 0.8s ease both;
+}
+@keyframes studio-ambient-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 光を出している間は、サイドメニューの白を薄くして透かす */
+.studio.has-ambient .studio-sidebar {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.48) 58%, rgba(255, 255, 255, 0.4));
+  border-right-color: rgba(255, 255, 255, 0.5);
+}
+.studio.has-ambient .studio-brand {
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+/* 光の上では白の斜め線が浮くので消す */
+.studio.has-ambient .studio-sidebar::before {
+  display: none;
+}

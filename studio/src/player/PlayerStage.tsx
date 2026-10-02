@@ -16,12 +16,13 @@ interface Props {
   /** カット内の時刻（ボイスの再生位置。なければカット開始からの秒数を使う） */
   getCutTime: () => number | undefined;
   getSpeakerPhoneme: () => string | undefined;
+  onCanvas?: (canvas: HTMLCanvasElement | null) => void;
 }
 
 /**
  * 再生画面の舞台。カットが変わるたびにタイムラインを渡し、時刻はボイスに合わせて描画側が進める
  */
-export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, cut, language, getCutTime, getSpeakerPhoneme }: Props) {
+export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, cut, language, getCutTime, getSpeakerPhoneme, onCanvas }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const timeRef = useRef(getCutTime);
@@ -43,7 +44,9 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     managerRef.current = manager;
     const observer = new ResizeObserver(([entry]) => manager.resize(entry.contentRect.width, entry.contentRect.height));
     observer.observe(canvas.parentElement ?? canvas);
+    onCanvas?.(canvas);
     return () => {
+      onCanvas?.(null);
       observer.disconnect();
       manager.dispose();
       managerRef.current = null;

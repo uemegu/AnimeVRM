@@ -33,6 +33,8 @@ interface Props {
   data: PlayerData;
   /** 一覧へ戻る（なければボタンを出さない） */
   onExit?: () => void;
+  /** 舞台の canvas ができた・なくなったときに呼ぶ（Studio のサイドメニューの光に使う） */
+  onCanvas?: (canvas: HTMLCanvasElement | null) => void;
 }
 
 type Phase = 'title' | 'playing' | 'ended';
@@ -40,7 +42,7 @@ type Phase = 'title' | 'playing' | 'ended';
 /**
  * シナリオの再生（分岐・ボイス・BGM・演出つき）。Studio の再生画面と Pages で使う
  */
-export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
+export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Props) {
   const { t, language, setLanguage } = useI18n();
   const tp = t.player;
   const runnerRef = useRef<ScenarioRunner>(new ScenarioRunner(scenario));
@@ -98,16 +100,19 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
   const shot = resolveCameraShot(scene, cast);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
 
+  /** '/' で始まらないファイルはシナリオのディレクトリから */
+  const resolveSceneUrl = (url: string) => (url.startsWith('/') ? url : `${baseUrl}${url}`);
+
   // シーンに入ったとき：音と文字送りを始める
   useEffect(() => {
     if (phase !== 'playing') return;
     const bgm = stage.bgm && stage.bgm !== 'silence' ? (data.bgm[stage.bgm] ?? { url: stage.bgm, volumeScale: 1 }) : null;
-    audio.playBgm(bgm?.url ?? null, bgm?.volumeScale ?? 1);
+    audio.playBgm(bgm?.url ?? null, { volume: (bgm?.volumeScale ?? 1) * (stage.bgmVolume ?? 1), pan: stage.bgmPan });
     audio.playAmbience(stage.ambience ?? null);
-    if (scene.seUrl) audio.playSe(scene.seUrl);
-    const voice = scene.voiceUrl ? (scene.voiceUrl.startsWith('/') ? scene.voiceUrl : `${baseUrl}${scene.voiceUrl}`) : null;
+    if (scene.seUrl) audio.playSe(resolveSceneUrl(scene.seUrl), { volume: scene.seVolume, pan: scene.sePan });
+    const voice = scene.voiceUrl ? resolveSceneUrl(scene.voiceUrl) : null;
     setVoiceDone(!voice);
-    audio.playVoice(voice, () => setVoiceDone(true));
+    audio.playVoice(voice, () => setVoiceDone(true), { volume: scene.voiceVolume, pan: scene.voicePan });
     setTyped(0);
     cutStartRef.current = performance.now();
     if (scene.flashEffect === 'white') setFlash((f) => f + 1);
@@ -239,6 +244,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit }: Props) {
         language={language}
         getCutTime={() => audio.getVoiceTime()}
         getSpeakerPhoneme={() => audio.getPhoneme()}
+        onCanvas={onCanvas}
       />
       {flash > 0 && <div key={flash} className="player-flash" />}
 

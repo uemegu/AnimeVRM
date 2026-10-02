@@ -25,6 +25,23 @@ describe('舞台の状態', () => {
     expect(Object.keys(stageAtScene(scenario, 2).cast)).toEqual(['emili']);
   });
 
+  it('BGM の音量・チャネルは同じ BGM のあいだ引き継ぎ、BGM が変わると既定に戻ること', () => {
+    const withMix: ScenarioPackage = {
+      id: 'm',
+      title: 't',
+      bgm: 'main',
+      scenes: [
+        { id: 'm1', text: '', bgmVolume: 0.5, bgmPan: 'left' },
+        { id: 'm2', text: '' },
+        { id: 'm3', text: '', bgm: 'night' },
+        { id: 'm4', text: '', bgm: 'love', bgmVolume: 0.3 },
+      ],
+    };
+    expect(stageAtScene(withMix, 1)).toMatchObject({ bgm: 'main', bgmVolume: 0.5, bgmPan: 'left' });
+    expect(stageAtScene(withMix, 2)).toMatchObject({ bgm: 'night', bgmVolume: undefined, bgmPan: undefined });
+    expect(stageAtScene(withMix, 3)).toMatchObject({ bgm: 'love', bgmVolume: 0.3, bgmPan: undefined });
+  });
+
   it('キャラの服装とループは呼び出し側の決まりで解決すること', () => {
     const cast = resolveCast(stageAtScene(scenario, 1), {
       modelUrlFor: (id) => `/models/${id}.vrm`,

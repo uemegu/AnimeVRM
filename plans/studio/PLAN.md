@@ -109,6 +109,14 @@ tools/eye-editor/
    - GEMINI.md の開発ルール（表情の強さ・カメラ・選択肢のシーンなど）は検証しない。Skill と指示でカバーする
    - 未対応：Studio の画面は、保存に成功したときの `problems`（参照の問題）をまだ表示しない
 
+## app/ との乖離（シナリオ形式）
+
+シナリオは Studio で編集し、app/ でも同じ JSON を再生する前提。Studio の再生（`studio/src/player/`）だけが対応していて、app/ の再生（`app/src/services/audio/SoundManager.ts`・`app/src/hooks/useScenarioPlayer.ts`）が未対応の項目をここに記録する。app/ を直したら消す。
+
+- **音量・チャネル**（2026-10-02 追加）：カットの `voiceVolume`・`voicePan`・`seVolume`・`sePan`・`bgmVolume`・`bgmPan`。app/ は読み飛ばし、既定の音量・ステレオで鳴らす。app/ の型（`app/src/types/scenario.ts`）にもない
+- **環境音**（`ambience`）：app/ は鳴らさない
+- **効果音の相対パス**：`seUrl` が `/` で始まらないとき、Studio はシナリオのディレクトリから探すが、app/ はそのまま読む（今のシナリオはすべて `/se/...` なので実害はない）
+
 ## バックログ
 
 - **モブ（背景の生徒など）**（2026-09-27 バックログへ）：旧ルートの群衆・半透明のモブ生徒は削除した。これを前提にしていた「休み時間の教室」（corridor-mob）は移していない
