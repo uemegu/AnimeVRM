@@ -46,6 +46,8 @@ export const en: Dictionary = {
     timeOfDay: 'Time of day',
     camera: 'Camera',
     shots: { wide: 'Wide', medium: 'Two-shot', speaker: 'Speaker', close: 'Close', side: 'From the side (walking)' },
+    cameraShift: 'Viewpoint',
+    cameraShifts: { up_left: 'Upper left', up: 'Up', up_right: 'Upper right', left: 'Left', center: 'Center', right: 'Right', down_left: 'Lower left', down: 'Down', down_right: 'Lower right' },
     expression: 'Expression',
     expressions: { neutral: 'Neutral', happy: 'Happy', relaxed: 'Relaxed', sad: 'Sad', angry: 'Angry', surprised: 'Surprised', nima: 'Smirk' },
     motion: 'Motion',

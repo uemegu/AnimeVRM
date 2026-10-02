@@ -13,6 +13,7 @@ import {
 } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
+import { ShiftPicker } from '../../components/ShiftPicker';
 import { format, useI18n } from '../../i18n';
 import { cutWarnings, makeText, textEn, textJa } from './scenarioEdit';
 import { VoicePanel } from './VoicePanel';
@@ -280,14 +281,17 @@ function StageTab({
       </div>
       <label className="field">
         <span className="field-label">{t.scenarios.camera}</span>
-        <select className="select" value={scene.camera ?? ''} onChange={(e) => set('camera', (e.target.value || undefined) as CameraShot | undefined)}>
-          <option value="">{t.scenarios.auto}</option>
-          {SHOTS.map((s) => (
-            <option key={s} value={s}>
-              {t.viewer.shots[s]}
-            </option>
-          ))}
-        </select>
+        <span className="camera-shot-row">
+          <select className="select" value={scene.camera ?? ''} onChange={(e) => set('camera', (e.target.value || undefined) as CameraShot | undefined)}>
+            <option value="">{t.scenarios.auto}</option>
+            {SHOTS.map((s) => (
+              <option key={s} value={s}>
+                {t.viewer.shots[s]}
+              </option>
+            ))}
+          </select>
+          <ShiftPicker value={scene.cameraShift} onChange={(shift) => set('cameraShift', shift ?? undefined)} />
+        </span>
       </label>
       <label className="inspector-check">
         <input type="checkbox" checked={!!scene.clearCast} onChange={(e) => set('clearCast', e.target.checked || undefined)} />

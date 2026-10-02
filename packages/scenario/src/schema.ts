@@ -41,6 +41,13 @@ export type AvatarSlotPosition = z.infer<typeof AvatarSlotPosition>;
 export const CameraShot = z.enum(['wide', 'medium', 'speaker', 'close', 'side']);
 export type CameraShot = z.infer<typeof CameraShot>;
 
+/**
+ * 構図からカメラを上下左右へずらす位置（3x3 の真ん中以外の8方向。省略で真ん中）。
+ * 注視点はそのままなので、少し上から・下から・斜めから見る形になる
+ */
+export const CameraShift = z.enum(['up_left', 'up', 'up_right', 'left', 'right', 'down_left', 'down', 'down_right']);
+export type CameraShift = z.infer<typeof CameraShift>;
+
 /** 'player' | 'speaker' | 'partner' | 'camera' | 'forward' またはキャラ ID */
 const LookAtTarget = z.string();
 
@@ -131,6 +138,8 @@ export const SceneTransition = z.strictObject({
   at: z.number().nonnegative(),
   /** この時刻から構図を切り替える */
   camera: CameraShot.optional(),
+  /** 切り替えた構図からカメラをずらす（省略で真ん中） */
+  cameraShift: CameraShift.optional(),
   /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
   cameraPose: CameraPose.optional(),
   cameraTransitionDuration: z.number().nonnegative().optional(),
@@ -243,6 +252,8 @@ export const ScenarioScene = z.strictObject({
   timeOfDay: z.string().optional(),
   transitions: z.array(SceneTransition).optional(),
   camera: CameraShot.optional(),
+  /** 構図からカメラを上下左右へずらす（省略で真ん中） */
+  cameraShift: CameraShift.optional(),
   /** カメラを直接指定する（camera の構図より優先。このカットだけに効く） */
   cameraPose: CameraPose.optional(),
   /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */

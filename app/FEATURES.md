@@ -48,6 +48,7 @@
 - `avatars` はキャラIDごとに `position`（`left` / `center` / `right` または座標）、`expression`、`motion` を指定します。`"visible": false` で退場、シーンの `"clearCast": true` で全員退場してから適用します。休日はヒロインが自動で私服になります。
 - `motion` は `assets/animations/<名前>.fbx`。待機・歩行などは繰り返し、身振りは1回再生して待機に戻ります（`data/motions.ts`、`motionLoop` で上書き可）。
 - カメラは `camera` で `wide`（全員）・`medium`（話者中心の会話）・`speaker`（話者）・`close`（バストアップ）・`side`（横から。並んで歩きながらの会話で、話者が画面の左寄りに横向きで映る）。省略時は人数と話者から自動で決まります。極端な接写はしません。
+- `cameraShift` で構図からカメラを上下左右へずらせます（`up_left`・`up`・`up_right`・`left`・`right`・`down_left`・`down`・`down_right`。省略で真ん中）。注視点はそのままなので、少し上から・下から・斜めから見る形になります。カット内のキーで構図を切り替えるときも、キーごとに指定できます。
 - 歩きながらの会話は `"scrollingBackground": {}` で背景を横に流し続けます（ルートの歩き会話と同じ、すりガラス風のぼかし付き）。以降のシーンにも引き継がれ、`false` で止めて通常の背景に戻ります。`speed`（既定 0.65、走る場面は 1.6 程度）、`blur`、`direction`、`textureUrl`（省略時はその場所の遠景）を指定できます。
 - 感情の演出は `avatars` に書きます。`blush`（頬を赤らめる・目が潤む）、`anger`（怒りマーク）、`tears`（涙）、`eyeWander`（目が泳ぐ。`true` または強さ 0〜2）、`motionSpeed`（モーションの速さ）、`fastMotion`（速い動きに残像）は、変えるまで以降のシーンに引き継がれます。`effectText`（漫画風の文字。`doki`・`iraira`・`gaan` などのプリセット名、または `{ "preset", "text" }`）と `sweat`（`fly4` 汗が飛ぶ / `jito` にじむ）はそのシーンで1回だけ出ます。
 - シーンの `screenTransition` で画面の切り替え（`fade_black` 暗転、`eyelid_close` 瞼を閉じる、`eyelid_blink` まばたき）、`focusLines: true` で集中線を出します。どちらもそのシーンだけです。セリフ途中で変えたいときは `transitions` のキーに同じ項目を書きます（Studio のタイムラインで編集できます）。
