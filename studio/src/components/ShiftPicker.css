@@ -1,0 +1,34 @@
+.shift-picker {
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+.shift-picker button {
+  padding: 0;
+  border: none;
+  border-radius: 1px;
+  background: var(--border-strong, #cbd5e1);
+  cursor: pointer;
+}
+.shift-picker button:hover:not(.active) {
+  background: var(--text-muted, #64748b);
+}
+.shift-picker button.active {
+  background: var(--accent);
+}
+
+/* 構図の選択と並べる */
+.camera-shot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camera-shot-row .select {
+  flex: 1;
+  min-width: 0;
+}

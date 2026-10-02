@@ -29,6 +29,7 @@ export type AvatarSlotPosition = 'left' | 'right' | 'center';
 export type {
   AvatarTransition,
   CameraPose,
+  CameraShift,
   CameraShot,
   EffectText,
   SceneAvatarConfig,
@@ -39,6 +40,7 @@ export type {
 } from '@anime-vrm/scenario';
 import type {
   CameraPose,
+  CameraShift,
   CameraShot,
   SceneAvatarConfig,
   SceneTransition,
@@ -112,6 +114,8 @@ export interface ScenarioScene {
   transitions?: SceneTransition[];
   /** カメラの構図（省略時は登場人数と話者から自動） */
   camera?: CameraShot;
+  /** 構図からカメラを上下左右へずらす（省略で真ん中） */
+  cameraShift?: CameraShift;
   /** カメラの直接指定（camera より優先。このカットだけに効く） */
   cameraPose?: CameraPose;
   /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */

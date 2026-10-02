@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { CameraPose, CameraShot, ScenarioScene, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
+import type { CameraPose, CameraShift, CameraShot, ScenarioScene, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -12,6 +12,8 @@ interface Props {
   locationId: string;
   cast: StageCastMember[];
   cameraShot: CameraShot;
+  /** 構図からカメラをずらす（カットを渡すときはカットの cameraShift が優先） */
+  cameraShift?: CameraShift | null;
   focusId: string | null;
   /** 流れる背景（歩きながらの会話）。null で止める */
   scrolling?: ScrollingBackgroundSettings | null;
@@ -50,6 +52,7 @@ export function StageCanvas({
   locationId,
   cast,
   cameraShot,
+  cameraShift = null,
   focusId,
   scrolling = null,
   cut = null,
@@ -119,9 +122,13 @@ export function StageCanvas({
     managerRef.current?.setCameraShot(cameraShot, focusId);
   }, [cameraShot, focusId]);
 
+  useEffect(() => {
+    managerRef.current?.setCameraShift(cameraShift);
+  }, [cameraShift]);
+
   // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
   const cutKey = JSON.stringify(
-    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceWhisper: cut.voiceWhisper } : null
+    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, cameraShift: cut.cameraShift, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceWhisper: cut.voiceWhisper } : null
   );
   useEffect(() => {
     const manager = managerRef.current;

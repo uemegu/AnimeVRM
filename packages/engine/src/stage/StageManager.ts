@@ -31,6 +31,7 @@ import {
   DEFAULT_SHOT_RIGS,
   DEFAULT_SLOT_POSITIONS,
   type CameraPose as CameraPoseSetting,
+  type CameraShift,
   type CameraShot,
   type LocationStage,
   type ShotRig,
@@ -47,6 +48,18 @@ const CAMERA_TRANSITION_SEC = 0.6;
 /** 横からの構図：カメラと注視点を話者より少し手前に、注視点を話者の少し前（左）に置く */
 const SIDE_SHOT_FORWARD = 0.25;
 const SIDE_SHOT_LEAD = 0.12;
+/** ずらしたときに動かす量（注視点までの距離に対する割合。横・縦） */
+const CAMERA_SHIFT_RATIO = { x: 0.35, y: 0.3 };
+const CAMERA_SHIFT_DIRECTIONS: Record<CameraShift, [number, number]> = {
+  up_left: [-1, 1],
+  up: [0, 1],
+  up_right: [1, 1],
+  left: [-1, 0],
+  right: [1, 0],
+  down_left: [-1, -1],
+  down: [0, -1],
+  down_right: [1, -1],
+};
 
 interface CameraPose {
   position: THREE.Vector3;
@@ -162,6 +175,9 @@ export class StageManager {
   private basePose: CameraPoseSetting | null = null;
   /** タイムラインで切り替えた構図・カメラ（カットの指定より優先） */
   private timelineShot: CameraShot | null = null;
+  /** 構図からのずらし（Studio で直接選ぶもの。カット・キーの指定が優先） */
+  private cameraShift: CameraShift | null = null;
+  private timelineShift: CameraShift | null = null;
   private timelinePose: { pose: CameraPoseSetting; duration?: number } | null = null;
   private cameraTransitionSec = CAMERA_TRANSITION_SEC;
   /** Studio でカメラを手で動かしている間は、構図によるカメラの移動を止める */
@@ -1045,6 +1061,7 @@ export class StageManager {
     if (cameraJson !== this.appliedCutCamera || seek) {
       this.appliedCutCamera = cameraJson;
       this.timelineShot = camera.pose ? null : (camera.shot ?? null);
+      this.timelineShift = camera.shift ?? null;
       this.timelinePose = camera.pose ? { pose: camera.pose, duration: seek ? 0 : camera.duration } : null;
       this.updateCameraTarget();
     }
@@ -1112,6 +1129,34 @@ export class StageManager {
     this.cameraShot = shot;
     this.cameraFocusId = focusId;
     this.updateCameraTarget();
+  }
+
+  /** 構図からカメラを上下左右へずらす（null で真ん中。カットに指定があればそちらが優先） */
+  public setCameraShift(shift: CameraShift | null): void {
+    this.cameraShift = shift;
+    this.updateCameraTarget();
+  }
+
+  /** 今のずらし。キーで構図を切り替えていればキーの指定、なければカットの指定 */
+  private currentShift(): CameraShift | null {
+    if (this.timelineShot) return this.timelineShift;
+    return this.cutScene?.cameraShift ?? this.cameraShift;
+  }
+
+  /** 注視点はそのまま、カメラを画面の左右・上下の向きへ平行にずらす */
+  private shiftPose(pose: CameraPose, shift: CameraShift | null): CameraPose {
+    if (!shift) return pose;
+    const [sx, sy] = CAMERA_SHIFT_DIRECTIONS[shift];
+    const forward = new THREE.Vector3().subVectors(pose.target, pose.position);
+    const distance = forward.length();
+    forward.normalize();
+    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+    const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+    const position = pose.position
+      .clone()
+      .addScaledVector(right, sx * distance * CAMERA_SHIFT_RATIO.x)
+      .addScaledVector(up, sy * distance * CAMERA_SHIFT_RATIO.y);
+    return { position, target: pose.target };
   }
 
   /**
@@ -1193,7 +1238,7 @@ export class StageManager {
     const direct = this.timelinePose?.pose ?? (this.timelineShot ? null : this.basePose);
     const pose: CameraPose = direct
       ? { position: new THREE.Vector3(...direct.position), target: new THREE.Vector3(...direct.target) }
-      : this.shotPose(frame);
+      : this.shiftPose(this.shotPose(frame), this.currentShift());
     const fov = direct?.fov ?? this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;

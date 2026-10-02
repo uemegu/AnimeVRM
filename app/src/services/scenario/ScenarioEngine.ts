@@ -10,6 +10,7 @@ import {
   SupportedLanguage,
   resolveLocalizedText,
   SceneAvatarConfig,
+  CameraShift,
   CameraShot,
   CameraPose,
   SceneTransition,
@@ -38,6 +39,7 @@ export interface ScenarioResolvedScene {
   timeOfDay?: import('../../types/visual').TimeOfDayId;
   autoNextSec?: number;
   camera?: CameraShot;
+  cameraShift?: CameraShift;
   clearCast?: boolean;
   /** 選択肢の制限時間（秒） */
   choiceTimeLimitSec?: number;
@@ -119,6 +121,7 @@ export class ScenarioEngine {
       camera: raw.camera,
       clearCast: raw.clearCast,
       choiceTimeLimitSec: raw.choiceTimeout?.seconds,
+      cameraShift: raw.cameraShift,
       cameraPose: raw.cameraPose,
       transitions: raw.transitions,
       screenTransition: raw.screenTransition,

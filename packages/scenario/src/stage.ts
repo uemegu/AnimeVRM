@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, CameraPose, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
@@ -255,6 +255,8 @@ export interface CutAvatarState {
 /** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
 export interface CutCameraState {
   shot?: CameraShot;
+  /** 構図を切り替えたキーのずらし（省略で真ん中） */
+  shift?: CameraShift;
   pose?: CameraPose;
   /** 切り替えた時刻と、動かすのにかける秒数 */
   at?: number;
@@ -318,6 +320,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
     if (key.focusLines !== undefined) focusLines = key.focusLines;
     if (key.camera !== undefined || key.cameraPose !== undefined) {
       camera.shot = key.camera;
+      camera.shift = key.cameraShift;
       camera.pose = key.cameraPose;
       camera.at = key.at;
       camera.duration = key.cameraTransitionDuration;

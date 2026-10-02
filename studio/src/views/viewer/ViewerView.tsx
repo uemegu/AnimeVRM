@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_AVATAR_LOOK, EffectTextPreset, SweatMode, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
+import { DEFAULT_AVATAR_LOOK, EffectTextPreset, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import { WHISPER_MOUTH_SCALE, type StageManager } from '@anime-vrm/engine/stage/StageManager';
@@ -12,6 +12,7 @@ import { VoiceLibrary } from './VoiceLibrary';
 import { BgmLibrary } from './BgmLibrary';
 import { SeLibrary } from './SeLibrary';
 import { useBackdrop } from '../../components/Backdrop';
+import { ShiftPicker } from '../../components/ShiftPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -44,6 +45,7 @@ export function ViewerView() {
   const [locationId, setLocationId] = useState('school_gate');
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDayId>('day');
   const [shot, setShot] = useState<CameraShot>('speaker');
+  const [shift, setShift] = useState<CameraShift | null>(null);
   const [expression, setExpression] = useState<string>('neutral');
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
@@ -358,6 +360,7 @@ export function ViewerView() {
               </button>
             ))}
           </div>
+          <ShiftPicker value={shift} onChange={setShift} />
           <select className="select viewer-location-select" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
             {Object.values(presets.locations).map((loc) => (
               <option key={loc.id} value={loc.id}>
@@ -368,7 +371,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} onManager={onManager} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} onManager={onManager} />
         </div>
 
         <p className="viewer-caption">

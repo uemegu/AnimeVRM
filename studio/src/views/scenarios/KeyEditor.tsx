@@ -1,6 +1,7 @@
 import type { AvatarTransition, CameraPose, CameraShot, SceneTransition } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
+import { ShiftPicker } from '../../components/ShiftPicker';
 import { useI18n } from '../../i18n';
 import { EffectFields } from './EffectFields';
 
@@ -48,25 +49,30 @@ export function KeyEditor({ kind, value, data, castIds, currentPose, onChange, o
         {atField}
         <label className="field">
           <span className="field-label">{t.scenarios.camera}</span>
-          <select
-            className="select"
-            value={mode === 'pose' ? 'pose' : (key.camera ?? '')}
-            onChange={(e) => {
-              const v = e.target.value;
-              let next = withField(withField(key, 'camera', undefined), 'cameraPose', undefined);
-              if (v === 'pose') next = { ...next, cameraPose: currentPose ?? key.cameraPose ?? { position: [0, 1.3, 1.6], target: [0, 1.2, 0] } };
-              else if (v) next = { ...next, camera: v as CameraShot };
-              onChange(next);
-            }}
-          >
-            <option value="">{tl.none}</option>
-            {SHOTS.map((s) => (
-              <option key={s} value={s}>
-                {`${tl.shot}: ${t.viewer.shots[s]}`}
-              </option>
-            ))}
-            <option value="pose">{tl.pose}</option>
-          </select>
+          <span className="camera-shot-row">
+            <select
+              className="select"
+              value={mode === 'pose' ? 'pose' : (key.camera ?? '')}
+              onChange={(e) => {
+                const v = e.target.value;
+                let next = withField(withField(key, 'camera', undefined), 'cameraPose', undefined);
+                // 構図を選び直したときはずらしを残し、構図をやめたら消す
+                if (!v || v === 'pose') next = withField(next, 'cameraShift', undefined);
+                if (v === 'pose') next = { ...next, cameraPose: currentPose ?? key.cameraPose ?? { position: [0, 1.3, 1.6], target: [0, 1.2, 0] } };
+                else if (v) next = { ...next, camera: v as CameraShot };
+                onChange(next);
+              }}
+            >
+              <option value="">{tl.none}</option>
+              {SHOTS.map((s) => (
+                <option key={s} value={s}>
+                  {`${tl.shot}: ${t.viewer.shots[s]}`}
+                </option>
+              ))}
+              <option value="pose">{tl.pose}</option>
+            </select>
+            {key.camera && <ShiftPicker value={key.cameraShift} onChange={(shift) => set('cameraShift', shift ?? undefined)} />}
+          </span>
         </label>
         {mode === 'pose' && (
           <div className="field">
