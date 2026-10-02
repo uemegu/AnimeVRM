@@ -24,7 +24,7 @@ import { PlayerAudio } from '../../player/PlayerAudio';
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const SLOTS = ['left', 'center', 'right'] as const;
-const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
+const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 /** 次のカットの選択肢で「ここで終わる」を表す値 */
 const END = '__end__';

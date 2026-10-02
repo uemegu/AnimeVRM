@@ -118,6 +118,7 @@ function buildCatalog(paths: WorkspacePaths, studio: Map<string, unknown>, scena
   const bgm = studio.get('bgm') as z.infer<typeof BgmBook> | undefined;
   return {
     characterIds: characters && new Set(characters.characters.map((c) => c.id)),
+    spriteKeys: characters && new Map(characters.characters.map((c) => [c.id, new Set((c.sprites ?? []).map((s) => s.key))])),
     locationIds: locations && new Set(Object.keys(locations.presets)),
     timeOfDayIds: timesOfDay && new Set(Object.keys(timesOfDay.presets)),
     bgmIds: bgm && new Set(Object.keys(bgm.bgm)),

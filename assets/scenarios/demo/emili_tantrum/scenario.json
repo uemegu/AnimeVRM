@@ -1,0 +1,634 @@
+{
+  "schemaVersion": 1,
+  "id": "emili_tantrum",
+  "title": {
+    "ja": "校門のヤダヤダー 〜曲がり角の食パン少女〜",
+    "en": "Tantrum at the Gate ~The Toast Corner Girl~"
+  },
+  "description": "食パンをくわえて激突する運命の恋を求めて駄々をこねるエミリと、重い愛で包み込むアオイの朝の攻防戦。",
+  "location": "town",
+  "scenes": [
+    {
+      "id": "w1",
+      "text": {
+        "ja": "今朝もタカシとアオイは、並んで楽しく登校していた。",
+        "en": "Takashi and Aoi were walking to school side by side again this morning, having a great time."
+      },
+      "background": "town",
+      "timeOfDay": "day",
+      "ambience": "/se/walking.mp3",
+      "scrollingBackground": {
+        "textureUrl": "/textures/town_far.avif",
+        "speed": 0.65,
+        "blur": 1,
+        "direction": "left"
+      },
+      "avatars": {
+        "aoi": {
+          "modelUrl": "/models/aoi/aoi-school-with-bag.vrm",
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "side"
+    },
+    {
+      "id": "w2",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「でね、昨日のドラマの最終回がもう最高でさ〜！ 主人公が食パンをくわえて走ってきて、ぶつかった人と恋に落ちるの！」",
+        "en": "\"And then, the drama's finale yesterday was the best! The heroine runs in with toast in her mouth, crashes into someone, and falls in love!\""
+      },
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "side",
+      "voiceUrl": "v_w2_67c6d173.mp3"
+    },
+    {
+      "id": "w3",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「……あれ？ 校門のところ、なんだか騒がしいね。……あれ？ エミリ？」",
+        "en": "\"...Huh? It's kind of noisy over at the gate. ...Wait, is that Emili?\""
+      },
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "headTurn": 0.6
+        }
+      },
+      "camera": "side",
+      "voiceUrl": "v_w3_34e87e97.mp3"
+    },
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「え、えっと……エミリちゃん？ 校門のど真ん中で、何してるの……？」",
+        "en": "\"Um, err... Emili? What on earth are you doing right in the middle of the school gate...?\""
+      },
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.5,
+            0,
+            0.8
+          ],
+          "rotationY": 2.5,
+          "motion": "Standing Idle",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 0.8,
+          "sweat": "jito"
+        },
+        "emili": {
+          "modelUrl": "/models/emili/emili-school-with-bag.vrm",
+          "sprite": "yada",
+          "position": [
+            0.9,
+            0,
+            -0.4
+          ],
+          "rotationY": 0,
+          "spriteHeight": 0.7
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1,
+          1.3,
+          2.4
+        ],
+        "target": [
+          0.3,
+          0.8,
+          -0.8
+        ],
+        "fov": 42
+      },
+      "nextSceneId": "s2",
+      "background": "painted_gate",
+      "scrollingBackground": false,
+      "ambience": false,
+      "voiceUrl": "v_s1_0051c048.mp3",
+      "bgm": "tuesday_afternoon_hijinks",
+      "bgmVolume": 0.5
+    },
+    {
+      "id": "s2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ヤダヤダー！ 学校入らないー！ 食パンくわえて全力疾走したのに、誰ともぶつからなかったのー！」",
+        "en": "\"No way, no way! I'm not going in! I sprinted with toast in my mouth, but didn't crash into anyone!\""
+      },
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1,
+          1.3,
+          2.4
+        ],
+        "target": [
+          0.3,
+          0.8,
+          -0.8
+        ],
+        "fov": 42
+      },
+      "nextSceneId": "s3",
+      "voiceUrl": "v_s2_266da874.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「そ、そんな理由……！？ というかエミリちゃん、毎朝リムジンで登校してるじゃない……！」",
+        "en": "\"T-That's why...?! But Emili, don't you usually come to school in a luxury limousine every morning...?!\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 1.2,
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1,
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.354,
+          1.282,
+          1.484
+        ],
+        "target": [
+          -0.405,
+          1.227,
+          0.555
+        ],
+        "fov": 32
+      },
+      "nextSceneId": "s4",
+      "voiceUrl": "v_s3_86653b25.mp3",
+      "transitions": [
+        {
+          "at": 0,
+          "camera": "close"
+        },
+        {
+          "at": 0,
+          "cameraPose": {
+            "position": [
+              0.733,
+              1.265,
+              1.506
+            ],
+            "target": [
+              -0.405,
+              1.227,
+              0.555
+            ],
+            "fov": 32
+          },
+          "cameraTransitionDuration": 1
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「角を曲がってイケメンと激突して『痛った〜い！』からの恋が始まらないなんて、青春への冒涜よー！ ヤダヤダー！」",
+        "en": "\"Rounding the corner, crashing into a boy, yelling 'Ouch!' and falling in love... Missing that is an insult to youth! Waaah!\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 2.5,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1,
+          1.3,
+          2.4
+        ],
+        "target": [
+          0.3,
+          0.8,
+          -0.8
+        ],
+        "fov": 42
+      },
+      "nextSceneId": "s5",
+      "voiceUrl": "v_s4_57d8bd45.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "text": {
+            "ja": "「……今から俺とぶつかり直してみる？」",
+            "en": "\"Want to try bumping into me right now?\""
+          },
+          "goto": "s_opt1"
+        },
+        {
+          "text": {
+            "ja": "「とりあえず、そのくわえてるパンを食べなよ」",
+            "en": "\"Why don't you just eat the toast you're biting first?\""
+          },
+          "goto": "s_opt2"
+        }
+      ],
+      "cameraPose": {
+        "position": [
+          -1,
+          1.3,
+          2.4
+        ],
+        "target": [
+          0.3,
+          0.8,
+          -0.8
+        ],
+        "fov": 42
+      }
+    },
+    {
+      "id": "s_opt1",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「え、タカシ♪ ……ぶつかり直して、くれるの？」",
+        "en": "\"Oh, Takashi♪ ...You'd really crash into me again?\""
+      },
+      "avatars": {
+        "emili": {
+          "sprite": false,
+          "rotationY": -0.2,
+          "motion": "Excited",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "headTurn": 0.9
+        },
+        "aoi": {
+          "rotationY": 1.2,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1,
+          "sweat": "jito",
+          "effectText": "nima"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.701,
+          1.379,
+          1.184
+        ],
+        "target": [
+          0.765,
+          1.242,
+          0.21
+        ],
+        "fov": 40
+      },
+      "nextSceneId": "s_opt1_2",
+      "voiceUrl": "v_s_opt1_18b15552.mp3",
+      "camera": "speaker"
+    },
+    {
+      "id": "s_opt1_2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ふふっ……エミリちゃん？ 私のタカシくんにぶつかったら……一生歩けないように、私が手厚く看護してあげようか？」",
+        "en": "\"Fufu... Emili? If you crash into my Takashi... should I nurse you so intensely that you'll never walk again?\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 1.2,
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1
+        },
+        "emili": {
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "aoi",
+          "headTurn": 0.8,
+          "effectText": "biku"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.4,
+          3
+        ],
+        "target": [
+          0.1,
+          1,
+          0.2
+        ],
+        "fov": 40
+      },
+      "nextSceneId": "s_climax",
+      "voiceUrl": "v_s_opt1_2_32e022af.mp3"
+    },
+    {
+      "id": "s_opt2",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「モグモグ……うん、自家製トリュフバターが染みてて美味しい！ ……って、言いくるめられないわよー！」",
+        "en": "\"*Munch munch*... Mmm, the homemade truffle butter is so rich! ...Wait, you can't sweet-talk me!\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 1.2,
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1,
+          "sweat": "fly4",
+          "effectText": "biku"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.4,
+          3
+        ],
+        "target": [
+          0.1,
+          1,
+          0.2
+        ],
+        "fov": 40
+      },
+      "nextSceneId": "s_opt2_2",
+      "voiceUrl": "v_s_opt2_0244afac.mp3"
+    },
+    {
+      "id": "s_opt2_2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「トリュフ！？ ……じゃなくてエミリちゃん、そのパンの袋に『購買部・先週末の売れ残り』って書いてある……」",
+        "en": "\"Truffle?! ...Wait, no, Emili, the wrapper says 'Cafeteria: Leftovers from last Friday'...\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 1.2,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1,
+          "sweat": "jito",
+          "effectText": "asease"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.4,
+          3
+        ],
+        "target": [
+          0.1,
+          1,
+          0.2
+        ],
+        "fov": 40
+      },
+      "nextSceneId": "s_climax",
+      "voiceUrl": "v_s_opt2_2_3dbfb286.mp3"
+    },
+    {
+      "id": "s_climax",
+      "speaker": "エミリ",
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ヒエエッ！？ 恋のトラブルどころか命の危機じゃないのー！？ 入る！ 猛ダッシュで保健室に入るわー！！」",
+        "en": "\"Eeeek?! This isn't a romantic mishap, it's a mortal peril! I'm going in! Sprinting straight to the nurse's office!!\""
+      },
+      "avatars": {
+        "emili": {
+          "sprite": false,
+          "rotationY": -0.2,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "aoi",
+          "transitions": [
+            {
+              "at": 1.2,
+              "motion": "Jogging",
+              "motionLoop": true,
+              "moveTo": [
+                2.4,
+                0,
+                -9
+              ],
+              "moveDuration": 3.2
+            },
+            {
+              "at": 2.4,
+              "fadeOut": 1.2
+            }
+          ]
+        },
+        "aoi": {
+          "rotationY": 1.4,
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili",
+          "headTurn": 1,
+          "sweat": "fly4"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.579,
+          1.371,
+          1.467
+        ],
+        "target": [
+          -0.497,
+          1.141,
+          0.301
+        ],
+        "fov": 32
+      },
+      "nextSceneId": "s_end1",
+      "voiceUrl": "v_s_climax_7fb419f9.mp3",
+      "transitions": [
+        {
+          "at": 0,
+          "camera": "close"
+        },
+        {
+          "at": 2.02,
+          "cameraPose": {
+            "position": [
+              0,
+              1.3,
+              1.6
+            ],
+            "target": [
+              0,
+              1.2,
+              0
+            ]
+          }
+        },
+        {
+          "at": 2.03,
+          "cameraPose": {
+            "position": [
+              1.159,
+              1.246,
+              0.95
+            ],
+            "target": [
+              0.768,
+              1.229,
+              0.803
+            ],
+            "fov": 32
+          },
+          "cameraTransitionDuration": 1
+        }
+      ]
+    },
+    {
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "id": "s_end1",
+      "text": {
+        "ja": "「あ、走って行っちゃった……」",
+        "en": "\"Oh, she ran off...\""
+      },
+      "avatars": {
+        "emili": {
+          "visible": false
+        },
+        "aoi": {
+          "rotationY": 2.5,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "headTurn": 0.6,
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1.3,
+          1.5,
+          2.7
+        ],
+        "target": [
+          -0.4,
+          1.2,
+          0.6
+        ],
+        "fov": 38
+      },
+      "nextSceneId": "s_end2",
+      "voiceUrl": "v_s_end1_b0da8b94.mp3",
+      "transitions": [
+        {
+          "at": 0
+        }
+      ]
+    },
+    {
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "id": "s_end2",
+      "text": {
+        "ja": "「ふふっ、タカシくん、邪魔者がいなくなって二人きりになれちゃったね♡」",
+        "en": "\"Hehe, Takashi, now that the nuisance is gone, it's just the two of us~\""
+      },
+      "avatars": {
+        "aoi": {
+          "rotationY": 0.35,
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "headTurn": 1,
+          "effectText": "doki"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.2,
+          1.45,
+          2.6
+        ],
+        "target": [
+          -0.45,
+          1.25,
+          0.8
+        ],
+        "fov": 34
+      },
+      "end": true,
+      "voiceUrl": "v_s_end2_1f524cb8.mp3",
+      "bgm": "mysterious"
+    }
+  ],
+  "bgm": "main_bgm",
+  "timeOfDay": "morning"
+}

@@ -30,6 +30,8 @@ export type Issue = Omit<Problem, 'file'>;
 export interface Catalog {
   /** キャラ ID（characters.json） */
   characterIds?: ReadonlySet<string>;
+  /** キャラ ID → 2D 画像の key（characters.json の sprites） */
+  spriteKeys?: ReadonlyMap<string, ReadonlySet<string>>;
   /** 場所 ID（locations.json） */
   locationIds?: ReadonlySet<string>;
   /** 時間帯 ID（time-of-day.json） */
@@ -88,6 +90,12 @@ class Checker {
     const ids = this.catalog.characterIds;
     if (id === undefined || !ids || ids.has(id)) return;
     this.error(path, `キャラ "${id}" は characters.json にいません`);
+  }
+
+  sprite(path: (string | number)[], characterId: string, key: string | undefined) {
+    const sprites = this.catalog.spriteKeys;
+    if (key === undefined || !sprites) return;
+    if (!sprites.get(characterId)?.has(key)) this.error(path, `キャラ "${characterId}" の 2D 画像 "${key}" は characters.json の sprites にありません`);
   }
 
   location(path: (string | number)[], id: string | undefined) {
@@ -156,6 +164,7 @@ class Checker {
   avatar(path: (string | number)[], key: string, config: SceneAvatarConfig) {
     this.character([...path, 'characterId'], config.characterId ?? key);
     this.file([...path, 'modelUrl'], config.modelUrl, 'モデル');
+    this.sprite([...path, 'sprite'], config.characterId ?? key, config.sprite || undefined);
     this.motion([...path, 'motion'], config.motion);
     this.lookAt([...path, 'lookAtTarget'], config.lookAtTarget);
     config.transitions?.forEach((t, i) => {

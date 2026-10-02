@@ -49,6 +49,7 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
           return (models.find((m) => m.key === outfit) ?? models.find((m) => m.key === 'default'))?.url;
         },
         isLoopingMotion: (motion) => !!data.motions[motion]?.loop,
+        spriteFor: (characterId, key) => data.characters.characters.find((c) => c.id === characterId)?.sprites?.find((s) => s.key === key),
       }),
     [stage, data, outfit]
   );

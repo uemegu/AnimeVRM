@@ -298,6 +298,7 @@ export class StageAvatar {
   private gazeTarget: THREE.Vector3 | null = null;
   private headTurn = 0;
   private readonly gazeObject = new THREE.Object3D();
+  private opacity = 1;
   private headYaw = 0;
   private headPitch = 0;
   /** 前のフレームで首・頭に足した回転（モーションが上書きしないボーンでも積み重ならないよう、次のフレームで戻す） */
@@ -450,6 +451,25 @@ export class StageAvatar {
     if (this.vrm) setDaylight(this.vrm.scene, amount);
   }
 
+  /** 全体の不透明度（1 で通常。去っていくキャラを薄くして消すとき） */
+  public setOpacity(opacity: number): void {
+    if (!this.vrm || opacity === this.opacity) return;
+    const wasOpaque = this.opacity >= 1;
+    this.opacity = opacity;
+    const opaque = opacity >= 1;
+    this.vrm.scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (const material of materials) {
+        const base = (material.userData.baseTransparent ??= material.transparent) as boolean;
+        material.opacity = opacity;
+        material.transparent = base || !opaque;
+        if (wasOpaque !== opaque) material.needsUpdate = true;
+      }
+    });
+  }
+
   /** モーションの再生速度（1 が通常） */
   /** 手が肌で止まる処理の精度を切り替える */
   public setHandClearance(mode: HandClearanceMode): void {
@@ -537,7 +557,7 @@ export class StageAvatar {
     const manager = this.vrm.expressionManager;
 
     // 笑顔等で目が閉じている時は重複まばたきを防止
-    const happyWeight = this.emotionWeights.get('happy') ?? 0;
+    const happyWeight = Math.max(this.emotionWeights.get('happy') ?? 0, this.emotionWeights.get('komari') ?? 0);
     if (happyWeight > 0.6) {
       manager.setValue('blink', 0.0);
       this.blinkState = 'open';

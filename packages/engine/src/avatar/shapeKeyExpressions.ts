@@ -8,6 +8,11 @@ const SHAPE_KEY_EXPRESSIONS: Record<string, { shapeKey: string; weight: number }
     { shapeKey: 'Fcl_BRW_Sorrow', weight: 1.0 },
     { shapeKey: 'Fcl_MTH_Fun', weight: 1.0 },
   ],
+  // 困り笑い：ハの字の困り眉に笑っている目（漫画の「あはは…」）
+  komari: [
+    { shapeKey: 'Fcl_BRW_Sorrow', weight: 1.0 },
+    { shapeKey: 'Fcl_EYE_Joy', weight: 1.0 },
+  ],
 };
 
 /**

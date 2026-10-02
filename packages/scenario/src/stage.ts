@@ -5,6 +5,7 @@
 import { z } from 'zod';
 import type { AudioPan, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
+import type { CharacterSprite } from './characters.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
 export interface StageState {
@@ -25,10 +26,22 @@ export interface StageState {
   scrolling?: ScrollingBackgroundConfig | null;
 }
 
+/** 舞台に立てる 2D のデフォルメ画像（描画に渡す形） */
+export interface StageSprite {
+  frames: string[];
+  fps: number;
+  playback: 'once' | 'loop' | 'pingpong';
+  /** 高さ（メートル） */
+  height: number;
+}
+
 /** 舞台に出すキャラ1人分（描画に渡す形） */
 export interface StageCastMember {
   id: string;
+  /** sprite があるときは空 */
   modelUrl: string;
+  /** 2D のデフォルメ画像。あれば 3D のモデルは出さない */
+  sprite?: StageSprite;
   /** 立ち位置の座標。省略時は slot から、場所の設定（または既定）の位置を使う */
   position?: [number, number, number];
   slot?: 'left' | 'center' | 'right';
@@ -140,7 +153,13 @@ export interface CastOptions {
   modelUrlFor: (characterId: string) => string | undefined;
   /** ループ再生するモーションかどうか（motionLoop の指定がないとき） */
   isLoopingMotion: (motion: string) => boolean;
+  /** キャラの 2D デフォルメ画像（characters.json の sprites）。なければ sprite の指定は無視する */
+  spriteFor?: (characterId: string, spriteKey: string) => CharacterSprite | undefined;
 }
+
+/** 2D 画像の高さの既定（メートル。座り込んだ子どものデフォルメくらい） */
+export const DEFAULT_SPRITE_HEIGHT = 0.6;
+const DEFAULT_SPRITE_FPS = 6;
 
 /**
  * 画面に出すキャラ（avatars で登場させたキャラだけ。話者でも登場していなければ声だけ）。
@@ -150,6 +169,26 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
   const members: StageCastMember[] = [];
   for (const [key, config] of Object.entries(stage.cast)) {
     const characterId = config.characterId ?? key;
+    if (config.sprite) {
+      const sprite = options.spriteFor?.(characterId, config.sprite);
+      if (!sprite) continue;
+      members.push({
+        id: key,
+        modelUrl: '',
+        sprite: {
+          frames: sprite.frames,
+          fps: sprite.fps ?? DEFAULT_SPRITE_FPS,
+          playback: sprite.playback ?? 'pingpong',
+          height: config.spriteHeight ?? sprite.height ?? DEFAULT_SPRITE_HEIGHT,
+        },
+        ...(Array.isArray(config.position) ? { position: config.position } : { slot: config.position ?? 'center' }),
+        rotationY: config.rotationY,
+        expression: 'neutral',
+        expressionWeight: 1,
+        motionLoop: true,
+      });
+      continue;
+    }
     const modelUrl = config.modelUrl ?? options.modelUrlFor(characterId);
     if (!modelUrl) continue;
     // 立ち位置の名前（left など）は、場所ごとの立ち位置の設定に合わせて描画側で座標にする
@@ -250,6 +289,9 @@ export interface CutAvatarState {
   tears?: boolean;
   eyeWander?: number;
   motionSpeed?: number;
+  /** 移動（at から duration 秒で to へ）と退場（at から duration 秒で透明になる） */
+  move?: { at: number; to: [number, number, number]; duration: number };
+  fadeOut?: { at: number; duration: number };
 }
 
 /** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
@@ -307,6 +349,8 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       if (key.tears !== undefined) state.tears = key.tears;
       if (key.eyeWander !== undefined) state.eyeWander = eyeWanderIntensity(key.eyeWander);
       if (key.motionSpeed !== undefined) state.motionSpeed = key.motionSpeed;
+      if (key.moveTo !== undefined) state.move = { at: key.at, to: key.moveTo, duration: key.moveDuration ?? 1 };
+      if (key.fadeOut !== undefined) state.fadeOut = { at: key.at, duration: key.fadeOut };
       if (key.effectText !== undefined || key.sweat !== undefined) {
         oneShots.push({ id, at: key.at, key: `${id}@${index}`, effectText: key.effectText, sweat: key.sweat });
       }
