@@ -805,7 +805,7 @@
     },
     "indoor_dark": {
       "id": "indoor_dark",
-      "name": "室内・暗",
+      "name": "昼・逆光",
       "description": "暗い店内の柔らかな陰影。窓の外の明るい通りとのコントラストを見せる（旧ルートの「室内・暗2」）",
       "lighting": {
         "hairRingTint": "#fff8ee",
