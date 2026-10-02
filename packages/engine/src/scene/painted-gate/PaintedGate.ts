@@ -34,7 +34,7 @@ async function loadTexture(file: string, repeat?: 'xy' | 'x'): Promise<THREE.Tex
   return texture;
 }
 
-type Projection = { matrix: THREE.Matrix4; eye: THREE.Vector3 };
+export type Projection = { matrix: THREE.Matrix4; eye: THREE.Vector3 };
 
 /**
  * Unlit material whose map is projected from the reference camera instead of
@@ -43,7 +43,7 @@ type Projection = { matrix: THREE.Matrix4; eye: THREE.Vector3 };
  * the tile in world space instead, blending over a margin at the frame edge;
  * transparent parts of the tile are cut out. Without one they are cut out.
  */
-function projectedMaterial(painting: THREE.Texture, projection: Projection,
+export function projectedMaterial(painting: THREE.Texture, projection: Projection,
   fallback?: { map: THREE.Texture; size: [number, number]; offset?: [number, number]; fadeDistance?: [number, number] }): THREE.MeshBasicMaterial {
   const material = new THREE.MeshBasicMaterial({ map: painting, toneMapped: false, side: THREE.DoubleSide, alphaTest: 0.5 });
   material.name = painting.name;
@@ -103,7 +103,7 @@ function facadeTileSize(texture: THREE.Texture): [number, number] {
   return [height * image.width / image.height, height];
 }
 
-function boxMesh(box: Box, material: THREE.Material): THREE.Mesh {
+export function boxMesh(box: Box, material: THREE.Material): THREE.Mesh {
   const size = box.max.map((v, i) => v - box.min[i]);
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(size[0], size[1], size[2]), material);
   mesh.name = box.name;
@@ -111,7 +111,7 @@ function boxMesh(box: Box, material: THREE.Material): THREE.Mesh {
   return mesh;
 }
 
-function groundPlane(name: string, material: THREE.Material, minX: number, maxX: number, nearZ: number, farZ: number): THREE.Mesh {
+export function groundPlane(name: string, material: THREE.Material, minX: number, maxX: number, nearZ: number, farZ: number): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(maxX - minX, nearZ - farZ), material);
   mesh.name = name;
   mesh.rotation.x = -Math.PI / 2;
@@ -120,7 +120,7 @@ function groundPlane(name: string, material: THREE.Material, minX: number, maxX:
 }
 
 /** Standee painting standing on the ground from `from` to `to` (world xz), facing the set; the image's bottom edge is the ground. */
-function farStandee(name: string, texture: THREE.Texture, from: [number, number], to: [number, number], repeatEvery?: number): THREE.Mesh {
+export function farStandee(name: string, texture: THREE.Texture, from: [number, number], to: [number, number], repeatEvery?: number): THREE.Mesh {
   const image = texture.image as { width: number; height: number };
   const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
   const tileWidth = repeatEvery ?? length;
@@ -142,7 +142,7 @@ function farStandee(name: string, texture: THREE.Texture, from: [number, number]
 }
 
 /** Morning sky with drifting clouds on a dome, for viewers without a sky of their own. */
-function skyDome(): THREE.Mesh {
+export function skyDome(): THREE.Mesh {
   const material = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,

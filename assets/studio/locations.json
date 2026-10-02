@@ -357,6 +357,54 @@
         }
       }
     },
+    "painted_seaside": {
+      "id": "painted_seaside",
+      "name": "海の見える公園（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-classroom/thumb-seaside.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-seaside",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1,
+          "y": 1.5,
+          "z": -2
+        },
+        "shadow": {
+          "color": "#4d6288",
+          "opacity": 0.7,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "depthOfField": {
+            "aperture": 0.02,
+            "maxBlur": 0.008,
+            "sharpRange": 3
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
     "modern_park": {
       "id": "modern_park",
       "name": "公園（並木）",

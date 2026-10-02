@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
 import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
 import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
+import { disposePaintedSeaside, loadPaintedSeaside } from '../scene/painted-seaside/PaintedSeaside';
 import { resolveAssetUrl } from '../utils/path';
 
 /** 組み込みの3D背景（builtin:<名前>） */
@@ -10,6 +11,7 @@ const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (gro
   'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
   'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
   'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
+  'builtin:painted-seaside': { load: loadPaintedSeaside, dispose: disposePaintedSeaside },
 };
 
 /** 場所の3D背景を読み込む。model は builtin:<名前> か glb の URL */
