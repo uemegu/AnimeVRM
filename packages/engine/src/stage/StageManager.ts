@@ -1294,6 +1294,7 @@ export class StageManager {
         avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined, LIP_SYNC_GAIN * this.speakerMouthScale);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
+        avatar.setWind(this.presets.locations[this.currentLocationId]?.wind);
         avatar.update(delta, { elapsed, camera: this.camera, renderer: this.renderer });
         activeMeshes.push(avatar.vrm.scene);
       }
