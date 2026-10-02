@@ -31,7 +31,7 @@ const vec3 = (ja: string, en: string, min: number, max: number, step: number) =>
   group(ja, en, { x: num('X', 'X', min, max, step), y: num('Y', 'Y', min, max, step), z: num('Z', 'Z', min, max, step) });
 
 /** 時間帯（光の設定）。indoor_dark は暗い店内など、外の明るさとの対比を見せる室内 */
-export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'divine', 'indoor_dark'] as const;
+export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'indoor_dark', 'divine'] as const;
 export const TimeOfDayId = z.enum(TIME_OF_DAY_IDS);
 export type TimeOfDayId = z.infer<typeof TimeOfDayId>;
 
