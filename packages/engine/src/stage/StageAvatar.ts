@@ -174,9 +174,57 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
     }
   });
 
+  for (const side of ['left', 'right'] as const) {
+    softenShoulder(tracks, vrm, `${side}Shoulder`, `${side}UpperArm`);
+  }
+
   const resultClip = new THREE.AnimationClip('vrmAnimation', clip.duration, tracks);
   animationClipCache.set(cacheKey, resultClip);
   return resultClip;
+}
+
+/**
+ * 鎖骨の回転をどれだけ残すか。Mixamo の待機モーションは鎖骨を 10〜15° 下げるので、
+ * そのまま移すとアニメ体型ではなで肩に見える
+ */
+const SHOULDER_ROTATION_SCALE = 0.5;
+
+/**
+ * 鎖骨の回転を弱め、そのぶんを上腕で打ち消す（肩の高さだけ変わり、腕の向きは元のモーションのまま）。
+ * 正規化ボーンは基準姿勢の回転が単位なので、ローカル回転どうしの掛け算で合わせられる
+ */
+function softenShoulder(tracks: THREE.KeyframeTrack[], vrm: VRM, shoulderBone: string, upperArmBone: string): void {
+  const shoulderName = vrm.humanoid?.getNormalizedBoneNode(shoulderBone as any)?.name;
+  const upperArmName = vrm.humanoid?.getNormalizedBoneNode(upperArmBone as any)?.name;
+  const shoulderIndex = tracks.findIndex((t) => t.name === `${shoulderName}.quaternion`);
+  if (shoulderIndex < 0) return;
+  const shoulder = tracks[shoulderIndex];
+  const upperArm = tracks.find((t) => t.name === `${upperArmName}.quaternion`);
+
+  const identity = new THREE.Quaternion();
+  const full = new THREE.Quaternion();
+  const soft = new THREE.Quaternion();
+  const soften = (q: THREE.Quaternion) => soft.copy(identity).slerp(q, SHOULDER_ROTATION_SCALE);
+
+  if (upperArm) {
+    // 上腕のキーの時刻で鎖骨の元の回転を取り、soft⁻¹ · full · upperArm に置き換える
+    const sample = new THREE.QuaternionLinearInterpolant(shoulder.times, shoulder.values, 4, new Float32Array(4));
+    const armValues = Float32Array.from(upperArm.values);
+    const arm = new THREE.Quaternion();
+    for (let i = 0; i < upperArm.times.length; i++) {
+      full.fromArray(sample.evaluate(upperArm.times[i]));
+      soften(full);
+      arm.fromArray(armValues, i * 4).premultiply(full).premultiply(soft.invert()).normalize();
+      arm.toArray(armValues, i * 4);
+    }
+    tracks[tracks.indexOf(upperArm)] = new THREE.QuaternionKeyframeTrack(upperArm.name, Array.from(upperArm.times), Array.from(armValues));
+  }
+
+  const shoulderValues = Float32Array.from(shoulder.values);
+  for (let i = 0; i < shoulderValues.length; i += 4) {
+    soften(full.fromArray(shoulderValues, i)).toArray(shoulderValues, i);
+  }
+  tracks[shoulderIndex] = new THREE.QuaternionKeyframeTrack(shoulder.name, Array.from(shoulder.times), Array.from(shoulderValues));
 }
 
 /** 読み込んだモーションのキャッシュを捨てる（書き出したばかりの FBX を読み直して確かめたあとなど） */
