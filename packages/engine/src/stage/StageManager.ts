@@ -36,11 +36,13 @@ import {
   type LocationStage,
   type ShotRig,
   type AvatarOneShot,
+  type CutAvatarState,
   type CutState,
   type ScenarioScene,
   type TextContent,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
+import { StageSpriteActor } from './StageSprite';
 import { resolveStageQuality, type StageQuality, type StageQualityLevel } from './quality';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
@@ -155,6 +157,8 @@ export class StageManager {
   private loadedAvatars: Map<string, StageAvatar> = new Map();
   /** 登場中のキャラ（表示順） */
   private castIds: string[] = [];
+  /** 3D の舞台に立てている 2D のデフォルメ画像（キー: 登場キャラの ID）。castIds には含めない */
+  private sprites: Map<string, StageSpriteActor> = new Map();
   private castPositions: Map<string, number> = new Map();
   /** 登場中のキャラの奥行き（立ち位置の z） */
   private castDepths: Map<string, number> = new Map();
@@ -188,6 +192,12 @@ export class StageManager {
   private cutTime = 0;
   /** キャラごとに最後に当てた状態（差分だけ当てるため） */
   private appliedCut = new Map<string, string>();
+  /** カットのタイムラインが指定した移動・退場（キャラ ID → 状態）。毎フレーム位置・透明度に反映する */
+  private cutMotion = new Map<string, Pick<CutAvatarState, 'move' | 'fadeOut'>>();
+  /** 移動中だったキャラ（移動が終わったら立ち位置へ戻す） */
+  private movedIds = new Set<string>();
+  /** 退場で透明になって隠したキャラ */
+  private fadedIds = new Set<string>();
   private appliedCutCamera = '';
   /** キャラごとの視線（キャストの指定をタイムラインで上書きしたもの） */
   private gaze = new Map<string, { target?: string; headTurn?: number }>();
@@ -757,6 +767,10 @@ export class StageManager {
   /** 登場中のキャラを立ち位置に置き直す（場所の設定が変わったとき） */
   private applyCastLayout(): void {
     for (const member of this.castMembers) {
+      if (member.sprite) {
+        this.sprites.get(member.id)?.place(this.resolvePosition(member));
+        continue;
+      }
       const avatar = this.loadedAvatars.get(member.id);
       if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
       const position = this.resolvePosition(member);
@@ -822,6 +836,8 @@ export class StageManager {
   public async setCast(members: StageCastMember[]): Promise<void> {
     const version = ++this.castVersion;
     this.castMembers = members;
+    this.setSprites(members.filter((member) => member.sprite));
+    members = members.filter((member) => !member.sprite);
     const avatars = await Promise.all(
       members.map((member) => this.loadAvatar(member.id, member.modelUrl).catch((err) => {
         console.error(`Failed to load avatar ${member.id}:`, err);
@@ -863,6 +879,54 @@ export class StageManager {
     // カットのタイムラインを、読み込んだキャラに当て直す（同じモーションは続けて再生する）
     this.appliedCut.clear();
     this.applyCutState(false);
+  }
+
+  /** カットのタイムラインの移動・退場を今の時刻で当てる（時刻から決まるので、頭出しでも同じ位置になる） */
+  private applyCutMotion(id: string, avatar: StageAvatar): void {
+    const member = this.castMembers.find((m) => m.id === id);
+    const root = avatar.vrm?.scene;
+    if (!member || !root) return;
+    const { move, fadeOut } = this.cutMotion.get(id) ?? {};
+    const base = this.resolvePosition(member);
+    if (move) {
+      const t = THREE.MathUtils.clamp((this.cutTime - move.at) / move.duration, 0, 1);
+      const x = base[0] + (move.to[0] - base[0]) * t;
+      const y = base[1] + (move.to[1] - base[1]) * t;
+      const z = base[2] + (move.to[2] - base[2]) * t;
+      root.position.set(x, y, z);
+      if (t > 0) root.rotation.y = Math.atan2(move.to[0] - base[0], move.to[2] - base[2]);
+      this.movedIds.add(id);
+    } else if (this.movedIds.delete(id)) {
+      root.position.set(...base);
+      root.rotation.y = member.rotationY ?? -base[0] * 0.5;
+    }
+    const fade = fadeOut ? THREE.MathUtils.clamp((this.cutTime - fadeOut.at) / fadeOut.duration, 0, 1) : 0;
+    avatar.setOpacity(1 - fade);
+    if (fade >= 1) {
+      root.visible = false;
+      this.fadedIds.add(id);
+    } else if (this.fadedIds.delete(id)) {
+      root.visible = true;
+    }
+  }
+
+  /** 2D のデフォルメ画像を立てる（指定にないものは隠す） */
+  private setSprites(members: StageCastMember[]): void {
+    const ids = new Set(members.map((member) => member.id));
+    this.sprites.forEach((actor, id) => {
+      if (!ids.has(id)) actor.setVisible(false);
+    });
+    for (const member of members) {
+      let actor = this.sprites.get(member.id);
+      if (!actor) {
+        actor = new StageSpriteActor(this.scene);
+        this.sprites.set(member.id, actor);
+      }
+      const position = this.resolvePosition(member);
+      actor.place(position);
+      actor.setSprite(member.sprite!).then(() => actor!.setVisible(true), (err) => console.error(`Failed to load sprite ${member.id}:`, err));
+      actor.setVisible(true);
+    }
   }
 
   /** 頭の高さ（直立時）。取得できなければ標準的な背丈を返す */
@@ -1005,6 +1069,7 @@ export class StageManager {
       const avatar = this.loadedAvatars.get(member.id);
       if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
       const key = state.avatars[member.id] ?? {};
+      this.cutMotion.set(member.id, { move: key.move, fadeOut: key.fadeOut });
       const look = member.look ?? DEFAULT_AVATAR_LOOK;
       const effective = {
         expression: key.expression ?? member.expression,
@@ -1113,6 +1178,8 @@ export class StageManager {
     if (target === 'camera' || target === 'player') return this.camera.position.clone();
     const headOf = (otherId: string | null | undefined) => {
       if (!otherId || otherId === id) return null;
+      const sprite = this.sprites.get(otherId);
+      if (sprite?.root.visible) return sprite.root.position.clone().setY(sprite.root.position.y + 0.4);
       const head = this.loadedAvatars.get(otherId)?.vrm?.humanoid?.getNormalizedBoneNode('head');
       return head && this.castIds.includes(otherId) ? head.getWorldPosition(new THREE.Vector3()) : null;
     };
@@ -1335,7 +1402,9 @@ export class StageManager {
       const activeMeshes: THREE.Object3D[] = [];
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
-        if (!avatar?.vrm || !avatar.vrm.scene.visible) continue;
+        if (!avatar?.vrm) continue;
+        this.applyCutMotion(id, avatar);
+        if (!avatar.vrm.scene.visible) continue;
         avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined, LIP_SYNC_GAIN * this.speakerMouthScale);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
@@ -1343,6 +1412,8 @@ export class StageManager {
         avatar.update(delta, { elapsed, camera: this.camera, renderer: this.renderer });
         activeMeshes.push(avatar.vrm.scene);
       }
+
+      this.sprites.forEach((actor) => actor.update(delta, this.camera));
 
       // 2. 太陽・レンズフレア・オクルージョン計算
       const location = this.presets.locations[this.currentLocationId];
@@ -1395,6 +1466,8 @@ export class StageManager {
       avatar.dispose();
     });
     this.loadedAvatars.clear();
+    this.sprites.forEach((actor) => actor.dispose());
+    this.sprites.clear();
     if (this.environment?.object) disposeEnvironment(this.environment.model, this.environment.object);
     this.environment = null;
     this.scrollingBackground.dispose();

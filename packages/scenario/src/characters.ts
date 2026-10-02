@@ -14,6 +14,22 @@ export const CharacterModel = z.strictObject({
 });
 export type CharacterModel = z.infer<typeof CharacterModel>;
 
+/** 2D のデフォルメ画像（漫画の「ヤダヤダー」など）。連番の画像を繰り返して動かし、3D の舞台に立てる */
+export const CharacterSprite = z.strictObject({
+  /** シナリオの avatars の sprite から参照する名前 */
+  key: z.string().regex(/^[a-z][a-z0-9_]*$/),
+  label: LocalizedString,
+  /** assets/ 以下の URL パス（透過 AVIF）。1枚なら止め絵 */
+  frames: z.array(z.string().startsWith('/')).min(1),
+  /** 1秒に切り替えるコマ数 */
+  fps: z.number().positive().max(60).optional(),
+  /** once = 1回で止まる、loop = 繰り返す、pingpong = 行って戻る（省略時は pingpong） */
+  playback: z.enum(['once', 'loop', 'pingpong']).optional(),
+  /** 舞台での高さ（メートル。省略時 0.6） */
+  height: z.number().positive().optional(),
+});
+export type CharacterSprite = z.infer<typeof CharacterSprite>;
+
 /** 音声生成（Irodori-TTS）の設定 */
 export const CharacterVoice = z.strictObject({
   /** 参照音声（リポジトリ直下からの相対パス） */
@@ -36,6 +52,8 @@ export const Character = z.strictObject({
   role: CharacterRole,
   themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   models: z.array(CharacterModel),
+  /** 2D のデフォルメ画像 */
+  sprites: z.array(CharacterSprite).optional(),
   voice: CharacterVoice.optional(),
   /** キャラ設定（自由記述） */
   profile: z.string(),

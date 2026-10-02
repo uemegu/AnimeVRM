@@ -18,7 +18,7 @@ import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'indoor_dark', 'divine'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
-const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima'] as const;
+const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const FACE_EFFECTS = ['blush', 'anger', 'tears', 'faceSweat'] as const;
 type FaceEffect = (typeof FACE_EFFECTS)[number];
 const TABS = ['expression', 'motion', 'voice', 'sound'] as const;

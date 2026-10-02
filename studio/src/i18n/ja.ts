@@ -48,7 +48,7 @@ export const ja = {
     cameraShift: '視点',
     cameraShifts: { up_left: '左上', up: '上', up_right: '右上', left: '左', center: '真ん中', right: '右', down_left: '左下', down: '下', down_right: '右下' },
     expression: '表情',
-    expressions: { neutral: '通常', happy: '笑顔', relaxed: '穏やか', sad: '悲しい', angry: '怒り', surprised: '驚き', nima: 'ニマニマ' },
+    expressions: { neutral: '通常', happy: '笑顔', relaxed: '穏やか', sad: '悲しい', angry: '怒り', surprised: '驚き', nima: 'ニマニマ', komari: '困り笑い' },
     motion: 'モーション',
     loop: 'ループ',
     searchMotion: 'モーションを検索',

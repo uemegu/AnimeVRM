@@ -60,7 +60,7 @@ export const CameraPose = z.strictObject({
 export type CameraPose = z.infer<typeof CameraPose>;
 
 /** 表情（VRM の標準の表情） */
-export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima']);
+export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima', 'komari']);
 export type Expression = z.infer<typeof Expression>;
 
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
@@ -118,6 +118,16 @@ const AvatarOneShotFields = {
   sweat: SweatMode.optional(),
 };
 
+/** セリフ途中の移動・退場（at から始まる。モーションは別に motion で指定する） */
+const AvatarMoveFields = {
+  /** この座標まで一定の速さで移動する（進行方向を向く。走って去る・歩いてくるなど） */
+  moveTo: Vec3.optional(),
+  /** moveTo にかける秒数（省略時 1） */
+  moveDuration: z.number().positive().optional(),
+  /** この秒数かけて透明になり、消える（去っていくキャラを画面から消すとき） */
+  fadeOut: z.number().positive().optional(),
+};
+
 /** セリフ途中のアバター演出（表情・モーション・視線など）。at はボイス再生位置またはシーン経過秒 */
 export const AvatarTransition = z.strictObject({
   at: z.number().nonnegative(),
@@ -130,6 +140,7 @@ export const AvatarTransition = z.strictObject({
   visible: z.boolean().optional(),
   ...AvatarLookFields,
   ...AvatarOneShotFields,
+  ...AvatarMoveFields,
 });
 export type AvatarTransition = z.infer<typeof AvatarTransition>;
 
@@ -156,6 +167,10 @@ export const SceneAvatarConfig = z.strictObject({
   motion: z.string().optional(),
   motionLoop: z.boolean().optional(),
   modelUrl: z.string().optional(),
+  /** 3D の代わりに、キャラの 2D デフォルメ画像（characters.json の sprites の key）を立てる。表情・モーション・視線は使わない */
+  sprite: z.union([z.string(), z.literal(false)]).optional(),
+  /** sprite の高さ（メートル。省略時はキャラの設定） */
+  spriteHeight: z.number().positive().optional(),
   expression: Expression.optional(),
   /** 原則 1.0 または 0.0 */
   expressionWeight: z.number().min(0).max(1).optional(),
