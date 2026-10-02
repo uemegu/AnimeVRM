@@ -12,6 +12,8 @@ export interface StudioData {
   motions: MotionBook['motions'];
   /** assets/animations のモーション名（拡張子なし） */
   animations: string[];
+  /** assets/se の効果音の URL */
+  se: string[];
 }
 
 async function staticJson<T>(name: string): Promise<T> {
@@ -32,8 +34,9 @@ export function useStudioData(): { data: StudioData | null; error: boolean; relo
       staticJson<BgmBook>('bgm'),
       staticJson<MotionBook>('motions'),
       api.assets('animations'),
+      api.assets('se'),
     ])
-      .then(([characters, locations, timeOfDay, bgm, motions, animations]) =>
+      .then(([characters, locations, timeOfDay, bgm, motions, animations, se]) =>
         setData({
           characters,
           locations: locations.presets,
@@ -41,6 +44,7 @@ export function useStudioData(): { data: StudioData | null; error: boolean; relo
           bgm: bgm.bgm,
           motions: motions.motions,
           animations: animations.map((a) => a.url.replace(/^\/animations\//, '').replace(/\.fbx$/i, '')),
+          se: se.map((a) => a.url),
         })
       )
       .catch(() => setError(true));

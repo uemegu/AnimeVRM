@@ -5,6 +5,7 @@ import { useI18n, type Language } from '../i18n';
 import { Icon, type IconName } from './Icon';
 import { ToastProvider } from './Toast';
 import { BackdropLayer, useBackdropActive } from './Backdrop';
+import { AmbientLayer, useAmbientActive } from './Ambient';
 import './Layout.css';
 
 interface NavItem {
@@ -39,6 +40,7 @@ function initialCollapsed(): boolean {
 export function Layout() {
   const { t, language, setLanguage } = useI18n();
   const backdrop = useBackdropActive();
+  const ambient = useAmbientActive();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
@@ -49,8 +51,9 @@ export function Layout() {
     }
   };
   return (
-    <div className={`studio${collapsed ? ' sidebar-collapsed' : ''}`}>
+    <div className={`studio${collapsed ? ' sidebar-collapsed' : ''}${ambient ? ' has-ambient' : ''}`}>
       <aside className="studio-sidebar">
+        <AmbientLayer />
         <div className="studio-brand">
           <div className="studio-brand-logo" aria-hidden="true">
             <svg viewBox="0 0 36 36" fill="none" className="studio-brand-svg">

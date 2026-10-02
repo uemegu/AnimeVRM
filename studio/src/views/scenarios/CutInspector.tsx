@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ScenarioScene as SceneSchema,
   stageAtScene,
@@ -17,6 +17,8 @@ import { format, useI18n } from '../../i18n';
 import { cutWarnings, makeText, textEn, textJa } from './scenarioEdit';
 import { VoicePanel } from './VoicePanel';
 import { EffectFields } from './EffectFields';
+import { AudioMixFields } from './AudioMixFields';
+import { PlayerAudio } from '../../player/PlayerAudio';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
@@ -77,7 +79,7 @@ export function CutInspector({ scenario, index, data, voice, onChange }: Props) 
           </ul>
         )}
         {tab === 'line' && <LineTab scene={scene} data={data} voice={voice} set={set} onChange={onChange} />}
-        {tab === 'stage' && <StageTab scenario={scenario} index={index} data={data} set={set} />}
+        {tab === 'stage' && <StageTab scenario={scenario} index={index} data={data} baseUrl={voice.baseUrl} set={set} onChange={onChange} />}
         {tab === 'cast' && <CastTab scenario={scenario} index={index} data={data} set={set} />}
         {tab === 'flow' && <FlowTab scenario={scenario} index={index} set={set} onChange={onChange} />}
         {tab === 'json' && <JsonTab scene={scene} onChange={onChange} />}
@@ -148,15 +150,51 @@ function LineTab({ scene, data, voice, set, onChange }: { scene: ScenarioScene; 
           <input type="checkbox" checked={!!scene.voiceWhisper} onChange={(e) => set('voiceWhisper', e.target.checked || undefined)} />
           {t.scenarios.voiceWhisper}
         </label>
+        {scene.voiceUrl && (
+          <AudioMixFields
+            volume={scene.voiceVolume}
+            pan={scene.voicePan}
+            fallback={{ volume: 1, pan: 'stereo' }}
+            clearLabel={t.scenarios.mixReset}
+            onChange={(volume, pan) => onChange(withField(withField(scene, 'voiceVolume', volume), 'voicePan', pan))}
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function StageTab({ scenario, index, data, set }: { scenario: ScenarioPackage; index: number; data: StudioData; set: Setter }) {
+function StageTab({
+  scenario,
+  index,
+  data,
+  baseUrl,
+  set,
+  onChange,
+}: {
+  scenario: ScenarioPackage;
+  index: number;
+  data: StudioData;
+  baseUrl: string;
+  set: Setter;
+  onChange: (s: ScenarioScene) => void;
+}) {
   const { t } = useI18n();
   const scene = scenario.scenes[index];
   const before = index > 0 ? stageAtScene(scenario, index - 1) : undefined;
+  // BGM の音量・チャネルは、同じ BGM のあいだ前のカットから引き継ぐ
+  const current = stageAtScene(scenario, index);
+  const bgmCarried = before && before.bgm === current.bgm;
+  const bgmFallback = { volume: (bgmCarried ? before.bgmVolume : undefined) ?? 1, pan: (bgmCarried ? before.bgmPan : undefined) ?? ('stereo' as const) };
+  // 効果音の試聴（ミュートは再生画面と共通）
+  const audioRef = useRef<PlayerAudio | null>(null);
+  useEffect(() => () => audioRef.current?.dispose(), []);
+  const previewSe = () => {
+    if (!scene.seUrl) return;
+    audioRef.current ??= new PlayerAudio();
+    audioRef.current.playSe(scene.seUrl.startsWith('/') ? scene.seUrl : `${baseUrl}${scene.seUrl}`, { volume: scene.seVolume, pan: scene.sePan });
+  };
+  const seOptions = scene.seUrl && !data.se.includes(scene.seUrl) ? [scene.seUrl, ...data.se] : data.se;
   const inherited = (value: string | undefined) => format(t.scenarios.inherited, { value: value ?? '—' });
   return (
     <div className="inspector-form">
@@ -194,6 +232,52 @@ function StageTab({ scenario, index, data, set }: { scenario: ScenarioPackage; i
           ))}
         </select>
       </label>
+      {current.bgm && current.bgm !== 'silence' && (
+        <div className="field">
+          <AudioMixFields
+            volume={scene.bgmVolume}
+            pan={scene.bgmPan}
+            fallback={bgmFallback}
+            clearLabel={bgmCarried ? t.scenarios.mixInherit : t.scenarios.mixReset}
+            onChange={(volume, pan) => onChange(withField(withField(scene, 'bgmVolume', volume), 'bgmPan', pan))}
+          />
+          <span className="field-hint">{t.scenarios.bgmMixHint}</span>
+        </div>
+      )}
+      <div className="field">
+        <span className="field-label">{t.scenarios.se}</span>
+        <div className="se-picker">
+          <select
+            className="select"
+            value={scene.seUrl ?? ''}
+            onChange={(e) => {
+              const url = e.target.value || undefined;
+              // 効果音を外したら音量・チャネルも消す
+              onChange(url ? withField(scene, 'seUrl', url) : withField(withField(withField(scene, 'seUrl', undefined), 'seVolume', undefined), 'sePan', undefined));
+            }}
+          >
+            <option value="">{t.scenarios.seNone}</option>
+            {seOptions.map((url) => (
+              <option key={url} value={url}>
+                {url.replace(/^\/se\//, '')}
+              </option>
+            ))}
+          </select>
+          <button type="button" className="btn icon" disabled={!scene.seUrl} title={t.common.play} onClick={previewSe}>
+            <Icon name="play" size={14} />
+          </button>
+        </div>
+        {scene.seUrl && (
+          <AudioMixFields
+            volume={scene.seVolume}
+            pan={scene.sePan}
+            fallback={{ volume: 1, pan: 'stereo' }}
+            clearLabel={t.scenarios.mixReset}
+            onChange={(volume, pan) => onChange(withField(withField(scene, 'seVolume', volume), 'sePan', pan))}
+          />
+        )}
+        <span className="field-hint">{t.scenarios.seHint}</span>
+      </div>
       <label className="field">
         <span className="field-label">{t.scenarios.camera}</span>
         <select className="select" value={scene.camera ?? ''} onChange={(e) => set('camera', (e.target.value || undefined) as CameraShot | undefined)}>

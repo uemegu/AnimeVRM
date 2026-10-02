@@ -292,29 +292,6 @@
   align-items: center;
   gap: 10px;
 }
-.scenario-preview-bar .segmented {
-  display: grid;
-  grid-auto-columns: 72px;
-  grid-auto-flow: column;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 8px;
-  background: var(--bg-muted);
-}
-.scenario-preview-bar .segmented button {
-  height: 26px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 12px;
-  cursor: pointer;
-}
-.scenario-preview-bar .segmented button.active {
-  background: var(--bg);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
 .scenario-frame {
   position: relative;
   width: 100%;
@@ -539,7 +516,6 @@
 }
 
 .scenario-preview-bar .center-tabs {
-  grid-auto-columns: 104px;
   margin-right: auto;
 }
 
@@ -1076,4 +1052,73 @@
   background: #eef2ff;
   color: #4338ca;
   font-size: 11px;
+}
+
+/* 音量・チャネル */
+.audio-mix {
+  display: grid;
+  grid-template-columns: auto 1fr 40px;
+  align-items: center;
+  gap: 6px 8px;
+}
+.audio-mix.unset .audio-mix-value,
+.audio-mix.unset .audio-mix-pan button.active {
+  color: var(--text-muted);
+}
+.audio-mix-label {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+.audio-mix-value {
+  font-size: 12px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.audio-mix-pan {
+  grid-column: 2 / 4;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--bg-muted);
+}
+.audio-mix-pan button {
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.audio-mix-pan button.active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+.audio-mix-clear {
+  grid-column: 1 / 4;
+  justify-self: end;
+  height: 24px;
+  min-width: 72px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-sub);
+  font-size: 12px;
+  cursor: pointer;
+}
+.audio-mix-clear:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.se-picker {
+  display: flex;
+  gap: 6px;
+}
+.se-picker .select {
+  flex: 1;
+  min-width: 0;
 }

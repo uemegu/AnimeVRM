@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { CameraPose, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, CameraPose, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
@@ -12,6 +12,9 @@ export interface StageState {
   timeOfDay?: TimeOfDayId;
   /** BGM の ID または URL。'silence' で無音 */
   bgm?: string;
+  /** BGM の音量の倍率とチャネル（BGM が変わると指定がなければ既定に戻る） */
+  bgmVolume?: number;
+  bgmPan?: AudioPan;
   /** 環境音（ループ）の URL。なければ鳴らさない */
   ambience?: string;
   /** 登場中のキャラ（キー: キャラID） */
@@ -109,10 +112,15 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
       if (config.motion !== undefined) motionCues[id] = scene.id;
     }
   }
+  const bgm = scene.bgm ?? scene.bgmUrl ?? prev.bgm;
+  // 別の BGM に変えたら、音量・チャネルはそのシーンの指定（なければ既定）にする
+  const bgmChanged = bgm !== prev.bgm;
   return {
     background: scene.background ?? prev.background,
     timeOfDay: (scene.timeOfDay as TimeOfDayId | undefined) ?? prev.timeOfDay,
-    bgm: scene.bgm ?? scene.bgmUrl ?? prev.bgm,
+    bgm,
+    bgmVolume: scene.bgmVolume ?? (bgmChanged ? undefined : prev.bgmVolume),
+    bgmPan: scene.bgmPan ?? (bgmChanged ? undefined : prev.bgmPan),
     ambience: scene.ambience === undefined ? prev.ambience : scene.ambience || undefined,
     cast,
     motionCues,

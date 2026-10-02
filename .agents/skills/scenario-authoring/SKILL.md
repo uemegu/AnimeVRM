@@ -35,6 +35,7 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 - 新しいシナリオは `assets/scenarios/<種類>/<ID>/scenario.json`。`id` はディレクトリ名と同じにする。種類とプロジェクトの対応は `assets/studio/projects.json`
 - セリフの話者は必ず `speakerCharacterId` で指定する（声だけの話者も）。`speaker` は表示名の上書きだけ
 - 背景・時間帯・BGM・登場キャラは、書いた項目だけ変わり、前のシーンから引き継ぐ
+- 音量の倍率（`voiceVolume`・`seVolume`・`bgmVolume`、0〜1、省略時 1）とチャネル（`voicePan`・`sePan`・`bgmPan`、`stereo` / `left` / `right`、省略時 `stereo`）。ボイス・効果音はそのシーンだけ、BGM は BGM が変わるまで引き継ぐ
 - 知らない項目はスキーマで拒否される。綴りを確かめる
 - ボイスはここでは作らない。必要なら Studio の音声生成か `irodori-tts` Skill を使う
 

@@ -79,6 +79,12 @@ export type EffectText = z.infer<typeof EffectText>;
 export const SweatMode = z.enum(['fly4', 'jito']);
 export type SweatMode = z.infer<typeof SweatMode>;
 
+/** 音を鳴らすチャネル（stereo はそのまま。left / right は片側だけから鳴らす） */
+export const AudioPan = z.enum(['stereo', 'left', 'right']);
+export type AudioPan = z.infer<typeof AudioPan>;
+/** 音量の倍率（既定の音量に掛ける。省略時は 1） */
+export const AudioVolume = z.number().min(0).max(1);
+
 /** 目が泳ぐ（true または強さ 0〜2。false・0 で止める） */
 const EyeWander = z.union([z.boolean(), z.number().min(0).max(2)]);
 
@@ -196,14 +202,26 @@ export const ScenarioScene = z.strictObject({
   voiceUrl: z.string().optional(),
   /** ボイスが囁き声（口の開きを小さくする） */
   voiceWhisper: z.boolean().optional(),
+  /** ボイスの音量の倍率 */
+  voiceVolume: AudioVolume.optional(),
+  /** ボイスを鳴らすチャネル（省略時は stereo） */
+  voicePan: AudioPan.optional(),
   /** 場所のプリセット ID または画像 URL */
   background: z.string().optional(),
   /** BGM の ID または URL */
   bgm: z.string().optional(),
   /** @deprecated bgm を使う */
   bgmUrl: z.string().optional(),
+  /** BGM の音量の倍率（bgm.json の volumeScale にさらに掛ける）。BGM が変わるまで引き継ぐ */
+  bgmVolume: AudioVolume.optional(),
+  /** BGM を鳴らすチャネル。BGM が変わるまで引き継ぐ */
+  bgmPan: AudioPan.optional(),
   /** シーンの始めに1回鳴らす効果音 */
   seUrl: z.string().optional(),
+  /** 効果音の音量の倍率 */
+  seVolume: AudioVolume.optional(),
+  /** 効果音を鳴らすチャネル（省略時は stereo） */
+  sePan: AudioPan.optional(),
   /** 環境音（ループ。セミの声・足音など）。以降のシーンに引き継ぎ、false で止める */
   ambience: z.union([z.string(), z.literal(false)]).optional(),
   avatars: z.record(z.string(), SceneAvatarConfig).optional(),

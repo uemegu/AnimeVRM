@@ -45,7 +45,7 @@ async function loadData(): Promise<StudioData> {
     staticJson<BgmBook>('bgm'),
     staticJson<MotionBook>('motions'),
   ]);
-  return { characters, locations: locations.presets, timeOfDay: timeOfDay.presets, bgm: bgm.bgm, motions: motions.motions, animations: [] };
+  return { characters, locations: locations.presets, timeOfDay: timeOfDay.presets, bgm: bgm.bgm, motions: motions.motions, animations: [], se: [] };
 }
 
 let resolveRendered: (() => void) | null = null;

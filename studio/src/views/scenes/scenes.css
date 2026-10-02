@@ -218,36 +218,6 @@
   flex-shrink: 0;
 }
 
-/* 表示中の切り替えボタン（ビューアと同じ見た目） */
-.scenes-preview .segmented {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-flow: column;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 8px;
-  background: var(--bg-muted);
-}
-.scenes-preview .segmented button {
-  height: 26px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-.scenes-preview .segmented button.active {
-  background: var(--bg);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-.scenes-preview .segmented.six button {
-  padding: 0 4px;
-  font-size: 11px;
-}
-
 .scenes-director {
   position: relative;
   flex: 1;

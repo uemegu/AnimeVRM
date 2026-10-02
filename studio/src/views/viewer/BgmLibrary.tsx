@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { BgmBook } from '@anime-vrm/scenario';
 import { api, ApiError, READ_ONLY, type AssetEntry } from '../../api/client';
 import { Icon } from '../../components/Icon';
@@ -35,6 +35,8 @@ interface Draft {
 }
 
 interface Props {
+  /** 見出しの位置に出すもの（BGM・効果音の切り替え） */
+  heading: ReactNode;
   playingUrl: string | null;
   muted: boolean;
   onToggle: (url: string, volumeScale: number) => void;
@@ -45,7 +47,7 @@ interface Props {
 /**
  * BGM の一覧（assets/studio/bgm.json）。試聴と、音声ファイルの登録（assets/bgm に置き、ID・曲名・音量を付ける）ができる
  */
-export function BgmLibrary({ playingUrl, muted, onToggle, onVolume, onToggleMute }: Props) {
+export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onToggleMute }: Props) {
   const { t, language } = useI18n();
   const tv = t.viewer;
   const [book, setBook] = useState<BgmBook | null>(null);
@@ -153,7 +155,7 @@ export function BgmLibrary({ playingUrl, muted, onToggle, onVolume, onToggleMute
   return (
     <section className="viewer-section grow">
       <div className="viewer-section-title">
-        <h2>{tv.bgm}</h2>
+        {heading}
         <div className="viewer-section-actions">
           <button type="button" className={`viewer-mini-btn${muted ? ' active' : ''}`} aria-pressed={muted} title={muted ? t.player.muted : t.player.sound} onClick={onToggleMute}>
             <Icon name={muted ? 'soundOff' : 'soundOn'} size={14} />
