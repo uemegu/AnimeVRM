@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CameraShot, ScenarioScene, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
+import type { CameraShot, ScenarioScene, SceneEffects, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { StageLoading, useCastLoading } from '../stage/StageLoading';
 
@@ -11,6 +11,8 @@ interface Props {
   cameraShot: CameraShot;
   speakerId: string | null;
   scrolling: ScrollingBackgroundSettings | null;
+  /** シーンの特殊効果（花火など） */
+  effects?: SceneEffects;
   /** 今のカット（カメラの直接指定・タイムライン・画面演出） */
   cut: ScenarioScene | null;
   language: 'ja' | 'en';
@@ -23,7 +25,7 @@ interface Props {
 /**
  * 再生画面の舞台。カットが変わるたびにタイムラインを渡し、時刻はボイスに合わせて描画側が進める
  */
-export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, cut, language, getCutTime, getSpeakerPhoneme, onCanvas }: Props) {
+export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cut, language, getCutTime, getSpeakerPhoneme, onCanvas }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { loading, run: runSetCast } = useCastLoading(managerRef);
@@ -69,6 +71,12 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  const effectsKey = JSON.stringify(effects ?? {});
+  useEffect(() => {
+    managerRef.current?.setEffects(effects);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectsKey]);
 
   const scrollingKey = JSON.stringify(scrolling);
   useEffect(() => {

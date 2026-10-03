@@ -489,7 +489,7 @@
         "hairRingTint": "#b8c4ff",
         "directional": {
           "color": "#dfe4ff",
-          "intensity": 2.0,
+          "intensity": 1.25,
           "position": {
             "x": 0.5,
             "y": 2,
@@ -498,7 +498,7 @@
         },
         "ambient": {
           "color": "#c4c8ff",
-          "intensity": 1.3
+          "intensity": 0.75
         },
         "sunShafts": {
           "enabled": false,
@@ -539,38 +539,44 @@
       "postProcessing": {
         "bloom": {
           "enabled": true,
-          "strength": 0.25,
-          "radius": 0.5,
-          "threshold": 0.82
+          "strength": 0.3,
+          "radius": 0.35,
+          "threshold": 0.95,
+          "deepGlow": {
+            "enabled": true,
+            "core": 1.1,
+            "halo": 0.6,
+            "haze": 0.22
+          }
         },
         "cinematic": {
           "diffusion": {
             "enabled": true,
-            "strength": 0.28,
+            "strength": 0.38,
             "radius": 2
           },
           "colorGrading": {
             "enabled": true,
             "shadowTint": "#1c1646",
-            "highlightTint": "#ffd9b8",
-            "strength": 0.45,
-            "contrast": 0.09,
-            "gamma": 0.9
+            "highlightTint": "#fff4e8",
+            "strength": 0.88,
+            "contrast": 0.31,
+            "gamma": 0.82
           },
           "adjustments": {
-            "saturation": 0.2,
-            "brightness": -0.02,
-            "contrast": -0.05
+            "saturation": 0.4,
+            "brightness": 0,
+            "contrast": 0
           },
           "vignette": {
             "enabled": true,
             "offset": 1.15,
-            "darkness": 0.25,
+            "darkness": 0.16,
             "color": "#101220"
           },
           "chromaticAberration": {
             "enabled": true,
-            "offset": 0.0018
+            "offset": 0.0003
           },
           "sharpen": {
             "enabled": false,
@@ -578,18 +584,24 @@
           },
           "filmGrain": {
             "enabled": true,
-            "strength": 0.035,
-            "size": 1.6
+            "strength": 0.009,
+            "size": 1.15
           }
+        },
+        "characterGlow": {
+          "enabled": true,
+          "strength": 1.3,
+          "radius": 0.014,
+          "threshold": 0.1
         }
       },
       "materials": {
         "body": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
           "shadeMultiply": "#d49ea3",
           "shadingToonyFactor": 0.991,
-          "shadingShiftFactor": -0.08,
-          "giEqualizationFactor": 0.85,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
           "rimEnabled": false,
@@ -600,11 +612,11 @@
           "outlineWidthFactor": 0.0016
         },
         "hair": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
           "shadeMultiply": "#8474a4",
           "shadingToonyFactor": 0.994,
-          "shadingShiftFactor": -0.08,
-          "giEqualizationFactor": 0.85,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
           "rimEnabled": false,
@@ -615,12 +627,12 @@
           "outlineWidthFactor": 0.0016
         },
         "cloth": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.9955,
-          "shadingShiftFactor": -0.08,
-          "darkLitLift": 1,
-          "giEqualizationFactor": 0.85,
+          "shadingShiftFactor": -0.05,
+          "darkLitLift": 1.5,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
           "rimEnabled": false,

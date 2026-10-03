@@ -79,12 +79,28 @@ export const LightingConfig = group('ライト', 'Lighting', {
   lensFlare: LensFlareConfig.optional(),
 });
 
+/** Linear HDR bloom profile. Optional so existing daylight rendering stays identical. */
+export const DeepGlowConfig = group('深い光のにじみ', 'Deep glow', {
+  enabled: bool('有効', 'Enabled'),
+  core: num('芯', 'Core', 0, 2, 0.05).min(0).max(2),
+  halo: num('色のにじみ', 'Halo', 0, 2, 0.05).min(0).max(2),
+  haze: num('光の裾', 'Haze', 0, 2, 0.05).min(0).max(2),
+});
+
 export const PostProcessingConfig = group('ポストプロセス', 'Post-processing', {
+  /** 人物の明るい部分の光を、輪郭の外（背景側）へぼんやりあふれさせる。人物の上はセルルックのまま */
+  characterGlow: group('人物の明部のにじみ', 'Character highlight glow', {
+    enabled: bool('有効', 'Enabled'),
+    strength: num('強さ', 'Strength', 0, 4, 0.05).min(0).max(4),
+    radius: num('広がり（画面高さ比）', 'Radius (screen height)', 0.001, 0.04, 0.001).min(0.001).max(0.04),
+    threshold: num('明部のしきい値', 'Highlight threshold', 0, 2, 0.01).min(0).max(2),
+  }).optional(),
   bloom: group('ブルーム', 'Bloom', {
     enabled: bool('有効', 'Enabled'),
     strength: num('強さ', 'Strength', 0, 0.8, 0.01),
     radius: num('広がり', 'Radius', 0, 1, 0.02),
-    threshold: num('しきい値', 'Threshold', 0.1, 1, 0.01),
+    threshold: num('しきい値', 'Threshold', 0.1, 2, 0.01),
+    deepGlow: DeepGlowConfig.optional(),
   }),
   cinematic: group('画作り', 'Cinematic', {
     diffusion: group('ディフュージョン', 'Diffusion', {
@@ -250,10 +266,20 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
     }).optional(),
     /** 明るい所の光のにじみ。夜祭りの灯りのように場所の絵で決まるものは、時間帯の設定より優先する */
     bloom: group('光のにじみ（ブルーム）', 'Bloom', {
-      strength: num('強さ', 'Strength', 0, 0.8, 0.01),
-      radius: num('広がり', 'Radius', 0, 1, 0.02),
-      threshold: num('しきい値', 'Threshold', 0.1, 1, 0.01),
+      strength: num('強さ', 'Strength', 0, 0.8, 0.01).optional(),
+      radius: num('広がり', 'Radius', 0, 1, 0.02).optional(),
+      threshold: num('しきい値', 'Threshold', 0.1, 2, 0.01).optional(),
+      deepGlow: DeepGlowConfig.optional(),
     }).optional(),
+  }).optional(),
+  /** 人物の見え方の場所ごとの調整（夜祭りの灯りのように場所の光で決まるもの） */
+  character: group('人物の見え方', 'Character look', {
+    /** 夜の自発光の目のハイライトが、にじみやブルームで光りすぎないよう白の少し下に抑える */
+    eyeCare: bool('目の光を抑える', 'Tame glowing eyes').optional(),
+    /** 輪郭を背景になじませる処理（ライトラップ）の、髪以外（服・肌）の強さの倍率。省略時は 0.3 */
+    lightWrapBody: num('輪郭のなじませ（服・肌）', 'Light wrap on body & clothes', 0, 1, 0.05, 0.3).optional(),
+    /** 人物の明るさの上限（表示用の値）。光が重なっても顔などが白飛びしないよう、これに向けて滑らかに抑える。省略時は抑えない */
+    highlightCap: num('人物の明るさの上限', 'Character highlight cap', 0.8, 1, 0.01, 0.95).optional(),
   }).optional(),
   backdrop: group('遠景の置き方', 'Backdrop placement', {
     mode: z.enum(['screen', 'world']).meta({
@@ -270,6 +296,15 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
 });
 export type LocationStage = z.infer<typeof LocationStage>;
 
+/** Location overrides inherit the time-of-day profile; no retained state between locations. */
+export function resolveBloomConfig(
+  base: z.infer<typeof PostProcessingConfig>['bloom'],
+  location?: NonNullable<LocationStage['camera']>['bloom'],
+): z.infer<typeof PostProcessingConfig>['bloom'] {
+  return { ...base, ...(location ? { enabled: true, ...location } : {}) };
+}
+
+
 /** 組み込みの3D背景（コードで組み立てるセット） */
 export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
@@ -280,6 +315,11 @@ export const BUILTIN_ENVIRONMENTS = {
 } as const;
 
 export const LocationEnvironment = group('3D背景', '3D set', {
+  festival: group('夏祭りの演出', 'Festival effects', {
+    stallLightBalance: num('屋台照明の左右差（正で左を強く）', 'Stall light balance', -1, 1, 0.05, 0).min(-1).max(1).optional(),
+    smokeStrength: num('花火の煙の濃さ', 'Firework smoke', 0, 1, 0.05).min(0).max(1),
+    smokeLifetime: num('残煙の時間（秒）', 'Smoke lifetime (s)', 1, 20, 0.5).min(1).max(20),
+  }).optional(),
   /** builtin:<名前>、または glb の URL（assets/ 基準） */
   model: z.string().min(1).meta({ ...label('モデル', 'Model'), kind: 'environment' }),
   position: vec3('位置', 'Position', -20, 20, 0.05),

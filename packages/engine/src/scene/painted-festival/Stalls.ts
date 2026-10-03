@@ -139,7 +139,7 @@ export function lanternMaterial(color?: THREE.Color): THREE.MeshBasicMaterial {
       .replace('#include <opaque_fragment>', [
         'float facing = abs(dot(normalize(vLanternNormal), normalize(vLanternView)));',
         'vec3 deep = diffuseColor.rgb * vec3(0.75, 0.32, 0.2);',
-        'outgoingLight = mix(deep, diffuseColor.rgb * 1.25, pow(facing, 1.2)) + vec3(1.0, 0.8, 0.55) * pow(facing, 6.0) * 0.6 * step(0.2, diffuseColor.r);',
+        'outgoingLight = mix(deep, diffuseColor.rgb * 1.25, pow(facing, 1.2)) + vec3(1.0, 0.8, 0.55) * pow(facing, 6.0) * 2.4 * step(0.2, diffuseColor.r);',
         '#include <opaque_fragment>',
       ].join('\n'));
   };
@@ -174,8 +174,8 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
   const rear = keep(flashMaterial({ color: '#1b1e30', side: THREE.DoubleSide }, 0.4));
   const counterTop = keep(flashMaterial({ color: '#8a6644' }, 0.3));
   const floor = keep(new THREE.MeshBasicMaterial({ color: '#3a2a20', toneMapped: false, fog: false }));
-  const bulb = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd9a0').multiplyScalar(3), toneMapped: false, fog: false }));
-  const redLantern = keep(lanternMaterial(new THREE.Color('#ff5a3c').multiplyScalar(1.6)));
+  const bulb = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd9a0').multiplyScalar(5), toneMapped: false, fog: false }));
+  const redLantern = keep(lanternMaterial(new THREE.Color('#ff5a3c').multiplyScalar(2.4)));
 
   const perKind = new Map<StallKind, { headerGeometry: THREE.BufferGeometry; backGeometry: THREE.BufferGeometry; counterFrontGeometry: THREE.BufferGeometry; header: THREE.Material; back: THREE.Material; counterFront: THREE.Material; roof: THREE.Material; valance: THREE.Material; side: THREE.Material }>();
   for (const kind of Object.keys(fronts) as StallKind[]) {
@@ -189,12 +189,12 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
       headerGeometry: keep(bandPlane(W, H - STALL.headerBottom, 1 - bands.header, 1)),
       backGeometry: keep(bandPlane(W, STALL.headerBottom - STALL.counterHeight, 1 - bands.counter, 1 - bands.header)),
       counterFrontGeometry: keep(bandPlane(W, STALL.counterHeight, 0, 1 - bands.counter)),
-      header: keep(flashMaterial({ map: front }, 0.5)),
+      header: keep(flashMaterial({ map: front, color: '#c8bac0' }, 0.35)),
       // The interior is lit by its own bulbs: no flash.
       back: keep(new THREE.MeshBasicMaterial({ map: front, toneMapped: false, fog: false })),
-      counterFront: keep(flashMaterial({ map: front }, 0.4)),
-      roof: keep(flashMaterial({ map: stripes, side: THREE.DoubleSide, color: '#c9c2c8' }, 1)),
-      valance: keep(flashMaterial({ map: scallop, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }, 0.8)),
+      counterFront: keep(flashMaterial({ map: front, color: '#a898a5' }, 0.3)),
+      roof: keep(flashMaterial({ map: stripes, side: THREE.DoubleSide, color: '#656880' }, 0.5)),
+      valance: keep(flashMaterial({ map: scallop, color: '#a09aab', transparent: true, alphaTest: 0.5, side: THREE.DoubleSide }, 0.8)),
       // Side skirts below the counter (open above, so the goods show from along the street).
       side: keep(flashMaterial({ color: new THREE.Color(colors[0]).multiplyScalar(0.35), side: THREE.DoubleSide }, 0.5)),
     });

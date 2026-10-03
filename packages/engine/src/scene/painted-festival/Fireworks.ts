@@ -96,14 +96,14 @@ const vertexShader = /* glsl */ `
       bright *= mix(1.0, glitter * 1.6, willow ? smoothstep(0.15, 0.4, t / life) : smoothstep(0.6, 0.9, t / life));
       // White-hot just after the burst. At the very start every star and its tail sit on the same
       // spot: fade them in, or the additive pile-up overflows the half-float target (a black dot).
-      bright *= (1.0 + 1.5 * exp(-t * 12.0)) * smoothstep(0.0, 0.06, t);
+      bright *= (1.0 + 1.5 * exp(-t * 12.0)) * smoothstep(0.015, 0.16, t);
       vec3 head = pistil ? uColorB[slot] : kind == 0.0 ? mix(uColorA[slot], uColorB[slot], smoothstep(0.42, 0.5, t / life)) : uColorA[slot];
       // Tails burn charcoal orange, cooling towards their end.
       vec3 ember = vec3(1.0, 0.5, 0.18);
       vec3 color = mix(head, ember, (kind == 0.0 || willow) ? smoothstep(0.0, 0.5, tail) : tail * 0.3);
       color = mix(color, vec3(1.0), 0.2 * exp(-t * 6.0));
       // Peony stars are fat: while they are still bunched up they would blow out into one blob.
-      vColor = color * bright * (kind == 1.0 ? 1.8 : 2.6) * mix(0.35, 1.0, smoothstep(0.0, 0.35, t));
+      vColor = color * bright * (kind == 1.0 ? 3.4 : 4.8) * mix(0.35, 1.0, smoothstep(0.0, 0.35, t));
       size = c.w * mix(1.0, 0.45, tail) * (pistil ? 0.8 : 1.0);
     }
     vec4 mv = viewMatrix * vec4(world, 1.0);
@@ -120,7 +120,7 @@ const fragmentShader = /* glsl */ `
     float r2 = dot(c, c);
     if (r2 > 1.0) discard;
     // A hot white-ish core inside a soft coloured halo.
-    float halo = exp(-r2 * 3.0) * 0.25;
+    float halo = exp(-r2 * 3.0) * 0.10;
     float core = exp(-r2 * 16.0);
     vec3 star = vColor * (core + halo) + vec3(dot(vColor, vec3(0.33))) * core * 0.35;
     gl_FragColor = vec4(min(mix(star, vColor * (1.0 - r2) * (1.0 - r2), vSoft), vec3(16.0)), 1.0);
@@ -137,13 +137,21 @@ export class Fireworks {
     uBursts: { value: Array.from({ length: SLOTS }, () => new THREE.Vector4()) },
     uBurstColors: { value: Array.from({ length: SLOTS }, () => new THREE.Color()) },
   };
+  /** Independent history: smoke outlives the short-lived particle slots. */
+  readonly smoke = { value: Array.from({ length: 24 }, () => new THREE.Vector4(0, 0, 0, -100)) };
+  private smokeCursor = 0;
   private readonly material: THREE.ShaderMaterial;
   private readonly clock = new THREE.Clock();
   private readonly shells: (Shell & { burst: number; center: THREE.Vector3 })[] = [];
   private nextLaunch = 0.2;
+  /** Launching new shells (the scenario can start and stop the show). */
+  private active = true;
+  private now = 0;
   private salvo = 0;
   private seed = 12345;
   private readonly size = new THREE.Vector2();
+  /** The bursts' centre weighted by brightness (set space), for the rim's direction on screen. */
+  private readonly flashCenter = new THREE.Vector3(0, 30, -70);
 
   constructor() {
     const count = SLOTS * (PARTICLES * TRAIL + RISE_POINTS + 1);
@@ -197,10 +205,11 @@ export class Fireworks {
     this.object.frustumCulled = false;
     // After the sky dome, before nothing else matters (additive).
     this.object.renderOrder = -5;
-    this.object.onBeforeRender = (renderer, _scene, camera) => {
+    this.object.onBeforeRender = (renderer, scene, camera) => {
       renderer.getDrawingBufferSize(this.size);
       this.material.uniforms.uScale.value = this.size.y * (camera as THREE.PerspectiveCamera).projectionMatrix.elements[5] / 2;
       this.update(this.clock.getElapsedTime());
+      this.splitBacklight(scene, camera);
     };
     this.light.name = 'Fireworks light';
     this.light.target.position.set(0, 1, 0);
@@ -229,7 +238,7 @@ export class Fireworks {
     shell.speed = (willow ? 18 : 26) * big;
     shell.life = willow ? 4.2 : shell.kind === 1 ? 2.0 : 2.6;
     shell.gravity = willow ? 2.6 : 1.4;
-    shell.size = (willow ? 0.75 : shell.kind === 1 ? 1.0 : 0.95) * big;
+    shell.size = (willow ? 0.48 : shell.kind === 1 ? 0.58 : 0.52) * big;
     const a = PALETTE[Math.floor(rnd() * PALETTE.length)];
     let b = PALETTE[Math.floor(rnd() * PALETTE.length)];
     if (b === a) b = PALETTE[(PALETTE.indexOf(a) + 3) % PALETTE.length];
@@ -238,6 +247,8 @@ export class Fireworks {
     // Rings face the viewer, tilted a little.
     shell.tilt.set((rnd() - 0.5) * 0.9, (rnd() - 0.5) * 0.9, 1).normalize();
     shell.burst = now + RISE_TIME;
+    this.smoke.value[this.smokeCursor].set(shell.center.x, shell.center.y, shell.center.z, shell.burst);
+    this.smokeCursor = (this.smokeCursor + 1) % this.smoke.value.length;
 
     const u = this.material.uniforms;
     u.uSlotA.value[free].set(shell.center.x, shell.center.y, shell.center.z, shell.burst);
@@ -247,12 +258,26 @@ export class Fireworks {
     u.uColorB.value[free].copy(shell.colors[1]);
   }
 
+  /**
+   * Start or stop the show. Started, the first shell goes up at once (it
+   * bursts RISE_TIME later); stopped, no new shells go up and those in the
+   * air burn out.
+   */
+  setActive(on: boolean): void {
+    if (on && !this.active) {
+      this.nextLaunch = this.now;
+      this.salvo = 0;
+    }
+    this.active = on;
+  }
+
   private update(now: number): void {
+    this.now = now;
     festivalUniforms.uTime.value = now;
     this.material.uniforms.uTime.value = now;
     // After a long pause (hidden tab) don't fire everything at once.
     if (now - this.nextLaunch > 3) this.nextLaunch = now;
-    while (now >= this.nextLaunch) {
+    while (this.active && now >= this.nextLaunch) {
       this.launch(this.nextLaunch);
       if (this.salvo > 0) {
         this.salvo--;
@@ -266,6 +291,7 @@ export class Fireworks {
     // Light: each burst flares then fades; sum them into one colour and a direction.
     const flash = festivalUniforms.uFlash.value.setRGB(0, 0, 0);
     const direction = new THREE.Vector3();
+    const center = new THREE.Vector3();
     let total = 0;
     this.shells.forEach((shell, i) => {
       const t = now - shell.burst;
@@ -277,6 +303,7 @@ export class Fireworks {
       flash.g += this.uniforms.uBurstColors.value[i].g * w;
       flash.b += this.uniforms.uBurstColors.value[i].b * w;
       direction.addScaledVector(shell.center.clone().normalize(), w);
+      center.addScaledVector(shell.center, w);
       total += w;
     });
     flash.multiplyScalar(0.18);
@@ -287,7 +314,27 @@ export class Fireworks {
       this.light.color.copy(flash).multiplyScalar(1 / Math.max(flash.r, flash.g, flash.b, 1e-4));
       this.light.position.copy(direction.normalize()).multiplyScalar(10).add(this.light.target.position);
     }
-    this.light.intensity = Math.min(total, 1.6) * 2.4;
+    this.light.intensity = Math.min(total, 1.6) * 1.7;
+    if (total > 0) this.flashCenter.copy(center.divideScalar(total));
+  }
+
+  /**
+   * MToon lights the whole figure with any light, even from behind, so a burst
+   * behind the character (in the direction the camera looks) would light her
+   * face. Split the light by where the bursts are relative to the camera: in
+   * front of the character it lights her; behind her it becomes a rim along
+   * her silhouette, drawn by the stage's character pass (scene.userData.characterRim).
+   */
+  private splitBacklight(scene: THREE.Object3D, camera: THREE.Camera): void {
+    const forward = camera.getWorldDirection(new THREE.Vector3());
+    const toLight = this.light.position.clone().sub(this.light.target.position).normalize().transformDirection(this.object.matrixWorld);
+    const behind = THREE.MathUtils.smoothstep(forward.dot(toLight), 0.05, 0.45);
+    const strength = this.light.intensity;
+    this.light.intensity = strength * (1 - behind);
+    const screen = this.object.localToWorld(this.flashCenter.clone()).project(camera);
+    const rim = (scene.userData.characterRim ??= { color: new THREE.Color(), screen: new THREE.Vector2() }) as { color: THREE.Color; screen: THREE.Vector2 };
+    rim.color.copy(this.light.color).multiplyScalar(Math.min(strength * behind * 0.35, 0.8));
+    rim.screen.set(screen.x * 0.5 + 0.5, screen.y * 0.5 + 0.5);
   }
 
   dispose(): void {

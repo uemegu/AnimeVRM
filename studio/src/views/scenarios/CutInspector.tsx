@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   ScenarioScene as SceneSchema,
+  SCENE_EFFECT_IDS,
   stageAtScene,
   TIME_OF_DAY_IDS,
   type CameraShot,
@@ -308,6 +309,24 @@ function StageTab({
           ))}
         </select>
       </label>
+      {SCENE_EFFECT_IDS.map((effect) => (
+        <label key={effect} className="field">
+          <span className="field-label">{t.scenarios.sceneEffects[effect]}</span>
+          <select
+            className="select"
+            value={scene.effects?.[effect] === undefined ? '' : scene.effects[effect] ? 'on' : 'off'}
+            onChange={(e) => {
+              const next = { ...scene.effects, [effect]: e.target.value === '' ? undefined : e.target.value === 'on' };
+              if (next[effect] === undefined) delete next[effect];
+              set('effects', Object.keys(next).length > 0 ? next : undefined);
+            }}
+          >
+            <option value="">{inherited(before?.effects?.[effect] === false ? t.scenarios.effectOff : t.scenarios.effectOn)}</option>
+            <option value="on">{t.scenarios.effectStart}</option>
+            <option value="off">{t.scenarios.effectStop}</option>
+          </select>
+        </label>
+      ))}
       <label className="inspector-check">
         <input type="checkbox" checked={!!scene.focusLines} onChange={(e) => set('focusLines', e.target.checked || undefined)} />
         {t.scenarios.focusLines}

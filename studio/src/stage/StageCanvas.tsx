@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { CameraPose, CameraShift, CameraShot, ScenarioScene, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
+import type { CameraPose, CameraShift, CameraShot, ScenarioScene, SceneEffects, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -18,6 +18,8 @@ interface Props {
   focusId: string | null;
   /** 流れる背景（歩きながらの会話）。null で止める */
   scrolling?: ScrollingBackgroundSettings | null;
+  /** シーンの特殊効果（花火など） */
+  effects?: SceneEffects;
   /** 今のカット（カメラの直接指定とカット内のタイムライン） */
   cut?: ScenarioScene | null;
   /** カット内の時刻。playing でなければ、その時刻へ頭出しする */
@@ -56,6 +58,7 @@ export function StageCanvas({
   cameraShift = null,
   focusId,
   scrolling = null,
+  effects,
   cut = null,
   cutTime = 0,
   playing = false,
@@ -112,6 +115,12 @@ export function StageCanvas({
     runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  const effectsKey = JSON.stringify(effects ?? {});
+  useEffect(() => {
+    managerRef.current?.setEffects(effects);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectsKey]);
 
   const scrollingKey = JSON.stringify(scrolling);
   useEffect(() => {

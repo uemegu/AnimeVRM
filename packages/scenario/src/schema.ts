@@ -215,6 +215,18 @@ export const ScrollingBackgroundConfig = z.strictObject({
 });
 export type ScrollingBackgroundConfig = z.infer<typeof ScrollingBackgroundConfig>;
 
+/**
+ * シーンの特殊効果。その効果を持つ場所でだけ働く（ない場所では何もしない）。
+ * 効果を足すときは、ここに項目を足し、場所の3D背景（userData.setEffects）で受け取る
+ */
+export const SCENE_EFFECT_IDS = ['fireworks'] as const;
+export type SceneEffectId = (typeof SCENE_EFFECT_IDS)[number];
+export const SceneEffects = z.strictObject({
+  /** 花火（夏祭り）。止めると新しく上げず、上がっている花火は消えるまで残る。どこでも指定がなければ上がり続ける */
+  fireworks: z.boolean().optional(),
+});
+export type SceneEffects = z.infer<typeof SceneEffects>;
+
 /** シーン（1セリフまたは1演出ステップ） */
 export const ScenarioScene = z.strictObject({
   id: z.string().min(1),
@@ -246,6 +258,8 @@ export const ScenarioScene = z.strictObject({
   seVolume: AudioVolume.optional(),
   /** 効果音を鳴らすチャネル（省略時は stereo） */
   sePan: AudioPan.optional(),
+  /** 特殊効果（花火など）。true でこのシーンから始め、false で止める。効果ごとに以降のシーンに引き継ぐ */
+  effects: SceneEffects.optional(),
   /** 環境音（ループ。セミの声・足音など）。以降のシーンに引き継ぎ、false で止める */
   ambience: z.union([z.string(), z.literal(false)]).optional(),
   avatars: z.record(z.string(), SceneAvatarConfig).optional(),
