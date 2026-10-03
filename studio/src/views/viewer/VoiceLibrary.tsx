@@ -11,9 +11,6 @@ export function voiceName(url: string): string {
 interface Props {
   voices: AssetEntry[];
   playingUrl: string | null;
-  /** 囁き声として試聴するか */
-  whisper: boolean;
-  onToggleWhisper: () => void;
   muted: boolean;
   onToggle: (url: string) => void;
   onToggleMute: () => void;
@@ -24,7 +21,7 @@ interface Props {
 /**
  * ボイスの一覧（assets/voices）。再生するとアバターが口を動かす。手元の音声ファイルを登録できる
  */
-export function VoiceLibrary({ voices, playingUrl, whisper, onToggleWhisper, muted, onToggle, onToggleMute, onUploaded }: Props) {
+export function VoiceLibrary({ voices, playingUrl, muted, onToggle, onToggleMute, onUploaded }: Props) {
   const { t } = useI18n();
   const tv = t.viewer;
   const [filter, setFilter] = useState('');
@@ -73,9 +70,6 @@ export function VoiceLibrary({ voices, playingUrl, whisper, onToggleWhisper, mut
           <button type="button" className={`viewer-mini-btn${muted ? ' active' : ''}`} aria-pressed={muted} title={muted ? t.player.muted : t.player.sound} onClick={onToggleMute}>
             <Icon name={muted ? 'soundOff' : 'soundOn'} size={14} />
           </button>
-          <button type="button" className={`viewer-mini-btn wide${whisper ? ' active' : ''}`} aria-pressed={whisper} title={tv.whisperHint} onClick={onToggleWhisper}>
-            {tv.whisper}
-          </button>
           {!READ_ONLY && (
             <>
               <input
@@ -97,6 +91,7 @@ export function VoiceLibrary({ voices, playingUrl, whisper, onToggleWhisper, mut
           )}
         </div>
       </div>
+      <p className="viewer-note">{tv.voiceMouthHint}</p>
       <input className="input" placeholder={tv.searchVoice} value={filter} onChange={(e) => setFilter(e.target.value)} />
       {message && <p className="viewer-note">{message}</p>}
       <ul className="viewer-motion-list viewer-voice-list" ref={listRef}>

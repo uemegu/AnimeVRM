@@ -1,7 +1,9 @@
 import { resolveAssetUrl } from '../../utils/path';
+import { VOICE_SILENCE_RMS, getVoiceMouthScale } from '@anime-vrm/engine/audio/lipSync';
+import { VoiceAnalyser, VOICE_PHONEMES, type VoiceFrame, type VoicePhoneme } from '@anime-vrm/engine/audio/VoiceAnalyser';
 
-export const PHONEMES = ['aa', 'ee', 'ih', 'oh', 'ou'] as const;
-export type Phoneme = (typeof PHONEMES)[number];
+export const PHONEMES = VOICE_PHONEMES;
+export type Phoneme = VoicePhoneme;
 
 export interface LipSyncStats {
   processingTimeMs: number;
@@ -33,8 +35,8 @@ export class AudioLipSync {
   public currentPhoneme: Phoneme | 'nn' | undefined = undefined;
   public currentRms: number = 0;
   public isPlaying: boolean = false;
-  public rmsThreshold: number = 0.008; // Attack threshold for voicing detection
-  public rmsReleaseThreshold: number = 0.003; // Release threshold to prevent dropouts
+  public rmsThreshold: number = VOICE_SILENCE_RMS;
+  public rmsReleaseThreshold: number = VOICE_SILENCE_RMS;
   public holdFrames: number = 12; // ~200ms at 60fps hangover time
   public audioDelay: number = 0.05; // Default delay compensation (50ms)
   public voiceGender: 'female' | 'male' = 'female';
@@ -59,7 +61,10 @@ export class AudioLipSync {
     phoneme: 'nn',
   };
 
-  private analyzerNode: AnalyserNode | null = null;
+  private voiceAnalyser: VoiceAnalyser | null = null;
+  private voiceMouthScale = 1;
+  private volume: number = 1;
+  private playbackGeneration: number = 0;
   private sourceNode: MediaElementAudioSourceNode | null = null;
   private delayNode: DelayNode | null = null;
   private gainNode: GainNode | null = null;
@@ -67,9 +72,7 @@ export class AudioLipSync {
   private objectUrlToRevoke: string | null = null;
 
   // AudioWorklet + WASM properties
-  private workletNode: AudioWorkletNode | null = null;
   public isWorkletReady: boolean = false;
-  private wasmBytesCache: ArrayBuffer | null = null;
 
   constructor(events: AudioLipSyncEvents = {}) {
     this.events = events;
@@ -84,11 +87,9 @@ export class AudioLipSync {
       });
 
       this.audioElement.addEventListener('ended', () => {
+        this.playbackGeneration++;
         this.isPlaying = false;
-        this.currentPhoneme = 'nn';
-        if (this.events.onPhonemeChange) {
-          this.events.onPhonemeChange('nn');
-        }
+        this.resetAnalysis();
         if (this.events.onPlayStateChange) {
           this.events.onPlayStateChange(false);
         }
@@ -98,11 +99,9 @@ export class AudioLipSync {
       });
 
       this.audioElement.addEventListener('pause', () => {
+        this.playbackGeneration++;
         this.isPlaying = false;
-        this.currentPhoneme = 'nn';
-        if (this.events.onPhonemeChange) {
-          this.events.onPhonemeChange('nn');
-        }
+        this.resetAnalysis();
         if (this.events.onPlayStateChange) {
           this.events.onPlayStateChange(false);
         }
@@ -117,7 +116,10 @@ export class AudioLipSync {
 
       this.audioElement.addEventListener('error', (e) => {
         console.error('Audio playback error:', e);
+        this.playbackGeneration++;
         this.isPlaying = false;
+        this.resetAnalysis();
+        this.events.onPlayStateChange?.(false);
         if (this.events.onError) {
           this.events.onError(new Error('Audio playback failed'));
         }
@@ -136,7 +138,7 @@ export class AudioLipSync {
    */
   public setVoiceGender(gender: 'female' | 'male'): void {
     this.voiceGender = gender;
-    this.workletNode?.port.postMessage({ type: 'set-gender', data: { gender } });
+    this.voiceAnalyser?.setGender(gender);
   }
 
   /**
@@ -144,9 +146,7 @@ export class AudioLipSync {
    */
   public setMuted(muted: boolean): void {
     this.isMuted = muted;
-    if (this.gainNode && this.audioContext) {
-      this.gainNode.gain.setValueAtTime(muted ? 0 : 1, this.audioContext.currentTime);
-    }
+    this.applyOutputVolume();
   }
 
   /**
@@ -155,86 +155,83 @@ export class AudioLipSync {
   public initAudioContext(): void {
     if (this.audioContext) return;
 
+    if (typeof window === 'undefined') return;
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
     this.audioContext = new AudioContextClass();
 
+    // 音声要素の音量も解析信号を変えるため、出力側の GainNode だけで調整する
+    this.audioElement.volume = 1;
+    this.audioElement.muted = false;
     this.sourceNode = this.audioContext.createMediaElementSource(this.audioElement);
-    this.analyzerNode = this.audioContext.createAnalyser();
-    this.analyzerNode.fftSize = 1024;
-    this.analyzerNode.smoothingTimeConstant = 0;
 
     this.delayNode = this.audioContext.createDelay(1.0);
     this.delayNode.delayTime.setValueAtTime(this.audioDelay, this.audioContext.currentTime);
 
     this.gainNode = this.audioContext.createGain();
-    this.gainNode.gain.setValueAtTime(this.isMuted ? 0 : 1, this.audioContext.currentTime);
+    this.applyOutputVolume();
 
     // Playback Route: source -> delay -> gain -> destination
     this.sourceNode.connect(this.delayNode);
     this.delayNode.connect(this.gainNode);
     this.gainNode.connect(this.audioContext.destination);
 
-    // Analysis Route
-    this.sourceNode.connect(this.analyzerNode);
-
-    if (this.engineMode === 'wasm') {
-      void this.initAudioWorklet();
-    }
-  }
-
-  private async initAudioWorklet(): Promise<void> {
-    if (!this.audioContext || this.workletNode) return;
-
-    try {
-      await this.audioContext.audioWorklet.addModule(resolveAssetUrl('/worklets/lipsync-processor.js'));
-
-      if (!this.wasmBytesCache) {
-        const resp = await fetch(resolveAssetUrl('/wasm/lipsync.wasm'));
-        this.wasmBytesCache = await resp.arrayBuffer();
-      }
-
-      this.workletNode = new AudioWorkletNode(this.audioContext, 'lipsync-processor');
-
-      this.workletNode.port.onmessage = (event) => {
-        const { type, data, error } = event.data;
-        if (type === 'wasm-ready') {
-          this.isWorkletReady = true;
-          this.workletNode?.port.postMessage({ type: 'set-gender', data: { gender: this.voiceGender } });
-          this.workletNode?.port.postMessage({ type: 'set-rms-threshold', data: { threshold: this.rmsThreshold } });
-          this.workletNode?.port.postMessage({ type: 'set-hold-frames', data: { frames: this.holdFrames } });
-        } else if (type === 'wasm-error') {
-          console.error('LipSync WASM error in AudioWorklet:', error);
-        } else if (type === 'analysis-result') {
-          const { phoneme, rms, f1, f2, distances, processingTimeMs } = data;
-          this.currentRms = rms;
-
-          if (this.currentPhoneme !== phoneme) {
-            this.currentPhoneme = phoneme;
-            this.events.onPhonemeChange?.(phoneme);
-          }
-
-          this.updateStats(processingTimeMs, rms, phoneme, f1, f2, distances);
-        }
-      };
-
-      this.workletNode.port.postMessage({
-        type: 'init-wasm',
-        data: {
-          wasmBytes: this.wasmBytesCache,
-          sampleRate: this.audioContext.sampleRate,
-        },
-      });
-
-      if (this.sourceNode) {
-        this.sourceNode.connect(this.workletNode);
-      }
-    } catch (err) {
-      console.warn('Failed to initialize AudioWorklet lipsync:', err);
-    }
+    this.voiceAnalyser = new VoiceAnalyser(this.audioContext, this.sourceNode, {
+      useWasm: this.engineMode === 'wasm',
+      gender: this.voiceGender,
+      rmsThreshold: this.rmsThreshold,
+      holdFrames: this.holdFrames,
+      onReady: (ready) => { this.isWorkletReady = ready; },
+      onAnalysis: ({ phoneme, rms, f1, f2, distances, processingTimeMs }) => {
+        if (!this.isPlaying || this.audioElement.paused || this.audioElement.ended) return;
+        this.currentRms = rms;
+        this.setPhoneme(phoneme);
+        this.updateStats(processingTimeMs, rms, phoneme, f1, f2, distances);
+      },
+    });
   }
 
   public getStats(): LipSyncStats {
     return { ...this.lastStats, distances: { ...this.lastStats.distances } };
+  }
+
+  /** 音声の特徴から推定した口の開き。WASM 非対応時は RMS 解析で補う */
+  public getMouthOpen(): number {
+    if (!this.isPlaying || this.audioElement.paused || this.audioElement.ended) return 0;
+    return this.readVoiceFrame().mouthOpen * this.voiceMouthScale;
+  }
+
+  public getPhoneme(): Phoneme | 'nn' | undefined {
+    if (!this.isPlaying || this.audioElement.paused || this.audioElement.ended) return undefined;
+    return this.readVoiceFrame().phoneme;
+  }
+
+  private readVoiceFrame(): VoiceFrame {
+    const frame = this.voiceAnalyser?.getFrame() ?? { phoneme: 'nn', rms: 0, mouthOpen: 0 };
+    this.currentRms = frame.rms;
+    this.setPhoneme(frame.phoneme);
+    return frame;
+  }
+
+  private setPhoneme(phoneme: Phoneme | 'nn'): void {
+    if (this.currentPhoneme === phoneme) return;
+    this.currentPhoneme = phoneme;
+    this.events.onPhonemeChange?.(phoneme);
+  }
+
+  private resetAnalysis(): void {
+    this.voiceAnalyser?.reset();
+    this.currentRms = 0;
+    this.setPhoneme('nn');
+  }
+
+  private applyOutputVolume(): void {
+    if (this.gainNode && this.audioContext) {
+      this.gainNode.gain.setValueAtTime(this.isMuted ? 0 : this.volume, this.audioContext.currentTime);
+    } else {
+      this.audioElement.volume = this.volume;
+      this.audioElement.muted = this.isMuted;
+    }
   }
 
   private updateStats(
@@ -273,15 +270,13 @@ export class AudioLipSync {
    * Load audio from URL
    */
   public loadAudioUrl(url: string, title?: string): void {
+    this.pause();
     this.initAudioContext();
     const resolvedUrl = resolveAssetUrl(url);
     this.audioTitle = title || url.split('/').pop() || 'Audio Track';
+    this.voiceMouthScale = getVoiceMouthScale(url);
     this.audioElement.src = resolvedUrl;
     this.audioElement.load();
-    this.currentPhoneme = 'nn';
-    if (this.events.onPhonemeChange) {
-      this.events.onPhonemeChange('nn');
-    }
   }
 
   /**
@@ -289,14 +284,21 @@ export class AudioLipSync {
    */
   public async play(): Promise<void> {
     this.initAudioContext();
-    if (this.audioContext && this.audioContext.state === 'suspended') {
-      await this.audioContext.resume();
-    }
+    const generation = ++this.playbackGeneration;
     try {
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
+      if (generation !== this.playbackGeneration) return;
       await this.audioElement.play();
-      this.isPlaying = true;
+      if (generation === this.playbackGeneration) this.isPlaying = true;
     } catch (err) {
       console.warn('Audio play request failed or interrupted:', err);
+      if (generation !== this.playbackGeneration) return;
+      this.isPlaying = false;
+      this.resetAnalysis();
+      this.events.onPlayStateChange?.(false);
+      this.events.onError?.(err instanceof Error ? err : new Error('Audio playback failed'));
     }
   }
 
@@ -304,18 +306,19 @@ export class AudioLipSync {
    * Pause audio
    */
   public pause(): void {
+    this.playbackGeneration++;
     if (typeof this.audioElement.pause === 'function') {
       this.audioElement.pause();
     }
     this.isPlaying = false;
-    this.currentPhoneme = 'nn';
-    this.events.onPhonemeChange?.('nn');
+    this.resetAnalysis();
   }
 
   /**
    * Stop audio and reset to beginning
    */
   public stop(): void {
+    this.playbackGeneration++;
     if (typeof this.audioElement.pause === 'function') {
       this.audioElement.pause();
     }
@@ -323,8 +326,7 @@ export class AudioLipSync {
       this.audioElement.currentTime = 0;
     }
     this.isPlaying = false;
-    this.currentPhoneme = 'nn';
-    this.events.onPhonemeChange?.('nn');
+    this.resetAnalysis();
     this.events.onPlayStateChange?.(false);
   }
 
@@ -332,9 +334,8 @@ export class AudioLipSync {
    * Set volume [0, 1]
    */
   public setVolume(volume: number): void {
-    if (this.audioElement) {
-      this.audioElement.volume = Math.max(0, Math.min(1, volume));
-    }
+    this.volume = Math.max(0, Math.min(1, volume));
+    this.applyOutputVolume();
   }
 
   /**
@@ -342,10 +343,14 @@ export class AudioLipSync {
    */
   public dispose(): void {
     this.stop();
-    this.analyzerNode?.disconnect();
-    this.analyzerNode = null;
-    this.workletNode?.disconnect();
-    this.workletNode = null;
+    this.voiceAnalyser?.dispose();
+    this.voiceAnalyser = null;
+    this.sourceNode?.disconnect();
+    this.sourceNode = null;
+    this.delayNode?.disconnect();
+    this.delayNode = null;
+    this.gainNode?.disconnect();
+    this.gainNode = null;
     this.isWorkletReady = false;
 
     if (this.objectUrlToRevoke) {

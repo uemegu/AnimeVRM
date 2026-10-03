@@ -312,7 +312,12 @@ export class SoundManager {
    * 口パク用の現在の音素。ボイス再生中でなければ undefined
    */
   public getVoicePhoneme(): Phoneme | 'nn' | undefined {
-    return this.voiceAudio?.isPlaying ? this.voiceAudio.currentPhoneme : undefined;
+    return this.voiceAudio?.isPlaying ? this.voiceAudio.getPhoneme() : undefined;
+  }
+
+  /** 元の録音の声量による口の開き。再生音量やミュートには影響されない */
+  public getVoiceMouthOpen(): number {
+    return this.voiceAudio?.getMouthOpen() ?? 0;
   }
 
   /**
@@ -323,6 +328,7 @@ export class SoundManager {
     if (this.bgmAudio) {
       this.bgmAudio.volume = this.masterVolume * this.bgmVolume;
     }
+    this.voiceAudio?.setVolume(this.masterVolume * this.voiceVolume);
   }
 
   public setBgmVolume(volume: number): void {

@@ -57,6 +57,7 @@ export const StageView: React.FC<StageViewProps> = ({
       canvas,
       presets: { timeOfDay: TIME_OF_DAY_PRESETS, locations: LOCATION_VISUAL_PRESETS },
       getSpeakerPhoneme: () => soundManager.getVoicePhoneme(),
+      getSpeakerMouthOpen: () => soundManager.getVoiceMouthOpen(),
       // カット内のタイムラインはボイスの再生位置で進める（ボイスがなければカット開始からの秒数）
       getCutTime: () => soundManager.getVoiceTime(),
       initialTimeOfDay: timeOfDay,
@@ -136,7 +137,7 @@ export const StageView: React.FC<StageViewProps> = ({
     manager.setCameraPose(cut?.cameraPose ?? null);
     manager.setCutTimeline(
       cut
-        ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions, cameraShift: cut.cameraShift, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceWhisper: cut.voiceWhisper }
+        ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions, cameraShift: cut.cameraShift, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceUrl: cut.voiceUrl, voiceWhisper: cut.voiceWhisper }
         : null
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

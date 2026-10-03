@@ -246,6 +246,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         language={language}
         getCutTime={() => audio.getVoiceTime()}
         getSpeakerPhoneme={() => audio.getPhoneme()}
+        getSpeakerMouthOpen={() => audio.getMouthOpen()}
         onCanvas={onCanvas}
       />
       {flash > 0 && <div key={flash} className="player-flash" />}
