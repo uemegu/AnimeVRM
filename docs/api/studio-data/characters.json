@@ -65,7 +65,24 @@
         "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
         "direction": ""
       },
-      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。"
+      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。",
+      "sprites": [
+        {
+          "key": "yada",
+          "label": {
+            "ja": "ヤダヤダー（駄々っ子）",
+            "en": "Tantrum"
+          },
+          "frames": [
+            "/models/emili/yadayada/emili-yada1.avif",
+            "/models/emili/yadayada/emili-yada2.avif",
+            "/models/emili/yadayada/emili-yada3.avif"
+          ],
+          "fps": 5,
+          "playback": "pingpong",
+          "height": 0.6
+        }
+      ]
     },
     {
       "id": "shion",

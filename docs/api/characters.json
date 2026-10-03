@@ -60,6 +60,23 @@
           "url": "/models/emili/emili-private.vrm"
         }
       ],
+      "sprites": [
+        {
+          "key": "yada",
+          "label": {
+            "ja": "ヤダヤダー（駄々っ子）",
+            "en": "Tantrum"
+          },
+          "frames": [
+            "/models/emili/yadayada/emili-yada1.avif",
+            "/models/emili/yadayada/emili-yada2.avif",
+            "/models/emili/yadayada/emili-yada3.avif"
+          ],
+          "fps": 5,
+          "playback": "pingpong",
+          "height": 0.6
+        }
+      ],
       "voice": {
         "ref": "assets/voices/trio_intro_2.mp3",
         "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
