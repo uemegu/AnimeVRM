@@ -244,6 +244,27 @@ const slot = (ja: string, en: string, def: [number, number, number]) =>
     .tuple([z.number(), z.number(), z.number()])
     .meta({ ...label(ja, en), min: -3, max: 3, step: 0.01, default: def });
 
+/**
+ * 場所の群衆。モブは淡い白黒の平塗り・止まったポーズで、登場キャラの上やカメラとの間に来るものは隠す。
+ * 範囲（x, z の矩形）ごとに人数を決めてばらまく
+ */
+export const LocationCrowd = z.strictObject({
+  /** モブにする VRM（assets/ 基準） */
+  models: z.array(z.string()).min(1),
+  /** ポーズを取るモーション（assets/animations/<名前>.fbx。各モーションの途中の数コマを使う） */
+  motions: z.array(z.string()).optional(),
+  areas: z.array(z.strictObject({
+    min: z.tuple([z.number(), z.number()]),
+    max: z.tuple([z.number(), z.number()]),
+    count: z.number().int().min(0).max(80),
+    /** 向き（度、+z 向きが 0）。省略時はばらばら */
+    facing: z.number().optional(),
+  })),
+  /** 並べ方の乱数の種（同じなら毎回同じ並び） */
+  seed: z.number().int().optional(),
+}).meta(label('群衆', 'Crowd'));
+export type LocationCrowd = z.infer<typeof LocationCrowd>;
+
 export const LocationStage = group('配置とカメラ', 'Staging & camera', {
   slots: group('立ち位置', 'Standing slots', {
     left: slot('左', 'Left', DEFAULT_SLOT_POSITIONS.left).optional(),
@@ -281,6 +302,8 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
     /** 人物の明るさの上限（表示用の値）。光が重なっても顔などが白飛びしないよう、これに向けて滑らかに抑える。省略時は抑えない */
     highlightCap: num('人物の明るさの上限', 'Character highlight cap', 0.8, 1, 0.01, 0.95).optional(),
   }).optional(),
+  /** 群衆（淡い色のモブ）。シーンの effects.crowd で出し入れする */
+  crowd: LocationCrowd.optional(),
   backdrop: group('遠景の置き方', 'Backdrop placement', {
     mode: z.enum(['screen', 'world']).meta({
       ...label('方式', 'Mode'),

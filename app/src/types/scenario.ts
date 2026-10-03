@@ -125,7 +125,7 @@ export interface ScenarioScene {
    */
   scrollingBackground?: ScrollingBackgroundConfig | false;
   /** 特殊効果（花火など）。true でこのシーンから始め、false で止める。効果ごとに以降のシーンに引き継ぐ */
-  effects?: { fireworks?: boolean };
+  effects?: { fireworks?: boolean; crowd?: boolean };
   /** 選択肢の制限時間（秒）と時間切れ時の分岐。省略時は10秒で1番目を自動選択 */
   choiceTimeout?: {
     seconds: number;

@@ -1,0 +1,909 @@
+{
+  "schemaVersion": 1,
+  "id": "festival_date",
+  "title": {
+    "ja": "夏祭りのシオン",
+    "en": "Summer festival with Shion"
+  },
+  "description": "夕暮れの神社で待ち合わせ、屋台の通りで金魚すくい、川沿いで花火を見上げる。浴衣のシオンとの夏祭り。",
+  "location": "shrine",
+  "timeOfDay": "evening",
+  "bgm": "love",
+  "scenes": [
+    {
+      "id": "s1_torii",
+      "text": "鳥居のそばで待っていると、夕暮れの光の中に浴衣姿のシオンが立っていた。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0.25,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "modelUrl": "/models/shion/shion-private2.vrm"
+        }
+      },
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "bgm": "love",
+      "autoNextSec": 3.5,
+      "screenTransition": "fade_black",
+      "camera": "wide"
+    },
+    {
+      "id": "s1_mitore",
+      "text": "普段のクールな制服姿とは全く違う艶やかな佇まいに、思わず見惚れて言葉を失ってしまう。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0.1,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s1_shion",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「私は今日のためにおしゃれしてきました。何か言う事があるんじゃないの？」",
+      "voiceUrl": "/voices/festival_date/s1_shion.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "ardy_proud",
+          "expression": "angry",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s2_choice",
+      "text": "",
+      "avatars": {
+        "shion": {
+          "motion": "ardy_proud",
+          "expression": "angry",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "choices": [
+        {
+          "id": "choice_mitoreta",
+          "text": "「すごく綺麗で見惚れてた」",
+          "goto": "s2_answer",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "choice_niau",
+          "text": "「浴衣、本当に似合ってるよ」",
+          "goto": "s2_answer",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ],
+      "camera": "speaker"
+    },
+    {
+      "id": "s2_answer",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……ふん。素直でよろしい。合格点あげてもいいわよ」",
+      "voiceUrl": "/voices/festival_date/s2_answer.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": -0.3,
+          "motion": "ardy_pout",
+          "expression": "komari",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "blush": true,
+          "effectText": "doki"
+        }
+      },
+      "camera": "speaker"
+    },
+    {
+      "id": "s2_go",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「さあ、日が暮れる前に屋台の方へ行きましょう」",
+      "voiceUrl": "/voices/festival_date/s2_go.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0.15,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "blush": false
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s3_street",
+      "text": "すっかり日が落ち、提灯の明かりに照らされた祭り通りへ。大勢の人でごった返している。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            1.2
+          ],
+          "rotationY": 0.2,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.6,
+          5.6
+        ],
+        "target": [
+          0,
+          1.35,
+          0
+        ],
+        "fov": 48
+      },
+      "background": "painted_festival",
+      "timeOfDay": "night",
+      "bgm": "main_bgm",
+      "effects": {
+        "fireworks": false,
+        "crowd": true
+      },
+      "screenTransition": "fade_black",
+      "autoNextSec": 3.5
+    },
+    {
+      "id": "s3_hitogomi",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「うぅ……人混みは苦手なのよね……」",
+      "voiceUrl": "/voices/festival_date/s3_hitogomi.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.15,
+            0,
+            1.75
+          ],
+          "rotationY": -0.15,
+          "motion": "clasp_hands_front",
+          "expression": "komari",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.4,
+          3.2
+        ],
+        "target": [
+          0.1,
+          1.28,
+          1.75
+        ],
+        "fov": 40
+      }
+    },
+    {
+      "id": "s3_sode",
+      "text": "シオンが、こちらの袖をきゅっと掴んだ。いつもより距離が近い。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            2.05
+          ],
+          "rotationY": -0.1,
+          "motion": "clasp_hands_front",
+          "expression": "komari",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "blush": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.45,
+          3.4
+        ],
+        "target": [
+          0.1,
+          1.25,
+          2.05
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s4_stop",
+      "text": "ふとシオンの足が止まる。視線の先には金魚すくいの水槽。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": -1.5708,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "blush": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.55,
+          -1.7
+        ],
+        "target": [
+          -1.8,
+          1.05,
+          -4.3
+        ],
+        "fov": 46
+      },
+      "autoNextSec": 3
+    },
+    {
+      "id": "s4_jiii",
+      "text": "水面を泳ぐ色鮮やかな金魚たちを、無言でじーーっと真剣に見つめている。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": -1.5708,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "effectText": "shiin"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.5,
+          -3.55
+        ],
+        "target": [
+          -2.7,
+          0.95,
+          -4.45
+        ],
+        "fov": 44
+      }
+    },
+    {
+      "id": "s4_haffu",
+      "text": "こちらが見ているのに気づき、ハッとして背筋を伸ばす。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "effectText": "biku"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s4_betsuni",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「べ、別に……こんなの子供がやるものでしょ……？」",
+      "voiceUrl": "/voices/festival_date/s4_betsuni.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.15,
+          "motion": "ardy_pout",
+          "expression": "komari",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "eyeWander": true,
+          "sweat": "fly4"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s4_yaru",
+      "text": "「一回やってみる？」と促すと、シオンは「あなたがそこまで言うなら……」と腕まくりをした。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "eyeWander": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.55,
+          -1.9
+        ],
+        "target": [
+          -1.6,
+          1.15,
+          -4.3
+        ],
+        "fov": 46
+      }
+    },
+    {
+      "id": "s5_tairyou",
+      "text": "袋いっぱいに金魚をすくい終えたシオン。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.0,
+          "motion": "clasp_hands_front",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "effectText": "kirakira"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      },
+      "screenTransition": "fade_black",
+      "autoNextSec": 3
+    },
+    {
+      "id": "s5_fufu",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「ふふっ……♪」",
+      "voiceUrl": "/voices/festival_date/s5_fufu.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.0,
+          "motion": "clasp_hands_front",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s5_kizuku",
+      "text": "こちらがそのニコニコ顔をじっと見つめているのに気づき、慌てて咳払いをして真顔に戻る。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "effectText": "biku"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s5_level",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……ごほん。さ、最近の祭りは……レベルが高いわね」",
+      "voiceUrl": "/voices/festival_date/s5_level.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "sweat": "jito"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s5_niyaniya",
+      "text": "微笑ましくてニヤニヤしていると、シオンが頬を赤らめて睨んでくる。",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "ardy_proud",
+          "expression": "angry",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "blush": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.5,
+          -1.9
+        ],
+        "target": [
+          -1.35,
+          1.2,
+          -4.2
+        ],
+        "fov": 44
+      }
+    },
+    {
+      "id": "s5_nanyo",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……何よ」",
+      "voiceUrl": "/voices/festival_date/s5_nanyo.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            -1.35,
+            0,
+            -4.2
+          ],
+          "rotationY": 0.6,
+          "motion": "ardy_proud",
+          "expression": "angry",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "anger": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.42,
+          -2.75
+        ],
+        "target": [
+          -1.35,
+          1.3,
+          -4.2
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s6_don",
+      "text": "川の向こうから、ドーン！と夜空を揺らす重低音。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "rotationY": 0.0,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward",
+          "blush": false,
+          "anger": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.2,
+          1.5,
+          2.4
+        ],
+        "target": [
+          0,
+          2.3,
+          -6
+        ],
+        "fov": 50
+      },
+      "effects": {
+        "fireworks": true
+      },
+      "seUrl": "/se/firework.mp3",
+      "bgm": "silence",
+      "autoNextSec": 3.2
+    },
+    {
+      "id": "s6_hanabi",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「あ、花火……」",
+      "voiceUrl": "/voices/festival_date/s6_hanabi.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "surprised",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.5,
+          0.6
+        ],
+        "target": [
+          0,
+          1.9,
+          -6
+        ],
+        "fov": 48
+      }
+    },
+    {
+      "id": "s6_kawazoi",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「あっち、川沿いに行けばもっとよく見えるはずよ。急ぎましょう」",
+      "voiceUrl": "/voices/festival_date/s6_kawazoi.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "rotationY": 0.2,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.15,
+          1.4,
+          0.1
+        ],
+        "target": [
+          0,
+          1.3,
+          -1.5
+        ],
+        "fov": 40
+      }
+    },
+    {
+      "id": "s7_saku",
+      "text": "川面の向こうに次々と大輪の花火が咲き乱れ、鮮やかな光がシオンの横顔を照らし出す。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -10.6
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          1.3,
+          1.25,
+          -11.7
+        ],
+        "target": [
+          0,
+          1.5,
+          -10.6
+        ],
+        "fov": 42
+      },
+      "bgm": "main_theme",
+      "screenTransition": "fade_black",
+      "autoNextSec": 4
+    },
+    {
+      "id": "s7_mugon",
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「…………」",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -10.6
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.9,
+          1.35,
+          -11.75
+        ],
+        "target": [
+          0,
+          1.45,
+          -10.6
+        ],
+        "fov": 38
+      }
+    },
+    {
+      "id": "s7_futari",
+      "text": "提灯の明かりと夜空の花火に包まれながら、静かな二人の時間が流れる。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -10.6
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.2,
+          -7.4
+        ],
+        "target": [
+          0,
+          2.6,
+          -16
+        ],
+        "fov": 52
+      },
+      "autoNextSec": 4.5
+    },
+    {
+      "id": "s8_saigo",
+      "text": "最後の特大花火が夜空いっぱいに消えていき、シオンがふとこちらを振り返る。",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -10.6
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "relaxed",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.45,
+          -8.5
+        ],
+        "target": [
+          0,
+          1.55,
+          -10.6
+        ],
+        "fov": 46
+      },
+      "autoNextSec": 3.5
+    },
+    {
+      "id": "s8_rainen",
+      "effects": {
+        "fireworks": false
+      },
+      "speaker": "シオン",
+      "speakerCharacterId": "shion",
+      "text": "「……来年も、誘われてもいいわよ？」",
+      "voiceUrl": "/voices/festival_date/s8_rainen.mp3",
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -10.6
+          ],
+          "rotationY": 0,
+          "motion": "clasp_hands_front",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "blush": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.1,
+          1.42,
+          -8.9
+        ],
+        "target": [
+          0,
+          1.35,
+          -10.6
+        ],
+        "fov": 40
+      },
+      "end": true
+    }
+  ]
+}

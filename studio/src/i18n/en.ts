@@ -249,7 +249,7 @@ export const en: Dictionary = {
     screenTransition: 'Screen transition',
     screenTransitions: { none: 'None', fade_black: 'Fade from black', eyelid_close: 'Close eyelids', eyelid_blink: 'Blink' },
     focusLines: 'Focus lines',
-    sceneEffects: { fireworks: 'Effect: fireworks' },
+    sceneEffects: { fireworks: 'Effect: fireworks', crowd: 'Effect: crowd' },
     effectOn: 'on',
     effectOff: 'stopped',
     effectStart: 'Start from this cut',

@@ -247,7 +247,7 @@ export const ja = {
     screenTransition: '画面の切り替え',
     screenTransitions: { none: 'なし', fade_black: '暗転', eyelid_close: '瞼を閉じる', eyelid_blink: 'まばたき' },
     focusLines: '集中線',
-    sceneEffects: { fireworks: '特殊効果：花火' },
+    sceneEffects: { fireworks: '特殊効果：花火', crowd: '特殊効果：群衆' },
     effectOn: '出ている',
     effectOff: '止まっている',
     effectStart: 'このカットから出す',

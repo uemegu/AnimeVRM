@@ -325,7 +325,7 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
 
   // Lights for the avatars (the set itself is unlit).
   for (const { position, color } of AVATAR_LIGHTS) {
-    const light = new THREE.PointLight(color, 6, 7, 2);
+    const light = new THREE.PointLight(color, 2.6, 6, 2);
     light.name = 'Stall light';
     light.position.set(...position);
     group.add(light);

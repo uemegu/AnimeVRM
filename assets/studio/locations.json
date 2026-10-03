@@ -488,13 +488,63 @@
         "character": {
           "eyeCare": true,
           "lightWrapBody": 1,
-          "highlightCap": 0.93
+          "highlightCap": 0.86
         },
         "backdrop": {
           "mode": "screen",
           "distance": 8,
           "height": 7.5,
           "offsetY": 1
+        },
+        "crowd": {
+          "models": [
+            "/models/mob/boy.vrm",
+            "/models/mob/classmate_kana.vrm",
+            "/models/mob/classmate_yui.vrm",
+            "/models/boy.vrm"
+          ],
+          "motions": [
+            "Standing Idle",
+            "mob_chat_gesture",
+            "mob_listen_nod",
+            "Idle"
+          ],
+          "areas": [
+            {
+              "min": [
+                -2.0,
+                -5.0
+              ],
+              "max": [
+                2.0,
+                1.0
+              ],
+              "count": 10
+            },
+            {
+              "min": [
+                -2.0,
+                1.0
+              ],
+              "max": [
+                2.0,
+                3.0
+              ],
+              "count": 2
+            },
+            {
+              "min": [
+                -6.0,
+                -10.8
+              ],
+              "max": [
+                6.0,
+                -7.6
+              ],
+              "count": 3
+            }
+          ],
+          "seed": 11
         }
       }
     },
