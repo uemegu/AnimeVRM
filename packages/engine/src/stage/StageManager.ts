@@ -18,6 +18,7 @@ import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
+import { Crowd } from './Crowd';
 import { resolveAssetUrl } from '../utils/path';
 import { ScreenEffects } from './ScreenEffects';
 import type { EffectPresetName } from '../effects/text/types';
@@ -168,6 +169,8 @@ export class StageManager {
   private loadedAvatars: Map<string, StageAvatar> = new Map();
   /** 登場中のキャラ（表示順） */
   private castIds: string[] = [];
+  /** 群衆（淡い色のモブ）。場所の stage.crowd で立つ範囲を決め、シーンの effects.crowd で出し入れする */
+  private crowd: Crowd;
   /** 3D の舞台に立てている 2D のデフォルメ画像（キー: 登場キャラの ID）。castIds には含めない */
   private sprites: Map<string, StageSpriteActor> = new Map();
   private castPositions: Map<string, number> = new Map();
@@ -273,6 +276,7 @@ export class StageManager {
     // 4. 空と雲の描画システム (SkyBackground)
     this.skyBackground = new SkyBackground(this.scene, { visible: true });
     this.scrollingBackground = new ScrollingBackground(this.scene, this.camera);
+    this.crowd = new Crowd(this.scene);
 
     // 5. ライト初期化
     this.directionalLight = new THREE.DirectionalLight('#ffffff', 3.2);
@@ -577,6 +581,7 @@ export class StageManager {
 
     this.applyEnvironment();
     this.applyKeyLight();
+    this.crowd.setLocation(locPreset.stage?.crowd);
 
     // 立ち位置・カメラは場所ごとの設定に合わせる
     this.applyCameraSettings();
@@ -788,6 +793,8 @@ export class StageManager {
   }
 
   private applyEffects(): void {
+    // 群衆は場所に設定があれば、止められていない限り出す
+    this.crowd.setEnabled(this.effects.crowd ?? true);
     this.environment?.object?.userData.setEffects?.(this.effects);
   }
 
@@ -1573,6 +1580,12 @@ export class StageManager {
       // 5. CinematicAnimeShader の時間更新
       this.cinematicAnimePass.uniforms['uTime'].value = elapsed;
 
+      // 群衆：登場キャラの上や手前に立つモブを隠す
+      this.crowd.update(this.camera, this.castIds.flatMap((id) => {
+        const root = this.loadedAvatars.get(id)?.vrm?.scene;
+        return root?.visible ? [root.position] : [];
+      }));
+
       // 6. 前髪の影用に髪の深度を描く
       this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
       // 逆光のリムライト（3D背景が scene.userData.characterRim に出す。前のフレームの値を使う）
@@ -1619,6 +1632,7 @@ export class StageManager {
     this.composer.renderTarget1?.dispose();
     this.composer.renderTarget2?.dispose();
     this.hairShadow.dispose();
+    this.crowd.dispose();
     this.characterMask.dispose();
     this.eyeMask.dispose();
     this.depthOfFieldPass.dispose();

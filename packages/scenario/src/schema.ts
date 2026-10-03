@@ -219,11 +219,13 @@ export type ScrollingBackgroundConfig = z.infer<typeof ScrollingBackgroundConfig
  * シーンの特殊効果。その効果を持つ場所でだけ働く（ない場所では何もしない）。
  * 効果を足すときは、ここに項目を足し、場所の3D背景（userData.setEffects）で受け取る
  */
-export const SCENE_EFFECT_IDS = ['fireworks'] as const;
+export const SCENE_EFFECT_IDS = ['fireworks', 'crowd'] as const;
 export type SceneEffectId = (typeof SCENE_EFFECT_IDS)[number];
 export const SceneEffects = z.strictObject({
   /** 花火（夏祭り）。止めると新しく上げず、上がっている花火は消えるまで残る。どこでも指定がなければ上がり続ける */
   fireworks: z.boolean().optional(),
+  /** 群衆（場所の stage.crowd があるところ）。淡い色のモブを並べる。どこでも指定がなければ出す */
+  crowd: z.boolean().optional(),
 });
 export type SceneEffects = z.infer<typeof SceneEffects>;
 

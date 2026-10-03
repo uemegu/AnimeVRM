@@ -37,4 +37,4 @@ export const WARM_POOLS: Pool[] = [
 const LIT_SPOTS = [[0, 0, 3.5], [0, -9.2, 10]];
 export const AVATAR_LIGHTS = STALLS
   .filter((stall) => LIT_SPOTS.some(([x, z, radius]) => Math.hypot(stall.x - x, stall.z - z) < radius))
-  .map((stall) => ({ position: [stall.x - stall.facing[0] * 0.2, STALL.headerBottom - 0.2, stall.z - stall.facing[1] * 0.2] as const, color: '#ffb066' }));
+  .map((stall) => ({ position: [stall.x - stall.facing[0] * 0.2, STALL.headerBottom - 0.2, stall.z - stall.facing[1] * 0.2] as const, color: '#ff9446' }));
