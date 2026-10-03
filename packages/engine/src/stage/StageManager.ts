@@ -17,7 +17,7 @@ import { OverlayPass } from '../postprocessing/OverlayPass';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
-import { StageAvatar } from './StageAvatar';
+import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { resolveAssetUrl } from '../utils/path';
 import { ScreenEffects } from './ScreenEffects';
 import type { EffectPresetName } from '../effects/text/types';
@@ -904,9 +904,60 @@ export class StageManager {
     // 現在の時間帯マテリアル設定を初期反映
     const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
     avatar.updateMaterialPreset(currentPreset.materials, currentPreset.outline);
+    this.warmUpAvatar(avatar);
 
     this.loadedAvatars.set(id, avatar);
     return avatar;
+  }
+
+  /**
+   * 不可視のままだと three.js はシェーダーのコンパイルもテクスチャのGPUアップロードもしないため、
+   * 初登場の瞬間に処理が走って表示が遅れる。非表示のまま先に済ませておく
+   * （同期処理の中で可視化→戻すので、1フレームも描画されない）
+   */
+  private warmUpAvatar(avatar: StageAvatar): void {
+    const root = avatar.vrm?.scene;
+    if (!root) return;
+    const wasVisible = root.visible;
+    root.visible = true;
+    try {
+      this.renderer.compile(this.scene, this.camera);
+      root.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (const material of materials) {
+          for (const value of Object.values(material)) {
+            if (value && (value as THREE.Texture).isTexture) this.renderer.initTexture(value as THREE.Texture);
+          }
+        }
+      });
+    } catch (err) {
+      console.warn(`Failed to warm up avatar ${avatar.id}:`, err);
+    } finally {
+      root.visible = wasVisible;
+    }
+  }
+
+  /**
+   * 後で登場するキャラのモデルとモーションを、表示せずに先に読み込んで準備しておく。
+   * すでに同じキャラが別のモデルで読み込み済みなら（入れ替えになるので）触らない
+   */
+  public async prewarmAvatars(items: { id: string; modelUrl: string; motions?: string[] }[]): Promise<void> {
+    for (const item of items) {
+      if (this.isDisposed) return;
+      const loaded = this.loadedAvatars.get(item.id);
+      if (loaded && loaded.modelUrl !== item.modelUrl) continue;
+      try {
+        const avatar = await this.loadAvatar(item.id, item.modelUrl);
+        if (!avatar.vrm) continue;
+        for (const motion of item.motions ?? []) {
+          await loadMixamoAnimation(`/animations/${motion}.fbx`, avatar.vrm).catch(() => undefined);
+        }
+      } catch (err) {
+        console.warn(`Failed to prewarm avatar ${item.id}:`, err);
+      }
+    }
   }
 
   /**

@@ -16,6 +16,8 @@ export interface StageViewProps {
   locationId: string;
   /** 登場キャラ（位置・モデル・表情・モーション） */
   cast: StageCastMember[];
+  /** 後のシーンで登場するキャラ（表示せずに先に読み込む） */
+  prewarm?: { id: string; modelUrl: string; motions?: string[] }[];
   cameraShot: CameraShot;
   /** 話者（カメラの寄り先・口パク対象） */
   speakerId?: string | null;
@@ -33,6 +35,7 @@ export const StageView: React.FC<StageViewProps> = ({
   timeOfDay,
   locationId,
   cast,
+  prewarm = [],
   cameraShot,
   speakerId = null,
   scrolling = null,
@@ -104,6 +107,13 @@ export const StageView: React.FC<StageViewProps> = ({
     stageManagerRef.current?.setCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  // 後のシーンで登場するキャラを、表示せずに先に読み込んで描画の準備まで済ませる
+  const prewarmKey = JSON.stringify(prewarm);
+  useEffect(() => {
+    if (prewarm.length > 0) void stageManagerRef.current?.prewarmAvatars(prewarm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prewarmKey]);
 
   // 特殊効果（シナリオの「あ、花火」から花火を上げるなど。内容が同じなら何もしない）
   const effectsKey = JSON.stringify(effects ?? {});

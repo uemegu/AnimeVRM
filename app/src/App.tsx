@@ -11,6 +11,7 @@ import { ShareService } from './services/share/ShareService';
 import {
   resolveCameraShot,
   resolveCast,
+  scenarioPrewarmAvatars,
   resolveLocationId,
   resolveScrollingBackground,
   resolveTimeOfDay,
@@ -217,6 +218,7 @@ export const App: React.FC = () => {
   });
   const activeLocationName = getLocationName(activeLocationId, lang);
   const cast = useMemo(() => resolveCast(stage, gameState.phase), [stage, gameState.phase]);
+  const prewarm = useMemo(() => scenarioPrewarmAvatars(player.scenario, gameState.phase), [player.scenario, gameState.phase]);
   const cameraShot = resolveCameraShot(currentScene, cast);
   const scrolling = useMemo(() => resolveScrollingBackground(stage, activeLocationId), [stage, activeLocationId]);
 
@@ -692,6 +694,7 @@ export const App: React.FC = () => {
               activeTimeOfDay={activeTimeOfDay}
               activeLocationId={activeLocationId}
               cast={cast}
+              prewarm={prewarm}
               cameraShot={cameraShot}
               scrolling={scrolling}
               effects={stage.effects}
