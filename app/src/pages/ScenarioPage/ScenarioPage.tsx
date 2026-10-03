@@ -19,6 +19,7 @@ export interface ScenarioPageProps {
   activeTimeOfDay: TimeOfDayId;
   activeLocationId: string;
   cast: StageCastMember[];
+  prewarm?: { id: string; modelUrl: string; motions?: string[] }[];
   cameraShot: CameraShot;
   scrolling: ScrollingBackgroundSettings | null;
   effects?: SceneEffects;
@@ -34,6 +35,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   activeTimeOfDay,
   activeLocationId,
   cast,
+  prewarm,
   cameraShot,
   scrolling,
   effects,
@@ -51,6 +53,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           timeOfDay={activeTimeOfDay}
           locationId={activeLocationId}
           cast={cast}
+          prewarm={prewarm}
           cameraShot={cameraShot}
           scrolling={scrolling}
           effects={effects}

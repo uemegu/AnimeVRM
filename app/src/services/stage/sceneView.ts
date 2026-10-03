@@ -11,7 +11,7 @@ import {
   type StageState,
 } from '@anime-vrm/scenario';
 import { DayPhase } from '../../types/game';
-import { ScenarioMeta } from '../../types/scenario';
+import { ScenarioMeta, ScenarioPackage } from '../../types/scenario';
 import { TimeOfDayId } from '../../types/visual';
 import { CHARACTERS, CharacterMaster } from '../../data/characters';
 import { LOOPING_MOTIONS } from '../../data/motions';
@@ -62,6 +62,28 @@ export function outfitModelUrl(character: CharacterMaster | undefined, phase: Da
   if (phase === 'holiday_action') return character?.privateModelUrl ?? character?.defaultModelUrl;
   if (phase === 'morning') return character?.commuteModelUrl ?? character?.defaultModelUrl;
   return character?.defaultModelUrl;
+}
+
+/** シナリオ全体に登場する 3D キャラ（モデルと使うモーション）。表示前の先読み用 */
+export function scenarioPrewarmAvatars(
+  scenario: ScenarioPackage | null | undefined,
+  phase: DayPhase
+): { id: string; modelUrl: string; motions: string[] }[] {
+  const byId = new Map<string, { id: string; modelUrl: string; motions: Set<string> }>();
+  for (const scene of scenario?.scenes ?? []) {
+    for (const [id, avatar] of Object.entries(scene.avatars ?? {})) {
+      if ((avatar as { sprite?: unknown }).sprite) continue;
+      const modelUrl = avatar.modelUrl ?? outfitModelUrl(CHARACTERS[avatar.characterId ?? id], phase);
+      if (!modelUrl) continue;
+      const entry = byId.get(id);
+      // 同じキャラが別モデルに替わる場合は、最初に出る方だけ先読みする
+      if (entry && entry.modelUrl !== modelUrl) continue;
+      const item = entry ?? { id, modelUrl, motions: new Set<string>() };
+      if (avatar.motion) item.motions.add(avatar.motion);
+      byId.set(id, item);
+    }
+  }
+  return [...byId.values()].map((item) => ({ ...item, motions: [...item.motions] }));
 }
 
 /**
