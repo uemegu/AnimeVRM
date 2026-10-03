@@ -3,7 +3,7 @@
   "bgm": {
     "main_theme": {
       "url": "/bgm/thema_music.mp3",
-      "volumeScale": 1.0,
+      "volumeScale": 1,
       "title": {
         "ja": "メインテーマ",
         "en": "Main Theme"
@@ -11,7 +11,7 @@
     },
     "main_bgm": {
       "url": "/bgm/main_bgm.mp3",
-      "volumeScale": 1.0,
+      "volumeScale": 1,
       "title": {
         "ja": "日常（メインBGM）",
         "en": "Daily Life (Main BGM)"
@@ -55,6 +55,14 @@
       "title": {
         "ja": "全力疾走",
         "en": "Full Sprint"
+      }
+    },
+    "tuesday_afternoon_hijinks": {
+      "url": "/bgm/Tuesday_Afternoon_Hijinks.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "ありゃりゃ",
+        "en": "aryarya"
       }
     }
   }
