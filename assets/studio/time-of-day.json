@@ -484,12 +484,12 @@
     "night": {
       "id": "night",
       "name": "夜",
-      "description": "静寂の夜空、淡い月明かり、深いコントラスト",
+      "description": "アニメ映画の夜。青紫の影、灯りのにじみ、フィルムの粒子",
       "lighting": {
         "hairRingTint": "#b8c4ff",
         "directional": {
-          "color": "#fffcf5",
-          "intensity": 2.7,
+          "color": "#dfe4ff",
+          "intensity": 2.0,
           "position": {
             "x": 0.5,
             "y": 2,
@@ -497,8 +497,8 @@
           }
         },
         "ambient": {
-          "color": "#f0f1ff",
-          "intensity": 2
+          "color": "#c4c8ff",
+          "intensity": 1.3
         },
         "sunShafts": {
           "enabled": false,
@@ -538,10 +538,10 @@
       },
       "postProcessing": {
         "bloom": {
-          "enabled": false,
-          "strength": 0.05,
-          "radius": 0.12,
-          "threshold": 0.9
+          "enabled": true,
+          "strength": 0.25,
+          "radius": 0.5,
+          "threshold": 0.82
         },
         "cinematic": {
           "diffusion": {
@@ -551,9 +551,9 @@
           },
           "colorGrading": {
             "enabled": true,
-            "shadowTint": "#000000",
-            "highlightTint": "#635e87",
-            "strength": 0.5,
+            "shadowTint": "#1c1646",
+            "highlightTint": "#ffd9b8",
+            "strength": 0.45,
             "contrast": 0.09,
             "gamma": 0.9
           },
@@ -565,7 +565,7 @@
           "vignette": {
             "enabled": true,
             "offset": 1.15,
-            "darkness": 0.15,
+            "darkness": 0.25,
             "color": "#101220"
           },
           "chromaticAberration": {
@@ -575,6 +575,11 @@
           "sharpen": {
             "enabled": false,
             "amount": 0.2
+          },
+          "filmGrain": {
+            "enabled": true,
+            "strength": 0.035,
+            "size": 1.6
           }
         }
       },

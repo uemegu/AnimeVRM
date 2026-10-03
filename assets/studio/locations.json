@@ -467,6 +467,11 @@
             "aperture": 0.02,
             "maxBlur": 0.008,
             "sharpRange": 3
+          },
+          "bloom": {
+            "strength": 0.38,
+            "radius": 0.55,
+            "threshold": 0.78
           }
         },
         "backdrop": {

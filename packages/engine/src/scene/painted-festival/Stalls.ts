@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { STALL, STALL_BANDS, STALL_COLORS, STALLS, STREET_HALF, type StallKind } from './layout';
+import { STALL, STALL_BANDS, STALL_COLORS, STALLS, type StallKind } from './layout';
 import { festivalUniforms } from './lights';
 
 /**
@@ -114,6 +114,39 @@ export function lanternGeometry(): THREE.BufferGeometry {
   return merged;
 }
 
+/**
+ * Glowing paper of a lantern: brightest where the paper faces the viewer (the light shines through
+ * it), darker and deeper in colour towards the silhouette, so it reads as a lit paper ball rather
+ * than a flat shape. Works for instanced lanterns too (instance colours).
+ */
+export function lanternMaterial(color?: THREE.Color): THREE.MeshBasicMaterial {
+  const material = new THREE.MeshBasicMaterial({ vertexColors: true, color: color ?? new THREE.Color(1, 1, 1), toneMapped: false, fog: false });
+  material.name = 'Lantern';
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace('void main() {', 'varying vec3 vLanternNormal;\nvarying vec3 vLanternView;\nvoid main() {')
+      .replace('#include <project_vertex>', [
+        '#include <project_vertex>',
+        'vec3 lanternNormal = normal;',
+        '#ifdef USE_INSTANCING',
+        'lanternNormal = mat3(instanceMatrix) * lanternNormal;',
+        '#endif',
+        'vLanternNormal = normalize(normalMatrix * lanternNormal);',
+        'vLanternView = -mvPosition.xyz;',
+      ].join('\n'));
+    shader.fragmentShader = shader.fragmentShader
+      .replace('void main() {', 'varying vec3 vLanternNormal;\nvarying vec3 vLanternView;\nvoid main() {')
+      .replace('#include <opaque_fragment>', [
+        'float facing = abs(dot(normalize(vLanternNormal), normalize(vLanternView)));',
+        'vec3 deep = diffuseColor.rgb * vec3(0.75, 0.32, 0.2);',
+        'outgoingLight = mix(deep, diffuseColor.rgb * 1.25, pow(facing, 1.2)) + vec3(1.0, 0.8, 0.55) * pow(facing, 6.0) * 0.6 * step(0.2, diffuseColor.r);',
+        '#include <opaque_fragment>',
+      ].join('\n'));
+  };
+  material.customProgramCacheKey = () => 'festival-lantern';
+  return material;
+}
+
 type StallParts = { group: THREE.Group; dispose: () => void };
 
 export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallParts {
@@ -128,6 +161,7 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
   const roofGeometry = keep(new THREE.PlaneGeometry(W + 0.12, roofLength));
   const valanceGeometry = keep(new THREE.PlaneGeometry(W + 0.12, 0.22));
   const sideGeometry = keep(new THREE.PlaneGeometry(D, STALL.counterHeight));
+  const rearGeometry = keep(new THREE.PlaneGeometry(W, STALL.roofBack));
   const lowerBackGeometry = keep(new THREE.BoxGeometry(W, STALL.counterHeight, 0.4));
   const floorGeometry = keep(new THREE.PlaneGeometry(W, D));
   const postGeometry = keep(new THREE.BoxGeometry(STALL.postSize, STALL.roofFront, STALL.postSize));
@@ -136,10 +170,12 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
 
   const wood = keep(flashMaterial({ color: '#4a3524' }, 0.6));
   const darkWood = keep(flashMaterial({ color: '#2b1f17' }, 0.3));
+  // The canvas at the back of every stall: plain dark cloth, so the backs of the rows recede.
+  const rear = keep(flashMaterial({ color: '#1b1e30', side: THREE.DoubleSide }, 0.4));
   const counterTop = keep(flashMaterial({ color: '#8a6644' }, 0.3));
   const floor = keep(new THREE.MeshBasicMaterial({ color: '#3a2a20', toneMapped: false, fog: false }));
   const bulb = keep(new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffd9a0').multiplyScalar(3), toneMapped: false, fog: false }));
-  const lanternMaterial = keep(new THREE.MeshBasicMaterial({ vertexColors: true, color: new THREE.Color('#ff5a3c').multiplyScalar(1.6), toneMapped: false, fog: false }));
+  const redLantern = keep(lanternMaterial(new THREE.Color('#ff5a3c').multiplyScalar(1.6)));
 
   const perKind = new Map<StallKind, { headerGeometry: THREE.BufferGeometry; backGeometry: THREE.BufferGeometry; counterFrontGeometry: THREE.BufferGeometry; header: THREE.Material; back: THREE.Material; counterFront: THREE.Material; roof: THREE.Material; valance: THREE.Material; side: THREE.Material }>();
   for (const kind of Object.keys(fronts) as StallKind[]) {
@@ -168,9 +204,9 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
     const m = perKind.get(stall.kind)!;
     const s = new THREE.Group();
     s.name = `Stall | ${stall.kind}`;
-    // Front faces the middle of the street.
-    s.rotation.y = stall.side < 0 ? Math.PI / 2 : -Math.PI / 2;
-    s.position.set(stall.side * (STREET_HALF + D / 2), 0, stall.z);
+    // The counter front on (x, z), facing the street or the river.
+    s.rotation.y = Math.atan2(stall.facing[0], stall.facing[1]);
+    s.position.set(stall.x - stall.facing[0] * D / 2, 0, stall.z - stall.facing[1] * D / 2);
 
     const add = (geometry: THREE.BufferGeometry, material: THREE.Material | THREE.Material[], x: number, y: number, z: number, rx = 0, ry = 0) => {
       const mesh = new THREE.Mesh(geometry, material);
@@ -183,6 +219,8 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
     add(m.headerGeometry, m.header, 0, (STALL.headerBottom + H) / 2, front + 0.02);
     add(m.backGeometry, m.back, 0, (STALL.counterHeight + STALL.headerBottom) / 2, -front + 0.4);
     add(lowerBackGeometry, darkWood, 0, STALL.counterHeight / 2, -front + 0.2);
+    // The canvas at the back, seen from behind the stall.
+    add(rearGeometry, rear, 0, STALL.roofBack / 2, -front, 0, Math.PI);
     add(m.counterFrontGeometry, m.counterFront, 0, STALL.counterHeight / 2, front + 0.001);
     add(counterBodyGeometry, [darkWood, darkWood, counterTop, darkWood, darkWood, darkWood], 0, STALL.counterHeight / 2, front - STALL.counterDepth / 2);
     add(floorGeometry, floor, 0, 0.005, 0, -Math.PI / 2);
@@ -195,10 +233,11 @@ export function createStalls(fronts: Record<StallKind, THREE.Texture>): StallPar
     add(roofGeometry, m.roof, 0, (STALL.roofBack + STALL.roofFront) / 2, STALL.overhang / 2, -Math.PI / 2 + roofTilt);
     add(valanceGeometry, m.valance, 0, STALL.roofFront - 0.11, front + STALL.overhang);
     // Bare bulbs under the roof, and a pair of lanterns at the front corners.
-    for (const bx of [-0.6, 0.6]) add(bulbGeometry, bulb, bx, STALL.headerBottom - 0.15, front - 0.5);
+    for (const bx of [-0.6, 0.6]) add(bulbGeometry, bulb, bx, STALL.headerBottom - 0.15, front - 0.5).name = 'Bulb';
     for (const lx of [-1, 1]) {
-      const l = add(lantern, lanternMaterial, lx * (W / 2 - 0.15), STALL.headerBottom - 0.35, front + 0.25);
+      const l = add(lantern, redLantern, lx * (W / 2 - 0.15), STALL.headerBottom - 0.35, front + 0.25);
       l.scale.setScalar(0.42);
+      l.name = 'Stall lantern';
     }
     group.add(s);
   }

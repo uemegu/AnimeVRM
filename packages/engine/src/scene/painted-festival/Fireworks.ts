@@ -17,23 +17,29 @@ import { festivalUniforms } from './lights';
  * no per-frame hook.
  */
 const SLOTS = 8;
-const PARTICLES = 150;
-const TRAIL = 7;
+const PARTICLES = 220;
+const TRAIL = 12;
 const RISE_POINTS = 18;
 const RISE_TIME = 1.25;
 
-/** Kinds: 0 chrysanthemum (sphere, long trails), 1 peony (sphere, short), 2 ring, 3 willow (gold, drooping), 4 colour change. */
-type Shell = { kind: number; speed: number; life: number; gravity: number; colors: [THREE.Color, THREE.Color]; size: number };
+/**
+ * Kinds (Japanese shells): 0 kiku (chrysanthemum: long tails that burn orange, the stars change
+ * colour), 1 botan (peony: bright stars, short tails), 2 wa (a ring, tilted), 3 yanagi (willow: gold
+ * stars drooping on long glittering tails), 4 yaeshin (double sphere: an inner pistil of another
+ * colour).
+ */
+type Shell = { kind: number; speed: number; life: number; gravity: number; colors: [THREE.Color, THREE.Color]; size: number; tilt: THREE.Vector3 };
 
-const PALETTE = ['#ff4a5a', '#ffb347', '#ffe066', '#6dff8a', '#5ab8ff', '#c77dff', '#ff7ad9', '#ffffff'].map((c) => new THREE.Color(c));
-const GOLD = new THREE.Color('#ffc46b');
+const PALETTE = ['#ff3d5a', '#ff9a3c', '#ffe066', '#5dff9a', '#4aa8ff', '#b77dff', '#ff6ad5', '#f4f7ff', '#4ff0ff'].map((c) => new THREE.Color(c));
+const GOLD = new THREE.Color('#ffbf5e');
 
 const vertexShader = /* glsl */ `
   #define SLOTS ${SLOTS}
+  #define TRAIL ${TRAIL.toFixed(1)}
   uniform float uTime, uScale, uLaunchY, uRiseTime;
   uniform vec4 uSlotA[SLOTS]; // centre xyz, burst time
   uniform vec4 uSlotB[SLOTS]; // speed, life, kind, gravity
-  uniform vec4 uSlotC[SLOTS]; // size
+  uniform vec4 uSlotC[SLOTS]; // ring tilt (normal) xyz, size
   uniform vec3 uColorA[SLOTS], uColorB[SLOTS];
   attribute vec3 aDir;
   attribute vec4 aInfo; // slot, trail index, seed, kind of point (0 star, 1 rise, 2 glow)
@@ -41,52 +47,64 @@ const vertexShader = /* glsl */ `
   varying float vSoft;
 
   void hide() { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); gl_PointSize = 0.0; vColor = vec3(0.0); }
+  float rand(float x) { return fract(sin(x * 91.7) * 43758.5453); }
 
   void main() {
     int slot = int(aInfo.x);
-    vec4 a = uSlotA[slot], b = uSlotB[slot];
+    vec4 a = uSlotA[slot], b = uSlotB[slot], c = uSlotC[slot];
     float trail = aInfo.y, seed = aInfo.z, point = aInfo.w;
     float age = uTime - a.w;
-    float life = b.y, kind = b.z;
+    float life = b.y, kind = floor(b.z + 0.5);
     vec3 world;
-    float size, bright;
+    float size;
     vSoft = 0.0;
     if (point > 1.5) {
-      // Glow lighting the smoke around the burst.
+      // The flash of the bursting charge, then a glow lighting the smoke around the burst.
       if (age < 0.0 || age > life) { hide(); return; }
       world = a.xyz;
-      size = b.x * 2.6;
-      bright = 0.16 * exp(-age * 1.6);
-      vColor = uColorA[slot] * bright;
+      size = b.x * 2.4;
+      vColor = vec3(1.0, 0.95, 0.85) * 0.22 * exp(-age * 12.0) + uColorA[slot] * 0.06 * exp(-age * 1.3);
       vSoft = 1.0;
     } else if (point > 0.5) {
       // Rising spark with a short tail of embers.
-      float t = age + uRiseTime - trail * 0.035;
+      float t = age + uRiseTime - trail * 0.03;
       if (t < 0.0 || t > uRiseTime || age > 0.0) { hide(); return; }
       float k = t / uRiseTime;
       float rise = 1.0 - (1.0 - k) * (1.0 - k);
       world = vec3(a.x + sin(t * 9.0 + seed * 6.0) * 0.15, mix(uLaunchY, a.y, rise), a.z);
-      size = mix(0.45, 0.2, trail / ${RISE_POINTS.toFixed(1)});
-      bright = (1.0 - trail / ${RISE_POINTS.toFixed(1)}) * 1.4;
-      vColor = vec3(1.0, 0.72, 0.4) * bright;
+      float f = trail / ${RISE_POINTS.toFixed(1)};
+      size = mix(0.4, 0.15, f);
+      vColor = vec3(1.0, 0.68, 0.35) * (1.0 - f) * 1.6;
     } else {
-      float t = age - trail * (kind > 2.5 && kind < 3.5 ? 0.07 : 0.04);
+      bool willow = kind == 3.0;
+      float spacing = kind == 0.0 ? 0.05 : kind == 1.0 ? 0.014 : willow ? 0.1 : 0.03;
+      float t = age - trail * spacing;
       if (t < 0.0 || t > life) { hide(); return; }
       vec3 dir = aDir;
-      if (kind > 1.5 && kind < 2.5) dir = normalize(vec3(dir.x, dir.y * 0.08, dir.z) + vec3(0.0, 0.0, 0.0001));
-      float drag = kind > 2.5 && kind < 3.5 ? 1.2 : 2.4;
-      float speed = b.x * (0.85 + 0.15 * fract(seed * 7.13));
+      float speed = b.x * (0.92 + 0.08 * rand(seed));
+      bool pistil = kind == 4.0 && seed < 0.4;
+      if (kind == 2.0) dir = normalize(dir - c.xyz * dot(dir, c.xyz) * 0.94);
+      if (pistil) speed *= 0.5;
+      float drag = willow ? 1.0 : 2.2;
       world = a.xyz + dir * speed * (1.0 - exp(-drag * t)) / drag;
       world.y -= 0.5 * b.w * t * t;
       float fade = 1.0 - t / life;
-      bright = pow(fade, 1.4) * (1.0 - trail / ${TRAIL.toFixed(1)});
-      // Twinkle as the stars burn out.
-      bright *= mix(1.0, step(0.5, fract(sin(seed * 91.7 + floor(uTime * 18.0)) * 43758.5)), smoothstep(0.55, 0.9, t / life));
-      // A white flash at the very start.
-      bright *= 1.0 + 2.5 * exp(-t * 14.0);
-      vec3 color = kind > 3.5 ? mix(uColorA[slot], uColorB[slot], step(0.45, t / life)) : mix(uColorA[slot], uColorB[slot], step(0.5, seed));
-      vColor = color * bright * 2.2;
-      size = uSlotC[slot].x * (trail < 0.5 ? 1.0 : 0.7);
+      float tail = trail / TRAIL;
+      float bright = pow(fade, willow ? 0.8 : 1.3) * pow(1.0 - tail, 1.6);
+      // Glitter as the stars burn out (all through a willow's fall).
+      float glitter = step(0.45, rand(seed * 13.1 + trail + floor(uTime * 20.0)));
+      bright *= mix(1.0, glitter * 1.6, willow ? smoothstep(0.15, 0.4, t / life) : smoothstep(0.6, 0.9, t / life));
+      // White-hot just after the burst. At the very start every star and its tail sit on the same
+      // spot: fade them in, or the additive pile-up overflows the half-float target (a black dot).
+      bright *= (1.0 + 1.5 * exp(-t * 12.0)) * smoothstep(0.0, 0.06, t);
+      vec3 head = pistil ? uColorB[slot] : kind == 0.0 ? mix(uColorA[slot], uColorB[slot], smoothstep(0.42, 0.5, t / life)) : uColorA[slot];
+      // Tails burn charcoal orange, cooling towards their end.
+      vec3 ember = vec3(1.0, 0.5, 0.18);
+      vec3 color = mix(head, ember, (kind == 0.0 || willow) ? smoothstep(0.0, 0.5, tail) : tail * 0.3);
+      color = mix(color, vec3(1.0), 0.2 * exp(-t * 6.0));
+      // Peony stars are fat: while they are still bunched up they would blow out into one blob.
+      vColor = color * bright * (kind == 1.0 ? 1.8 : 2.6) * mix(0.35, 1.0, smoothstep(0.0, 0.35, t));
+      size = c.w * mix(1.0, 0.45, tail) * (pistil ? 0.8 : 1.0);
     }
     vec4 mv = viewMatrix * vec4(world, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -101,9 +119,11 @@ const fragmentShader = /* glsl */ `
     vec2 c = gl_PointCoord * 2.0 - 1.0;
     float r2 = dot(c, c);
     if (r2 > 1.0) discard;
-    // A hot core with a soft halo (the stage may run without bloom at night).
-    float core = mix(exp(-r2 * 14.0) + 0.22 * exp(-r2 * 2.5), (1.0 - r2) * (1.0 - r2), vSoft);
-    gl_FragColor = vec4(vColor * core, 1.0);
+    // A hot white-ish core inside a soft coloured halo.
+    float halo = exp(-r2 * 3.0) * 0.25;
+    float core = exp(-r2 * 16.0);
+    vec3 star = vColor * (core + halo) + vec3(dot(vColor, vec3(0.33))) * core * 0.35;
+    gl_FragColor = vec4(min(mix(star, vColor * (1.0 - r2) * (1.0 - r2), vSoft), vec3(16.0)), 1.0);
     #include <colorspace_fragment>
   }
 `;
@@ -164,7 +184,7 @@ export class Fireworks {
         uRiseTime: { value: RISE_TIME },
         uSlotA: { value: Array.from({ length: SLOTS }, () => new THREE.Vector4(0, 0, 0, -100)) },
         uSlotB: { value: Array.from({ length: SLOTS }, () => new THREE.Vector4(1, 1, 0, 0)) },
-        uSlotC: { value: Array.from({ length: SLOTS }, () => new THREE.Vector4(0.5, 0, 0, 0)) },
+        uSlotC: { value: Array.from({ length: SLOTS }, () => new THREE.Vector4(0, 1, 0, 0.5)) },
         uColorA: { value: Array.from({ length: SLOTS }, () => new THREE.Color()) },
         uColorB: { value: Array.from({ length: SLOTS }, () => new THREE.Color()) },
       },
@@ -184,7 +204,7 @@ export class Fireworks {
     };
     this.light.name = 'Fireworks light';
     this.light.target.position.set(0, 1, 0);
-    for (let i = 0; i < SLOTS; i++) this.shells.push({ kind: 0, speed: 1, life: 1, gravity: 0, colors: [new THREE.Color(), new THREE.Color()], size: 0.5, burst: -100, center: new THREE.Vector3() });
+    for (let i = 0; i < SLOTS; i++) this.shells.push({ kind: 0, speed: 1, life: 1, gravity: 0, colors: [new THREE.Color(), new THREE.Color()], size: 0.5, tilt: new THREE.Vector3(0, 0, 1), burst: -100, center: new THREE.Vector3() });
   }
 
   private random(): number {
@@ -204,21 +224,25 @@ export class Fireworks {
       THREE.MathUtils.lerp(FIREWORKS.height[0], FIREWORKS.height[1], rnd()),
       THREE.MathUtils.lerp(FIREWORKS.z[0], FIREWORKS.z[1], rnd()),
     );
-    const big = 0.7 + rnd() * 0.5;
-    shell.speed = (shell.kind === 3 ? 19 : 25) * big;
-    shell.life = shell.kind === 3 ? 3.4 : shell.kind === 1 ? 1.7 : 2.3;
-    shell.gravity = shell.kind === 3 ? 3.2 : 1.6;
-    shell.size = (shell.kind === 3 ? 0.8 : 1.0) * big;
+    const big = 0.75 + rnd() * 0.5;
+    const willow = shell.kind === 3;
+    shell.speed = (willow ? 18 : 26) * big;
+    shell.life = willow ? 4.2 : shell.kind === 1 ? 2.0 : 2.6;
+    shell.gravity = willow ? 2.6 : 1.4;
+    shell.size = (willow ? 0.75 : shell.kind === 1 ? 1.0 : 0.95) * big;
     const a = PALETTE[Math.floor(rnd() * PALETTE.length)];
-    const b = PALETTE[Math.floor(rnd() * PALETTE.length)];
-    shell.colors[0].copy(shell.kind === 3 ? GOLD : a);
-    shell.colors[1].copy(shell.kind === 3 ? GOLD : shell.kind === 0 ? a : b);
+    let b = PALETTE[Math.floor(rnd() * PALETTE.length)];
+    if (b === a) b = PALETTE[(PALETTE.indexOf(a) + 3) % PALETTE.length];
+    shell.colors[0].copy(willow ? GOLD : a);
+    shell.colors[1].copy(willow ? GOLD : b);
+    // Rings face the viewer, tilted a little.
+    shell.tilt.set((rnd() - 0.5) * 0.9, (rnd() - 0.5) * 0.9, 1).normalize();
     shell.burst = now + RISE_TIME;
 
     const u = this.material.uniforms;
     u.uSlotA.value[free].set(shell.center.x, shell.center.y, shell.center.z, shell.burst);
     u.uSlotB.value[free].set(shell.speed, shell.life, shell.kind, shell.gravity);
-    u.uSlotC.value[free].x = shell.size;
+    u.uSlotC.value[free].set(shell.tilt.x, shell.tilt.y, shell.tilt.z, shell.size);
     u.uColorA.value[free].copy(shell.colors[0]);
     u.uColorB.value[free].copy(shell.colors[1]);
   }
@@ -245,7 +269,7 @@ export class Fireworks {
     let total = 0;
     this.shells.forEach((shell, i) => {
       const t = now - shell.burst;
-      const w = t < 0 || t > shell.life ? 0 : Math.exp(-t * 1.6) * (0.6 + 0.4 * Math.min(1, t * 20)) * shell.speed / 25;
+      const w = t < 0 || t > shell.life ? 0 : Math.exp(-t * 1.6) * (0.6 + 0.4 * Math.min(1, t * 20)) * shell.speed / 26;
       this.uniforms.uBursts.value[i].set(shell.center.x, shell.center.y, shell.center.z, w);
       this.uniforms.uBurstColors.value[i].copy(shell.colors[0]).lerp(shell.colors[1], 0.5);
       if (w <= 0) return;
@@ -256,6 +280,9 @@ export class Fireworks {
       total += w;
     });
     flash.multiplyScalar(0.18);
+    // Several bursts at once must not wash the whole night out.
+    const peak = Math.max(flash.r, flash.g, flash.b);
+    if (peak > 0.11) flash.multiplyScalar(0.11 / peak);
     if (total > 0) {
       this.light.color.copy(flash).multiplyScalar(1 / Math.max(flash.r, flash.g, flash.b, 1e-4));
       this.light.position.copy(direction.normalize()).multiplyScalar(10).add(this.light.target.position);

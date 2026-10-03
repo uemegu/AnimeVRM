@@ -459,10 +459,7 @@ export class StageManager {
     this.skyBackground.setTimeOfDay(todId);
 
     // 4. ブルーム
-    this.bloomPass.enabled = preset.postProcessing.bloom.enabled;
-    this.bloomPass.strength = preset.postProcessing.bloom.strength;
-    this.bloomPass.radius = preset.postProcessing.bloom.radius;
-    this.bloomPass.threshold = preset.postProcessing.bloom.threshold;
+    this.applyBloom();
 
     // 5. ゴッドレイ（サンシャフト）
     const sunShafts = preset.lighting.sunShafts;
@@ -512,6 +509,10 @@ export class StageManager {
 
     u.uSharpenEnabled.value = c.sharpen.enabled ? 1.0 : 0.0;
     u.uSharpenAmount.value = c.sharpen.amount;
+
+    u.uFilmGrainEnabled.value = c.filmGrain?.enabled ? 1.0 : 0.0;
+    u.uFilmGrainStrength.value = c.filmGrain?.strength ?? 0;
+    u.uFilmGrainSize.value = c.filmGrain?.size ?? 1.5;
 
     // 7. フォグ
     if (preset.fog.enabled) {
@@ -709,6 +710,16 @@ export class StageManager {
     }
   }
 
+  /** ブルームは場所のカメラ設定にあればそれを、なければ時間帯の設定を使う */
+  private applyBloom(): void {
+    const location = this.locationStage?.camera?.bloom;
+    const bloom = location ? { enabled: true, ...location } : (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).postProcessing.bloom;
+    this.bloomPass.enabled = bloom.enabled;
+    this.bloomPass.strength = bloom.strength;
+    this.bloomPass.radius = bloom.radius;
+    this.bloomPass.threshold = bloom.threshold;
+  }
+
   /** 背景ぼかしは場所のカメラ設定にあるときだけ（重いので品質 low では切る） */
   private applyDepthOfField(): void {
     const settings = this.locationStage?.camera?.depthOfField;
@@ -750,6 +761,7 @@ export class StageManager {
 
   private applyCameraSettings(): void {
     this.applyDepthOfField();
+    this.applyBloom();
     const fov = this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;
