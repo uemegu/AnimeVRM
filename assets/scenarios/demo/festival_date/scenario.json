@@ -20,12 +20,12 @@
             0,
             0
           ],
-          "rotationY": 0.25,
-          "motion": "Standing Idle",
+          "motion": "Idle",
           "expression": "neutral",
-          "expressionWeight": 1.0,
-          "lookAtTarget": "forward",
-          "modelUrl": "/models/shion/shion-private2.vrm"
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "modelUrl": "/models/shion/shion-private2.vrm",
+          "motionLoop": true
         }
       },
       "background": "shrine",
@@ -45,10 +45,9 @@
             0,
             0
           ],
-          "rotationY": 0.1,
-          "motion": "Standing Idle",
+          "motion": "Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player"
         }
       },
@@ -68,13 +67,14 @@
             0
           ],
           "rotationY": 0,
-          "motion": "ardy_proud",
+          "motion": "clasp_hands_front",
           "expression": "angry",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player"
         }
       },
-      "camera": "speaker"
+      "camera": "speaker",
+      "voiceWhisper": true
     },
     {
       "id": "s2_choice",
@@ -83,7 +83,7 @@
         "shion": {
           "motion": "ardy_proud",
           "expression": "angry",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player"
         }
       },
@@ -120,16 +120,16 @@
             0,
             0
           ],
-          "rotationY": -0.3,
-          "motion": "ardy_pout",
+          "motion": "Idle",
           "expression": "komari",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "blush": true,
           "effectText": "doki"
         }
       },
-      "camera": "speaker"
+      "camera": "speaker",
+      "voiceWhisper": true
     },
     {
       "id": "s2_go",
@@ -144,15 +144,15 @@
             0,
             0
           ],
-          "rotationY": 0.15,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "blush": false
         }
       },
-      "camera": "wide"
+      "camera": "wide",
+      "voiceWhisper": true
     },
     {
       "id": "s3_street",
@@ -167,7 +167,7 @@
           "rotationY": 0.2,
           "motion": "Standing Idle",
           "expression": "neutral",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward"
         }
       },
@@ -186,7 +186,7 @@
       },
       "background": "painted_festival",
       "timeOfDay": "night",
-      "bgm": "main_bgm",
+      "bgm": "nervous_hands_and_coffee_cups",
       "effects": {
         "fireworks": false,
         "crowd": true
@@ -210,7 +210,7 @@
           "rotationY": -0.15,
           "motion": "clasp_hands_front",
           "expression": "komari",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "sweat": "jito"
         }
@@ -227,7 +227,8 @@
           1.75
         ],
         "fov": 40
-      }
+      },
+      "voiceWhisper": true
     },
     {
       "id": "s3_sode",
@@ -242,7 +243,7 @@
           "rotationY": -0.1,
           "motion": "clasp_hands_front",
           "expression": "komari",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "blush": true
         }
@@ -274,7 +275,7 @@
           "rotationY": -1.5708,
           "motion": "Standing Idle",
           "expression": "neutral",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "blush": false
         }
@@ -292,7 +293,8 @@
         ],
         "fov": 46
       },
-      "autoNextSec": 3
+      "autoNextSec": 3,
+      "screenTransition": "fade_black"
     },
     {
       "id": "s4_jiii",
@@ -307,9 +309,8 @@
           "rotationY": -1.5708,
           "motion": "Standing Idle",
           "expression": "neutral",
-          "expressionWeight": 1.0,
-          "lookAtTarget": "forward",
-          "effectText": "shiin"
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
         }
       },
       "cameraPose": {
@@ -339,16 +340,15 @@
           "rotationY": 0.6,
           "motion": "Standing Idle",
           "expression": "surprised",
-          "expressionWeight": 1.0,
-          "lookAtTarget": "player",
-          "effectText": "biku"
+          "expressionWeight": 1,
+          "lookAtTarget": "player"
         }
       },
       "cameraPose": {
         "position": [
-          -0.35,
-          1.42,
-          -2.75
+          -0.65,
+          1.411,
+          -3.734
         ],
         "target": [
           -1.35,
@@ -371,20 +371,19 @@
             0,
             -4.2
           ],
-          "rotationY": 0.15,
-          "motion": "ardy_pout",
+          "rotationY": 0.6,
+          "motion": "Acknowledging",
           "expression": "komari",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
-          "eyeWander": true,
-          "sweat": "fly4"
+          "eyeWander": true
         }
       },
       "cameraPose": {
         "position": [
-          -0.35,
-          1.42,
-          -2.75
+          -0.65,
+          1.411,
+          -3.734
         ],
         "target": [
           -1.35,
@@ -407,23 +406,23 @@
           "rotationY": 0.6,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "eyeWander": false
         }
       },
       "cameraPose": {
         "position": [
-          0.4,
-          1.55,
-          -1.9
+          -0.65,
+          1.411,
+          -3.734
         ],
         "target": [
-          -1.6,
-          1.15,
-          -4.3
+          -1.35,
+          1.3,
+          -4.2
         ],
-        "fov": 46
+        "fov": 38
       }
     },
     {
@@ -436,10 +435,10 @@
             0,
             -4.2
           ],
-          "rotationY": 0.0,
+          "rotationY": 0,
           "motion": "clasp_hands_front",
           "expression": "happy",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "effectText": "kirakira"
         }
@@ -473,10 +472,10 @@
             0,
             -4.2
           ],
-          "rotationY": 0.0,
+          "rotationY": 0,
           "motion": "clasp_hands_front",
           "expression": "happy",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward"
         }
       },
@@ -492,7 +491,8 @@
           -4.2
         ],
         "fov": 38
-      }
+      },
+      "voiceWhisper": true
     },
     {
       "id": "s5_kizuku",
@@ -507,16 +507,16 @@
           "rotationY": 0.6,
           "motion": "Standing Idle",
           "expression": "surprised",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "effectText": "biku"
         }
       },
       "cameraPose": {
         "position": [
-          -0.35,
-          1.42,
-          -2.75
+          -0.84,
+          1.389,
+          -3.087
         ],
         "target": [
           -1.35,
@@ -542,16 +542,16 @@
           "rotationY": 0.6,
           "motion": "Standing Idle",
           "expression": "neutral",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "sweat": "jito"
         }
       },
       "cameraPose": {
         "position": [
-          -0.35,
-          1.42,
-          -2.75
+          -0.84,
+          1.389,
+          -3.087
         ],
         "target": [
           -1.35,
@@ -574,23 +574,23 @@
           "rotationY": 0.6,
           "motion": "ardy_proud",
           "expression": "angry",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "blush": true
         }
       },
       "cameraPose": {
         "position": [
-          0.3,
-          1.5,
-          -1.9
+          -0.84,
+          1.389,
+          -3.087
         ],
         "target": [
           -1.35,
-          1.2,
+          1.3,
           -4.2
         ],
-        "fov": 44
+        "fov": 38
       }
     },
     {
@@ -609,16 +609,16 @@
           "rotationY": 0.6,
           "motion": "ardy_proud",
           "expression": "angry",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "anger": true
         }
       },
       "cameraPose": {
         "position": [
-          -0.35,
-          1.42,
-          -2.75
+          -0.84,
+          1.389,
+          -3.087
         ],
         "target": [
           -1.35,
@@ -634,31 +634,30 @@
       "avatars": {
         "shion": {
           "position": [
+            -1.35,
             0,
-            0,
-            -1.5
+            -4.2
           ],
-          "rotationY": 0.0,
-          "motion": "Standing Idle",
-          "expression": "surprised",
-          "expressionWeight": 1.0,
-          "lookAtTarget": "forward",
-          "blush": false,
-          "anger": false
+          "rotationY": 0.6,
+          "motion": "ardy_proud",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "blush": true
         }
       },
       "cameraPose": {
         "position": [
-          0.2,
-          1.5,
-          2.4
+          -0.84,
+          1.389,
+          -3.087
         ],
         "target": [
-          0,
-          2.3,
-          -6
+          -1.35,
+          1.3,
+          -4.2
         ],
-        "fov": 50
+        "fov": 38
       },
       "effects": {
         "fireworks": true
@@ -676,29 +675,30 @@
       "avatars": {
         "shion": {
           "position": [
+            -1.35,
             0,
-            0,
-            -1.5
+            -4.2
           ],
           "rotationY": 3.1416,
           "motion": "Standing Idle",
           "expression": "surprised",
-          "expressionWeight": 1.0,
-          "lookAtTarget": "forward"
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "anger": false
         }
       },
       "cameraPose": {
         "position": [
-          0.6,
-          1.5,
-          0.6
+          -1.314,
+          0.955,
+          -3.023
         ],
         "target": [
-          0,
-          1.9,
-          -6
+          -1.35,
+          1.3,
+          -4.2
         ],
-        "fov": 48
+        "fov": 38
       }
     },
     {
@@ -710,30 +710,31 @@
       "avatars": {
         "shion": {
           "position": [
+            -1.35,
             0,
-            0,
-            -1.5
+            -4.2
           ],
           "rotationY": 0.2,
           "motion": "Standing Idle",
           "expression": "happy",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player"
         }
       },
       "cameraPose": {
         "position": [
-          0.15,
-          1.4,
-          0.1
+          -1.213,
+          1.27,
+          -2.981
         ],
         "target": [
-          0,
+          -1.35,
           1.3,
-          -1.5
+          -4.2
         ],
-        "fov": 40
-      }
+        "fov": 38
+      },
+      "voiceWhisper": true
     },
     {
       "id": "s7_saku",
@@ -748,7 +749,7 @@
           "rotationY": 3.1416,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward"
         }
       },
@@ -784,7 +785,7 @@
           "rotationY": 3.1416,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward"
         }
       },
@@ -815,7 +816,7 @@
           "rotationY": 3.1416,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "forward"
         }
       },
@@ -847,7 +848,7 @@
           "rotationY": 0,
           "motion": "Standing Idle",
           "expression": "relaxed",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player"
         }
       },
@@ -885,7 +886,7 @@
           "rotationY": 0,
           "motion": "clasp_hands_front",
           "expression": "happy",
-          "expressionWeight": 1.0,
+          "expressionWeight": 1,
           "lookAtTarget": "player",
           "blush": true
         }
@@ -903,7 +904,8 @@
         ],
         "fov": 40
       },
-      "end": true
+      "end": true,
+      "voiceWhisper": true
     }
   ]
 }

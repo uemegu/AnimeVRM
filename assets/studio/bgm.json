@@ -64,6 +64,14 @@
         "ja": "ありゃりゃ",
         "en": "aryarya"
       }
+    },
+    "nervous_hands_and_coffee_cups": {
+      "url": "/bgm/Nervous_Hands_and_Coffee_Cups.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "Holiday",
+        "en": "Holiday"
+      }
     }
   }
 }

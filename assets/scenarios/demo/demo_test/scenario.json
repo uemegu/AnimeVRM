@@ -1,0 +1,46 @@
+{
+  "id": "demo_test",
+  "title": "demo_test",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "もう、またぁ。私がいないとダメなんだから〜。",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "background": "courtyard",
+      "timeOfDay": "morning",
+      "bgm": "main_bgm",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "motion": "you_need_me",
+          "lookAtTarget": "player",
+          "transitions": [
+            {
+              "at": 2.42,
+              "expression": "relaxed",
+              "expressionWeight": 1
+            }
+          ]
+        }
+      },
+      "voiceUrl": "v_s1_f9e09600.mp3",
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "text": "おはよう。今日も眠いわね・・・。",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral"
+        }
+      },
+      "clearCast": true,
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "voiceUrl": "v_s2_b55d6ec7.mp3"
+    }
+  ]
+}
