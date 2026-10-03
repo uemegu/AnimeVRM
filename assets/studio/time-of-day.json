@@ -584,8 +584,8 @@
           },
           "filmGrain": {
             "enabled": true,
-            "strength": 0.009,
-            "size": 1.15
+            "strength": 0.022,
+            "size": 1.6
           }
         },
         "characterGlow": {
