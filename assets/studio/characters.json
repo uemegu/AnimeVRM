@@ -76,12 +76,6 @@
           "url": "/models/emili/emili-school-with-bag.vrm"
         }
       ],
-      "voice": {
-        "ref": "assets/voices/trio_intro_2.mp3",
-        "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
-        "direction": ""
-      },
-      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。",
       "sprites": [
         {
           "key": "yada",
@@ -98,7 +92,13 @@
           "playback": "pingpong",
           "height": 0.6
         }
-      ]
+      ],
+      "voice": {
+        "ref": "assets/voices/trio_intro_2.mp3",
+        "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
+        "direction": ""
+      },
+      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。"
     },
     {
       "id": "shion",
@@ -132,6 +132,13 @@
             "en": "Commute"
           },
           "url": "/models/shion/shion-school-with-bag.vrm"
+        },
+        {
+          "key": "kimono",
+          "label": {
+            "ja": "着物"
+          },
+          "url": "/models/shion/shion-private2.vrm"
         }
       ],
       "voice": {
