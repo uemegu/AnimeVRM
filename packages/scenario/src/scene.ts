@@ -264,6 +264,7 @@ export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
   'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
   'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },
+  'builtin:painted-festival': { ja: '簡易3D 夏祭り', en: 'Painted summer festival' },
 } as const;
 
 export const LocationEnvironment = group('3D背景', '3D set', {
@@ -277,10 +278,17 @@ export type LocationEnvironment = z.infer<typeof LocationEnvironment>;
 
 /**
  * 3D背景の絵に描き込んである光。絵の光は時間帯で変わらないので、キャラを照らす光の向きを
- * 時間帯の設定より優先してこれに合わせ、キャラの影を地面に落とす（光の色は時間帯のまま）
+ * 時間帯の設定より優先してこれに合わせ、キャラの影を地面に落とす（光の色は、指定がなければ時間帯のまま）
  */
 export const LocationLight = group('絵の光', 'Painted light', {
   direction: vec3('光の来る向き', 'Direction to the light', -5, 5, 0.05),
+  /** 光の色と強さ。夜祭りのように光まで絵と決まっている場所だけ指定し、省略時は時間帯のまま */
+  color: color('色', 'Color').optional(),
+  intensity: num('強さ', 'Intensity', 0, 8, 0.1, 1).optional(),
+  ambient: group('環境光', 'Ambient light', {
+    color: color('色', 'Color'),
+    intensity: num('強さ', 'Intensity', 0, 3, 0.05),
+  }).optional(),
   shadow: group('地面に落とすキャラの影', 'Character shadow on the ground', {
     color: color('色', 'Color'),
     opacity: num('濃さ', 'Opacity', 0, 1, 0.05, 0.4),

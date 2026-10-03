@@ -441,14 +441,8 @@ export class StageManager {
     this.currentTimeOfDay = todId;
     const preset = this.presets.timeOfDay[todId] || this.presets.timeOfDay.day;
 
-    // 1. 平行光（向きは場所の絵の光を優先する）
-    this.directionalLight.color.set(preset.lighting.directional.color);
-    this.directionalLight.intensity = preset.lighting.directional.intensity;
+    // 1-2. 平行光と環境光（場所の絵の光があればそちらを優先する）
     this.applyKeyLight();
-
-    // 2. 環境光
-    this.ambientLight.color.set(preset.lighting.ambient.color);
-    this.ambientLight.intensity = preset.lighting.ambient.intensity;
 
     // 2.4 天使の輪の色（時間帯の光になじませる）
     setHairRingTint(preset.lighting.hairRingTint);
@@ -691,14 +685,18 @@ export class StageManager {
   }
 
   /**
-   * キャラを照らす平行光の向きと、地面に落とす影。3D背景の絵に光が描き込んである場所は
-   * その光の向き（場所の light）に合わせ、なければ時間帯の設定を使う
+   * キャラを照らす平行光・環境光と、地面に落とす影。3D背景の絵に光が描き込んである場所は
+   * その光（場所の light）に合わせ、指定のない項目は時間帯の設定を使う
    */
   private applyKeyLight(): void {
-    const directional = (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).lighting.directional;
+    const { directional, ambient } = (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).lighting;
     const light = this.presets.locations[this.currentLocationId]?.light;
     const direction = light?.direction ?? directional.position;
     this.directionalLight.position.set(direction.x, direction.y, direction.z);
+    this.directionalLight.color.set(light?.color ?? directional.color);
+    this.directionalLight.intensity = light?.intensity ?? directional.intensity;
+    this.ambientLight.color.set(light?.ambient?.color ?? ambient.color);
+    this.ambientLight.intensity = light?.ambient?.intensity ?? ambient.intensity;
 
     const shadow = light?.shadow;
     // castShadow を切り替えるとシェーダーが作り直されるので、変わるときだけ触る

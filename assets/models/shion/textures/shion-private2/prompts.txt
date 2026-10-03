@@ -1,0 +1,36 @@
+Built-in image_gen used for four kimono UV textures.
+Original model backup: scratch/shion-kimono/shion-private2.original.vrm
+Reference: user supplied kimono image.
+Generated images were aligned to the original UV image bounds and exported at 2048x2048 with byte-identical alpha channels. No meshes, UV coordinates, bones or expressions changed.
+
+TEXTURE 15
+Use case: style-transfer
+Asset type: production VRM kimono lower garment UV albedo texture, square 2048x2048 PNG.
+Input images: Image 1 is the edit target, an existing UV texture atlas. Image 2 is the clothing design reference only.
+Primary request: Repaint ONLY the cloth print of image 1 to faithfully evoke the elegant kimono in image 2: deep midnight navy indigo fabric (#27273f), softly illustrated pale blush cherry blossoms, layered pink peonies, ivory and icy blue flowers, cascading lavender wisteria, muted slate blue foliage, fine antique gold circular floral linework, a few small gold stars and scattered petals, flowing blush pink ornamental ribbon-and-tassel PRINT.
+Composition: The target has a large TRANSPARENT EMPTY upper half. The lower half contains the skirt UV region, spanning x=323..1724 and y=1059..2015 in the original 2048 square. Keep this fabric region EXACTLY in its original position and size, the same panel boundaries, shading folds and lower edge. Repaint the existing simple carnation pattern with the reference's refined varied blossoms. Arrange elegant asymmetric floral cascades and gold arcs along the lower skirt and side panels, with navy breathing room. All flowers remain within the existing cloth region. Moderate motif scale matching reference, not a dense tiny repeated floral wallpaper.
+Constraints: Output a full 2048x2048 square UV image with genuine transparent background. Preserve the exact original cloth silhouette, alpha cutout, UV island placement, panel seam locations and subtle cloth shading. Do NOT create a character, mannequin, photograph, 3D render or garment silhouette. Do not move, crop, zoom, stretch or expand the cloth UV region. Do not add labels, borders, watermarks. Image 2 guides print design only; do not paste any part of the human figure.
+
+TEXTURE 16
+Use case: style-transfer
+Asset type: production VRM kimono upper garment and sleeves UV albedo atlas.
+Input images: Image 1 is the EDIT TARGET, existing square UV map. Image 2 is the desired kimono clothing reference. Image 3 is the finished matching lower-skirt UV texture, for matching paint style and navy color.
+Primary request: Repaint the simple flowers in image 1 to match image 2 and image 3: deep midnight indigo navy silk, pale pink cherry blossoms and peonies, ivory and powder blue blossoms, cascading lavender wisteria with slate blue foliage, delicate antique-gold flower circles/arcs and tiny stars, a little blush pink ribbon print. Use richly detailed soft Japanese illustration as in the reference. Provide tasteful floral clusters, navy negative space, smaller scattered blossoms, and wisteria clusters; reference-sized motifs.
+CRITICAL UV constraints: Output a square 2048x2048 PNG, the SAME atlas layout as image 1. KEEP EVERY island's outline, position, size, perspective, fold shading and seam edges EXACTLY. The 2 top sleeve islands sit on the canvas top edge (left x=0..800 and right x=1245..2048), separated by the original transparent U-shaped opening. The torso is the large rectangle x=394..1655 y=425..1115 with the original V notch and two tiny islands above. The entire lower portion below y=1115 stays empty transparent. Repaint only inside existing opaque cloth islands. Do not crop or resize the canvas, do not rearrange islands or round their outlines. Make ALL fabrics consistent navy, including side padding.
+Constraints: GENUINE transparent background, preserve alpha and cutouts. No characters, no mannequin, no garment render, no full kimono silhouette, no text, no labels, no watermark. This is a flat UV texture atlas, not an image of a garment.
+
+TEXTURE 17
+Use case: style-transfer
+Asset type: VRM obi sash flat UV albedo texture atlas, square PNG 2048x2048.
+Input images: Image 1 is the EDIT TARGET (yellow obi band on transparent square atlas). Image 2 is design reference for the PALE PINK OBI ONLY.
+Primary request: Change the yellow obi fabric to soft pearl blush pink and pale lavender (#ead3df), a subtle creamy ivory woven floral brocade pattern matching the reference's belt. Keep the existing cloth folds and edge shading. Repaint the horizontal purple cord to muted rose red with thin lavender accents and a fine gold edge. Replace the tiny central oval jewel with an elegant larger five-petal pink/lavender floral obidome ornament with gold outlines and a pearl center, delicately braided loops extending to either side. Small decorative short peach/pink tassel printed beneath the flower INSIDE the obi band. The flower should be about 55% of belt height, centered near original center jewel; graceful and detailed, same hand-painted anime texture style as reference.
+CRITICAL layout: The obi remains the exact narrow horizontal band of Image 1 in the same place, approximately x=388..1659 and y=824..1015 on the original 2048 square canvas. The large area above, below and beside it stays genuinely transparent. Do NOT enlarge the band to fill canvas. Keep silhouette, cloth folds, cord path, band corners, edge positions, island coordinates and transparent cutout exactly. Every new ornament must be contained WITHIN existing band, no extension or hanging object outside.
+Avoid: no character, no 3D belt, no clothing render, no text, no labels, no watermark, no yellow/gold fabric base. Output full square with exact original island placement.
+
+TEXTURE 18
+Use case: style-transfer
+Asset type: production VRM back obi bow UV albedo texture atlas, square 2048x2048 PNG.
+Input images: Image 1 is the EDIT TARGET, two yellow bow UV islands on transparent background. Image 2 is the desired kimono clothing reference. Image 3 is the matching finished obi texture, use its pearl blush pink/cream brocade material.
+Primary request: Recolor BOTH existing yellow bow UV islands to elegant pearl blush pink and pale lavender obi fabric with a delicate creamy ivory woven sakura/floral brocade pattern. Match image 3 band, with soft silk highlights and mauve fold shadows. Keep original dimensional fold shading and smooth bow outline, use small delicate woven motifs (no giant blossoms or metallic fabric).
+CRITICAL UV layout: Full original square canvas. Preserve exactly the two ORIGINAL bow islands at the left and right of the canvas around the upper-middle height. Their shape, spacing, position, size, silhouette, fold directions, edge outline and small knot attachment UV areas must remain unchanged. The rest of the image remains genuinely transparent. Do NOT create a complete bow in the middle, do not join islands, do not move, crop, zoom, enlarge, or rearrange islands. This is a flat texture map, not a 3D render or garment photograph.
+Constraints: change only bow cloth material/color, preserve original alpha and UV island edges. No person, no text, no labels, no watermark, no yellow fabric.

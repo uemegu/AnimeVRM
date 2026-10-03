@@ -414,6 +414,69 @@
         }
       }
     },
+    "painted_festival": {
+      "id": "painted_festival",
+      "name": "夏祭り（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-classroom/thumb-festival.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-festival",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -0.55,
+          "y": 0.42,
+          "z": -1
+        },
+        "color": "#a9b6ff",
+        "intensity": 0.9,
+        "ambient": {
+          "color": "#4a4f86",
+          "intensity": 0.7
+        },
+        "shadow": {
+          "color": "#1a1d3a",
+          "opacity": 0.35,
+          "softness": 6
+        }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.6,
+          "y": 0,
+          "z": 0.8
+        },
+        "strength": 0.04,
+        "gust": 0.5
+      },
+      "stage": {
+        "camera": {
+          "depthOfField": {
+            "aperture": 0.02,
+            "maxBlur": 0.008,
+            "sharpRange": 3
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
     "modern_park": {
       "id": "modern_park",
       "name": "公園（並木）",

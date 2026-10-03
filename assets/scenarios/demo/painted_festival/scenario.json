@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_festival",
+  "title": {
+    "ja": "夏祭りのアオイ — 簡易3Dの夏祭り",
+    "en": "Aoi at the summer festival (painted 3D)"
+  },
+  "description": "屋台の並ぶ通りの先に川と対岸の灯り、空に花火が上がる簡易3Dの夏祭り。屋台の灯りと花火の光がアオイを照らす。",
+  "location": "painted_festival",
+  "timeOfDay": "night",
+  "scenes": [
+    {
+      "id": "street",
+      "text": "屋台の灯りが並ぶ通り。川の向こうで、花火が上がり始めた。",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.35,
+          2.4
+        ],
+        "target": [
+          0,
+          1.2,
+          0
+        ],
+        "fov": 44
+      },
+      "autoNextSec": 3
+    },
+    {
+      "id": "fireworks",
+      "text": "川の上の夜空に、次々と花火が開いていく。",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            -1.5
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          1.0,
+          1.1,
+          0.8
+        ],
+        "target": [
+          0,
+          3.6,
+          -8
+        ],
+        "fov": 55
+      },
+      "autoNextSec": 3
+    },
+    {
+      "id": "look_up",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "「わあ……！　ねえ、今の見た？　すっごく大きかったよ！」",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            -3.5
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.7,
+          1.3,
+          -5.4
+        ],
+        "target": [
+          0,
+          1.45,
+          -3.5
+        ],
+        "fov": 44
+      }
+    },
+    {
+      "id": "wide",
+      "text": "対岸の灯りが川面に揺れている。",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.6,
+          5.5
+        ],
+        "target": [
+          0,
+          1.4,
+          -3
+        ],
+        "fov": 50
+      }
+    }
+  ]
+}
