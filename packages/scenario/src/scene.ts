@@ -119,6 +119,12 @@ export const PostProcessingConfig = group('ポストプロセス', 'Post-process
       enabled: bool('有効', 'Enabled'),
       amount: num('強さ', 'Amount', 0, 1, 0.02),
     }),
+    /** フィルムの粒子。アニメ映画のフィルム撮影っぽさを足す */
+    filmGrain: group('フィルムグレイン', 'Film grain', {
+      enabled: bool('有効', 'Enabled'),
+      strength: num('強さ', 'Strength', 0, 0.2, 0.005),
+      size: num('粒の大きさ（px）', 'Grain size (px)', 1, 4, 0.1, 1.5).optional(),
+    }).optional(),
   }),
   para: group('パラ（空気感）', 'Atmosphere gradient', {
     enabled: bool('有効', 'Enabled').optional(),
@@ -241,6 +247,12 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
       maxBlur: num('ぼけの上限（画面の高さに対する割合）', 'Max blur (of screen height)', 0, 0.05, 0.001, DEFAULT_DEPTH_OF_FIELD.maxBlur),
       /** ピントより奥でもぼかさない幅。キャラのすぐ後ろの物（門など）はくっきり見せ、遠景だけぼかす */
       sharpRange: num('ピントの奥でぼかさない幅（m）', 'Sharp range behind focus (m)', 0, 20, 0.1, DEFAULT_DEPTH_OF_FIELD.sharpRange).optional(),
+    }).optional(),
+    /** 明るい所の光のにじみ。夜祭りの灯りのように場所の絵で決まるものは、時間帯の設定より優先する */
+    bloom: group('光のにじみ（ブルーム）', 'Bloom', {
+      strength: num('強さ', 'Strength', 0, 0.8, 0.01),
+      radius: num('広がり', 'Radius', 0, 1, 0.02),
+      threshold: num('しきい値', 'Threshold', 0.1, 1, 0.01),
     }).optional(),
   }).optional(),
   backdrop: group('遠景の置き方', 'Backdrop placement', {

@@ -70,5 +70,13 @@ export function nightSky(): THREE.Mesh {
   mesh.name = 'Night sky';
   mesh.renderOrder = -10;
   mesh.frustumCulled = false;
+  // Keep the dome around the camera: centred on the set, its far side would fall past the
+  // viewer's draw distance (100 m) when the camera stands near the river looking inland.
+  mesh.onBeforeRender = (_renderer, _scene, camera) => {
+    const local = mesh.parent ? mesh.parent.worldToLocal(camera.getWorldPosition(new THREE.Vector3())) : camera.position.clone();
+    mesh.position.copy(local);
+    mesh.updateMatrix();
+    mesh.matrixWorld.multiplyMatrices(mesh.parent?.matrixWorld ?? new THREE.Matrix4(), mesh.matrix);
+  };
   return mesh;
 }

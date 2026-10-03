@@ -50,6 +50,7 @@ export const CinematicAnimeShader = {
     uFilmGrainEnabled: { value: 0.0 },
     uFilmGrainStrength: { value: 0.035 },
     uFilmGrainSpeed: { value: 1.0 },
+    uFilmGrainSize: { value: 1.5 },
 
     // 7. Smart Sharpening (Digital anime crispness / CAS-like)
     uSharpenEnabled: { value: 1.0 },
@@ -105,6 +106,7 @@ export const CinematicAnimeShader = {
     uniform float uFilmGrainEnabled;
     uniform float uFilmGrainStrength;
     uniform float uFilmGrainSpeed;
+    uniform float uFilmGrainSize;
 
     // Smart Sharpening
     uniform float uSharpenEnabled;
@@ -223,7 +225,9 @@ export const CinematicAnimeShader = {
         baseColor = texture2D(tDiffuse, uv);
       }
 
-      vec3 color = baseColor.rgb;
+      // The target is half float and very bright lights (fireworks) stay above 1 after the output pass;
+      // the screen blends below assume 0..1 and would turn them negative (black dots). The display clips there anyway.
+      vec3 color = clamp(baseColor.rgb, 0.0, 1.0);
 
       // ----------------------------------------------------
       // 2. Soft Diffusion Glow (Anime Film Paraffin Glow)
@@ -243,7 +247,7 @@ export const CinematicAnimeShader = {
         blur += texture2D(tDiffuse, uv + vec2( texel.x,  texel.y) * 1.5).rgb * 0.08;
 
         // Soft screen/lighten blend to give the characteristic anime glowing air look
-        vec3 glow = 1.0 - (1.0 - color) * (1.0 - blur * 0.85);
+        vec3 glow = 1.0 - (1.0 - color) * (1.0 - min(blur, vec3(1.0)) * 0.85);
         color = mix(color, glow, clamp(uDiffusionStrength * 0.7, 0.0, 1.0));
       }
 
@@ -310,7 +314,10 @@ export const CinematicAnimeShader = {
       // ----------------------------------------------------
       if (uFilmGrainEnabled > 0.5 && uFilmGrainStrength > 0.0) {
         float timeOffset = floor(uTime * 24.0 * uFilmGrainSpeed);
-        float noise = (hash(gl_FragCoord.xy + vec2(timeOffset * 17.1, timeOffset * 31.7)) - 0.5) * 2.0;
+        // Grains a little larger than a pixel, blended between neighbours so they read as film, not digital noise.
+        vec2 gp = gl_FragCoord.xy / uFilmGrainSize + vec2(timeOffset * 17.1, timeOffset * 31.7);
+        vec2 gi = floor(gp), gf = smoothstep(0.0, 1.0, fract(gp));
+        float noise = (mix(mix(hash(gi), hash(gi + vec2(1.0, 0.0)), gf.x), mix(hash(gi + vec2(0.0, 1.0)), hash(gi + vec2(1.0)), gf.x), gf.y) - 0.5) * 2.6;
         // Grain is most visible in midtones, less in extreme blacks/whites
         float lum = getLuma(color);
         float grainMask = 1.0 - 2.0 * abs(lum - 0.5);

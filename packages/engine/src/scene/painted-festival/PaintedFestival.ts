@@ -4,12 +4,13 @@ import { resolveAssetUrl } from '../../utils/path';
 import { farStandee } from '../painted-gate/PaintedGate';
 import { Fireworks } from './Fireworks';
 import {
-  ANDON_POSTS, BANNER, EDGE_Z, EMBANKMENT, FAR, FAR_BANK, GROUND, LANTERN_STRINGS, RAILING, RIVER_Y, STALL_COLORS, STREET_HALF, TILES, type StallKind,
+  ANDON_POSTS, BANNER, EDGE_Z, EMBANKMENT, FAR, FAR_BANK, GROUND, LANTERN_STRINGS, RAILING, RIVER_Y, STALL_COLORS, TILES, type StallKind,
 } from './layout';
 import { AVATAR_LIGHTS, festivalUniforms, WARM_POOLS } from './lights';
 import { nightSky } from './NightSky';
 import { createRiver } from './River';
-import { createStalls, flashMaterial, lanternGeometry } from './Stalls';
+import { Glows } from './Glows';
+import { createStalls, flashMaterial, lanternGeometry, lanternMaterial } from './Stalls';
 
 /**
  * Summer festival at night (simple 3D set). A street lined with food stalls
@@ -207,6 +208,7 @@ function railing(tile: THREE.Texture): THREE.Group {
   const top = EMBANKMENT.top + RAILING.height + 0.1;
   for (const x of ANDON_POSTS) {
     const andon = new THREE.Mesh(paperGeometry, paper);
+    andon.name = 'Andon';
     andon.position.set(x, top + 0.19, RAILING.z);
     const cap = new THREE.Mesh(capGeometry, frame);
     cap.position.set(x, top + 0.41, RAILING.z);
@@ -215,34 +217,31 @@ function railing(tile: THREE.Texture): THREE.Group {
   return group;
 }
 
-/** Strings of paper lanterns across the street, sagging between the stall roofs. */
+/** Strings of paper lanterns, sagging between the stall roofs (street) or wooden poles (promenade). */
 function lanternStrings(): THREE.Group {
   const group = new THREE.Group();
   group.name = 'Lantern strings';
-  const half = STREET_HALF + 0.2;
-  const count = Math.round(2 * half / LANTERN_STRINGS.spacing);
-  const geometry = lanternGeometry();
-  const material = new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false });
-  material.name = 'Lanterns';
-  const mesh = new THREE.InstancedMesh(geometry, material, LANTERN_STRINGS.z.length * count);
+  const { strings, height, sag, spacing } = LANTERN_STRINGS;
+  const counts = strings.map(({ from, to }) => Math.max(1, Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]) / spacing)));
+  const mesh = new THREE.InstancedMesh(lanternGeometry(), lanternMaterial(), counts.reduce((a, b) => a + b, 0));
   mesh.name = 'Lanterns';
-  const red = new THREE.Color('#ff4d38').multiplyScalar(1.8), white = new THREE.Color('#fff0d0').multiplyScalar(1.8);
+  const red = new THREE.Color('#ff4d38').multiplyScalar(1.7), white = new THREE.Color('#fff0d0').multiplyScalar(1.5);
   const wire: number[] = [];
-  const sag = (x: number) => LANTERN_STRINGS.height - LANTERN_STRINGS.sag * (1 - (x / half) ** 2);
+  const poles: THREE.BufferGeometry[] = [];
   const matrix = new THREE.Matrix4();
   let i = 0;
-  for (const z of LANTERN_STRINGS.z) {
-    for (let k = 0; k < count; k++) {
-      const x = -half + (k + 0.5) * 2 * half / count;
-      matrix.makeScale(0.22, 0.3, 0.22).setPosition(x, sag(x) - 0.2, z);
+  strings.forEach(({ from, to, poles: withPoles }, s) => {
+    // t: 0..1 along the string; the wire sags in a parabola.
+    const at = (t: number) => [from[0] + (to[0] - from[0]) * t, height - sag * 4 * t * (1 - t), from[1] + (to[1] - from[1]) * t] as const;
+    for (let k = 0; k < counts[s]; k++) {
+      const [x, y, z] = at((k + 0.5) / counts[s]);
+      matrix.makeScale(0.22, 0.3, 0.22).setPosition(x, y - 0.2, z);
       mesh.setMatrixAt(i, matrix);
       mesh.setColorAt(i++, k % 2 ? white : red);
     }
-    for (let k = 0; k < 24; k++) {
-      const a = -half + k * 2 * half / 24, b = -half + (k + 1) * 2 * half / 24;
-      wire.push(a, sag(a), z, b, sag(b), z);
-    }
-  }
+    for (let k = 0; k < 24; k++) wire.push(...at(k / 24), ...at((k + 1) / 24));
+    if (withPoles) for (const [x, z] of [from, to]) poles.push(new THREE.BoxGeometry(0.1, height + 0.15, 0.1).translate(x, (height + 0.15) / 2, z));
+  });
   group.add(mesh);
   const wireGeometry = new THREE.BufferGeometry();
   wireGeometry.setAttribute('position', new THREE.Float32BufferAttribute(wire, 3));
@@ -251,6 +250,13 @@ function lanternStrings(): THREE.Group {
   const lines = new THREE.LineSegments(wireGeometry, wireMaterial);
   lines.name = 'Lantern wire';
   group.add(lines);
+  if (poles.length) {
+    const pole = new THREE.Mesh(mergeGeometries(poles.map((g) => celShade(g, new THREE.Color('#5a3b26'), new THREE.Color('#1e1517')))), new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, fog: false }));
+    poles.forEach((g) => g.dispose());
+    pole.name = 'Lantern poles';
+    (pole.material as THREE.Material).name = 'Lantern poles';
+    group.add(pole);
+  }
   return group;
 }
 
@@ -310,11 +316,17 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
     light.position.set(...position);
     group.add(light);
   }
-  const overhead = new THREE.PointLight('#ff8a5c', 3, 6, 2);
-  overhead.name = 'Lantern light';
-  overhead.position.set(0, LANTERN_STRINGS.height - 0.3, LANTERN_STRINGS.z[1]);
-  group.add(overhead);
+  for (const z of [0.6, -9.2]) {
+    const overhead = new THREE.PointLight('#ff8a5c', 3, 6, 2);
+    overhead.name = 'Lantern light';
+    overhead.position.set(0, LANTERN_STRINGS.height - 0.3, z);
+    group.add(overhead);
+  }
   group.add(fireworks.light, fireworks.light.target);
+  // Glow around every light and drifting bokeh: the soft, luminous air of an anime film.
+  group.updateMatrixWorld(true);
+  const glows = new Glows(group);
+  group.add(glows.halos, glows.bokeh);
   group.userData.fireworks = fireworks;
   return group;
 }
