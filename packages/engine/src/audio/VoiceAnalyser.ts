@@ -1,5 +1,7 @@
 import { resolveAssetUrl } from '../utils/path';
-import { VOICE_SILENCE_RMS, VoiceMouthEnvelope } from './lipSync';
+
+/** WASM の無音判定に渡す共通の閾値。 */
+export const VOICE_SILENCE_RMS = 0.003;
 
 const moduleLoads = new WeakMap<AudioContext, Promise<void>>();
 const wasmLoads = new Map<string, Promise<ArrayBuffer>>();
@@ -48,7 +50,6 @@ export interface VoiceAnalysisResult extends VoiceFrame {
 }
 
 export interface VoiceAnalyserOptions {
-  useWasm?: boolean;
   gender?: 'female' | 'male';
   rmsThreshold?: number;
   holdFrames?: number;
@@ -56,12 +57,9 @@ export interface VoiceAnalyserOptions {
   onReady?: (ready: boolean) => void;
 }
 
-/** 出力音量より前の信号を WASM で解析する。初期化中・非対応環境では RMS 解析で補う。 */
+/** 出力音量より前の信号を WASM で解析し、その結果を受け取る。 */
 export class VoiceAnalyser {
   public ready = false;
-  private readonly analyser: AnalyserNode;
-  private readonly samples: Float32Array<ArrayBuffer>;
-  private readonly envelope = new VoiceMouthEnvelope();
   private worklet: AudioWorkletNode | null = null;
   private silentOutput: GainNode | null = null;
   private latest: VoiceFrame = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
@@ -75,33 +73,17 @@ export class VoiceAnalyser {
     private readonly options: VoiceAnalyserOptions = {},
   ) {
     this.gender = options.gender ?? 'female';
-    this.analyser = context.createAnalyser();
-    this.analyser.fftSize = 1024;
-    this.analyser.smoothingTimeConstant = 0;
-    this.samples = new Float32Array(this.analyser.fftSize);
-    source.connect(this.analyser);
-    if (options.useWasm !== false) void this.initWorklet();
+    void this.initWorklet();
   }
 
   getFrame(): VoiceFrame {
-    if (this.disposed) return { phoneme: 'nn', rms: 0, mouthOpen: 0 };
-    if (this.ready) return { ...this.latest };
-    this.analyser.getFloatTimeDomainData(this.samples);
-    let sum = 0;
-    for (const sample of this.samples) sum += sample * sample;
-    const rms = Math.sqrt(sum / this.samples.length);
-    const shapes: VoicePhoneme[] = ['aa', 'oh', 'ih', 'aa', 'ee'];
-    return {
-      rms,
-      phoneme: rms < VOICE_SILENCE_RMS ? 'nn' : shapes[Math.floor(this.context.currentTime / 0.11) % shapes.length],
-      mouthOpen: this.envelope.update(rms, this.context.currentTime),
-    };
+    if (!this.ready || this.disposed) return { phoneme: 'nn', rms: 0, mouthOpen: 0 };
+    return { ...this.latest };
   }
 
   reset(): void {
     this.generation++;
     this.latest = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
-    this.envelope.reset();
     this.worklet?.port.postMessage({ type: 'reset', data: { generation: this.generation } });
   }
 
@@ -122,7 +104,6 @@ export class VoiceAnalyser {
         if (this.disposed) return;
         this.ready = false;
         this.latest = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
-        this.envelope.reset();
         this.options.onReady?.(false);
       };
       worklet.port.onmessage = (event) => {
@@ -132,7 +113,6 @@ export class VoiceAnalyser {
           if (data?.abiVersion !== 2) {
             this.ready = false;
             this.latest = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
-            this.envelope.reset();
             this.options.onReady?.(false);
             console.warn('LipSync AudioWorklet ABI mismatch:', data?.abiVersion);
             return;
@@ -145,10 +125,10 @@ export class VoiceAnalyser {
           this.options.onReady?.(true);
         } else if (type === 'wasm-error') {
           this.ready = false;
-          this.envelope.reset();
+          this.latest = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
           this.options.onReady?.(false);
           console.warn('LipSync WASM error in AudioWorklet:', error);
-        } else if (type === 'analysis-result' && data.generation === this.generation) {
+        } else if (type === 'analysis-result' && this.ready && data.generation === this.generation) {
           this.latest = {
             phoneme: data.phoneme,
             rms: data.rms,
@@ -167,6 +147,7 @@ export class VoiceAnalyser {
     } catch (error) {
       if (this.disposed) return;
       this.ready = false;
+      this.latest = { phoneme: 'nn', rms: 0, mouthOpen: 0 };
       this.options.onReady?.(false);
       console.warn('Failed to initialize AudioWorklet lipsync:', error);
     }
@@ -176,8 +157,6 @@ export class VoiceAnalyser {
     this.disposed = true;
     this.ready = false;
     this.reset();
-    this.source.disconnect(this.analyser);
-    this.analyser.disconnect();
     if (this.worklet) {
       this.source.disconnect(this.worklet);
       this.worklet.port.onmessage = null;

@@ -159,7 +159,6 @@ export const en: Dictionary = {
     camera: 'Camera',
     auto: 'Auto',
     clearCast: 'Remove everyone from the previous cut',
-    voiceWhisper: 'Further reduce mouth opening (optional)',
     flash: 'White flash',
     autoNextSec: 'AUTO wait (s)',
     movieAutoNextSec: 'Gap before next cut (s)',

@@ -339,7 +339,7 @@ export function processFrame(): void {
 
   // 強い発声では高域の倍音が増える。録音音量が揃っている音声でも、同じ式で声の強さを推定する。
   // 既存ボイスの実測範囲（高域/低域が約 -30〜-8 dB）を共通の基準にする。
-  // 囁き・摩擦子音にも高域があるので、囁きの既知ラベルは呼び出し側で上限を掛ける。
+  // 息・摩擦音にも高域があるため、スペクトル平坦度で連続補正する。
   if (rawRms >= 0.003) {
     let lowPower: f32 = 0.0;
     let highPower: f32 = 0.0;
@@ -356,18 +356,19 @@ export function processFrame(): void {
       }
     }
     const flatness = <f32>Math.exp(<f64>(logPower / <f32>bandCount)) / ((lowPower + highPower) / <f32>bandCount + 0.00000001);
-    // 息・摩擦子音の高域を声の強さと取り違えないよう、倍音のある区間でだけ更新する。
-    if (flatness < 0.01) {
-      const emphasisDb = 10.0 * <f32>Math.log(<f64>((highPower + 0.00000001) / (lowPower + 0.00000001))) / <f32>Math.LN10;
-      const emphasis = <f32>Math.min(1.0, Math.max(0.0, <f64>((emphasisDb + 30.0) / 22.0)));
-      const strength: f32 = 0.25 + 0.75 * emphasis;
-      if (!hasSpectralStrength) {
-        spectralStrength = strength;
-        hasSpectralStrength = true;
-      } else {
-        const blend: f32 = 1.0 - <f32>Math.exp(<f64>(-frameDuration / 0.2));
-        spectralStrength += (strength - spectralStrength) * blend;
-      }
+    const emphasisDb = 10.0 * <f32>Math.log(<f64>((highPower + 0.00000001) / (lowPower + 0.00000001))) / <f32>Math.LN10;
+    const emphasis = <f32>Math.min(1.0, Math.max(0.0, <f64>((emphasisDb + 30.0) / 22.0)));
+    const toneStrength: f32 = 0.25 + 0.75 * emphasis;
+    const noiseWeight = <f32>Math.min(1.0, Math.max(0.0, Math.log(<f64>(Math.max(<f64>flatness, 0.00000001) / 0.005)) / Math.log(0.08 / 0.005)));
+    const strength: f32 = toneStrength * (1.0 - noiseWeight) + 0.45 * noiseWeight;
+    // ラベルによる判別をせず、倍音から息成分まで同じ式で推定する。
+    // 短い摩擦子音で開きが急変しないよう、強さは口の開閉より長い時間で平滑化する。
+    if (!hasSpectralStrength) {
+      spectralStrength = strength;
+      hasSpectralStrength = true;
+    } else {
+      const blend: f32 = 1.0 - <f32>Math.exp(<f64>(-frameDuration / 0.2));
+      spectralStrength += (strength - spectralStrength) * blend;
     }
   }
   updateMouthOpen(rawRms);

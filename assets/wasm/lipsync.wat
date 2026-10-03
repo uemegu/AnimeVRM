@@ -67,30 +67,6 @@
   f64.convert_i32_u
   f64.sub
  )
- (func $~lib/staticarray/StaticArray<f32>#__get (param $0 i32) (param $1 i32) (result f32)
-  local.get $1
-  local.get $0
-  i32.const 20
-  i32.sub
-  i32.load offset=16
-  i32.const 2
-  i32.shr_u
-  i32.ge_u
-  if
-   i32.const 2032
-   i32.const 2096
-   i32.const 78
-   i32.const 41
-   call $~lib/builtins/abort
-   unreachable
-  end
-  local.get $0
-  local.get $1
-  i32.const 2
-  i32.shl
-  i32.add
-  f32.load
- )
  (func $~lib/math/NativeMath.log (param $0 f64) (result f64)
   (local $1 i32)
   (local $2 i64)
@@ -256,6 +232,30 @@
   f64.const 0.6931471803691238
   f64.mul
   f64.add
+ )
+ (func $~lib/staticarray/StaticArray<f32>#__get (param $0 i32) (param $1 i32) (result f32)
+  local.get $1
+  local.get $0
+  i32.const 20
+  i32.sub
+  i32.load offset=16
+  i32.const 2
+  i32.shr_u
+  i32.ge_u
+  if
+   i32.const 2032
+   i32.const 2096
+   i32.const 78
+   i32.const 41
+   call $~lib/builtins/abort
+   unreachable
+  end
+  local.get $0
+  local.get $1
+  i32.const 2
+  i32.shl
+  i32.add
+  f32.load
  )
  (func $~lib/math/NativeMath.exp (param $0 f64) (result f64)
   (local $1 i32)
@@ -2245,6 +2245,35 @@
      br $for-loop|3
     end
    end
+   local.get $1
+   f32.const 9.99999993922529e-09
+   f32.add
+   local.get $7
+   f32.const 9.99999993922529e-09
+   f32.add
+   f32.div
+   f64.promote_f32
+   call $~lib/math/NativeMath.log
+   f32.demote_f64
+   f64.promote_f32
+   f64.const 10
+   f64.mul
+   f64.const 2.3025851249694824
+   f64.div
+   f64.const 30
+   f64.add
+   f64.const 22
+   f64.div
+   f64.const 0
+   f64.max
+   f64.const 1
+   f64.min
+   f32.demote_f64
+   f32.const 0.75
+   f32.mul
+   f32.const 0.25
+   f32.add
+   f32.const 1
    local.get $2
    local.get $0
    f32.convert_i32_s
@@ -2261,61 +2290,50 @@
    f32.const 9.99999993922529e-09
    f32.add
    f32.div
-   f32.const 0.009999999776482582
-   f32.lt
+   f64.promote_f32
+   f64.const 1e-08
+   f64.max
+   f64.const 0.005
+   f64.div
+   call $~lib/math/NativeMath.log
+   f64.const 16
+   call $~lib/math/NativeMath.log
+   f64.div
+   f64.const 0
+   f64.max
+   f64.const 1
+   f64.min
+   f32.demote_f64
+   local.tee $1
+   f32.sub
+   f32.mul
+   local.get $1
+   f32.const 0.44999998807907104
+   f32.mul
+   f32.add
+   local.set $1
+   global.get $assembly/index/hasSpectralStrength
    if
+    global.get $assembly/index/spectralStrength
     local.get $1
-    f32.const 9.99999993922529e-09
-    f32.add
-    local.get $7
-    f32.const 9.99999993922529e-09
-    f32.add
+    global.get $assembly/index/spectralStrength
+    f32.sub
+    f32.const 1
+    global.get $assembly/index/frameDuration
+    f32.const -0.20000000298023224
     f32.div
     f64.promote_f32
-    call $~lib/math/NativeMath.log
+    call $~lib/math/NativeMath.exp
     f32.demote_f64
-    f64.promote_f32
-    f64.const 10
-    f64.mul
-    f64.const 2.3025851249694824
-    f64.div
-    f64.const 30
-    f64.add
-    f64.const 22
-    f64.div
-    f64.const 0
-    f64.max
-    f64.const 1
-    f64.min
-    f32.demote_f64
-    f32.const 0.75
+    f32.sub
     f32.mul
-    f32.const 0.25
     f32.add
-    local.set $1
-    global.get $assembly/index/hasSpectralStrength
-    if
-     global.get $assembly/index/spectralStrength
-     local.get $1
-     global.get $assembly/index/spectralStrength
-     f32.sub
-     f32.const 1
-     global.get $assembly/index/frameDuration
-     f32.const -0.20000000298023224
-     f32.div
-     f64.promote_f32
-     call $~lib/math/NativeMath.exp
-     f32.demote_f64
-     f32.sub
-     f32.mul
-     f32.add
-     global.set $assembly/index/spectralStrength
-    else
-     local.get $1
-     global.set $assembly/index/spectralStrength
-     i32.const 1
-     global.set $assembly/index/hasSpectralStrength
-    end
+    global.set $assembly/index/spectralStrength
+   else
+    local.get $1
+    global.set $assembly/index/spectralStrength
+    i32.const 1
+    global.set $assembly/index/hasSpectralStrength
    end
   end
   local.get $9

@@ -238,7 +238,7 @@ export const ScenarioScene = z.strictObject({
   text: TextContent,
   /** '/' で始まらなければシナリオのディレクトリからの相対パス */
   voiceUrl: z.string().optional(),
-  /** ボイスが囁き声（口の開きを小さくする） */
+  /** @deprecated 旧データの読み込み用。開口度は音声解析で決まり、この指定は使わない */
   voiceWhisper: z.boolean().optional(),
   /** ボイスの音量の倍率 */
   voiceVolume: AudioVolume.optional(),
@@ -421,7 +421,7 @@ export const CallSceneStep = z.strictObject({
   /** null なら通話終了 */
   nextStepId: z.string().nullable().optional(),
   voiceUrl: z.string().optional(),
-  /** ボイスが囁き声（口の開きを小さくする） */
+  /** @deprecated 旧データの読み込み用。開口度は音声解析で決まり、この指定は使わない */
   voiceWhisper: z.boolean().optional(),
 });
 

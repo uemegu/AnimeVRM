@@ -137,7 +137,7 @@ export const StageView: React.FC<StageViewProps> = ({
     manager.setCameraPose(cut?.cameraPose ?? null);
     manager.setCutTimeline(
       cut
-        ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions, cameraShift: cut.cameraShift, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceUrl: cut.voiceUrl, voiceWhisper: cut.voiceWhisper }
+        ? { id: cut.id, text: cut.text, avatars: cut.avatars, transitions: cut.transitions, cameraShift: cut.cameraShift, screenTransition: cut.screenTransition, focusLines: cut.focusLines }
         : null
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

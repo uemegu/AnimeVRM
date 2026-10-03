@@ -23,13 +23,19 @@ async function analyzer() {
   const pcm = new Float32Array(wasm.memory.buffer, Number(wasm.INPUT_OFFSET.value), 1024);
   const stats = new Float32Array(wasm.memory.buffer, Number(wasm.STATS_OFFSET.value), 5);
   let frame = 0;
+  let noiseSeed = 12345;
   return {
     wasm, stats,
-    feed(rms: number, highBandAmplitude = 0.01) {
+    feed(rms: number, highBandAmplitude = 0.01, noise = false) {
       let energy = 0;
       for (let i = 0; i < pcm.length; i++) {
         const t = (frame * pcm.length + i) / 48000;
-        pcm[i] = Math.sin(2 * Math.PI * 220 * t) + 0.5 * Math.sin(2 * Math.PI * 440 * t) + highBandAmplitude * Math.sin(2 * Math.PI * 3200 * t);
+        if (noise) {
+          noiseSeed = (Math.imul(noiseSeed, 1664525) + 1013904223) >>> 0;
+          pcm[i] = noiseSeed / 2147483648 - 1;
+        } else {
+          pcm[i] = Math.sin(2 * Math.PI * 220 * t) + 0.5 * Math.sin(2 * Math.PI * 440 * t) + highBandAmplitude * Math.sin(2 * Math.PI * 3200 * t);
+        }
         energy += pcm[i] * pcm[i];
       }
       const scale = rms / Math.sqrt(energy / pcm.length);
@@ -42,7 +48,7 @@ async function analyzer() {
 }
 
 describe('WASM mouth opening from the recording', () => {
-  it('falls back safely when the Worklet receives an incompatible binary', async () => {
+  it('rejects an incompatible binary without running an alternative analysis', async () => {
     const messages: Array<{ type: string; error?: string }> = [];
     const sandbox = {
       AudioWorkletProcessor: class {
@@ -104,5 +110,19 @@ describe('WASM mouth opening from the recording', () => {
     voice.wasm.resetState();
     expect(voice.stats[4]).toBe(0);
     expect(voice.feed(0)).toBe(0);
+  });
+
+  it('estimates breath-like noise from PCM instead of retaining the initial full strength', async () => {
+    const breath = await analyzer();
+    const voiced = await analyzer();
+    for (let i = 0; i < 60; i++) {
+      breath.feed(0.16, 0, true);
+      voiced.feed(0.16, 0.4);
+    }
+    expect(breath.stats[1]).toBeCloseTo(voiced.stats[1], 5);
+    expect(breath.stats[4]).toBeGreaterThan(0);
+    expect(breath.stats[4]).toBeLessThan(voiced.stats[4] * 0.6);
+    for (let i = 0; i < 40; i++) breath.feed(0, 0, true);
+    expect(breath.stats[4]).toBe(0);
   });
 });

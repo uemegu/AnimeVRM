@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { getVoiceMouthScale, WHISPER_MOUTH_SCALE } from '../audio/lipSync';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -109,16 +108,12 @@ export interface StageOptions {
 
 /** 口パクで口を開く大きさ（普通の声） */
 export const LIP_SYNC_GAIN = 0.7;
-/** 囁き声の口の開き（普通の声に対する倍率） */
-export { WHISPER_MOUTH_SCALE } from '../audio/lipSync';
 
 export class StageManager {
   private canvas: HTMLCanvasElement;
   private presets: StagePresets;
   private readonly getSpeakerPhoneme?: () => string | undefined;
   private readonly getSpeakerMouthOpen?: () => number;
-  /** 話者の口の開きの倍率（囁き声は小さくする）。カットの voiceWhisper から決める */
-  private speakerMouthScale = 1;
   private readonly getCutTime?: () => number | undefined;
   private cutStartedAt = 0;
   private scene: THREE.Scene;
@@ -1115,11 +1110,6 @@ export class StageManager {
   }
 
   /** 口パクさせるキャラ（話者） */
-  /** 話者の口の開きの倍率。1 が普通の声、囁き声は WHISPER_MOUTH_SCALE（カットを渡すと voiceWhisper で上書きされる） */
-  public setSpeakerMouthScale(scale: number): void {
-    this.speakerMouthScale = scale;
-  }
-
   public setSpeaker(id: string | null): void {
     this.speakerId = id;
   }
@@ -1153,8 +1143,6 @@ export class StageManager {
   /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
   public setCutTimeline(scene: ScenarioScene | null): void {
     this.cutScene = scene;
-    // asmr_ の制限は音声解析側で適用済み。既存の手動指定と重なっても二重に縮めない。
-    this.speakerMouthScale = scene?.voiceWhisper && getVoiceMouthScale(scene.voiceUrl) === 1 ? WHISPER_MOUTH_SCALE : 1;
     this.cutTime = 0;
     this.cutStartedAt = this.clock.getElapsedTime();
     this.appliedCut.clear();
@@ -1553,7 +1541,7 @@ export class StageManager {
         if (!avatar?.vrm) continue;
         this.applyCutMotion(id, avatar);
         if (!avatar.vrm.scene.visible) continue;
-        avatar.updateLipSync(id === this.speakerId ? phoneme : undefined, LIP_SYNC_GAIN * this.speakerMouthScale * mouthOpen);
+        avatar.updateLipSync(id === this.speakerId ? phoneme : undefined, LIP_SYNC_GAIN * mouthOpen);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
         avatar.setWind(this.presets.locations[this.currentLocationId]?.wind);
