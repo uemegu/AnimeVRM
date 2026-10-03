@@ -10,6 +10,7 @@ class LipSyncProcessor extends AudioWorkletProcessor {
     this.ringBuffer = new Float32Array(1024);
     this.writeIndex = 0;
     this.totalSamples = 0;
+    this.generation = 0;
 
     // Throttle analysis to ~60Hz (approx every 735 samples at 44.1kHz or 800 samples at 48kHz)
     // 735 samples / 128 quantum = ~5.74 quantum blocks (~16.6ms)
@@ -32,6 +33,11 @@ class LipSyncProcessor extends AudioWorkletProcessor {
             }
           });
 
+          const abi = this.wasmInstance.exports.LIP_SYNC_ABI_VERSION;
+          if (Number(abi?.value ?? abi) !== 2) {
+            throw new Error('LipSync WASM/Worklet version mismatch');
+          }
+
           this.wasmMemory = this.wasmInstance.exports.memory;
           this.inputOffset = (this.wasmInstance.exports.INPUT_OFFSET ? Number(this.wasmInstance.exports.INPUT_OFFSET.value ?? this.wasmInstance.exports.INPUT_OFFSET) : 32768) >> 2;
           this.statsOffset = (this.wasmInstance.exports.STATS_OFFSET ? Number(this.wasmInstance.exports.STATS_OFFSET.value ?? this.wasmInstance.exports.STATS_OFFSET) : 53424) >> 2;
@@ -41,8 +47,10 @@ class LipSyncProcessor extends AudioWorkletProcessor {
             this.wasmInstance.exports.init(sampleRate || 44100.0);
           }
           this.analysisIntervalSamples = Math.round((sampleRate || 44100.0) / 60); // 60fps
-          this.port.postMessage({ type: 'wasm-ready' });
+          this.port.postMessage({ type: 'wasm-ready', data: { abiVersion: 2 } });
         } catch (err) {
+          this.wasmInstance = null;
+          this.wasmMemory = null;
           this.port.postMessage({ type: 'wasm-error', error: String(err) });
         }
       } else if (type === 'set-gender') {
@@ -58,6 +66,7 @@ class LipSyncProcessor extends AudioWorkletProcessor {
           this.wasmInstance.exports.setHoldFrames(data.frames);
         }
       } else if (type === 'reset') {
+        this.generation = data?.generation ?? this.generation + 1;
         this.writeIndex = 0;
         this.totalSamples = 0;
         this.samplesSinceLastAnalysis = 0;
@@ -93,6 +102,9 @@ class LipSyncProcessor extends AudioWorkletProcessor {
       this.totalSamples >= 1024 &&
       this.samplesSinceLastAnalysis >= this.analysisIntervalSamples
     ) {
+      if (this.wasmInstance.exports.setFrameDuration) {
+        this.wasmInstance.exports.setFrameDuration(this.samplesSinceLastAnalysis / sampleRate);
+      }
       this.samplesSinceLastAnalysis = 0;
       this.runAnalysis();
     }
@@ -119,12 +131,13 @@ class LipSyncProcessor extends AudioWorkletProcessor {
     this.wasmInstance.exports.processFrame();
 
     // Read STATS_OFFSET
-    // [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32)]
+    // [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32), mouthOpen (f32)]
     const statsIdx = this.statsOffset || 13356;
     const rawPhonemeIdx = memI32[statsIdx];
     const rms = memF32[statsIdx + 1];
     const f1 = memF32[statsIdx + 2];
     const f2 = memF32[statsIdx + 3];
+    const mouthOpen = memF32[statsIdx + 4];
 
     // Read DISTANCES_OFFSET
     // 0: aa, 1: ee, 2: ih, 3: oh, 4: ou
@@ -150,6 +163,8 @@ class LipSyncProcessor extends AudioWorkletProcessor {
         rms,
         f1,
         f2,
+        mouthOpen,
+        generation: this.generation,
         distances,
         processingTimeMs: duration
       }

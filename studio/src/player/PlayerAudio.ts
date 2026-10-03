@@ -1,5 +1,7 @@
 import type { AudioPan } from '@anime-vrm/scenario';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { getVoiceMouthScale } from '@anime-vrm/engine/audio/lipSync';
+import { VoiceAnalyser } from '@anime-vrm/engine/audio/VoiceAnalyser';
 
 const BGM_VOLUME = 0.35;
 const AMBIENCE_VOLUME = 0.25;
@@ -29,20 +31,16 @@ class Output {
     readonly audio: HTMLAudioElement,
     context: AudioContext | null,
     private readonly base: number,
-    /** 左右・音量の前に挟むノード（ボイスの解析用） */
-    insert?: AudioNode
+    /** 左右・音量の前から分岐する解析経路 */
+    analyse?: (source: MediaElementAudioSourceNode) => void
   ) {
     if (!context) return;
     try {
       const source = context.createMediaElementSource(audio);
       this.panner = context.createStereoPanner();
       this.gain = context.createGain();
-      if (insert) {
-        source.connect(insert);
-        insert.connect(this.panner);
-      } else {
-        source.connect(this.panner);
-      }
+      source.connect(this.panner);
+      analyse?.(source);
       this.panner.connect(this.gain);
       this.gain.connect(context.destination);
     } catch {
@@ -122,9 +120,10 @@ export class PlayerAudio {
   /** 鳴っている効果音（ミュートの切り替えを反映するため） */
   private readonly ses = new Map<Output, AudioMix>();
   private voice: Output | null = null;
+  private voiceFinished = false;
   private voiceMix: AudioMix = {};
-  private analyser: AnalyserNode | null = null;
-  private samples: Float32Array<ArrayBuffer> | null = null;
+  private voiceAnalyser: VoiceAnalyser | null = null;
+  private voiceMouthScale = 1;
   private mutedState: boolean;
   private onVoiceEnd: (() => void) | null = null;
 
@@ -188,19 +187,32 @@ export class PlayerAudio {
     if (!url) return;
     const audio = new Audio(resolveAssetUrl(url));
     const context = this.audioContext();
-    const analyser = context ? this.createAnalyser(context) : null;
-    const output = new Output(audio, context, VOICE_VOLUME, analyser ?? undefined);
-    this.analyser = output.routed ? analyser : null;
+    const output = new Output(audio, context, VOICE_VOLUME, (source) => {
+      if (context) this.voiceAnalyser = new VoiceAnalyser(context, source);
+    });
+    this.voiceMouthScale = getVoiceMouthScale(url);
     this.voice = output;
+    this.voiceFinished = false;
     this.voiceMix = mix;
     output.apply(mix, this.mutedState);
     this.onVoiceEnd = onEnd ?? null;
-    audio.addEventListener('ended', () => {
-      if (this.voice === output) this.onVoiceEnd?.();
-    });
+    const reset = () => {
+      if (this.voice === output) this.voiceAnalyser?.reset();
+    };
+    const finish = () => {
+      if (this.voice !== output || this.voiceFinished) return;
+      this.voiceFinished = true;
+      reset();
+      const onEnd = this.onVoiceEnd;
+      this.onVoiceEnd = null;
+      onEnd?.();
+    };
+    audio.addEventListener('pause', reset);
+    audio.addEventListener('error', finish);
+    audio.addEventListener('ended', finish);
     void audio.play().catch(() => {
       // 再生できなければ（自動再生の制限など）、終わったものとして扱う
-      if (this.voice === output) this.onVoiceEnd?.();
+      finish();
     });
   }
 
@@ -208,25 +220,27 @@ export class PlayerAudio {
     this.onVoiceEnd = null;
     this.voice?.audio.pause();
     this.voice = null;
+    this.voiceAnalyser?.dispose();
+    this.voiceAnalyser = null;
   }
 
   /** ボイスの再生位置（再生していなければ undefined） */
   getVoiceTime(): number | undefined {
     const voice = this.voice?.audio;
-    return voice && !voice.paused && !voice.ended ? voice.currentTime : undefined;
+    return voice && !this.voiceFinished && !voice.paused && !voice.ended ? voice.currentTime : undefined;
   }
 
   /** 口の形（声の大きさから。ミュート中も口は動かす） */
   getPhoneme(): string | undefined {
-    if (!this.analyser || !this.samples || this.getVoiceTime() === undefined) return undefined;
-    this.analyser.getFloatTimeDomainData(this.samples);
-    let sum = 0;
-    for (const v of this.samples) sum += v * v;
-    const rms = Math.sqrt(sum / this.samples.length);
-    if (rms < 0.02) return undefined;
-    // 母音は解析しないので、時間でゆるく口の形を変える
-    const shapes = ['aa', 'oh', 'ih', 'aa', 'ee'];
-    return shapes[Math.floor(performance.now() / 110) % shapes.length];
+    if (this.getVoiceTime() === undefined) return undefined;
+    const phoneme = this.voiceAnalyser?.getFrame().phoneme;
+    return phoneme === 'nn' ? undefined : phoneme;
+  }
+
+  /** 元の録音の声量による口の開き。再生音量やミュートには影響されない */
+  getMouthOpen(): number {
+    if (this.getVoiceTime() === undefined) return 0;
+    return (this.voiceAnalyser?.getFrame().mouthOpen ?? 0) * this.voiceMouthScale;
   }
 
   /** 共有の AudioContext（作れなければ null）。再生の操作のたびに呼び、止まっていれば再開する */
@@ -238,13 +252,6 @@ export class PlayerAudio {
     } catch {
       return null;
     }
-  }
-
-  private createAnalyser(context: AudioContext): AnalyserNode {
-    const analyser = context.createAnalyser();
-    analyser.fftSize = 1024;
-    this.samples = new Float32Array(analyser.fftSize);
-    return analyser;
   }
 
   dispose(): void {

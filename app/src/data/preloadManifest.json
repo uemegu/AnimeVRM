@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-01T16:12:39.340Z",
+  "generatedAt": "2026-10-03T15:17:07.285Z",
   "itemCount": 14,
-  "totalBytes": 179543185,
-  "totalMb": 171.2,
+  "totalBytes": 183177465,
+  "totalMb": 174.7,
   "items": [
     {
       "id": "aoi_school",
@@ -21,7 +21,7 @@
         "ja": "エミリ（制服モデル）",
         "en": "Emili (School)"
       },
-      "sizeBytes": 17182712,
+      "sizeBytes": 17473972,
       "type": "vrm"
     },
     {
@@ -31,7 +31,7 @@
         "ja": "シオン（制服モデル）",
         "en": "Shion (School)"
       },
-      "sizeBytes": 14305108,
+      "sizeBytes": 16131464,
       "type": "vrm"
     },
     {
@@ -51,7 +51,7 @@
         "ja": "エミリ（制服・リュック付き）",
         "en": "Emili (School with Bag)"
       },
-      "sizeBytes": 19627812,
+      "sizeBytes": 18477040,
       "type": "vrm"
     },
     {
@@ -61,7 +61,7 @@
         "ja": "シオン（制服・リュック付き）",
         "en": "Shion (School with Bag)"
       },
-      "sizeBytes": 15130088,
+      "sizeBytes": 17135892,
       "type": "vrm"
     },
     {
@@ -91,7 +91,7 @@
         "ja": "シオン（私服モデル）",
         "en": "Shion (Private)"
       },
-      "sizeBytes": 15411372,
+      "sizeBytes": 16071720,
       "type": "vrm"
     },
     {
@@ -131,7 +131,7 @@
         "ja": "リップシンク解析モジュール",
         "en": "LipSync WASM"
       },
-      "sizeBytes": 6774,
+      "sizeBytes": 7392,
       "type": "wasm"
     },
     {
@@ -141,7 +141,7 @@
         "ja": "オーディオプロセッサ",
         "en": "Audio Worklet"
       },
-      "sizeBytes": 5737,
+      "sizeBytes": 6403,
       "type": "binary"
     }
   ]

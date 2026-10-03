@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DEFAULT_AVATAR_LOOK, EffectTextPreset, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
-import { WHISPER_MOUTH_SCALE, type StageManager } from '@anime-vrm/engine/stage/StageManager';
+import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { api, type AssetEntry } from '../../api/client';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
@@ -140,10 +140,7 @@ export function ViewerView() {
     setMuted(audio.muted);
   };
   const getPhoneme = useCallback(() => audioRef.current?.getPhoneme(), []);
-
-  // 囁き声として試聴するか（口を小さく開く）。試聴用なので保存しない。シナリオではセリフの voiceWhisper で指定する
-  const [whisper, setWhisper] = useState(false);
-  const mouthScale = playingVoice && whisper ? WHISPER_MOUTH_SCALE : 1;
+  const getMouthOpen = useCallback(() => audioRef.current?.getMouthOpen() ?? 0, []);
 
   const characters = book?.characters.filter((c) => c.models.length > 0) ?? [];
   const character = characters.find((c) => c.id === characterId);
@@ -325,8 +322,6 @@ export function ViewerView() {
             <VoiceLibrary
               voices={voices}
               playingUrl={playingVoice}
-              whisper={whisper}
-              onToggleWhisper={() => setWhisper((current) => !current)}
               muted={muted}
               onToggle={toggleVoice}
               onToggleMute={toggleMute}
@@ -371,7 +366,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} getSpeakerPhoneme={getPhoneme} mouthScale={mouthScale} onManager={onManager} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
         </div>
 
         <p className="viewer-caption">

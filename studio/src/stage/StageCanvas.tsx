@@ -42,7 +42,9 @@ interface Props {
   onManager?: (manager: StageManager | null) => void;
   /** 話者（focusId）の口の形。ボイスを鳴らしている間だけ返す */
   getSpeakerPhoneme?: () => string | undefined;
-  /** 話者の口の開きの倍率（囁き声は小さくする）。カットを渡すときは不要（カットの voiceWhisper で決まる） */
+  /** 音声の音量に合わせた口の開き（0〜1） */
+  getSpeakerMouthOpen?: () => number;
+  /** 音声から求めた口の開きに追加する倍率 */
   mouthScale?: number;
 }
 
@@ -69,6 +71,7 @@ export function StageCanvas({
   onShotRig,
   onManager,
   getSpeakerPhoneme,
+  getSpeakerMouthOpen,
   mouthScale,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,7 +79,9 @@ export function StageCanvas({
   const { language } = useI18n();
   const { loading, run: runSetCast } = useCastLoading(managerRef);
   const phonemeRef = useRef(getSpeakerPhoneme);
+  const mouthOpenRef = useRef(getSpeakerMouthOpen);
   phonemeRef.current = getSpeakerPhoneme;
+  mouthOpenRef.current = getSpeakerMouthOpen;
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -87,6 +92,7 @@ export function StageCanvas({
       initialLocationId: locationId,
       language,
       getSpeakerPhoneme: () => phonemeRef.current?.(),
+      getSpeakerMouthOpen: () => mouthOpenRef.current?.() ?? 1,
     });
     managerRef.current = manager;
     onManager?.(manager);
@@ -139,7 +145,7 @@ export function StageCanvas({
 
   // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
   const cutKey = JSON.stringify(
-    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, cameraShift: cut.cameraShift, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceWhisper: cut.voiceWhisper } : null
+    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, cameraShift: cut.cameraShift, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines, voiceUrl: cut.voiceUrl, voiceWhisper: cut.voiceWhisper } : null
   );
   useEffect(() => {
     const manager = managerRef.current;

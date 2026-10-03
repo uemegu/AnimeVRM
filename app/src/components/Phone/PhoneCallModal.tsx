@@ -5,6 +5,7 @@ import { resolveLocalizedText } from '../../types/scenario';
 import { CallScenario, CommunicationResult } from '../../types/communication';
 import { StageAvatar } from '@anime-vrm/engine/stage/StageAvatar';
 import { LIP_SYNC_GAIN, WHISPER_MOUTH_SCALE } from '@anime-vrm/engine/stage/StageManager';
+import { getVoiceMouthScale } from '@anime-vrm/engine/audio/lipSync';
 import { CHARACTERS } from '../../data/characters';
 import { TIME_OF_DAY_PRESETS } from '../../data/timeOfDayPresets';
 import { DialogueBox } from '../Dialogue/DialogueBox';
@@ -37,7 +38,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   const step = scenario.steps[currentStepId];
   // 描画ループから今のステップの囁き指定を読む
   const whisperRef = useRef(false);
-  whisperRef.current = step?.voiceWhisper === true;
+  whisperRef.current = step?.voiceWhisper === true && getVoiceMouthScale(step.voiceUrl) === 1;
   const char = CHARACTERS[scenario.characterId];
   const charName = char ? resolveLocalizedText(char.name, lang) : scenario.characterId;
   const heroineColor = char?.themeColor || '#38bdf8';
@@ -126,7 +127,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     const animate = () => {
       if (isDisposed) return;
       const delta = clock.getDelta();
-      avatar.updateLipSync(soundManager.getVoicePhoneme(), LIP_SYNC_GAIN * (whisperRef.current ? WHISPER_MOUTH_SCALE : 1));
+      avatar.updateLipSync(soundManager.getVoicePhoneme(), LIP_SYNC_GAIN * soundManager.getVoiceMouthOpen() * (whisperRef.current ? WHISPER_MOUTH_SCALE : 1));
       avatar.update(delta);
       renderer.render(scene, camera);
       animationFrameId = requestAnimationFrame(animate);

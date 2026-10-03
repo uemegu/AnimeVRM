@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { getVoiceMouthScale, WHISPER_MOUTH_SCALE } from '../audio/lipSync';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -91,6 +92,8 @@ export interface StageOptions {
   presets: StagePresets;
   /** 話しているキャラの口の形（音声の解析結果）。なければ口パクしない */
   getSpeakerPhoneme?: () => string | undefined;
+  /** 音声解析による開口度（0〜1）。未指定なら従来の固定幅で動かす */
+  getSpeakerMouthOpen?: () => number;
   /**
    * カット内の時刻（ボイスの再生位置など）。指定すると毎フレームこの時刻でタイムラインを進める。
    * undefined を返したときはカット開始からの経過秒数を使う（Studio のように自分で setCutTime する場合は指定しない）
@@ -107,12 +110,13 @@ export interface StageOptions {
 /** 口パクで口を開く大きさ（普通の声） */
 export const LIP_SYNC_GAIN = 0.7;
 /** 囁き声の口の開き（普通の声に対する倍率） */
-export const WHISPER_MOUTH_SCALE = 0.4;
+export { WHISPER_MOUTH_SCALE } from '../audio/lipSync';
 
 export class StageManager {
   private canvas: HTMLCanvasElement;
   private presets: StagePresets;
   private readonly getSpeakerPhoneme?: () => string | undefined;
+  private readonly getSpeakerMouthOpen?: () => number;
   /** 話者の口の開きの倍率（囁き声は小さくする）。カットの voiceWhisper から決める */
   private speakerMouthScale = 1;
   private readonly getCutTime?: () => number | undefined;
@@ -239,6 +243,7 @@ export class StageManager {
     this.canvas = options.canvas;
     this.presets = options.presets;
     this.getSpeakerPhoneme = options.getSpeakerPhoneme;
+    this.getSpeakerMouthOpen = options.getSpeakerMouthOpen;
     this.getCutTime = options.getCutTime;
     this.language = options.language ?? 'ja';
     this.quality = resolveStageQuality(options.quality);
@@ -1148,7 +1153,8 @@ export class StageManager {
   /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
   public setCutTimeline(scene: ScenarioScene | null): void {
     this.cutScene = scene;
-    this.speakerMouthScale = scene?.voiceWhisper ? WHISPER_MOUTH_SCALE : 1;
+    // asmr_ の制限は音声解析側で適用済み。既存の手動指定と重なっても二重に縮めない。
+    this.speakerMouthScale = scene?.voiceWhisper && getVoiceMouthScale(scene.voiceUrl) === 1 ? WHISPER_MOUTH_SCALE : 1;
     this.cutTime = 0;
     this.cutStartedAt = this.clock.getElapsedTime();
     this.appliedCut.clear();
@@ -1540,12 +1546,14 @@ export class StageManager {
 
       // 1. 登場中のアバターの更新（口パクは話者だけ）
       const activeMeshes: THREE.Object3D[] = [];
+      const phoneme = this.getSpeakerPhoneme?.();
+      const mouthOpen = this.getSpeakerMouthOpen?.() ?? 1;
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm) continue;
         this.applyCutMotion(id, avatar);
         if (!avatar.vrm.scene.visible) continue;
-        avatar.updateLipSync(id === this.speakerId ? this.getSpeakerPhoneme?.() : undefined, LIP_SYNC_GAIN * this.speakerMouthScale);
+        avatar.updateLipSync(id === this.speakerId ? phoneme : undefined, LIP_SYNC_GAIN * this.speakerMouthScale * mouthOpen);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
         avatar.setWind(this.presets.locations[this.currentLocationId]?.wind);

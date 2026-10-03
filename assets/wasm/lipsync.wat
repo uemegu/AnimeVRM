@@ -1,8 +1,8 @@
 (module
  (type $0 (func (param f64) (result f64)))
- (type $1 (func))
- (type $2 (func (param f32) (result f32)))
- (type $3 (func (param f32)))
+ (type $1 (func (param f32)))
+ (type $2 (func))
+ (type $3 (func (param f32) (result f32)))
  (type $4 (func (param i32)))
  (type $5 (func (param i32 i32) (result f32)))
  (type $6 (func (param i64) (result i32)))
@@ -11,6 +11,7 @@
  (global $assembly/index/INPUT_OFFSET i32 (i32.const 32768))
  (global $assembly/index/DISTANCES_OFFSET i32 (i32.const 53404))
  (global $assembly/index/STATS_OFFSET i32 (i32.const 53424))
+ (global $assembly/index/LIP_SYNC_ABI_VERSION i32 (i32.const 2))
  (global $assembly/index/currentPhoneme (mut i32) (i32.const -1))
  (global $assembly/index/isVoicing (mut i32) (i32.const 0))
  (global $assembly/index/silenceHoldCounter (mut i32) (i32.const 0))
@@ -20,6 +21,10 @@
  (global $assembly/index/voiceGender (mut i32) (i32.const 0))
  (global $assembly/index/sampleRate (mut f32) (f32.const 44100))
  (global $assembly/index/initialized (mut i32) (i32.const 0))
+ (global $assembly/index/mouthOpen (mut f32) (f32.const 0))
+ (global $assembly/index/spectralStrength (mut f32) (f32.const 1))
+ (global $assembly/index/hasSpectralStrength (mut i32) (i32.const 0))
+ (global $assembly/index/frameDuration (mut f32) (f32.const 0))
  (global $~lib/math/rempio2_y0 (mut f64) (f64.const 0))
  (global $~lib/math/rempio2_y1 (mut f64) (f64.const 0))
  (global $~lib/math/res128_hi (mut i64) (i64.const 0))
@@ -40,6 +45,8 @@
  (export "INPUT_OFFSET" (global $assembly/index/INPUT_OFFSET))
  (export "DISTANCES_OFFSET" (global $assembly/index/DISTANCES_OFFSET))
  (export "STATS_OFFSET" (global $assembly/index/STATS_OFFSET))
+ (export "LIP_SYNC_ABI_VERSION" (global $assembly/index/LIP_SYNC_ABI_VERSION))
+ (export "setFrameDuration" (func $assembly/index/setFrameDuration))
  (export "init" (func $assembly/index/init))
  (export "setVoiceGender" (func $assembly/index/setVoiceGender))
  (export "setRmsThreshold" (func $assembly/index/setRmsThreshold))
@@ -47,6 +54,7 @@
  (export "resetState" (func $assembly/index/resetState))
  (export "processFrame" (func $assembly/index/processFrame))
  (export "memory" (memory $0))
+ (start $~start)
  (func $~lib/math/NativeMath.round (param $0 f64) (result f64)
   local.get $0
   f64.ceil
@@ -82,6 +90,391 @@
   i32.shl
   i32.add
   f32.load
+ )
+ (func $~lib/math/NativeMath.log (param $0 f64) (result f64)
+  (local $1 i32)
+  (local $2 i64)
+  (local $3 i32)
+  (local $4 f64)
+  (local $5 i32)
+  (local $6 f64)
+  (local $7 f64)
+  (local $8 f64)
+  local.get $0
+  i64.reinterpret_f64
+  local.tee $2
+  i64.const 32
+  i64.shr_u
+  i32.wrap_i64
+  local.tee $1
+  i32.const 31
+  i32.shr_u
+  local.tee $3
+  local.get $1
+  i32.const 1048576
+  i32.lt_u
+  i32.or
+  if
+   local.get $2
+   i64.const 1
+   i64.shl
+   i64.eqz
+   if
+    f64.const -1
+    local.get $0
+    local.get $0
+    f64.mul
+    f64.div
+    return
+   end
+   local.get $3
+   if
+    local.get $0
+    local.get $0
+    f64.sub
+    f64.const 0
+    f64.div
+    return
+   end
+   i32.const -54
+   local.set $5
+   local.get $0
+   f64.const 18014398509481984
+   f64.mul
+   i64.reinterpret_f64
+   local.tee $2
+   i64.const 32
+   i64.shr_u
+   i32.wrap_i64
+   local.set $1
+  else
+   local.get $1
+   i32.const 2146435072
+   i32.ge_u
+   if
+    local.get $0
+    return
+   else
+    local.get $2
+    i64.const 32
+    i64.shl
+    i64.eqz
+    local.get $1
+    i32.const 1072693248
+    i32.eq
+    i32.and
+    if
+     f64.const 0
+     return
+    end
+   end
+  end
+  local.get $2
+  i64.const 4294967295
+  i64.and
+  local.get $1
+  i32.const 614242
+  i32.add
+  local.tee $1
+  i32.const 1048575
+  i32.and
+  i32.const 1072079006
+  i32.add
+  i64.extend_i32_u
+  i64.const 32
+  i64.shl
+  i64.or
+  f64.reinterpret_i64
+  f64.const -1
+  f64.add
+  local.tee $7
+  f64.const 0.5
+  f64.mul
+  local.get $7
+  f64.mul
+  local.set $0
+  local.get $7
+  local.get $7
+  f64.const 2
+  f64.add
+  f64.div
+  local.tee $8
+  local.get $8
+  f64.mul
+  local.tee $4
+  local.get $4
+  f64.mul
+  local.set $6
+  local.get $8
+  local.get $0
+  local.get $4
+  local.get $6
+  local.get $6
+  local.get $6
+  f64.const 0.14798198605116586
+  f64.mul
+  f64.const 0.1818357216161805
+  f64.add
+  f64.mul
+  f64.const 0.2857142874366239
+  f64.add
+  f64.mul
+  f64.const 0.6666666666666735
+  f64.add
+  f64.mul
+  local.get $6
+  local.get $6
+  local.get $6
+  f64.const 0.15313837699209373
+  f64.mul
+  f64.const 0.22222198432149784
+  f64.add
+  f64.mul
+  f64.const 0.3999999999940942
+  f64.add
+  f64.mul
+  f64.add
+  f64.add
+  f64.mul
+  local.get $5
+  local.get $1
+  i32.const 20
+  i32.shr_s
+  i32.const 1023
+  i32.sub
+  i32.add
+  f64.convert_i32_s
+  local.tee $4
+  f64.const 1.9082149292705877e-10
+  f64.mul
+  f64.add
+  local.get $0
+  f64.sub
+  local.get $7
+  f64.add
+  local.get $4
+  f64.const 0.6931471803691238
+  f64.mul
+  f64.add
+ )
+ (func $~lib/math/NativeMath.exp (param $0 f64) (result f64)
+  (local $1 i32)
+  (local $2 f64)
+  (local $3 i32)
+  (local $4 f64)
+  (local $5 i32)
+  (local $6 f64)
+  (local $7 f64)
+  local.get $0
+  i64.reinterpret_f64
+  i64.const 32
+  i64.shr_u
+  i32.wrap_i64
+  local.tee $1
+  i32.const 31
+  i32.shr_u
+  local.set $5
+  local.get $1
+  i32.const 2147483647
+  i32.and
+  local.tee $1
+  i32.const 1082532651
+  i32.ge_u
+  if
+   local.get $0
+   local.get $0
+   f64.ne
+   if
+    local.get $0
+    return
+   end
+   local.get $0
+   f64.const 709.782712893384
+   f64.gt
+   if
+    local.get $0
+    f64.const 8988465674311579538646525e283
+    f64.mul
+    return
+   end
+   local.get $0
+   f64.const -745.1332191019411
+   f64.lt
+   if
+    f64.const 0
+    return
+   end
+  end
+  local.get $1
+  i32.const 1071001154
+  i32.gt_u
+  if
+   local.get $0
+   local.get $0
+   f64.const 1.4426950408889634
+   f64.mul
+   f64.const 0.5
+   local.get $0
+   f64.copysign
+   f64.add
+   i32.trunc_sat_f64_s
+   i32.const 1
+   local.get $5
+   i32.const 1
+   i32.shl
+   i32.sub
+   local.get $1
+   i32.const 1072734898
+   i32.ge_u
+   select
+   local.tee $3
+   f64.convert_i32_s
+   f64.const 0.6931471803691238
+   f64.mul
+   f64.sub
+   local.tee $2
+   local.get $3
+   f64.convert_i32_s
+   f64.const 1.9082149292705877e-10
+   f64.mul
+   local.tee $6
+   f64.sub
+   local.set $0
+  else
+   local.get $1
+   i32.const 1043333120
+   i32.le_u
+   if
+    local.get $0
+    f64.const 1
+    f64.add
+    return
+   end
+   local.get $0
+   local.set $2
+  end
+  local.get $0
+  local.get $0
+  f64.mul
+  local.tee $7
+  local.get $7
+  f64.mul
+  local.set $4
+  local.get $0
+  local.get $0
+  local.get $7
+  f64.const 0.16666666666666602
+  f64.mul
+  local.get $4
+  local.get $7
+  f64.const 6.613756321437934e-05
+  f64.mul
+  f64.const -2.7777777777015593e-03
+  f64.add
+  local.get $4
+  local.get $7
+  f64.const 4.1381367970572385e-08
+  f64.mul
+  f64.const -1.6533902205465252e-06
+  f64.add
+  f64.mul
+  f64.add
+  f64.mul
+  f64.add
+  f64.sub
+  local.tee $0
+  f64.mul
+  f64.const 2
+  local.get $0
+  f64.sub
+  f64.div
+  local.get $6
+  f64.sub
+  local.get $2
+  f64.add
+  f64.const 1
+  f64.add
+  local.tee $2
+  local.set $0
+  local.get $3
+  local.tee $1
+  i32.const 1023
+  i32.gt_s
+  if (result f64)
+   local.get $0
+   f64.const 8988465674311579538646525e283
+   f64.mul
+   local.set $0
+   local.get $1
+   i32.const 1023
+   i32.sub
+   local.tee $1
+   i32.const 1023
+   i32.gt_s
+   if (result f64)
+    i32.const 1023
+    local.get $1
+    i32.const 1023
+    i32.sub
+    local.tee $1
+    local.get $1
+    i32.const 1023
+    i32.ge_s
+    select
+    local.set $1
+    local.get $0
+    f64.const 8988465674311579538646525e283
+    f64.mul
+   else
+    local.get $0
+   end
+  else
+   local.get $1
+   i32.const -1022
+   i32.lt_s
+   if (result f64)
+    local.get $0
+    f64.const 2.004168360008973e-292
+    f64.mul
+    local.set $0
+    local.get $1
+    i32.const 969
+    i32.add
+    local.tee $1
+    i32.const -1022
+    i32.lt_s
+    if (result f64)
+     i32.const -1022
+     local.get $1
+     i32.const 969
+     i32.add
+     local.tee $1
+     local.get $1
+     i32.const -1022
+     i32.le_s
+     select
+     local.set $1
+     local.get $0
+     f64.const 2.004168360008973e-292
+     f64.mul
+    else
+     local.get $0
+    end
+   else
+    local.get $0
+   end
+  end
+  local.get $1
+  i64.extend_i32_s
+  i64.const 1023
+  i64.add
+  i64.const 52
+  i64.shl
+  f64.reinterpret_i64
+  f64.mul
+  local.get $2
+  local.get $3
+  select
  )
  (func $~lib/math/NativeMath.cos (param $0 f64) (result f64)
   (local $1 f64)
@@ -713,171 +1106,51 @@
   i64.sub
   i32.wrap_i64
  )
- (func $~lib/math/NativeMath.log (param $0 f64) (result f64)
-  (local $1 i32)
-  (local $2 i64)
-  (local $3 i32)
-  (local $4 f64)
-  (local $5 i32)
-  (local $6 f64)
-  (local $7 f64)
-  (local $8 f64)
+ (func $assembly/index/updateMouthOpen (param $0 f32)
+  global.get $assembly/index/mouthOpen
   local.get $0
-  i64.reinterpret_f64
-  local.tee $2
-  i64.const 32
-  i64.shr_u
-  i32.wrap_i64
-  local.tee $1
-  i32.const 31
-  i32.shr_u
-  local.tee $3
-  local.get $1
-  i32.const 1048576
-  i32.lt_u
-  i32.or
+  f32.const -0.003000000026077032
+  f32.add
+  f32.const 0.2770000100135803
+  f32.div
+  f64.promote_f32
+  f64.const 0
+  f64.max
+  f64.const 1
+  f64.min
+  f32.demote_f64
+  global.get $assembly/index/spectralStrength
+  f32.mul
+  local.tee $0
+  global.get $assembly/index/mouthOpen
+  f32.sub
+  f32.const 1
+  global.get $assembly/index/frameDuration
+  f32.neg
+  f32.const 0.02500000037252903
+  f32.const 0.07999999821186066
+  local.get $0
+  global.get $assembly/index/mouthOpen
+  f32.gt
+  select
+  f32.div
+  f64.promote_f32
+  call $~lib/math/NativeMath.exp
+  f32.demote_f64
+  f32.sub
+  f32.mul
+  f32.add
+  global.set $assembly/index/mouthOpen
+  global.get $assembly/index/mouthOpen
+  f32.const 1.0000000474974513e-03
+  f32.lt
   if
-   local.get $2
-   i64.const 1
-   i64.shl
-   i64.eqz
-   if
-    f64.const -1
-    local.get $0
-    local.get $0
-    f64.mul
-    f64.div
-    return
-   end
-   local.get $3
-   if
-    local.get $0
-    local.get $0
-    f64.sub
-    f64.const 0
-    f64.div
-    return
-   end
-   i32.const -54
-   local.set $5
-   local.get $0
-   f64.const 18014398509481984
-   f64.mul
-   i64.reinterpret_f64
-   local.tee $2
-   i64.const 32
-   i64.shr_u
-   i32.wrap_i64
-   local.set $1
-  else
-   local.get $1
-   i32.const 2146435072
-   i32.ge_u
-   if
-    local.get $0
-    return
-   else
-    local.get $2
-    i64.const 32
-    i64.shl
-    i64.eqz
-    local.get $1
-    i32.const 1072693248
-    i32.eq
-    i32.and
-    if
-     f64.const 0
-     return
-    end
-   end
+   f32.const 0
+   global.set $assembly/index/mouthOpen
   end
-  local.get $2
-  i64.const 4294967295
-  i64.and
-  local.get $1
-  i32.const 614242
-  i32.add
-  local.tee $1
-  i32.const 1048575
-  i32.and
-  i32.const 1072079006
-  i32.add
-  i64.extend_i32_u
-  i64.const 32
-  i64.shl
-  i64.or
-  f64.reinterpret_i64
-  f64.const -1
-  f64.add
-  local.tee $7
-  f64.const 0.5
-  f64.mul
-  local.get $7
-  f64.mul
-  local.set $0
-  local.get $7
-  local.get $7
-  f64.const 2
-  f64.add
-  f64.div
-  local.tee $8
-  local.get $8
-  f64.mul
-  local.tee $4
-  local.get $4
-  f64.mul
-  local.set $6
-  local.get $8
-  local.get $0
-  local.get $4
-  local.get $6
-  local.get $6
-  local.get $6
-  f64.const 0.14798198605116586
-  f64.mul
-  f64.const 0.1818357216161805
-  f64.add
-  f64.mul
-  f64.const 0.2857142874366239
-  f64.add
-  f64.mul
-  f64.const 0.6666666666666735
-  f64.add
-  f64.mul
-  local.get $6
-  local.get $6
-  local.get $6
-  f64.const 0.15313837699209373
-  f64.mul
-  f64.const 0.22222198432149784
-  f64.add
-  f64.mul
-  f64.const 0.3999999999940942
-  f64.add
-  f64.mul
-  f64.add
-  f64.add
-  f64.mul
-  local.get $5
-  local.get $1
-  i32.const 20
-  i32.shr_s
-  i32.const 1023
-  i32.sub
-  i32.add
-  f64.convert_i32_s
-  local.tee $4
-  f64.const 1.9082149292705877e-10
-  f64.mul
-  f64.add
-  local.get $0
-  f64.sub
-  local.get $7
-  f64.add
-  local.get $4
-  f64.const 0.6931471803691238
-  f64.mul
-  f64.add
+  i32.const 53440
+  global.get $assembly/index/mouthOpen
+  f32.store
  )
  (func $assembly/index/init (param $0 f32)
   (local $1 i32)
@@ -1154,6 +1427,10 @@
   f32.demote_f64
   f32.const 1125
   f32.mul
+ )
+ (func $~start
+  f32.const 0.01666666753590107
+  global.set $assembly/index/frameDuration
  )
  (func $~lib/math/NativeMath.sin (param $0 f64) (result f64)
   (local $1 f64)
@@ -1467,225 +1744,6 @@
   i32.and
   select
  )
- (func $~lib/math/NativeMath.exp (param $0 f64) (result f64)
-  (local $1 i32)
-  (local $2 f64)
-  (local $3 i32)
-  (local $4 f64)
-  (local $5 i32)
-  (local $6 f64)
-  (local $7 f64)
-  local.get $0
-  i64.reinterpret_f64
-  i64.const 32
-  i64.shr_u
-  i32.wrap_i64
-  local.tee $1
-  i32.const 31
-  i32.shr_u
-  local.set $5
-  local.get $1
-  i32.const 2147483647
-  i32.and
-  local.tee $1
-  i32.const 1082532651
-  i32.ge_u
-  if
-   local.get $0
-   local.get $0
-   f64.ne
-   if
-    local.get $0
-    return
-   end
-   local.get $0
-   f64.const 709.782712893384
-   f64.gt
-   if
-    local.get $0
-    f64.const 8988465674311579538646525e283
-    f64.mul
-    return
-   end
-   local.get $0
-   f64.const -745.1332191019411
-   f64.lt
-   if
-    f64.const 0
-    return
-   end
-  end
-  local.get $1
-  i32.const 1071001154
-  i32.gt_u
-  if
-   local.get $0
-   local.get $0
-   f64.const 1.4426950408889634
-   f64.mul
-   f64.const 0.5
-   local.get $0
-   f64.copysign
-   f64.add
-   i32.trunc_sat_f64_s
-   i32.const 1
-   local.get $5
-   i32.const 1
-   i32.shl
-   i32.sub
-   local.get $1
-   i32.const 1072734898
-   i32.ge_u
-   select
-   local.tee $3
-   f64.convert_i32_s
-   f64.const 0.6931471803691238
-   f64.mul
-   f64.sub
-   local.tee $2
-   local.get $3
-   f64.convert_i32_s
-   f64.const 1.9082149292705877e-10
-   f64.mul
-   local.tee $6
-   f64.sub
-   local.set $0
-  else
-   local.get $1
-   i32.const 1043333120
-   i32.le_u
-   if
-    local.get $0
-    f64.const 1
-    f64.add
-    return
-   end
-   local.get $0
-   local.set $2
-  end
-  local.get $0
-  local.get $0
-  f64.mul
-  local.tee $7
-  local.get $7
-  f64.mul
-  local.set $4
-  local.get $0
-  local.get $0
-  local.get $7
-  f64.const 0.16666666666666602
-  f64.mul
-  local.get $4
-  local.get $7
-  f64.const 6.613756321437934e-05
-  f64.mul
-  f64.const -2.7777777777015593e-03
-  f64.add
-  local.get $4
-  local.get $7
-  f64.const 4.1381367970572385e-08
-  f64.mul
-  f64.const -1.6533902205465252e-06
-  f64.add
-  f64.mul
-  f64.add
-  f64.mul
-  f64.add
-  f64.sub
-  local.tee $0
-  f64.mul
-  f64.const 2
-  local.get $0
-  f64.sub
-  f64.div
-  local.get $6
-  f64.sub
-  local.get $2
-  f64.add
-  f64.const 1
-  f64.add
-  local.tee $2
-  local.set $0
-  local.get $3
-  local.tee $1
-  i32.const 1023
-  i32.gt_s
-  if (result f64)
-   local.get $0
-   f64.const 8988465674311579538646525e283
-   f64.mul
-   local.set $0
-   local.get $1
-   i32.const 1023
-   i32.sub
-   local.tee $1
-   i32.const 1023
-   i32.gt_s
-   if (result f64)
-    i32.const 1023
-    local.get $1
-    i32.const 1023
-    i32.sub
-    local.tee $1
-    local.get $1
-    i32.const 1023
-    i32.ge_s
-    select
-    local.set $1
-    local.get $0
-    f64.const 8988465674311579538646525e283
-    f64.mul
-   else
-    local.get $0
-   end
-  else
-   local.get $1
-   i32.const -1022
-   i32.lt_s
-   if (result f64)
-    local.get $0
-    f64.const 2.004168360008973e-292
-    f64.mul
-    local.set $0
-    local.get $1
-    i32.const 969
-    i32.add
-    local.tee $1
-    i32.const -1022
-    i32.lt_s
-    if (result f64)
-     i32.const -1022
-     local.get $1
-     i32.const 969
-     i32.add
-     local.tee $1
-     local.get $1
-     i32.const -1022
-     i32.le_s
-     select
-     local.set $1
-     local.get $0
-     f64.const 2.004168360008973e-292
-     f64.mul
-    else
-     local.get $0
-    end
-   else
-    local.get $0
-   end
-  end
-  local.get $1
-  i64.extend_i32_s
-  i64.const 1023
-  i64.add
-  i64.const 52
-  i64.shl
-  f64.reinterpret_i64
-  f64.mul
-  local.get $2
-  local.get $3
-  select
- )
  (func $assembly/index/setVoiceGender (param $0 i32)
   local.get $0
   global.set $assembly/index/voiceGender
@@ -1697,6 +1755,16 @@
  (func $assembly/index/setHoldFrames (param $0 i32)
   local.get $0
   global.set $assembly/index/holdFrames
+ )
+ (func $assembly/index/setFrameDuration (param $0 f32)
+  local.get $0
+  f64.promote_f32
+  f64.const 0.001
+  f64.max
+  f64.const 0.1
+  f64.min
+  f32.demote_f64
+  global.set $assembly/index/frameDuration
  )
  (func $assembly/index/runFft
   (local $0 i32)
@@ -1894,10 +1962,19 @@
   global.set $assembly/index/silenceHoldCounter
   f32.const 0
   global.set $assembly/index/smoothedRms
+  f32.const 0
+  global.set $assembly/index/mouthOpen
+  f32.const 1
+  global.set $assembly/index/spectralStrength
+  i32.const 0
+  global.set $assembly/index/hasSpectralStrength
+  i32.const 53440
+  f32.const 0
+  f32.store
  )
  (func $assembly/index/processFrame
-  (local $0 f32)
-  (local $1 i32)
+  (local $0 i32)
+  (local $1 f32)
   (local $2 f32)
   (local $3 i32)
   (local $4 i32)
@@ -1916,37 +1993,37 @@
    call $assembly/index/init
   end
   loop $for-loop|0
-   local.get $1
+   local.get $0
    i32.const 1024
    i32.lt_s
    if
     local.get $2
-    local.get $1
+    local.get $0
     i32.const 2
     i32.shl
     local.tee $3
     i32.const 32768
     i32.add
     f32.load
-    local.tee $0
-    local.get $0
+    local.tee $9
+    local.get $9
     f32.mul
     f32.add
     local.set $2
     local.get $3
     i32.const 36864
     i32.add
-    local.get $0
+    local.get $9
     local.get $3
     i32.const 54000
     i32.add
     f32.load
     f32.mul
     f32.store
-    local.get $1
+    local.get $0
     i32.const 1
     i32.add
-    local.set $1
+    local.set $0
     br $for-loop|0
    end
   end
@@ -1959,21 +2036,21 @@
   f64.promote_f32
   f64.sqrt
   f32.demote_f64
-  local.tee $0
+  local.tee $9
   f32.const 0.4000000059604645
   f32.mul
   f32.add
   global.set $assembly/index/smoothedRms
-  local.get $0
+  local.get $9
   global.get $assembly/index/smoothedRms
-  local.get $0
+  local.get $9
   global.get $assembly/index/smoothedRms
   f32.gt
   select
-  local.set $7
+  local.set $10
   global.get $assembly/index/isVoicing
   if
-   local.get $7
+   local.get $10
    f32.const 0.003000000026077032
    f32.lt
    if
@@ -1994,7 +2071,7 @@
     global.set $assembly/index/silenceHoldCounter
    end
   else
-   local.get $7
+   local.get $10
    global.get $assembly/index/rmsThreshold
    f32.ge
    if
@@ -2013,7 +2090,7 @@
    i32.const -1
    i32.store
    i32.const 53428
-   local.get $7
+   local.get $10
    f32.store
    i32.const 53432
    f32.const 0
@@ -2022,67 +2099,228 @@
    f32.const 0
    f32.store
    i32.const 0
-   local.set $1
+   local.set $0
    loop $for-loop|1
-    local.get $1
+    local.get $0
     i32.const 5
     i32.lt_s
     if
-     local.get $1
+     local.get $0
      i32.const 2
      i32.shl
      i32.const 53404
      i32.add
      f32.const 99
      f32.store
-     local.get $1
+     local.get $0
      i32.const 1
      i32.add
-     local.set $1
+     local.set $0
      br $for-loop|1
     end
    end
+   local.get $9
+   call $assembly/index/updateMouthOpen
    return
   end
   call $assembly/index/runFft
   i32.const 0
-  local.set $1
+  local.set $0
   loop $for-loop|2
-   local.get $1
+   local.get $0
    i32.const 512
    i32.lt_s
    if
-    local.get $1
+    local.get $0
     i32.const 2
     i32.shl
     local.tee $3
     i32.const 40960
     i32.add
     f32.load
-    local.set $0
+    local.set $2
     local.get $3
     i32.const 49152
     i32.add
-    local.get $0
-    local.get $0
+    local.get $2
+    local.get $2
     f32.mul
     local.get $3
     i32.const 45056
     i32.add
     f32.load
-    local.tee $0
-    local.get $0
+    local.tee $2
+    local.get $2
     f32.mul
     f32.add
     f32.store
-    local.get $1
+    local.get $0
     i32.const 1
     i32.add
-    local.set $1
+    local.set $0
     br $for-loop|2
    end
   end
-  loop $for-loop|3
+  local.get $9
+  f32.const 0.003000000026077032
+  f32.ge
+  if
+   f32.const 0
+   local.set $2
+   i32.const 0
+   local.set $0
+   i32.const 1
+   local.set $4
+   loop $for-loop|3
+    local.get $4
+    i32.const 512
+    i32.lt_s
+    if
+     local.get $4
+     i32.const 2
+     i32.shl
+     i32.const 49152
+     i32.add
+     f32.load
+     local.set $11
+     local.get $4
+     f32.convert_i32_s
+     global.get $assembly/index/sampleRate
+     f32.mul
+     f32.const 0.0009765625
+     f32.mul
+     local.tee $12
+     f32.const 2e3
+     f32.lt
+     local.get $12
+     f32.const 100
+     f32.ge
+     i32.and
+     if
+      local.get $7
+      local.get $11
+      f32.add
+      local.set $7
+     else
+      local.get $1
+      local.get $11
+      f32.add
+      local.get $1
+      local.get $12
+      f32.const 8e3
+      f32.lt
+      local.get $12
+      f32.const 2e3
+      f32.ge
+      i32.and
+      select
+      local.set $1
+     end
+     local.get $12
+     f32.const 8e3
+     f32.lt
+     local.get $12
+     f32.const 100
+     f32.ge
+     i32.and
+     if
+      local.get $2
+      local.get $11
+      f32.const 9.99999993922529e-09
+      f32.add
+      f64.promote_f32
+      call $~lib/math/NativeMath.log
+      f32.demote_f64
+      f32.add
+      local.set $2
+      local.get $0
+      i32.const 1
+      i32.add
+      local.set $0
+     end
+     local.get $4
+     i32.const 1
+     i32.add
+     local.set $4
+     br $for-loop|3
+    end
+   end
+   local.get $2
+   local.get $0
+   f32.convert_i32_s
+   f32.div
+   f64.promote_f32
+   call $~lib/math/NativeMath.exp
+   f32.demote_f64
+   local.get $7
+   local.get $1
+   f32.add
+   local.get $0
+   f32.convert_i32_s
+   f32.div
+   f32.const 9.99999993922529e-09
+   f32.add
+   f32.div
+   f32.const 0.009999999776482582
+   f32.lt
+   if
+    local.get $1
+    f32.const 9.99999993922529e-09
+    f32.add
+    local.get $7
+    f32.const 9.99999993922529e-09
+    f32.add
+    f32.div
+    f64.promote_f32
+    call $~lib/math/NativeMath.log
+    f32.demote_f64
+    f64.promote_f32
+    f64.const 10
+    f64.mul
+    f64.const 2.3025851249694824
+    f64.div
+    f64.const 30
+    f64.add
+    f64.const 22
+    f64.div
+    f64.const 0
+    f64.max
+    f64.const 1
+    f64.min
+    f32.demote_f64
+    f32.const 0.75
+    f32.mul
+    f32.const 0.25
+    f32.add
+    local.set $1
+    global.get $assembly/index/hasSpectralStrength
+    if
+     global.get $assembly/index/spectralStrength
+     local.get $1
+     global.get $assembly/index/spectralStrength
+     f32.sub
+     f32.const 1
+     global.get $assembly/index/frameDuration
+     f32.const -0.20000000298023224
+     f32.div
+     f64.promote_f32
+     call $~lib/math/NativeMath.exp
+     f32.demote_f64
+     f32.sub
+     f32.mul
+     f32.add
+     global.set $assembly/index/spectralStrength
+    else
+     local.get $1
+     global.set $assembly/index/spectralStrength
+     i32.const 1
+     global.set $assembly/index/hasSpectralStrength
+    end
+   end
+  end
+  local.get $9
+  call $assembly/index/updateMouthOpen
+  loop $for-loop|4
    local.get $6
    i32.const 26
    i32.lt_s
@@ -2090,33 +2328,33 @@
     local.get $6
     i32.const 2
     i32.shl
-    local.tee $1
+    local.tee $0
     i32.const 66504
     i32.add
     i32.load
     local.set $5
     f32.const 0
     local.set $2
-    local.get $1
+    local.get $0
     i32.const 66400
     i32.add
     i32.load
     local.tee $4
-    local.get $1
+    local.get $0
     i32.const 66296
     i32.add
     i32.load
-    local.tee $1
+    local.tee $0
     i32.gt_s
     if
      local.get $4
-     local.get $1
+     local.get $0
      i32.sub
      f32.convert_i32_s
-     local.set $0
-     local.get $1
+     local.set $1
+     local.get $0
      local.set $3
-     loop $for-loop|4
+     loop $for-loop|5
       local.get $3
       i32.const 512
       i32.lt_s
@@ -2127,10 +2365,10 @@
       if
        local.get $2
        local.get $3
-       local.get $1
+       local.get $0
        i32.sub
        f32.convert_i32_s
-       local.get $0
+       local.get $1
        f32.div
        local.get $3
        i32.const 2
@@ -2145,7 +2383,7 @@
        i32.const 1
        i32.add
        local.set $3
-       br $for-loop|4
+       br $for-loop|5
       end
      end
     end
@@ -2157,8 +2395,8 @@
      local.get $4
      i32.sub
      f32.convert_i32_s
-     local.set $0
-     loop $for-loop|5
+     local.set $1
+     loop $for-loop|6
       local.get $4
       i32.const 512
       i32.lt_s
@@ -2172,7 +2410,7 @@
        local.get $4
        i32.sub
        f32.convert_i32_s
-       local.get $0
+       local.get $1
        f32.div
        local.get $4
        i32.const 2
@@ -2187,7 +2425,7 @@
        i32.const 1
        i32.add
        local.set $4
-       br $for-loop|5
+       br $for-loop|6
       end
      end
     end
@@ -2207,37 +2445,37 @@
     i32.const 1
     i32.add
     local.set $6
-    br $for-loop|3
+    br $for-loop|4
    end
   end
   i32.const 0
   local.set $3
-  loop $for-loop|6
+  loop $for-loop|7
    local.get $3
    i32.const 13
    i32.lt_s
    if
     f32.const 0
-    local.set $0
+    local.set $1
     local.get $3
     i32.const 26
     i32.mul
-    local.set $1
+    local.set $0
     i32.const 0
     local.set $4
-    loop $for-loop|7
+    loop $for-loop|8
      local.get $4
      i32.const 26
      i32.lt_s
      if
-      local.get $0
+      local.get $1
       local.get $4
       i32.const 2
       i32.shl
       i32.const 53248
       i32.add
       f32.load
-      local.get $1
+      local.get $0
       local.get $4
       i32.add
       i32.const 2
@@ -2247,12 +2485,12 @@
       f32.load
       f32.mul
       f32.add
-      local.set $0
+      local.set $1
       local.get $4
       i32.const 1
       i32.add
       local.set $4
-      br $for-loop|7
+      br $for-loop|8
      end
     end
     local.get $3
@@ -2260,42 +2498,42 @@
     i32.shl
     i32.const 53352
     i32.add
-    local.get $0
-    local.get $0
+    local.get $1
+    local.get $1
     f32.add
     f32.store
     local.get $3
     i32.const 1
     i32.add
     local.set $3
-    br $for-loop|6
+    br $for-loop|7
    end
   end
   i32.const -1
   local.set $5
   f32.const 999999
-  local.set $0
+  local.set $1
   i32.const 1328
   i32.const 1056
   global.get $assembly/index/voiceGender
   select
   local.set $3
   i32.const 0
-  local.set $1
-  loop $for-loop|8
-   local.get $1
+  local.set $0
+  loop $for-loop|9
+   local.get $0
    i32.const 5
    i32.lt_s
    if
     f32.const 0
     local.set $2
-    local.get $1
+    local.get $0
     i32.const 12
     i32.mul
     local.set $4
     i32.const 0
     local.set $6
-    loop $for-loop|9
+    loop $for-loop|10
      local.get $6
      i32.const 12
      i32.lt_s
@@ -2322,10 +2560,10 @@
       i32.const 1
       i32.add
       local.set $6
-      br $for-loop|9
+      br $for-loop|10
      end
     end
-    local.get $1
+    local.get $0
     i32.const 2
     i32.shl
     i32.const 53404
@@ -2339,7 +2577,7 @@
     f32.mul
     local.get $2
     global.get $assembly/index/currentPhoneme
-    local.get $1
+    local.get $0
     i32.eq
     select
     local.tee $2
@@ -2353,20 +2591,20 @@
     f32.const 100
     f32.div
     f32.store
-    local.get $0
+    local.get $1
     local.get $2
     f32.gt
     if
-     local.get $1
+     local.get $0
      local.set $5
      local.get $2
-     local.set $0
+     local.set $1
     end
-    local.get $1
+    local.get $0
     i32.const 1
     i32.add
-    local.set $1
-    br $for-loop|8
+    local.set $0
+    br $for-loop|9
    end
   end
   local.get $5
@@ -2375,7 +2613,7 @@
   global.get $assembly/index/sampleRate
   f32.const 0.0009765625
   f32.mul
-  local.tee $10
+  local.tee $7
   f64.promote_f32
   f64.const 2
   f64.mul
@@ -2384,22 +2622,22 @@
   f64.const 3
   f64.max
   i32.trunc_sat_f64_s
-  local.set $1
-  loop $for-loop|10
+  local.set $0
+  loop $for-loop|11
    local.get $8
    i32.const 512
    i32.lt_s
    if
     f32.const 0
-    local.set $0
+    local.set $1
     i32.const 0
     local.set $6
     i32.const 0
-    local.get $1
+    local.get $0
     i32.sub
     local.set $3
-    loop $for-loop|11
-     local.get $1
+    loop $for-loop|12
+     local.get $0
      local.get $3
      i32.ge_s
      if
@@ -2418,7 +2656,7 @@
        i32.const 1
        i32.add
        local.set $6
-       local.get $0
+       local.get $1
        local.get $4
        i32.const 2
        i32.shl
@@ -2426,13 +2664,13 @@
        i32.add
        f32.load
        f32.add
-       local.set $0
+       local.set $1
       end
       local.get $3
       i32.const 1
       i32.add
       local.set $3
-      br $for-loop|11
+      br $for-loop|12
      end
     end
     local.get $8
@@ -2440,7 +2678,7 @@
     i32.shl
     i32.const 51200
     i32.add
-    local.get $0
+    local.get $1
     local.get $6
     f32.convert_i32_s
     f32.const 1
@@ -2454,14 +2692,14 @@
     i32.const 1
     i32.add
     local.set $8
-    br $for-loop|10
+    br $for-loop|11
    end
   end
   i32.const 1712
   i32.const 1600
   global.get $assembly/index/voiceGender
   select
-  local.tee $1
+  local.tee $0
   local.get $5
   i32.const 0
   local.get $5
@@ -2476,87 +2714,87 @@
   i32.shl
   local.tee $3
   call $~lib/staticarray/StaticArray<f32>#__get
-  local.get $1
+  local.get $0
   local.get $3
   i32.const 1
   i32.add
   call $~lib/staticarray/StaticArray<f32>#__get
-  local.get $1
+  local.get $0
   local.get $3
   i32.const 2
   i32.add
   call $~lib/staticarray/StaticArray<f32>#__get
-  local.set $0
-  local.get $1
+  local.set $11
+  local.get $0
   local.get $3
   i32.const 3
   i32.add
   call $~lib/staticarray/StaticArray<f32>#__get
-  local.set $9
+  local.set $12
   f32.const -1
   local.set $2
-  local.get $10
+  local.get $7
   f32.div
   f64.promote_f32
   call $~lib/math/NativeMath.round
   i32.trunc_sat_f64_s
   local.set $3
-  local.get $10
+  local.get $7
   f32.div
   f64.promote_f32
   call $~lib/math/NativeMath.round
   i32.trunc_sat_f64_s
   local.tee $4
-  local.set $1
-  loop $for-loop|12
-   local.get $1
+  local.set $0
+  loop $for-loop|13
+   local.get $0
    i32.const 512
    i32.lt_s
-   local.get $1
+   local.get $0
    local.get $3
    i32.le_s
    i32.and
    if
-    local.get $1
+    local.get $0
     i32.const 2
     i32.shl
     i32.const 51200
     i32.add
     f32.load
-    local.tee $11
+    local.tee $1
     local.get $2
     f32.gt
     if
-     local.get $1
+     local.get $0
      local.set $4
-     local.get $11
+     local.get $1
      local.set $2
     end
-    local.get $1
+    local.get $0
     i32.const 1
     i32.add
-    local.set $1
-    br $for-loop|12
+    local.set $0
+    br $for-loop|13
    end
   end
   f32.const -1
   local.set $2
-  local.get $9
-  local.get $10
+  local.get $12
+  local.get $7
   f32.div
   f64.promote_f32
   call $~lib/math/NativeMath.round
   i32.trunc_sat_f64_s
   local.set $6
-  local.get $0
-  local.get $10
+  local.get $11
+  local.get $7
   f32.div
   f64.promote_f32
   call $~lib/math/NativeMath.round
   i32.trunc_sat_f64_s
-  local.tee $1
+  local.tee $0
   local.set $3
-  loop $for-loop|13
+  loop $for-loop|14
    local.get $3
    i32.const 512
    i32.lt_s
@@ -2571,41 +2809,41 @@
     i32.const 51200
     i32.add
     f32.load
-    local.tee $0
+    local.tee $1
     local.get $2
     f32.gt
     if
-     local.get $0
+     local.get $1
      local.set $2
      local.get $3
-     local.set $1
+     local.set $0
     end
     local.get $3
     i32.const 1
     i32.add
     local.set $3
-    br $for-loop|13
+    br $for-loop|14
    end
   end
   i32.const 53424
   local.get $5
   i32.store
   i32.const 53428
-  local.get $7
+  local.get $10
   f32.store
   i32.const 53432
   local.get $4
   f32.convert_i32_s
-  local.get $10
+  local.get $7
   f32.mul
   f64.promote_f32
   call $~lib/math/NativeMath.round
   f32.demote_f64
   f32.store
   i32.const 53436
-  local.get $1
+  local.get $0
   f32.convert_i32_s
-  local.get $10
+  local.get $7
   f32.mul
   f64.promote_f32
   call $~lib/math/NativeMath.round

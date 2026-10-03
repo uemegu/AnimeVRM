@@ -17,7 +17,7 @@ const NUM_MFCC: i32 = 13;
 // 53248: mel bands float32 [26] (104 bytes) -> 53248 .. 53352
 // 53352: mfcc float32 [13] (52 bytes) -> 53352 .. 53404
 // 53404: vowel distances float32 [5] (20 bytes: aa, ee, ih, oh, ou) -> 53404 .. 53424
-// 53424: output stats [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32)] (16 bytes) -> 53424 .. 53440
+// 53424: output stats [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32), mouthOpen (f32)] (20 bytes) -> 53424 .. 53444
 //
 // Tables:
 // 54000: hammingTable float32 [1024] (4096 bytes) -> 54000 .. 58096
@@ -30,6 +30,8 @@ const NUM_MFCC: i32 = 13;
 export const INPUT_OFFSET: usize = 32768;
 export const DISTANCES_OFFSET: usize = 53404;
 export const STATS_OFFSET: usize = 53424;
+/** 開口度を含む stats レイアウト。Worklet と古いバイナリの組み合わせを検出する。 */
+export const LIP_SYNC_ABI_VERSION: i32 = 2;
 
 const WINDOWED_OFFSET: usize = 36864;
 const REAL_OFFSET: usize = 40960;
@@ -59,6 +61,26 @@ let smoothedRms: f32 = 0.0;
 let voiceGender: i32 = 0; // 0: female, 1: male
 let sampleRate: f32 = 44100.0;
 let initialized: bool = false;
+let mouthOpen: f32 = 0.0;
+let spectralStrength: f32 = 1.0;
+let hasSpectralStrength: bool = false;
+let frameDuration: f32 = 1.0 / 60.0;
+
+/** RMS と声の高域の強さで開口度を求める。キャラ名やファイル別のピーク正規化は使わない。 */
+function updateMouthOpen(rawRms: f32): void {
+  const amplitude = <f32>Math.min(1.0, Math.max(0.0, <f64>((rawRms - 0.003) / (0.28 - 0.003))));
+  const target = amplitude * spectralStrength;
+  const duration: f32 = target > mouthOpen ? 0.025 : 0.08;
+  const blend: f32 = 1.0 - <f32>Math.exp(<f64>(-frameDuration / duration));
+  mouthOpen += (target - mouthOpen) * blend;
+  if (mouthOpen < 0.001) mouthOpen = 0.0;
+  store<f32>(STATS_OFFSET + 16, mouthOpen);
+}
+
+/** AudioWorklet の実際の解析間隔（サンプルレート・quantum による差を反映） */
+export function setFrameDuration(seconds: f32): void {
+  frameDuration = <f32>Math.min(0.1, Math.max(0.001, <f64>seconds));
+}
 
 // Target MFCC vectors (MFCC 1..12) for female [0..4] and male [0..4]
 // Vowel order: 0: aa, 1: ee, 2: ih, 3: oh, 4: ou
@@ -199,6 +221,10 @@ export function resetState(): void {
   isVoicing = false;
   silenceHoldCounter = 0;
   smoothedRms = 0.0;
+  mouthOpen = 0.0;
+  spectralStrength = 1.0;
+  hasSpectralStrength = false;
+  store<f32>(STATS_OFFSET + 16, 0.0);
 }
 
 // In-place Radix-2 Cooley-Tukey FFT of length 1024
@@ -297,6 +323,7 @@ export function processFrame(): void {
     for (let p = 0; p < 5; p++) {
       store<f32>(DISTANCES_OFFSET + (<usize>p << 2), 99.0);
     }
+    updateMouthOpen(rawRms);
     return;
   }
 
@@ -309,6 +336,41 @@ export function processFrame(): void {
     const im = load<f32>(IMAG_OFFSET + (<usize>i << 2));
     store<f32>(POWER_OFFSET + (<usize>i << 2), r * r + im * im);
   }
+
+  // 強い発声では高域の倍音が増える。録音音量が揃っている音声でも、同じ式で声の強さを推定する。
+  // 既存ボイスの実測範囲（高域/低域が約 -30〜-8 dB）を共通の基準にする。
+  // 囁き・摩擦子音にも高域があるので、囁きの既知ラベルは呼び出し側で上限を掛ける。
+  if (rawRms >= 0.003) {
+    let lowPower: f32 = 0.0;
+    let highPower: f32 = 0.0;
+    let logPower: f32 = 0.0;
+    let bandCount: i32 = 0;
+    for (let i = 1; i < HALF_SIZE; i++) {
+      const hz = <f32>i * sampleRate / <f32>FFT_SIZE;
+      const power = load<f32>(POWER_OFFSET + (<usize>i << 2));
+      if (hz >= 100.0 && hz < 2000.0) lowPower += power;
+      else if (hz >= 2000.0 && hz < 8000.0) highPower += power;
+      if (hz >= 100.0 && hz < 8000.0) {
+        logPower += <f32>Math.log(<f64>(power + 0.00000001));
+        bandCount++;
+      }
+    }
+    const flatness = <f32>Math.exp(<f64>(logPower / <f32>bandCount)) / ((lowPower + highPower) / <f32>bandCount + 0.00000001);
+    // 息・摩擦子音の高域を声の強さと取り違えないよう、倍音のある区間でだけ更新する。
+    if (flatness < 0.01) {
+      const emphasisDb = 10.0 * <f32>Math.log(<f64>((highPower + 0.00000001) / (lowPower + 0.00000001))) / <f32>Math.LN10;
+      const emphasis = <f32>Math.min(1.0, Math.max(0.0, <f64>((emphasisDb + 30.0) / 22.0)));
+      const strength: f32 = 0.25 + 0.75 * emphasis;
+      if (!hasSpectralStrength) {
+        spectralStrength = strength;
+        hasSpectralStrength = true;
+      } else {
+        const blend: f32 = 1.0 - <f32>Math.exp(<f64>(-frameDuration / 0.2));
+        spectralStrength += (strength - spectralStrength) * blend;
+      }
+    }
+  }
+  updateMouthOpen(rawRms);
 
   // 4. Compute Mel Filter Bank & log-energy
   for (let i = 0; i < NUM_MEL_BANDS; i++) {
@@ -437,7 +499,7 @@ export function processFrame(): void {
   const f1Hz = <f32>Math.round(<f64>(<f32>bestF1Bin * binWidth));
   const f2Hz = <f32>Math.round(<f64>(<f32>bestF2Bin * binWidth));
 
-  // Write Stats: [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32)]
+  // Write Stats: [phoneme_idx (i32), rms (f32), f1 (f32), f2 (f32), mouthOpen (already stored)]
   store<i32>(STATS_OFFSET, bestPhoneme);
   store<f32>(STATS_OFFSET + 4, effectiveRms);
   store<f32>(STATS_OFFSET + 8, f1Hz);
