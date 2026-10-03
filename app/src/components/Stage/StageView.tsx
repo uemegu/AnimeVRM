@@ -6,6 +6,7 @@ import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { soundManager } from '../../services/audio/SoundManager';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
+import type { SceneEffects } from '@anime-vrm/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -20,6 +21,8 @@ export interface StageViewProps {
   speakerId?: string | null;
   /** 流れる背景（歩きながらの会話）。null なら場所の遠景 */
   scrolling?: ScrollingBackgroundSettings | null;
+  /** シーンの特殊効果（花火など） */
+  effects?: SceneEffects;
   /** 今のカット（カメラの直接指定とカット内のタイムライン） */
   cut?: ScenarioResolvedScene | null;
   className?: string;
@@ -33,6 +36,7 @@ export const StageView: React.FC<StageViewProps> = ({
   cameraShot,
   speakerId = null,
   scrolling = null,
+  effects,
   cut = null,
   className = '',
   onLoaded,
@@ -100,6 +104,13 @@ export const StageView: React.FC<StageViewProps> = ({
     stageManagerRef.current?.setCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  // 特殊効果（シナリオの「あ、花火」から花火を上げるなど。内容が同じなら何もしない）
+  const effectsKey = JSON.stringify(effects ?? {});
+  useEffect(() => {
+    stageManagerRef.current?.setEffects(effects);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectsKey]);
 
   // 流れる背景（設定が同じなら何もしない）
   const scrollingKey = JSON.stringify(scrolling);

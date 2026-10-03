@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import type { SceneEffects } from '@anime-vrm/scenario';
+import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
 import { farStandee } from '../painted-gate/PaintedGate';
@@ -225,7 +227,7 @@ function lanternStrings(): THREE.Group {
   const counts = strings.map(({ from, to }) => Math.max(1, Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]) / spacing)));
   const mesh = new THREE.InstancedMesh(lanternGeometry(), lanternMaterial(), counts.reduce((a, b) => a + b, 0));
   mesh.name = 'Lanterns';
-  const red = new THREE.Color('#ff4d38').multiplyScalar(1.7), white = new THREE.Color('#fff0d0').multiplyScalar(1.5);
+  const red = new THREE.Color('#ff4d38').multiplyScalar(2.5), white = new THREE.Color('#fff0d0').multiplyScalar(2.2);
   const wire: number[] = [];
   const poles: THREE.BufferGeometry[] = [];
   const matrix = new THREE.Matrix4();
@@ -279,7 +281,19 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
   group.name = 'Painted festival';
   const fireworks = new Fireworks();
 
-  group.add(nightSky());
+  const sky = nightSky(fireworks);
+  group.add(sky);
+  group.userData.configureEnvironment = (settings: LocationEnvironment) => {
+    const u = (sky.material as THREE.ShaderMaterial).uniforms;
+    u.uSmokeStrength.value = settings.festival?.smokeStrength ?? 0;
+    u.uSmokeLifetime.value = settings.festival?.smokeLifetime ?? 10;
+    const balance = settings.festival?.stallLightBalance ?? 0;
+    group.traverse((object) => {
+      if (object instanceof THREE.PointLight && object.name === 'Stall light') {
+        object.intensity = 8 * (1 - Math.sign(object.position.x) * balance);
+      }
+    });
+  };
   group.add(fireworks.object);
   group.add(ground(paving));
   group.add(embankment(paving));
@@ -311,7 +325,7 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
 
   // Lights for the avatars (the set itself is unlit).
   for (const { position, color } of AVATAR_LIGHTS) {
-    const light = new THREE.PointLight(color, 8, 7, 2);
+    const light = new THREE.PointLight(color, 6, 7, 2);
     light.name = 'Stall light';
     light.position.set(...position);
     group.add(light);
@@ -328,6 +342,8 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
   const glows = new Glows(group);
   group.add(glows.halos, glows.bokeh);
   group.userData.fireworks = fireworks;
+  // Scene effects from the scenario: fireworks go up unless a scene stops them.
+  group.userData.setEffects = (effects: SceneEffects) => fireworks.setActive(effects.fireworks ?? true);
   return group;
 }
 
@@ -348,6 +364,8 @@ export function disposePaintedFestival(group: THREE.Group): void {
     }
   });
   (group.userData.fireworks as Fireworks | undefined)?.dispose();
+  // The fireworks' backlight rim is published on the scene; it must not outlive the set.
+  if (group.parent) delete group.parent.userData.characterRim;
   group.removeFromParent();
   geometries.forEach((geometry) => geometry.dispose());
   materials.forEach((material) => material.dispose());

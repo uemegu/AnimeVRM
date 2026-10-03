@@ -432,19 +432,24 @@
           "z": 0
         },
         "rotationY": 0,
-        "scale": 1
+        "scale": 1,
+        "festival": {
+          "smokeStrength": 0.65,
+          "smokeLifetime": 12,
+          "stallLightBalance": 0.65
+        }
       },
       "light": {
         "direction": {
-          "x": -0.55,
-          "y": 0.42,
-          "z": -1
+          "x": -0.95,
+          "y": 0.65,
+          "z": 0.25
         },
         "color": "#a9b6ff",
-        "intensity": 0.9,
+        "intensity": 2.1,
         "ambient": {
           "color": "#4a4f86",
-          "intensity": 0.7
+          "intensity": 0.32
         },
         "shadow": {
           "color": "#1a1d3a",
@@ -464,15 +469,26 @@
       "stage": {
         "camera": {
           "depthOfField": {
-            "aperture": 0.02,
-            "maxBlur": 0.008,
-            "sharpRange": 3
+            "aperture": 0.007,
+            "maxBlur": 0.003,
+            "sharpRange": 5
           },
           "bloom": {
-            "strength": 0.38,
-            "radius": 0.55,
-            "threshold": 0.78
+            "strength": 0.55,
+            "radius": 0.5,
+            "threshold": 0.8,
+            "deepGlow": {
+              "enabled": false,
+              "core": 1.1,
+              "halo": 0.6,
+              "haze": 0.22
+            }
           }
+        },
+        "character": {
+          "eyeCare": true,
+          "lightWrapBody": 1,
+          "highlightCap": 0.93
         },
         "backdrop": {
           "mode": "screen",

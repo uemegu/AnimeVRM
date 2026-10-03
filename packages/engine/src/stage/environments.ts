@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { disposePaintedFestival, loadPaintedFestival } from '../scene/painted-festival/PaintedFestival';
 import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
@@ -41,8 +42,9 @@ export function disposeEnvironment(model: string, object: THREE.Object3D): void 
 }
 
 /** 位置・向き（度）・大きさを当てる */
-export function placeEnvironment(object: THREE.Object3D, placement: { position: { x: number; y: number; z: number }; rotationY: number; scale: number }): void {
+export function placeEnvironment(object: THREE.Object3D, placement: LocationEnvironment): void {
   object.position.set(placement.position.x, placement.position.y, placement.position.z);
   object.rotation.set(0, THREE.MathUtils.degToRad(placement.rotationY), 0);
   object.scale.setScalar(placement.scale);
+  object.userData.configureEnvironment?.(placement);
 }

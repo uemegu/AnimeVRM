@@ -694,6 +694,7 @@ export const App: React.FC = () => {
               cast={cast}
               cameraShot={cameraShot}
               scrolling={scrolling}
+              effects={stage.effects}
               onDialogueClick={player.advance}
               onChoiceClick={handleChoiceClick}
               onChoiceTimeout={player.timeoutChoice}

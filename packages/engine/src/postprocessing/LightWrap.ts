@@ -8,17 +8,20 @@ import { createLayerDepthTarget, renderLayerDepth } from '../shader/LayerDepth';
  * ライトラップ: キャラの輪郭の内側に、周囲の「背景だけ」をぼかした色を足す合成処理。
  *   背景が明るい所ほど光がキャラに回り込み、キャラが背景になじむ。暗い背景ではほとんど変わらない。
  *   描画直後のリニア空間（ブルームの前）で行う。
- *   暗く縁のくっきりした服に強くかけると切り抜きの縁取り（ハロー）に見えるので、
- *   髪以外は bodyStrength 倍に弱める。髪の判定には前髪の影用の髪の深度を使う。
+ *   髪以外（服・肌）の強さは bodyStrength 倍にする（1 で髪と同じ）。暗く縁のくっきりした服に強くかけると
+ *   切り抜きの縁取り（ハロー）に見えることがあるので既定は 0.3。場所の stage.character.lightWrapBody で変えられる。髪の判定には前髪の影用の髪の深度を使う。
  */
 
 // アバターのメッシュを載せるレイヤー（マスク描画時にこのレイヤーだけを描く）
 export const CHARACTER_LAYER = 6;
+// 目（白目・瞳・ハイライト）のメッシュを載せるレイヤー。人物のにじみから目を外すのに使う
+export const EYE_LAYER = 7;
 
 export class CharacterMaskRenderer {
   private renderTarget: THREE.WebGLRenderTarget;
 
-  constructor(width: number, height: number) {
+  /** layer: 描くレイヤー（既定はキャラ全体。EYE_LAYER なら目だけ） */
+  constructor(width: number, height: number, private readonly layer = CHARACTER_LAYER) {
     this.renderTarget = createLayerDepthTarget(width, height);
   }
 
@@ -32,7 +35,7 @@ export class CharacterMaskRenderer {
   }
 
   public render(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera): void {
-    renderLayerDepth(renderer, scene, camera, CHARACTER_LAYER, this.renderTarget);
+    renderLayerDepth(renderer, scene, camera, this.layer, this.renderTarget);
   }
 
   public dispose(): void {

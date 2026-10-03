@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, SceneEffects, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
 
@@ -24,6 +24,8 @@ export interface StageState {
   motionCues?: Record<string, string>;
   /** 流れる背景（歩きながらの会話） */
   scrolling?: ScrollingBackgroundConfig | null;
+  /** 特殊効果ごとの入/切（指定のない効果は場所の既定） */
+  effects?: SceneEffects;
 }
 
 /** 舞台に立てる 2D のデフォルメ画像（描画に渡す形） */
@@ -138,6 +140,7 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
     cast,
     motionCues,
     scrolling: scene.scrollingBackground === undefined ? prev.scrolling : scene.scrollingBackground || null,
+    effects: scene.effects ? { ...prev.effects, ...scene.effects } : prev.effects,
   };
 }
 

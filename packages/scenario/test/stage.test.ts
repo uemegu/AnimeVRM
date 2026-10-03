@@ -25,6 +25,21 @@ describe('舞台の状態', () => {
     expect(Object.keys(stageAtScene(scenario, 2).cast)).toEqual(['emili']);
   });
 
+  it('特殊効果は指定したシーンから始め・止め、効果ごとに以降のシーンに引き継ぐこと', () => {
+    const show: ScenarioPackage = {
+      id: 'f',
+      title: 't',
+      scenes: [
+        { id: 'f1', text: '' },
+        { id: 'f2', text: '', effects: { fireworks: false } },
+        { id: 'f3', text: '' },
+        { id: 'f4', text: 'あ、花火', effects: { fireworks: true } },
+        { id: 'f5', text: '' },
+      ],
+    };
+    expect([0, 1, 2, 3, 4].map((i) => stageAtScene(show, i).effects?.fireworks)).toEqual([undefined, false, false, true, true]);
+  });
+
   it('BGM の音量・チャネルは同じ BGM のあいだ引き継ぎ、BGM が変わると既定に戻ること', () => {
     const withMix: ScenarioPackage = {
       id: 'm',

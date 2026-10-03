@@ -11,7 +11,10 @@
   "scenes": [
     {
       "id": "street",
-      "text": "屋台の灯りが並ぶ通り。川の向こうで、花火が上がり始めた。",
+      "effects": {
+        "fireworks": false
+      },
+      "text": "屋台の灯りが並ぶ通り。花火が始まるまで、まだ少しある。",
       "avatars": {
         "shion": {
           "position": [
@@ -77,9 +80,12 @@
     },
     {
       "id": "river_front",
+      "effects": {
+        "fireworks": true
+      },
       "speaker": "シオン",
       "speakerCharacterId": "shion",
-      "text": "「ここ、よく見えるのよ。……ほら、始まった」",
+      "text": "「あ、花火」",
       "avatars": {
         "shion": {
           "position": [
@@ -107,7 +113,8 @@
           -10.2
         ],
         "fov": 44
-      }
+      },
+      "autoNextSec": 3.5
     },
     {
       "id": "fireworks",

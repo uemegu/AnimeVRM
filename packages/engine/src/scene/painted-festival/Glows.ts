@@ -95,20 +95,20 @@ export class Glows {
     const inverse = new THREE.Matrix4().copy(set.matrixWorld).invert();
     const local = (object: THREE.Object3D) => object.getWorldPosition(new THREE.Vector3()).applyMatrix4(inverse);
     set.traverse((object) => {
-      if (object.name === 'Stall lantern') halos.push({ position: local(object), color: new THREE.Color('#ff5530').multiplyScalar(0.55), size: 1.1 });
-      if (object.name === 'Bulb') halos.push({ position: local(object), color: new THREE.Color('#ffc070').multiplyScalar(0.5), size: 0.7 });
-      if (object.name === 'Andon') halos.push({ position: local(object), color: new THREE.Color('#ffb060').multiplyScalar(0.55), size: 1.3 });
+      if (object.name === 'Stall lantern') halos.push({ position: local(object), color: new THREE.Color('#ff5530').multiplyScalar(0.9), size: 1.1 });
+      if (object.name === 'Bulb') halos.push({ position: local(object), color: new THREE.Color('#ffc070').multiplyScalar(0.85), size: 0.7 });
+      if (object.name === 'Andon') halos.push({ position: local(object), color: new THREE.Color('#ffb060').multiplyScalar(0.9), size: 1.3 });
       if (object instanceof THREE.InstancedMesh && object.name === 'Lanterns') {
         const matrix = new THREE.Matrix4(), color = new THREE.Color();
         for (let i = 0; i < object.count; i++) {
           object.getMatrixAt(i, matrix);
           object.getColorAt(i, color);
-          halos.push({ position: new THREE.Vector3().setFromMatrixPosition(matrix), color: color.clone().multiplyScalar(0.3), size: 0.9 });
+          halos.push({ position: new THREE.Vector3().setFromMatrixPosition(matrix), color: color.clone().multiplyScalar(0.45), size: 0.9 });
         }
       }
     });
     // The lantern hanging from the banner pole (painted).
-    halos.push({ position: new THREE.Vector3(BANNER.x + 0.35, BANNER.height * 0.8, BANNER.z - 0.1), color: new THREE.Color('#ffa850').multiplyScalar(0.6), size: 1.4 });
+    halos.push({ position: new THREE.Vector3(BANNER.x + 0.35, BANNER.height * 0.8, BANNER.z - 0.1), color: new THREE.Color('#ffa850').multiplyScalar(0.95), size: 1.4 });
     this.halos = points('Light glows', pointsMaterial(false), halos);
 
     // Bokeh: a scatter of warm orbs along the street, denser near the stalls.

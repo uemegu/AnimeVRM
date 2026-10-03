@@ -241,6 +241,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         cameraShot={shot}
         speakerId={scene.speakerCharacterId ?? null}
         scrolling={scrolling}
+        effects={stage.effects}
         cut={phase === 'playing' ? scene : null}
         language={language}
         getCutTime={() => audio.getVoiceTime()}

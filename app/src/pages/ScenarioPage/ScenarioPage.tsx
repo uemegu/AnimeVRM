@@ -3,6 +3,7 @@ import { resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
+import type { SceneEffects } from '@anime-vrm/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { StageView } from '../../components/Stage/StageView';
@@ -20,6 +21,7 @@ export interface ScenarioPageProps {
   cast: StageCastMember[];
   cameraShot: CameraShot;
   scrolling: ScrollingBackgroundSettings | null;
+  effects?: SceneEffects;
   onDialogueClick: () => void;
   onChoiceClick: (index: number) => void;
   onChoiceTimeout: () => void;
@@ -34,6 +36,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   cast,
   cameraShot,
   scrolling,
+  effects,
   onDialogueClick,
   onChoiceClick,
   onChoiceTimeout,
@@ -50,6 +53,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           cast={cast}
           cameraShot={cameraShot}
           scrolling={scrolling}
+          effects={effects}
           speakerId={currentScene?.speakerCharacterId ?? null}
           cut={currentScene}
         />

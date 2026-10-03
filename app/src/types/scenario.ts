@@ -124,6 +124,8 @@ export interface ScenarioScene {
    * 歩きながらの会話などで、背景を横に流し続ける（以降のシーンに引き継ぐ。false で止めて通常の背景に戻す）
    */
   scrollingBackground?: ScrollingBackgroundConfig | false;
+  /** 特殊効果（花火など）。true でこのシーンから始め、false で止める。効果ごとに以降のシーンに引き継ぐ */
+  effects?: { fireworks?: boolean };
   /** 選択肢の制限時間（秒）と時間切れ時の分岐。省略時は10秒で1番目を自動選択 */
   choiceTimeout?: {
     seconds: number;

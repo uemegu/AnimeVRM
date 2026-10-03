@@ -7,6 +7,9 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 
 import type { LocationVisualPreset, TimeOfDayId, TimeOfDayPreset } from './visual';
+import { CharacterGlowPass } from '../postprocessing/CharacterGlow';
+import { CharacterFinishShader, type CharacterRim } from '../postprocessing/CharacterFinish';
+import { HighlightShoulderShader } from '../postprocessing/HighlightShoulder';
 import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
 import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
@@ -20,11 +23,12 @@ import { ScreenEffects } from './ScreenEffects';
 import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
 import { HairShadowRenderer } from '../shader/HairShadow';
-import { CharacterMaskRenderer, LightWrapShader } from '../postprocessing/LightWrap';
+import { CharacterMaskRenderer, DEFAULT_LIGHT_WRAP_PARAMS, EYE_LAYER, LightWrapShader } from '../postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
 import { setHairRingTint } from '../shader/HairRing';
 import {
   cutStateAt,
+  resolveBloomConfig,
   DEFAULT_AVATAR_LOOK,
   DEFAULT_BACKDROP,
   DEFAULT_CAMERA_FOV,
@@ -40,6 +44,7 @@ import {
   type CutAvatarState,
   type CutState,
   type ScenarioScene,
+  type SceneEffects,
   type TextContent,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
@@ -122,6 +127,9 @@ export class StageManager {
   private lightWrapPass: ShaderPass;
   private paraPass: ShaderPass;
   private bloomPass: UnrealBloomPass;
+  private highlightShoulderPass: ShaderPass;
+  private characterGlowPass: CharacterGlowPass;
+  private characterFinishPass: ShaderPass;
   private godRaysPass: ShaderPass;
   private cinematicAnimePass: ShaderPass;
   private smaaPass: SMAAPass;
@@ -130,6 +138,7 @@ export class StageManager {
   private hairShadow: HairShadowRenderer;
   // キャラのマスク（ライトラップ用）
   private characterMask: CharacterMaskRenderer;
+  private eyeMask: CharacterMaskRenderer;
 
   // 光源・環境・空
   private directionalLight: THREE.DirectionalLight;
@@ -145,6 +154,7 @@ export class StageManager {
   private backdropMesh!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
   /** 場所の3D背景（組み込みのセットや glb） */
   private environment: { model: string; object: THREE.Object3D | null } | null = null;
+  private effects: SceneEffects = {};
   /** 最後に指定された登場キャラ（場所が変わったら立ち位置を当て直す） */
   private castMembers: StageCastMember[] = [];
   private sunEffect: SunEffect;
@@ -318,16 +328,21 @@ export class StageManager {
 
     this.renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(this.renderPass);
+    this.characterMask = new CharacterMaskRenderer(targetW, targetH);
+    this.eyeMask = new CharacterMaskRenderer(targetW, targetH, EYE_LAYER);
+    this.characterGlowPass = new CharacterGlowPass(this.characterMask.texture, this.eyeMask.texture);
+    this.characterGlowPass.setSize(targetW, targetH);
+    this.composer.addPass(this.characterGlowPass.depthCapture);
 
     // 背景ぼかし（本描画の深度を読むので RenderPass の直後に置く）
     this.depthOfFieldPass = new DepthOfFieldPass();
     this.depthOfFieldPass.enabled = false;
     this.composer.addPass(this.depthOfFieldPass);
+    this.composer.addPass(this.characterGlowPass);
     // 文字演出・汗は、ぼかしのあとに重ねる（ぼかしの対象にしない）
     this.composer.addPass(new OverlayPass(this.scene, this.camera));
 
     // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
-    this.characterMask = new CharacterMaskRenderer(targetW, targetH);
     this.lightWrapPass = new ShaderPass(LightWrapShader);
     this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.lightWrapPass.uniforms['tMask'].value = this.characterMask.texture;
@@ -348,6 +363,9 @@ export class StageManager {
     this.composer.addPass(this.godRaysPass);
 
     // ここまでリニア空間。OutputPass で表示用の sRGB に変換する
+    this.highlightShoulderPass = new ShaderPass(HighlightShoulderShader);
+    this.highlightShoulderPass.enabled = false;
+    this.composer.addPass(this.highlightShoulderPass);
     this.composer.addPass(new OutputPass());
 
     // パラ（背景の空気の色をキャラの上だけにグラデーションで重ねる。スクリーン合成なので sRGB で行う）
@@ -359,6 +377,14 @@ export class StageManager {
     this.cinematicAnimePass = new ShaderPass(CinematicAnimeShader);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.composer.addPass(this.cinematicAnimePass);
+
+    // 人物の仕上げ（逆光のリムライトと明部の上限）。色調補正の後の表示用の値で行う
+    this.characterFinishPass = new ShaderPass(CharacterFinishShader);
+    this.characterFinishPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.characterFinishPass.uniforms['tEye'].value = this.eyeMask.texture;
+    this.characterFinishPass.uniforms['uResolution'].value.set(targetW, targetH);
+    this.characterFinishPass.enabled = false;
+    this.composer.addPass(this.characterFinishPass);
 
     this.smaaPass = new SMAAPass();
     this.smaaPass.setSize(targetW, targetH);
@@ -482,6 +508,7 @@ export class StageManager {
     // 6. CinematicAnimeShader (Uber Pass)
     const u = this.cinematicAnimePass.uniforms;
     const c = preset.postProcessing.cinematic;
+    this.applyCharacterLook();
 
     u.uDiffusionEnabled.value = c.diffusion.enabled ? 1.0 : 0.0;
     u.uDiffusionStrength.value = c.diffusion.strength;
@@ -710,20 +737,58 @@ export class StageManager {
     }
   }
 
-  /** ブルームは場所のカメラ設定にあればそれを、なければ時間帯の設定を使う */
+  /** ブルームは時間帯を基本に、場所に書かれた項目だけを上書きする */
   private applyBloom(): void {
     const location = this.locationStage?.camera?.bloom;
-    const bloom = location ? { enabled: true, ...location } : (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).postProcessing.bloom;
+    const base = (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).postProcessing.bloom;
+    const bloom = resolveBloomConfig(base, location);
+    const glow = bloom.deepGlow;
+    const deep = !!glow?.enabled;
+    // Reuse the five existing blur levels: no second blur pyramid or extra render targets.
+    this.bloomPass.bloomTintColors.forEach((tint, i) => tint.setScalar(
+      deep ? [glow.core, glow.core * 0.7, glow.halo, glow.halo * 0.6, glow.haze][i] : 1,
+    ));
+    this.highlightShoulderPass.enabled = bloom.enabled && deep;
     this.bloomPass.enabled = bloom.enabled;
     this.bloomPass.strength = bloom.strength;
     this.bloomPass.radius = bloom.radius;
     this.bloomPass.threshold = bloom.threshold;
   }
 
+  /** 人物の明部のにじみ（時間帯）と、目の光の抑え・輪郭のなじませ（場所） */
+  private applyCharacterLook(): void {
+    const glow = (this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day).postProcessing.characterGlow;
+    const look = this.locationStage?.character;
+    const eyeCare = !!look?.eyeCare;
+    const enabled = !!glow?.enabled || eyeCare;
+    this.characterGlowPass.enabled = enabled;
+    this.characterGlowPass.depthCapture.enabled = enabled;
+    this.characterGlowPass.uniforms.uStrength.value = glow?.enabled ? glow.strength : 0;
+    this.characterGlowPass.uniforms.uRadius.value = glow?.radius ?? 0.012;
+    this.characterGlowPass.uniforms.uThreshold.value = glow?.threshold ?? 0.16;
+    this.characterGlowPass.uniforms.uEyeCare.value = eyeCare ? 1 : 0;
+    const finish = this.characterFinishPass.uniforms;
+    finish['uEyeCare'].value = eyeCare ? 1 : 0;
+    const cap = look?.highlightCap;
+    finish['uCapKnee'].value = cap ? cap - 0.12 : 1;
+    finish['uCapTop'].value = cap ?? 1;
+    this.lightWrapPass.uniforms['uBodyStrength'].value = look?.lightWrapBody ?? DEFAULT_LIGHT_WRAP_PARAMS.bodyStrength;
+  }
+
   /** 背景ぼかしは場所のカメラ設定にあるときだけ（重いので品質 low では切る） */
   private applyDepthOfField(): void {
     const settings = this.locationStage?.camera?.depthOfField;
     this.depthOfFieldPass.setParams(settings && this.quality.depthOfField ? { ...DEFAULT_DEPTH_OF_FIELD, ...settings } : null);
+  }
+
+  /** シーンの特殊効果（花火など）。3D背景が受け取る（userData.setEffects）。その効果のない場所では何もしない */
+  public setEffects(effects: SceneEffects | undefined): void {
+    this.effects = effects ?? {};
+    this.applyEffects();
+  }
+
+  private applyEffects(): void {
+    this.environment?.object?.userData.setEffects?.(this.effects);
   }
 
   /** 3D背景を読み込んで置く（同じモデルなら置き直すだけ） */
@@ -755,6 +820,7 @@ export class StageManager {
         object.traverse((child) => { if (child.userData.setSky) child.visible = false; });
         placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
         this.scene.add(object);
+        this.applyEffects();
       })
       .catch((err) => console.error(`3D背景を読み込めません: ${settings.model}`, err));
   }
@@ -762,6 +828,7 @@ export class StageManager {
   private applyCameraSettings(): void {
     this.applyDepthOfField();
     this.applyBloom();
+    this.applyCharacterLook();
     const fov = this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;
@@ -1379,6 +1446,8 @@ export class StageManager {
     this.smaaPass.setSize(targetW, targetH);
     this.hairShadow.setSize(targetW, targetH);
     this.characterMask.setSize(targetW, targetH);
+    this.eyeMask.setSize(targetW, targetH);
+    this.characterFinishPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.screenEffects?.resize();
   }
@@ -1455,8 +1524,19 @@ export class StageManager {
 
       // 6. 前髪の影用に髪の深度を描く
       this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
-      if (this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled) {
+      // 逆光のリムライト（3D背景が scene.userData.characterRim に出す。前のフレームの値を使う）
+      const rim = this.scene.userData.characterRim as CharacterRim | undefined;
+      const finish = this.characterFinishPass.uniforms;
+      if (rim) {
+        (finish['uRimColor'].value as THREE.Color).copy(rim.color);
+        (finish['uRimScreen'].value as THREE.Vector2).copy(rim.screen);
+      } else {
+        (finish['uRimColor'].value as THREE.Color).setRGB(0, 0, 0);
+      }
+      this.characterFinishPass.enabled = !!rim || finish['uCapTop'].value < 1;
+      if (this.characterFinishPass.enabled || this.characterGlowPass.enabled || this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled) {
         this.characterMask.render(this.renderer, this.scene, this.camera);
+        if (this.characterGlowPass.uniforms.uEyeCare.value > 0.5 || this.characterFinishPass.uniforms['uEyeCare'].value > 0.5) this.eyeMask.render(this.renderer, this.scene, this.camera);
       }
 
       // 7. ポストプロセスパイプライン経由でレンダリング
@@ -1489,7 +1569,10 @@ export class StageManager {
     this.composer.renderTarget2?.dispose();
     this.hairShadow.dispose();
     this.characterMask.dispose();
+    this.eyeMask.dispose();
     this.depthOfFieldPass.dispose();
+    this.highlightShoulderPass.dispose();
+    this.characterGlowPass.dispose();
     this.groundShadow.geometry.dispose();
     this.groundShadow.material.dispose();
     this.renderer.dispose();

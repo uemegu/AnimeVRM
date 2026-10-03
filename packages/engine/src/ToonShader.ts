@@ -13,7 +13,7 @@ import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
 import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './shader/HairRing';
 import { attachFaceSdf, createFaceSdfFrame, injectFaceSdf } from './shader/FaceSdf';
-import { CHARACTER_LAYER } from './postprocessing/LightWrap';
+import { CHARACTER_LAYER, EYE_LAYER } from './postprocessing/LightWrap';
 
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
@@ -293,6 +293,8 @@ export function applyToonShader(
           };
         }
       }
+      // 目は人物のにじみ（CharacterGlow）から外すため、目だけのマスクにも描く
+      if (sourceMaterial && isEyeMaterial(sourceMaterial.name || '')) mesh.layers.enable(EYE_LAYER);
       if (!sourceMaterial || processedMaterials.has(sourceMaterial)) return;
       processedMaterials.add(sourceMaterial);
 
