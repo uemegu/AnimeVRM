@@ -1,6 +1,5 @@
 import { resolveAssetUrl } from '../../utils/path';
-import { VOICE_SILENCE_RMS, getVoiceMouthScale } from '@anime-vrm/engine/audio/lipSync';
-import { VoiceAnalyser, VOICE_PHONEMES, type VoiceFrame, type VoicePhoneme } from '@anime-vrm/engine/audio/VoiceAnalyser';
+import { VoiceAnalyser, VOICE_PHONEMES, VOICE_SILENCE_RMS, type VoiceFrame, type VoicePhoneme } from '@anime-vrm/engine/audio/VoiceAnalyser';
 
 export const PHONEMES = VOICE_PHONEMES;
 export type Phoneme = VoicePhoneme;
@@ -27,8 +26,6 @@ export interface AudioLipSyncEvents {
   onStatsUpdate?: (stats: LipSyncStats) => void;
 }
 
-export type LipSyncEngine = 'wasm' | 'legacy';
-
 export class AudioLipSync {
   public audioContext: AudioContext | null = null;
   public audioElement: HTMLAudioElement;
@@ -41,7 +38,6 @@ export class AudioLipSync {
   public audioDelay: number = 0.05; // Default delay compensation (50ms)
   public voiceGender: 'female' | 'male' = 'female';
   public audioTitle: string = '';
-  public engineMode: LipSyncEngine = 'wasm';
   public isMuted: boolean = false;
 
   private minTimeMs: number = Infinity;
@@ -62,7 +58,6 @@ export class AudioLipSync {
   };
 
   private voiceAnalyser: VoiceAnalyser | null = null;
-  private voiceMouthScale = 1;
   private volume: number = 1;
   private playbackGeneration: number = 0;
   private sourceNode: MediaElementAudioSourceNode | null = null;
@@ -177,7 +172,6 @@ export class AudioLipSync {
     this.gainNode.connect(this.audioContext.destination);
 
     this.voiceAnalyser = new VoiceAnalyser(this.audioContext, this.sourceNode, {
-      useWasm: this.engineMode === 'wasm',
       gender: this.voiceGender,
       rmsThreshold: this.rmsThreshold,
       holdFrames: this.holdFrames,
@@ -195,10 +189,10 @@ export class AudioLipSync {
     return { ...this.lastStats, distances: { ...this.lastStats.distances } };
   }
 
-  /** 音声の特徴から推定した口の開き。WASM 非対応時は RMS 解析で補う */
+  /** WASM が音声の特徴から推定した口の開き。解析が未準備なら閉じる */
   public getMouthOpen(): number {
     if (!this.isPlaying || this.audioElement.paused || this.audioElement.ended) return 0;
-    return this.readVoiceFrame().mouthOpen * this.voiceMouthScale;
+    return this.readVoiceFrame().mouthOpen;
   }
 
   public getPhoneme(): Phoneme | 'nn' | undefined {
@@ -274,7 +268,6 @@ export class AudioLipSync {
     this.initAudioContext();
     const resolvedUrl = resolveAssetUrl(url);
     this.audioTitle = title || url.split('/').pop() || 'Audio Track';
-    this.voiceMouthScale = getVoiceMouthScale(url);
     this.audioElement.src = resolvedUrl;
     this.audioElement.load();
   }

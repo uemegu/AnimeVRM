@@ -157,7 +157,6 @@ export const ja = {
     camera: 'カメラ',
     auto: '自動',
     clearCast: '前のカットの登場キャラを全員下げる',
-    voiceWhisper: '口の開きをさらに控えめにする（任意）',
     flash: '白フラッシュ',
     autoNextSec: 'AUTO の待ち秒数',
     movieAutoNextSec: '次のカットまでの間（秒）',

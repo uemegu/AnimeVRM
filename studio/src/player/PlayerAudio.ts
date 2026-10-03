@@ -1,6 +1,5 @@
 import type { AudioPan } from '@anime-vrm/scenario';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
-import { getVoiceMouthScale } from '@anime-vrm/engine/audio/lipSync';
 import { VoiceAnalyser } from '@anime-vrm/engine/audio/VoiceAnalyser';
 
 const BGM_VOLUME = 0.35;
@@ -123,7 +122,6 @@ export class PlayerAudio {
   private voiceFinished = false;
   private voiceMix: AudioMix = {};
   private voiceAnalyser: VoiceAnalyser | null = null;
-  private voiceMouthScale = 1;
   private mutedState: boolean;
   private onVoiceEnd: (() => void) | null = null;
 
@@ -190,7 +188,6 @@ export class PlayerAudio {
     const output = new Output(audio, context, VOICE_VOLUME, (source) => {
       if (context) this.voiceAnalyser = new VoiceAnalyser(context, source);
     });
-    this.voiceMouthScale = getVoiceMouthScale(url);
     this.voice = output;
     this.voiceFinished = false;
     this.voiceMix = mix;
@@ -230,17 +227,17 @@ export class PlayerAudio {
     return voice && !this.voiceFinished && !voice.paused && !voice.ended ? voice.currentTime : undefined;
   }
 
-  /** 口の形（声の大きさから。ミュート中も口は動かす） */
+  /** WASM が解析した口の形。ミュート中も口は動かす */
   getPhoneme(): string | undefined {
     if (this.getVoiceTime() === undefined) return undefined;
     const phoneme = this.voiceAnalyser?.getFrame().phoneme;
     return phoneme === 'nn' ? undefined : phoneme;
   }
 
-  /** 元の録音の声量による口の開き。再生音量やミュートには影響されない */
+  /** WASM が解析した録音の特徴による口の開き。再生音量やミュートには影響されない */
   getMouthOpen(): number {
     if (this.getVoiceTime() === undefined) return 0;
-    return (this.voiceAnalyser?.getFrame().mouthOpen ?? 0) * this.voiceMouthScale;
+    return this.voiceAnalyser?.getFrame().mouthOpen ?? 0;
   }
 
   /** 共有の AudioContext（作れなければ null）。再生の操作のたびに呼び、止まっていれば再開する */

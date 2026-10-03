@@ -80,7 +80,7 @@ export interface ScenarioScene {
   text: TextContent;
   /** 日本語ボイス音声URL（※英語ボイスは作らない方針のため単一URLで管理）。'/' で始まらない場合はシナリオディレクトリからの相対パス */
   voiceUrl?: string;
-  /** ボイスが囁き声（口の開きを小さくする） */
+  /** @deprecated 旧データの読み込み用。開口度は音声解析だけで決まる */
   voiceWhisper?: boolean;
   /** 背景画像URLまたはプリセットキー */
   background?: string;

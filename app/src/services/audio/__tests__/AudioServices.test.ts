@@ -226,7 +226,7 @@ describe('AudioLipSync', () => {
     const lipSync = new AudioLipSync();
     expect(lipSync.isPlaying).toBe(false);
     expect(lipSync.currentPhoneme).toBeUndefined();
-    expect(lipSync.engineMode).toBe('wasm');
+    expect(lipSync.getMouthOpen()).toBe(0);
     expect(lipSync.audioDelay).toBe(0.05);
 
     lipSync.setVoiceGender('female');

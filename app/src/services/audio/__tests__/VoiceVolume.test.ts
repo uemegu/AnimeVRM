@@ -18,31 +18,19 @@ class MockGain extends MockNode {
   gain = new MockParam();
 }
 
-class MockAnalyser extends MockNode {
-  fftSize = 1024;
-  smoothingTimeConstant = 0;
-  getFloatTimeDomainData = vi.fn((samples: Float32Array) => samples.fill(this.context.rms));
-  constructor(private readonly context: MockContext) { super(); }
-}
-
 class MockContext {
   static instances: MockContext[] = [];
   state = 'running';
   currentTime = 0;
   sampleRate = 44100;
-  rms = 0.1;
   destination = new MockNode();
-  analyser: MockAnalyser | undefined;
   gains: MockGain[] = [];
   audioWorklet = { addModule: vi.fn(async () => {}) };
   resume = async () => {};
   close = async () => { this.state = 'closed'; };
   constructor() { MockContext.instances.push(this); }
   createMediaElementSource() { return new MockNode(); }
-  createAnalyser() {
-    this.analyser = new MockAnalyser(this);
-    return this.analyser;
-  }
+  createAnalyser = vi.fn(() => { throw new Error('JS audio analysis must not be used'); });
   createGain() {
     const gain = new MockGain();
     this.gains.push(gain);
@@ -117,6 +105,41 @@ async function readyWorklet(): Promise<MockWorklet> {
   return worklet;
 }
 
+const renamedVoiceUrls = [
+  '/voices/ordinary.wav',
+  '/voices/asmr_renamed.wav',
+  '/voices/shion_renamed.wav',
+  '/voices/emili_renamed.wav',
+  '/voices/aoi_renamed.wav',
+];
+
+const audioServices = [
+  {
+    name: 'app',
+    create: () => {
+      const audio = new AudioLipSync();
+      return {
+        play: async (url: string) => { audio.loadAudioUrl(url); await audio.play(); },
+        getMouthOpen: () => audio.getMouthOpen(),
+        stop: () => audio.stop(),
+        dispose: () => audio.dispose(),
+      };
+    },
+  },
+  {
+    name: 'Studio',
+    create: () => {
+      const audio = new PlayerAudio();
+      return {
+        play: async (url: string) => { audio.playVoice(url); },
+        getMouthOpen: () => audio.getMouthOpen(),
+        stop: () => audio.stopVoice(),
+        dispose: () => audio.dispose(),
+      };
+    },
+  },
+];
+
 beforeEach(() => {
   MockContext.instances = [];
   MockAudio.instances = [];
@@ -129,34 +152,27 @@ beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(8) })));
 });
 
-afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
 describe('continuous voice opening', () => {
-  it('handles quiet voices in the fallback and releases smoothly into silence', () => {
+  it('keeps the mouth closed without JS analysis until WASM is ready', async () => {
     const context = new MockContext();
-    const analyser = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode, { useWasm: false });
-    context.rms = 0.01;
-    const quiet = analyser.getFrame();
-    expect(quiet.phoneme).not.toBe('nn');
-    expect(quiet.mouthOpen).toBeGreaterThan(0);
-    context.rms = 0.25;
+    let initializeModule: (() => void) | undefined;
+    context.audioWorklet.addModule.mockImplementationOnce(() => new Promise<void>((resolve) => { initializeModule = resolve; }));
+    const analyser = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode);
+    expect(analyser.getFrame()).toEqual({ phoneme: 'nn', rms: 0, mouthOpen: 0 });
     context.currentTime = 0.5;
-    const loud = analyser.getFrame().mouthOpen;
-    expect(loud).toBeGreaterThan(quiet.mouthOpen);
-    context.rms = 0;
-    context.currentTime = 0.6;
-    const release = analyser.getFrame();
-    expect(release.phoneme).toBe('nn');
-    expect(release.mouthOpen).toBeGreaterThan(0);
-    expect(release.mouthOpen).toBeLessThan(loud);
-    context.currentTime = 2;
-    expect(analyser.getFrame().mouthOpen).toBe(0);
+    expect(analyser.getFrame()).toEqual({ phoneme: 'nn', rms: 0, mouthOpen: 0 });
+    expect(context.createAnalyser).not.toHaveBeenCalled();
+    initializeModule?.();
+    const worklet = await readyWorklet();
+    worklet.analyse(0.08);
+    expect(analyser.getFrame()).toEqual({ phoneme: 'oh', rms: 0.18, mouthOpen: 0.08 });
     analyser.dispose();
   });
 
   it('keeps recorded delivery independent of output volume and mute', async () => {
     const voice = new AudioLipSync();
-    voice.engineMode = 'legacy';
     voice.setVolume(0.25);
     voice.setMuted(true);
     voice.loadAudioUrl('/voices/test.wav');
@@ -165,8 +181,10 @@ describe('continuous voice opening', () => {
     expect(voice.audioElement.volume).toBe(1);
     expect(voice.audioElement.muted).toBe(false);
     expect(context.gains[0].gain.value).toBe(0);
+    const worklet = await readyWorklet();
+    worklet.analyse(0.4);
     const opening = voice.getMouthOpen();
-    expect(opening).toBeGreaterThan(0);
+    expect(opening).toBe(0.4);
     voice.setVolume(0.9);
     voice.setMuted(false);
     expect(context.gains[0].gain.value).toBe(0.9);
@@ -178,6 +196,7 @@ describe('continuous voice opening', () => {
   });
 
   it('shares module initialization and WASM loading across voices in one context', async () => {
+    vi.stubEnv('BASE_URL', '/voice-cache-regression/');
     const context = new MockContext();
     const first = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode);
     const second = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode);
@@ -188,18 +207,17 @@ describe('continuous voice opening', () => {
     second.dispose();
   });
 
-  it('uses WASM opening directly, stops JS sampling and drops results from the previous voice', async () => {
+  it('uses WASM opening directly without JS sampling and drops results from the previous voice', async () => {
     const voice = new AudioLipSync();
     voice.loadAudioUrl('/voices/first.wav');
     await voice.play();
     const worklet = await readyWorklet();
     const context = MockContext.instances[0];
-    context.rms = 0.9;
     worklet.analyse(0.36);
     expect(voice.getMouthOpen()).toBe(0.36);
     expect(voice.getPhoneme()).toBe('oh');
     expect(voice.getStats().rms).toBe(0.18);
-    expect(context.analyser?.getFloatTimeDomainData).not.toHaveBeenCalled();
+    expect(context.createAnalyser).not.toHaveBeenCalled();
     const previousGeneration = worklet.generation;
     voice.loadAudioUrl('/voices/second.wav');
     await voice.play();
@@ -214,32 +232,31 @@ describe('continuous voice opening', () => {
     voice.dispose();
   });
 
-  it('resumes RMS fallback after a processor failure and retries failed module loading', async () => {
+  it('closes the mouth after a processor failure and retries failed module loading', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     const context = new MockContext();
     context.audioWorklet.addModule.mockRejectedValueOnce(new Error('unsupported module'));
     const unavailable = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode);
     await vi.waitFor(() => expect(console.warn).toHaveBeenCalled());
     expect(unavailable.ready).toBe(false);
-    expect(unavailable.getFrame().mouthOpen).toBeGreaterThan(0);
+    expect(unavailable.getFrame()).toEqual({ phoneme: 'nn', rms: 0, mouthOpen: 0 });
     const onReady = vi.fn();
     const retry = new VoiceAnalyser(context as unknown as AudioContext, new MockNode() as unknown as AudioNode, { onReady });
     const worklet = await readyWorklet();
     expect(context.audioWorklet.addModule).toHaveBeenCalledTimes(2);
     worklet.analyse(0.7);
     expect(retry.getFrame().mouthOpen).toBe(0.7);
-    context.rms = 0.01;
     worklet.onprocessorerror?.();
     expect(retry.ready).toBe(false);
     expect(onReady).toHaveBeenLastCalledWith(false);
-    const fallback = retry.getFrame();
-    expect(fallback.mouthOpen).toBeGreaterThan(0);
-    expect(fallback.mouthOpen).toBeLessThan(0.7);
+    worklet.analyse(0.9);
+    expect(retry.getFrame()).toEqual({ phoneme: 'nn', rms: 0, mouthOpen: 0 });
+    expect(context.createAnalyser).not.toHaveBeenCalled();
     unavailable.dispose();
     retry.dispose();
   });
 
-  it('keeps RMS fallback for an old worklet without the versioned opening protocol', async () => {
+  it('keeps the mouth closed for an old worklet without the versioned opening protocol', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     const onReady = vi.fn();
     const context = new MockContext();
@@ -249,25 +266,26 @@ describe('continuous voice opening', () => {
     expect(analyser.ready).toBe(false);
     expect(onReady).toHaveBeenLastCalledWith(false);
     expect(console.warn).toHaveBeenCalledWith('LipSync AudioWorklet ABI mismatch:', undefined);
-    expect(analyser.getFrame().mouthOpen).toBeGreaterThan(0);
-    expect(context.analyser?.getFloatTimeDomainData).toHaveBeenCalled();
+    MockWorklet.instances[0].analyse(0.9);
+    expect(analyser.getFrame()).toEqual({ phoneme: 'nn', rms: 0, mouthOpen: 0 });
+    expect(context.createAnalyser).not.toHaveBeenCalled();
     analyser.dispose();
   });
 
-  it('exposes opening through SoundManager and applies the ASMR file reference once', async () => {
+  it('exposes the unmodified WASM opening through SoundManager for an ASMR-named file', async () => {
     const manager = new SoundManager({ masterVolume: 0.4, voiceVolume: 0.5 });
     manager.setMuted(true);
     manager.playVoice('/voices/asmr_hello.wav');
     const worklet = await readyWorklet();
     worklet.analyse(0.5);
-    expect(manager.getVoiceMouthOpen()).toBeCloseTo(0.325);
+    expect(manager.getVoiceMouthOpen()).toBe(0.5);
     expect(manager.getVoicePhoneme()).toBe('oh');
     const context = MockContext.instances[0];
     expect(context.gains[0].gain.value).toBe(0);
     manager.setMuted(false);
     manager.setMasterVolume(0.8);
     expect(context.gains[0].gain.value).toBe(0.4);
-    expect(manager.getVoiceMouthOpen()).toBeCloseTo(0.325);
+    expect(manager.getVoiceMouthOpen()).toBe(0.5);
     manager.stopVoice();
     expect(manager.getVoiceMouthOpen()).toBe(0);
     manager.dispose();
@@ -280,13 +298,13 @@ describe('continuous voice opening', () => {
     const worklet = await readyWorklet();
     worklet.analyse(0.6);
     expect(player.getPhoneme()).toBe('oh');
-    expect(player.getMouthOpen()).toBeCloseTo(0.39);
+    expect(player.getMouthOpen()).toBe(0.6);
     const context = MockContext.instances[0];
     expect(context.gains[0].gain.value).toBe(0);
-    expect(context.analyser?.getFloatTimeDomainData).not.toHaveBeenCalled();
+    expect(context.createAnalyser).not.toHaveBeenCalled();
     player.setMuted(false);
     expect(context.gains[0].gain.value).toBe(0.2);
-    expect(player.getMouthOpen()).toBeCloseTo(0.39);
+    expect(player.getMouthOpen()).toBe(0.6);
     MockAudio.instances[0].pause();
     expect(player.getMouthOpen()).toBe(0);
     player.stopVoice();
@@ -362,5 +380,41 @@ describe('continuous voice opening', () => {
     expect(voice.isPlaying).toBe(false);
     expect(voice.getMouthOpen()).toBe(0);
     voice.dispose();
+  });
+});
+
+describe.each(audioServices)('$name voice filename independence', ({ create }) => {
+  it('returns the same unmodified WASM opening after renaming a voice', async () => {
+    for (const url of renamedVoiceUrls) {
+      const audio = create();
+      const expectedWorkletCount = MockWorklet.instances.length + 1;
+      await audio.play(url);
+      await vi.waitFor(() => expect(MockWorklet.instances).toHaveLength(expectedWorkletCount));
+      const worklet = await readyWorklet();
+      for (const opening of [0, 0.16, 0.65, 1]) {
+        worklet.analyse(opening);
+        expect(audio.getMouthOpen()).toBe(opening);
+      }
+      audio.stop();
+      worklet.analyse(0.8);
+      expect(audio.getMouthOpen()).toBe(0);
+      audio.dispose();
+    }
+  });
+
+  it('keeps the mouth closed when WASM is unavailable regardless of filename', async () => {
+    vi.stubGlobal('AudioWorkletNode', undefined);
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    for (const url of renamedVoiceUrls) {
+      const audio = create();
+      await audio.play(url);
+      const context = MockContext.instances.at(-1)!;
+      for (const time of [0, 0.1, 0.2, 0.3, 2]) {
+        context.currentTime = time;
+        expect(audio.getMouthOpen()).toBe(0);
+      }
+      expect(context.createAnalyser).not.toHaveBeenCalled();
+      audio.dispose();
+    }
   });
 });

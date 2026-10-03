@@ -28,7 +28,7 @@ export interface CallSceneStep {
   nextStepId?: string | null; // nullなら通話終了
   /** ボイス（'/' で始まらなければ通話のディレクトリからの相対パス） */
   voiceUrl?: string;
-  /** ボイスが囁き声（口の開きを小さくする） */
+  /** @deprecated 旧データの読み込み用。開口度は音声解析だけで決まる */
   voiceWhisper?: boolean;
 }
 

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-10-03T15:17:07.285Z",
+  "generatedAt": "2026-10-03T15:48:08.428Z",
   "itemCount": 14,
-  "totalBytes": 183177465,
+  "totalBytes": 183177530,
   "totalMb": 174.7,
   "items": [
     {
@@ -131,7 +131,7 @@
         "ja": "リップシンク解析モジュール",
         "en": "LipSync WASM"
       },
-      "sizeBytes": 7392,
+      "sizeBytes": 7457,
       "type": "wasm"
     },
     {
