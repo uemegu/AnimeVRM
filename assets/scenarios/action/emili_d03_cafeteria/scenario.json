@@ -1,0 +1,202 @@
+{
+  "id": "emili_d03_cafeteria",
+  "title": {
+    "ja": "ブラックカードと自販機の隙間"
+  },
+  "priority": 5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 3,
+      "to": 4
+    },
+    "locations": [
+      "cafeteria"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d01_gate"
+        }
+      ]
+    }
+  },
+  "location": "cafeteria",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "cafeteria",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "購買のレジで誰かが揉めているらしい"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "どうして買えないのよ！？　神崎グループの特注ブラックカードよ！？",
+      "background": "cafeteria",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Angry",
+          "lookAtTarget": "forward",
+          "anger": true
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_817abfb0.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "cafeteria_lady",
+      "speaker": "購買のおばちゃん",
+      "text": "神崎さん、うちは現金だけなのよ〜",
+      "voiceUrl": "v_s2_67a95bb9.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "mob_student",
+      "speaker": "生徒",
+      "text": "早くしてくれよ〜",
+      "voiceUrl": "v_s3_b102d4ea.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "（エミリが真っ赤になり、悔しそうに噛んだ唇から八重歯がはみ出す）",
+      "avatars": {
+        "emili": {
+          "anger": false,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "pose_hide_mouth_shy"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_d03_pay",
+          "text": "（小銭を出す）おばちゃん、デニッシュ二つ。俺が払う",
+          "goto": "c1",
+          "setFlags": {
+            "emili_c02": true
+          },
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "emili_d03_watch",
+          "text": "（後ろで見守る）",
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ！",
+      "avatars": {
+        "emili": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "effectText": "biku"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_47a49573.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "ちょっとアンタ！　小銭持ってるでしょ！？　貸しなさい！",
+      "avatars": {
+        "emili": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "motion": "Antada"
+        }
+      },
+      "voiceUrl": "v_c2_ac9fa50d.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……はい"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "mob_student",
+      "speaker": "生徒たち",
+      "text": "うおお、押すな押すな！",
+      "focusLines": true,
+      "camera": "wide",
+      "voiceUrl": "v_merge_9ce76f93.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "た、タカシ……近い……",
+      "cg": "/cg/emili/vending_gap.avif",
+      "voiceUrl": "v_s10_7efb3993.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "わ、悪気はない！　出られないんだ！"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "わ、分かってるわよバカ……っ！",
+      "voiceUrl": "v_s12_5ced3753.mp3"
+    },
+    {
+      "id": "s13",
+      "text": "（一分間、二人とも顔を背けたまま）"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……パン代。今度、ちゃんと返すから。借りっぱなしは神崎家の恥よ",
+      "cg": false,
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s14_d6454cd7.mp3"
+    }
+  ]
+}

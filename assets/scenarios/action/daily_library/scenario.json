@@ -3,6 +3,7 @@
   "title": {
     "ja": "図書室: 静かな時間"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -13,7 +14,6 @@
       "library"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

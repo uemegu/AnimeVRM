@@ -3,6 +3,7 @@
   "title": {
     "ja": "映画館: 一人の休日"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "cinema"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

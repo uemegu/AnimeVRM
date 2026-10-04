@@ -1,0 +1,126 @@
+{
+  "id": "daily_classroom_rain",
+  "title": {
+    "ja": "雨の日はボーナスタイム"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "locations": [
+      "classroom"
+    ],
+    "weather": [
+      "rain"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "naruse"
+      ],
+      "hintText": {
+        "ja": "窓の外は雨。教室にナルセが残っている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "雨だりー。髪うねるし、靴濡れるし",
+      "background": "painted_classroom",
+      "rain": true,
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_01156e4c.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "素晴らしい……湿度85パーセント……"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "は？",
+      "avatars": {
+        "naruse": {
+          "expression": "surprised",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s3_2089ca65.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "乾いてる日はカチカチの網戸の埃が、湿気で柔らかくなってる。濡れ雑巾一枚でスルッと落ちる。天の恵みだ",
+      "cutin": "/cutins/takashi/halo_cleaning.avif"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_rain_help",
+          "text": "ナルセも手伝え",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_rain_wipe",
+          "text": "（無言で拭き続ける）",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "やだよ！！",
+      "cutin": false,
+      "avatars": {
+        "naruse": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c1_506de6d8.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "……雨の日のお前、一番危険だわ",
+      "cutin": false,
+      "avatars": {
+        "naruse": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "jito"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_fc91828b.mp3"
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
-import type { SceneEffects } from '@anime-vrm/scenario';
+import type { CutinConfig, SceneEffects, StillImageConfig } from '@anime-vrm/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { StageView } from '../../components/Stage/StageView';
@@ -23,6 +23,9 @@ export interface ScenarioPageProps {
   cameraShot: CameraShot;
   scrolling: ScrollingBackgroundSettings | null;
   effects?: SceneEffects;
+  cg?: StillImageConfig | null;
+  cutin?: CutinConfig | null;
+  rain?: boolean;
   onDialogueClick: () => void;
   onChoiceClick: (index: number) => void;
   onChoiceTimeout: () => void;
@@ -39,6 +42,9 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   cameraShot,
   scrolling,
   effects,
+  cg,
+  cutin,
+  rain,
   onDialogueClick,
   onChoiceClick,
   onChoiceTimeout,
@@ -57,6 +63,9 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           cameraShot={cameraShot}
           scrolling={scrolling}
           effects={effects}
+          cg={cg}
+          cutin={cutin}
+          rain={rain}
           speakerId={currentScene?.speakerCharacterId ?? null}
           cut={currentScene}
         />

@@ -3,6 +3,7 @@
   "title": {
     "ja": "屋上: 風の通り道"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -13,7 +14,6 @@
       "rooftop"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

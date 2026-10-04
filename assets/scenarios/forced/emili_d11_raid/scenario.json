@@ -1,0 +1,168 @@
+{
+  "id": "emili_d11_raid",
+  "title": {
+    "ja": "強制連行"
+  },
+  "priority": 30,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "days": [
+      11
+    ],
+    "requireFlags": [
+      "route_emili"
+    ]
+  },
+  "location": "school_gate",
+  "bgm": "action",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "sp_leader",
+      "speaker": "黒服リーダー",
+      "text": "エミリお嬢様。本日付で、スイスの全寮制学校へ転校していただきます",
+      "background": "gate_ambush",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "sad",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "wide",
+      "cg": "/cg/emili/raid_five_sedans.avif",
+      "voiceUrl": "v_s1_7b137c0f.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "なによそれ……聞いてない！　私は行かない！　ここにいたいの！",
+      "cg": false,
+      "avatars": {
+        "emili": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Angry"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_2f793304.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "sp_leader",
+      "speaker": "黒服リーダー",
+      "text": "お嬢様が毎日我々の目を盗み、素性の知れない男子生徒と街を出歩いていることを、旦那様はご存じです",
+      "voiceUrl": "v_s3_320ecfc9.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……素性の知れない男子生徒って、俺か！？）",
+      "cutin": "/cutins/takashi/cleaning_gear.avif"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "放しなさいよ！　……誰か、助けて……っ！",
+      "cutin": false,
+      "avatars": {
+        "emili": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "tears": true,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s5_ab1ee295.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choiceTimeout": {
+        "seconds": 3
+      },
+      "choices": [
+        {
+          "id": "emili_d11_charge",
+          "text": "エミリから手を引けええっ！！（突っ込む）",
+          "goto": "c1",
+          "setFlags": {
+            "emili_c07": true
+          }
+        },
+        {
+          "id": "emili_d11_tools",
+          "text": "（掃除用具を置いてから行く）",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "text": "（人垣を突き破り、エミリの手首を掴む）",
+      "cutin": "/cutins/takashi/cleaning_gear_charge.avif",
+      "focusLines": true,
+      "camera": "medium",
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "text": "（ゴーグルを外しかけて――間に合わない。結局そのまま突っ込む）",
+      "cutin": "/cutins/takashi/cleaning_gear_charge.avif",
+      "focusLines": true,
+      "camera": "medium"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "エミリ、手ぇ離すな！　逃げるぞ！",
+      "cutin": false
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "タカシ……！？",
+      "avatars": {
+        "emili": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "effectText": "biku"
+        }
+      },
+      "voiceUrl": "v_s10_7dc220d8.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "sp_leader",
+      "speaker": "黒服リーダー",
+      "text": "ゴーグル、マスク、刃物……不審者だ！　お嬢様を保護せよ！　安全ネット展開！",
+      "background": "school_gate",
+      "scrollingBackground": {
+        "speed": 1.6
+      },
+      "avatars": {
+        "emili": {
+          "motion": "Jogging",
+          "fastMotion": true
+        }
+      },
+      "camera": "side",
+      "focusLines": true,
+      "voiceUrl": "v_s11_51487d7f.mp3"
+    }
+  ]
+}

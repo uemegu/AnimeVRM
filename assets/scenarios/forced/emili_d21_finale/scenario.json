@@ -1,0 +1,209 @@
+{
+  "id": "emili_d21_finale",
+  "title": {
+    "ja": "運命の５秒"
+  },
+  "priority": 50,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      21
+    ],
+    "requireFlags": [
+      "route_emili"
+    ]
+  },
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……来てくれたのね、タカシ",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_4999d590.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "来るって言っただろ"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……私ね、ずっと待ってたの。アンタが何か言ってくれるの",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s3_c9b6606c.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "２１日間の猶予はここまでです、人の子よ",
+      "flashEffect": "white",
+      "seUrl": "/se/piano_note.mp3",
+      "timeOfDay": "divine",
+      "bgm": "mysterious",
+      "avatars": {
+        "god": {
+          "position": [
+            0.9,
+            0,
+            -0.6
+          ],
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        },
+        "emili": {
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s4_add2fd54.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "財閥の令嬢と庶民の男子。なかなか見応えのある身分違いでしたよ",
+      "avatars": {
+        "god": {
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s5_bb0a8557.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "では――ＧＯと言ったら５秒以内に、本心を告げなさい。レディー……ＧＯ！！",
+      "avatars": {
+        "god": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "pose_point_go"
+        }
+      },
+      "focusLines": true,
+      "camera": "close",
+      "voiceUrl": "v_s6_5293a4a0.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "timeOfDay": "evening",
+      "bgm": "love",
+      "avatars": {
+        "god": {
+          "visible": false
+        },
+        "emili": {
+          "lookAtTarget": "camera",
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "medium",
+      "choiceTimeout": {
+        "seconds": 5,
+        "goto": "bad",
+        "setFlags": {
+          "finale_timeout": true
+        }
+      },
+      "choices": [
+        {
+          "id": "emili_finale_love",
+          "text": "エミリが好きだ！　令嬢だろうが関係ない！",
+          "goto": "love",
+          "setFlags": {
+            "finale_love": true,
+            "finale_answered": true
+          }
+        },
+        {
+          "id": "emili_finale_stay",
+          "text": "これからも、お前の隣で一番の相棒でいさせてくれ！",
+          "goto": "stay",
+          "setFlags": {
+            "finale_stay": true,
+            "finale_answered": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "love",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "エミリーーーッ！！",
+      "focusLines": true,
+      "camera": "wide"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "俺はエミリが好きだ！　大財閥の令嬢だろうが関係ない！　俺の隣で、ずっとただのエミリとして笑っててくれ！！　俺の彼女になってくれええっ！！",
+      "focusLines": true,
+      "camera": "medium",
+      "end": true
+    },
+    {
+      "id": "stay",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "エミリ！　俺はこれからも、お前の隣にいたい！　神崎家のお嬢様じゃなく、ただのエミリを一番近くで守る、最高の相棒でいさせてくれ！",
+      "camera": "medium",
+      "end": true
+    },
+    {
+      "id": "bad",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "エミリ……俺……その……",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（俺が好きだって言ったら、エミリはパパと正面からぶつかることになる。その責任、俺に取れるのか……？）",
+      "end": true
+    }
+  ]
+}

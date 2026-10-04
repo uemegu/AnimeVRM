@@ -1,0 +1,272 @@
+{
+  "id": "common_d11_button",
+  "title": {
+    "ja": "取れたボタン"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "days": [
+      11
+    ]
+  },
+  "location": "corridor",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "あっ！？　嘘でしょ、ボタン取れた！　これパパが特注したやつなのに〜！",
+      "background": "corridor",
+      "timeOfDay": "day",
+      "avatars": {
+        "emili": {
+          "position": "left",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Excited",
+          "effectText": "gaan"
+        },
+        "aoi": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s1_3f8090d7.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "あらら……",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili"
+        }
+      },
+      "voiceUrl": "v_s2_33aff63c.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……騒がしいわね",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "emili"
+        }
+      },
+      "voiceUrl": "v_s3_6ebfb903.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "どうしよう、私お裁縫なんてやったことないわよ！？",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "sweat": "fly4"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s4_c2b3f477.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choiceFallback": "highest_affinity",
+      "camera": "wide",
+      "choices": [
+        {
+          "id": "route_aoi",
+          "text": "アオイ、頼めるか？",
+          "goto": "ra",
+          "setFlags": {
+            "route_aoi": true
+          },
+          "condition": {
+            "minAffinity": {
+              "aoi": 8
+            }
+          }
+        },
+        {
+          "id": "route_emili",
+          "text": "昼休みでいいなら、俺が縫ってやるよ",
+          "goto": "re",
+          "setFlags": {
+            "route_emili": true
+          },
+          "condition": {
+            "minAffinity": {
+              "emili": 8
+            }
+          }
+        },
+        {
+          "id": "route_shion",
+          "text": "（シオンの方を見る）",
+          "goto": "rs",
+          "setFlags": {
+            "route_shion": true
+          },
+          "condition": {
+            "minAffinity": {
+              "shion": 8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ra",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "うん、任せて。ソーイングセット教室だから……預かって、次の休み時間に縫うね",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Acknowledging",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_ra_22748805.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "助かるわアオイちゃん！",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Excited"
+        }
+      },
+      "voiceUrl": "v_s7_e8d7790a.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "お礼に、放課後クレープ奢るわ！　駅前の新しいお店！　タカシも来なさい、言い出しっぺなんだから",
+      "avatars": {
+        "emili": {
+          "motion": "pose_hands_on_hips_proud",
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s8_5d1b810a.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "俺、今日掃除当番なんだけど……"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "終わってからでいいわよ。校門集合ね！",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Greeting"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_s10_081c6997.mp3"
+    },
+    {
+      "id": "re",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……アンタが？　お裁縫？",
+      "avatars": {
+        "emili": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_re_61df9cbb.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "掃除用の雑巾、自分で繕ってるからな"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "アンタって本当に何者なのよ……。じゃ、じゃあ昼休み、お願い",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_s13_2b7e5f26.mp3"
+    },
+    {
+      "id": "rs",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……見苦しいわね。とりあえずこれで留めておきなさい",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "emili",
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_rs_609c00fb.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "放課後、家庭科室で縫えばいいわ。……行くわよタカシ、遅れる",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s15_ecf271af.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（――この時は、まだ知らなかった。この小さなボタン一つで、放課後がとんでもないことになるなんて）",
+      "camera": "wide",
+      "screenTransition": "fade_black"
+    }
+  ]
+}

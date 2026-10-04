@@ -23,6 +23,7 @@ VOICED = [c for c in BOOK['characters'] if c.get('voice')]
 REFS = {c['id']: os.path.join(REPO, c['voice']['ref']) for c in VOICED}
 BASE = {c['id']: c['voice']['caption'] + c['voice'].get('direction', '') for c in VOICED}
 POSTPROCESS = {c['id']: c['voice']['postprocess'] for c in VOICED if c['voice'].get('postprocess')}
+NAMES = {c['id']: c['name']['ja'] for c in BOOK['characters']}
 MOOD = BOOK['voiceMoods']
 WHISPER = BOOK['whisperCaption']
 SHOUT = BOOK['shoutCaption']
@@ -64,11 +65,16 @@ def lines():
     for cid in sorted(os.listdir(call_dir)):
         path = os.path.join(call_dir, cid, 'scenario.json')
         data = json.load(open(path))
+        who = data['characterId']
+        heroine_name = NAMES.get(who)
         for step in data['steps'].values():
-            text = (step.get('text') or {}).get('ja', '')
+            text = step.get('text') or ''
+            text = text if isinstance(text, str) else text.get('ja', '')
             if not text.strip() or step.get('choices'):
                 continue
-            who = data['characterId']
+            # 主人公のセリフ・地の文には声を付けない（話者がその電話の相手のときだけ）
+            if step.get('speaker') != heroine_name:
+                continue
             digest = hashlib.sha1(f'{who}|{text}'.encode()).hexdigest()[:8]
             yield path, step, who, step.get('expression', 'neutral'), text, f"v_{step['id']}_{digest}.wav"
 

@@ -1,0 +1,210 @@
+{
+  "id": "shion_d21_finale",
+  "title": {
+    "ja": "運命の５秒"
+  },
+  "priority": 50,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      21
+    ],
+    "requireFlags": [
+      "route_shion"
+    ]
+  },
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……本当に、来たのね",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_ba7e7a07.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "全部伝えるために来た"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……検証を始めましょう",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "voiceUrl": "v_s3_e8781fa2.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "２１日間の猶予はここまでです",
+      "flashEffect": "white",
+      "seUrl": "/se/piano_note.mp3",
+      "timeOfDay": "divine",
+      "bgm": "mysterious",
+      "avatars": {
+        "god": {
+          "position": [
+            0.9,
+            0,
+            -0.6
+          ],
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        },
+        "shion": {
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s4_119d921b.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "私の仕掛けまで見抜くとは、実に見事な娘でした。おかげで雨も脚立も裏目に出ましたけれど",
+      "avatars": {
+        "god": {
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s5_a3800042.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "では――ＧＯと言ったら５秒以内に、本心を告げなさい。偽りなら雷です。レディー……ＧＯ！！",
+      "avatars": {
+        "god": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "pose_point_go"
+        }
+      },
+      "focusLines": true,
+      "camera": "close",
+      "voiceUrl": "v_s6_5d359662.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "timeOfDay": "evening",
+      "bgm": "love",
+      "avatars": {
+        "god": {
+          "visible": false
+        },
+        "shion": {
+          "lookAtTarget": "camera",
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "medium",
+      "choiceTimeout": {
+        "seconds": 5,
+        "goto": "bad",
+        "setFlags": {
+          "finale_timeout": true
+        }
+      },
+      "choices": [
+        {
+          "id": "shion_finale_love",
+          "text": "シオンが好きだ！　きっかけは神様でも、選んだのは俺だ！",
+          "goto": "love",
+          "setFlags": {
+            "finale_love": true,
+            "finale_answered": true
+          }
+        },
+        {
+          "id": "shion_finale_stay",
+          "text": "名前はまだつけられない。でも、シオンの隣で調べ物を続けたい！",
+          "goto": "stay",
+          "setFlags": {
+            "finale_stay": true,
+            "finale_answered": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "love",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "シオーーーンッ！！",
+      "focusLines": true,
+      "camera": "wide"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "俺はシオンが好きだ！　きっかけは神様の悪戯でも、蔵でお前の隣に座ったのは俺が選んだことだ！　俺のために一人で線を引き続けてくれたシオンが、世界で一番大好きだ！！",
+      "focusLines": true,
+      "camera": "medium",
+      "end": true
+    },
+    {
+      "id": "stay",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "シオン！　この気持ちに名前をつける自信は、まだない！　でも、呪いが解けても、シオンの隣で一緒に調べ物を続けたい！　それだけは本当だ！",
+      "camera": "medium",
+      "end": true
+    },
+    {
+      "id": "bad",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "シオン……俺……その……",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（もし、これが神様の仕掛けが残した錯覚だったら。偽りと判定されて、シオンの前で雷に打たれたら――）",
+      "end": true
+    }
+  ]
+}

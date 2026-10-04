@@ -1,0 +1,91 @@
+{
+  "id": "shion_d20_shrine",
+  "title": {
+    "ja": "誠の心"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      20
+    ],
+    "requireFlags": [
+      "route_shion"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d18_teacher"
+        }
+      ]
+    }
+  },
+  "location": "shrine",
+  "timeOfDay": "day",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（ブラシと精製水で、石碑の苔と泥を落としていく）",
+      "background": "shrine",
+      "timeOfDay": "day",
+      "cg": "/cg/shion/monument_polish.avif"
+    },
+    {
+      "id": "s2",
+      "text": "『五秒の刻、誠の心を以て約すべし』"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（誠の心。……５秒様は、偽りの言葉を通さない）"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（だったら――）"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d20_pray",
+          "text": "（石碑に手を合わせる）",
+          "goto": "c1",
+          "setFlags": {
+            "shion_insight": true
+          }
+        },
+        {
+          "id": "shion_d20_check",
+          "text": "（拭き残しがないか確認する）",
+          "goto": "c2",
+          "setFlags": {
+            "shion_insight": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（女神の判定そのものが、俺の気持ちが本物だって証明になる）",
+      "focusLines": true,
+      "end": true
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……よし、ピカピカだ。……って、そうじゃない。女神の判定そのものが、証明になるんだ）",
+      "focusLines": true,
+      "end": true
+    }
+  ]
+}

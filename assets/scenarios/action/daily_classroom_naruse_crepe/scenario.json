@@ -1,0 +1,201 @@
+{
+  "id": "daily_classroom_naruse_crepe",
+  "title": {
+    "ja": "女子トーク乱入未遂"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 5,
+      "to": 20
+    },
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "aoi",
+        "emili",
+        "shion"
+      ],
+      "hintText": {
+        "ja": "アオイたちがクレープの話で盛り上がっている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "駅前に新しくできたクレープ屋さん、行った？",
+      "background": "painted_classroom",
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "aoi"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "emili"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s1_b8f07bab.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "まだよ。庶民のスイーツ店に一人で並ぶのは、ハードルが高いわ",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s2_411a13db.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……カスタードチョコバナナが、糖分純度が高くて優秀よ",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s3_4523b979.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ（小声）",
+      "text": "タカシ見ろ、天国だ！　俺がジェントルにあの輪に入って、クレープデートの権利を勝ち取る！",
+      "voiceUrl": "v_s4_af895051.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "やめとけ、自爆するぞ"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "やあ、麗しきレディーたち。エスコートが必要なら、この成瀬が――",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera"
+        },
+        "emili": {
+          "lookAtTarget": "camera"
+        },
+        "shion": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s6_a01b7ac4.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……静かにして。二酸化炭素が増えるわ",
+      "avatars": {
+        "shion": {
+          "expression": "angry",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s7_482cbe56.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "誰かしらこの無礼者は。三百年早いわよ",
+      "avatars": {
+        "emili": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "voiceUrl": "v_s8_8dba89c3.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "あはは……成瀬くん、お昼休みもう終わるよ？",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "jito"
+        }
+      },
+      "voiceUrl": "v_s9_c441be28.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_crepe_pat",
+          "text": "（石像になったナルセの肩を叩く）",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_crepe_told",
+          "text": "言わんこっちゃない",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "……女子って、強敵だな……！",
+      "camera": "wide",
+      "end": true,
+      "voiceUrl": "v_c1_b4b33b25.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "傷口に塩を塗るな……！",
+      "camera": "wide",
+      "end": true,
+      "voiceUrl": "v_c2_69de5989.mp3"
+    }
+  ]
+}

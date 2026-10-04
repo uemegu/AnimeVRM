@@ -3,6 +3,7 @@
   "title": {
     "ja": "公園: のどかな休日"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "park"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

@@ -1,0 +1,142 @@
+{
+  "id": "emili_d20_park",
+  "title": {
+    "ja": "ただのエミリでいても"
+  },
+  "priority": 10,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      20
+    ],
+    "locations": [
+      "park"
+    ],
+    "requireFlags": [
+      "route_emili"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d17_rain"
+        }
+      ]
+    }
+  },
+  "location": "park",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "park",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "公園のベンチに、赤い髪の子がいたらしい"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……ねえタカシ。私、来週パパと話すことにしたわ。電話じゃなくて、顔を見て",
+      "background": "painted_seaside",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_1a72b33e.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "転校のことも、友達のことも。私の言葉で",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s2_578c92a0.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……でも、ちょっと怖い。神崎家の娘じゃなくて、ただのエミリでいても……いいのかな",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s3_708de1be.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_d20_just",
+          "text": "当たり前だろ。俺は、ただのエミリと一緒にいるのが楽しいんだ",
+          "goto": "c1",
+          "addAffinity": {
+            "emili": 3
+          }
+        },
+        {
+          "id": "emili_d20_yaeba",
+          "text": "八重歯がはみ出るお嬢様なんて、他にいないしな",
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……ふふ。アンタってたまに、すごくいいこと言うわよね",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c1_13eb4247.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ、またそれ！？",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "pose_arms_crossed_pout",
+          "effectText": "iraira"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_3a3446ea.mp3"
+    }
+  ]
+}

@@ -11,6 +11,8 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export interface NightRoomPageProps {
   day: number;
   affinities: Record<string, number>;
+  /** 選択肢の出現条件の判定に使う */
+  flags: Record<string, boolean | number | string>;
   /** 今夜届く電話・メール（ScheduleManager.getNightCommunications） */
   communications: NightCommunication[];
   onSave: () => void;
@@ -29,6 +31,7 @@ const MAX_AFFINITY_SCALE = 10;
 export const NightRoomPage: React.FC<NightRoomPageProps> = ({
   day,
   affinities,
+  flags,
   communications,
   onSave,
   onLoad,
@@ -284,6 +287,7 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       {activeCallScenario && (
         <PhoneCallModal
           scenario={activeCallScenario}
+          context={{ flags, affinities }}
           onClose={handleCloseCallModal}
         />
       )}
@@ -292,6 +296,7 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
       {activeMailScenario && (
         <PhoneMailModal
           scenario={activeMailScenario}
+          context={{ flags, affinities }}
           onClose={handleCloseMailModal}
         />
       )}

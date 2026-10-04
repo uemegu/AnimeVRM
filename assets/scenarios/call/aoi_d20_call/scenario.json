@@ -1,0 +1,140 @@
+{
+  "id": "aoi_d20_call",
+  "title": {
+    "ja": "明日、あの神社で"
+  },
+  "priority": 10,
+  "availability": {
+    "days": [
+      20
+    ],
+    "requireFlags": [
+      "route_aoi"
+    ]
+  },
+  "characterId": "aoi",
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "タカシくん、まだ起きてた？"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_951316e4.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "ああ。……眠れなくて"
+      },
+      "nextStepId": "step_3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "私も。……明日で、また一緒に学校行くようになってから、ちょうど三週間だね"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "step_4",
+      "voiceUrl": "v_step_3_2e8cf5f0.mp3"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……あのね。明日の夕方、あの神社に来てくれる？"
+      },
+      "expression": "neutral",
+      "expressionWeight": 1,
+      "nextStepId": "step_5",
+      "voiceUrl": "v_step_4_8daa494b.mp3"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "タカシくんに、ちゃんと伝えたいことがあるの"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "c6",
+      "voiceUrl": "v_step_5_a6875702.mp3"
+    },
+    "c6": {
+      "id": "c6",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d20_call_go",
+          "text": {
+            "ja": "俺も、アオイに言わなきゃいけないことがある。絶対行く"
+          },
+          "goto": "c1",
+          "setFlags": {
+            "aoi_promise": true
+          }
+        },
+        {
+          "id": "aoi_d20_call_what",
+          "text": {
+            "ja": "伝えたいことって？"
+          },
+          "goto": "c2",
+          "setFlags": {
+            "aoi_promise": true
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……うん。待ってるね"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "merge",
+      "voiceUrl": "v_c1_c44d2761.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "それは明日。……来てくれなきゃ、言えないよ"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "merge",
+      "voiceUrl": "v_c2_5b482a51.mp3"
+    },
+    "merge": {
+      "id": "merge",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "おやすみ、タカシくん"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "step_10",
+      "voiceUrl": "v_merge_499c58cd.mp3"
+    },
+    "step_10": {
+      "id": "step_10",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "（明日。５秒で、全部言う）"
+      },
+      "nextStepId": null
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "id": "shion_call_return",
+  "title": {
+    "ja": "返却期限の確認"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 4,
+      "to": 10
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d01_library"
+        }
+      ]
+    }
+  },
+  "characterId": "shion",
+  "audioOnly": true,
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "夜分に失礼。図書委員長としての事務連絡よ。あなたが借りた歴史小説、返却期限は明日"
+      },
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_7e0b6f5f.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "もう読み終わったから明日返すよ。めちゃくちゃ面白かった"
+      },
+      "nextStepId": "step_3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……もう読了したの？　上下巻で八百ページ近くあるのに"
+      },
+      "nextStepId": "c4",
+      "voiceUrl": "v_step_3_178f4431.mp3"
+    },
+    "c4": {
+      "id": "c4",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_return_loved",
+          "text": {
+            "ja": "シオンが勧めてくれた本だからな。主人公が知恵で窮地を切り抜けるところ、最高だった"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_return_skim",
+          "text": {
+            "ja": "最後の方は斜め読みだけど"
+          },
+          "goto": "c2"
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……そう"
+      },
+      "nextStepId": "step_6",
+      "voiceUrl": "v_c1_d115b02a.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……あの場面の伏線回収、美しかったでしょう"
+      },
+      "nextStepId": "step_7",
+      "voiceUrl": "v_step_6_f8278d38.mp3"
+    },
+    "step_7": {
+      "id": "step_7",
+      "speaker": "",
+      "text": {
+        "ja": "（そこから十分ほど、静かな熱を帯びた読書談義が続いた）"
+      },
+      "nextStepId": "merge"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……感想は、ちゃんと読んでから聞くわ"
+      },
+      "nextStepId": "merge",
+      "voiceUrl": "v_c2_caaa5c84.mp3"
+    },
+    "merge": {
+      "id": "merge",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……あなたと本の話をするのは、悪くないわね。明日、図書室で待ってるわ"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_merge_dd919f33.mp3"
+    }
+  }
+}

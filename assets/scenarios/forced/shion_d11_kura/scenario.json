@@ -1,0 +1,184 @@
+{
+  "id": "shion_d11_kura",
+  "title": {
+    "ja": "閉ざされた神輿蔵"
+  },
+  "priority": 30,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "days": [
+      11
+    ],
+    "requireFlags": [
+      "route_shion"
+    ]
+  },
+  "location": "shrine",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "昔の神事の奉納札が、この奥にあるかもしれないの",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_8df5d9b1.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "（ビュウッ――バタンッ。……ガチャン）",
+      "cg": "/cg/shion/kura_dark.avif",
+      "screenTransition": "fade_black",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "focusLines": true
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……開かない！　外の閂が下りたのか！？"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "スマホ……圏外。この土壁、電波を通さないんだわ",
+      "voiceUrl": "v_s4_7ffcf5bb.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "…………",
+      "voiceUrl": "v_s5_4bc7b57e.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "シオン？"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……暗いの、嫌いなの。お化けなんていないって分かってるのに、昔から、暗闇だけは……",
+      "voiceUrl": "v_s7_38af8b1b.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d11_penlight",
+          "text": "（ペンライトを灯して、少し間を空けて隣に座る）大丈夫だ。俺がずっとここにいる",
+          "goto": "c1",
+          "setFlags": {
+            "shion_c06": true
+          },
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_d11_knock",
+          "text": "おーい！　誰かー！（扉を叩く）",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "text": "（シオンが、ブレザーの袖を両手で握ってくる）",
+      "cg": "/cg/shion/kura_sleeve.avif",
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……っ、大きな音、出さないで……！",
+      "focusLines": true,
+      "voiceUrl": "v_c2_f9d8cae6.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ご、ごめん！",
+      "cg": "/cg/shion/kura_sleeve.avif"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "待ってろ。俺を誰だと思ってる。学校一の清掃ガチ勢だぞ"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "刃厚0.3ミリ……テコの原理で、外の閂を押し上げる……！",
+      "cutin": "/cutins/items/thin_spatula.avif"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "開いたぞ！",
+      "cutin": false,
+      "cg": "/cg/shion/kura_open.avif",
+      "flashEffect": "white"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……バカ。……どうしてそこまで、私のために必死になれるのよ",
+      "cg": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "tears": true,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s15_5b39ce95.mp3"
+    },
+    {
+      "id": "s16",
+      "text": "（袖を握っていた手を、シオンが名残惜しそうに離す）",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward"
+        }
+      }
+    }
+  ]
+}

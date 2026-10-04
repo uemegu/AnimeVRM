@@ -1,0 +1,140 @@
+{
+  "id": "shion_d11_call",
+  "title": {
+    "ja": "鍵の確認と、ついでの話"
+  },
+  "priority": 10,
+  "availability": {
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d11_kura",
+          "sameDay": true
+        }
+      ]
+    }
+  },
+  "characterId": "shion",
+  "audioOnly": true,
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "夜分にごめんなさい。神輿蔵の鍵、あなたが持っていないかしら"
+      },
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_59eb866d.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "ああ、俺のポケットだ。扉の前に落ちてたから拾っといた"
+      },
+      "nextStepId": "step_3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "シオン",
+      "text": {
+        "ja": "よかった。明日の朝、白石先生に返しておいてくれる？"
+      },
+      "nextStepId": "step_4",
+      "voiceUrl": "v_step_3_23bf4778.mp3"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "了解"
+      },
+      "nextStepId": "step_5"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "シオン",
+      "text": {
+        "ja": "…………"
+      },
+      "nextStepId": "step_6",
+      "voiceUrl": "v_step_5_4bc7b57e.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……ついでだから、言っておくわ。部屋を暗くしたら、蔵の中を思い出してしまって"
+      },
+      "nextStepId": "step_7",
+      "voiceUrl": "v_step_6_d1d38fd4.mp3"
+    },
+    "step_7": {
+      "id": "step_7",
+      "speaker": "シオン",
+      "text": {
+        "ja": "本当に怖かったの。でも、ペンライトの光と、握ってた袖だけ、ずっと温かくて……安心した"
+      },
+      "nextStepId": "c8",
+      "voiceUrl": "v_step_7_922fad89.mp3"
+    },
+    "c8": {
+      "id": "c8",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d11_call_again",
+          "text": {
+            "ja": "眠れなかったら、また電話していいぞ"
+          },
+          "goto": "c1",
+          "setFlags": {
+            "shion_c07": true
+          },
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "shion_d11_call_human",
+          "text": {
+            "ja": "シオンにも怖いものがあるんだな"
+          },
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……それは、検証の範囲外よ"
+      },
+      "nextStepId": "step_10",
+      "voiceUrl": "v_c1_a7f72455.mp3"
+    },
+    "step_10": {
+      "id": "step_10",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……でも、覚えておくわ。おやすみなさい"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_step_10_aba6c31e.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……人間だもの。おやすみなさい"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_c2_0eb0aa14.mp3"
+    }
+  }
+}

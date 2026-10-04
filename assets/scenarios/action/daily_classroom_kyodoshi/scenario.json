@@ -1,0 +1,135 @@
+{
+  "id": "daily_classroom_kyodoshi",
+  "title": {
+    "ja": "郷土史オタクの血"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 10
+    },
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "teacher"
+      ],
+      "hintText": {
+        "ja": "古典の授業。白石先生の様子がいつもと違う"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "はい、教科書82ページ。定時に帰りたいからサクサクいくよ〜",
+      "background": "painted_classroom",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_90704978.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "……この『境界の神』、実はこの街の裏山の神社にも似た伝承があってね",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_s2_1fc6092c.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "mob_student",
+      "speaker": "生徒",
+      "text": "あの寂れた神社ですか？",
+      "voiceUrl": "v_s3_5da13f71.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "……よくぞ聞いてくれたわね。あそこは室町の創建で、本殿の木組みは当時のまま、裏手の神輿蔵の金具には――",
+      "avatars": {
+        "teacher": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "effectText": "kirakira",
+          "motion": "Antada"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s4_21bd8a37.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "――それでね、寛政の頃の巡検使の記録が郷土資料室にあってだな――",
+      "avatars": {
+        "teacher": {
+          "motion": "mob_chat_gesture"
+        }
+      },
+      "voiceUrl": "v_s5_66cf6c83.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_kyodo_note",
+          "text": "（ノートを取り続ける）",
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 1
+          }
+        },
+        {
+          "id": "daily_kyodo_naruse",
+          "text": "（ナルセと目を見合わせる）",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……５秒様の手がかりが、あるかもしれない）",
+      "end": true
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ（小声）",
+      "text": "定時の鬼を定時に帰さない唯一の方法、神社の話を振ることだな",
+      "end": true,
+      "voiceUrl": "v_c2_cb5029b9.mp3"
+    }
+  ]
+}

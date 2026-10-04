@@ -1,0 +1,246 @@
+{
+  "id": "emili_d17_rain",
+  "title": {
+    "ja": "雨の石段"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "evening"
+    ],
+    "dayRange": {
+      "from": 16,
+      "to": 17
+    },
+    "requireFlags": [
+      "route_emili"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d15_classroom"
+        }
+      ]
+    }
+  },
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……エミリ！？　何やってんだ、ずぶ濡れじゃないか！",
+      "background": "shrine_rain",
+      "timeOfDay": "evening",
+      "rain": true,
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "sad",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……アンタの帰り道、ここ通るでしょ。学校だと、誰に見られてるか分からないから",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s2_2a16e2d7.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ＳＰは？"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "撒いてきたわ。……今日だけは、一人で来たかったの",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s4_5f6dd7ec.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "月曜は、酷いこと言って……ごめんなさい",
+      "avatars": {
+        "emili": {
+          "motion": "Quick Formal Bow"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s5_1ccbb8c1.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_d17_umbrella",
+          "text": "（黙って傘を差しかける）",
+          "goto": "c1",
+          "setFlags": {
+            "emili_c10": true
+          },
+          "addAffinity": {
+            "emili": 2
+          },
+          "condition": {
+            "minAffinity": {
+              "emili": 16
+            }
+          }
+        },
+        {
+          "id": "emili_d17_serious",
+          "text": "本気だったのか？",
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "text": "（エミリが傘の下で顔を上げる）",
+      "cutin": "/cutins/emili/umbrella_hands.avif",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera",
+          "expression": "surprised",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "違う！",
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera",
+          "expression": "angry",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_c2_b98a6037.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "日曜の夜、パパから電話があったの。『庶民の男子と噂になっているそうだな』って",
+      "cutin": false,
+      "avatars": {
+        "emili": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_merge_b11040fd.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "『そんな男と関わり続けるなら、転校の件も、その男子のことも考えなければならない』って",
+      "voiceUrl": "v_s10_07fa92e0.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……俺のことを？"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "パパは、本気になったら何でも調べるわ。タカシの家のことも、お母さんのことも",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera",
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s12_d8c82f5d.mp3"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "だから、みんなの前で否定しておけば……報告されても、タカシは関係ないってことになると思ったの",
+      "voiceUrl": "v_s13_518db012.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……バカだな、お前"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "迷惑かどうかは、俺が決める。困ってるなら、一緒にパパさんに会いに行ってやる。清掃用具は置いていくけどな"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ、なによそれ……",
+      "avatars": {
+        "emili": {
+          "tears": true,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s16_b9f953a0.mp3"
+    },
+    {
+      "id": "s17",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……頑固で、お人好しで……大バカよ",
+      "cutin": "/cutins/emili/umbrella_hands.avif",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s17_8629d7e5.mp3"
+    }
+  ]
+}

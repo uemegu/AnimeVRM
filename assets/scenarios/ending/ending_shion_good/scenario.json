@@ -1,0 +1,268 @@
+{
+  "id": "ending_shion_good",
+  "title": {
+    "ja": "GOOD END　検証は、これから"
+  },
+  "priority": 20,
+  "availability": {
+    "requireFlags": [
+      "route_shion",
+      "finale_answered"
+    ]
+  },
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "……一点の偽りもない本心ですね。合格です。……もっとも、その娘の検証は、まだ終わっていないようですが",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "flashEffect": "white",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s1_0dd4dcb8.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "……直球の愛ではありませんが、一点の偽りもない本心ですね。及第点、合格です",
+      "flashEffect": "white",
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_b22f839a.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……雷、落ちなかったわね",
+      "avatars": {
+        "shion": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s3_6282b86f.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "『隣で調べ物を続けたい』という本心が、立証されたわけね",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s4_0b36eaa0.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……ごめん。シオンが言ってたこと、俺もまだ答えが出せなくて"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "謝らないで。私だって答えは出せていないもの",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s6_45f154a8.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "正直、少しほっとしたの。あなたが呪いを解くために、無理に『好き』と叫ばなかったことに",
+      "avatars": {
+        "shion": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s7_81482476.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "神様の仕掛けがなくなった今なら、ちゃんと検証できるはずよ。時間をかけて、正確に",
+      "avatars": {
+        "shion": {
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s8_4e93cf80.mp3"
+    },
+    {
+      "id": "s9",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_good_assistant",
+          "text": "付き合うよ、助手として",
+          "goto": "c1"
+        },
+        {
+          "id": "shion_good_result",
+          "text": "検証結果、出たら教えてくれ",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ええ。たっぷりこき使ってあげる",
+      "avatars": {
+        "shion": {
+          "expression": "nima",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_47dbb436.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……あなたが先に出してもいいのよ",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "Antada"
+        }
+      },
+      "voiceUrl": "v_c2_0f480cb2.mp3"
+    },
+    {
+      "id": "merge",
+      "text": "数週間後――",
+      "screenTransition": "fade_black",
+      "bgm": "main_bgm"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "この頁、なんて読めるかしら",
+      "background": "painted_library",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "chin_rest",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s13_171160b4.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "『此の社の神、時を司りて戯れを好む』……かな"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "正解。助手のくせに、読むのが早くなったじゃない",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s15_8f81ec03.mp3"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "鍵閉めに来たんだけど……相変わらず息ぴったりだねえ",
+      "avatars": {
+        "teacher": {
+          "position": "left",
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "shion"
+        },
+        "shion": {
+          "position": "right"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s16_6bb7b75e.mp3"
+    },
+    {
+      "id": "s17",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "余計な茶化しは不要です。純粋な学術調査ですから",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "teacher",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "voiceUrl": "v_s17_048d736b.mp3"
+    },
+    {
+      "id": "s18",
+      "text": "（シオンの手帳の新しいページ：『検証記録 No.1：仕掛けがなくても、隣にいると心拍数が上がる。――要継続観察』）",
+      "cutin": "/cutins/items/shion_notebook.avif"
+    }
+  ]
+}

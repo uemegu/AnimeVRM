@@ -1,0 +1,145 @@
+{
+  "id": "daily_classroom_aoi_tamagoyaki",
+  "title": {
+    "ja": "卵焼きの隙間埋め"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 5,
+      "to": 20
+    },
+    "locations": [
+      "classroom"
+    ],
+    "minAffinity": {
+      "aoi": 6
+    }
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "aoi"
+      ],
+      "hintText": {
+        "ja": "アオイがお弁当を広げている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "タカシくん、お昼一緒に食べよ。……あ、これ。卵焼き作りすぎちゃって。隙間埋めるの手伝って",
+      "background": "painted_classroom",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Greeting",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_9f874ee5.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "いいのか？　……うまっ。甘さと出汁が絶妙",
+      "cutin": "/cutins/items/tamagoyaki.avif"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "ホント？　……よかった",
+      "cutin": false,
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "voiceUrl": "v_s3_ed8ba47a.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "（……昨日の夜、四個も卵使って焼き直したなんて、絶対言えない）",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "forward",
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s4_4e271114.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_tamago_daily",
+          "text": "アオイの卵焼き、毎日でも食べたい",
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "daily_tamago_again",
+          "text": "作りすぎたなら、また手伝うよ",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……っ！　ま、毎日は……考えとく",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "camera": "close",
+      "end": true,
+      "voiceUrl": "v_c1_b4375e5b.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……うん。また、作りすぎちゃうかも",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_e204fae9.mp3"
+    }
+  ]
+}

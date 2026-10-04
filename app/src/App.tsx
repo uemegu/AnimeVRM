@@ -114,6 +114,13 @@ export const App: React.FC = () => {
     if (initialPhaseParam === 'night') {
       initial.phase = 'night';
       initial.currentScenarioId = null;
+      // 動作確認用: ?phase=night&day=3&seen=prologue_day1,aoi_d02_library&flags=route_aoi で、その夜に届く電話・メールを見る
+      const params = new URLSearchParams(window.location.search);
+      const day = Number(params.get('day'));
+      if (day >= 1) initial.day = day;
+      const seen = params.get('seen')?.split(',').filter(Boolean) ?? [];
+      initial.scenarioHistory = seen.map((scenarioId) => ({ scenarioId, day: initial.day, type: 'completed' as const }));
+      for (const flag of params.get('flags')?.split(',').filter(Boolean) ?? []) initial.flags[flag] = true;
     }
     if (initialPhaseParam === 'holiday') {
       // 動作確認用: 最初の土曜日の休日行動から開始
@@ -126,9 +133,8 @@ export const App: React.FC = () => {
       initial.phase = 'afterschool_action';
       initial.flags = {
         ...initial.flags,
-        aoi_t10_promise: true,
-        confessed: true,
-        confession_sincere: true,
+        route_aoi: true,
+        aoi_promise: true,
       };
       initial.affinities = {
         ...initial.affinities,
@@ -362,13 +368,30 @@ export const App: React.FC = () => {
       if (!ACTION_PHASES.includes(state.phase)) return;
 
       const entry = scenarioRepository.get(scenario.id);
-      if (entry?.category === 'forced' && !entry.consumesTurn) {
-        stopPlayer();
-        setIsSelectingLocation(true);
-        return;
+      const isEveningEvent = entry?.availability?.timeSlots?.includes('evening') ?? false;
+      if (entry?.category === 'forced' && !isEveningEvent) {
+        // 続けて起きる強制イベント（追いかけっこの続きなど）があれば、そのまま再生する
+        const chained = ScheduleManager.checkForcedInterruption(state);
+        if (chained) {
+          startScenario(await loadScenario(chained), state);
+          return;
+        }
+        if (!entry.consumesTurn) {
+          stopPlayer();
+          setIsSelectingLocation(true);
+          return;
+        }
       }
 
       const nextPhase = ScheduleManager.getNextPhase(state.phase);
+      // 放課後の行動を終えたら、夜の自室へ戻る前に下校時・帰宅時の強制イベントを見る
+      if (nextPhase === 'night' && state.phase === 'afterschool_action' && !isEveningEvent) {
+        const evening = ScheduleManager.checkEveningEvent(state);
+        if (evening) {
+          startScenario(await loadScenario(evening), state);
+          return;
+        }
+      }
       if (nextPhase === 'night') {
         await AssetPreloader.preloadSceneAssets('myroom');
         stopPlayer();
@@ -671,6 +694,7 @@ export const App: React.FC = () => {
             <NightRoomPage
               day={gameState.day}
               affinities={gameState.affinities}
+              flags={gameState.flags}
               communications={nightCommunications}
               onSave={() => openSaveLoad('save')}
               onLoad={() => openSaveLoad('load')}
@@ -698,6 +722,9 @@ export const App: React.FC = () => {
               cameraShot={cameraShot}
               scrolling={scrolling}
               effects={stage.effects}
+              cg={stage.cg}
+              cutin={stage.cutin}
+              rain={stage.rain}
               onDialogueClick={player.advance}
               onChoiceClick={handleChoiceClick}
               onChoiceTimeout={player.timeoutChoice}

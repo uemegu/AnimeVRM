@@ -16,6 +16,7 @@ import {
   SceneTransition,
   ScreenTransition,
 } from '../../types/scenario';
+import { availableChoices, matchesChoiceCondition } from '@anime-vrm/scenario';
 
 /** 画面描画用に言語解決済みのシーン情報 */
 export interface ScenarioResolvedScene {
@@ -143,11 +144,7 @@ export class ScenarioEngine {
     const raw = this.getRawScene();
     if (!raw || !raw.choices) return [];
 
-    return raw.choices.filter((choice) => {
-      if (!choice.condition) return true;
-      const actual = this.flags[choice.condition.flag];
-      return actual === choice.condition.value;
-    });
+    return availableChoices(raw.choices, { flags: this.flags, affinities: this.affinities }, raw.choiceFallback);
   }
 
   /**
@@ -260,6 +257,21 @@ export class ScenarioEngine {
 
   /** シーン突入時のフラグ更新などの副作用を適用 */
   private applyCurrentSceneEffects(): void {
+    // 条件を満たさないシーンは飛ばす（次のシーンの決め方は通常の進行と同じ）
+    for (let guard = 0; guard < this.package.scenes.length; guard++) {
+      const current = this.getRawScene();
+      if (!current?.condition || matchesChoiceCondition(current.condition, { flags: this.flags, affinities: this.affinities })) break;
+      if (current.end) {
+        this.finished = true;
+        return;
+      }
+      const target = current.nextSceneId ? this.package.scenes.findIndex((s) => s.id === current.nextSceneId) : this.sceneIndex + 1;
+      if (target < 0 || target >= this.package.scenes.length) {
+        this.finished = true;
+        return;
+      }
+      this.sceneIndex = target;
+    }
     const scene = this.getRawScene();
     if (!scene) return;
 

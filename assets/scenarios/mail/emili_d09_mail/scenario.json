@@ -1,0 +1,90 @@
+{
+  "id": "emili_d09_mail",
+  "title": {
+    "ja": "手のひらが痛いわ"
+  },
+  "priority": 5,
+  "availability": {
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d09_cleaning",
+          "sameDay": true
+        }
+      ]
+    }
+  },
+  "characterId": "emili",
+  "previewText": {
+    "ja": "タカシ。手のひらが痛いわ"
+  },
+  "time": "22:08",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "タカシ。手のひらが痛いわ"
+      },
+      "time": "22:07"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "雑巾って、あんなに力がいるものなのね"
+      },
+      "time": "22:08"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "emili_d09_mail_good",
+      "text": {
+        "ja": "初めてにしては上出来だったぞ"
+      },
+      "reactions": [
+        {
+          "text": {
+            "ja": "べ、別にまたやりたいとかじゃないわよ！"
+          },
+          "time": "22:10"
+        },
+        {
+          "text": {
+            "ja": "……でも、床がピカピカになった時、ちょっとだけ気持ちよかったのは認めてあげる"
+          },
+          "time": "22:10"
+        },
+        {
+          "stamp": "/stamps/emili/golden_rose.avif",
+          "time": "22:10"
+        }
+      ],
+      "addAffinity": {
+        "emili": 2
+      }
+    },
+    {
+      "id": "emili_d09_mail_night",
+      "text": {
+        "ja": "明日には治るよ。おやすみ"
+      },
+      "reactions": [
+        {
+          "text": {
+            "ja": "……ふん。おやすみなさい"
+          },
+          "time": "22:10"
+        },
+        {
+          "stamp": "/stamps/emili/bear_sleep.avif",
+          "time": "22:10"
+        }
+      ],
+      "addAffinity": {
+        "emili": 1
+      }
+    }
+  ]
+}

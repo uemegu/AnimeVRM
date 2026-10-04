@@ -1,0 +1,254 @@
+{
+  "id": "aoi_d13_house",
+  "title": {
+    "ja": "目を合わせられないパフェ"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      13
+    ],
+    "requireFlags": [
+      "invited_aoi_house"
+    ]
+  },
+  "location": "aoi_house",
+  "timeOfDay": "day",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi_mom",
+      "speaker": "アオイの母（声）",
+      "text": "タカシくん、いらっしゃい。ごゆっくりね",
+      "background": "aoi_house",
+      "timeOfDay": "day",
+      "voiceUrl": "v_s1_cac6f043.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……どうぞ。手作りのイチゴパフェ",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "forward",
+          "blush": true
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_b7a9f6e4.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "い、いただきます"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……距離が、1メートルある）",
+      "camera": "wide"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……あのさ",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s5_0b605bff.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "は、はい"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "膝裏って……本当に、普段から見てたの？",
+      "avatars": {
+        "aoi": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s7_d455a3cc.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ぶふっ！？",
+      "focusLines": true
+    },
+    {
+      "id": "s9",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d13_honest",
+          "text": "……ごめん。見てた。でも、守りたいって言ったのは本気だ",
+          "goto": "c1",
+          "setFlags": {
+            "aoi_c08": true
+          },
+          "addAffinity": {
+            "aoi": 3
+          },
+          "condition": {
+            "minAffinity": {
+              "aoi": 14
+            }
+          }
+        },
+        {
+          "id": "aoi_d13_bug",
+          "text": "極限状態の脳のバグで、単語を適当に繋いだだけで！",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "…………",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "blush": true,
+          "eyeWander": true
+        }
+      },
+      "voiceUrl": "v_c1_efcc78e9.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……そういうとこ、正直すぎ",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "aoi_feminine_hair_tuck"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_s11_8da0c7cf.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……ふーん",
+      "avatars": {
+        "aoi": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "effectText": "shiin"
+        }
+      },
+      "voiceUrl": "v_c2_3615f5d0.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……あの時ね。タカシくんが手を引いて走ってくれた時、すごく心強かった",
+      "avatars": {
+        "aoi": {
+          "eyeWander": 0,
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "bgm": "love",
+      "camera": "medium",
+      "voiceUrl": "v_merge_09d1dc29.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "昔から、いざって時は絶対来てくれるよね",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s14_fb60eae1.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……ありがとう。それだけは、ちゃんと言いたかったの",
+      "avatars": {
+        "aoi": {
+          "motion": "Quick Formal Bow"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s15_c540c2bf.mp3"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "aoi_mom",
+      "speaker": "アオイの母（声）",
+      "text": "アオイー、紅茶おかわりいるー？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "effectText": "biku"
+        }
+      },
+      "voiceUrl": "v_s16_38c24442.mp3"
+    },
+    {
+      "id": "s17",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "い、いらない！",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s17_a8beebb6.mp3"
+    },
+    {
+      "id": "s18",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……膝裏のことは、許されたのか許されてないのか、結局よく分からなかった）",
+      "bgm": "main_bgm",
+      "camera": "wide"
+    }
+  ]
+}

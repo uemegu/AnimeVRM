@@ -28,6 +28,9 @@ export type AvatarSlotPosition = 'left' | 'right' | 'center';
  */
 export type {
   AvatarTransition,
+  ChoiceCondition,
+  CutinConfig,
+  StillImageConfig,
   CameraPose,
   CameraShift,
   CameraShot,
@@ -39,6 +42,9 @@ export type {
   SweatMode,
 } from '@anime-vrm/scenario';
 import type {
+  ChoiceCondition,
+  CutinConfig,
+  StillImageConfig,
   CameraPose,
   CameraShift,
   CameraShot,
@@ -60,11 +66,8 @@ export interface ScenarioChoice {
   setFlags?: Record<string, boolean | number | string>;
   /** 選択時に好感度を加算する設定 (キャラID -> 加算値) */
   addAffinity?: Record<string, number>;
-  /** 選択肢の出現条件（指定フラグが一致する場合のみ表示） */
-  condition?: {
-    flag: string;
-    value: boolean | number | string;
-  };
+  /** 選択肢の出現条件（フラグ・好感度。書いた項目をすべて満たす場合のみ表示） */
+  condition?: ChoiceCondition;
 }
 
 import { BgmId } from '../data/bgmPresets';
@@ -78,6 +81,8 @@ export interface ScenarioScene {
   speakerCharacterId?: string;
   /** セリフ・地の文本文 */
   text: TextContent;
+  /** この条件を満たさないときは、このシーンを飛ばして次へ進む */
+  condition?: ChoiceCondition;
   /** 日本語ボイス音声URL（※英語ボイスは作らない方針のため単一URLで管理）。'/' で始まらない場合はシナリオディレクトリからの相対パス */
   voiceUrl?: string;
   /** @deprecated 旧データの読み込み用。開口度は音声解析だけで決まる */
@@ -124,6 +129,14 @@ export interface ScenarioScene {
    * 歩きながらの会話などで、背景を横に流し続ける（以降のシーンに引き継ぐ。false で止めて通常の背景に戻す）
    */
   scrollingBackground?: ScrollingBackgroundConfig | false;
+  /** 雨を降らせる。以降のシーンに引き継ぎ、false で止める */
+  rain?: boolean;
+  /** 画面いっぱいの一枚絵。以降のシーンに引き継ぎ、false で消す */
+  cg?: string | StillImageConfig | false;
+  /** 舞台の端に載せるカットイン。以降のシーンに引き継ぎ、false で消す */
+  cutin?: string | CutinConfig | false;
+  /** 条件に合う選択肢がないときの扱い（highest_affinity: 好感度が最も高いキャラの選択肢を1つ出す） */
+  choiceFallback?: 'highest_affinity';
   /** 特殊効果（花火など）。true でこのシーンから始め、false で止める。効果ごとに以降のシーンに引き継ぐ */
   effects?: { fireworks?: boolean; crowd?: boolean };
   /** 選択肢の制限時間（秒）と時間切れ時の分岐。省略時は10秒で1番目を自動選択 */
@@ -138,13 +151,15 @@ export interface ScenarioScene {
 import { ActionLocationId, DayPhase } from './game';
 
 /** シナリオの発生時間帯。複数指定した場合は OR 条件 */
-export type ScenarioTimeSlot = 'morning' | 'afternoon' | 'afterschool' | 'holiday';
+export type ScenarioTimeSlot = 'morning' | 'afternoon' | 'afterschool' | 'holiday' | 'evening';
 
 /** 先行シナリオ、またはそこで選択された選択肢の条件 */
 export interface ScenarioPrerequisite {
   scenarioId: string;
   /** 指定時はその選択肢を選んでいること、未指定時はシナリオ完了を要求 */
   choiceId?: string;
+  /** その日のうちに満たしたこと */
+  sameDay?: boolean;
 }
 
 /** all 内は AND、any 内は OR。両方指定した場合はグループ同士も AND */
@@ -161,6 +176,10 @@ export interface ScenarioAvailability {
   timeSlots?: ScenarioTimeSlot[];
   /** 発生日の両端を含む範囲。未指定なら上下限なし */
   dayRange?: { from?: number; to?: number };
+  /** この日のどれかで発生 */
+  days?: number[];
+  /** 天気（雨の日は data/calendar.ts） */
+  weather?: Array<'clear' | 'rain'>;
   /** 発生場所。複数指定した場合は OR 条件 */
   locations?: ActionLocationId[];
   /** 指定フラグがすべて立っていれば発生する */

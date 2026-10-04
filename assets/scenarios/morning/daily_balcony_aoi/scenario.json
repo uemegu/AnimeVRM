@@ -1,0 +1,134 @@
+{
+  "id": "daily_balcony_aoi",
+  "title": {
+    "ja": "仕切り板越しのおはよう"
+  },
+  "priority": -5,
+  "availability": {
+    "dayRange": {
+      "from": 3,
+      "to": 20
+    },
+    "minAffinity": {
+      "aoi": 6
+    }
+  },
+  "location": "apartment_door",
+  "timeOfDay": "morning",
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（朝6時50分。ベランダの手すりを雑巾で拭いている）",
+      "background": "apartment_door",
+      "timeOfDay": "morning",
+      "cutin": "/cutins/takashi/bedhead_balcony.avif"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……ふふっ、朝から掃除してる",
+      "avatars": {
+        "aoi": {
+          "position": "right",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "cutin": false,
+      "voiceUrl": "v_s2_bfc23218.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "うおっ、アオイ！？",
+      "avatars": {
+        "aoi": {
+          "effectText": "biku"
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "おはよ、タカシくん。ハーブに水あげてたら、隣から雑巾の音がして",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Greeting"
+        }
+      },
+      "voiceUrl": "v_s4_c2205cdf.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "寝癖、昔と同じとこ跳ねてるよ",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s5_eb21c74b.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_balcony_hair",
+          "text": "（慌てて寝癖を押さえる）",
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "daily_balcony_wipe",
+          "text": "アオイの手すりも拭こうか？",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "直らないって、それ。ふふっ",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c1_ac497350.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "えっ……い、いいよ！　……でも、今度お願いしようかな",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_a4f18351.mp3"
+    }
+  ]
+}

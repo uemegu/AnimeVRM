@@ -1,0 +1,254 @@
+{
+  "id": "aoi_d16_rain",
+  "title": {
+    "ja": "一本の傘"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "evening"
+    ],
+    "days": [
+      16
+    ],
+    "requireFlags": [
+      "route_aoi"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d15_classroom"
+        }
+      ]
+    }
+  },
+  "location": "school_gate",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……タカシくん",
+      "background": "painted_gate",
+      "timeOfDay": "evening",
+      "rain": true,
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_5e26996f.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……傘、ないのか"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "朝、晴れてたから",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s3_4384428f.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "一緒に帰ろう。同じマンションなんだし"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……でも、また誰かに見られたら",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "voiceUrl": "v_s5_24649388.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d16_umbrella",
+          "text": "（傘を渡して）じゃあこれ使え。俺は小降りになるまで待つ",
+          "goto": "c1",
+          "setFlags": {
+            "aoi_c09": true
+          },
+          "addAffinity": {
+            "aoi": 3
+          },
+          "condition": {
+            "minAffinity": {
+              "aoi": 17
+            }
+          }
+        },
+        {
+          "id": "aoi_d16_seen",
+          "text": "見られたっていいだろ",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……バカ。同じところに帰るのに、別々の方が変でしょ",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_412b07a3.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……タカシくんはよくても、私は……",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_c2_697ae12d.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……でも、濡れて帰るのも、やだ",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s9_e7fbbe5b.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……避けてて、ごめんね",
+      "background": "town",
+      "scrollingBackground": {
+        "speed": 0.5
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "Walking",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "side",
+      "cutin": "/cutins/aoi/one_umbrella.avif",
+      "voiceUrl": "v_merge_1075eeba.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "俺があんなこと叫んだからだろ",
+      "cutin": false
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "違うの。みんなに言われて、タカシくんの顔見るのが急に恥ずかしくなっただけ。嫌いになったんじゃないよ",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s12_97e90584.mp3"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……体育館で言ったこと。守るって。本気だった？",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s13_fbe26446.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "本気だ。変なこと言ったのは反省してる。でも、そこは一ミリも嘘じゃない"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……そっか",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s15_3f553a5e.mp3"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……肩、濡れてるよ。もうちょっとこっち",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s16_780b2bda.mp3"
+    }
+  ]
+}

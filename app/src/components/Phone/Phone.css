@@ -710,3 +710,92 @@
   color: #94a3b8;
   padding: 6px 0;
 }
+
+/* 縦に積む吹き出し（写真・スタンプ・本文） */
+.phone-msg-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.phone-msg-stack.player {
+  align-items: flex-end;
+}
+
+/* スタンプ（吹き出しなし） */
+.phone-msg-stamp {
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 写真 */
+.phone-msg-photo {
+  display: block;
+  max-width: 168px;
+  max-height: 220px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* 送信を取り消しました */
+.phone-msg-retracted {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(15, 23, 42, 0.18);
+  padding: 4px 10px;
+  border-radius: 10px;
+}
+
+/* 音声のみの通話 */
+.phone-call-audio-only {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+
+.phone-call-audio-ring {
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  padding: 4px;
+  background: var(--heroine-color, #38bdf8);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--heroine-color, #38bdf8) 55%, transparent);
+}
+
+.phone-call-audio-ring.speaking {
+  animation: phone-call-audio-pulse 1.4s ease-out infinite;
+}
+
+.phone-call-audio-ring img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  background: #e2e8f0;
+}
+
+.phone-call-audio-label {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@keyframes phone-call-audio-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--heroine-color, #38bdf8) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 26px transparent;
+  }
+}

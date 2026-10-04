@@ -6,7 +6,7 @@ import { LOCATION_VISUAL_PRESETS } from '../../data/locationVisualPresets';
 import { soundManager } from '../../services/audio/SoundManager';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
-import type { SceneEffects } from '@anime-vrm/scenario';
+import type { CutinConfig, SceneEffects, StillImageConfig } from '@anime-vrm/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -25,6 +25,11 @@ export interface StageViewProps {
   scrolling?: ScrollingBackgroundSettings | null;
   /** シーンの特殊効果（花火など） */
   effects?: SceneEffects;
+  /** 画面いっぱいの一枚絵と、端のカットイン */
+  cg?: StillImageConfig | null;
+  cutin?: CutinConfig | null;
+  /** 雨 */
+  rain?: boolean;
   /** 今のカット（カメラの直接指定とカット内のタイムライン） */
   cut?: ScenarioResolvedScene | null;
   className?: string;
@@ -40,6 +45,9 @@ export const StageView: React.FC<StageViewProps> = ({
   speakerId = null,
   scrolling = null,
   effects,
+  cg = null,
+  cutin = null,
+  rain = false,
   cut = null,
   className = '',
   onLoaded,
@@ -129,6 +137,17 @@ export const StageView: React.FC<StageViewProps> = ({
     stageManagerRef.current?.setScrollingBackground(scrolling);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollingKey]);
+
+  // 一枚絵・カットイン（内容が同じなら何もしない）
+  useEffect(() => {
+    stageManagerRef.current?.setRain(rain);
+  }, [rain]);
+
+  const stillsKey = JSON.stringify([cg, cutin]);
+  useEffect(() => {
+    stageManagerRef.current?.setStills(cg, cutin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stillsKey]);
 
   // カットが変わったら、カメラの直接指定とカット内のタイムラインを渡す
   useEffect(() => {

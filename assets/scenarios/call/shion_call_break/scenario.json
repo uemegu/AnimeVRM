@@ -1,0 +1,114 @@
+{
+  "id": "shion_call_break",
+  "title": {
+    "ja": "五分だけの息抜き"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 8,
+      "to": 18
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d03_library"
+        }
+      ]
+    }
+  },
+  "characterId": "shion",
+  "audioOnly": true,
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……二時間、数学の問題集を解いていたの。脳が飽和したから、五分だけインターバル"
+      },
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_65ef9c48.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "何か、頭を使わずに聞ける話をして"
+      },
+      "nextStepId": "c3",
+      "voiceUrl": "v_step_2_d0580e1d.mp3"
+    },
+    "c3": {
+      "id": "c3",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_break_cleaner",
+          "text": {
+            "ja": "今日、黒板消しクリーナーを分解してフィルター洗った話する？"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "shion_break_naruse",
+          "text": {
+            "ja": "ナルセがまたモテ仕草で撃沈した話"
+          },
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……驚くほど知的負荷が低そうね。聞かせて"
+      },
+      "nextStepId": "step_5",
+      "voiceUrl": "v_c1_cfc600e8.mp3"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "",
+      "text": {
+        "ja": "（チョークの粉の落とし方を、のんびり語った）"
+      },
+      "nextStepId": "step_6"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……あなたの汚れへの情熱を聞いてると、肩の力が抜けるわ"
+      },
+      "nextStepId": "merge",
+      "voiceUrl": "v_step_6_e7c0afbf.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……それは知ってる。教室中に聞こえてたもの"
+      },
+      "nextStepId": "merge",
+      "voiceUrl": "v_c2_e7abfa9d.mp3"
+    },
+    "merge": {
+      "id": "merge",
+      "speaker": "シオン",
+      "text": {
+        "ja": "いい気分転換になったわ。……ありがとう、タカシ"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_merge_bd59ecd1.mp3"
+    }
+  }
+}

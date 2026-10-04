@@ -1,0 +1,156 @@
+{
+  "id": "daily_rooftop_naruse_moves",
+  "title": {
+    "ja": "モテ仕草大作戦"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "locations": [
+      "rooftop"
+    ]
+  },
+  "location": "rooftop",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "rooftop",
+      "hintCharacterIds": [
+        "naruse"
+      ],
+      "hintText": {
+        "ja": "ナルセが屋上へ続く階段で雑誌を読んでいる"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "タカシ！　『女子がキュン死する男子の無意識モテ仕草TOP3』だ！　お前、女子役やれ！",
+      "background": "rooftop",
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Antada",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_bfd9b2d7.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "なんで俺が……"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "第３位、『ネクタイを緩める仕草』！",
+      "avatars": {
+        "naruse": {
+          "motion": "pose_loosen_tie",
+          "expression": "nima",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s3_d091ae03.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "グエッ……し、死ぬ……！",
+      "avatars": {
+        "naruse": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "effectText": "gaan",
+          "sweat": "fly4"
+        }
+      },
+      "voiceUrl": "v_s4_45fa06f7.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "第２位、『前髪をクシャッと掻き上げる』！",
+      "avatars": {
+        "naruse": {
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "pose_hair_sweep"
+        }
+      },
+      "voiceUrl": "v_s5_1d211846.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "（整髪料が変な方向に固まり、トサカ頭になった）",
+      "cutin": "/cutins/naruse/tosaka.avif"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_moves_first",
+          "text": "……第１位は？",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_moves_suspect",
+          "text": "お前のそれ、寝癖のすごい不審者だぞ",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "『不意に見せる真剣な横顔』……",
+      "avatars": {
+        "naruse": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "motion": "torso_twist_left"
+        }
+      },
+      "voiceUrl": "v_c1_3e412471.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "とりあえず鏡見てこい",
+      "end": true
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "まだ１位が残ってんだよ！！",
+      "cutin": false,
+      "avatars": {
+        "naruse": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Angry"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_bdfc80f4.mp3"
+    }
+  ]
+}

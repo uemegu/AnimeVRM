@@ -1,0 +1,251 @@
+{
+  "id": "aoi_d15_classroom",
+  "title": {
+    "ja": "教室の爆弾"
+  },
+  "priority": 10,
+  "availability": {
+    "days": [
+      15
+    ],
+    "requireFlags": [
+      "route_aoi"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d13_house"
+        }
+      ]
+    }
+  },
+  "location": "classroom",
+  "timeOfDay": "morning",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "mob_boy",
+      "speaker": "クラスの男子",
+      "text": "おーいタカシ！　聞いたぞ、アオイの膝裏を一生守るって叫んだらしいな！",
+      "background": "painted_classroom",
+      "timeOfDay": "morning",
+      "avatars": {
+        "naruse": {
+          "position": "left",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Antada",
+          "lookAtTarget": "camera"
+        },
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        },
+        "shion": {
+          "position": "right",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s1_5388bd5b.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "な、なんでそれを！？",
+      "focusLines": true
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "私が教えたの！　パパのＳＰを手玉に取ったナイト様だもん、自慢しなきゃ！",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s3_3db475b5.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "エミリィィィッ！！"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……己の業を白日の下に晒してまで人を守るとは、ある意味究極の自己犠牲ね。感心はしないけれど",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s5_de2a5f4b.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "mob_boy",
+      "speaker": "クラスの男子",
+      "text": "あ、膝裏の人だー！",
+      "seUrl": "/se/door_rattle.mp3",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0.9
+          ],
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "tears": true,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "forward"
+        },
+        "naruse": {
+          "motion": "Excited"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s6_fc3248ed.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "mob_boy",
+      "speaker": "クラスの男子たち",
+      "text": "守ってもらえてよかったね〜！",
+      "voiceUrl": "v_s7_9de0b5e5.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "…………",
+      "camera": "close",
+      "voiceUrl": "v_s8_efcc78e9.mp3"
+    },
+    {
+      "id": "s9",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d15_run",
+          "text": "アオイ、これはその――（駆け寄る）",
+          "goto": "c1"
+        },
+        {
+          "id": "aoi_d15_stop",
+          "text": "お前らやめろ！　アオイは関係ないだろ！",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……もう、知らない",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_968fd846.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "mob_boy",
+      "speaker": "クラスの男子たち",
+      "text": "かばったー！",
+      "avatars": {
+        "naruse": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Excited"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_c2_fad2bd28.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……もう、知らない",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s12_968fd846.mp3"
+    },
+    {
+      "id": "merge",
+      "text": "（その日、アオイは一度もタカシと目を合わせなかった）",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "screenTransition": "fade_black"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "人の子よ。告白まで、あと６日です",
+      "background": "god_realm",
+      "timeOfDay": "divine",
+      "bgm": "mysterious",
+      "clearCast": true,
+      "avatars": {
+        "god": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "screenTransition": "eyelid_close",
+      "camera": "medium",
+      "voiceUrl": "v_s14_9d4e5f63.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "god",
+      "speaker": "女神",
+      "text": "冷やかされて、すれ違って、自然消滅。……腑抜けのまま黒焦げになりたいのですか？",
+      "avatars": {
+        "god": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "pose_point_go"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s15_5b30e251.mp3"
+    }
+  ]
+}
