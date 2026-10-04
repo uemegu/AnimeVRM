@@ -273,6 +273,8 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
   }).optional(),
   camera: group('カメラ', 'Camera', {
     fov: num('画角', 'Field of view', 15, 60, 1, DEFAULT_CAMERA_FOV).optional(),
+    /** 広い3D背景の奥が切れないようにする。未指定の場所は100m。 */
+    far: num('描画する距離（m）', 'Far clipping distance (m)', 10, 500, 10, 100).min(10).max(500).optional(),
     wide: shotRig('引き', 'Wide', DEFAULT_SHOT_RIGS.wide).optional(),
     medium: shotRig('会話', 'Two-shot', DEFAULT_SHOT_RIGS.medium).optional(),
     speaker: shotRig('話者', 'Speaker', DEFAULT_SHOT_RIGS.speaker).optional(),
@@ -333,6 +335,7 @@ export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
   'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
+  'builtin:painted-ground': { ja: '簡易3D 運動場', en: 'Painted sports ground' },
   'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },
   'builtin:painted-festival': { ja: '簡易3D 夏祭り', en: 'Painted summer festival' },
 } as const;

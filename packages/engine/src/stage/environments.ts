@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { disposePaintedFestival, loadPaintedFestival } from '../scene/painted-festival/PaintedFestival';
 import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
 import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
+import { disposePaintedGround, loadPaintedGround } from '../scene/painted-ground/PaintedGround';
 import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
 import { disposePaintedSeaside, loadPaintedSeaside } from '../scene/painted-seaside/PaintedSeaside';
 import { resolveAssetUrl } from '../utils/path';
@@ -13,6 +14,7 @@ const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (gro
   'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
   'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
   'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
+  'builtin:painted-ground': { load: loadPaintedGround, dispose: disposePaintedGround },
   'builtin:painted-seaside': { load: loadPaintedSeaside, dispose: disposePaintedSeaside },
   'builtin:painted-festival': { load: loadPaintedFestival, dispose: disposePaintedFestival },
 };
