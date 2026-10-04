@@ -150,8 +150,12 @@ export function StageCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cutKey]);
 
+  // 止めている間の時刻の変更と、再生を始めたときは、その時刻へ頭出しする（モーションも途中から合わせ直す）
+  const wasPlayingRef = useRef(playing);
   useEffect(() => {
-    managerRef.current?.setCutTime(cutTime, !playing);
+    const started = playing && !wasPlayingRef.current;
+    wasPlayingRef.current = playing;
+    managerRef.current?.setCutTime(cutTime, !playing || started);
   }, [cutTime, playing]);
 
   // 先頭から再生したら、カットの切り替え演出（暗転など）も見せる

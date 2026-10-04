@@ -1233,7 +1233,8 @@ export class StageManager {
       }
       const motionChanged = !before || before.motion !== effective.motion || before.motionCue !== effective.motionCue || before.motionLoop !== effective.motionLoop;
       if (motionChanged || seek) {
-        const offset = seek && effective.motionAt !== undefined ? this.cutTime - effective.motionAt : 0;
+        // 頭出しでは、モーションが始まった時刻（キーの時刻、なければカットの頭）からの経過ぶん進めておく
+        const offset = seek ? Math.max(0, this.cutTime - (effective.motionAt ?? 0)) : 0;
         // 頭出しのときは同じモーションでも再生し直す
         if (seek) this.avatarMotionUrls.delete(member.id);
         this.playMotion(member.id, avatar, effective.motion, effective.motionLoop, effective.motionCue, offset);
