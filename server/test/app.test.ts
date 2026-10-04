@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp } from '../src/app.ts';
 import { REPO_ROOT } from '../src/config.ts';
@@ -8,6 +9,7 @@ import type { VoiceTools } from '../src/tts/voiceTools.ts';
 import { voiceFileName } from '../src/tts/voiceLines.ts';
 
 const REAL_ASSETS = path.join(REPO_ROOT, 'assets');
+const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
 let root: string;
 let assetsDir: string;
@@ -41,8 +43,9 @@ function putJson(url: string, body: unknown) {
   return request(url, { method: 'PUT', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } });
 }
 
+/** 試験用のシナリオ（test/fixtures/scenarios。ボイスは中身のない置き換え） */
 async function copyScenario(category: string, id: string) {
-  await fs.cp(path.join(REAL_ASSETS, 'scenarios', category, id), path.join(assetsDir, 'scenarios', category, id), { recursive: true });
+  await fs.cp(path.join(FIXTURES, 'scenarios', category, id), path.join(assetsDir, 'scenarios', category, id), { recursive: true });
 }
 
 beforeEach(async () => {
@@ -185,7 +188,7 @@ describe('Studio 用 JSON', () => {
 
 describe('音声生成', () => {
   it('ファイル名のハッシュが既存のボイスと同じ規則であること', () => {
-    // assets/scenarios/ending/ending_good の s1（scenario-voices.py で作ったもの）
+    // test/fixtures/scenarios/ending/ending_good の s1（scenario-voices.py で作ったもの）
     expect(voiceFileName('s1', 'aoi', '……ふふ。びっくりした。でも、嬉しい。')).toBe('v_s1_1bf07a6e.mp3');
   });
 

@@ -6,6 +6,7 @@ import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-
 import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
 import { disposePaintedGround, loadPaintedGround } from '../scene/painted-ground/PaintedGround';
 import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
+import { disposePaintedGym, loadPaintedGym } from '../scene/painted-gym/PaintedGym';
 import { disposePaintedSeaside, loadPaintedSeaside } from '../scene/painted-seaside/PaintedSeaside';
 import { disposeShoppingStreet, loadShoppingStreet } from '../scene/shopping-street/ShoppingStreet';
 import { resolveAssetUrl } from '../utils/path';
@@ -14,6 +15,7 @@ import { resolveAssetUrl } from '../utils/path';
 const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (group: THREE.Group) => void }> = {
   'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
   'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
+  'builtin:painted-gym': { load: loadPaintedGym, dispose: disposePaintedGym },
   'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
   'builtin:painted-ground': { load: loadPaintedGround, dispose: disposePaintedGround },
   'builtin:painted-seaside': { load: loadPaintedSeaside, dispose: disposePaintedSeaside },

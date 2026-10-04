@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { LocationFile, TimeOfDayFile, resolveBloomConfig, DeepGlowConfig, LocationEnvironment, PostProcessingConfig } from '../src/index.ts';
+import { LocationFile, TimeOfDayFile, resolveBloomConfig, resolveLocationVisuals, DeepGlowConfig, LocationEnvironment, PostProcessingConfig } from '../src/index.ts';
 
 const STUDIO = path.resolve(import.meta.dirname, '../../../assets/studio');
 const read = (name: string) => JSON.parse(fs.readFileSync(path.join(STUDIO, name), 'utf8'));
@@ -9,6 +9,21 @@ const issues = (result: { success: boolean; error?: { issues: Array<{ path: Prop
   result.success ? [] : result.error!.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
 
 describe('シーン設定', () => {
+  it('室内の絵に重なるフレアと色補正を場所で抑え、移動後は時間帯の設定へ戻る', () => {
+    const evening = TimeOfDayFile.parse(read('time-of-day.json')).presets.evening;
+    const original = structuredClone(evening);
+    const gym = LocationFile.parse(read('locations.json')).presets.painted_gym;
+    const resolved = resolveLocationVisuals(evening, gym.stage);
+    expect(resolved.lighting.lensFlare?.enabled).toBe(false);
+    expect(resolved.lighting.sunShafts?.enabled).toBe(false);
+    expect(resolved.postProcessing.cinematic.adjustments.saturation).toBe(0);
+    expect(resolved.lighting.directional).toEqual(evening.lighting.directional);
+    expect(resolved.postProcessing.characterGlow).toEqual(evening.postProcessing.characterGlow);
+    expect(resolveLocationVisuals(evening)).toEqual(original);
+    expect(resolveLocationVisuals(evening, { camera: { fov: 40 } })).toEqual(original);
+    expect(evening).toEqual(original);
+  });
+
   it('time-of-day.json がスキーマに合うこと', () => {
     expect(issues(TimeOfDayFile.safeParse(read('time-of-day.json')))).toEqual([]);
   });

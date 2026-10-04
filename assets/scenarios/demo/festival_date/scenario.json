@@ -83,7 +83,7 @@
       "text": "",
       "avatars": {
         "shion": {
-          "motion": "ardy_proud",
+          "motion": "pose_hands_on_hips_proud",
           "expression": "angry",
           "expressionWeight": 1,
           "lookAtTarget": "player"
@@ -548,7 +548,7 @@
             -4.2
           ],
           "rotationY": 0.6,
-          "motion": "ardy_proud",
+          "motion": "pose_hands_on_hips_proud",
           "expression": "angry",
           "expressionWeight": 1,
           "lookAtTarget": "player",
@@ -581,7 +581,7 @@
             -4.2
           ],
           "rotationY": 0.6,
-          "motion": "ardy_proud",
+          "motion": "pose_hands_on_hips_proud",
           "expression": "angry",
           "expressionWeight": 1,
           "lookAtTarget": "player",

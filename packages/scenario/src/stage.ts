@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, SceneEffects, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
 
@@ -26,6 +26,19 @@ export interface StageState {
   scrolling?: ScrollingBackgroundConfig | null;
   /** 特殊効果ごとの入/切（指定のない効果は場所の既定） */
   effects?: SceneEffects;
+  /** 雨 */
+  rain?: boolean;
+  /** 画面いっぱいの一枚絵 */
+  cg?: StillImageConfig | null;
+  /** 舞台の端に載せるカットイン */
+  cutin?: CutinConfig | null;
+}
+
+/** 一枚絵・カットインの指定を、引き継ぐ状態にする（undefined は前のまま、false は消す） */
+function mergeStill<T extends { url: string }>(prev: T | null | undefined, value: string | T | false | undefined): T | null | undefined {
+  if (value === undefined) return prev;
+  if (value === false) return null;
+  return (typeof value === 'string' ? { url: value } : value) as T;
 }
 
 /** 舞台に立てる 2D のデフォルメ画像（描画に渡す形） */
@@ -141,6 +154,9 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
     motionCues,
     scrolling: scene.scrollingBackground === undefined ? prev.scrolling : scene.scrollingBackground || null,
     effects: scene.effects ? { ...prev.effects, ...scene.effects } : prev.effects,
+    rain: scene.rain ?? prev.rain,
+    cg: mergeStill(prev.cg, scene.cg),
+    cutin: mergeStill(prev.cutin, scene.cutin),
   };
 }
 

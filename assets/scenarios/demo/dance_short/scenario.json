@@ -32,7 +32,7 @@
           "transitions": [
             {
               "at": 14.4,
-              "motion": "ardy_victory",
+              "motion": "Excited",
               "expression": "neutral",
               "expressionWeight": 1
             }

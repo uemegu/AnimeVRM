@@ -193,6 +193,23 @@ export type SceneAvatarConfig = z.infer<typeof SceneAvatarConfig>;
 export const ScreenTransition = z.enum(['fade_black', 'eyelid_close', 'eyelid_blink']);
 export type ScreenTransition = z.infer<typeof ScreenTransition>;
 
+/**
+ * 選択肢を出す条件（書いた項目すべてを満たすときだけ出す）。
+ * ★の選択肢（その時点の好感度が基準以上のときだけ出る）は minAffinity で書く
+ */
+export const ChoiceCondition = z.strictObject({
+  /** このフラグの値が value と一致する */
+  flag: z.string().optional(),
+  value: FlagValue.optional(),
+  /** すべて立っている */
+  requireFlags: z.array(z.string()).optional(),
+  /** どれも立っていない */
+  unlessFlags: z.array(z.string()).optional(),
+  /** 好感度がそれぞれ値以上 */
+  minAffinity: AffinityMap.optional(),
+});
+export type ChoiceCondition = z.infer<typeof ChoiceCondition>;
+
 export const ScenarioChoice = z.strictObject({
   /** 履歴条件から参照する ID（省略時は goto 先のシーン ID） */
   id: z.string().optional(),
@@ -200,10 +217,32 @@ export const ScenarioChoice = z.strictObject({
   goto: z.string(),
   setFlags: FlagMap.optional(),
   addAffinity: AffinityMap.optional(),
-  /** 指定フラグが一致するときだけ表示する */
-  condition: z.strictObject({ flag: z.string(), value: FlagValue }).optional(),
+  /** 条件を満たすときだけ表示する */
+  condition: ChoiceCondition.optional(),
 });
 export type ScenarioChoice = z.infer<typeof ScenarioChoice>;
+
+/**
+ * 一枚絵（画面いっぱいのイベント絵・カットイン）。文字列は画像の URL だけの指定
+ * - fit: 画面いっぱいの絵の合わせ方（cover = 余白なく切り抜く、contain = 全体を収めて余白を暗くする。既定 cover）
+ */
+export const StillImageConfig = z.strictObject({
+  url: z.string(),
+  fit: z.enum(['cover', 'contain']).optional(),
+});
+export type StillImageConfig = z.infer<typeof StillImageConfig>;
+
+/**
+ * カットイン（舞台の上の端に載せる小窓の絵。ペルソナの選択肢の場面のように、主人公の格好や反応を見せる）
+ * - side: 載せる側（既定 right）
+ * - size: 画面の幅に対する小窓の幅（0.15〜0.5、既定 0.24）
+ */
+export const CutinConfig = z.strictObject({
+  url: z.string(),
+  side: z.enum(['left', 'right']).optional(),
+  size: z.number().min(0.15).max(0.5).optional(),
+});
+export type CutinConfig = z.infer<typeof CutinConfig>;
 
 /** 流れる背景（歩きながらの会話など） */
 export const ScrollingBackgroundConfig = z.strictObject({
@@ -236,6 +275,8 @@ export const ScenarioScene = z.strictObject({
   speakerCharacterId: z.string().optional(),
   /** 選択肢のあるシーンでは空文字にする（開発ルール） */
   text: TextContent,
+  /** この条件を満たさないときは、このシーンを飛ばして次へ進む（選んだ答えで一言だけ変える場合など） */
+  condition: ChoiceCondition.optional(),
   /** '/' で始まらなければシナリオのディレクトリからの相対パス */
   voiceUrl: z.string().optional(),
   /** @deprecated 旧データの読み込み用。開口度は音声解析で決まり、この指定は使わない */
@@ -291,6 +332,17 @@ export const ScenarioScene = z.strictObject({
   clearCast: z.boolean().optional(),
   /** 以降のシーンに引き継ぐ。false で止めて通常の背景に戻す */
   scrollingBackground: z.union([ScrollingBackgroundConfig, z.literal(false)]).optional(),
+  /** 雨を降らせる（場所によらない画面の雨）。以降のシーンに引き継ぎ、false で止める */
+  rain: z.boolean().optional(),
+  /** 画面いっぱいの一枚絵（3D の舞台を覆う）。以降のシーンに引き継ぎ、false で消す */
+  cg: z.union([z.string(), StillImageConfig, z.literal(false)]).optional(),
+  /** 舞台の端に載せるカットインの絵。以降のシーンに引き継ぎ、false で消す */
+  cutin: z.union([z.string(), CutinConfig, z.literal(false)]).optional(),
+  /**
+   * 条件に合う選択肢が1つもないときの扱い。
+   * highest_affinity: minAffinity の条件を持つ選択肢のうち、そのキャラの好感度が最も高いもの1つだけを出す（ルート分岐）
+   */
+  choiceFallback: z.enum(['highest_affinity']).optional(),
   /** 選択肢の制限時間。省略時は10秒で1番目を自動選択 */
   choiceTimeout: z
     .strictObject({
@@ -306,6 +358,8 @@ export type ScenarioScene = z.infer<typeof ScenarioScene>;
 export const ScenarioPrerequisite = z.strictObject({
   scenarioId: z.string(),
   choiceId: z.string().optional(),
+  /** その日のうちに満たしたこと（「〜の日の夜」の電話・メール、電話の直後のメールなど） */
+  sameDay: z.boolean().optional(),
 });
 
 /** 発生条件。項目間は AND、配列の中身は項目ごとの説明に従う */
@@ -317,8 +371,12 @@ export const ScenarioAvailability = z.strictObject({
       any: z.array(ScenarioPrerequisite).optional(),
     })
     .optional(),
-  /** いずれかに一致すれば発生（'morning' | 'afternoon' | 'afterschool' | 'holiday'） */
+  /** いずれかに一致すれば発生（'morning' | 'afternoon' | 'afterschool' | 'holiday' | 'evening'。evening は放課後の行動のあと、下校時の強制イベント） */
   timeSlots: z.array(z.string()).optional(),
+  /** この日のどれかで発生（dayRange と併用すると両方を満たす日） */
+  days: z.array(z.number().int().min(1)).optional(),
+  /** 天気（'rain' = 雨の日。雨の日は app の暦で決まる） */
+  weather: z.array(z.enum(['clear', 'rain'])).optional(),
   /** 両端を含む日の範囲 */
   dayRange: z
     .strictObject({ from: z.number().int().min(1).optional(), to: z.number().int().min(1).optional() })
@@ -418,6 +476,8 @@ export const CallChoice = z.strictObject({
   goto: z.string(),
   setFlags: FlagMap.optional(),
   addAffinity: AffinityMap.optional(),
+  /** 条件を満たすときだけ表示する（★の選択肢など） */
+  condition: ChoiceCondition.optional(),
 });
 
 export const CallSceneStep = z.strictObject({
@@ -439,26 +499,55 @@ export const CallSceneStep = z.strictObject({
 export const CallScenario = z.strictObject({
   ...CommunicationMeta,
   modelUrl: z.string().optional(),
+  /** 音声のみの通話（相手の姿を映さない） */
+  audioOnly: z.boolean().optional(),
   initialStepId: z.string(),
   steps: z.record(z.string(), CallSceneStep),
 });
 export type CallScenario = z.infer<typeof CallScenario>;
 
-export const MailMessage = z.strictObject({
-  id: z.string(),
-  sender: z.enum(['heroine', 'player']),
-  text: TextContent,
-  time: z.string(),
-});
+/** メールの吹き出しの中身（本文・スタンプ・写真のどれか1つ以上） */
+const MailContentFields = {
+  text: TextContent.optional(),
+  /** スタンプの画像（'/' 始まりは assets/ 基準。例: /stamps/aoi/rabbit_bow.avif） */
+  stamp: z.string().optional(),
+  /** 写真の画像 */
+  image: z.string().optional(),
+  /** 届いてからこの秒数で「送信を取り消しました」に変わる（誤爆の取り消し） */
+  retractAfterSec: z.number().positive().optional(),
+};
+const hasMailContent = (m: { text?: unknown; stamp?: unknown; image?: unknown }) =>
+  m.text !== undefined || m.stamp !== undefined || m.image !== undefined;
 
-export const MailReplyOption = z.strictObject({
-  id: z.string(),
-  text: TextContent,
-  reactionText: TextContent,
-  reactionTime: z.string().optional(),
-  setFlags: FlagMap.optional(),
-  addAffinity: AffinityMap.optional(),
-});
+export const MailMessage = z
+  .strictObject({
+    id: z.string(),
+    sender: z.enum(['heroine', 'player']),
+    ...MailContentFields,
+    time: z.string(),
+  })
+  .refine(hasMailContent, { message: 'text・stamp・image のどれかが必要です' });
+export type MailMessage = z.infer<typeof MailMessage>;
+
+/** 返信のあとに相手から届くメッセージ */
+export const MailReaction = z
+  .strictObject({ ...MailContentFields, time: z.string().optional() })
+  .refine(hasMailContent, { message: 'text・stamp・image のどれかが必要です' });
+
+export const MailReplyOption = z
+  .strictObject({
+    id: z.string(),
+    text: TextContent,
+    /** 返信への反応（1通）。複数届くときは reactions。どちらもなければ既読のまま */
+    reactionText: TextContent.optional(),
+    reactionTime: z.string().optional(),
+    /** 返信への反応（順に届く。スタンプ・写真も送れる） */
+    reactions: z.array(MailReaction).optional(),
+    setFlags: FlagMap.optional(),
+    addAffinity: AffinityMap.optional(),
+    /** 条件を満たすときだけ表示する */
+    condition: ChoiceCondition.optional(),
+  });
 
 /** 夜のメール */
 export const MailScenario = z.strictObject({

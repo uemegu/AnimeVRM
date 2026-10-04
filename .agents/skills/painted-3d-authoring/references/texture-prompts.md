@@ -34,6 +34,20 @@ not a low-poly render or generic flat colours.
 
 側面・背面が固有の窓や入口を持つ場合は別の立面を生成する。前面の上階を流用する場合も、窓の高さと間隔を側面の実寸に合わせ、下階を別に組む。
 
+## 室内の窓のある壁
+
+店舗の窓内と、外の空が見える室内の窓を区別する。空と雲は Three.js の `SkyBackground` が描くため、後者は空部分を透過にする。
+
+```text
+Orthographic interior wall elevation, matching Image 1's architecture and materials.
+Keep solid wall, window frames, mullions, curtains, and outside trees/buildings.
+Make ONLY the sky regions through the window panes genuinely transparent.
+No painted sky, clouds, sun, coloured sky gradient, or opaque glass filling the sky.
+No floor, ceiling, furniture, perspective, borders, or labels.
+```
+
+`transparent_background: true` を指定する。壁自体まで透過しないこと、窓外の樹木の輪郭から空部分が抜けていることを生成後に画像で確認する。壁の裏の立体にも対応する開口が必要。
+
 ## 地面・壁のタイル
 
 ```text

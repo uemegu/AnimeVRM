@@ -8,6 +8,8 @@ description: >-
 
 このプロジェクトの「簡易3D」は、描き込まれた背景画の質感を、軽い立体に貼って複数方向から撮れるようにしたセット。簡略化するのは形状の複雑さであり、絵の密度や撮影できる方向ではない。
 
+**空と雲は Three.js の既存 `SkyBackground` で描画する。窓越しの空も含め、生成する壁・窓・遠景の画像に空を描き込まない。** 屋内の窓では窓枠・カーテン・窓外の樹木や建物を残し、空に当たる部分だけを透明にする。画像生成には `transparent_background: true` を指定し、AVIF の alpha を保つ。窓の裏を不透明な壁・箱で塞がず、実画面で窓から Three.js の空が見えることを確認する。`layers.background.url` は共通の `/textures/painted-classroom/sky-only.png` を使用する。
+
 通常は運動場・中庭・商店街の方式を選ぶ。各建物の前・横・後ろに、その面に対応する絵をUVで貼る。床はタイル、屋根や家具は実形状、植栽は透明な絵の交差板、遠景は外周の板に分ける。正面の一枚絵を箱に投影しただけで完成扱いにしない。カメラ投影はユーザーが撮影方向を限定したセットを求めた場合に検討する。
 
 以下のパスとコマンドはリポジトリルート基準。
@@ -70,7 +72,7 @@ description: >-
 1. `packages/engine/src/scene/<セット名>/` に非同期の `load...(): Promise<THREE.Group>` と `dispose...()` を作る。
 2. `packages/engine/src/stage/environments.ts` の `BUILTINS` に load/dispose を登録する。
 3. `packages/scenario/src/scene.ts` の `BUILTIN_ENVIRONMENTS` にIDと表示名を登録する。
-4. `assets/studio/locations.json` の `presets` に場所を追加する。`environment.model`、配置、人物の光、camera、slots、thumbnail を設定する。昼の屋外は `layers.background.url` に `/textures/painted-classroom/sky-only.png` を使える。
+4. `assets/studio/locations.json` の `presets` に場所を追加する。`environment.model`、配置、人物の光、camera、slots、thumbnail を設定する。屋外と窓から空が見える屋内は `layers.background.url` に `/textures/painted-classroom/sky-only.png` を使う。
 5. `assets/scenarios/demo/<デモID>/scenario.json` に方向確認用のカットを作る。場所・シナリオ編集は `.agents/skills/scenario-authoring/SKILL.md` の形式・検証方法に従う。
 6. Pagesに出す場合は `studio/pages/catalog.ts` と `studio/pages/collectAssets.ts` にデモと素材を登録する。別ディレクトリの共有素材も収集対象にする。
 

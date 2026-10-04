@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { CameraPose, CameraShift, CameraShot, ScenarioScene, SceneEffects, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
+import type { CameraPose, CameraShift, CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
@@ -20,6 +20,11 @@ interface Props {
   scrolling?: ScrollingBackgroundSettings | null;
   /** シーンの特殊効果（花火など） */
   effects?: SceneEffects;
+  /** 画面いっぱいの一枚絵と、端のカットイン */
+  cg?: StillImageConfig | null;
+  cutin?: CutinConfig | null;
+  /** 雨 */
+  rain?: boolean;
   /** 今のカット（カメラの直接指定とカット内のタイムライン） */
   cut?: ScenarioScene | null;
   /** カット内の時刻。playing でなければ、その時刻へ頭出しする */
@@ -59,6 +64,9 @@ export function StageCanvas({
   focusId,
   scrolling = null,
   effects,
+  cg = null,
+  cutin = null,
+  rain = false,
   cut = null,
   cutTime = 0,
   playing = false,
@@ -115,6 +123,16 @@ export function StageCanvas({
     runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  useEffect(() => {
+    managerRef.current?.setRain(rain);
+  }, [rain]);
+
+  const stillsKey = JSON.stringify([cg, cutin]);
+  useEffect(() => {
+    managerRef.current?.setStills(cg, cutin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stillsKey]);
 
   const effectsKey = JSON.stringify(effects ?? {});
   useEffect(() => {

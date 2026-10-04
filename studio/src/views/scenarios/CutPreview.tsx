@@ -71,6 +71,9 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
         focusId={scene?.speakerCharacterId ?? null}
         scrolling={scrolling}
         effects={stage.effects}
+        cg={stage.cg}
+        cutin={stage.cutin}
+        rain={stage.rain}
         cut={scene ?? null}
         cutTime={cutTime}
         playing={playing}

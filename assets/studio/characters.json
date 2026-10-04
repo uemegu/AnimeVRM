@@ -40,7 +40,7 @@
         "caption": "穏やかで優しい、清楚な幼馴染の女子高校生の声。",
         "direction": ""
       },
-      "profile": "穏やかで優しい聖母。黒服騒動で自分を命がけで守ってくれた主人公にガチ惚れ。以降は「タカシくんは私のヒーロー」「一生お世話してあげる」と、穏やかな笑顔のまま愛が重くなる。"
+      "profile": "タカシの幼馴染。小学校の途中で転校し、高2の春に隣の部屋へ越してきた。優しく家庭的で、料理と裁縫が得意。昔のように接しようとしては、ふと異性として意識して照れる。"
     },
     {
       "id": "emili",
@@ -98,7 +98,7 @@
         "caption": "天真爛漫で元気いっぱいな、お嬢様の女子高校生の声。",
         "direction": ""
       },
-      "profile": "天真爛漫なお嬢様。「ブレザーのボタンが取れちゃったから交換して〜！」とアオイに制服を借りた張本人。騒動の真相を明かして平謝りするトラブルメーカー。"
+      "profile": "神崎グループの令嬢。天真爛漫で世間知らず、思い立ったら即行動のトラブルメーカー。強がりのツンデレで、照れると八重歯がのぞく。父は過保護で、私設SPを付けている。"
     },
     {
       "id": "shion",
@@ -146,7 +146,7 @@
         "caption": "ダウナーでクールな、気だるげで低めの女子高校生の声。",
         "direction": ""
       },
-      "profile": "ダウナー系・文武両道。体育館のキャットウォークから騒動を高みの見物。「……アクション映画の撮影かしら。怪我人が出ないなら好きにしなさい」とクールに見届ける。"
+      "profile": "図書委員長。クールで毒舌な秀才だが、甘いものに目がない。地元の伝承や都市伝説を冷静に検証するのが趣味で、女神の宣告に怯えるタカシを観察している。"
     },
     {
       "id": "god",
@@ -172,7 +172,7 @@
         "direction": "",
         "postprocess": "divine_reverb"
       },
-      "profile": "短気で理不尽な超越者。「5秒で告白しないと◯すから（ピー音）」。主人公のアクションシーンを神界のモニターで見て「意外とやるじゃないですか」と感心している。"
+      "profile": "裏山の神社の女神（通称「5秒様」）。短気で理不尽。21日目の夕方、GOから5秒で想う相手に本心を告げなければ天罰の雷を落とすと宣告する。裏で急接近ハプニングを起こして楽しんでいる。"
     },
     {
       "id": "teacher",
@@ -194,10 +194,10 @@
       ],
       "voice": {
         "ref": "assets/voices/teacher/sample_03_cool_strict.mp3",
-        "caption": "クールで厳格な、若い女性教師の声。",
+        "caption": "気だるげでサバサバした、20代後半の女性教師の声。",
         "direction": ""
       },
-      "profile": "担任。クールで厳しいが、少女漫画と恋バナに目がない。"
+      "profile": "2年A組の担任で国語教諭・図書室顧問の白石梓。白衣を羽織った気だるげでサバサバした20代後半。定時退勤を愛するが、郷土史・民俗学の話になると止まらない。"
     },
     {
       "id": "naruse",
@@ -222,7 +222,7 @@
         "caption": "お調子者で自信満々な男子高校生の声。",
         "direction": ""
       },
-      "profile": "主人公の悪友。恋愛経験ゼロの自称恋愛マスター。"
+      "profile": "タカシの中学からの悪友・成瀬陽介。モテテクを収集しては実践して撃沈するお調子者。タカシの掃除狂いの一番の理解者でツッコミ役。"
     },
     {
       "id": "yui",
@@ -283,7 +283,135 @@
       "role": "player",
       "themeColor": "#475569",
       "models": [],
-      "profile": "主人公。女神から「5秒で告白しないと◯す」と脅されている男子高校生。普段は奇行を連発しているが、アオイの危機には火事場の馬鹿力と驚異の運動神経を発揮する。怪我はしないが全力疾走で息は上がる。"
+      "profile": "主人公。清掃ガチ勢（汚れ落としフェチ）の男子高校生。母と二人暮らし。女神から「21日目に5秒で本心を告げよ」と宣告される。大切な相手の危機には異常な動体視力と身体能力を発揮する。"
+    },
+    {
+      "id": "takashi_mom",
+      "name": {
+        "ja": "タカシの母",
+        "en": "Takashi's Mom"
+      },
+      "role": "sub",
+      "themeColor": "#a16207",
+      "models": [],
+      "profile": "タカシの母。マンションで息子と二人暮らし。台所の換気扇まで磨き上げる息子に呆れている。",
+      "voice": {
+        "ref": "assets/voices/takashi_mom_ref.mp3",
+        "caption": "40代の母親の声。気さくで少し呆れたような、生活感のある明るいトーン。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "aoi_mom",
+      "name": {
+        "ja": "アオイの母",
+        "en": "Aoi's Mom"
+      },
+      "role": "mob",
+      "themeColor": "#ca8a04",
+      "models": [],
+      "profile": "アオイの母。おっとりした声だけの登場。",
+      "voice": {
+        "ref": "assets/voices/aoi_mom_ref.mp3",
+        "caption": "40代のおっとりした優しい母親の声。柔らかく穏やかなトーン。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "mob_boy",
+      "name": {
+        "ja": "クラスの男子",
+        "en": "Classmate"
+      },
+      "role": "mob",
+      "themeColor": "#64748b",
+      "models": [],
+      "profile": "2年A組の男子。",
+      "voice": {
+        "ref": "assets/voices/mob_boy_ref.mp3",
+        "caption": "元気でお調子者の男子高校生の声。明るく、からかうような軽いノリ。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "mob_student",
+      "name": {
+        "ja": "生徒",
+        "en": "Student"
+      },
+      "role": "mob",
+      "themeColor": "#94a3b8",
+      "models": [],
+      "profile": "図書室などに居合わせた生徒。",
+      "voice": {
+        "ref": "assets/voices/mob_student_ref.mp3",
+        "caption": "おとなしく真面目な高校生の声。少し気弱で丁寧なトーン。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "kids",
+      "name": {
+        "ja": "小学生",
+        "en": "Kids"
+      },
+      "role": "mob",
+      "themeColor": "#84cc16",
+      "models": [],
+      "profile": "通学路の小学生たち（声のみ）。",
+      "voice": {
+        "ref": "assets/voices/kids_ref.mp3",
+        "caption": "小学校低学年の子どもの声。無邪気で高い声。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "teacher_colleague",
+      "name": {
+        "ja": "隣の席の先生",
+        "en": "Colleague"
+      },
+      "role": "mob",
+      "themeColor": "#78716c",
+      "models": [],
+      "profile": "職員室で白石先生の隣の席の先生。",
+      "voice": {
+        "ref": "assets/voices/teacher_colleague_ref.mp3",
+        "caption": "人の良さそうな中年の男性教師の声。穏やかで少し気弱。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "sebastian",
+      "name": {
+        "ja": "セバスチャン",
+        "en": "Sebastian"
+      },
+      "role": "mob",
+      "themeColor": "#57534e",
+      "models": [],
+      "profile": "神崎家の執事（声のみ）。",
+      "voice": {
+        "ref": "assets/voices/sebastian_ref.mp3",
+        "caption": "初老の執事の男性の声。落ち着いて品があり、低く丁寧で控えめ。",
+        "direction": ""
+      }
+    },
+    {
+      "id": "cafeteria_lady",
+      "name": {
+        "ja": "購買のおばちゃん",
+        "en": "Cafeteria Lady"
+      },
+      "role": "mob",
+      "themeColor": "#d97706",
+      "models": [],
+      "profile": "購買のレジのおばちゃん。現金しか受け付けない。",
+      "voice": {
+        "ref": "assets/voices/cafeteria_lady_ref.mp3",
+        "caption": "50代の気のいい購買のおばちゃんの声。明るく大らかで、のんびりした話し方。",
+        "direction": ""
+      }
     },
     {
       "id": "sp_leader",
@@ -340,7 +468,9 @@
     "sad": "少し寂しそうに、しおらしく弱々しいトーンで話す。",
     "angry": "語気を強めて、怒ったように話す。",
     "surprised": "驚いて動揺し、声が上ずる。",
-    "neutral": "自然な会話のトーンで話す。"
+    "neutral": "自然な会話のトーンで話す。",
+    "komari": "困ったように眉を下げ、少し戸惑いながら話す。",
+    "nima": "にやりと含み笑いしながら、からかうように話す。"
   },
   "whisperCaption": "周りに聞こえないよう、小声で囁くように話す。",
   "shoutCaption": "感情が高ぶり、大きな声で叫ぶ。"

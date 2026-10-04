@@ -1,5 +1,6 @@
 import dagre from '@dagrejs/dagre';
 import type { ScenarioPackage } from '@anime-vrm/scenario';
+import { describeChoiceCondition } from '@anime-vrm/scenario';
 import { textJa } from './scenarioEdit';
 
 export type FlowEdgeKind = 'next' | 'jump' | 'choice' | 'timeout';
@@ -21,7 +22,7 @@ export function buildFlowEdges(scenario: ScenarioPackage): FlowEdge[] {
   scenario.scenes.forEach((scene, index) => {
     if (scene.choices?.length) {
       scene.choices.forEach((choice, i) => {
-        const condition = choice.condition ? `［${choice.condition.flag}=${String(choice.condition.value)}］` : '';
+        const condition = choice.condition ? `［${describeChoiceCondition(choice.condition)}］` : '';
         edges.push({ id: `${scene.id}-c${i}`, from: scene.id, to: choice.goto, kind: 'choice', label: `${condition}${textJa(choice.text)}` });
       });
       if (scene.choiceTimeout?.goto) {

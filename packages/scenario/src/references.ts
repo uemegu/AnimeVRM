@@ -229,7 +229,11 @@ function checkStory(c: Checker, data: ScenarioPackage) {
     scene.choices?.forEach((choice, j) => {
       sceneRef([...at, 'choices', j, 'goto'], choice.goto);
       c.affinity([...at, 'choices', j, 'addAffinity'], choice.addAffinity);
+      c.affinity([...at, 'choices', j, 'condition', 'minAffinity'], choice.condition?.minAffinity);
     });
+    const still = (value: typeof scene.cg) => (typeof value === 'string' ? value : value ? value.url : undefined);
+    c.file([...at, 'cg'], still(scene.cg), '一枚絵');
+    c.file([...at, 'cutin'], still(scene.cutin), 'カットインの絵');
     if (scene.speakerCharacterId !== undefined) c.character([...at, 'speakerCharacterId'], scene.speakerCharacterId);
     else if ((typeof scene.speaker === 'string' ? scene.speaker : scene.speaker?.ja)?.trim()) c.warn([...at, 'speakerCharacterId'], '話者（speaker）があるのに speakerCharacterId がありません');
     c.file([...at, 'voiceUrl'], scene.voiceUrl, 'ボイス');
@@ -273,6 +277,7 @@ function checkCall(c: Checker, data: CallScenario) {
     step.choices?.forEach((choice, j) => {
       stepRef([...at, 'choices', j, 'goto'], choice.goto);
       c.affinity([...at, 'choices', j, 'addAffinity'], choice.addAffinity);
+      c.affinity([...at, 'choices', j, 'condition', 'minAffinity'], choice.condition?.minAffinity);
     });
     c.motion([...at, 'motion'], step.motion);
     c.file([...at, 'voiceUrl'], step.voiceUrl, 'ボイス');
@@ -282,7 +287,16 @@ function checkCall(c: Checker, data: CallScenario) {
 function checkMail(c: Checker, data: MailScenario) {
   c.character(['characterId'], data.characterId);
   c.availability(['availability'], data.availability);
-  data.replyOptions?.forEach((r, i) => c.affinity(['replyOptions', i, 'addAffinity'], r.addAffinity));
+  const content = (path: (string | number)[], m: { stamp?: string; image?: string }) => {
+    c.file([...path, 'stamp'], m.stamp, 'スタンプ');
+    c.file([...path, 'image'], m.image, '写真');
+  };
+  data.messages.forEach((m, i) => content(['messages', i], m));
+  data.replyOptions?.forEach((r, i) => {
+    c.affinity(['replyOptions', i, 'addAffinity'], r.addAffinity);
+    c.affinity(['replyOptions', i, 'condition', 'minAffinity'], r.condition?.minAffinity);
+    r.reactions?.forEach((m, j) => content(['replyOptions', i, 'reactions', j], m));
+  });
 }
 
 /**
