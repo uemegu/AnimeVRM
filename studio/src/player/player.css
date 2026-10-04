@@ -418,6 +418,20 @@
   height: auto;
   aspect-ratio: 16 / 9;
 }
+/* 枠の外の舞台の光は、縦型のときだけ出す（横型は場所の遠景のまま） */
+.player-view {
+  position: relative;
+}
+.player-view > .player {
+  position: relative;
+  z-index: 1;
+}
+.player-view > .stage-glow {
+  display: none;
+}
+.player-view:has(> .player.portrait) > .stage-glow {
+  display: block;
+}
 /* 縦型（9:16）。ショート動画と同じく高さ 1280px で止める */
 .player-view > .player.portrait {
   width: min(100cqw, 100cqh * 9 / 16, 720px);

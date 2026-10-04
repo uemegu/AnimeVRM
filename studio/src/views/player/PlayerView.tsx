@@ -8,7 +8,7 @@ import { ScenarioPlayer } from '../../player/ScenarioPlayer';
 import { ScenarioCatalog } from '../../player/ScenarioCatalog';
 import { loadPlayerData, type PlayerData } from '../../player/playerData';
 import { useBackdrop } from '../../components/Backdrop';
-import { setAmbientSource } from '../../components/Ambient';
+import { setAmbientSource, StageGlowLayer } from '../../components/Ambient';
 import '../../player/player.css';
 
 /**
@@ -62,6 +62,7 @@ export function PlayerView() {
   if (category && id) {
     return (
       <div className="player-view">
+        <StageGlowLayer />
         {scenario && data ? (
           <ScenarioPlayer scenario={scenario} baseUrl={`/scenarios/${category}/${id}/`} data={data} onExit={() => navigate('/player')} onCanvas={setAmbientSource} />
         ) : null}
