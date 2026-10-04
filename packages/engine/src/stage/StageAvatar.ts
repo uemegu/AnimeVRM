@@ -408,7 +408,8 @@ export class StageAvatar {
   ): Promise<THREE.AnimationAction | null> {
     if (!this.vrm || !this.mixer) return null;
 
-    if (this.currentAnimationUrl === url && this.currentAction && this.currentAction.isRunning()) {
+    // 同じモーションでも、ループのする・しないが変わったら再生し直す
+    if (this.currentAnimationUrl === url && this.currentAction?.isRunning() && (this.currentAction.loop === THREE.LoopRepeat) === loop) {
       return this.currentAction;
     }
 
