@@ -1,0 +1,145 @@
+{
+  "id": "aoi_call_quiz",
+  "title": {
+    "ja": "小テスト前の確認通話"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 8,
+      "to": 14
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d02_library"
+        }
+      ]
+    }
+  },
+  "characterId": "aoi",
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "タカシくん、勉強中？　フランス革命って何年だっけ……年号ごちゃごちゃで"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_fcb1b25e.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "1789年。『非難爆発フランス革命』"
+      },
+      "nextStepId": "step_3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "分かりやすい！　……ねえ、このまま問題出し合ってもいい？"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "step_4",
+      "voiceUrl": "v_step_3_2c71bc8d.mp3"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "",
+      "text": {
+        "ja": "（しばらく、ペンの音とページをめくる音だけが続く）"
+      },
+      "nextStepId": "step_5"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……ねえ。夜にこうやって二人で話してると、なんか安心する"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "step_6",
+      "voiceUrl": "v_step_5_bec97713.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "昼間はみんながいるけど、今はタカシくんを独り占めできてるみたいで――"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "step_7",
+      "voiceUrl": "v_step_6_5d41f9a4.mp3"
+    },
+    "step_7": {
+      "id": "step_7",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "あっ、ち、違う！　幼馴染としてね！？　今のナシ！"
+      },
+      "expression": "surprised",
+      "expressionWeight": 1,
+      "nextStepId": "c8",
+      "voiceUrl": "v_step_7_2bc6b27a.mp3"
+    },
+    "c8": {
+      "id": "c8",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_quiz_keep",
+          "text": {
+            "ja": "……ナシにしなくていいけど"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "aoi_quiz_next",
+          "text": {
+            "ja": "はいはい、次の問題な"
+          },
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "っ……！　べ、勉強に戻る！！"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_c1_e192caa4.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……うん"
+      },
+      "expression": "sad",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_c2_20b34edb.mp3"
+    }
+  }
+}

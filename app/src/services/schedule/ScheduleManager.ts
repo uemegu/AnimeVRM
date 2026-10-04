@@ -14,6 +14,10 @@ import {
   HOLIDAY_ACTION_LOCATIONS,
 } from '../../data/locations';
 import { scenarioRepository } from '../scenario/ScenarioRepository';
+import { weatherOf } from '../../data/calendar';
+
+/** 一度見たら再び選ばれない種類（汎用シナリオは何度でも選ばれる） */
+const ONCE_CATEGORIES: ReadonlySet<ScenarioCategory> = new Set(['morning', 'action', 'holiday', 'forced']);
 
 /**
  * シナリオの選択はすべて目次（メタ情報）だけで行う。
@@ -107,6 +111,13 @@ export class ScheduleManager {
   }
 
   /**
+   * 放課後の行動を終えたあと、夜の自室へ戻る前の強制イベント（下校時・帰宅時。timeSlots に 'evening'）
+   */
+  public static checkEveningEvent(gameState: GameState): ScenarioIndexEntry | null {
+    return this.getEligibleScenarios(['forced'], gameState, undefined, false, true)[0] ?? null;
+  }
+
+  /**
    * 今夜ヒロインから届く電話・メール（1人につき1件まで）
    * - 今夜すでに応答・拒否・既読にしたものがあれば、その人からは他に届かない
    * - なければ、条件を満たし未完了のものから優先度の高いもの（同値なら電話→メール、目次順）
@@ -122,10 +133,19 @@ export class ScheduleManager {
 
     const result: NightCommunication[] = [];
     const heroines = new Set(all.map((entry) => entry.characterId).filter((id): id is HeroineId => Boolean(id)));
+    // 今夜終えた電話・メールの続き（after に今夜のものを sameDay で指定したもの）は、同じ人からでも届く
+    const isFollowUpOfTonight = (entry: ScenarioIndexEntry) =>
+      [...(entry.availability?.after?.all ?? []), ...(entry.availability?.after?.any ?? [])].some(
+        (p) => p.sameDay && all.some((c) => c.id === p.scenarioId) && isCompleted(p.scenarioId, gameState.day)
+      );
     for (const characterId of heroines) {
-      const doneTonight = all.find((entry) => entry.characterId === characterId && isCompleted(entry.id, gameState.day));
+      const doneTonight = all.filter((entry) => entry.characterId === characterId && isCompleted(entry.id, gameState.day));
+      const followUp = communications.find(
+        (entry) => entry.characterId === characterId && !isCompleted(entry.id) && isFollowUpOfTonight(entry)
+      );
       const selected =
-        doneTonight ??
+        followUp ??
+        doneTonight[doneTonight.length - 1] ??
         communications.find((entry) => entry.characterId === characterId && !isCompleted(entry.id));
       if (!selected) continue;
       result.push({
@@ -134,7 +154,7 @@ export class ScheduleManager {
         characterId,
         previewText: selected.previewText,
         time: selected.time,
-        done: Boolean(doneTonight),
+        done: selected !== followUp && doneTonight.includes(selected),
       });
     }
     return result;
@@ -183,12 +203,17 @@ export class ScheduleManager {
     categories: ScenarioCategory[],
     gameState: GameState,
     locationId?: ActionLocationId,
-    ignoreTimeSlots = false
+    ignoreTimeSlots = false,
+    evening = false
   ): ScenarioIndexEntry[] {
+    const completed = new Set(
+      (gameState.scenarioHistory ?? []).filter((entry) => entry.type === 'completed').map((entry) => entry.scenarioId)
+    );
     return categories
       .flatMap((category) => scenarioRepository.list(category))
       .map((scenario, index) => ({ scenario, index }))
-      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId, ignoreTimeSlots))
+      .filter(({ scenario }) => scenario.fallback || !ONCE_CATEGORIES.has(scenario.category) || !completed.has(scenario.id))
+      .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId, ignoreTimeSlots, evening))
       .sort((a, b) => {
         const priorityDifference = this.getScenarioPriority(b.scenario) - this.getScenarioPriority(a.scenario);
         return priorityDifference || a.index - b.index;
@@ -196,8 +221,10 @@ export class ScheduleManager {
       .map(({ scenario }) => scenario);
   }
 
+  /** 汎用シナリオは最後。汎用どうしでは、場所を指定したもの（その場所らしい一コマ）を、どこでも起きるものより先にする */
   private static getScenarioPriority(scenario: ScenarioMeta): number {
-    return scenario.fallback ? Number.NEGATIVE_INFINITY : scenario.priority ?? 0;
+    if (scenario.fallback) return -1e9 + (scenario.availability?.locations?.length ? 1 : 0);
+    return scenario.priority ?? 0;
   }
 
   /** シナリオの日付・時間帯・場所・フラグ・進行履歴条件を判定 */
@@ -205,9 +232,15 @@ export class ScheduleManager {
     scenario: ScenarioMeta,
     gameState: GameState,
     locationId?: ActionLocationId,
-    ignoreTimeSlots = false
+    ignoreTimeSlots = false,
+    evening = false
   ): boolean {
     const availability = scenario.availability;
+    // 下校時の強制イベントは、放課後の行動を終えたときだけ（ほかの時間帯の判定では選ばない）
+    const isEveningEvent = availability?.timeSlots?.includes('evening') ?? false;
+    if (isEveningEvent !== evening) return false;
+    if (availability?.days && !availability.days.includes(gameState.day)) return false;
+    if (availability?.weather && !availability.weather.includes(weatherOf(gameState.day))) return false;
     if (availability?.requireFlags?.some((flag) => !gameState.flags[flag])) return false;
     if (availability?.unlessFlags?.some((flag) => Boolean(gameState.flags[flag]))) return false;
     const affinityOf = (charId: string) => gameState.affinities[charId] ?? 0;
@@ -232,7 +265,7 @@ export class ScheduleManager {
       if (!matchesLegacyPhase) return false;
     }
 
-    if (availability?.timeSlots && !ignoreTimeSlots) {
+    if (availability?.timeSlots && !ignoreTimeSlots && !evening) {
       if (!availability.timeSlots.some((timeSlot) => this.matchesTimeSlot(timeSlot, gameState))) {
         return false;
       }
@@ -240,9 +273,10 @@ export class ScheduleManager {
 
     const prerequisites = availability?.after;
     const history = gameState.scenarioHistory ?? [];
-    const matchesPrerequisite = (condition: { scenarioId: string; choiceId?: string }): boolean =>
+    const matchesPrerequisite = (condition: { scenarioId: string; choiceId?: string; sameDay?: boolean }): boolean =>
       history.some((entry) => {
         if (entry.scenarioId !== condition.scenarioId) return false;
+        if (condition.sameDay && entry.day !== gameState.day) return false;
         if (condition.choiceId !== undefined) {
           return entry.type === 'choice' && entry.choiceId === condition.choiceId;
         }
@@ -264,6 +298,8 @@ export class ScheduleManager {
         return gameState.phase === 'afterschool_action';
       case 'holiday':
         return isHoliday(gameState.day);
+      case 'evening':
+        return false;
     }
     return false;
   }

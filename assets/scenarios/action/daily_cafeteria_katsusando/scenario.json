@@ -1,0 +1,141 @@
+{
+  "id": "daily_cafeteria_katsusando",
+  "title": {
+    "ja": "カツサンド争奪戦の物理学"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "locations": [
+      "cafeteria"
+    ],
+    "days": [
+      5,
+      12,
+      19
+    ]
+  },
+  "location": "cafeteria",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "cafeteria",
+      "hintCharacterIds": [
+        "naruse"
+      ],
+      "hintText": {
+        "ja": "金曜限定のカツサンドの日"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "金曜限定５食、幻のカツサンドだ！　……くそっ、人の壁で間に合わねえ！",
+      "background": "corridor",
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Jogging",
+          "lookAtTarget": "forward"
+        }
+      },
+      "scrollingBackground": {
+        "speed": 1.2
+      },
+      "camera": "side",
+      "voiceUrl": "v_s1_2b86804d.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ナルセ、床を見ろ。春休みに俺が塗り重ねたアクリル樹脂ワックスだ。廊下の左側だけ、摩擦係数が極端に低い",
+      "cutin": "/cutins/takashi/halo_cleaning.avif"
+    },
+    {
+      "id": "s3",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_katsu_skate",
+          "text": "俺の背中を掴め！",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_katsu_safe",
+          "text": "……いや、廊下を走るのは危ない",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "タカシ……お前が掃除オタクで本当によかった……！",
+      "cutin": false,
+      "scrollingBackground": {
+        "speed": 1.6
+      },
+      "avatars": {
+        "naruse": {
+          "fastMotion": true,
+          "expression": "happy",
+          "expressionWeight": 1,
+          "effectText": "yatta"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_5437a7e7.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "この期に及んで！？",
+      "cutin": false,
+      "avatars": {
+        "naruse": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "effectText": "gaan"
+        }
+      },
+      "voiceUrl": "v_c2_eb9966de.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "（結局、最後の二個をギリギリで確保した）",
+      "scrollingBackground": false,
+      "background": "cafeteria",
+      "avatars": {
+        "naruse": {
+          "motion": "Standing Idle"
+        }
+      },
+      "screenTransition": "fade_black"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "掃除の成果を、こんなことに使うなよ……",
+      "scrollingBackground": false,
+      "background": "cafeteria",
+      "avatars": {
+        "naruse": {
+          "fastMotion": false,
+          "motion": "Excited"
+        }
+      },
+      "camera": "medium"
+    }
+  ]
+}

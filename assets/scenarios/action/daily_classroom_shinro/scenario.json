@@ -1,0 +1,157 @@
+{
+  "id": "daily_classroom_shinro",
+  "title": {
+    "ja": "進路希望調査票"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 5,
+      "to": 12
+    },
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "teacher"
+      ],
+      "hintText": {
+        "ja": "白石先生が進路希望調査票を手に呼んでいる"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "タカシ。第一志望、『国立大学工学部・極限環境清掃工学科』って何？",
+      "background": "staff_room",
+      "timeOfDay": "evening",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "chin_rest",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_56778c9d.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "えっ、ないんですか！？"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "ないわよ！　宇宙ステーションのトイレでも磨く気！？",
+      "avatars": {
+        "teacher": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s3_e3f207f3.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "自己洗浄コーティングとか、歴史的建造物の非破壊汚れ除去とか、やりたいことは山ほどあって……"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "……狂気じみてるのに、妙に筋が通ってるのが腹立つわね",
+      "avatars": {
+        "teacher": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_s5_cf919ac9.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_shinro_serious",
+          "text": "本気なんです",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_shinro_anywhere",
+          "text": "とりあえず、掃除ができればどこでも",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "……応用化学か材料工学。表面界面化学の研究室を探しなさい。あんたの執着、学問にできるわ",
+      "avatars": {
+        "teacher": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_8b3da728.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "どこでもはダメ。……表面界面化学、調べてきなさい",
+      "avatars": {
+        "teacher": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_c2_bc7c08e5.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "礼はいいから、帰りに進路室の机拭いていって",
+      "avatars": {
+        "teacher": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_merge_6b1037c7.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "喜んで！"
+    }
+  ]
+}

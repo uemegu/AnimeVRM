@@ -1,0 +1,98 @@
+{
+  "id": "aoi_d11_mail",
+  "title": {
+    "ja": "土曜日、うちに来て"
+  },
+  "priority": 10,
+  "availability": {
+    "days": [
+      11
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d11_gym"
+        }
+      ]
+    }
+  },
+  "characterId": "aoi",
+  "previewText": {
+    "ja": "今日はごめんね。叩いちゃって"
+  },
+  "time": "22:14",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "今日はごめんね。叩いちゃって"
+      },
+      "time": "22:13"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "text": {
+        "ja": "ちゃんとお礼したいから、土曜日、うちに来てくれる？"
+      },
+      "time": "22:14"
+    },
+    {
+      "id": "m3",
+      "sender": "heroine",
+      "text": {
+        "ja": "お母さんにも話したら、『タカシくん連れてきなさい』って"
+      },
+      "time": "22:14"
+    }
+  ],
+  "replyOptions": [
+    {
+      "id": "aoi_d11_mail_go",
+      "text": {
+        "ja": "行く。俺の方こそ、怖がらせてごめん"
+      },
+      "reactions": [
+        {
+          "text": {
+            "ja": "うん。……待ってるね"
+          },
+          "time": "22:16"
+        },
+        {
+          "stamp": "/stamps/aoi/rabbit_bow.avif",
+          "time": "22:16"
+        }
+      ],
+      "setFlags": {
+        "invited_aoi_house": true,
+        "aoi_c07": true
+      },
+      "addAffinity": {
+        "aoi": 2
+      }
+    },
+    {
+      "id": "aoi_d11_mail_knee",
+      "text": {
+        "ja": "膝裏の件は本当に誤解で"
+      },
+      "reactions": [
+        {
+          "text": {
+            "ja": "その話は土曜にゆっくり聞きます"
+          },
+          "time": "22:17"
+        },
+        {
+          "stamp": "/stamps/aoi/rabbit_blank.avif",
+          "time": "22:17"
+        }
+      ],
+      "setFlags": {
+        "invited_aoi_house": true
+      }
+    }
+  ]
+}

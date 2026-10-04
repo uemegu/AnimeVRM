@@ -2,8 +2,8 @@
  * コミュニケーション機能（TV電話・LINE風メール）の型定義
  */
 
-import type { Expression } from '@anime-vrm/scenario';
-import { LocalizedString, ScenarioAvailability } from './scenario';
+import type { ChoiceCondition, Expression } from '@anime-vrm/scenario';
+import { LocalizedString, ScenarioAvailability, TextContent } from './scenario';
 
 export type HeroineId = 'aoi' | 'emili' | 'shion';
 
@@ -14,6 +14,8 @@ export interface CallChoice {
   goto: string;
   setFlags?: Record<string, boolean | number | string>;
   addAffinity?: Record<string, number>;
+  /** 条件を満たすときだけ表示する（★の選択肢など） */
+  condition?: ChoiceCondition;
 }
 
 /** TV電話の1ステップ（セリフ・演出・表情） */
@@ -49,26 +51,48 @@ export interface CommunicationMeta {
 /** TV電話のシナリオパッケージ */
 export interface CallScenario extends CommunicationMeta {
   modelUrl?: string; // 例: 私服モデル
+  /** 音声のみの通話（相手の姿を映さない） */
+  audioOnly?: boolean;
   initialStepId: string;
   steps: Record<string, CallSceneStep>;
 }
 
+/** メールの吹き出しの中身（本文・スタンプ・写真のどれか1つ以上） */
+export interface MailContent {
+  text?: TextContent;
+  /** スタンプの画像 URL */
+  stamp?: string;
+  /** 写真の画像 URL */
+  image?: string;
+  /** 届いてからこの秒数で「送信を取り消しました」に変わる */
+  retractAfterSec?: number;
+}
+
 /** LINE風メールの1通のメッセージ */
-export interface MailMessage {
+export interface MailMessage extends MailContent {
   id: string;
   sender: 'heroine' | 'player';
-  text: LocalizedString;
   time: string; // 例: "23:42"
+}
+
+/** 返信のあとに相手から届くメッセージ */
+export interface MailReaction extends MailContent {
+  time?: string;
 }
 
 /** LINE風メールの返信選択肢 */
 export interface MailReplyOption {
   id: string;
-  text: LocalizedString;
-  reactionText: LocalizedString;
+  text: TextContent;
+  /** 返信への反応（1通） */
+  reactionText?: TextContent;
   reactionTime?: string;
+  /** 返信への反応（順に届く。スタンプ・写真も送れる） */
+  reactions?: MailReaction[];
   setFlags?: Record<string, boolean | number | string>;
   addAffinity?: Record<string, number>;
+  /** 条件を満たすときだけ表示する */
+  condition?: ChoiceCondition;
 }
 
 /** LINE風メールのシナリオ */

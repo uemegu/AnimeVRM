@@ -3,6 +3,7 @@
   "title": {
     "ja": "商店街: ウィンドウショッピング"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "shopping_street"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

@@ -3,6 +3,7 @@
   "title": {
     "ja": "運動場: 部活の声"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -13,7 +14,6 @@
       "sports_ground"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

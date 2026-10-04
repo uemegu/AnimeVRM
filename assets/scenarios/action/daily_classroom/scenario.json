@@ -3,6 +3,7 @@
   "title": {
     "ja": "教室: いつもの休み時間"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -13,7 +14,6 @@
       "classroom"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

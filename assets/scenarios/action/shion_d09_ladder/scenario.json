@@ -1,0 +1,198 @@
+{
+  "id": "shion_d09_ladder",
+  "title": {
+    "ja": "点検済みの脚立"
+  },
+  "priority": 5,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 8,
+      "to": 10
+    },
+    "locations": [
+      "library"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d03_library"
+        }
+      ]
+    }
+  },
+  "location": "library",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "郷土資料室の灯りがついている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "見違えたわね。あなたの掃除への執念、少し異常よ",
+      "background": "painted_library",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_e66aba73.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "脚立もネジ締め直しといたぞ"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "最上段の地誌、取ってくるわ",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s3_2175b91f.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "（キリキリッ……ガタッ）",
+      "cg": "/cg/shion/ladder_fall.avif",
+      "focusLines": true,
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      }
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "…………",
+      "voiceUrl": "v_s5_4bc7b57e.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ど、どきなさいよ！　重いわ……！　じゃなくて、私が重いでしょう！？",
+      "voiceUrl": "v_s6_9ab64e6c.mp3"
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d09_hurt",
+          "text": "怪我ないか？",
+          "goto": "c1",
+          "setFlags": {
+            "shion_c05": true
+          },
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_d09_light",
+          "text": "いや、軽かったぞ",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ないわよ。あなたが勝手に下敷きになったんだから。……礼は言わないわよ",
+      "cg": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_27822699.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……『重い』よりはマシだけど、デリカシーはゼロね",
+      "cg": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_c2_5b68b10a.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……おかしいわ。あなた、脚立は点検したって言ったわよね",
+      "avatars": {
+        "shion": {
+          "blush": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_merge_eef2408e.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ああ、ネジもきっちり"
+    },
+    {
+      "id": "s12",
+      "text": "（シオンが無言で、ノートに何かを書き込んでいる）",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward"
+        }
+      }
+    }
+  ]
+}

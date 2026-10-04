@@ -3,6 +3,7 @@
   "title": {
     "ja": "アオイの家: 留守"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "aoi_house"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

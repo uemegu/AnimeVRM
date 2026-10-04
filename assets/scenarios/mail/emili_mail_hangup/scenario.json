@@ -1,0 +1,39 @@
+{
+  "id": "emili_mail_hangup",
+  "title": {
+    "ja": "ほんとに切ったわね"
+  },
+  "priority": 20,
+  "availability": {
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_call_hangup",
+          "choiceId": "emili_hangup_cut",
+          "sameDay": true
+        }
+      ]
+    }
+  },
+  "characterId": "emili",
+  "previewText": {
+    "ja": "ほんとに切ったわね！？"
+  },
+  "time": "22:01",
+  "messages": [
+    {
+      "id": "m1",
+      "sender": "heroine",
+      "text": {
+        "ja": "ほんとに切ったわね！？"
+      },
+      "time": "22:01"
+    },
+    {
+      "id": "m2",
+      "sender": "heroine",
+      "stamp": "/stamps/emili/bear_angry.avif",
+      "time": "22:01"
+    }
+  ]
+}

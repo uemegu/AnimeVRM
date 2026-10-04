@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { resolveLocalizedText } from '../../types/scenario';
-import { MailScenario, MailReplyOption, MailMessage, CommunicationResult } from '../../types/communication';
+import { MailScenario, MailReplyOption, MailContent, MailReaction, CommunicationResult } from '../../types/communication';
+import { availableChoices, type ChoiceContext } from '@anime-vrm/scenario';
+import { resolveAssetUrl } from '../../utils/path';
 import { CHARACTERS } from '../../data/characters';
 import { soundManager } from '../../services/audio/SoundManager';
 import './Phone.css';
@@ -9,19 +11,36 @@ import { useLanguage } from '../../contexts/LanguageContext';
 export interface PhoneMailModalProps {
   scenario: MailScenario;
   alreadyReplied?: boolean;
+  /** 返信の出現条件の判定に使うフラグ・好感度 */
+  context?: ChoiceContext;
   /** 閉じたときの結果（フラグ・好感度・選んだ選択肢）。完了の記録は呼び出し側で行う */
   onClose: (result: Omit<CommunicationResult, 'id'>) => void;
 }
 
+/** 画面に出す1通（届いた順に並べる） */
+interface ShownMessage extends MailContent {
+  key: string;
+  sender: 'heroine' | 'player';
+  time: string;
+  retracted?: boolean;
+}
+
+/** 反応が続けて届くときの間（ミリ秒） */
+const REACTION_INTERVAL_MS = 1100;
+
 export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
   scenario,
   alreadyReplied = false,
+  context,
   onClose,
 }) => {
   const { lang } = useLanguage();
-  const [messages, setMessages] = useState<MailMessage[]>(() => [...scenario.messages]);
+  const [messages, setMessages] = useState<ShownMessage[]>(() =>
+    scenario.messages.map((m) => ({ ...m, key: m.id }))
+  );
   const [isReplied, setIsReplied] = useState<boolean>(alreadyReplied);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const timersRef = useRef<number[]>([]);
 
   const accumulatedFlagsRef = useRef<Record<string, boolean | number | string>>({});
   const accumulatedAffinityRef = useRef<Record<string, number>>({});
@@ -33,6 +52,31 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
   const charName = char ? resolveLocalizedText(char.name, lang) : scenario.characterId;
   const heroineColor = char?.themeColor || '#38bdf8';
   const avatarImgUrl = `/assets/characters/${scenario.characterId}_normal.avif`;
+  const replyOptions = availableChoices(scenario.replyOptions, context ?? { flags: {} });
+
+  const later = (ms: number, run: () => void) => {
+    timersRef.current.push(window.setTimeout(run, ms));
+  };
+  useEffect(() => () => timersRef.current.forEach((t) => window.clearTimeout(t)), []);
+
+  /** 届いてから決まった秒数で「送信を取り消しました」に変える */
+  const scheduleRetract = (list: ShownMessage[]) => {
+    for (const m of list) {
+      if (m.retractAfterSec === undefined || m.retracted) continue;
+      later(m.retractAfterSec * 1000, () =>
+        setMessages((prev) => prev.map((x) => (x.key === m.key ? { ...x, retracted: true } : x)))
+      );
+    }
+  };
+  useEffect(() => {
+    // 返信済みで開き直したときは、取り消し済みの状態から見せる
+    if (alreadyReplied) {
+      setMessages((prev) => prev.map((m) => (m.retractAfterSec !== undefined ? { ...m, retracted: true } : m)));
+    } else {
+      scheduleRetract(messages);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 最下部自動スクロール
   const scrollToBottom = () => {
@@ -48,14 +92,8 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
     if (isReplied) return;
 
     // 1. プレイヤーの返信メッセージを追加
-    const playerMsg: MailMessage = {
-      id: `player_reply_${Date.now()}`,
-      sender: 'player',
-      text: option.text,
-      time: '23:43',
-    };
-
-    setMessages((prev) => [...prev, playerMsg]);
+    const lastTime = messages[messages.length - 1]?.time ?? scenario.time;
+    setMessages((prev) => [...prev, { key: `player_reply_${option.id}`, sender: 'player', text: option.text, time: lastTime }]);
     setIsReplied(true);
 
     if (option.setFlags) {
@@ -69,20 +107,23 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
       }
     }
 
-    // 2. 相手からのリアクション返信（入力中演出を挟んで追加）
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const heroineReactionMsg: MailMessage = {
-        id: `heroine_react_${Date.now()}`,
-        sender: 'heroine',
-        text: option.reactionText,
-        time: option.reactionTime || '23:44',
-      };
-      setMessages((prev) => [...prev, heroineReactionMsg]);
-
-      soundManager.playUiSe('mailNotification');
-    }, 1100);
+    // 2. 相手からの反応（入力中演出を挟んで1通ずつ追加）
+    const reactions: MailReaction[] = option.reactions ?? (option.reactionText ? [{ text: option.reactionText, time: option.reactionTime }] : []);
+    reactions.forEach((reaction, index) => {
+      later(REACTION_INTERVAL_MS * index, () => setIsTyping(true));
+      later(REACTION_INTERVAL_MS * (index + 1) - 100, () => {
+        setIsTyping(false);
+        const shown: ShownMessage = {
+          ...reaction,
+          key: `heroine_react_${option.id}_${index}`,
+          sender: 'heroine',
+          time: reaction.time ?? option.reactionTime ?? lastTime,
+        };
+        setMessages((prev) => [...prev, shown]);
+        scheduleRetract([shown]);
+        soundManager.playUiSe('mailNotification');
+      });
+    });
   };
 
   const handleBack = () => {
@@ -91,6 +132,25 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
       affinityDelta: accumulatedAffinityRef.current,
       choiceIds: chosenIdsRef.current,
     });
+  };
+
+  /** 吹き出しの中身（取り消し・スタンプ・写真・本文） */
+  const renderContent = (msg: ShownMessage, side: 'heroine' | 'player') => {
+    if (msg.retracted) {
+      return (
+        <div className="phone-msg-retracted">
+          {lang === 'ja' ? `${side === 'heroine' ? charName : 'あなた'}が送信を取り消しました` : 'Message unsent'}
+        </div>
+      );
+    }
+    const text = msg.text !== undefined ? resolveLocalizedText(msg.text, lang) : '';
+    return (
+      <>
+        {msg.stamp && <img className="phone-msg-stamp" src={resolveAssetUrl(msg.stamp)} alt="" />}
+        {msg.image && <img className={`phone-msg-photo ${side}`} src={resolveAssetUrl(msg.image)} alt="" />}
+        {text && <div className={`phone-msg-bubble ${side}`}>{text}</div>}
+      </>
+    );
   };
 
   return (
@@ -151,39 +211,29 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
             </div>
 
             {messages.map((msg) => {
-              const isHeroine = msg.sender === 'heroine';
-              const text = resolveLocalizedText(msg.text, lang);
-
-              if (isHeroine) {
+              if (msg.sender === 'heroine') {
                 return (
-                  <div key={msg.id} className="phone-msg-row heroine">
+                  <div key={msg.key} className="phone-msg-row heroine">
                     <img
                       src={avatarImgUrl}
                       alt={charName}
                       className="phone-mail-target-avatar"
                       style={{ width: 28, height: 28 }}
                     />
-                    <div className="phone-msg-bubble heroine">
-                      {text}
-                    </div>
+                    <div className="phone-msg-stack">{renderContent(msg, 'heroine')}</div>
                     <span className="phone-msg-time">{msg.time}</span>
                   </div>
                 );
-              } else {
-                return (
-                  <div key={msg.id} className="phone-msg-row player">
-                    <div className="phone-msg-bubble player">
-                      {text}
-                    </div>
-                    <div className="phone-msg-meta player">
-                      <span className="phone-msg-read-mark">
-                        {lang === 'ja' ? '既読' : 'Read'}
-                      </span>
-                      <span className="phone-msg-time">{msg.time}</span>
-                    </div>
-                  </div>
-                );
               }
+              return (
+                <div key={msg.key} className="phone-msg-row player">
+                  <div className="phone-msg-stack player">{renderContent(msg, 'player')}</div>
+                  <div className="phone-msg-meta player">
+                    <span className="phone-msg-read-mark">{lang === 'ja' ? '既読' : 'Read'}</span>
+                    <span className="phone-msg-time">{msg.time}</span>
+                  </div>
+                </div>
+              );
             })}
 
             {isTyping && (
@@ -205,13 +255,13 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
 
           {/* Reply Area */}
           <div className="phone-mail-reply-box">
-            {!isReplied && scenario.replyOptions && scenario.replyOptions.length > 0 ? (
+            {!isReplied && replyOptions.length > 0 ? (
               <>
                 <div className="phone-mail-reply-label">
                   {lang === 'ja' ? '返信メッセージを選択' : 'Select Reply Message'}
                 </div>
                 <div className="phone-mail-reply-options">
-                  {scenario.replyOptions.map((opt) => (
+                  {replyOptions.map((opt) => (
                     <button
                       key={opt.id}
                       type="button"

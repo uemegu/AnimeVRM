@@ -1,0 +1,214 @@
+{
+  "id": "aoi_d03_door",
+  "title": {
+    "ja": "お裾分けとエプロン"
+  },
+  "priority": 10,
+  "availability": {
+    "timeSlots": [
+      "evening"
+    ],
+    "dayRange": {
+      "from": 3,
+      "to": 4
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d02_library"
+        }
+      ]
+    }
+  },
+  "location": "apartment_door",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "takashi_mom",
+      "speaker": "母（声）",
+      "text": "タカシー、出てー",
+      "background": "apartment_door",
+      "timeOfDay": "evening",
+      "seUrl": "/se/door_chime.mp3",
+      "voiceUrl": "v_s1_10496730.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "あ、タカシくん。これ、肉じゃが。お母さんと作ったら作りすぎちゃって。おばさんと食べて？",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "modelUrl": "/models/aoi/aoi-private.vrm",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Greeting",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "seUrl": "/se/door_rattle.mp3",
+      "voiceUrl": "v_s2_6d04ae38.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "おお、ありがとう。母さん喜ぶよ",
+      "avatars": {
+        "aoi": {
+          "motion": "clasp_hands_front"
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……エプロン。背中で結んだ紐で、腰のくびれが……）",
+      "avatars": {
+        "aoi": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d03_ceiling",
+          "text": "（天井を見上げる）",
+          "goto": "c1",
+          "setFlags": {
+            "aoi_c03": true
+          },
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "aoi_d03_stare",
+          "text": "（凝視してしまう）",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……い、いい匂いだな！",
+      "camera": "medium"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "でしょ？　……なんで天井見てるの？",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "torso_twist_left"
+        }
+      },
+      "voiceUrl": "v_s7_ed8b41fb.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "照明がな、綺麗で",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……タカシくん？　どこ見てるの？",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_c2_0b7a6239.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "た、タッパーの柄を！",
+      "avatars": {
+        "aoi": {
+          "sweat": "jito"
+        }
+      }
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……無地だよ？",
+      "avatars": {
+        "aoi": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "effectText": "shiin"
+        }
+      },
+      "voiceUrl": "v_s11_c2ce2e5f.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "タッパー、明日返してくれればいいからね。おやすみ！",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Greeting"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_merge_e792a010.mp3"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "takashi_mom",
+      "speaker": "母（声）",
+      "text": "あんた、玄関で何ニヤけてんの",
+      "seUrl": "/se/door_rattle.mp3",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "voiceUrl": "v_s13_4a5afcfa.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ニヤけてない！"
+    }
+  ]
+}

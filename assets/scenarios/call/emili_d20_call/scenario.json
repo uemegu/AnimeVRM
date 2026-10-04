@@ -1,0 +1,102 @@
+{
+  "id": "emili_d20_call",
+  "title": {
+    "ja": "逃げたら総動員"
+  },
+  "priority": 10,
+  "availability": {
+    "days": [
+      20
+    ],
+    "requireFlags": [
+      "route_emili"
+    ]
+  },
+  "characterId": "emili",
+  "modelUrl": "/models/emili/emili-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……もしもし、タカシ？"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_bb1a0f74.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "明日の夕方、あの神社に来なさいよね。石段の上の、拝殿の前"
+      },
+      "expression": "neutral",
+      "expressionWeight": 1,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_425a8760.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "逃げたら……神崎グループ総動員で、地の果てまで追い詰めるんだから"
+      },
+      "expression": "angry",
+      "expressionWeight": 1,
+      "nextStepId": "c4",
+      "voiceUrl": "v_step_3_ec37e634.mp3"
+    },
+    "c4": {
+      "id": "c4",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_d20_call_go",
+          "text": {
+            "ja": "逃げるわけないだろ。明日、絶対に伝える"
+          },
+          "goto": "c1",
+          "setFlags": {
+            "emili_promise": true
+          }
+        },
+        {
+          "id": "emili_d20_call_please",
+          "text": {
+            "ja": "総動員は勘弁してくれ"
+          },
+          "goto": "c2",
+          "setFlags": {
+            "emili_promise": true
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……うん。待ってるわ。おやすみ、私のナイト様"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_c1_a6efc9fc.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "じゃあ来なさい。……来て、くれるわよね？"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_c2_776008a3.mp3"
+    }
+  }
+}

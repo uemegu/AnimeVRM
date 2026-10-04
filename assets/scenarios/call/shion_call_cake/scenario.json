@@ -1,0 +1,123 @@
+{
+  "id": "shion_call_cake",
+  "title": {
+    "ja": "極秘の購入依頼"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 8,
+      "to": 14
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d06_parfait"
+        }
+      ]
+    }
+  },
+  "characterId": "shion",
+  "audioOnly": true,
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……タカシ。頼みたいことがあるの"
+      },
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_8e1d9b95.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "明日の放課後、駅前の洋菓子店で、季節限定のいちごショートが二十個だけ出るの。……一つ、買ってきてほしいのよ"
+      },
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_0f91325d.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "自分で行けばいいんじゃないか？"
+      },
+      "nextStepId": "step_4"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "シオン",
+      "text": {
+        "ja": "あの店、毎回うちの生徒が並ぶのよ。図書委員長がケーキの行列に並んでいるところを見られたら……"
+      },
+      "nextStepId": "step_5",
+      "voiceUrl": "v_step_4_64ab7caa.mp3"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……甘味処の件を知ってるのは、あなただけだから"
+      },
+      "nextStepId": "c6",
+      "voiceUrl": "v_step_5_3fe31d33.mp3"
+    },
+    "c6": {
+      "id": "c6",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_cake_ok",
+          "text": {
+            "ja": "いいよ。一個でいいのか？"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_cake_fee",
+          "text": {
+            "ja": "口止め料、高くつくぞ"
+          },
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……手数料として、あなたの分も買っていいわ。私が出すから"
+      },
+      "nextStepId": "step_8",
+      "voiceUrl": "v_c1_82553aae.mp3"
+    },
+    "step_8": {
+      "id": "step_8",
+      "speaker": "シオン",
+      "text": {
+        "ja": "一人で食べるより、感想を言い合える相手がいた方が……糖分の吸収効率がいい気がするの。根拠はないけれど"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_step_8_84219f56.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "シオン",
+      "text": {
+        "ja": "……あなたの貸出カードの有効期限、停止してもいいのよ"
+      },
+      "nextStepId": null,
+      "voiceUrl": "v_c2_36e79435.mp3"
+    }
+  }
+}

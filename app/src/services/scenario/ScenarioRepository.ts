@@ -52,9 +52,21 @@ export class ScenarioRepository {
     });
   }
 
-  /** 夜のメールの本文を読み込む */
+  /** 夜のメールの本文を読み込む。スタンプ・写真の相対パスはシナリオディレクトリ基準に直す */
   public loadMail(id: string): Promise<MailScenario> {
-    return this.loadFile(id, (json) => json as MailScenario);
+    return this.loadFile(id, (json, entry) => {
+      const mail = json as MailScenario;
+      const fix = <T extends { stamp?: string; image?: string }>(m: T): T => ({
+        ...m,
+        stamp: resolveRelative(m.stamp, entry.baseUrl),
+        image: resolveRelative(m.image, entry.baseUrl),
+      });
+      return {
+        ...mail,
+        messages: mail.messages.map(fix),
+        replyOptions: mail.replyOptions?.map((r) => ({ ...r, reactions: r.reactions?.map(fix) })),
+      };
+    });
   }
 
   private loadFile<T>(id: string, parse: (json: unknown, entry: ScenarioIndexEntry) => T): Promise<T> {
@@ -77,6 +89,12 @@ function resolveRelative(url: string | undefined, baseUrl: string): string | und
   return `${baseUrl}${url}`;
 }
 
+/** 一枚絵・カットインの相対パスを直す */
+function resolveStill<T extends { url: string }>(value: string | T, baseUrl: string): string | T {
+  if (typeof value === 'string') return resolveRelative(value, baseUrl)!;
+  return { ...value, url: resolveRelative(value.url, baseUrl)! };
+}
+
 function resolveScenarioAssets(scenario: ScenarioPackage, baseUrl: string): ScenarioPackage {
   return {
     ...scenario,
@@ -84,6 +102,8 @@ function resolveScenarioAssets(scenario: ScenarioPackage, baseUrl: string): Scen
       ...scene,
       voiceUrl: resolveRelative(scene.voiceUrl, baseUrl),
       seUrl: resolveRelative(scene.seUrl, baseUrl),
+      ...(scene.cg ? { cg: resolveStill(scene.cg, baseUrl) } : {}),
+      ...(scene.cutin ? { cutin: resolveStill(scene.cutin, baseUrl) } : {}),
     })),
   };
 }

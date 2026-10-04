@@ -3,6 +3,7 @@
   "title": {
     "ja": "遊園地: 人混み"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "amusement_park"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

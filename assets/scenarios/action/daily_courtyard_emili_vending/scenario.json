@@ -1,0 +1,141 @@
+{
+  "id": "daily_courtyard_emili_vending",
+  "title": {
+    "ja": "自販機ミッション"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 3,
+      "to": 20
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "minAffinity": {
+      "emili": 6
+    }
+  },
+  "location": "courtyard",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "エミリが自販機の前で真剣な顔をしている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "この金属の円盤を、あの投入口に入れればいいのね？",
+      "background": "courtyard",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_17d064b9.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "爆弾処理みたいな顔すんな"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "きゃっ！？　……ほ、本当にジュースが出てきたわ！　コインが冷たい缶に変化した……現代の錬金術ね！",
+      "avatars": {
+        "emili": {
+          "effectText": "biku",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Excited"
+        }
+      },
+      "voiceUrl": "v_s3_2e4b5cca.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "（缶を高く掲げて、八重歯を見せて笑う）",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_vending_cute",
+          "text": "世界一可愛い錬金術師だな",
+          "goto": "c1",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "daily_vending_normal",
+          "text": "それ、みんな普通に買ってるからな",
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "か、か、かわっ……！？　う、うるさいわね！",
+      "avatars": {
+        "emili": {
+          "blush": true,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Angry"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c1_51682ca5.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "私にとっては世紀の大発見なの！",
+      "avatars": {
+        "emili": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Antada"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_c23704db.mp3"
+    }
+  ]
+}

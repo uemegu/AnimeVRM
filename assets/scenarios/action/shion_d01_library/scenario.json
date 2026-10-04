@@ -1,0 +1,229 @@
+{
+  "id": "shion_d01_library",
+  "title": {
+    "ja": "あなた、呪われてるの？"
+  },
+  "priority": 5,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 1,
+      "to": 3
+    },
+    "locations": [
+      "library"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "prologue_day1"
+        }
+      ]
+    }
+  },
+  "location": "library",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "図書室なら、神社のことが分かるかもしれない"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "５秒……天罰……雷……黒焦げ……どうすりゃいいんだ……",
+      "background": "painted_library",
+      "timeOfDay": "evening"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……静かにしなさい",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_d44239ff.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "うわっ！？"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "図書委員長の月詠よ。同じクラスでしょう。……ここは、秒数を数えながら本棚を荒らす場所じゃないわ",
+      "avatars": {
+        "shion": {
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s4_59c71d5b.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "神社の由来。解呪の方法。そして『５秒』という単語の反芻……",
+      "avatars": {
+        "shion": {
+          "motion": "chin_rest",
+          "lookAtTarget": "forward"
+        }
+      },
+      "cutin": "/cutins/items/legend_book.avif",
+      "voiceUrl": "v_s5_a1fb24e3.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "あなた……もしかして、『５秒様』の呪いにかかったの？",
+      "cutin": false,
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s6_656f60d0.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "な、なんでそれを！？"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d01_honest",
+          "text": "……信じてもらえないと思うけど、今朝、神社で（正直に話す）",
+          "goto": "c1",
+          "setFlags": {
+            "shion_c01": true
+          },
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_d01_homework",
+          "text": "いや、ちょっと課題で調べてて",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……面白い。続けて",
+      "avatars": {
+        "shion": {
+          "expression": "nima",
+          "expressionWeight": 1,
+          "effectText": "kirakira"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_fad4313e.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "課題で脈拍と発汗が異常値になる人はいないわ。……正直に話しなさい",
+      "avatars": {
+        "shion": {
+          "expression": "angry",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_c2_42c45240.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……はい"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "この街の古い伝承よ。裏山の神社には、煮え切らない者に雷を落とす『５秒様』が棲んでいる、ってね",
+      "avatars": {
+        "shion": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "motion": "chin_rest"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_merge_15908918.mp3"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "今じゃただの怪談扱いだけど。……あなたのその怯え方、演技には見えないわ",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s13_8e64818c.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "――被験者タカシ。あなたの呪い、私が検証させてもらうわ",
+      "avatars": {
+        "shion": {
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "Antada"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s14_3d7989ff.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "ひ、被験者！？",
+      "camera": "medium"
+    }
+  ]
+}

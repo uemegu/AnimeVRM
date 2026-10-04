@@ -3,6 +3,8 @@ import { soundManager } from '../../services/audio/SoundManager';
 import * as THREE from 'three';
 import { resolveLocalizedText } from '../../types/scenario';
 import { CallScenario, CommunicationResult } from '../../types/communication';
+import { availableChoices, type ChoiceContext } from '@anime-vrm/scenario';
+import { resolveAssetUrl } from '../../utils/path';
 import { StageAvatar } from '@anime-vrm/engine/stage/StageAvatar';
 import { LIP_SYNC_GAIN } from '@anime-vrm/engine/stage/StageManager';
 import { CHARACTERS } from '../../data/characters';
@@ -14,12 +16,15 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 export interface PhoneCallModalProps {
   scenario: CallScenario;
+  /** 選択肢の出現条件の判定に使うフラグ・好感度（通話中に選んだ分も足して判定する） */
+  context?: ChoiceContext;
   /** 閉じたときの結果（フラグ・好感度・選んだ選択肢）。完了の記録は呼び出し側で行う */
   onClose: (result: Omit<CommunicationResult, 'id'>) => void;
 }
 
 export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   scenario,
+  context,
   onClose,
 }) => {
   const { lang } = useLanguage();
@@ -35,6 +40,16 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   const avatarRef = useRef<StageAvatar | null>(null);
 
   const step = scenario.steps[currentStepId];
+  // 条件に合う選択肢（通話中に立てたフラグ・好感度も反映）
+  const choices = availableChoices(step?.choices, {
+    flags: { ...context?.flags, ...accumulatedFlagsRef.current },
+    affinities: Object.fromEntries(
+      [...new Set([...Object.keys(context?.affinities ?? {}), ...Object.keys(accumulatedAffinityRef.current)])].map((id) => [
+        id,
+        (context?.affinities?.[id] ?? 0) + (accumulatedAffinityRef.current[id] ?? 0),
+      ])
+    ),
+  });
   const char = CHARACTERS[scenario.characterId];
   const charName = char ? resolveLocalizedText(char.name, lang) : scenario.characterId;
   const heroineColor = char?.themeColor || '#38bdf8';
@@ -56,7 +71,8 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   // 3D Canvas / StageAvatar レンダリングセットアップ（室内明設定）
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    // 音声のみの通話では相手の姿を映さない
+    if (!canvas || scenario.audioOnly) return;
 
     let isDisposed = false;
     let animationFrameId: number;
@@ -173,7 +189,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
     if (!step) return;
 
     // 選択肢表示中はクリック進行不可
-    if (step.choices && step.choices.length > 0) {
+    if (choices.length > 0) {
       return;
     }
 
@@ -191,8 +207,8 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
 
   // 通常選択肢と同じ選択ハンドラー
   const handleChoiceSelect = (choiceIndex: number) => {
-    if (!step?.choices || !step.choices[choiceIndex]) return;
-    const choice = step.choices[choiceIndex];
+    const choice = choices[choiceIndex];
+    if (!choice) return;
 
     chosenIdsRef.current.push(choice.id);
     if (choice.setFlags) {
@@ -207,7 +223,7 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
   };
 
   // 選択肢用データ変換
-  const formattedChoices = step?.choices?.map((c) => ({
+  const formattedChoices = choices.length === 0 ? undefined : choices.map((c) => ({
     text: resolveLocalizedText(c.text, lang),
     goto: c.goto,
   }));
@@ -239,10 +255,20 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
 
         {/* TV Call Screen Container */}
         <div className="phone-call-container">
-          {/* 3D Stage (StageAvatar closeup) */}
-          <div className="phone-call-canvas-area">
-            <canvas ref={canvasRef} className="phone-call-canvas" />
-          </div>
+          {scenario.audioOnly ? (
+            /* 音声通話：相手のアイコンと話している間の波紋 */
+            <div className="phone-call-audio-only">
+              <div className={`phone-call-audio-ring${step && resolveLocalizedText(step.speaker, lang) === charName ? ' speaking' : ''}`}>
+                <img src={resolveAssetUrl(`/assets/characters/${scenario.characterId}_normal.avif`)} alt={charName} />
+              </div>
+              <span className="phone-call-audio-label">{lang === 'ja' ? '音声通話' : 'Voice call'}</span>
+            </div>
+          ) : (
+            /* 3D Stage (StageAvatar closeup) */
+            <div className="phone-call-canvas-area">
+              <canvas ref={canvasRef} className="phone-call-canvas" />
+            </div>
+          )}
 
           {/* CRT / Display Scanline Effects */}
           <div className="phone-call-display-effects" />

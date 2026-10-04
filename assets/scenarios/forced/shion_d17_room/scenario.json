@@ -1,0 +1,207 @@
+{
+  "id": "shion_d17_room",
+  "title": {
+    "ja": "灯りの消えない資料室"
+  },
+  "priority": 20,
+  "availability": {
+    "timeSlots": [
+      "evening"
+    ],
+    "dayRange": {
+      "from": 16,
+      "to": 17
+    },
+    "requireFlags": [
+      "route_shion"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d15_reveal"
+        }
+      ]
+    }
+  },
+  "location": "library",
+  "timeOfDay": "evening",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "タカシ、ちょうどいい。シオンが資料室の鍵返しに来ないのよ。定時過ぎちゃうから見てきて",
+      "background": "painted_library",
+      "timeOfDay": "evening",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_b387bfbe.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "（郷土資料室。机いっぱいの文献と、手帳に向かうシオン）",
+      "avatars": {
+        "teacher": {
+          "visible": false
+        }
+      },
+      "screenTransition": "fade_black",
+      "cutin": "/cutins/items/shion_notebook_crossed.avif"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ノックくらいしなさい",
+      "cutin": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "chin_rest",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s3_b070442e.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "それ……何を調べてるんだ？"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……勘違いしないで。被験者が黒焦げになったら、研究が未完で終わるからよ",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward",
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s5_98ef8182.mp3"
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d17_know",
+          "text": "告白以外の方法なんてないって、シオンが一番分かってるだろ",
+          "goto": "c1",
+          "setFlags": {
+            "shion_c09": true
+          },
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "shion_d17_thanks",
+          "text": "俺のために、ありがとう",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ええ。分かってるわ",
+      "avatars": {
+        "shion": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_66c44c78.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……あなたのためじゃないって言ったでしょう",
+      "avatars": {
+        "shion": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_c2_9216fb7b.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "旧記を三回読み直したわ。どこにも、そんな記述はなかった",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_merge_c756b545.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "それでも、探さずにいられなかったの",
+      "avatars": {
+        "shion": {
+          "motion": "clasp_hands_front"
+        }
+      },
+      "voiceUrl": "v_s10_eac50d3c.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "あなたが、私のせいで本心を言えずに黒焦げになるのも。……私なんかのために、打算の告白をするのも。どっちも嫌だった",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "tears": true
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s11_ad3eae05.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……鍵は私が返すわ。もう帰って",
+      "avatars": {
+        "shion": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s12_c2b9451f.mp3"
+    }
+  ]
+}

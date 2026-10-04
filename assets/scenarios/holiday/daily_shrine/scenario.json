@@ -3,6 +3,7 @@
   "title": {
     "ja": "神社: 静かな境内"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "shrine"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

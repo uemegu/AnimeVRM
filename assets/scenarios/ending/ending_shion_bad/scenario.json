@@ -1,0 +1,243 @@
+{
+  "id": "ending_shion_bad",
+  "title": {
+    "ja": "BAD END　立証された仮説"
+  },
+  "priority": 20,
+  "availability": {
+    "requireFlags": [
+      "route_shion",
+      "finale_timeout"
+    ]
+  },
+  "location": "shrine",
+  "bgm": "bad_ending",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "……５秒。時間切れです",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_c1bc9bb7.mp3"
+    },
+    {
+      "id": "s2",
+      "text": "（ゴロゴロ……ドォンッ！）",
+      "flashEffect": "white",
+      "screenTransition": "fade_black",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cutin": "/cutins/takashi/afro_smoke.avif"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "黒焦げは勘弁してあげました。……自分の心を信じきれなかったのですね",
+      "voiceUrl": "v_s3_8a961c9b.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "タカシ！！",
+      "cutin": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Jogging",
+          "fastMotion": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s4_3421916f.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "脈拍、呼吸……正常。……よかった……",
+      "avatars": {
+        "shion": {
+          "fastMotion": false,
+          "motion": "clasp_hands_front",
+          "expression": "sad",
+          "expressionWeight": 1,
+          "tears": true
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s5_6ebb1b52.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……雷が落ちた、ということは。本心を告げられなかった",
+      "avatars": {
+        "shion": {
+          "tears": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s6_60d3da93.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "最初から分かっていた仮説が、立証されただけよ",
+      "voiceUrl": "v_s7_8aec380d.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "choiceTimeout": {
+        "seconds": 5
+      },
+      "choices": [
+        {
+          "id": "shion_bad_wait",
+          "text": "違うんだ、俺は――",
+          "goto": "c1"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "いいの。……立てる？　白石先生に連絡するわ",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_c1_e4eb3b1c.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "翌週――",
+      "screenTransition": "fade_black",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      }
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "いらっしゃい。返却ならこちらへどうぞ",
+      "background": "painted_library",
+      "timeOfDay": "evening",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s11_b4f4b447.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "シオン、調査のこと――"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "終了したわ。手帳にも結論を書いたもの",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s13_da776dd1.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "資料室は、いつでも使えるわよ。あなたが綺麗にしてくれたおかげで、他の生徒も来るようになったから。……ありがとう",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s14_21bcc3e9.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "タカシ。本借りないなら今日は帰りな",
+      "avatars": {
+        "shion": {
+          "visible": false
+        },
+        "teacher": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s15_034db9ee.mp3"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "……あいつ、あの日から閉館後に一人で資料室にこもってるよ。何読んでるかは、教えてくれないけどね",
+      "avatars": {
+        "teacher": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s16_2f6cf66b.mp3"
+    },
+    {
+      "id": "s17",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（あの５秒で、検証されることを恐れずに言えていたら――）",
+      "camera": "wide"
+    }
+  ]
+}

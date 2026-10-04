@@ -1,0 +1,110 @@
+{
+  "id": "daily_classroom_teiji",
+  "title": {
+    "ja": "定時退勤の神速ルーティン"
+  },
+  "priority": -10,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "classroom",
+      "hintCharacterIds": [
+        "teacher"
+      ],
+      "hintText": {
+        "ja": "日直の日誌を職員室に届けないと"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（日直の日誌を職員室に届けに来た）",
+      "background": "staff_room",
+      "timeOfDay": "evening"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "teacher_colleague",
+      "speaker": "隣の席の先生",
+      "text": "白石先生、明日の時間割の件なんですが――",
+      "avatars": {
+        "teacher": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_0a4c9bb5.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "teacher",
+      "speaker": "白石先生",
+      "text": "お疲れ様でしたー！　質問は明朝8時15分以降に受け付けまーす！",
+      "avatars": {
+        "teacher": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Greeting",
+          "lookAtTarget": "camera",
+          "fastMotion": true
+        }
+      },
+      "voiceUrl": "v_s3_520f8280.mp3"
+    },
+    {
+      "id": "s4",
+      "text": "（残像を残して消えた。書類が風で舞う）",
+      "avatars": {
+        "teacher": {
+          "visible": false
+        }
+      },
+      "focusLines": true
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_teiji_leave",
+          "text": "（日誌を机に置いて帰る）",
+          "goto": "c1"
+        },
+        {
+          "id": "daily_teiji_papers",
+          "text": "（舞った書類を拾い集める）",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……校門まで45秒って、本当だったんだ）",
+      "end": true
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "teacher_colleague",
+      "speaker": "隣の席の先生",
+      "text": "ありがとう……君は良い子だね……",
+      "end": true,
+      "voiceUrl": "v_c2_d171a47f.mp3"
+    }
+  ]
+}

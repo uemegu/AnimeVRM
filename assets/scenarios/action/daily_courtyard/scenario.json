@@ -3,6 +3,7 @@
   "title": {
     "ja": "中庭: 昼下がりのベンチ"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -13,7 +14,6 @@
       "courtyard"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

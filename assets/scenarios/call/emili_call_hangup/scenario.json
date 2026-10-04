@@ -1,0 +1,169 @@
+{
+  "id": "emili_call_hangup",
+  "title": {
+    "ja": "切り際のもどかしさ"
+  },
+  "priority": 2,
+  "availability": {
+    "days": [
+      12,
+      19
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d09_cleaning"
+        }
+      ]
+    }
+  },
+  "characterId": "emili",
+  "modelUrl": "/models/emili/emili-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "じゃあ月曜、その資料を白石先生に出せばいいんだな。……そろそろ切るか"
+      },
+      "nextStepId": "step_2"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……もう切るの？"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_d9afe151.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "用件が済んだら即切るなんて、味気ないじゃない。……今週バタバタしたから、少し雑談くらいしたいのよ"
+      },
+      "expression": "angry",
+      "expressionWeight": 1,
+      "nextStepId": "step_4",
+      "voiceUrl": "v_step_3_411d21bd.mp3"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "",
+      "text": {
+        "ja": "（しばらく、クラスの噂話や来週の体育の話が続く）"
+      },
+      "nextStepId": "step_5"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……もう十時ね。アンタから切りなさいよ"
+      },
+      "expression": "neutral",
+      "expressionWeight": 1,
+      "nextStepId": "step_6",
+      "voiceUrl": "v_step_5_99ff3042.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "かけてきたのエミリだろ"
+      },
+      "nextStepId": "step_7"
+    },
+    "step_7": {
+      "id": "step_7",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "私から切ると、突き放したみたいで後味悪いのよ"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "step_8",
+      "voiceUrl": "v_step_7_3f00537f.mp3"
+    },
+    "step_8": {
+      "id": "step_8",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……じゃあ、せーので同時に切るわよ。せーの……"
+      },
+      "expression": "neutral",
+      "expressionWeight": 1,
+      "nextStepId": "c9",
+      "voiceUrl": "v_step_8_6110bf22.mp3"
+    },
+    "c9": {
+      "id": "c9",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_hangup_stay",
+          "text": {
+            "ja": "（切らない）"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "emili_hangup_cut",
+          "text": {
+            "ja": "（切る）"
+          },
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……ちょっと！　アンタ切ってないじゃない！"
+      },
+      "expression": "angry",
+      "expressionWeight": 1,
+      "nextStepId": "step_11",
+      "voiceUrl": "v_c1_43c216c6.mp3"
+    },
+    "step_11": {
+      "id": "step_11",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "エミリもだろ"
+      },
+      "nextStepId": "step_12"
+    },
+    "step_12": {
+      "id": "step_12",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "……ふふ、バカね。おやすみなさい、タカシ"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_step_12_323b7b5f.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "",
+      "text": {
+        "ja": "（通話終了）"
+      },
+      "nextStepId": null
+    }
+  }
+}

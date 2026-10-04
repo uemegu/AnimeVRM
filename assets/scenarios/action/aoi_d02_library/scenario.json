@@ -1,0 +1,308 @@
+{
+  "id": "aoi_d02_library",
+  "title": {
+    "ja": "図書室の案内と大きな手"
+  },
+  "priority": 5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 3
+    },
+    "locations": [
+      "library"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d01_classroom"
+        }
+      ]
+    }
+  },
+  "location": "library",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "aoi"
+      ],
+      "hintText": {
+        "ja": "アオイが図書室の場所を探していた"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "わあ、前の学校の図書室より広い！　……あ、この作家さんの新刊ある！",
+      "background": "painted_library",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Excited",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_29f2f18e.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "声、声"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……っ、ごめん",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "sweat": "jito"
+        }
+      },
+      "voiceUrl": "v_s3_b278ae08.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "拾うよ"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "アオイ、危ないっ！",
+      "focusLines": true,
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "effectText": "biku",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "wide"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……っ！",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "voiceUrl": "v_s6_a21e7b76.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……当たってないか？"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "う、うん……",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "voiceUrl": "v_s8_dc2bb284.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "mob_student",
+      "speaker": "生徒",
+      "text": "す、すみません！　大丈夫でしたか！？",
+      "camera": "medium",
+      "voiceUrl": "v_s9_6ff267c2.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "（本を棚に戻し終えて）",
+      "screenTransition": "fade_black",
+      "avatars": {
+        "aoi": {
+          "blush": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      }
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……タカシくんの手、こんなに大きかったっけ",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s11_8059bba0.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "え？",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera"
+        }
+      }
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "昔は私の方が背も高かったし、手も大きかったのに。……なんか、ずるい",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "aoi_feminine_hair_tuck"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s13_5ba0ca19.mp3"
+    },
+    {
+      "id": "s14",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d02_changed",
+          "text": "アオイだって、すごく変わったよ",
+          "goto": "c1",
+          "setFlags": {
+            "aoi_c02": true
+          },
+          "addAffinity": {
+            "aoi": 3
+          }
+        },
+        {
+          "id": "aoi_d02_muscle",
+          "text": "鍛えてるからな（力こぶ）",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……えっ",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "blush": true,
+          "eyeWander": true
+        }
+      },
+      "voiceUrl": "v_c1_852ba269.mp3"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "そ、そういうの、急に言わないで……",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_s16_07f3f077.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "ふふっ、細いよ？",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "voiceUrl": "v_c2_5c50c671.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……あ、芯ケース。ありがと",
+      "avatars": {
+        "aoi": {
+          "eyeWander": 0,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_merge_64c407fd.mp3"
+    },
+    {
+      "id": "s19",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "っ……ご、ごめん！　静電気！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "blush": true,
+          "effectText": "biku"
+        }
+      },
+      "voiceUrl": "v_s19_58db5cfb.mp3"
+    },
+    {
+      "id": "s20",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（今、四月だぞ……）",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      }
+    }
+  ]
+}

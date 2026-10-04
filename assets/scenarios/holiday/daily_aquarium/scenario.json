@@ -3,6 +3,7 @@
   "title": {
     "ja": "水族館: 青い世界"
   },
+  "fallback": true,
   "availability": {
     "timeSlots": [
       "holiday"
@@ -11,7 +12,6 @@
       "aquarium"
     ]
   },
-  "priority": -5,
   "bgm": "main_bgm",
   "scenes": [
     {

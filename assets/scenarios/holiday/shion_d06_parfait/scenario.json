@@ -1,0 +1,194 @@
+{
+  "id": "shion_d06_parfait",
+  "title": {
+    "ja": "メガ盛りパフェの秘密"
+  },
+  "priority": 5,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "dayRange": {
+      "from": 6,
+      "to": 7
+    },
+    "locations": [
+      "shopping_street"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d01_library"
+        }
+      ]
+    }
+  },
+  "location": "shopping_street",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "shopping_street",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "商店街の甘味処で、見覚えのある横顔を見たらしい"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……あれ、シオンか？　なんだあの幸せそうな顔……）",
+      "background": "shopping_street_3d",
+      "cg": "/cg/shion/parfait_melt.avif"
+    },
+    {
+      "id": "s2",
+      "text": "（ピキッ）",
+      "cg": "/cg/shion/parfait_freeze.avif"
+    },
+    {
+      "id": "s3",
+      "text": "（数十秒後、店から出てきたシオン）",
+      "cg": false,
+      "screenTransition": "fade_black"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ちょっと来て",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s4_e6c615c1.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……見たわね",
+      "avatars": {
+        "shion": {
+          "effectText": "shiin"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s5_1938e024.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "いや、すごく美味そうに食うんだなと――"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "忘れなさい。記憶から抹消して。……他言無用よ。言ったら、あなたの調査データを全部シュレッダーにかけるわ",
+      "avatars": {
+        "shion": {
+          "motion": "Antada"
+        }
+      },
+      "voiceUrl": "v_s7_8874f574.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "choices": [
+        {
+          "id": "shion_d06_human",
+          "text": "甘いもの好きなの、別に悪いことじゃないだろ。普段より人間らしくていいと思う",
+          "goto": "c1",
+          "setFlags": {
+            "shion_c03": true
+          },
+          "addAffinity": {
+            "shion": 3
+          }
+        },
+        {
+          "id": "shion_d06_mimic",
+          "text": "『ん〜〜っ！』って言ってたよな",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……余計なお世話よ。甘味は脳の栄養補給なの。……それだけよ",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "motion": "Standing Idle"
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_6b05f999.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "…………っ！！",
+      "avatars": {
+        "shion": {
+          "anger": true,
+          "expression": "angry",
+          "expressionWeight": 1,
+          "effectText": "iraira"
+        }
+      },
+      "voiceUrl": "v_c2_eee0be35.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "次の調査、覚えておきなさい",
+      "avatars": {
+        "shion": {
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s11_e60789f2.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……あなたしか知らないのよ、このこと。だから――本当に、誰にも言わないで",
+      "avatars": {
+        "shion": {
+          "anger": false,
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_merge_f61c73bc.mp3"
+    }
+  ]
+}

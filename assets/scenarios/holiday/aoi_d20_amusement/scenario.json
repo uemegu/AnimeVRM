@@ -1,0 +1,220 @@
+{
+  "id": "aoi_d20_amusement",
+  "title": {
+    "ja": "観覧車からの景色"
+  },
+  "priority": 10,
+  "availability": {
+    "timeSlots": [
+      "holiday"
+    ],
+    "days": [
+      20
+    ],
+    "locations": [
+      "amusement_park"
+    ],
+    "requireFlags": [
+      "unlock_amusement_park",
+      "route_aoi"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "aoi_d16_rain"
+        }
+      ]
+    }
+  },
+  "location": "amusement_park",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "amusement_park",
+      "hintCharacterIds": [
+        "aoi"
+      ],
+      "hintText": {
+        "ja": "アオイと約束した遊園地"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "お化け屋敷のタカシくん、すっごい声出てたね",
+      "background": "amusement_park",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Ohoho",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_5d25eb9f.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "射的で一発で景品落とす方がおかしいだろ"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "ふふっ、昔から得意だったでしょ？",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s3_d2a5e846.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……あ、見て。あそこ、私たちのマンションかな",
+      "cg": "/cg/aoi/ferris_wheel_gondola.avif",
+      "screenTransition": "fade_black",
+      "bgm": "love",
+      "voiceUrl": "v_s4_ceb28c0c.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "たぶんな。……ちっちゃいな"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "昔はあの辺で、泥だらけになって遊んでたのにね",
+      "voiceUrl": "v_s6_9ab60558.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……私たち、昔の『ただの幼馴染』には、もう戻れないのかな",
+      "voiceUrl": "v_s7_9a521eb7.mp3"
+    },
+    {
+      "id": "s8",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d20_back",
+          "text": "……戻りたいか？",
+          "goto": "c1",
+          "setFlags": {
+            "aoi_c10": true
+          },
+          "addAffinity": {
+            "aoi": 3
+          }
+        },
+        {
+          "id": "aoi_d20_noback",
+          "text": "戻れなくていい",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……戻りたい、わけじゃない。でも、今のタカシくんといると胸が苦しくて、昔みたいに気楽にいられなくて",
+      "cg": false,
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward",
+          "motion": "clasp_hands_front"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_c1_b848631f.mp3"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "それがちょっとだけ怖くて……嬉しいの",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "nextSceneId": "merge",
+      "voiceUrl": "v_s10_700e2cda.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……っ",
+      "cg": false,
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_c2_2ce8f695.mp3"
+    },
+    {
+      "id": "s12",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……そういうの、ここで言う？",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s12_6b8c2752.mp3"
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "…………",
+      "cg": "/cg/aoi/ferris_wheel_gondola.avif",
+      "voiceUrl": "v_merge_efcc78e9.mp3"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "…………"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（あと一日。……言うことは、もう決まってる）"
+    }
+  ]
+}

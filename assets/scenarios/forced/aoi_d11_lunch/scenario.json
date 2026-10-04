@@ -1,0 +1,211 @@
+{
+  "id": "aoi_d11_lunch",
+  "title": {
+    "ja": "清掃ガチ勢の完全装備"
+  },
+  "priority": 10,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "days": [
+      11
+    ],
+    "requireFlags": [
+      "route_aoi"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "consumesTurn": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "……タカシ。そのカバンからはみ出てるの、何？",
+      "background": "painted_classroom",
+      "avatars": {
+        "naruse": {
+          "position": "left",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s1_e2fa992b.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "保護ゴーグル、防塵マスク、ゴム手袋、金属スクレーパー、強力洗剤",
+      "cutin": "/cutins/takashi/cleaning_gear.avif"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "テロでも起こす気か？",
+      "avatars": {
+        "naruse": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "jito"
+        }
+      },
+      "voiceUrl": "v_s3_50e7b179.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "今日は理科室の掃除当番だぞ。換気扇の油汚れと、決着をつける日だ",
+      "focusLines": true
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "目が怖えよ……",
+      "cutin": false,
+      "avatars": {
+        "naruse": {
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "voiceUrl": "v_s5_877a3e87.mp3"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "タカシくん、放課後のクレープの件なんだけど。掃除、何時くらいに終わりそう？",
+      "avatars": {
+        "aoi": {
+          "position": "right",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Greeting",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_s6_01f778d1.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "理科室の換気扇次第だな……",
+      "camera": "medium"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "じゃあ私、先に校門でエミリちゃんと待ってるね。ブレザーもその時渡すんだ",
+      "avatars": {
+        "aoi": {
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s8_dc9a9575.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "さっき縫い終わったんだけど、エミリちゃん休み時間のたびにどっか行っちゃって、まだ渡せてないの",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "chin_rest"
+        }
+      },
+      "voiceUrl": "v_s9_f88bcac6.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_d11_promise",
+          "text": "掃除終わったらすぐ行く。先に待っててくれ",
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "aoi_d11_fan",
+          "text": "換気扇次第だな",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "うん。……換気扇に夢中になって忘れないでね？",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "close",
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_26c6b430.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……タカシくん？",
+      "avatars": {
+        "aoi": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "anger": true,
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_c2_6fc6af5a.mp3"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "すぐ行きます",
+      "avatars": {
+        "aoi": {
+          "anger": false,
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "……おいタカシ。お前、いつの間にそんなラブコメ体質になってんだよ……",
+      "avatars": {
+        "naruse": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "wide",
+      "voiceUrl": "v_merge_c38b4f95.mp3"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "id": "aoi_call_kairanban",
+  "title": {
+    "ja": "回覧板と糸電話"
+  },
+  "priority": 1,
+  "availability": {
+    "dayRange": {
+      "from": 2,
+      "to": 6
+    },
+    "after": {
+      "all": [
+        {
+          "scenarioId": "prologue_day1"
+        }
+      ]
+    }
+  },
+  "characterId": "aoi",
+  "modelUrl": "/models/aoi/aoi-private.vrm",
+  "initialStepId": "step_1",
+  "steps": {
+    "step_1": {
+      "id": "step_1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "タカシくん、今ちょっとだけいい？　お母さんから回覧板預かってて、渡し忘れちゃった"
+      },
+      "expression": "komari",
+      "expressionWeight": 1,
+      "nextStepId": "step_2",
+      "voiceUrl": "v_step_1_c28a962a.mp3"
+    },
+    "step_2": {
+      "id": "step_2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "明日の朝渡すね。『町内清掃のお知らせ』が入ってるって、おばさんに伝えといて"
+      },
+      "expression": "neutral",
+      "expressionWeight": 1,
+      "nextStepId": "step_3",
+      "voiceUrl": "v_step_2_8f89d001.mp3"
+    },
+    "step_3": {
+      "id": "step_3",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "町内清掃！？　急ぎだな。……俺も出る"
+      },
+      "nextStepId": "step_4"
+    },
+    "step_4": {
+      "id": "step_4",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "言うと思った。だから先に教えたの"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "step_5",
+      "voiceUrl": "v_step_4_0d85fc38.mp3"
+    },
+    "step_5": {
+      "id": "step_5",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "……ねえ、ベランダから話してると、手を伸ばせば届きそうなのに電話って、変な感じだね"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": "step_6",
+      "voiceUrl": "v_step_5_bddc78da.mp3"
+    },
+    "step_6": {
+      "id": "step_6",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "昔、公園で糸電話作ったの覚えてる？"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "c7",
+      "voiceUrl": "v_step_6_6dd0874d.mp3"
+    },
+    "c7": {
+      "id": "c7",
+      "speaker": "",
+      "text": "",
+      "choices": [
+        {
+          "id": "aoi_kairanban_remember",
+          "text": {
+            "ja": "俺が引っ張りすぎて、紙コップの底が抜けたやつな"
+          },
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 2
+          }
+        },
+        {
+          "id": "aoi_kairanban_forgot",
+          "text": {
+            "ja": "……そんなことあったっけ"
+          },
+          "goto": "c2"
+        }
+      ]
+    },
+    "c1": {
+      "id": "c1",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "そう、それ！　覚えてたんだ"
+      },
+      "expression": "happy",
+      "expressionWeight": 1,
+      "nextStepId": "merge",
+      "voiceUrl": "v_c1_5fa5014b.mp3"
+    },
+    "c2": {
+      "id": "c2",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "えー！　私は全部覚えてるのに"
+      },
+      "expression": "angry",
+      "expressionWeight": 1,
+      "nextStepId": "merge",
+      "voiceUrl": "v_c2_675e7f61.mp3"
+    },
+    "merge": {
+      "id": "merge",
+      "speaker": "アオイ",
+      "text": {
+        "ja": "じゃあ明日ね。おやすみ、タカシくん"
+      },
+      "expression": "relaxed",
+      "expressionWeight": 1,
+      "nextStepId": null,
+      "voiceUrl": "v_merge_11b8e500.mp3"
+    }
+  }
+}

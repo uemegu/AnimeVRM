@@ -1,0 +1,247 @@
+{
+  "id": "ending_emili_good",
+  "title": {
+    "ja": "GOOD END　相棒と、保留の答え"
+  },
+  "priority": 20,
+  "availability": {
+    "requireFlags": [
+      "route_emili",
+      "finale_answered"
+    ]
+  },
+  "location": "shrine",
+  "bgm": "love",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "……偽りのない本心ですね。合格です。……もっとも、お嬢様の方は、まだ答えを出す覚悟がないようですが",
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "flashEffect": "white",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s1_8ab203dd.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "god",
+      "speaker": "女神（声）",
+      "text": "……恋人としての直球ではありませんが、偽りのない本心ですね。及第点、合格です",
+      "flashEffect": "white",
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
+      "background": "shrine",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s2_34e3662b.mp3"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……相棒、ね",
+      "avatars": {
+        "emili": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s3_64ccedd1.mp3"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "わざわざメイドにブレザーのアイロンまでかけさせてきたのに",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s4_caaad486.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "え？"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……なんでもないわよ",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera",
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s6_99d6e1cc.mp3"
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "でも、合格。アンタは嘘がつけない男だもの。今のが、今のアンタの精一杯の本当なんでしょ",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "voiceUrl": "v_s7_7c5ee200.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "パパとの話し合い、ちゃんとやるわ。相棒がいるなら、ここに残る理由は十分すぎるもの",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "voiceUrl": "v_s8_eff1e038.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "だから今はそれで許してあげる。……次は、もっとちゃんとした言葉を言わせてみせるんだからね！",
+      "avatars": {
+        "emili": {
+          "motion": "pose_poke_chest"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s9_3631922a.mp3"
+    },
+    {
+      "id": "s10",
+      "text": "",
+      "choices": [
+        {
+          "id": "emili_good_harsh",
+          "text": "……手厳しいな",
+          "goto": "c1"
+        },
+        {
+          "id": "emili_good_next",
+          "text": "次は、言うよ",
+          "goto": "c2"
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "当然よ！",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Ohoho"
+        }
+      },
+      "cutin": "/cutins/emili/yaeba_grin.avif",
+      "nextSceneId": "merge",
+      "voiceUrl": "v_c1_9ecf287e.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ！　き、期待しないで待っててあげる！",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "Angry"
+        }
+      },
+      "voiceUrl": "v_c2_de19838d.mp3"
+    },
+    {
+      "id": "merge",
+      "text": "数週間後――",
+      "cutin": false,
+      "screenTransition": "fade_black",
+      "bgm": "main_bgm"
+    },
+    {
+      "id": "s14",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "お待たせ、タカシ！　セバスチャンには『図書館で勉強』って言って撒いてきたわ！",
+      "background": "painted_ground",
+      "timeOfDay": "evening",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "blush": false,
+          "motion": "Jogging",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s14_abdd15d0.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "転校の話、白紙になったんだろ？　もう逃げなくても……"
+    },
+    {
+      "id": "s16",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "脱走は脱走で楽しいのよ！　ほら、駄菓子屋の新作制覇！",
+      "avatars": {
+        "emili": {
+          "motion": "Excited"
+        }
+      },
+      "voiceUrl": "v_s16_4ed9bc03.mp3"
+    }
+  ]
+}

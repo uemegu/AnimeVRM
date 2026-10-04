@@ -1,0 +1,127 @@
+{
+  "id": "daily_library_shion_notebook",
+  "title": {
+    "ja": "学校の怪異検証記録"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afterschool"
+    ],
+    "dayRange": {
+      "from": 4,
+      "to": 20
+    },
+    "locations": [
+      "library"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d03_library"
+        }
+      ]
+    }
+  },
+  "location": "library",
+  "timeOfDay": "evening",
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "郷土資料室の机に、黒革の手帳が置きっぱなしになっている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（机に置かれた黒革の手帳。『学校の怪異現象に関する論理的検証記録』）",
+      "background": "painted_library",
+      "timeOfDay": "evening",
+      "cutin": "/cutins/items/shion_notebook.avif"
+    },
+    {
+      "id": "s2",
+      "text": "（「理科室の動く人体模型→キャスターの摩耗と床の傾斜0.3度。タカシに注油を依頼し鎮圧」「音楽室の肖像画の視線→表面の埃の乱反射。タカシの拭き取りで解決」）"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（オカルト好きなのか、否定したいのか、どっちなんだ……）"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……他人の手帳を無断で覗くとは、知的好奇心の使い所を間違えているわね",
+      "cutin": false,
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera",
+          "effectText": "shiin"
+        }
+      },
+      "camera": "medium",
+      "voiceUrl": "v_s4_ee41b309.mp3"
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_notebook_sorry",
+          "text": "ごめん。でも、俺の掃除、役に立ってたんだな",
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "daily_notebook_all",
+          "text": "怪異、全部俺が掃除で解決してない？",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ええ。あなたは優秀な清掃担当よ。……許すわ、今回だけ",
+      "avatars": {
+        "shion": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c1_8beba55f.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……それは否定しないけれど、覗いた罪は別よ",
+      "avatars": {
+        "shion": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_b01993b2.mp3"
+    }
+  ]
+}

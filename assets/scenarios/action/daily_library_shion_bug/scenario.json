@@ -1,0 +1,135 @@
+{
+  "id": "daily_library_shion_bug",
+  "title": {
+    "ja": "シオン、虫に敗北する"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 5,
+      "to": 20
+    },
+    "locations": [
+      "library"
+    ],
+    "minAffinity": {
+      "shion": 6
+    }
+  },
+  "location": "library",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "library",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "窓辺の席でシオンが本を読んでいる"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "ひっ……！？",
+      "background": "painted_library",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward",
+          "effectText": "biku",
+          "sweat": "fly4"
+        }
+      },
+      "camera": "medium",
+      "focusLines": true,
+      "voiceUrl": "v_s1_2a81ec4c.mp3"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "む、虫……！　硬い殻を持った飛行物体が……っ！",
+      "cg": "/cg/daily/shion_bug_cling.avif",
+      "voiceUrl": "v_s2_cd722e6c.mp3"
+    },
+    {
+      "id": "s3",
+      "text": "",
+      "choices": [
+        {
+          "id": "daily_bug_window",
+          "text": "（ノートで窓の外へ誘導する）もう大丈夫。飛んでった",
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "daily_bug_weak",
+          "text": "シオンにも苦手なものがあるんだな",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "…………",
+      "cg": false,
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_c1_4bc7b57e.mp3"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "み、見なかったことにしなさい！　昆虫の飛行軌道は予測不能なのよ！",
+      "avatars": {
+        "shion": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Dismissing Gesture"
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_s5_a4b195b4.mp3"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "いいから早く追い出して……！",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "tears": true
+        }
+      },
+      "end": true,
+      "voiceUrl": "v_c2_55ba38ef.mp3"
+    }
+  ]
+}
