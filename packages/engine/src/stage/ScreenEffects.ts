@@ -30,7 +30,7 @@ export class ScreenEffects {
     this.eyelidTop = this.createEyelid('top');
     this.eyelidBottom = this.createEyelid('bottom');
     this.blackout = document.createElement('div');
-    Object.assign(this.blackout.style, { position: 'absolute', inset: '0', background: '#000', opacity: '0' });
+    Object.assign(this.blackout.style, { position: 'absolute', inset: '0', background: '#000', opacity: '0', zIndex: '60' });
     this.layer.appendChild(this.blackout);
   }
 
@@ -45,6 +45,8 @@ export class ScreenEffects {
       background: '#000',
       boxShadow: '0 0 50px 30px rgba(0, 0, 0, 0.95)',
       [side]: '0',
+      // 一枚絵・カットイン（StillImages）や集中線より上で、画面全体を閉じる
+      zIndex: '60',
       transform: `translateY(${side === 'top' ? -102 : 102}%)`,
       transition: `transform ${EYELID_CLOSE_SEC}s ${EYELID_EASING}`,
       ...(side === 'top'

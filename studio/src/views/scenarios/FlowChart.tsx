@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Background, Controls, Handle, MarkerType, Position, ReactFlow, type Edge, type Node, type NodeProps, type ReactFlowInstance } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import type { CharacterBook, ScenarioPackage } from '@anime-vrm/scenario';
+import { choiceConditionFlags } from '@anime-vrm/scenario';
 import { useI18n } from '../../i18n';
 import { buildFlowEdges, layoutFlow, type FlowEdgeKind } from './flowGraph';
 import { textJa } from './scenarioEdit';
@@ -147,7 +148,7 @@ export function FlowChart({ scenario, characters, selectedId, onSelect }: { scen
       Object.keys(scene.setFlags ?? {}).forEach((f) => set.add(f));
       for (const c of scene.choices ?? []) {
         Object.keys(c.setFlags ?? {}).forEach((f) => set.add(f));
-        if (c.condition) used.add(c.condition.flag);
+        choiceConditionFlags(c.condition).forEach((f) => used.add(f));
       }
     }
     scenario.availability?.requireFlags?.forEach((f) => used.add(f));

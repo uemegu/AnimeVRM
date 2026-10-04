@@ -48,7 +48,7 @@
       "voiceUrl": "/voices/confess_intro_2.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_confess_hesitant",
+          "motion": "clasp_hands_front",
           "expression": "neutral",
           "blush": true,
           "effectText": "doki"
@@ -131,7 +131,7 @@
       "voiceUrl": "/voices/confess_love_1.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_confess_joy",
+          "motion": "Excited",
           "expression": "happy",
           "effectText": "yatta"
         }
@@ -152,7 +152,7 @@
       "voiceUrl": "/voices/confess_love_2.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_confess_heart",
+          "motion": "pose_hand_on_chest",
           "expression": "relaxed",
           "effectText": {
             "preset": "doki",
@@ -176,7 +176,7 @@
       "voiceUrl": "/voices/confess_love_hug.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_confess_hug",
+          "motion": "pose_offer_hand",
           "expression": "relaxed",
           "effectText": {
             "preset": "doki",

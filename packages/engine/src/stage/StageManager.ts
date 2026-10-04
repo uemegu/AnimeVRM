@@ -21,6 +21,7 @@ import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
 import { resolveAssetUrl } from '../utils/path';
 import { ScreenEffects } from './ScreenEffects';
+import { StillImages, type CutinSettings, type StillImageSettings } from './StillImages';
 import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
 import { HairShadowRenderer } from '../shader/HairShadow';
@@ -30,6 +31,7 @@ import { setHairRingTint } from '../shader/HairRing';
 import {
   cutStateAt,
   resolveBloomConfig,
+  resolveLocationVisuals,
   DEFAULT_AVATAR_LOOK,
   DEFAULT_BACKDROP,
   DEFAULT_CAMERA_FOV,
@@ -53,6 +55,8 @@ import { StageSpriteActor } from './StageSprite';
 import { resolveStageQuality, type StageQuality, type StageQualityLevel } from './quality';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
+/** これより短いモーションは止め絵のポーズとして扱う（待機に戻さず保つ） */
+const POSE_CLIP_MAX_SEC = 0.2;
 const CAMERA_TRANSITION_SEC = 0.6;
 /** 横からの構図：カメラと注視点を話者より少し手前に、注視点を話者の少し前（左）に置く */
 const SIDE_SHOT_FORWARD = 0.25;
@@ -218,6 +222,8 @@ export class StageManager {
   private firedOneShots = new Set<string>();
   /** 集中線・瞼・暗転（canvas の親要素に重ねる） */
   private screenEffects: ScreenEffects | null = null;
+  /** 一枚絵・カットイン（画面演出の下に重ねる） */
+  private stillImages: StillImages | null = null;
   private language: 'ja' | 'en';
   private quality: StageQuality;
   private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
@@ -243,7 +249,10 @@ export class StageManager {
     this.language = options.language ?? 'ja';
     this.quality = resolveStageQuality(options.quality);
     this.clock = new THREE.Clock();
-    if (this.canvas.parentElement) this.screenEffects = new ScreenEffects(this.canvas.parentElement);
+    if (this.canvas.parentElement) {
+      this.stillImages = new StillImages(this.canvas.parentElement);
+      this.screenEffects = new ScreenEffects(this.canvas.parentElement);
+    }
 
     // 1. シーン初期化
     this.scene = new THREE.Scene();
@@ -469,7 +478,7 @@ export class StageManager {
    */
   public setTimeOfDay(todId: TimeOfDayId): void {
     this.currentTimeOfDay = todId;
-    const preset = this.presets.timeOfDay[todId] || this.presets.timeOfDay.day;
+    const preset = resolveLocationVisuals(this.presets.timeOfDay[todId] || this.presets.timeOfDay.day, this.presets.locations[this.currentLocationId]?.stage);
 
     // 1-2. 平行光と環境光（場所の絵の光があればそちらを優先する）
     this.applyKeyLight();
@@ -586,6 +595,9 @@ export class StageManager {
     // 立ち位置・カメラは場所ごとの設定に合わせる
     this.applyCameraSettings();
     this.applyCastLayout();
+
+    // 場所固有の画作りを適用し、移動先に指定がなければ時間帯の設定へ戻す。
+    this.setTimeOfDay(this.currentTimeOfDay);
 
     // 2. 中景 (Midground: renderOrder = -1)
     if (this.midgroundMesh) {
@@ -1078,7 +1090,7 @@ export class StageManager {
     return y > 0.8 && y < 2.2 ? y : 1.4;
   }
 
-  /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す */
+  /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す（止め絵のポーズは保つ） */
   private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = '', offsetSec = 0): void {
     // モーション名（assets/animations/<名前>.fbx）のほか、URL（Studio で生成した直後の FBX など）も受け付ける
     const url = !motion ? IDLE_ANIMATION_URL : /^(blob:|data:|https?:|\/)/.test(motion) ? motion : `/animations/${motion}.fbx`;
@@ -1095,6 +1107,8 @@ export class StageManager {
       // 頭出しでは途中から再生する
       if (action && offsetSec > 0) action.time = loop ? offsetSec % action.getClip().duration : Math.min(offsetSec, action.getClip().duration);
       if (loop || !action || this.isDisposed) return;
+      // 1枚の絵から作った止め絵のポーズ（ほぼ長さのないモーション）は、待機に戻さずそのまま保つ
+      if (action.getClip().duration <= POSE_CLIP_MAX_SEC) return;
       const durationMs = Math.max(0, action.getClip().duration - action.time) * 1000;
       const timer = window.setTimeout(() => {
         this.motionReturnTimers.delete(id);
@@ -1109,6 +1123,17 @@ export class StageManager {
   public setScrollingBackground(settings: ScrollingBackgroundSettings | null): void {
     this.scrollingBackground.set(settings);
     this.applyBackdrop();
+  }
+
+  /** 一枚絵（画面いっぱい）とカットイン（端の小窓）。null で消す */
+  public setStills(cg: StillImageSettings | null, cutin: CutinSettings | null): void {
+    this.stillImages?.setCg(cg);
+    this.stillImages?.setCutin(cutin);
+  }
+
+  /** 画面に雨を降らせる（場所によらない 2D の雨） */
+  public setRain(active: boolean): void {
+    this.stillImages?.setRain(active);
   }
 
   /** 口パクさせるキャラ（話者） */
@@ -1505,6 +1530,7 @@ export class StageManager {
     this.characterFinishPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.screenEffects?.resize();
+    this.stillImages?.resize();
   }
 
   /**
@@ -1518,7 +1544,7 @@ export class StageManager {
       const delta = this.clock.getDelta();
       const elapsed = this.clock.getElapsedTime();
 
-      const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
+      const currentPreset = resolveLocationVisuals(this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day, this.presets.locations[this.currentLocationId]?.stage);
 
       // 0. カット内のタイムライン、カメラ構図の補間と、流れる背景
       if (this.getCutTime && this.cutScene) {
@@ -1612,6 +1638,7 @@ export class StageManager {
   public dispose(): void {
     this.isDisposed = true;
     this.screenEffects?.dispose();
+    this.stillImages?.dispose();
     this.motionReturnTimers.forEach((timer) => window.clearTimeout(timer));
     this.motionReturnTimers.clear();
     if (this.animationFrameId !== null) {

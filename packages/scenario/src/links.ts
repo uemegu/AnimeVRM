@@ -28,8 +28,12 @@ export function scenarioLinks(data: unknown): ScenarioLinks {
     for (const [key, child] of Object.entries(value)) {
       if (key === 'setFlags' && child && typeof child === 'object') {
         for (const [flag, v] of Object.entries(child)) if (v !== false) sets.add(flag);
-      } else if (key === 'condition' && child && typeof (child as { flag?: unknown }).flag === 'string') {
-        conditions.add((child as { flag: string }).flag);
+      } else if (key === 'condition' && child && typeof child === 'object') {
+        const condition = child as { flag?: unknown; requireFlags?: unknown; unlessFlags?: unknown };
+        if (typeof condition.flag === 'string') conditions.add(condition.flag);
+        for (const list of [condition.requireFlags, condition.unlessFlags]) {
+          if (Array.isArray(list)) for (const flag of list) if (typeof flag === 'string') conditions.add(flag);
+        }
       } else if (key !== 'availability') {
         walk(child);
       }

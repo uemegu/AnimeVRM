@@ -23,6 +23,7 @@ export const PAGES_ENTRIES: PagesEntry[] = [
   { id: 'gesture_battle', slug: 'gesture-battle' },
   { id: 'painted_classroom', slug: 'painted-classroom' },
   { id: 'painted_library', slug: 'painted-library' },
+  { id: 'painted_gym', slug: 'painted-gym', ogp: '/textures/painted-gym/thumb.avif' },
   { id: 'painted_gate', slug: 'painted-gate' },
   { id: 'shopping_street', slug: 'shopping-street', ogp: '/textures/shopping-street/thumb.avif' },
   { id: 'painted_ground', slug: 'painted-ground', ogp: '/textures/painted-ground/thumb.avif' },

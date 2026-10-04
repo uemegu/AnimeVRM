@@ -294,6 +294,123 @@
         }
       }
     },
+    "painted_gym": {
+      "id": "painted_gym",
+      "name": "体育館（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-gym/thumb.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gym",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -3,
+          "y": 2.2,
+          "z": 1.2
+        },
+        "color": "#ffd4a0",
+        "intensity": 1.2,
+        "ambient": {
+          "color": "#e2cbbb",
+          "intensity": 0.75
+        },
+        "shadow": {
+          "color": "#665348",
+          "opacity": 0.3,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 100,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.1,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          },
+          "bloom": {
+            "strength": 0.06,
+            "radius": 0.3,
+            "threshold": 1.1
+          }
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "postProcessing": {
+          "sunShafts": false,
+          "lensFlare": false,
+          "cinematic": {
+            "diffusion": {
+              "enabled": false,
+              "strength": 0.12,
+              "radius": 1.8
+            },
+            "colorGrading": {
+              "enabled": false,
+              "shadowTint": "#11103b",
+              "highlightTint": "#fa6600",
+              "strength": 0.44,
+              "contrast": 0.15,
+              "gamma": 0.95
+            },
+            "vignette": {
+              "enabled": false,
+              "offset": 1.15,
+              "darkness": 0.12,
+              "color": "#2a1418"
+            },
+            "chromaticAberration": {
+              "enabled": false,
+              "offset": 0.002
+            },
+            "adjustments": {
+              "saturation": 0,
+              "brightness": 0,
+              "contrast": 0
+            }
+          }
+        }
+      }
+    },
     "painted_classroom": {
       "id": "painted_classroom",
       "name": "教室（簡易3D）",

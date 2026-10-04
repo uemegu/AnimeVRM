@@ -24,16 +24,76 @@
     "mob_listen_nod": {
       "loop": true
     },
-    "ardy_pray": {
+    "pose_air_guitar": {
       "loop": true
     },
-    "ardy_shiver": {
+    "pose_arms_crossed_pout": {
       "loop": true
     },
-    "ardy_fan": {
+    "pose_cover_face": {
       "loop": true
     },
-    "ardy_shy_cover": {
+    "pose_drink_can": {
+      "loop": true
+    },
+    "pose_hair_sweep": {
+      "loop": true
+    },
+    "pose_hand_on_chest": {
+      "loop": true
+    },
+    "pose_hands_on_hips_proud": {
+      "loop": true
+    },
+    "pose_headlock": {
+      "loop": true
+    },
+    "pose_hide_mouth_shy": {
+      "loop": true
+    },
+    "pose_hold_hem": {
+      "loop": true
+    },
+    "pose_hug_notebook": {
+      "loop": true
+    },
+    "pose_lean_forward_peek": {
+      "loop": true
+    },
+    "pose_loosen_tie": {
+      "loop": true
+    },
+    "pose_offer_can": {
+      "loop": true
+    },
+    "pose_offer_hand": {
+      "loop": true
+    },
+    "pose_phone_call": {
+      "loop": true
+    },
+    "pose_point_go": {
+      "loop": true
+    },
+    "pose_poke_chest": {
+      "loop": true
+    },
+    "pose_pound_chest": {
+      "loop": true
+    },
+    "pose_pray_hands": {
+      "loop": true
+    },
+    "pose_raise_can": {
+      "loop": true
+    },
+    "pose_read_book": {
+      "loop": true
+    },
+    "pose_shiver_fear": {
+      "loop": true
+    },
+    "pose_stretch_legs": {
       "loop": true
     }
   }

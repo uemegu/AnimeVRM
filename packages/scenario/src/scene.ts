@@ -266,6 +266,12 @@ export const LocationCrowd = z.strictObject({
 export type LocationCrowd = z.infer<typeof LocationCrowd>;
 
 export const LocationStage = group('配置とカメラ', 'Staging & camera', {
+  /** 絵に光が含まれる場所で、時間帯の画作りが二重に重ならないよう調整する。 */
+  postProcessing: group('場所の画作り', 'Location post-processing', {
+    cinematic: PostProcessingConfig.shape.cinematic.partial().optional(),
+    sunShafts: bool('光条', 'Sun shafts').optional(),
+    lensFlare: bool('レンズフレア', 'Lens flare').optional(),
+  }).optional(),
   slots: group('立ち位置', 'Standing slots', {
     left: slot('左', 'Left', DEFAULT_SLOT_POSITIONS.left).optional(),
     center: slot('中央', 'Center', DEFAULT_SLOT_POSITIONS.center).optional(),
@@ -321,6 +327,24 @@ export const LocationStage = group('配置とカメラ', 'Staging & camera', {
 });
 export type LocationStage = z.infer<typeof LocationStage>;
 
+/** Resolve afresh from the time profile, so leaving a location restores the original look. */
+export function resolveLocationVisuals(base: TimeOfDayPreset, stage?: LocationStage): TimeOfDayPreset {
+  const local = stage?.postProcessing;
+  if (!local) return base;
+  return {
+    ...base,
+    lighting: {
+      ...base.lighting,
+      sunShafts: base.lighting.sunShafts ? { ...base.lighting.sunShafts, enabled: local.sunShafts ?? base.lighting.sunShafts.enabled } : undefined,
+      lensFlare: base.lighting.lensFlare ? { ...base.lighting.lensFlare, enabled: local.lensFlare ?? base.lighting.lensFlare.enabled } : undefined,
+    },
+    postProcessing: {
+      ...base.postProcessing,
+      cinematic: { ...base.postProcessing.cinematic, ...local.cinematic },
+    },
+  };
+}
+
 /** Location overrides inherit the time-of-day profile; no retained state between locations. */
 export function resolveBloomConfig(
   base: z.infer<typeof PostProcessingConfig>['bloom'],
@@ -334,6 +358,7 @@ export function resolveBloomConfig(
 export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
+  'builtin:painted-gym': { ja: '簡易3D 体育館', en: 'Painted gymnasium' },
   'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
   'builtin:painted-ground': { ja: '簡易3D 運動場', en: 'Painted sports ground' },
   'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },

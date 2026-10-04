@@ -3,6 +3,7 @@
  */
 import type { ScenarioChoice, ScenarioPackage, ScenarioScene } from './schema.ts';
 import { initialStageState, mergeStageState, type StageState } from './stage.ts';
+import { availableChoices, matchesChoiceCondition } from './conditions.ts';
 
 type FlagValue = boolean | number | string;
 
@@ -36,9 +37,9 @@ export class ScenarioRunner {
     return { ...this.flags };
   }
 
-  /** 今のシーンで選べる選択肢（条件に合うものだけ） */
+  /** 今のシーンで選べる選択肢（条件に合うものだけ。好感度は持たないので、好感度の条件は満たしたものとして出す） */
   get choices(): ScenarioChoice[] {
-    return (this.scene.choices ?? []).filter((c) => !c.condition || this.flags[c.condition.flag] === c.condition.value);
+    return availableChoices(this.scene.choices, { flags: this.flags }, this.scene.choiceFallback);
   }
 
   /** 次のシーンへ（選択肢を待っているときは進まない）。終わったら true */
@@ -78,6 +79,17 @@ export class ScenarioRunner {
   }
 
   private enter(index: number): void {
+    // 条件を満たさないシーンは飛ばす（好感度は持たないので、フラグの条件だけで決まる）
+    for (let guard = 0; guard < this.scenario.scenes.length; guard++) {
+      const scene = this.scenario.scenes[index];
+      if (!scene?.condition || matchesChoiceCondition(scene.condition, { flags: this.flags })) break;
+      const next = scene.end ? -1 : scene.nextSceneId ? this.scenario.scenes.findIndex((s) => s.id === scene.nextSceneId) : index + 1;
+      if (next < 0 || next >= this.scenario.scenes.length) {
+        this.finish();
+        return;
+      }
+      index = next;
+    }
     this.index = index;
     const scene = this.scenario.scenes[index];
     Object.assign(this.flags, scene.setFlags);

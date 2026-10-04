@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
-import { CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, TRACK, TREES, WING, type Planter } from './layout';
+import { BENCH, CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, TRACK, TREES, WING, type Planter } from './layout';
 
 const TEXTURES = '/textures/painted-ground';
 
@@ -99,6 +99,32 @@ function goal(x: number, z: number, facing: number): THREE.Group {
   group.add(bars('Goal | frame', frame, '#eeeadd'), bars('Goal | net', net, '#cbd1c3'));
   group.position.set(x, 0, z);
   group.rotation.y = facing;
+  return group;
+}
+
+/** Plain school sideline bench: three wooden slats, a backrest and painted steel legs. */
+function bench(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'Sideline bench | wooden slats on steel legs';
+  const { length, seatHeight } = BENCH;
+  // Lit top, shaded front, darker ends, matching the unlit painted look of the set.
+  const wood = [paint('#7a5232'), paint('#7a5232'), paint('#a97b4f'), paint('#4f3420'), paint('#8c603a'), paint('#8c603a')];
+  for (const z of [-0.12, 0, 0.12]) group.add(box('Bench | seat slat', [length, 0.035, 0.1], [0, seatHeight - 0.018, z], wood));
+  for (const y of [0.62, 0.76]) group.add(box('Bench | backrest slat', [length, 0.09, 0.03], [0, y, -0.22], wood));
+  const frame: THREE.BufferGeometry[] = [];
+  for (const x of [-length / 2 + 0.2, length / 2 - 0.2]) {
+    frame.push(new THREE.BoxGeometry(0.04, seatHeight - 0.035, 0.04).translate(x, (seatHeight - 0.035) / 2, 0.14));
+    frame.push(new THREE.BoxGeometry(0.04, 0.82, 0.04).translate(x, 0.41, -0.2));
+    frame.push(new THREE.BoxGeometry(0.04, 0.03, 0.4).translate(x, seatHeight - 0.05, -0.03));
+    frame.push(new THREE.BoxGeometry(0.04, 0.03, 0.36).translate(x, 0.08, -0.03));
+  }
+  group.add(bars('Bench | steel frame', frame, '#3f5f67'));
+  const shade = new THREE.Mesh(new THREE.PlaneGeometry(length + 0.3, 0.7).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#5b4a36', transparent: true, opacity: 0.18, depthWrite: false, toneMapped: false, fog: false }));
+  shade.name = 'Bench | ground shade';
+  shade.position.set(0.12, 0.015, 0.05);
+  group.add(shade);
+  group.position.set(BENCH.x, 0, BENCH.z);
+  group.rotation.y = BENCH.facing;
   return group;
 }
 
@@ -402,7 +428,7 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
     floor.position.y = 0.02;
     group.add(floor);
   }
-  group.add(track(), goal(-25, -24, 0), goal(-25, 20, Math.PI));
+  group.add(track(), goal(-25, -24, 0), goal(-25, 20, Math.PI), bench());
   group.add(campus(facade, side, tree));
   side.dispose(); // Only the per-wall clones are used by the meshes.
   group.add(fence([FIELD.minX, FIELD.maxZ], [FIELD.minX, FIELD.minZ], 6));

@@ -53,6 +53,8 @@ export const OUTER_VERGES: readonly Planter[] = [
 ] as const;
 
 export const CYCLE_PARKING = { minX: 57, maxX: 80, minZ: -5, maxZ: 28, roofX: 69, roofZ: 1, roofWidth: 18, roofDepth: 5.5 } as const;
+/** Sideline bench inside the east net, facing the field; scenarios seat avatars on it (seat top in metres). */
+export const BENCH = { x: 2.9, z: -6, facing: -Math.PI / 2, length: 1.8, seatHeight: 0.42 } as const;
 export const CENTRAL_TREE = { x: 31, z: -10, height: 8, base: 0.14 } as const;
 
 /** Cutout trees are separate from buildings, so their silhouettes have parallax. */
