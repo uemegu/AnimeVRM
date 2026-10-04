@@ -105,7 +105,7 @@ export function CutWorkbench({ scenario, index, baseUrl, data, outfit, onChangeS
 
   return (
     <div className="workbench">
-      <div className="scenario-frame">
+      <div className={`scenario-frame${scenario.aspect === 'portrait' ? ' portrait' : ''}`}>
         <CutPreview
           scenario={scenario}
           baseUrl={baseUrl}

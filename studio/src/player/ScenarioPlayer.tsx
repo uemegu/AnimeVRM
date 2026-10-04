@@ -6,6 +6,7 @@ import {
   resolveScrollingBackground,
   ScenarioRunner,
   type ScenarioPackage,
+  type ScreenAspect,
   type TextContent,
   type TimeOfDayId,
 } from '@anime-vrm/scenario';
@@ -56,6 +57,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   const [muted, setMuted] = useState(audioRef.current.muted);
   const [flash, setFlash] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
+  /** 画面の向き（シナリオの指定から始め、ヘッダーで切り替えられる） */
+  const [aspect, setAspect] = useState<ScreenAspect>(scenario.aspect ?? 'landscape');
   /** 今のカットに入った時刻（ムービーの尺の計算に使う） */
   const cutStartRef = useRef(0);
 
@@ -79,6 +82,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
     audio.stopVoice();
     setPhase('title');
     setStep((s) => s + 1);
+    setAspect(scenario.aspect ?? 'landscape');
   }, [scenario, audio]);
 
   const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
@@ -232,7 +236,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   };
 
   return (
-    <div className={`player${movie ? ' movie' : ''}${movie && phase === 'playing' ? ' movie-playing' : ''}`}>
+    <div className={`player${movie ? ' movie' : ''}${movie && phase === 'playing' ? ' movie-playing' : ''}${aspect === 'portrait' ? ' portrait' : ''}`}>
       <PlayerStage
         presets={presets}
         timeOfDay={timeOfDay}
@@ -253,22 +257,26 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
 
       <header className="player-header">
         {onExit && (
-          <button type="button" className="player-button" onClick={onExit}>
+          <button type="button" className="player-button" title={tp.back} onClick={onExit}>
             <Icon name="back" size={14} />
-            {tp.back}
+            <span className="player-button-label">{tp.back}</span>
           </button>
         )}
         <span className="player-title">{localize(scenario.title, language)}</span>
         <span className="player-spacer" />
         {!movie && (
-          <button type="button" className={`player-button${auto ? ' active' : ''}`} aria-pressed={auto} onClick={() => setAuto(!auto)}>
+          <button type="button" className={`player-button${auto ? ' active' : ''}`} aria-pressed={auto} title={tp.auto} onClick={() => setAuto(!auto)}>
             <Icon name="play" size={14} />
-            {tp.auto}
+            <span className="player-button-label">{tp.auto}</span>
           </button>
         )}
-        <button type="button" className={`player-button${muted ? ' active' : ''}`} aria-pressed={muted} onClick={toggleMute}>
+        <button type="button" className="player-button" title={aspect === 'portrait' ? tp.landscape : tp.portrait} onClick={() => setAspect(aspect === 'portrait' ? 'landscape' : 'portrait')}>
+          <Icon name={aspect === 'portrait' ? 'landscape' : 'portrait'} size={14} />
+          <span className="player-button-label">{aspect === 'portrait' ? tp.landscape : tp.portrait}</span>
+        </button>
+        <button type="button" className={`player-button${muted ? ' active' : ''}`} aria-pressed={muted} title={muted ? tp.muted : tp.sound} onClick={toggleMute}>
           <Icon name={muted ? 'soundOff' : 'soundOn'} size={14} />
-          {muted ? tp.muted : tp.sound}
+          <span className="player-button-label">{muted ? tp.muted : tp.sound}</span>
         </button>
         <button type="button" className="player-button" onClick={() => setLanguage(language === 'ja' ? 'en' : 'ja')}>
           {language === 'ja' ? 'EN' : 'JA'}

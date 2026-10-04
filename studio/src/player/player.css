@@ -99,6 +99,22 @@
   color: #1d4ed8;
   background: #eff6ff;
 }
+/* 縦型は幅が狭いので、ヘッダーのボタンはアイコンだけにする */
+.player.portrait .player-header .player-button {
+  min-width: 32px;
+  padding: 0 8px;
+}
+.player.portrait .player-header .player-button-label {
+  display: none;
+}
+.player.portrait .player-title {
+  max-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.player.portrait .player-spacer {
+  display: none;
+}
 .player-button.large {
   height: 40px;
   min-width: 140px;
@@ -401,6 +417,11 @@
   width: min(100cqw, 100cqh * 16 / 9, 1280px);
   height: auto;
   aspect-ratio: 16 / 9;
+}
+/* 縦型（9:16）。ショート動画と同じく高さ 1280px で止める */
+.player-view > .player.portrait {
+  width: min(100cqw, 100cqh * 9 / 16, 720px);
+  aspect-ratio: 9 / 16;
 }
 .player-list {
   height: 100%;

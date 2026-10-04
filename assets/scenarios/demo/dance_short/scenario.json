@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "dance_short",
+  "title": {
+    "ja": "踊ってみた — アオイ",
+    "en": "Dance Cover — Aoi"
+  },
+  "playMode": "movie",
+  "aspect": "portrait",
+  "description": "縦型ショート動画風のムービー。運動場で制服のアオイがダンスを踊り、斜め後ろでエミリが盛り上げる。カメラは少し上から見下ろす位置で固定。",
+  "location": "painted_ground",
+  "bgm": "action",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "dance",
+      "text": "",
+      "duration": 17,
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.42,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "dance_mixamo",
+          "motionLoop": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "transitions": [
+            {
+              "at": 14.4,
+              "motion": "ardy_victory",
+              "expression": "neutral",
+              "expressionWeight": 1
+            }
+          ]
+        },
+        "emili": {
+          "position": [
+            -1,
+            0,
+            -2.6
+          ],
+          "rotationY": 0.35,
+          "motion": "Excited",
+          "motionLoop": true,
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "aoi"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.284,
+          1.232,
+          1.872
+        ],
+        "target": [
+          -0.28,
+          0.9,
+          0
+        ],
+        "fov": 46
+      }
+    }
+  ]
+}

@@ -301,6 +301,12 @@
   background: #0f172a;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
 }
+/* 縦型（9:16）のシナリオは、高さを画面の 7 割に抑えて中央に置く */
+.scenario-frame.portrait {
+  width: min(100%, 70vh * 9 / 16);
+  aspect-ratio: 9 / 16;
+  margin-inline: auto;
+}
 .cut-preview {
   position: relative;
   width: 100%;

@@ -68,10 +68,11 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
 
   const motionHips = findMixamoNode('mixamorigHips');
   const motionHipsHeight = motionHips ? motionHips.position.y : 1;
+  // 腰の高さは基準姿勢で測る（今の姿勢で測ると、腰を落としたモーションの最中に読み込んだモーションまで低くなる）
+  const restHipsY = vrm.humanoid?.normalizedRestPose.hips?.position?.[1];
   const vrmHips = vrm.humanoid?.getNormalizedBoneNode('hips');
-  const vrmHipsY = vrmHips ? vrmHips.getWorldPosition(_vec3).y : 1;
-  const vrmRootY = vrm.scene.getWorldPosition(_vec3b).y;
-  const vrmHipsHeight = Math.abs(vrmHipsY - vrmRootY);
+  const vrmHipsHeight =
+    restHipsY ?? (vrmHips ? Math.abs(vrmHips.getWorldPosition(_vec3).y - vrm.scene.getWorldPosition(_vec3b).y) : 1);
   const hipsPositionScale = motionHipsHeight !== 0 ? vrmHipsHeight / motionHipsHeight : 1;
 
   const mixamoVRMBoneMap: Record<string, string> = {
