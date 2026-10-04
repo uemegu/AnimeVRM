@@ -31,7 +31,7 @@
       "background": "shrine",
       "timeOfDay": "evening",
       "bgm": "love",
-      "autoNextSec": 3.5,
+      "autoNextSec": 2,
       "screenTransition": "fade_black",
       "camera": "wide"
     },
@@ -51,7 +51,9 @@
           "lookAtTarget": "player"
         }
       },
-      "camera": "medium"
+      "camera": "medium",
+      "autoNextSec": 2,
+      "screenTransition": "eyelid_blink"
     },
     {
       "id": "s1_shion",
@@ -264,7 +266,7 @@
     },
     {
       "id": "s4_stop",
-      "text": "ふとシオンの足が止まる。視線の先には金魚すくいの水槽。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -293,12 +295,12 @@
         ],
         "fov": 46
       },
-      "autoNextSec": 3,
+      "autoNextSec": 2,
       "screenTransition": "fade_black"
     },
     {
       "id": "s4_jiii",
-      "text": "水面を泳ぐ色鮮やかな金魚たちを、無言でじーーっと真剣に見つめている。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -325,11 +327,12 @@
           -4.45
         ],
         "fov": 44
-      }
+      },
+      "autoNextSec": 2
     },
     {
       "id": "s4_haffu",
-      "text": "こちらが見ているのに気づき、ハッとして背筋を伸ばす。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -356,7 +359,8 @@
           -4.2
         ],
         "fov": 38
-      }
+      },
+      "autoNextSec": 2
     },
     {
       "id": "s4_betsuni",
@@ -372,11 +376,12 @@
             -4.2
           ],
           "rotationY": 0.6,
-          "motion": "Acknowledging",
-          "expression": "komari",
+          "expression": "angry",
           "expressionWeight": 1,
           "lookAtTarget": "forward",
-          "eyeWander": true
+          "eyeWander": true,
+          "motionLoop": false,
+          "sweat": "jito"
         }
       },
       "cameraPose": {
@@ -495,38 +500,6 @@
       "voiceWhisper": true
     },
     {
-      "id": "s5_kizuku",
-      "text": "こちらがそのニコニコ顔をじっと見つめているのに気づき、慌てて咳払いをして真顔に戻る。",
-      "avatars": {
-        "shion": {
-          "position": [
-            -1.35,
-            0,
-            -4.2
-          ],
-          "rotationY": 0.6,
-          "motion": "Standing Idle",
-          "expression": "surprised",
-          "expressionWeight": 1,
-          "lookAtTarget": "player",
-          "effectText": "biku"
-        }
-      },
-      "cameraPose": {
-        "position": [
-          -0.84,
-          1.389,
-          -3.087
-        ],
-        "target": [
-          -1.35,
-          1.3,
-          -4.2
-        ],
-        "fov": 38
-      }
-    },
-    {
       "id": "s5_level",
       "speaker": "シオン",
       "speakerCharacterId": "shion",
@@ -562,38 +535,6 @@
       }
     },
     {
-      "id": "s5_niyaniya",
-      "text": "微笑ましくてニヤニヤしていると、シオンが頬を赤らめて睨んでくる。",
-      "avatars": {
-        "shion": {
-          "position": [
-            -1.35,
-            0,
-            -4.2
-          ],
-          "rotationY": 0.6,
-          "motion": "ardy_proud",
-          "expression": "angry",
-          "expressionWeight": 1,
-          "lookAtTarget": "player",
-          "blush": true
-        }
-      },
-      "cameraPose": {
-        "position": [
-          -0.84,
-          1.389,
-          -3.087
-        ],
-        "target": [
-          -1.35,
-          1.3,
-          -4.2
-        ],
-        "fov": 38
-      }
-    },
-    {
       "id": "s5_nanyo",
       "speaker": "シオン",
       "speakerCharacterId": "shion",
@@ -611,7 +552,8 @@
           "expression": "angry",
           "expressionWeight": 1,
           "lookAtTarget": "player",
-          "anger": true
+          "anger": true,
+          "sweat": "jito"
         }
       },
       "cameraPose": {
@@ -630,7 +572,7 @@
     },
     {
       "id": "s6_don",
-      "text": "川の向こうから、ドーン！と夜空を揺らす重低音。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -664,7 +606,7 @@
       },
       "seUrl": "/se/firework.mp3",
       "bgm": "silence",
-      "autoNextSec": 3.2
+      "autoNextSec": 2
     },
     {
       "id": "s6_hanabi",
@@ -738,7 +680,7 @@
     },
     {
       "id": "s7_saku",
-      "text": "川面の向こうに次々と大輪の花火が咲き乱れ、鮮やかな光がシオンの横顔を照らし出す。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -768,7 +710,7 @@
       },
       "bgm": "main_theme",
       "screenTransition": "fade_black",
-      "autoNextSec": 4
+      "autoNextSec": 2
     },
     {
       "id": "s7_mugon",
@@ -805,7 +747,7 @@
     },
     {
       "id": "s7_futari",
-      "text": "提灯の明かりと夜空の花火に包まれながら、静かな二人の時間が流れる。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -833,11 +775,11 @@
         ],
         "fov": 52
       },
-      "autoNextSec": 4.5
+      "autoNextSec": 2
     },
     {
       "id": "s8_saigo",
-      "text": "最後の特大花火が夜空いっぱいに消えていき、シオンがふとこちらを振り返る。",
+      "text": "",
       "avatars": {
         "shion": {
           "position": [
@@ -865,7 +807,7 @@
         ],
         "fov": 46
       },
-      "autoNextSec": 3.5
+      "autoNextSec": 1
     },
     {
       "id": "s8_rainen",
@@ -906,6 +848,11 @@
       },
       "end": true,
       "voiceWhisper": true
+    },
+    {
+      "id": "s27",
+      "text": "",
+      "screenTransition": "eyelid_close"
     }
   ]
 }

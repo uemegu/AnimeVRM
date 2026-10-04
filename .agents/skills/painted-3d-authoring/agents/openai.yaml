@@ -1,0 +1,3 @@
+interface:
+  display_name: "簡易3D背景の制作"
+  short_description: "元絵の描き込みを保ち、左右・後方から撮れる簡易3D背景を制作する"
