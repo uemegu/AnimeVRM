@@ -35,3 +35,20 @@
 .studio.has-ambient .studio-sidebar::before {
   display: none;
 }
+
+/* 再生画面の枠の外ににじむ舞台の光（すりガラス越し） */
+.stage-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.stage-glow canvas {
+  position: absolute;
+  inset: -80px;
+  width: calc(100% + 160px);
+  height: calc(100% + 160px);
+  filter: blur(36px) saturate(1.35) brightness(1.04);
+  animation: studio-ambient-in 0.8s ease both;
+}
