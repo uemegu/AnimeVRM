@@ -389,8 +389,18 @@
 }
 
 /* Studio の再生画面 */
+/* プレイヤーは 16:9 の枠に収めて中央に置く。大きくしすぎると粗さが目立つので幅 1280px で止める */
 .player-view {
   height: 100%;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.player-view > .player {
+  width: min(100cqw, 100cqh * 16 / 9, 1280px);
+  height: auto;
+  aspect-ratio: 16 / 9;
 }
 .player-list {
   height: 100%;
