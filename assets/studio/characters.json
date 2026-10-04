@@ -332,32 +332,6 @@
         "direction": ""
       },
       "profile": "陽気な商店街のおじさん。"
-    },
-    {
-      "id": "test",
-      "name": {
-        "ja": "test",
-        "en": ""
-      },
-      "role": "sub",
-      "themeColor": "#64748b",
-      "models": [
-        {
-          "key": "default",
-          "label": {
-            "ja": "通常"
-          },
-          "url": "/models/AvatarSample_A.vrm"
-        },
-        {
-          "key": "banny",
-          "label": {
-            "ja": "バニー"
-          },
-          "url": "/models/AvatarSample_E.vrm"
-        }
-      ],
-      "profile": ""
     }
   ],
   "voiceMoods": {
