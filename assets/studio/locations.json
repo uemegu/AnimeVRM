@@ -23,7 +23,7 @@
     },
     "courtyard": {
       "id": "courtyard",
-      "name": "中庭",
+      "name": "中庭（簡易3D）",
       "isIndoor": false,
       "thumbnail": "/textures/painted-ground/thumb-courtyard.avif",
       "layers": {
