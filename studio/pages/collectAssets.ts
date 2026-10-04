@@ -31,6 +31,7 @@ const BUILTIN_ENVIRONMENTS: Record<string, string> = {
   'builtin:painted-classroom': 'textures/painted-classroom',
   'builtin:painted-library': 'textures/painted-library',
   'builtin:painted-gate': 'textures/painted-gate',
+  'builtin:painted-ground': 'textures/painted-ground',
   'builtin:painted-seaside': 'textures/painted-seaside',
 };
 
@@ -61,6 +62,9 @@ export function collectPagesAssets(assetsDir: string, scenarioIds: string[], ext
     for (const layer of Object.values(location.layers ?? {}) as Json[]) addUrl(layer?.url);
     const model = location.environment?.model as string | undefined;
     if (model) found.add(BUILTIN_ENVIRONMENTS[model] ?? strip(model));
+    if (model === 'builtin:painted-ground') {
+      found.add('textures/painted-gate/tile-paving.avif');
+    }
   };
   const addMotion = (motion: string | undefined) => {
     if (motion) found.add(`animations/${motion}.fbx`);

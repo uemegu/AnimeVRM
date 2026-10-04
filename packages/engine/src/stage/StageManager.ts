@@ -837,8 +837,10 @@ export class StageManager {
     this.applyBloom();
     this.applyCharacterLook();
     const fov = this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
-    if (this.camera.fov !== fov) {
+    const far = this.locationStage?.camera?.far ?? 100;
+    if (this.camera.fov !== fov || this.camera.far !== far) {
       this.camera.fov = fov;
+      this.camera.far = far;
       this.camera.updateProjectionMatrix();
     }
     this.updateCameraTarget();
