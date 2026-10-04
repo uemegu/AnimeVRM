@@ -7,7 +7,7 @@
  *   npm run shot -- demo/test_demo --scene s3 --time 2.5 -o out.png
  *   npm run shot -- demo/test_demo --file draft.json 保存していない JSON を撮る（相対パスの基準は <種類>/<ID> のディレクトリ）
  *
- * そのほか: --outfit default|private|commute、--width / --height（既定 1280x720）、--no-dialogue（セリフ枠を消す）、
+ * そのほか: --outfit default|private|commute、--width / --height（既定 1280x720。縦型のシナリオは 720x1280）、--no-dialogue（セリフ枠を消す）、
  * --no-hud（左上の場所・時間帯・構図の表示を消す）、--settle 秒（読み込み後に待つ時間。既定 1.5）、
  * --url http://127.0.0.1:5175/（起動中の Studio の開発サーバーを使う）、--headed
  *
@@ -29,8 +29,8 @@ const { values: options, positionals } = parseArgs({
     output: { type: 'string', short: 'o' },
     file: { type: 'string' },
     outfit: { type: 'string', default: 'default' },
-    width: { type: 'string', default: '1280' },
-    height: { type: 'string', default: '720' },
+    width: { type: 'string' },
+    height: { type: 'string' },
     'no-dialogue': { type: 'boolean', default: false },
     'no-hud': { type: 'boolean', default: false },
     settle: { type: 'string', default: '1.5' },
@@ -55,7 +55,7 @@ if (!category || !id) fail('シナリオは <種類>/<ID> で指定してくだ�
 if (category === 'call' || category === 'mail') fail('電話・メールは撮影できません');
 const scenarioFile = options.file ? path.resolve(options.file) : path.join(REPO_ROOT, 'assets/scenarios', category, id, 'scenario.json');
 if (!fs.existsSync(scenarioFile)) fail(`シナリオがありません: ${path.relative(REPO_ROOT, scenarioFile)}`);
-const scenario = JSON.parse(fs.readFileSync(scenarioFile, 'utf8')) as { scenes?: { id: string }[] };
+const scenario = JSON.parse(fs.readFileSync(scenarioFile, 'utf8')) as { scenes?: { id: string }[]; aspect?: string };
 const scenes = scenario.scenes ?? [];
 if (scenes.length === 0) fail('シーンがありません');
 
@@ -71,8 +71,9 @@ if (options.output && indices.length !== 1) fail('-o は1カットだけ撮る�
 
 const time = Number(options.time);
 const settleMs = Number(options.settle) * 1000;
-const width = Number(options.width);
-const height = Number(options.height);
+const portrait = scenario.aspect === 'portrait';
+const width = Number(options.width ?? (portrait ? 720 : 1280));
+const height = Number(options.height ?? (portrait ? 1280 : 720));
 if (![time, settleMs, width, height].every(Number.isFinite)) fail('--time・--settle・--width・--height は数値で指定してください');
 if (!['default', 'private', 'commute'].includes(options.outfit)) fail('--outfit は default / private / commute のいずれかです');
 

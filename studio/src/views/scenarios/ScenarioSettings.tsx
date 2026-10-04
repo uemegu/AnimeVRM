@@ -51,6 +51,13 @@ export function ScenarioSettings({ scenario, data, onChange }: { scenario: Scena
         {scenario.playMode === 'movie' && <span className="field-hint">{t.scenarios.movieHint}</span>}
       </label>
       <label className="field">
+        <span className="field-label">{t.scenarios.meta.aspect}</span>
+        <select className="select" value={scenario.aspect ?? 'landscape'} onChange={(e) => set('aspect', e.target.value === 'portrait' ? 'portrait' : undefined)}>
+          <option value="landscape">{t.scenarios.aspects.landscape}</option>
+          <option value="portrait">{t.scenarios.aspects.portrait}</option>
+        </select>
+      </label>
+      <label className="field">
         <span className="field-label">{t.scenarios.meta.location}</span>
         <select className="select" value={scenario.location ?? ''} onChange={(e) => set('location', e.target.value || undefined)}>
           <option value="">—</option>

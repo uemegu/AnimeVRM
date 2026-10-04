@@ -353,6 +353,14 @@ export const ActionLocationHint = z.strictObject({
 export const PlayMode = z.enum(['game', 'movie']);
 export type PlayMode = z.infer<typeof PlayMode>;
 
+/**
+ * 画面の向き
+ * - landscape: 横型（16:9）
+ * - portrait: 縦型（9:16。ショート動画向け）
+ */
+export const ScreenAspect = z.enum(['landscape', 'portrait']);
+export type ScreenAspect = z.infer<typeof ScreenAspect>;
+
 /** 通常シナリオ（scenario.json の中身） */
 export const ScenarioPackage = z.strictObject({
   /** 形式の版。省略時は 1 */
@@ -361,6 +369,8 @@ export const ScenarioPackage = z.strictObject({
   title: TextContent,
   /** 省略時は game */
   playMode: PlayMode.optional(),
+  /** 再生画面の向き。省略時は landscape（再生画面でも切り替えられる） */
+  aspect: ScreenAspect.optional(),
   /** 一覧に出す紹介文 */
   description: TextContent.optional(),
   /** 舞台の場所。場所選択を経ずに始まるシナリオの背景に使う */
