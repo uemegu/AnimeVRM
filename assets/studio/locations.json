@@ -738,6 +738,78 @@
           "offsetY": 1
         }
       }
+    },
+    "shopping_street_3d": {
+      "id": "shopping_street_3d",
+      "name": "商店街（簡易3D）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:shopping-street",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#526690",
+          "opacity": 0.5,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 180,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.25,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        }
+      },
+      "thumbnail": "/textures/shopping-street/thumb.avif"
     }
   }
 }

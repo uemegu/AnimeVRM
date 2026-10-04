@@ -338,6 +338,7 @@ export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-ground': { ja: '簡易3D 運動場', en: 'Painted sports ground' },
   'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },
   'builtin:painted-festival': { ja: '簡易3D 夏祭り', en: 'Painted summer festival' },
+  'builtin:shopping-street': { ja: '簡易3D 商店街', en: 'Shopping street' },
 } as const;
 
 export const LocationEnvironment = group('3D背景', '3D set', {
