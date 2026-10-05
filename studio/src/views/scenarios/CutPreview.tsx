@@ -8,7 +8,7 @@ import {
   type ScenarioPackage,
   type TimeOfDayId,
 } from '@anime-vrm/scenario';
-import type { StagePresets } from '@anime-vrm/engine/stage/StageManager';
+import type { StageManager, StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import type { StudioData } from '../../data/useStudioData';
 import { useI18n } from '../../i18n';
 import { StageCanvas } from '../../stage/StageCanvas';
@@ -30,12 +30,14 @@ interface Props {
   onCameraPose: (pose: CameraPose) => void;
   /** 変わるたびに、手で動かしたカメラを構図の位置へ戻す */
   viewResetKey?: number;
+  /** 描画（StageManager）を受け取る（撮影ツールで構図を確かめる） */
+  onManager?: (manager: StageManager | null) => void;
 }
 
 /**
  * カットの見え方（app と同じ描画）。先頭からこのカットまでの指定を引き継いだ舞台を映す
  */
-export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose, viewResetKey }: Props) {
+export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose, viewResetKey, onManager }: Props) {
   const { t } = useI18n();
   const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
   const scene = scenario.scenes[index];
@@ -56,7 +58,7 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
 
   const locationId = stage.background ?? scenario.location ?? 'classroom';
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
-  const shot = resolveCameraShot(scene ?? null, cast);
+  const shot = resolveCameraShot(scene ?? null, cast, stage);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
   const speaker = textJa(scene?.speaker) || (scene?.speakerCharacterId ? data.characters.characters.find((c) => c.id === scene.speakerCharacterId)?.name.ja : '');
 
@@ -80,6 +82,7 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
         freeCamera={freeCamera}
         onCameraPose={onCameraPose}
         viewResetKey={viewResetKey}
+        onManager={onManager}
       />
       {scene && scenario.playMode !== 'movie' && (textJa(scene.text) || scene.choices?.length) ? (
         <div className="cut-dialogue">

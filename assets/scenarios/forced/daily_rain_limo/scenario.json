@@ -16,7 +16,7 @@
       "to": 20
     }
   },
-  "location": "school_gate",
+  "location": "entrance_rain",
   "timeOfDay": "evening",
   "consumesTurn": true,
   "scenes": [
@@ -25,9 +25,8 @@
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "うわー、土砂降り。傘置いてきちゃった",
-      "background": "painted_gate",
-      "timeOfDay": "evening",
-      "rain": true,
+      "background": "entrance_rain",
+      "timeOfDay": "rainy",
       "avatars": {
         "aoi": {
           "position": "left",
@@ -52,6 +51,7 @@
         }
       },
       "camera": "wide",
+      "ambience": "/se/rain_loop.mp3",
       "voiceUrl": "v_s1_90727ce2.mp3"
     },
     {

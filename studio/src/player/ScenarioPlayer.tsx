@@ -102,7 +102,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   );
   const locationId = stage.background ?? scenario.location ?? 'classroom';
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
-  const shot = resolveCameraShot(scene, cast);
+  const shot = resolveCameraShot(scene, cast, stage);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
 
   /** '/' で始まらないファイルはシナリオのディレクトリから */
@@ -249,7 +249,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         cg={stage.cg}
         cutin={stage.cutin}
         rain={stage.rain}
-        cut={phase === 'playing' ? scene : null}
+        cut={phase === 'playing' ? { ...scene, screenTransition: stage.screenTransition } : null}
         language={language}
         getCutTime={() => audio.getVoiceTime()}
         getSpeakerPhoneme={() => audio.getPhoneme()}

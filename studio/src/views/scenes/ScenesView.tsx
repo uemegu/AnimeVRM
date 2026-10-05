@@ -254,6 +254,7 @@ export function ScenesView() {
               images={images}
               environments={environments}
               openDepth={tab === 'locations' ? 2 : 0}
+              hidden={tab === 'locations' ? ['id', 'seats'] : undefined}
             />
           )}
         </section>

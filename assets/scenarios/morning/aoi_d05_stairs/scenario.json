@@ -38,7 +38,7 @@
       "scrollingBackground": {
         "speed": 1.2
       },
-      "camera": "medium",
+      "camera": "side",
       "voiceUrl": "v_s1_7528c79d.mp3"
     },
     {

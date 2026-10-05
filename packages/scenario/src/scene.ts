@@ -30,8 +30,8 @@ const group = <T extends z.core.$ZodLooseShape>(ja: string, en: string, shape: T
 const vec3 = (ja: string, en: string, min: number, max: number, step: number) =>
   group(ja, en, { x: num('X', 'X', min, max, step), y: num('Y', 'Y', min, max, step), z: num('Z', 'Z', min, max, step) });
 
-/** 時間帯（光の設定）。indoor_dark は暗い店内など、外の明るさとの対比を見せる室内 */
-export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'indoor_dark', 'divine'] as const;
+/** 時間帯（光の設定）。rainy は雨雲の下の薄暗さ、indoor_dark は暗い店内など、外の明るさとの対比を見せる室内 */
+export const TIME_OF_DAY_IDS = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark', 'divine'] as const;
 export const TimeOfDayId = z.enum(TIME_OF_DAY_IDS);
 export type TimeOfDayId = z.infer<typeof TimeOfDayId>;
 
@@ -412,6 +412,27 @@ export const LocationWind = group('風', 'Wind', {
 });
 export type LocationWind = z.infer<typeof LocationWind>;
 
+/** 席のカメラ（構図ごと。座っているキャラは立ち姿の高さで構図を決めると外れるので、席ごとに決める） */
+const SeatCamera = z.strictObject({
+  position: z.tuple([z.number(), z.number(), z.number()]),
+  target: z.tuple([z.number(), z.number(), z.number()]),
+  fov: z.number().positive().optional(),
+});
+
+/**
+ * 座れる席（机に肘をつく・ベンチに座るなど）。座りのモーションはこの席の位置でだけ使う（GEMINI.md）。
+ * 台本では `<キャラ>.seat=<席の ID>` で座らせる（app/scripts/compile-script.py）
+ */
+export const LocationSeat = z.strictObject({
+  name: z.string(),
+  position: z.tuple([z.number(), z.number(), z.number()]),
+  rotationY: z.number().optional(),
+  /** この席で使う座りのモーション */
+  motion: z.string(),
+  cameras: z.strictObject({ close: SeatCamera.optional(), medium: SeatCamera.optional(), wide: SeatCamera.optional() }).optional(),
+});
+export type LocationSeat = z.infer<typeof LocationSeat>;
+
 export const LocationVisualPreset = z.strictObject({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
   name: z.string().meta(label('名前', 'Name')),
@@ -442,6 +463,8 @@ export const LocationVisualPreset = z.strictObject({
   light: LocationLight.optional(),
   wind: LocationWind.optional(),
   stage: LocationStage.optional(),
+  /** 座れる席（キー: 席の ID。シナリオの座りのモーションの位置の確認に使う） */
+  seats: z.record(z.string().regex(/^[a-z][a-z0-9_]*$/), LocationSeat).optional(),
 });
 export type LocationVisualPreset = z.infer<typeof LocationVisualPreset>;
 

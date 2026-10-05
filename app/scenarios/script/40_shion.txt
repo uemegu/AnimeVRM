@@ -1,0 +1,627 @@
+#################### シオン 導入 Day 1〜10
+
+=== action shion_d01_library | あなた、呪われてるの？
+priority: 5
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 1, "to": 3}, "locations": ["library"], "after": {"all": [{"scenarioId": "prologue_day1"}]}}
+hint: library | shion | 図書室なら、神社のことが分かるかもしれない
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; time=evening; shion.seat=library_desk; shion.expr=neutral; shion.look=forward; cam=wide
+player: ５秒……天罰……雷……黒焦げ……どうすりゃいいんだ……
+shion: ……静かにしなさい
+player: うわっ！？ {cam=medium}
+shion: 図書委員長の月詠よ。同じクラスでしょう。……図書室で独り言を言う人、初めて見たわ
+shion: それと、その棚。抜いた本は元の順番に戻して {shion.expr=komari}
+player: あ、悪い……。なあ月詠、こういうの詳しい？　裏山の神社の……雷を落とす神様の話とか {shion.expr=neutral}
+shion: ……裏山なら、『５秒様』ね
+player: ご、５秒様！？ {cutin=/cutins/items/legend_book.avif}
+shion: 煮え切らない者に雷を落とす、って言い伝え。今じゃ小学生が肝試しに使うだけの怪談よ {cutin=off}
+shion: ……怪談を聞いた人の顔じゃないわね。どうしたの？ {shion.look=camera; cam=close}
+?
+> shion_d01_honest | ……信じてもらえないと思うけど、今朝、神社で（正直に話す） | c1 | flags=shion_c01 | aff=shion:3
+> shion_d01_homework | いや、ちょっと課題で調べてて | c2 | aff=shion:1
+*c1
+shion: …… {shion.expr=surprised; cam=medium}
+shion: 光る女の人が、２１日後に雷を落とすと言った。……自分で言ってて、おかしいと思わない？ {shion.expr=komari}
+player: 思うよ！　思うけど……
+-> merge
+*c2
+shion: 課題で調べる人は、そんな青い顔で本を抱えないわ {shion.expr=neutral; cam=medium}
+player: ……はい。実は、今朝……
+*merge
+shion: 信じたわけじゃないわ。……ただ、５秒様の記録は、この図書室にはほとんど残っていないの。私がいくら探しても {shion.expr=neutral; shion.look=forward}
+shion: あなたの話が本当なら、記録に残っていない何かが、まだあの神社にあることになる {shion.look=camera}
+: （シオンが手帳を開き、今日の日付を書き込む） {cutin=/cutins/items/shion_notebook.avif}
+shion: ２１日後まで、記録をつけさせてもらうわ。――被験者タカシ。あなたが黒焦げになるかどうかも含めて {cutin=off; shion.expr=nima; cam=close}
+player: ひ、被験者！？　縁起でもないこと書くなよ！？ {cam=medium}
+
+=== action shion_d03_library | 埃の海と古文書の鍵
+priority: 5
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 3, "to": 5}, "locations": ["library"], "after": {"all": [{"scenarioId": "shion_d01_library"}]}}
+hint: library | shion | シオンが図書室の奥で誰かを待っている
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; time=evening; shion.seat=library_desk; shion.expr=neutral; shion.look=camera; cam=medium
+shion: 神社の金色の光、自称女神、５秒、２１日。……実に非論理的ね
+player: 俺だって嘘なら笑い飛ばしたいよ！
+teacher: おーいシオン、施錠の時間……って、タカシもいるのか。新興宗教の勧誘なら職員室でやってね {shion.pos=right; shion.motion=Standing Idle; teacher.pos=left; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=camera; cam=wide}
+shion: 先生。郷土資料室の『社寺旧記』を閲覧させていただけませんか {shion.look=teacher}
+teacher: あー、あの部屋ねえ。前の担当がずぼらでさ、五年は手つかず。埃とカビで誰も寄り付かないのよ {teacher.expr=komari; teacher.look=shion; cam=medium}
+player: ……五年？　埃とカビ？
+: （ゴゴゴゴゴ……） {cutin=/cutins/takashi/dark_aura.avif; teacher.look=camera; shion.look=camera; shion.fx=biku; cam=wide}
+?
+> shion_d03_clean | 先生、俺にその部屋を掃除させてください | c1 | flags=shion_c02 | aff=shion:2
+> shion_d03_later | ……いや、今日はちょっと | c2
+*c1
+teacher: へえ。綺麗にしてくれたら、旧記はシオンに好きに読ませてあげる {cutin=off; teacher.expr=nima; teacher.motion=Antada}
+-> merge
+*c2
+teacher: じゃ、古文書の話はナシね {cutin=off; teacher.expr=neutral; teacher.motion=Dismissing Gesture}
+shion: ……タカシ {shion.expr=angry; shion.fx=shiin; cam=close}
+player: やります！！ {focus}
+*merge
+player: 窓のサッシ、溝が真っ黒だ…… {cg=/cg/shion/dusty_archive.avif; trans=fade_black; teacher.out}
+shion: ……筆箱に、そんなものが入ってるの？ {cg=off; cutin=/cutins/items/thin_spatula.avif; shion.pos=center; shion.expr=surprised; shion.motion=Standing Idle; shion.look=camera; cam=medium}
+player: 隙間掃除用の極薄ヘラ。刃厚0.3ミリ。どんな隙間にも入る
+shion: あなた、本当にわけがわからない人ね {cutin=off; shion.expr=relaxed; shion.motion=pose_hug_notebook}
+
+=== holiday shion_d06_parfait | メガ盛りパフェの秘密
+priority: 5
+location: shopping_street
+time: day
+avail: {"timeSlots": ["holiday"], "dayRange": {"from": 6, "to": 7}, "locations": ["shopping_street"], "after": {"all": [{"scenarioId": "shion_d01_library"}]}}
+hint: shopping_street | shion | 商店街の甘味処で、見覚えのある横顔を見たらしい
+bgm: sunlight_on_cobblestones
+---
+player: （……あれ、シオンか？　なんだあの幸せそうな顔……） {bg=shopping_street_3d; cg=/cg/shion/parfait_melt.avif}
+: （ピキッ） {cg=/cg/shion/parfait_freeze.avif}
+: （数十秒後、店から出てきたシオン） {cg=off; trans=fade_black}
+shion: ……ちょっと来て {shion.pos=center; shion.expr=angry; shion.blush; shion.motion=Standing Idle; shion.look=camera; cam=medium}
+shion: ……見たわね {shion.fx=shiin; cam=close}
+player: いや、すごく美味そうに食うんだなと――
+shion: 忘れなさい。記憶から抹消して。……他言無用よ。言ったら、あなたの調査データを全部シュレッダーにかけるわ {shion.motion=Antada}
+?
+> shion_d06_human | 甘いもの好きなの、別に悪いことじゃないだろ。普段より人間らしくていいと思う | c1 | flags=shion_c03 | aff=shion:3
+> shion_d06_mimic | 『ん〜〜っ！』って言ってたよな | c2 | aff=shion:-1
+*c1
+shion: ……余計なお世話よ。甘味は脳の栄養補給なの。……それだけよ {shion.expr=komari; shion.look=forward; shion.motion=Standing Idle}
+-> merge
+*c2
+shion: …………っ！！ {shion.anger; shion.expr=angry; shion.fx=iraira}
+shion: 次の調査、覚えておきなさい {shion.motion=Dismissing Gesture}
+*merge
+shion: ……あなたしか知らないのよ、このこと。だから――本当に、誰にも言わないで {shion.anger=0; shion.expr=komari; shion.look=camera; shion.motion=clasp_hands_front; cam=close}
+
+=== holiday shion_d07_shrine | 石碑と局地的な雨
+priority: 5
+location: shrine
+time: day
+avail: {"timeSlots": ["holiday"], "days": [7], "locations": ["shrine"], "after": {"all": [{"scenarioId": "shion_d03_library"}]}}
+hint: shrine | shion | シオンが神社の現地調査をすると言っていた
+---
+@ bg=shrine; time=day; shion.pos=center; shion.expr=neutral; shion.motion=pose_hug_notebook; shion.look=forward; cam=medium
+shion: 『五秒の刻、誠の心を以て約すべし』……古い神事の記録がもとになってるようね
+player: 誠の心……
+shion: まずいわ、ノートが―― {rain; time=rainy; bg=shrine_rain; shion.expr=surprised; shion.motion=pose_hug_notebook; shion.item=notebook; shion.fx=biku; shion.look=camera; focus; se=/se/sudden_rain.mp3; ambience=/se/rain_loop.mp3}
+?
+> shion_d07_jacket | （ウインドブレーカーをノートの上に広げる）社務所の軒下まで走るぞ！ | merge | flags=shion_c04 | aff=shion:2
+> shion_d07_run | とりあえず走れ！ | c2
+*c2
+shion: ……字がにじんだわ {shion.expr=komari; shion.motion=Standing Idle}
+*merge
+shion: ……バカな人。自分が濡れてるじゃない {scroll=off; shion.fast=0; cg=/cg/shion/eaves_rain.avif}
+player: ノートもシオンも濡れなきゃいいだろ
+shion: ……被験者に風邪をひかれたら、検証が滞るのよ
+: （シオンはノートを胸に抱え直し、雨が止むまでこちらを見なかった）
+shion: ……おかしいわね。今日の降水確率、ゼロパーセントだったのに {cg=off; shion.pos=center; shion.motion=pose_hug_notebook; shion.expr=neutral; shion.look=forward; shion.blush; cam=medium}
+
+=== action shion_d09_ladder | 点検済みの脚立
+priority: 5
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 8, "to": 10}, "locations": ["library"], "after": {"all": [{"scenarioId": "shion_d03_library"}]}}
+hint: library | shion | 郷土資料室の灯りがついている
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; time=evening; shion.pos=center; shion.expr=relaxed; shion.motion=Standing Idle; shion.look=camera; cam=medium
+shion: 見違えたわね。あなたの掃除への執念、少し異常よ
+player: 脚立もネジ締め直しといたぞ
+shion: 最上段の地誌、取ってくるわ {shion.look=forward}
+: （キリキリッ……ガタッ） {cg=/cg/shion/ladder_fall.avif; focus; shion.out; se=/se/stepladder_metal_clank.mp3}
+shion: ………… {name=シオン}
+shion: ……ど、どきなさいよ！　重いわ……！　じゃなくて、私が重いでしょう！？
+?
+> shion_d09_hurt | 怪我ないか？ | c1 | flags=shion_c05 | aff=shion:3
+> shion_d09_light | いや、軽かったぞ | c2 | aff=shion:1
+*c1
+shion: ……ないわよ。あなたが勝手に下敷きになったんだから。……礼は言わないわよ {cg=off; shion.pos=center; shion.expr=komari; shion.blush; shion.motion=Standing Idle; shion.look=forward; cam=medium}
+-> merge
+*c2
+shion: ……『重い』よりはマシだけど、デリカシーはゼロね {cg=off; shion.pos=center; shion.expr=angry; shion.blush; shion.motion=Standing Idle; shion.look=camera; cam=medium}
+*merge
+shion: ……おかしいわ。あなた、脚立は点検したって言ったわよね {shion.blush=0; shion.expr=neutral; shion.look=camera; shion.motion=pose_hug_notebook}
+player: ああ、ネジもきっちり
+: （シオンが無言で、ノートに何かを書き込んでいる） {shion.look=forward}
+
+=== mail shion_d09_mail | 本日の事象検証メモ
+character: shion
+priority: 5
+preview: 本日の事象検証メモ
+time: 23:12
+avail: {"after": {"all": [{"scenarioId": "shion_d09_ladder", "sameDay": true}]}}
+---
+shion 23:10: 本日の事象検証メモ
+shion 23:10: １：脚立の金具の緩み。点検済みという証言と矛盾。要再検証
+shion 23:11: ２：被験者の反射神経を高く評価。怪我はなかったかしら
+shion 23:11: ３：接触時、あなたの胸板が予想以上に硬かったことは想定外だった
+shion 23:12: ……変な意味ではないから。他言無用よ
+> shion_d09_mail_fine | 怪我はないよ。シオンも無事でよかった | | aff=shion:2
+  shion 23:14: ……ええ。明日も資料室で
+  shion 23:14: [stamp=/stamps/shion/owl_bow.avif]
+> shion_d09_mail_three | ３は記録しなくてよかったんじゃ | | aff=shion:1
+  shion 23:14: データは正確に残すものよ
+  shion 23:14: [stamp=/stamps/shion/owl_blank.avif]
+
+#################### シオン 展開期 Day 11〜21
+
+=== forced shion_d11_kura | 閉ざされた神輿蔵
+priority: 30
+consumesTurn: true
+location: shrine
+time: evening
+avail: {"timeSlots": ["afterschool"], "days": [11], "requireFlags": ["route_shion"]}
+---
+@ bg=shrine; time=evening; shion.pos=center; shion.expr=neutral; shion.motion=Standing Idle; shion.look=camera; cam=medium
+shion: 昔の神事の奉納札が、この奥にあるかもしれないの
+: （ビュウッ――バタンッ。……ガチャン） {cg=/cg/shion/kura_dark.avif; trans=fade_black; shion.out; focus; se=/se/strong_gust.mp3}
+player: ……開かない！　外の閂が下りたのか！？
+shion: スマホ……圏外。この土壁、電波を通さないんだわ
+shion: …………
+player: シオン？
+shion: ……暗いの、嫌いなの。お化けなんていないって分かってるのに、昔から、暗闇だけは……
+?
+> shion_d11_penlight | （ペンライトを灯して、少し間を空けて隣に座る）大丈夫だ。俺がずっとここにいる | c1 | flags=shion_c06 | aff=shion:3
+> shion_d11_knock | おーい！　誰かー！（扉を叩く） | c2 | aff=shion:1
+*c1
+: （シオンが、ブレザーの袖を両手で握ってくる） {cg=/cg/shion/kura_sleeve.avif}
+-> merge
+*c2
+shion: ……っ、大きな音、出さないで……！ {focus}
+player: ご、ごめん！ {cg=/cg/shion/kura_sleeve.avif}
+*merge
+player: 待ってろ。俺を誰だと思ってる。学校一の清掃ガチ勢だぞ
+player: 刃厚0.3ミリ……テコの原理で、外の閂を押し上げる……！ {cutin=/cutins/items/thin_spatula.avif; se=/se/wooden_bar_unlatch.mp3}
+player: 開いたぞ！ {cutin=off; cg=/cg/shion/kura_open.avif; flash; se=/se/old_wooden_door_open.mp3}
+shion: ……バカ。……どうしてそこまで、私のために必死になれるのよ {cg=off; shion.pos=center; shion.expr=komari; shion.blush; shion.tears; shion.motion=clasp_hands_front; shion.look=camera; cam=close}
+: （袖を握っていた手を、シオンが名残惜しそうに離す） {shion.look=forward}
+
+=== call shion_d11_call | 鍵の確認と、ついでの話
+character: shion
+priority: 10
+audioOnly: true
+avail: {"after": {"all": [{"scenarioId": "shion_d11_kura", "sameDay": true}]}}
+---
+shion: 夜分にごめんなさい。神輿蔵の鍵、あなたが持っていないかしら
+player: ああ、俺のポケットだ。扉の前に落ちてたから拾っといた
+shion: よかった。明日の朝、白石先生に返しておいてくれる？
+player: 了解
+shion: …………
+shion: ……ついでだから、言っておくわ。部屋を暗くしたら、蔵の中を思い出してしまって。今、電気をつけたまま話してるの
+shion: それと……あなたの袖、ほつれていたでしょう。私が握りすぎたせいね。明日、繕ってあげるから持ってきて
+?
+> shion_d11_call_again | 眠れなかったら、また電話していいぞ | c1 | flags=shion_c07 | aff=shion:2
+> shion_d11_call_human | シオンにも怖いものがあるんだな | c2 | aff=shion:1
+*c1
+shion: ……それは、検証の範囲外よ
+shion: ……でも、覚えておくわ。おやすみなさい
+-> end
+*c2
+shion: ……人間だもの。おやすみなさい
+-> end
+
+=== forced shion_d13_cafe | 自分のフォークで
+priority: 20
+consumesTurn: true
+location: shopping_street
+time: day
+avail: {"timeSlots": ["holiday"], "days": [13], "requireFlags": ["route_shion"], "after": {"all": [{"scenarioId": "shion_d11_kura"}]}}
+bgm: sunlight_on_cobblestones
+---
+@ bg=cafe_indoor; time=indoor_dark; shion.pos=[0.3, -0.12, 0.45]; shion.rot=-0.35; shion.expr=neutral; shion.blush; shion.motion=Standing Idle; shion.look=camera; campose=[0.18, 1.16, 1.45, 0.28, 1.15, 0.45]
+shion: 蔵のお礼よ。……特製ベリーパンケーキ {cutin=/cutins/items/berry_pancake.avif; campose=[0.18, 1.16, 1.45, 0.28, 1.15, 0.45]}
+shion: 一口、どうぞ。切り分けてあげるから、自分のフォークで食べなさい {shion.look=forward; campose=[0.18, 1.16, 1.45, 0.28, 1.15, 0.45]}
+: （カチャ……カチャ……） {cutin=off; campose=[0.12, 1.15, 1.55, 0.08, 1.15, -1.0]; se=/se/tableware_spoon.mp3}
+? {campose=[0.12, 1.15, 1.55, 0.08, 1.15, -1.0]}
+> shion_d13_tasty | ……美味い。シオンが好きな店なだけあるな | c1 | aff=shion:3
+> shion_d13_parfait | パフェの店とどっちが好き？ | c2 | aff=shion:1
+*c1
+shion: ……でしょう。ここ、一人で来るにはちょっと勇気がいるの {shion.expr=relaxed; shion.look=camera; campose=[0.18, 1.16, 1.45, 0.28, 1.15, 0.45]}
+shion: ……今日は、来やすかったわ {shion.expr=happy; campose=[0.22, 1.16, 1.3, 0.29, 1.15, 0.45]}
+-> end
+*c2
+shion: その話は他言無用と言ったはずよ {shion.expr=nima; shion.look=camera; campose=[0.18, 1.16, 1.45, 0.28, 1.15, 0.45]}
+-> end
+
+=== forced shion_d15_reveal | 仕掛けの真実
+priority: 30
+consumesTurn: true
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "days": [15], "requireFlags": ["route_shion"], "after": {"all": [{"scenarioId": "shion_d13_cafe"}]}}
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; time=evening; shion.seat=library_desk; shion.expr=neutral; shion.look=camera; cam=medium
+shion: ……旧記、全部解読できたわ
+player: 本当か！
+shion: 解呪の条件は一つ。『想う相手に、偽りのない本心を５秒で告げること』。打算の告白は通らない
+player: ……やっぱり、そうなるのか
+shion: それと、もう一つ。私の検証メモを並べてみたの {cutin=/cutins/items/shion_notebook.avif}
+: ――第七日、降水確率ゼロ％の日に、境内でだけ局地的な土砂降り
+: ――第九日、点検済みの脚立の金具が、ひとりでに緩む
+: ――第十一日、無風の境内で、神輿蔵の扉だけを閉める旋風
+shion: どれも、私とあなたが二人きりの時。そして、どれも私たちを近づけている {cutin=off}
+shion: 旧記にも『縁を結ばんとする者の周りに、風を起こし、水を降らせる』とある {shion.look=forward}
+player: ……あれ全部、女神の仕込みだったのかよ！？ {focus}
+shion: ……ええ {shion.look=camera}
+shion: ……ねえ。その『想う相手』、いるの？ {shion.expr=komari; cam=close}
+?
+> shion_d15_yes | ……いる | merge | flags=shion_c08 | cond=shion>=15
+> shion_d15_silent | （答えられない） | c2
+*c2
+shion: ……沈黙も、答えのうちね {shion.expr=sad; shion.look=forward}
+*merge
+shion: ……言わないで。それが、もし私だったとしても {bgm=where_the_rain_stops; shion.expr=sad; shion.look=forward; cam=medium}
+player: え……
+shion: あなたには、呪いを解くために告白しなければならない理由がある。私たちを近づけたのは、神様の雨と脚立と暗闇よ {shion.look=camera}
+shion: そんな状況で『好き』と言われて……私はどうやって、それが本物だと検証すればいいの？ {shion.expr=komari; cam=close}
+shion: 私の気持ちもよ。蔵で心臓が鳴ったのは、あなたが好きだから？　それとも、暗闇と吊り橋効果のせい？ {shion.pos=center; shion.motion=clasp_hands_front; cam=medium}
+shion: ……区別がつかないの。汚染されたデータは、採用できない {shion.tears; shion.look=forward}
+shion: 調査は、これで終わり。……帰って {shion.expr=sad; cam=medium}
+god: あらあら、仕掛けがバレて裏目に出ましたか {bg=god_realm; time=divine; bgm=mysterious; clear; god.pos=center; god.expr=nima; god.motion=Ohoho; god.look=camera; trans=eyelid_close; cam=medium}
+god: でもね人の子。私が動かせるのは、風と雨と金具だけ。人の心までは動かせませんよ {god.expr=neutral; god.motion=Standing Idle; cam=close}
+god: 告白まで、あと６日です {god.motion=pose_point_go}
+
+=== forced shion_d17_room | 灯りの消えない資料室
+priority: 20
+consumesTurn: true
+location: library
+time: evening
+avail: {"timeSlots": ["evening"], "dayRange": {"from": 16, "to": 17}, "requireFlags": ["route_shion"], "after": {"all": [{"scenarioId": "shion_d15_reveal"}]}}
+bgm: where_the_rain_stops
+---
+teacher: タカシ、ちょうどいい。シオンが資料室の鍵返しに来ないのよ。定時過ぎちゃうから見てきて {bg=painted_library; time=evening; teacher.pos=center; teacher.expr=komari; teacher.motion=Standing Idle; teacher.look=camera; cam=medium}
+: （郷土資料室。机いっぱいの文献と、手帳に向かうシオン） {teacher.out; trans=fade_black; cutin=/cutins/items/shion_notebook_crossed.avif}
+shion: ……ノックくらいしなさい {cutin=off; shion.seat=library_desk; shion.expr=neutral; shion.look=camera; cam=medium}
+player: それ……何を調べてるんだ？
+shion: ……勘違いしないで。被験者が黒焦げになったら、研究が未完で終わるからよ {shion.look=forward}
+?
+> shion_d17_know | 告白以外の方法なんてないって、シオンが一番分かってるだろ | c1 | flags=shion_c09 | aff=shion:2
+> shion_d17_thanks | 俺のために、ありがとう | c2 | aff=shion:1
+*c1
+shion: ……ええ。分かってるわ {shion.expr=sad; shion.look=camera}
+-> merge
+*c2
+shion: ……あなたのためじゃないって言ったでしょう {shion.expr=angry; shion.look=camera}
+*merge
+shion: 旧記を三回読み直したわ。どこにも、そんな記述はなかった {shion.expr=komari; shion.look=forward}
+shion: それでも、探さずにいられなかったの
+shion: あなたが、私のせいで本心を言えずに黒焦げになるのも。……私なんかのために、打算の告白をするのも。どっちも嫌だった {shion.look=camera; shion.tears; cam=close}
+shion: ……鍵は私が返すわ。もう帰って {shion.expr=sad; shion.look=forward; cam=medium}
+
+=== forced shion_d18_teacher | 缶コーヒーと「縁」
+priority: 20
+consumesTurn: true
+location: corridor
+time: evening
+avail: {"timeSlots": ["evening"], "days": [18], "requireFlags": ["route_shion"], "after": {"all": [{"scenarioId": "shion_d17_room"}]}}
+---
+teacher: 飲みな。頭冷やすのにちょうどいいでしょ {bg=corridor; time=evening; teacher.pos=center; teacher.expr=neutral; teacher.motion=pose_offer_can; teacher.item=can_coffee; teacher.look=camera; cam=medium; cutin=/cutins/items/canned_coffee.avif; se=/se/vending_can_drop.mp3}
+player: ……先生。もし、誰かを好きになったきっかけが、誰かに仕組まれたものだったら……その気持ちって、偽物ですか {cutin=off}
+teacher: ……ずいぶん哲学的なこと聞くじゃない {teacher.expr=surprised}
+teacher: 古典で『縁』って習ったでしょ。昔の人は、出会いのきっかけなんて全部神様のせいにしてたのよ {teacher.expr=relaxed; teacher.motion=Standing Idle; teacher.look=forward}
+teacher: 隣の席になったのも、雨宿りで一緒になったのも、全部『縁』
+player: ……はい
+teacher: でもさ、その縁を続けたのは神様じゃなくて、本人たちなんだよ {teacher.look=camera; teacher.motion=Standing Idle}
+teacher: 大事なのは、きっかけの後に、自分で何を選んだか {cam=close}
+player: （蔵で、震えるシオンの隣に座ったのは……神様の風じゃない。俺が選んだことだ） {cam=medium}
+teacher: あいつ、入学してからずっと本と壁しか見てなかったのにね。最近は、あんたの背中を目で追ってるよ {teacher.expr=nima}
+?
+> shion_d18_thanks | ……ありがとうございます、先生 | c1 | flags=shion_c10
+> shion_d18_fate | 先生も、そういう『縁』あったんですか？ | c2
+*c1
+teacher: 礼はいいから。後悔だけはしなさんなよ {teacher.expr=relaxed}
+-> end
+*c2
+teacher: 定時退勤の邪魔する気？ {teacher.expr=nima; teacher.motion=Standing Greeting}
+-> end
+
+=== forced shion_d20_shrine | 誠の心
+priority: 20
+consumesTurn: true
+location: shrine
+time: day
+avail: {"timeSlots": ["holiday"], "days": [20], "requireFlags": ["route_shion"], "after": {"all": [{"scenarioId": "shion_d18_teacher"}]}}
+---
+: （ブラシと精製水で、石碑の苔と泥を落としていく） {bg=shrine; time=day; cg=/cg/shion/monument_polish.avif}
+: 『五秒の刻、誠の心を以て約すべし』
+player: （誠の心。……５秒様は、偽りの言葉を通さない）
+player: （だったら――）
+?
+> shion_d20_pray | （石碑に手を合わせる） | c1 | flags=shion_insight
+> shion_d20_check | （拭き残しがないか確認する） | c2 | flags=shion_insight
+*c1
+player: （女神の判定そのものが、俺の気持ちが本物だって証明になる） {focus}
+-> end
+*c2
+player: （……よし、ピカピカだ。……って、そうじゃない。女神の判定そのものが、証明になるんだ） {focus}
+-> end
+
+=== call shion_d20_call | 検証してくれ
+character: shion
+priority: 10
+audioOnly: true
+avail: {"days": [20], "requireFlags": ["route_shion", "shion_insight"]}
+---
+shion: ……もしもし。何か用？
+player: 明日の夕方、あの神社に来てほしい
+shion: ……解呪の告白なら、あなたが想う相手とするべきでしょう
+player: ああ。だから、シオンに来てほしいんだ
+shion: …………
+player: シオンは、俺の気持ちが本物か検証できないって言ったよな
+player: でも、シオンが解読した旧記が正しいなら、５秒様は偽りを通さない。打算の告白なら、俺は雷に打たれる
+?
+> shion_d20_trust | だから、検証してくれ。シオンの調べたことを、俺は信じてる | c1 | flags=shion_promise,shion_trust | cond=shion>=19
+> shion_d20_threat | 来てくれないと、俺、黒焦げになる | c2 | flags=shion_promise
+*c1
+shion: ……ずるい人ね。私の研究を、そんなふうに使うなんて
+shion: ……いいわ。その検証、見届ける
+-> merge
+*c2
+shion: ……脅しは非論理的よ。……でも、見届けるのは被験者への責任ね
+*merge
+shion: ……絶対に逃げないでよね、タカシ
+
+=== forced shion_d21_finale | 運命の５秒
+priority: 50
+consumesTurn: true
+location: shrine
+time: evening
+bgm: love
+avail: {"timeSlots": ["holiday"], "days": [21], "requireFlags": ["route_shion"]}
+---
+@ bg=shrine; time=evening; shion.pos=center; shion.expr=neutral; shion.motion=clasp_hands_front; shion.look=camera; cam=medium
+shion: ……本当に、来たのね
+player: 全部伝えるために来た
+shion: ……検証を始めましょう {shion.expr=relaxed; shion.blush}
+god: ２１日間の猶予はここまでです {flash; se=/se/divine_bell.mp3; time=divine; bgm=mysterious; shion.out; god.pos=center; god.expr=neutral; god.motion=Standing Idle; god.look=camera; cam=wide}
+god: 私の仕掛けまで見抜くとは、実に見事な娘でした。おかげで雨も脚立も裏目に出ましたけれど {god.expr=nima; god.motion=Ohoho; cam=medium}
+god: では――ＧＯと言ったら５秒以内に、本心を告げなさい。偽りなら雷です。レディー……ＧＯ！！ {god.expr=angry; god.motion=pose_point_go; focus; cam=close}
+? {time=evening; bgm=before_the_pendulum_falls; god.out; shion.pos=center; shion.expr=neutral; shion.look=camera; shion.motion=clasp_hands_front; cam=medium; timeout=5; timeout_goto=bad; timeout_flags=finale_timeout}
+> shion_finale_love | シオンが好きだ！　きっかけは神様でも、選んだのは俺だ！ | love | flags=finale_love,finale_answered
+> shion_finale_stay | 名前はまだつけられない。でも、シオンの隣で調べ物を続けたい！ | stay | flags=finale_stay,finale_answered
+*love
+player: シオーーーンッ！！ {focus; cam=wide}
+player: 俺はシオンが好きだ！　きっかけは神様の悪戯でも、蔵でお前の隣に座ったのは俺が選んだことだ！　俺のために一人で線を引き続けてくれたシオンが、世界で一番大好きだ！！ {focus; cam=medium}
+-> end
+*stay
+player: シオン！　この気持ちに名前をつける自信は、まだない！　でも、呪いが解けても、シオンの隣で一緒に調べ物を続けたい！　それだけは本当だ！ {cam=medium}
+-> end
+*bad
+player: シオン……俺……その…… {shion.expr=komari; cam=medium}
+player: （もし、これが神様の仕掛けが残した錯覚だったら。偽りと判定されて、シオンの前で雷に打たれたら――）
+-> end
+
+#################### シオン 結末
+
+=== ending ending_shion_true | TRUE END　検証完了
+priority: 30
+location: shrine
+time: evening
+bgm: love
+avail: {"requireFlags": ["route_shion", "finale_love", "shion_c08", "shion_trust"]}
+---
+@ bg=shrine; time=evening; shion.pos=center; shion.expr=surprised; shion.motion=clasp_hands_front; shion.look=camera; cam=medium
+god: ……一点の曇りもない本心でした。文句なしの合格です {name=女神（声）; flash}
+shion: …………雷、落ちなかったわね {shion.expr=neutral}
+shion: 旧記が正しければ……今の言葉は、本心だと立証された。……検証、完了よ {shion.look=forward; cutin=/cutins/shion/notebook_trembling.avif}
+shion: ……ずるいわ。私が何日かけても出せなかった答えを、５秒で出すなんて {cutin=off; shion.look=camera; shion.expr=komari; shion.blush; cam=close}
+shion: ……私も、一つだけ分かったの {shion.expr=relaxed}
+shion: 蔵で心臓が鳴ったのは、暗闇のせいだったかもしれない。でも、一人で資料室にいた時、私が探していたのは、あなたを助ける方法だった {shion.look=forward}
+shion: 神様は、私に手帳を開かせることまではできないわ {shion.look=camera; shion.tears}
+shion: ……反論の余地、ゼロよ。私の心、あなたに論破されちゃった {cg=/cg/shion/true_shoulder.avif}
+?
+> shion_true_hug | （そっと抱きしめる） | c1
+> shion_true_memo | これも検証メモに書くのか？ | c2
+*c1
+shion: ……大好きよ、タカシ。ずっと、私の隣にいなさい
+-> merge
+*c2
+shion: ……書くわよ。『被験者、合格』って
+shion: ……大好きよ、タカシ
+*merge
+: 数週間後―― {cg=off; trans=fade_black; shion.out; bgm=walking_with_you}
+teacher: 施錠の時間だぞ〜……って、なんだいその距離は。イチャつくなら資料室の鍵閉めてからにしなさいよ。先生は定時退勤するからね {bg=painted_library; time=evening; teacher.pos=left; teacher.expr=nima; teacher.motion=Standing Idle; teacher.look=camera; shion.tears=0; shion.blush=0; shion.expr=neutral; shion.seat=library_desk; shion.look=forward; cam=wide}
+shion: ……気にすることはないわ。ここは私の特等席よ。誰にも譲る気はないわ {teacher.out; cam=medium}
+emili: 見てアオイちゃん、シオンがタカシの隣にぴったり！ {se=/se/door_rattle.mp3; emili.pos=[-1.2, 0, -0.8]; emili.expr=happy; emili.motion=Antada; emili.look=shion; aoi.pos=[-0.6, 0, -1.0]; aoi.expr=happy; aoi.motion=Standing Idle; aoi.look=shion; cam=wide}
+aoi: シオンさん、雰囲気柔らかくなったね
+shion: ……誰かしら。図書室の静寂を乱す不心得者は {shion.expr=nima; cam=medium; cutin=/cutins/shion/sleeve_pinch.avif}
+
+=== ending ending_shion_good | GOOD END　検証は、これから
+priority: 20
+location: shrine
+time: evening
+bgm: love
+avail: {"requireFlags": ["route_shion", "finale_answered"]}
+---
+@ bg=shrine; time=evening; shion.pos=center; shion.expr=surprised; shion.motion=clasp_hands_front; shion.look=camera; cam=medium
+god: ……一点の偽りもない本心ですね。合格です。……もっとも、その娘の検証は、まだ終わっていないようですが {name=女神（声）; flash; if=finale_love}
+god: ……直球の愛ではありませんが、一点の偽りもない本心ですね。及第点、合格です {name=女神（声）; flash; if=!finale_love; bg=shrine; time=evening; shion.pos=center; shion.expr=surprised; shion.motion=clasp_hands_front; shion.look=camera; cam=medium}
+shion: ……雷、落ちなかったわね {shion.expr=neutral}
+shion: 『隣で調べ物を続けたい』という本心が、立証されたわけね {shion.expr=relaxed; shion.look=forward; if=!finale_love}
+player: ……ごめん。シオンが言ってたこと、俺もまだ答えが出せなくて {if=!finale_love}
+shion: 謝らないで。私だって答えは出せていないもの {shion.look=camera; if=!finale_love}
+shion: 正直、少しほっとしたの。あなたが呪いを解くために、無理に『好き』と叫ばなかったことに {shion.expr=happy; cam=close; if=!finale_love}
+shion: ……あなたの『好き』は、偽りではないと立証されたわけね {shion.expr=komari; shion.blush; shion.look=forward; if=finale_love}
+player: ……返事は、今じゃなくていい {if=finale_love}
+shion: ……ずるいわ。こっちはまだ、自分の心拍数の原因すら特定できていないのに {shion.look=camera; if=finale_love}
+shion: でも、少し安心したの。雷を前にしても、あなたの言葉は揺らがなかった。……それは、有力なデータよ {shion.expr=happy; cam=close; if=finale_love}
+shion: 神様の仕掛けがなくなった今なら、ちゃんと検証できるはずよ。時間をかけて、正確に {shion.motion=Standing Idle}
+?
+> shion_good_assistant | 付き合うよ、助手として | c1
+> shion_good_result | 検証結果、出たら教えてくれ | c2
+*c1
+shion: ……ええ。たっぷりこき使ってあげる {shion.expr=nima}
+-> merge
+*c2
+shion: ……あなたが先に出してもいいのよ {shion.expr=relaxed; shion.motion=Antada}
+*merge
+: 数週間後―― {trans=fade_black; bgm=main_bgm}
+shion: この頁、なんて読めるかしら {bg=painted_library; time=evening; shion.seat=library_desk; shion.expr=neutral; shion.look=forward; cam=medium}
+player: 『此の社の神、時を司りて戯れを好む』……かな
+shion: 正解。助手のくせに、読むのが早くなったじゃない {shion.look=camera; shion.expr=happy}
+teacher: 鍵閉めに来たんだけど……相変わらず息ぴったりだねえ {teacher.pos=left; teacher.expr=nima; teacher.motion=Standing Idle; teacher.look=shion; cam=wide}
+shion: 余計な茶化しは不要です。純粋な学術調査ですから {shion.look=teacher; shion.expr=angry; shion.blush}
+: （シオンの手帳の新しいページ：『検証記録 No.1：仕掛けがなくても、隣にいると心拍数が上がる。――要継続観察』） {cutin=/cutins/items/shion_notebook.avif}
+
+=== ending ending_shion_bad | BAD END　立証された仮説
+priority: 20
+location: shrine
+time: evening
+bgm: bad_ending
+avail: {"requireFlags": ["route_shion", "finale_timeout"]}
+---
+@ bg=shrine; time=evening; shion.pos=center; shion.expr=komari; shion.motion=Standing Idle; shion.look=camera; cam=medium
+god: ……５秒。時間切れです {name=女神（声）}
+: （ゴロゴロ……ドォンッ！） {flash; trans=fade_black; shion.out; cutin=/cutins/takashi/afro_smoke.avif; se=/se/thunder_bad_end.mp3}
+god: 黒焦げは勘弁してあげました。……自分の心を信じきれなかったのですね {name=女神（声）}
+shion: タカシ！！ {cutin=off; shion.pos=center; shion.expr=surprised; shion.motion=Jogging; shion.fast; shion.look=camera; cam=medium}
+shion: 脈拍、呼吸……正常。……よかった…… {shion.fast=0; shion.motion=clasp_hands_front; shion.expr=sad; shion.tears; cam=close}
+shion: ……雷が落ちた、ということは。本心を告げられなかった {shion.tears=0; shion.expr=neutral; shion.look=forward}
+shion: 最初から分かっていた仮説が、立証されただけよ
+? {timeout=5}
+> shion_bad_wait | 違うんだ、俺は―― | c1
+*c1
+shion: いいの。……立てる？　白石先生に連絡するわ {shion.look=camera; shion.expr=relaxed}
+
+: 翌週―― {trans=fade_black; shion.out}
+shion: いらっしゃい。返却ならこちらへどうぞ {bg=painted_library; time=evening; shion.pos=center; shion.expr=neutral; shion.motion=Standing Idle; shion.look=camera; cam=medium}
+player: シオン、調査のこと――
+shion: 終了したわ。手帳にも結論を書いたもの {shion.look=forward}
+shion: 資料室は、いつでも使えるわよ。あなたが綺麗にしてくれたおかげで、他の生徒も来るようになったから。……ありがとう {shion.look=camera; shion.expr=relaxed}
+teacher: タカシ。本借りないなら今日は帰りな {shion.out; teacher.pos=center; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=camera}
+teacher: ……あいつ、あの日から閉館後に一人で資料室にこもってるよ。何読んでるかは、教えてくれないけどね {teacher.expr=komari; teacher.look=forward}
+player: （あの５秒で、検証されることを恐れずに言えていたら――） {cam=wide}
+
+#################### シオン 夜の連絡
+
+=== call shion_call_return | 返却期限の確認
+character: shion
+priority: 1
+audioOnly: true
+avail: {"dayRange": {"from": 4, "to": 10}, "after": {"all": [{"scenarioId": "shion_d01_library"}]}}
+---
+shion: 夜分に失礼。図書委員長としての事務連絡よ。あなたが借りた歴史小説、返却期限は明日
+player: もう読み終わったから明日返すよ。めちゃくちゃ面白かった
+shion: ……もう読了したの？　上下巻で八百ページ近くあるのに
+?
+> shion_return_loved | 最後に城を明け渡すところ、あれは負けじゃなくて勝ちだよな | c1 | aff=shion:3
+> shion_return_skim | 最後の方は斜め読みだけど | c2
+*c1
+shion: ……そう読んだの
+shion: あの場面で泣いた人の感想は、たくさん見たわ。でも、勝ちだと言ったのはあなたが初めて
+: （そこから十分ほど、静かな熱を帯びた読書談義が続いた）
+-> merge
+*c2
+shion: ……感想は、ちゃんと読んでから聞くわ
+*merge
+shion: ……下巻の最後の一行、明日もう一度確かめたいの。返しに来る時、少し時間をちょうだい
+
+=== call shion_call_cake | 極秘の購入依頼
+character: shion
+priority: 1
+audioOnly: true
+avail: {"dayRange": {"from": 8, "to": 14}, "after": {"all": [{"scenarioId": "shion_d06_parfait"}]}}
+---
+shion: ……タカシ。頼みたいことがあるの
+shion: 明日の放課後、駅前の洋菓子店で、季節限定のいちごショートが二十個だけ出るの。……一つ、買ってきてほしいのよ
+player: 自分で行けばいいんじゃないか？
+shion: あの店、毎回うちの生徒が並ぶのよ。図書委員長がケーキの行列に並んでいるところを見られたら……
+shion: ……甘味処の件を知ってるのは、あなただけだから
+?
+> shion_cake_ok | いいよ。一個でいいのか？ | c1 | aff=shion:3
+> shion_cake_fee | 口止め料、高くつくぞ | c2 | aff=shion:1
+*c1
+shion: ……手数料として、あなたの分も買っていいわ。私が出すから
+shion: 一人で食べるより、感想を言い合える相手がいた方が……糖分の吸収効率がいい気がするの。根拠はないけれど
+-> end
+*c2
+shion: ……あなたの貸出カードの有効期限、停止してもいいのよ
+-> end
+
+=== call shion_call_resume | 部屋着のビデオ通話
+character: shion
+priority: 1
+model: /models/shion/shion-private.vrm
+avail: {"dayRange": {"from": 8, "to": 14}, "after": {"all": [{"scenarioId": "shion_d03_library"}]}}
+---
+shion: 聞こえるかしら。レジュメの三行目だけど――……どうしたの？ {expr=neutral}
+player: いや……家だと髪、結んでるんだな
+shion: 勉強の時は邪魔だから。……何か変かしら？ {expr=komari}
+?
+> shion_resume_cute | それ、勉強に入るスイッチみたいだな | c1 | aff=shion:2
+> shion_resume_who | いつもと印象違うから、一瞬誰かと思った | c2 | aff=shion:1
+*c1
+: （シオンが髪をほどこうと手を伸ばし、途中で止める） {motion=pose_hide_mouth_shy}
+shion: ……分析しないで。ほどくと集中が切れるの。今は、このままにしておくわ {expr=komari}
+-> merge
+*c2
+shion: ……それは褒めてるの？ {expr=angry}
+*merge
+shion: ……早く三行目を確認しなさい。終わらないと切るわよ {expr=neutral}
+
+=== call shion_call_break | 五分だけの息抜き
+character: shion
+priority: 1
+audioOnly: true
+avail: {"dayRange": {"from": 8, "to": 18}, "after": {"all": [{"scenarioId": "shion_d03_library"}]}}
+---
+shion: ……二時間、数学の問題集を解いていたの。脳が飽和したから、五分だけインターバル
+shion: 何か、頭を使わずに聞ける話をして
+?
+> shion_break_cleaner | 今日、黒板消しクリーナーを分解してフィルター洗った話する？ | c1 | aff=shion:2
+> shion_break_naruse | ナルセがまたモテ仕草で撃沈した話 | c2 | aff=shion:1
+*c1
+shion: ……驚くほど知的負荷が低そうね。聞かせて
+: （チョークの粉の落とし方を、のんびり語った）
+shion: ……あなたの汚れへの情熱を聞いてると、肩の力が抜けるわ
+-> merge
+*c2
+shion: ……それは知ってる。教室中に聞こえてたもの
+*merge
+shion: いい気分転換になったわ。……ありがとう、タカシ
+
+=== call shion_call_fivesec | ５秒という安全装置
+character: shion
+priority: 1
+audioOnly: true
+avail: {"dayRange": {"from": 9, "to": 14}, "after": {"all": [{"scenarioId": "shion_d09_ladder"}]}}
+---
+shion: 今日複写した『社寺旧記』の一節。『心の迷い、時を費やすほどに深し』
+shion: ５秒という短すぎる制限は……迷いや計算を挟ませないための、安全装置なのかもしれないわ
+player: 安全装置？
+shion: 人は時間をかけるほど、プライドや恐怖で本心を隠す。だから、５秒の中で本音だけを言わせる
+?
+> shion_fivesec_thanks | じゃあ、５秒で言えるように、今のうちに考えとく | c1 | aff=shion:3
+> shion_fivesec_intro | ５秒って、自己紹介も終わらないよな | c2 | aff=shion:1
+*c1
+shion: ……考えすぎたら、それこそ安全装置に引っかかるわよ
+shion: ……でも、そうね。考えるのは、悪いことじゃない
+shion: 旧記の続きは明日読むわ。おやすみなさい
+-> end
+*c2
+shion: ……ええ。だから、言うべきことだけを言うのよ
+

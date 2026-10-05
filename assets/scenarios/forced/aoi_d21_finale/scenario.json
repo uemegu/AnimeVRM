@@ -65,24 +65,19 @@
       "speaker": "女神",
       "text": "２１日間の猶予はここまでです、人の子よ",
       "flashEffect": "white",
-      "seUrl": "/se/piano_note.mp3",
+      "seUrl": "/se/divine_bell.mp3",
       "timeOfDay": "divine",
       "bgm": "mysterious",
       "avatars": {
+        "aoi": {
+          "visible": false
+        },
         "god": {
-          "position": [
-            0.9,
-            0,
-            -0.6
-          ],
+          "position": "center",
           "expression": "neutral",
           "expressionWeight": 1,
           "motion": "Standing Idle",
           "lookAtTarget": "camera"
-        },
-        "aoi": {
-          "motion": "Standing Idle",
-          "lookAtTarget": "forward"
         }
       },
       "camera": "wide",
@@ -136,12 +131,15 @@
       "id": "s8",
       "text": "",
       "timeOfDay": "evening",
-      "bgm": "love",
+      "bgm": "before_the_pendulum_falls",
       "avatars": {
         "god": {
           "visible": false
         },
         "aoi": {
+          "position": "center",
+          "expression": "neutral",
+          "expressionWeight": 1,
           "lookAtTarget": "camera",
           "motion": "clasp_hands_front"
         }

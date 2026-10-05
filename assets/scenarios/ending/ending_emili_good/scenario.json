@@ -76,6 +76,11 @@
           "lookAtTarget": "forward"
         }
       },
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
       "voiceUrl": "v_s3_64ccedd1.mp3"
     },
     {
@@ -89,13 +94,23 @@
           "expressionWeight": 1
         }
       },
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
       "voiceUrl": "v_s4_caaad486.mp3"
     },
     {
       "id": "s5",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "え？"
+      "text": "え？",
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      }
     },
     {
       "id": "s6",
@@ -109,10 +124,81 @@
           "expressionWeight": 1
         }
       },
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
       "voiceUrl": "v_s6_99d6e1cc.mp3"
     },
     {
       "id": "s7",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……ば、ばっかじゃないの！？　神様の前で、あんな大声で……！",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward"
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s7_2b6f6ee2.mp3"
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……嬉しくないわけ、ないじゃない。でも、まだ『はい』とは言えないの",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s8_c340f00a.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……パパさんのことか",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      }
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "神崎家の娘のまま返事をしたら、きっとアンタを巻き込むわ。……だから、ちゃんと片付けてから答えたいの",
+      "avatars": {
+        "emili": {
+          "expression": "sad",
+          "expressionWeight": 1
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s10_186f7749.mp3"
+    },
+    {
+      "id": "s11",
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "でも、合格。アンタは嘘がつけない男だもの。今のが、今のアンタの精一杯の本当なんでしょ",
@@ -122,10 +208,10 @@
           "expressionWeight": 1
         }
       },
-      "voiceUrl": "v_s7_7c5ee200.mp3"
+      "voiceUrl": "v_s11_7c5ee200.mp3"
     },
     {
-      "id": "s8",
+      "id": "s12",
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "パパとの話し合い、ちゃんとやるわ。相棒がいるなら、ここに残る理由は十分すぎるもの",
@@ -136,10 +222,15 @@
           "motion": "Standing Idle"
         }
       },
-      "voiceUrl": "v_s8_eff1e038.mp3"
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s12_eff1e038.mp3"
     },
     {
-      "id": "s9",
+      "id": "s13",
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "だから今はそれで許してあげる。……次は、もっとちゃんとした言葉を言わせてみせるんだからね！",
@@ -149,10 +240,52 @@
         }
       },
       "camera": "close",
-      "voiceUrl": "v_s9_3631922a.mp3"
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s13_3631922a.mp3"
     },
     {
-      "id": "s10",
+      "id": "s14",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "パパとの話し合い、ちゃんとやるわ。こんな大バカがいるなら、ここに残る理由は十分すぎるもの",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s14_86bf0817.mp3"
+    },
+    {
+      "id": "s15",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "だから返事は、それが済んでから。……その時は、ただのエミリとしてちゃんと答えてあげるんだからね！",
+      "avatars": {
+        "emili": {
+          "motion": "pose_poke_chest"
+        }
+      },
+      "camera": "close",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s15_7eb04651.mp3"
+    },
+    {
+      "id": "s16",
       "text": "",
       "choices": [
         {
@@ -163,7 +296,22 @@
         {
           "id": "emili_good_next",
           "text": "次は、言うよ",
-          "goto": "c2"
+          "goto": "c2",
+          "condition": {
+            "unlessFlags": [
+              "finale_love"
+            ]
+          }
+        },
+        {
+          "id": "emili_good_again",
+          "text": "何度でも言うよ",
+          "goto": "c3",
+          "condition": {
+            "requireFlags": [
+              "finale_love"
+            ]
+          }
         }
       ]
     },
@@ -196,7 +344,23 @@
           "motion": "Angry"
         }
       },
+      "nextSceneId": "merge",
       "voiceUrl": "v_c2_de19838d.mp3"
+    },
+    {
+      "id": "c3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ！　い、一回でいいわよ、バカ！",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "motion": "Angry"
+        }
+      },
+      "voiceUrl": "v_c3_855a29d9.mp3"
     },
     {
       "id": "merge",
@@ -206,7 +370,7 @@
       "bgm": "main_bgm"
     },
     {
-      "id": "s14",
+      "id": "s21",
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "お待たせ、タカシ！　セバスチャンには『図書館で勉強』って言って撒いてきたわ！",
@@ -223,16 +387,16 @@
         }
       },
       "camera": "medium",
-      "voiceUrl": "v_s14_abdd15d0.mp3"
+      "voiceUrl": "v_s21_abdd15d0.mp3"
     },
     {
-      "id": "s15",
+      "id": "s22",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "転校の話、白紙になったんだろ？　もう逃げなくても……"
     },
     {
-      "id": "s16",
+      "id": "s23",
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "脱走は脱走で楽しいのよ！　ほら、駄菓子屋の新作制覇！",
@@ -241,7 +405,7 @@
           "motion": "Excited"
         }
       },
-      "voiceUrl": "v_s16_4ed9bc03.mp3"
+      "voiceUrl": "v_s23_4ed9bc03.mp3"
     }
   ]
 }

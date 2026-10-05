@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { CHARACTERS, HEROINE_IDS } from '../../data/characters';
 import { CallScenario, CommunicationResult, MailScenario, NightCommunication } from '../../types/communication';
 import { scenarioRepository } from '../../services/scenario/ScenarioRepository';
 import { PhoneNotificationCard } from '../../components/Phone/PhoneNotificationCard';
@@ -7,6 +6,7 @@ import { PhoneCallModal } from '../../components/Phone/PhoneCallModal';
 import { PhoneMailModal } from '../../components/Phone/PhoneMailModal';
 import '../../components/Room/NightRoomView.css';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { resolveAssetUrl } from '../../utils/path';
 
 export interface NightRoomPageProps {
   day: number;
@@ -24,9 +24,6 @@ export interface NightRoomPageProps {
   /** 電話・メール本文の読み込みに失敗したとき */
   onLoadError: (error: unknown) => void;
 }
-
-// 好感度最大値の目安（ゲージ計算用）
-const MAX_AFFINITY_SCALE = 10;
 
 export const NightRoomPage: React.FC<NightRoomPageProps> = ({
   day,
@@ -107,7 +104,7 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
         <div className="room-image-wrapper">
           <div className="room-image-clip">
             <img
-              src="/textures/myroom-night_far.avif"
+              src={resolveAssetUrl('/textures/myroom-night_far.avif')}
               alt={lang === 'ja' ? '自室' : 'My Room'}
               className="room-main-img"
             />
@@ -143,44 +140,6 @@ export const NightRoomPage: React.FC<NightRoomPageProps> = ({
         </header>
 
         <div className="room-sidebar-content">
-          {/* 現在の親愛度ステータス（好感度メーター付き） */}
-          <div className="affinity-status-panel">
-            <div className="affinity-panel-inner">
-              <div className="affinity-panel-title">
-                <span>
-                  {lang === 'ja' ? 'ヒロイン好感度' : 'Heroine Affinities'}
-                </span>
-              </div>
-              <div className="affinity-list">
-                {HEROINE_IDS.map((charId) => {
-                  const char = CHARACTERS[charId];
-                  const val = affinities[charId] || 0;
-                  const name = char.name[lang] || char.name.ja;
-                  const percent = Math.min(100, Math.round((val / MAX_AFFINITY_SCALE) * 100));
-
-                  return (
-                    <div
-                      key={charId}
-                      className="affinity-item"
-                      style={{ '--affinity-color': char.themeColor } as React.CSSProperties}
-                    >
-                      <div className="affinity-item-header">
-                        <span className="affinity-name">{name}</span>
-                        <span className="affinity-val">Lv. {val}</span>
-                      </div>
-                      <div className="affinity-bar-track">
-                        <div
-                          className="affinity-bar-fill"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
           {/* コマンドカード群（元の構成） */}
           <div className="room-card-list">
             {/* 就寝する */}

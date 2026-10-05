@@ -24,6 +24,7 @@
     }
   },
   "location": "library",
+  "bgm": "sunlight_on_ink",
   "timeOfDay": "evening",
   "actionHints": [
     {
@@ -65,7 +66,8 @@
           "position": "center",
           "expression": "angry",
           "expressionWeight": 1,
-          "motion": "Standing Idle",
+          "motion": "pose_hug_notebook",
+          "heldItem": "notebook",
           "lookAtTarget": "camera",
           "effectText": "shiin"
         }

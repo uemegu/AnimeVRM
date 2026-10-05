@@ -14,6 +14,9 @@ const CATEGORIES = ['morning', 'action', 'holiday', 'forced', 'ending', 'special
 /** ゲーム本編に出さない種類（demo は演出の見本。Pages で再生する） */
 const SKIPPED_CATEGORIES = ['demo'];
 
+/** 登場人物（cast）を目次に載せる種類（行き先を選んで流れるもの） */
+const CAST_CATEGORIES = ['action', 'holiday'];
+
 /** 目次に載せるメタ情報（本文のシーン等は遅延ロード時に読む） */
 const META_KEYS = [
   'id',
@@ -64,6 +67,18 @@ export function buildScenarioIndex() {
       const entry = { category, baseUrl: `/scenarios/${category}/${dirName}/` };
       for (const key of META_KEYS) {
         if (scenario[key] !== undefined) entry[key] = scenario[key];
+      }
+      // 行き先の地図に誰がいるかを出すため、舞台に立つ人・話す人（主人公は除く）
+      if (CAST_CATEGORIES.includes(category)) {
+        const cast = new Set();
+        for (const scene of scenario.scenes ?? []) {
+          for (const [id, avatar] of Object.entries(scene.avatars ?? {})) {
+            if (avatar.visible !== false) cast.add(avatar.characterId ?? id);
+          }
+          if (scene.speakerCharacterId) cast.add(scene.speakerCharacterId);
+        }
+        cast.delete('player');
+        if (cast.size > 0) entry.cast = [...cast].sort();
       }
       entries.push(entry);
     }

@@ -71,7 +71,7 @@
         {
           "id": "emili_outfit_blouse",
           "text": {
-            "ja": "今着てるそのブラウスでいいんじゃないか。似合ってる"
+            "ja": "今着てるそれなら、商店街でも浮かないと思う"
           },
           "goto": "c1",
           "addAffinity": {
@@ -91,23 +91,29 @@
       "id": "c1",
       "speaker": "エミリ",
       "text": {
-        "ja": "……え？　こ、これ？"
+        "ja": "……これ？　部屋着よ？"
       },
       "expression": "surprised",
       "expressionWeight": 1,
-      "nextStepId": "step_7",
-      "voiceUrl": "v_c1_efe8db23.mp3"
+      "nextStepId": "step_7"
     },
     "step_7": {
       "id": "step_7",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "部屋着がそれなら、たぶん大丈夫だ"
+      },
+      "nextStepId": "step_8"
+    },
+    "step_8": {
+      "id": "step_8",
       "speaker": "エミリ",
       "text": {
-        "ja": "……なら、これにしてあげる。アンタがそこまで言うならね"
+        "ja": "……庶民の基準が、ますます分からなくなってきたわ"
       },
       "expression": "komari",
       "expressionWeight": 1,
-      "nextStepId": null,
-      "voiceUrl": "v_step_7_b541db89.mp3"
+      "nextStepId": null
     },
     "c2": {
       "id": "c2",

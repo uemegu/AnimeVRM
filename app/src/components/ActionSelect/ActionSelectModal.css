@@ -299,6 +299,8 @@
 .heroine-bg-aoi { --heroine-color: #eab308; --heroine-surface: #fef9c3; }
 .heroine-bg-emili { --heroine-color: #ef4444; --heroine-surface: #fee2e2; }
 .heroine-bg-shion { --heroine-color: #3b82f6; --heroine-surface: #dbeafe; }
+.heroine-bg-naruse { --heroine-color: #0ea5e9; --heroine-surface: #e0f2fe; }
+.heroine-bg-teacher { --heroine-color: #64748b; --heroine-surface: #f1f5f9; }
 .action-focus-heroine-box.heroine-bg-unknown { background: linear-gradient(145deg, #64748b, #25354d); }
 
 /* The square portrait is framed from the head to the chest; the counter-skew

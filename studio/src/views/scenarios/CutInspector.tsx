@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  HeldItemId,
   ScenarioScene as SceneSchema,
   SCENE_EFFECT_IDS,
   stageAtScene,
@@ -493,6 +494,22 @@ function CastTab({ scenario, index, data, set }: { scenario: ScenarioPackage; in
                     {character?.models.map((m) => (
                       <option key={m.key} value={m.url}>
                         {m.label.ja}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span className="field-label">{t.scenarios.heldItem}</span>
+                  <select
+                    className="select"
+                    value={own.heldItem === false ? '-' : (typeof own.heldItem === 'object' ? own.heldItem.item : own.heldItem) ?? ''}
+                    onChange={(e) => update('heldItem', e.target.value === '-' ? false : ((e.target.value || undefined) as SceneAvatarConfig['heldItem']))}
+                  >
+                    <option value="">{inherit(prev.heldItem ? t.scenarios.heldItems[typeof prev.heldItem === 'object' ? prev.heldItem.item : prev.heldItem] : undefined)}</option>
+                    <option value="-">{t.scenarios.heldItemNone}</option>
+                    {HeldItemId.options.map((id) => (
+                      <option key={id} value={id}>
+                        {t.scenarios.heldItems[id]}
                       </option>
                     ))}
                   </select>

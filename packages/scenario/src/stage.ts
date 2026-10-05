@@ -3,13 +3,15 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraPose, CameraShift, CameraShot, EffectText, ScenarioPackage, ScenarioScene, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraPose, CameraShift, CameraShot, EffectText, HeldItemId, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
 export interface StageState {
   background?: string;
+  /** シナリオの場所（最初に背景を指定するまでの背景。場所が変わったかの判定に使う） */
+  location?: string;
   timeOfDay?: TimeOfDayId;
   /** BGM の ID または URL。'silence' で無音 */
   bgm?: string;
@@ -32,6 +34,8 @@ export interface StageState {
   cg?: StillImageConfig | null;
   /** 舞台の端に載せるカットイン */
   cutin?: CutinConfig | null;
+  /** 今のシーンの切り替え演出（シーンの指定。なければ場所が変わったときは暗転）。引き継がない */
+  screenTransition?: ScreenTransition;
 }
 
 /** 一枚絵・カットインの指定を、引き継ぐ状態にする（undefined は前のまま、false は消す） */
@@ -76,6 +80,8 @@ export interface StageCastMember {
   look?: AvatarLook;
   /** 日なたの明るさ（窓の外の人物など） */
   daylight?: number;
+  /** 手に持つ小物（hand を省略したら小物ごとの既定の手） */
+  heldItem?: { item: HeldItemId; hand?: 'left' | 'right' };
 }
 
 /** 顔・体の演出の状態 */
@@ -120,12 +126,17 @@ export interface ScrollingBackgroundSettings {
 export const EMPTY_STAGE: StageState = { cast: {} };
 
 /** シナリオ開始時の舞台 */
-export function initialStageState(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience'>): StageState {
-  return { bgm: scenario.bgm, ambience: scenario.ambience, timeOfDay: scenario.timeOfDay as TimeOfDayId | undefined, cast: {} };
+export function initialStageState(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience'> & { location?: string }): StageState {
+  return { location: scenario.location, bgm: scenario.bgm, ambience: scenario.ambience, timeOfDay: scenario.timeOfDay as TimeOfDayId | undefined, cast: {} };
 }
 
-/** シーンの指定を舞台に反映する（キャラは項目ごとに上書き、visible: false で退場） */
+/**
+ * シーンの指定を舞台に反映する（キャラは項目ごとに上書き、visible: false で退場）。
+ * 場所が変わったら、一枚絵・カットインを下げ（そのシーンで指定したものは出す）、切り替え演出の指定がなければ暗転する
+ */
 export function mergeStageState(prev: StageState, scene: ScenarioScene): StageState {
+  const prevBackground = prev.background ?? prev.location;
+  const placeChanged = scene.background !== undefined && prevBackground !== undefined && scene.background !== prevBackground;
   const cast: Record<string, SceneAvatarConfig> = scene.clearCast ? {} : { ...prev.cast };
   const motionCues: Record<string, string> = scene.clearCast ? {} : { ...prev.motionCues };
   for (const [id, config] of Object.entries(scene.avatars ?? {})) {
@@ -136,6 +147,8 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
       const { effectText: _text, sweat: _sweat, ...rest } = config;
       const { effectText: _prevText, sweat: _prevSweat, ...prev } = cast[id] ?? {};
       cast[id] = { ...prev, ...rest };
+      // 小物はモーションと組で指定する（モーションだけ変えたら手放す）
+      if (config.heldItem === false || (config.motion !== undefined && config.heldItem === undefined)) delete cast[id].heldItem;
       // モーションを指定したシーンを覚えておく（同じ身振りを別のシーンで指定したら再生し直す）
       if (config.motion !== undefined) motionCues[id] = scene.id;
     }
@@ -145,6 +158,7 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
   const bgmChanged = bgm !== prev.bgm;
   return {
     background: scene.background ?? prev.background,
+    location: prev.location,
     timeOfDay: (scene.timeOfDay as TimeOfDayId | undefined) ?? prev.timeOfDay,
     bgm,
     bgmVolume: scene.bgmVolume ?? (bgmChanged ? undefined : prev.bgmVolume),
@@ -155,13 +169,15 @@ export function mergeStageState(prev: StageState, scene: ScenarioScene): StageSt
     scrolling: scene.scrollingBackground === undefined ? prev.scrolling : scene.scrollingBackground || null,
     effects: scene.effects ? { ...prev.effects, ...scene.effects } : prev.effects,
     rain: scene.rain ?? prev.rain,
-    cg: mergeStill(prev.cg, scene.cg),
-    cutin: mergeStill(prev.cutin, scene.cutin),
+    cg: mergeStill(placeChanged ? null : prev.cg, scene.cg),
+    cutin: mergeStill(placeChanged ? null : prev.cutin, scene.cutin),
+    // 白く光って場所が変わる（神界へ飛ぶなど）ときは暗転を重ねない
+    screenTransition: scene.screenTransition ?? (placeChanged && scene.flashEffect !== 'white' ? 'fade_black' : undefined),
   };
 }
 
 /** シナリオの先頭から指定シーンまでを順にたどった舞台（Studio で途中のカットを表示するため） */
-export function stageAtScene(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience' | 'scenes'>, sceneIndex: number): StageState {
+export function stageAtScene(scenario: Pick<ScenarioPackage, 'bgm' | 'timeOfDay' | 'ambience' | 'scenes'> & { location?: string }, sceneIndex: number): StageState {
   let stage = initialStageState(scenario);
   for (const scene of scenario.scenes.slice(0, sceneIndex + 1)) stage = mergeStageState(stage, scene);
   return stage;
@@ -224,6 +240,7 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       lookAtTarget: config.lookAtTarget,
       headTurn: config.headTurn,
       ...(config.daylight !== undefined ? { daylight: config.daylight } : {}),
+      ...(config.heldItem ? { heldItem: typeof config.heldItem === 'string' ? { item: config.heldItem } : config.heldItem } : {}),
       look: {
         blush: config.blush ?? false,
         anger: config.anger ?? false,
@@ -252,12 +269,15 @@ export function resolveScrollingBackground(stage: StageState, locationBackground
   };
 }
 
-/** カメラ構図（指定がなければ、1人なら話者、選択肢や話者不在は全体、複数人の会話は話者中心） */
+/** カメラ構図（指定がなければ、流れる背景なら横から、1人なら話者、選択肢や話者不在は全体、複数人の会話は話者中心） */
 export function resolveCameraShot(
   scene: Pick<ScenarioScene, 'camera' | 'choices' | 'speakerCharacterId'> | null,
-  cast: Pick<StageCastMember, 'id'>[]
+  cast: Pick<StageCastMember, 'id'>[],
+  stage?: Pick<StageState, 'scrolling'>
 ): CameraShot {
   if (scene?.camera) return scene.camera;
+  // 流れる背景（歩きながらの会話）では横から撮る。正面から撮ると、背景の流れと進む向きが食い違う
+  if (stage?.scrolling && cast.length > 0) return 'side';
   if (cast.length <= 1) return 'speaker';
   if (scene?.choices) return 'wide';
   return scene?.speakerCharacterId && cast.some((m) => m.id === scene.speakerCharacterId) ? 'medium' : 'wide';
@@ -271,6 +291,10 @@ export const MotionBook = z.strictObject({
     z.strictObject({
       /** 待機・歩行など、繰り返して自然なもの */
       loop: z.boolean().optional(),
+      /** 座る・机に肘をつくなど、場所の席（locations.json の seats）でだけ使うもの */
+      seated: z.boolean().optional(),
+      /** 歩く・走るなど、体の向きへ進んで見えるもの（流れる背景では横向きで使う） */
+      locomotion: z.boolean().optional(),
     })
   ),
 });

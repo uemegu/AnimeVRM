@@ -24,7 +24,7 @@
     }
   },
   "location": "shrine",
-  "bgm": "love",
+  "bgm": "where_the_rain_stops",
   "timeOfDay": "evening",
   "consumesTurn": true,
   "scenes": [
@@ -34,7 +34,7 @@
       "speaker": "タカシ",
       "text": "……エミリ！？　何やってんだ、ずぶ濡れじゃないか！",
       "background": "shrine_rain",
-      "timeOfDay": "evening",
+      "timeOfDay": "rainy",
       "rain": true,
       "avatars": {
         "emili": {
@@ -45,7 +45,8 @@
           "lookAtTarget": "forward"
         }
       },
-      "camera": "medium"
+      "camera": "medium",
+      "ambience": "/se/rain_loop.mp3"
     },
     {
       "id": "s2",
@@ -217,6 +218,7 @@
       "speakerCharacterId": "emili",
       "speaker": "エミリ",
       "text": "……っ、なによそれ……",
+      "bgm": "love",
       "avatars": {
         "emili": {
           "tears": true,

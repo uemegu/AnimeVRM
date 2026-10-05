@@ -76,6 +76,7 @@
           "fastMotion": true
         }
       },
+      "cutin": "/cutins/naruse/headlock.avif",
       "focusLines": true,
       "voiceUrl": "v_s3_6b25dc3c.mp3"
     },
@@ -119,6 +120,7 @@
       "speakerCharacterId": "naruse",
       "speaker": "ナルセ",
       "text": "ワックスで寄ってくるのはお前だけだバカヤロー！！",
+      "cutin": false,
       "avatars": {
         "naruse": {
           "effectText": "iraira"
@@ -132,6 +134,7 @@
       "speakerCharacterId": "naruse",
       "speaker": "ナルセ",
       "text": "は？",
+      "cutin": false,
       "avatars": {
         "naruse": {
           "anger": false,

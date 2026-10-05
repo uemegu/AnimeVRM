@@ -55,7 +55,7 @@
         {
           "id": "shion_return_loved",
           "text": {
-            "ja": "シオンが勧めてくれた本だからな。主人公が知恵で窮地を切り抜けるところ、最高だった"
+            "ja": "最後に城を明け渡すところ、あれは負けじゃなくて勝ちだよな"
           },
           "goto": "c1",
           "addAffinity": {
@@ -75,19 +75,17 @@
       "id": "c1",
       "speaker": "シオン",
       "text": {
-        "ja": "……そう"
+        "ja": "……そう読んだの"
       },
-      "nextStepId": "step_6",
-      "voiceUrl": "v_c1_d115b02a.mp3"
+      "nextStepId": "step_6"
     },
     "step_6": {
       "id": "step_6",
       "speaker": "シオン",
       "text": {
-        "ja": "……あの場面の伏線回収、美しかったでしょう"
+        "ja": "あの場面で泣いた人の感想は、たくさん見たわ。でも、勝ちだと言ったのはあなたが初めて"
       },
-      "nextStepId": "step_7",
-      "voiceUrl": "v_step_6_f8278d38.mp3"
+      "nextStepId": "step_7"
     },
     "step_7": {
       "id": "step_7",
@@ -110,10 +108,9 @@
       "id": "merge",
       "speaker": "シオン",
       "text": {
-        "ja": "……あなたと本の話をするのは、悪くないわね。明日、図書室で待ってるわ"
+        "ja": "……下巻の最後の一行、明日もう一度確かめたいの。返しに来る時、少し時間をちょうだい"
       },
-      "nextStepId": null,
-      "voiceUrl": "v_merge_dd919f33.mp3"
+      "nextStepId": null
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "id": "aoi_call_kairanban",
   "title": {
-    "ja": "回覧板と糸電話"
+    "ja": "回覧板と仕切り板"
   },
   "priority": 1,
   "availability": {
@@ -66,45 +66,54 @@
       "id": "step_5",
       "speaker": "アオイ",
       "text": {
-        "ja": "……ねえ、ベランダから話してると、手を伸ばせば届きそうなのに電話って、変な感じだね"
+        "ja": "……ねえ。このベランダの仕切り板、薄いね。タカシくんの部屋のテレビ、ちょっと聞こえてる"
       },
       "expression": "relaxed",
       "expressionWeight": 1,
-      "nextStepId": "step_6",
-      "voiceUrl": "v_step_5_bddc78da.mp3"
+      "nextStepId": "step_6"
     },
     "step_6": {
       "id": "step_6",
+      "speaker": "タカシ",
+      "text": {
+        "ja": "……え、マジで？"
+      },
+      "nextStepId": "step_7"
+    },
+    "step_7": {
+      "id": "step_7",
       "speaker": "アオイ",
       "text": {
-        "ja": "昔、公園で糸電話作ったの覚えてる？"
+        "ja": "昨日の夜、ずっと『落ちない油汚れ』の動画見てたでしょ"
       },
       "expression": "happy",
       "expressionWeight": 1,
-      "nextStepId": "c7",
-      "voiceUrl": "v_step_6_6dd0874d.mp3"
+      "nextStepId": "c8"
     },
-    "c7": {
-      "id": "c7",
+    "c8": {
+      "id": "c8",
       "speaker": "",
       "text": "",
       "choices": [
         {
           "id": "aoi_kairanban_remember",
           "text": {
-            "ja": "俺が引っ張りすぎて、紙コップの底が抜けたやつな"
+            "ja": "……音、気をつける"
           },
           "goto": "c1",
           "addAffinity": {
-            "aoi": 2
+            "aoi": 1
           }
         },
         {
           "id": "aoi_kairanban_forgot",
           "text": {
-            "ja": "……そんなことあったっけ"
+            "ja": "換気扇の油は、つけ置きが正解なんだよ"
           },
-          "goto": "c2"
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 2
+          }
         }
       ]
     },
@@ -112,23 +121,21 @@
       "id": "c1",
       "speaker": "アオイ",
       "text": {
-        "ja": "そう、それ！　覚えてたんだ"
+        "ja": "ううん、いいの。……静かすぎるより、ちょっと音がする方が落ち着く"
       },
-      "expression": "happy",
+      "expression": "relaxed",
       "expressionWeight": 1,
-      "nextStepId": "merge",
-      "voiceUrl": "v_c1_5fa5014b.mp3"
+      "nextStepId": "merge"
     },
     "c2": {
       "id": "c2",
       "speaker": "アオイ",
       "text": {
-        "ja": "えー！　私は全部覚えてるのに"
+        "ja": "ふふっ、知らないよ！　……でも、ちょっと見てみたくなった"
       },
-      "expression": "angry",
+      "expression": "happy",
       "expressionWeight": 1,
-      "nextStepId": "merge",
-      "voiceUrl": "v_c2_675e7f61.mp3"
+      "nextStepId": "merge"
     },
     "merge": {
       "id": "merge",

@@ -178,10 +178,42 @@
     "baseUrl": "/scenarios/morning/morning_default/",
     "id": "morning_default",
     "title": {
-      "ja": "朝: いつもの通学路"
+      "ja": "いつもの通学路"
     },
-    "location": "school_gate",
+    "location": "town",
     "fallback": true
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_naruse/",
+    "id": "morning_naruse",
+    "title": {
+      "ja": "寝ぐせのナルセ"
+    },
+    "location": "town",
+    "fallback": true,
+    "availability": {
+      "dayRange": {
+        "from": 2,
+        "to": 20
+      }
+    }
+  },
+  {
+    "category": "morning",
+    "baseUrl": "/scenarios/morning/morning_shrine_steps/",
+    "id": "morning_shrine_steps",
+    "title": {
+      "ja": "石段の下"
+    },
+    "location": "shrine",
+    "fallback": true,
+    "availability": {
+      "dayRange": {
+        "from": 2,
+        "to": 20
+      }
+    }
   },
   {
     "category": "morning",
@@ -246,6 +278,10 @@
           "ja": "アオイが教室でプリントとにらめっこしている"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "mob_boy"
     ]
   },
   {
@@ -286,6 +322,10 @@
           "ja": "アオイが図書室の場所を探していた"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "mob_student"
     ]
   },
   {
@@ -326,6 +366,10 @@
           "ja": "アオイが購買の人混みの後ろで背伸びしている"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "emili"
     ]
   },
   {
@@ -369,6 +413,9 @@
           "ja": "体育のあと、アオイが木陰で休んでいる"
         }
       }
+    ],
+    "cast": [
+      "aoi"
     ]
   },
   {
@@ -412,6 +459,9 @@
           "ja": "エミリが何か封筒を持ってうろうろしている"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -465,6 +515,74 @@
           "ja": "金曜限定のカツサンドの日"
         }
       }
+    ],
+    "cast": [
+      "naruse"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_cafeteria_milk/",
+    "id": "daily_cafeteria_milk",
+    "title": {
+      "ja": "紙パックの角"
+    },
+    "location": "cafeteria",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon"
+      ],
+      "locations": [
+        "cafeteria"
+      ]
+    },
+    "cast": [
+      "cafeteria_lady"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_cafeteria_shion_sweets/",
+    "id": "daily_cafeteria_shion_sweets",
+    "title": {
+      "ja": "脳の燃料"
+    },
+    "location": "cafeteria",
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 6,
+        "to": 20
+      },
+      "locations": [
+        "cafeteria"
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "shion_d06_parfait"
+          }
+        ]
+      }
+    },
+    "priority": -5,
+    "actionHints": [
+      {
+        "locationId": "cafeteria",
+        "hintCharacterIds": [
+          "shion"
+        ],
+        "hintText": {
+          "ja": "購買の菓子パンの棚の前で、誰かが長いこと迷っている"
+        }
+      }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -484,7 +602,56 @@
       "locations": [
         "classroom"
       ]
-    }
+    },
+    "cast": [
+      "kana",
+      "yui"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_classroom_aoi_crowd/",
+    "id": "daily_classroom_aoi_crowd",
+    "title": {
+      "ja": "囲まれる転入生"
+    },
+    "location": "classroom",
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 1,
+        "to": 2
+      },
+      "locations": [
+        "classroom"
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "common_d01_homeroom"
+          }
+        ]
+      }
+    },
+    "priority": 5,
+    "actionHints": [
+      {
+        "locationId": "classroom",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "アオイがクラスの女子に囲まれている"
+        }
+      }
+    ],
+    "cast": [
+      "aoi",
+      "kana",
+      "yui"
+    ]
   },
   {
     "category": "action",
@@ -520,6 +687,9 @@
           "ja": "アオイがお弁当を広げている"
         }
       }
+    ],
+    "cast": [
+      "aoi"
     ]
   },
   {
@@ -556,6 +726,32 @@
           "ja": "エミリがお腹を押さえている"
         }
       }
+    ],
+    "cast": [
+      "emili"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_classroom_eraser/",
+    "id": "daily_classroom_eraser",
+    "title": {
+      "ja": "黒板消しクリーナー"
+    },
+    "location": "classroom",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "classroom"
+      ]
+    },
+    "cast": [
+      "naruse"
     ]
   },
   {
@@ -591,6 +787,10 @@
           "ja": "教室に忘れ物をした気がする"
         }
       }
+    ],
+    "cast": [
+      "naruse",
+      "teacher"
     ]
   },
   {
@@ -624,6 +824,11 @@
           "ja": "古典の授業。白石先生の様子がいつもと違う"
         }
       }
+    ],
+    "cast": [
+      "mob_student",
+      "naruse",
+      "teacher"
     ]
   },
   {
@@ -653,7 +858,28 @@
           "ja": "ナルセが教科書を探している"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_classroom_nap/",
+    "id": "daily_classroom_nap",
+    "title": {
+      "ja": "五時間目の前"
+    },
+    "location": "classroom",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "locations": [
+        "classroom"
+      ]
+    }
   },
   {
     "category": "action",
@@ -688,6 +914,12 @@
           "ja": "アオイたちがクレープの話で盛り上がっている"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "emili",
+      "naruse",
+      "shion"
     ]
   },
   {
@@ -722,6 +954,10 @@
           "ja": "家庭科の調理実習。アオイとエミリが同じ班だ"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "emili"
     ]
   },
   {
@@ -758,6 +994,13 @@
           "ja": "掃除当番の放課後。いつもの顔ぶれ"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "emili",
+      "naruse",
+      "shion",
+      "teacher"
     ]
   },
   {
@@ -787,6 +1030,9 @@
           "ja": "ナルセが机に突っ伏している"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
   },
   {
@@ -819,6 +1065,9 @@
           "ja": "窓の外は雨。教室にナルセが残っている"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
   },
   {
@@ -852,6 +1101,9 @@
           "ja": "白石先生が進路希望調査票を手に呼んでいる"
         }
       }
+    ],
+    "cast": [
+      "teacher"
     ]
   },
   {
@@ -888,6 +1140,12 @@
           "ja": "みんなが教室に残っている"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "emili",
+      "naruse",
+      "shion"
     ]
   },
   {
@@ -917,6 +1175,10 @@
           "ja": "日直の日誌を職員室に届けないと"
         }
       }
+    ],
+    "cast": [
+      "teacher",
+      "teacher_colleague"
     ]
   },
   {
@@ -946,6 +1208,9 @@
           "ja": "白石先生が窓の前で首をかしげている"
         }
       }
+    ],
+    "cast": [
+      "teacher"
     ]
   },
   {
@@ -953,8 +1218,9 @@
     "baseUrl": "/scenarios/action/daily_courtyard/",
     "id": "daily_courtyard",
     "title": {
-      "ja": "中庭: 昼下がりのベンチ"
+      "ja": "中庭のベンチ"
     },
+    "location": "courtyard",
     "fallback": true,
     "availability": {
       "timeSlots": [
@@ -966,6 +1232,92 @@
         "courtyard"
       ]
     }
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_courtyard_aoi_lost/",
+    "id": "daily_courtyard_aoi_lost",
+    "title": {
+      "ja": "移動教室の迷子"
+    },
+    "location": "courtyard",
+    "availability": {
+      "timeSlots": [
+        "morning"
+      ],
+      "dayRange": {
+        "from": 2,
+        "to": 4
+      },
+      "locations": [
+        "courtyard"
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "common_d01_homeroom"
+          }
+        ]
+      }
+    },
+    "priority": -5,
+    "actionHints": [
+      {
+        "locationId": "courtyard",
+        "hintCharacterIds": [
+          "aoi"
+        ],
+        "hintText": {
+          "ja": "中庭で誰かが校舎の見取り図とにらめっこしている"
+        }
+      }
+    ],
+    "cast": [
+      "aoi"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_courtyard_emili_onigiri/",
+    "id": "daily_courtyard_emili_onigiri",
+    "title": {
+      "ja": "コンビニおにぎりの開け方"
+    },
+    "location": "courtyard",
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "dayRange": {
+        "from": 5,
+        "to": 20
+      },
+      "locations": [
+        "courtyard"
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "emili_d03_cafeteria"
+          }
+        ]
+      }
+    },
+    "priority": -5,
+    "actionHints": [
+      {
+        "locationId": "courtyard",
+        "hintCharacterIds": [
+          "emili"
+        ],
+        "hintText": {
+          "ja": "中庭の植え込みの陰に、見覚えのある深紅のボブが"
+        }
+      }
+    ],
+    "cast": [
+      "emili"
+    ]
   },
   {
     "category": "action",
@@ -1001,6 +1353,9 @@
           "ja": "エミリが自販機の前で真剣な顔をしている"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1038,6 +1393,10 @@
           "ja": "中庭でアオイがプリントを抱えている"
         }
       }
+    ],
+    "cast": [
+      "aoi",
+      "naruse"
     ]
   },
   {
@@ -1067,20 +1426,61 @@
           "ja": "白石先生が自販機の前で固まっている"
         }
       }
+    ],
+    "cast": [
+      "naruse",
+      "teacher"
     ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_courtyard_pigeon/",
+    "id": "daily_courtyard_pigeon",
+    "title": {
+      "ja": "鳩とパンくず"
+    },
+    "location": "courtyard",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "afternoon"
+      ],
+      "locations": [
+        "courtyard"
+      ]
+    }
   },
   {
     "category": "action",
     "baseUrl": "/scenarios/action/daily_library/",
     "id": "daily_library",
     "title": {
-      "ja": "図書室: 静かな時間"
+      "ja": "静かな図書室"
     },
+    "location": "library",
     "fallback": true,
     "availability": {
       "timeSlots": [
         "morning",
         "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "library"
+      ]
+    }
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_library_return/",
+    "id": "daily_library_return",
+    "title": {
+      "ja": "返却ポスト"
+    },
+    "location": "library",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
         "afterschool"
       ],
       "locations": [
@@ -1122,6 +1522,9 @@
           "ja": "窓辺の席でシオンが本を読んでいる"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -1162,6 +1565,52 @@
           "ja": "郷土資料室の机に、黒革の手帳が置きっぱなしになっている"
         }
       }
+    ],
+    "cast": [
+      "shion"
+    ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_library_shion_shelf/",
+    "id": "daily_library_shion_shelf",
+    "title": {
+      "ja": "届かない棚"
+    },
+    "location": "library",
+    "availability": {
+      "timeSlots": [
+        "morning"
+      ],
+      "dayRange": {
+        "from": 4,
+        "to": 20
+      },
+      "locations": [
+        "library"
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "shion_d01_library"
+          }
+        ]
+      }
+    },
+    "priority": -5,
+    "actionHints": [
+      {
+        "locationId": "library",
+        "hintCharacterIds": [
+          "shion"
+        ],
+        "hintText": {
+          "ja": "シオンが返却された本を棚に戻している"
+        }
+      }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -1202,6 +1651,9 @@
           "ja": "閉館間際の図書室に、シオンが残っている"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -1221,7 +1673,10 @@
       "locations": [
         "rooftop"
       ]
-    }
+    },
+    "cast": [
+      "god"
+    ]
   },
   {
     "category": "action",
@@ -1257,6 +1712,9 @@
           "ja": "エミリがスマホを覗き込んで何かつぶやいている"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1286,6 +1744,9 @@
           "ja": "ナルセが夕日の屋上で黄昏れている"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
   },
   {
@@ -1315,7 +1776,29 @@
           "ja": "ナルセが屋上へ続く階段で雑誌を読んでいる"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_rooftop_town/",
+    "id": "daily_rooftop_town",
+    "title": {
+      "ja": "屋上から見える神社"
+    },
+    "location": "rooftop",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "rooftop"
+      ]
+    }
   },
   {
     "category": "action",
@@ -1328,6 +1811,25 @@
     "availability": {
       "timeSlots": [
         "morning",
+        "afternoon",
+        "afterschool"
+      ],
+      "locations": [
+        "sports_ground"
+      ]
+    }
+  },
+  {
+    "category": "action",
+    "baseUrl": "/scenarios/action/daily_sports_ground_ball/",
+    "id": "daily_sports_ground_ball",
+    "title": {
+      "ja": "ファウルボール"
+    },
+    "location": "sports_ground",
+    "fallback": true,
+    "availability": {
+      "timeSlots": [
         "afternoon",
         "afterschool"
       ],
@@ -1374,6 +1876,11 @@
           "ja": "購買のレジで誰かが揉めているらしい"
         }
       }
+    ],
+    "cast": [
+      "cafeteria_lady",
+      "emili",
+      "mob_student"
     ]
   },
   {
@@ -1414,6 +1921,9 @@
           "ja": "エミリがそわそわしながら誰かを待っている"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1454,6 +1964,9 @@
           "ja": "教室の掃除当番、今日は誰だっけ"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1494,6 +2007,9 @@
           "ja": "図書室なら、神社のことが分かるかもしれない"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -1534,6 +2050,10 @@
           "ja": "シオンが図書室の奥で誰かを待っている"
         }
       }
+    ],
+    "cast": [
+      "shion",
+      "teacher"
     ]
   },
   {
@@ -1574,6 +2094,9 @@
           "ja": "郷土資料室の灯りがついている"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -1614,6 +2137,9 @@
           "ja": "アオイが公園を散歩しているらしい"
         }
       }
+    ],
+    "cast": [
+      "aoi"
     ]
   },
   {
@@ -1657,6 +2183,9 @@
           "ja": "アオイと約束した遊園地"
         }
       }
+    ],
+    "cast": [
+      "aoi"
     ]
   },
   {
@@ -1768,6 +2297,9 @@
           "ja": "ベランダのスニーカーが限界を迎えている"
         }
       }
+    ],
+    "cast": [
+      "takashi_mom"
     ]
   },
   {
@@ -1814,6 +2346,9 @@
           "ja": "ナルセが商店街のカラオケの前にいる"
         }
       }
+    ],
+    "cast": [
+      "naruse"
     ]
   },
   {
@@ -1888,6 +2423,9 @@
           "ja": "商店街のゲームセンターで、赤い髪の子を見かけたらしい"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1930,6 +2468,9 @@
           "ja": "公園のベンチに、赤い髪の子がいたらしい"
         }
       }
+    ],
+    "cast": [
+      "emili"
     ]
   },
   {
@@ -1979,6 +2520,9 @@
           "ja": "商店街の甘味処で、見覚えのある横顔を見たらしい"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -2018,6 +2562,9 @@
           "ja": "シオンが神社の現地調査をすると言っていた"
         }
       }
+    ],
+    "cast": [
+      "shion"
     ]
   },
   {
@@ -2148,7 +2695,7 @@
     "title": {
       "ja": "一本の傘"
     },
-    "location": "school_gate",
+    "location": "entrance_rain",
     "consumesTurn": true,
     "availability": {
       "timeSlots": [
@@ -2194,6 +2741,32 @@
   },
   {
     "category": "forced",
+    "baseUrl": "/scenarios/forced/common_d01_homeroom/",
+    "id": "common_d01_homeroom",
+    "title": {
+      "ja": "転入生は隣の部屋の"
+    },
+    "location": "classroom",
+    "consumesTurn": true,
+    "availability": {
+      "timeSlots": [
+        "morning"
+      ],
+      "days": [
+        1
+      ],
+      "after": {
+        "all": [
+          {
+            "scenarioId": "prologue_day1"
+          }
+        ]
+      }
+    },
+    "priority": 20
+  },
+  {
+    "category": "forced",
     "baseUrl": "/scenarios/forced/common_d11_button/",
     "id": "common_d11_button",
     "title": {
@@ -2217,7 +2790,7 @@
     "title": {
       "ja": "春の嵐とリムジン"
     },
-    "location": "school_gate",
+    "location": "entrance_rain",
     "consumesTurn": true,
     "availability": {
       "timeSlots": [
@@ -2791,7 +3364,7 @@
     "baseUrl": "/scenarios/call/aoi_call_kairanban/",
     "id": "aoi_call_kairanban",
     "title": {
-      "ja": "回覧板と糸電話"
+      "ja": "回覧板と仕切り板"
     },
     "availability": {
       "dayRange": {
@@ -2814,7 +3387,7 @@
     "baseUrl": "/scenarios/call/aoi_call_quiz/",
     "id": "aoi_call_quiz",
     "title": {
-      "ja": "小テスト前の確認通話"
+      "ja": "段ボールの出し方"
     },
     "availability": {
       "dayRange": {

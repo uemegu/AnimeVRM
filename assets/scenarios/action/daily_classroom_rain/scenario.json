@@ -35,7 +35,7 @@
       "speaker": "ナルセ",
       "text": "雨だりー。髪うねるし、靴濡れるし",
       "background": "painted_classroom",
-      "rain": true,
+      "timeOfDay": "rainy",
       "avatars": {
         "naruse": {
           "position": "center",
@@ -46,6 +46,7 @@
         }
       },
       "camera": "medium",
+      "ambience": "/se/rain_loop.mp3",
       "voiceUrl": "v_s1_01156e4c.mp3"
     },
     {

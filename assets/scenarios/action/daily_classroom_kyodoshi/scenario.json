@@ -56,8 +56,7 @@
       "avatars": {
         "teacher": {
           "expression": "relaxed",
-          "expressionWeight": 1,
-          "motion": "chin_rest"
+          "expressionWeight": 1
         }
       },
       "voiceUrl": "v_s2_1fc6092c.mp3"
@@ -95,6 +94,7 @@
           "motion": "mob_chat_gesture"
         }
       },
+      "seUrl": "/se/school_chime_end.mp3",
       "voiceUrl": "v_s5_66cf6c83.mp3"
     },
     {

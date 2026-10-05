@@ -108,7 +108,7 @@
         {
           "id": "emili_chisel_cute",
           "text": {
-            "ja": "バレバレすぎて可愛いな"
+            "ja": "セバスチャンさんに、ありがとうって伝えといて"
           },
           "goto": "c1",
           "addAffinity": {
@@ -131,12 +131,29 @@
       "id": "c1",
       "speaker": "エミリ",
       "text": {
-        "ja": "か、かわ……！？　な、何言ってるのよバカ！　見つかったから切るわ！"
+        "ja": "……なんでアンタが先にセバスチャンにお礼言うのよ"
       },
-      "expression": "surprised",
+      "expression": "komari",
       "expressionWeight": 1,
-      "nextStepId": null,
-      "voiceUrl": "v_c1_aba19405.mp3"
+      "nextStepId": "step_11"
+    },
+    "step_11": {
+      "id": "step_11",
+      "speaker": "セバスチャン",
+      "text": {
+        "ja": "恐れ入ります"
+      },
+      "nextStepId": "step_12"
+    },
+    "step_12": {
+      "id": "step_12",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "セバスチャン！！　……き、切るわ！"
+      },
+      "expression": "angry",
+      "expressionWeight": 1,
+      "nextStepId": null
     },
     "c2": {
       "id": "c2",

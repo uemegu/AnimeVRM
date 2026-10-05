@@ -37,7 +37,7 @@
           "position": "center",
           "expression": "surprised",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "Standing Idle",
           "lookAtTarget": "forward"
         }
       },

@@ -141,7 +141,7 @@
       "bgm": "silence",
       "avatars": {
         "aoi": {
-          "motion": "pose_pray_hands",
+          "motion": "clasp_hands_front",
           "expression": "relaxed",
           "expressionWeight": 1,
           "lookAtTarget": "forward"
@@ -163,7 +163,7 @@
       "speaker": "女神",
       "text": "『どうせ無理』……？　自分では何もせず神頼みとは、虫酸が走るほど情けない！",
       "flashEffect": "white",
-      "seUrl": "/se/piano_note.mp3",
+      "seUrl": "/se/divine_bell.mp3",
       "background": "god_realm",
       "timeOfDay": "divine",
       "bgm": "mysterious",

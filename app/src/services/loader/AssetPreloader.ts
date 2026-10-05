@@ -5,9 +5,20 @@ import { ScenarioPackage } from '../../types/scenario';
 import { CHARACTERS } from '../../data/characters';
 import { DayPhase } from '../../types/game';
 import { outfitModelUrl } from '../stage/sceneView';
+import { resolveAssetUrl } from '../../utils/path';
+import { installBoundedAssetCache } from './assetCache';
 
-// Three.js のメモリキャッシュを有効化
-THREE.Cache.enabled = true;
+// Three.js のメモリキャッシュを、容量の上限付きで有効化
+installBoundedAssetCache();
+
+/**
+ * 先読みしたデータを three.js のローダー（FileLoader）が使えるよう、同じキー（file:<URL>）で置く。
+ * 画像（ImageLoader が別のキーで画像要素を持つ）と音声（three.js を通さない）はメモリに持たず、
+ * 取得してブラウザのキャッシュに載せるだけにする
+ */
+function cacheForLoaders(resolvedUrl: string, buffer: ArrayBuffer): void {
+  if (/\.(vrm|glb|gltf|fbx|bin|wasm)(\?|$)/i.test(resolvedUrl)) THREE.Cache.add(`file:${resolvedUrl}`, buffer);
+}
 
 export interface PreloadItem {
   id: string;
@@ -103,11 +114,11 @@ export class AssetPreloader {
     await Promise.all(
       validUrls.map(async (url) => {
         try {
-          const res = await fetch(url);
+          // 公開先のサブディレクトリ（base）を付けた URL で取得し、ローダーが引くのと同じキーでキャッシュする
+          const resolved = resolveAssetUrl(url);
+          const res = await fetch(resolved);
           if (res.ok) {
-            const buffer = await res.arrayBuffer();
-            // Three.js キャッシュへ追加
-            THREE.Cache.add(url, buffer);
+            cacheForLoaders(resolved, await res.arrayBuffer());
             this.cachedUrls.add(url);
           }
         } catch (e) {
@@ -148,14 +159,15 @@ export class AssetPreloader {
     onDelta: (bytesDelta: number) => void
   ): Promise<void> {
     try {
-      const response = await fetch(url);
+      const resolved = resolveAssetUrl(url);
+      const response = await fetch(resolved);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status} for ${url}`);
       }
 
       if (!response.body) {
         const buffer = await response.arrayBuffer();
-        THREE.Cache.add(url, buffer);
+        cacheForLoaders(resolved, buffer);
         onDelta(buffer.byteLength);
         return;
       }
@@ -182,7 +194,7 @@ export class AssetPreloader {
         position += chunk.length;
       }
 
-      THREE.Cache.add(url, allChunks.buffer);
+      cacheForLoaders(resolved, allChunks.buffer);
     } catch (e) {
       console.warn(`[AssetPreloader] Fetch failed for ${url}:`, e);
     }

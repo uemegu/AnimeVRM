@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { soundManager } from '../../services/audio/SoundManager';
 import './ChoiceBox.css';
+import { resolveAssetUrl } from '../../utils/path';
 
 export interface ChoiceBoxProps {
   choices: Array<{
@@ -195,10 +196,10 @@ export const ChoiceBox: React.FC<ChoiceBoxProps> = ({ choices, onSelect, timeLim
       {/* 3. Left Character: Hero with dark blue silhouette shadow */}
       <div className="adv-cutin-char adv-cutin-left">
         <div className="adv-char-shadow">
-          <img src="/img/hero.avif" alt="" />
+          <img src={resolveAssetUrl('/img/hero.avif')} alt="" />
         </div>
         <div className="adv-char-main">
-          <img src="/img/hero.avif" alt="Hero" />
+          <img src={resolveAssetUrl('/img/hero.avif')} alt="Hero" />
         </div>
       </div>
 

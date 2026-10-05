@@ -23,6 +23,7 @@
     }
   },
   "location": "library",
+  "bgm": "sunlight_on_ink",
   "timeOfDay": "evening",
   "consumesTurn": true,
   "scenes": [
@@ -35,31 +36,70 @@
       "timeOfDay": "evening",
       "avatars": {
         "shion": {
-          "position": "center",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "chin_rest",
           "lookAtTarget": "camera"
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s1_79664da1.mp3"
     },
     {
       "id": "s2",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "本当か！"
+      "text": "本当か！",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s3",
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "解呪の条件は一つ。『想う相手に、偽りのない本心を５秒で告げること』。打算の告白は通らない",
-      "avatars": {
-        "shion": {
-          "motion": "Standing Idle"
-        }
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
       },
       "voiceUrl": "v_s3_b2f12124.mp3"
     },
@@ -67,7 +107,20 @@
       "id": "s4",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "……やっぱり、そうなるのか"
+      "text": "……やっぱり、そうなるのか",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s5",
@@ -75,19 +128,71 @@
       "speaker": "シオン",
       "text": "それと、もう一つ。私の検証メモを並べてみたの",
       "cutin": "/cutins/items/shion_notebook.avif",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s5_ff091b62.mp3"
     },
     {
       "id": "s6",
-      "text": "――第七日、降水確率ゼロ％の日に、境内でだけ局地的な土砂降り"
+      "text": "――第七日、降水確率ゼロ％の日に、境内でだけ局地的な土砂降り",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s7",
-      "text": "――第九日、点検済みの脚立の金具が、ひとりでに緩む"
+      "text": "――第九日、点検済みの脚立の金具が、ひとりでに緩む",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s8",
-      "text": "――第十一日、無風の境内で、神輿蔵の扉だけを閉める旋風"
+      "text": "――第十一日、無風の境内で、神輿蔵の扉だけを閉める旋風",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s9",
@@ -95,6 +200,19 @@
       "speaker": "シオン",
       "text": "どれも、私とあなたが二人きりの時。そして、どれも私たちを近づけている",
       "cutin": false,
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s9_99521009.mp3"
     },
     {
@@ -107,6 +225,19 @@
           "lookAtTarget": "forward"
         }
       },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s10_f84f2d64.mp3"
     },
     {
@@ -114,7 +245,20 @@
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "……あれ全部、女神の仕込みだったのかよ！？",
-      "focusLines": true
+      "focusLines": true,
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s12",
@@ -125,6 +269,19 @@
         "shion": {
           "lookAtTarget": "camera"
         }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
       },
       "voiceUrl": "v_s12_3d3e0548.mp3"
     },
@@ -140,11 +297,37 @@
         }
       },
       "camera": "close",
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.1,
+          1.7
+        ],
+        "target": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 36
+      },
       "voiceUrl": "v_s13_01b540e4.mp3"
     },
     {
       "id": "s14",
       "text": "",
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.1,
+          1.7
+        ],
+        "target": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 36
+      },
       "choices": [
         {
           "id": "shion_d15_yes",
@@ -178,6 +361,19 @@
           "lookAtTarget": "forward"
         }
       },
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.1,
+          1.7
+        ],
+        "target": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 36
+      },
       "voiceUrl": "v_c2_be7cf60f.mp3"
     },
     {
@@ -185,7 +381,7 @@
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "……言わないで。それが、もし私だったとしても",
-      "bgm": "bad_ending",
+      "bgm": "where_the_rain_stops",
       "avatars": {
         "shion": {
           "expression": "sad",
@@ -194,13 +390,39 @@
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_merge_397d1ecf.mp3"
     },
     {
       "id": "s17",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "え……"
+      "text": "え……",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s18",
@@ -211,6 +433,19 @@
         "shion": {
           "lookAtTarget": "camera"
         }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
       },
       "voiceUrl": "v_s18_17fc85e9.mp3"
     },
@@ -226,6 +461,19 @@
         }
       },
       "camera": "close",
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.1,
+          1.7
+        ],
+        "target": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 36
+      },
       "voiceUrl": "v_s19_e0697e17.mp3"
     },
     {
@@ -235,9 +483,11 @@
       "text": "私の気持ちもよ。蔵で心臓が鳴ったのは、あなたが好きだから？　それとも、暗闇と吊り橋効果のせい？",
       "avatars": {
         "shion": {
+          "position": "center",
           "motion": "clasp_hands_front"
         }
       },
+      "camera": "medium",
       "voiceUrl": "v_s20_4f3f0879.mp3"
     },
     {

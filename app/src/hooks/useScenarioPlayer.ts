@@ -5,6 +5,9 @@ import { soundManager } from '../services/audio/SoundManager';
 import { useLanguage } from '../contexts/LanguageContext';
 import { EMPTY_STAGE, StageState, initialStageState, mergeStageState } from '../services/stage/sceneView';
 
+/** 環境音の音量（効果音の音量に対する倍率。会話の邪魔にならないよう控えめに） */
+const AMBIENCE_VOLUME_SCALE = 0.5;
+
 /** シナリオ進行の通知（ゲーム状態への反映は呼び出し側で行う） */
 export interface ScenarioProgress {
   scenario: ScenarioPackage;
@@ -207,6 +210,13 @@ export function useScenarioPlayer({ onProgress }: ScenarioPlayerOptions) {
       soundManager.stopVoice();
     }
   }, [scenario?.id, currentScene?.id, currentScene?.voiceUrl, currentScene?.seUrl, clearAutoTimer]);
+
+  // 環境音（雨などのループ）。指定が変わったら差し替え、シナリオを終えたら止める
+  const ambience = stage.ambience;
+  useEffect(() => {
+    if (!ambience) return;
+    return soundManager.playLoopSe(ambience, AMBIENCE_VOLUME_SCALE);
+  }, [ambience]);
 
   useEffect(() => clearAutoTimer, [clearAutoTimer]);
 

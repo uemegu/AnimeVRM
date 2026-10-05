@@ -24,56 +24,63 @@ export const InterludeOverlay = forwardRef<InterludeOverlayHandle>(
     const [subtitle, setSubtitle] = useState('');
 
     const isRunningRef = useRef(false);
+    /** 実行中の幕間。途中で次の幕間が頼まれたら、終わってから続けて流す（捨てると画面の切り替えが止まる） */
+    const queueRef = useRef<Promise<void>>(Promise.resolve());
+
+    const play = async (options: InterludeTransitionOptions) => {
+      isRunningRef.current = true;
+
+      const defaultTitle = lang === 'ja' ? '5秒で告白' : '5 Seconds Confession';
+      const defaultSubtitle = '5 SECONDS CONFESSION';
+
+      setTitle(options.title ?? defaultTitle);
+      setSubtitle(options.subtitle ?? defaultSubtitle);
+
+      const holdMs = options.holdDurationMs ?? 320;
+
+      // 1. 表示開始
+      setIsExiting(false);
+      setIsCovered(false);
+      setIsVisible(true);
+
+      // 次フレームでスライドインアニメーション開始
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      setIsCovered(true);
+
+      // 2. スライドイン完了待ち (420ms + バッファ)
+      await new Promise((resolve) => setTimeout(resolve, 430));
+
+      // 3. 画面全体が覆われた状態でコールバック実行
+      if (options.onCovered) {
+        try {
+          await options.onCovered();
+        } catch (err) {
+          console.error('Error during interlude onCovered:', err);
+        }
+      }
+
+      // 4. タイトルを読み取れるようホールド
+      await new Promise((resolve) => setTimeout(resolve, holdMs));
+
+      // 5. スライドアウト開始
+      setIsCovered(false);
+      setIsExiting(true);
+
+      // スライドアウト完了待ち
+      await new Promise((resolve) => setTimeout(resolve, 430));
+
+      // 6. リセット
+      setIsVisible(false);
+      setIsExiting(false);
+      isRunningRef.current = false;
+    };
 
     useImperativeHandle(ref, () => ({
       isRunning: () => isRunningRef.current,
-      playTransition: async (options: InterludeTransitionOptions = {}) => {
-        if (isRunningRef.current) return;
-        isRunningRef.current = true;
-
-        const defaultTitle = lang === 'ja' ? '5秒で告白' : '5 Seconds Confession';
-        const defaultSubtitle = '5 SECONDS CONFESSION';
-
-        setTitle(options.title ?? defaultTitle);
-        setSubtitle(options.subtitle ?? defaultSubtitle);
-
-        const holdMs = options.holdDurationMs ?? 320;
-
-        // 1. 表示開始
-        setIsExiting(false);
-        setIsCovered(false);
-        setIsVisible(true);
-
-        // 次フレームでスライドインアニメーション開始
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        setIsCovered(true);
-
-        // 2. スライドイン完了待ち (420ms + バッファ)
-        await new Promise((resolve) => setTimeout(resolve, 430));
-
-        // 3. 画面全体が覆われた状態でコールバック実行
-        if (options.onCovered) {
-          try {
-            await options.onCovered();
-          } catch (err) {
-            console.error('Error during interlude onCovered:', err);
-          }
-        }
-
-        // 4. タイトルを読み取れるようホールド
-        await new Promise((resolve) => setTimeout(resolve, holdMs));
-
-        // 5. スライドアウト開始
-        setIsCovered(false);
-        setIsExiting(true);
-
-        // スライドアウト完了待ち
-        await new Promise((resolve) => setTimeout(resolve, 430));
-
-        // 6. リセット
-        setIsVisible(false);
-        setIsExiting(false);
-        isRunningRef.current = false;
+      playTransition: (options: InterludeTransitionOptions = {}) => {
+        const next = queueRef.current.then(() => play(options));
+        queueRef.current = next.catch(() => {});
+        return next;
       },
     }));
 

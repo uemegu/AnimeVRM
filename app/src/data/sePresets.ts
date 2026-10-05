@@ -3,7 +3,7 @@
  * 画面側はファイル名や音量を持たず、ID で soundManager.playUiSe を呼ぶ
  */
 
-export type UiSeId = 'shown' | 'hover' | 'select' | 'cancel' | 'mailNotification' | 'phoneVibe';
+export type UiSeId = 'shown' | 'hover' | 'select' | 'cancel' | 'mailNotification' | 'phoneVibe' | 'callEnd';
 
 export interface SePreset {
   /** 音声ファイルパス（public配下） */
@@ -25,4 +25,6 @@ export const UI_SE_PRESETS: Record<UiSeId, SePreset> = {
   mailNotification: { url: '/sounds/mail_notification.mp3', volumeScale: 1.0 },
   /** 電話の着信バイブ（ループ再生） */
   phoneVibe: { url: '/sounds/phone_vibe.mp3', volumeScale: 1.0 },
+  /** 電話を切った音（通話の最後まで進んだとき） */
+  callEnd: { url: '/se/call_end_tone.mp3', volumeScale: 0.8 },
 };

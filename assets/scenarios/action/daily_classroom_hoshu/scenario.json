@@ -48,7 +48,7 @@
           "position": "left",
           "expression": "sad",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "Standing Idle",
           "lookAtTarget": "teacher"
         },
         "teacher": {

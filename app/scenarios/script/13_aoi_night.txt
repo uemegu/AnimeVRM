@@ -1,0 +1,115 @@
+=== call aoi_call_kairanban | 回覧板と仕切り板
+character: aoi
+priority: 1
+model: /models/aoi/aoi-private.vrm
+avail: {"dayRange": {"from": 2, "to": 6}, "after": {"all": [{"scenarioId": "prologue_day1"}]}}
+---
+aoi: タカシくん、今ちょっとだけいい？　お母さんから回覧板預かってて、渡し忘れちゃった {expr=komari}
+aoi: 明日の朝渡すね。『町内清掃のお知らせ』が入ってるって、おばさんに伝えといて {expr=neutral}
+player: 町内清掃！？　急ぎだな。……俺も出る
+aoi: 言うと思った。だから先に教えたの {expr=happy}
+aoi: ……ねえ。このベランダの仕切り板、薄いね。タカシくんの部屋のテレビ、ちょっと聞こえてる {expr=relaxed}
+player: ……え、マジで？
+aoi: 昨日の夜、ずっと『落ちない油汚れ』の動画見てたでしょ {expr=happy}
+?
+> aoi_kairanban_remember | ……音、気をつける | c1 | aff=aoi:1
+> aoi_kairanban_forgot | 換気扇の油は、つけ置きが正解なんだよ | c2 | aff=aoi:2
+*c1
+aoi: ううん、いいの。……静かすぎるより、ちょっと音がする方が落ち着く {expr=relaxed}
+-> merge
+*c2
+aoi: ふふっ、知らないよ！　……でも、ちょっと見てみたくなった {expr=happy}
+*merge
+aoi: じゃあ明日ね。おやすみ、タカシくん {expr=relaxed}
+
+=== mail aoi_mail_photo | 誤爆写真
+character: aoi
+priority: 1
+preview: 明日の体育ってグラウンドだっけ？
+time: 22:31
+avail: {"dayRange": {"from": 3, "to": 10}, "after": {"all": [{"scenarioId": "prologue_day1"}]}}
+---
+aoi 22:30: 明日の体育ってグラウンドだっけ？雨降りそう
+player 22:30: 雨なら体育館シューズ持参って、白石先生が言ってた
+aoi 22:31: 了解！ありがと！
+aoi 22:31: [image=/mail/aoi/selfie_mistake.avif; retract=2.5]
+aoi 22:31: 間違えた間違えた間違えた！！！
+aoi 22:31: 前の学校の友達に送るやつ！！
+aoi 22:32: 見てないよね！？見てないって言って！！
+> aoi_photo_seen | ちょんまげと白塗りパック、しっかり確認した | | aff=aoi:1
+  aoi 22:33: うわあああ見られたぁぁぁ
+  aoi 22:33: [stamp=/stamps/aoi/rabbit_cry.avif]
+  aoi 22:33: 明日会ったら怒るからね！！
+> aoi_photo_notseen | 何も見てない。おやすみ | | aff=aoi:2
+  aoi 22:33: ……絶対見たでしょ
+  aoi 22:34: でも、ありがと
+  aoi 22:34: [stamp=/stamps/aoi/rabbit_bow.avif]
+
+=== call aoi_call_quiz | 段ボールの出し方
+character: aoi
+priority: 1
+model: /models/aoi/aoi-private.vrm
+avail: {"dayRange": {"from": 8, "to": 14}, "after": {"all": [{"scenarioId": "aoi_d02_library"}]}}
+---
+aoi: タカシくん、今いい？　お母さんがまだ帰ってなくて……このマンションって、段ボール何曜日に出せばいいの？ {expr=komari}
+player: 資源ごみは第二・第四水曜。紐で十字に縛って、ガムテープは剥がす。伝票も剥がせよ、名前と住所が書いてあるから
+aoi: ……ごめん、メモするからもう一回ゆっくり {expr=happy}
+: （ペンの音。アオイの後ろに、封をしたままの段ボールが積んである）
+player: ……まだ結構残ってるな
+aoi: うん。引っ越して二週間なのに、半分も開けてないの {expr=relaxed}
+aoi: 開けたら、前の学校のものばっかり出てきそうで。……寄せ書きとか {expr=sad}
+?
+> aoi_quiz_keep | 次の水曜までに、一緒に開けるか？　畳むのは得意だ | c1 | aff=aoi:2
+> aoi_quiz_next | 無理に開けなくてもいいだろ。急ぐもんでもないし | c2 | aff=aoi:1
+*c1
+aoi: ……段ボール畳むのが得意な人、初めて見た {expr=happy}
+aoi: じゃあ、お願いしようかな。お母さんにも言っとく {expr=relaxed}
+-> bye
+*c2
+aoi: ……うん {expr=neutral}
+aoi: なんか、それ聞いたらちょっと楽になった {expr=relaxed}
+*bye
+aoi: 水曜ね。……おやすみ、タカシくん {expr=happy}
+
+=== call aoi_call_bento | 明日のお弁当の相談
+character: aoi
+priority: 1
+model: /models/aoi/aoi-private.vrm
+avail: {"days": [7, 14], "after": {"all": [{"scenarioId": "aoi_d06_park"}]}}
+---
+aoi: タカシくん、お風呂上がり？　ちょっと聞きたいことがあって {expr=happy}
+aoi: 明日のお弁当、鶏肉安かったから唐揚げにするの。タカシくんの分も作ろうと思って {expr=happy}
+aoi: 最近購買のパンばっかりでしょ？　……で、ニンニク醤油と生姜醤油、どっち派？ {expr=neutral}
+?
+> aoi_bento_ginger | 生姜醤油。さっぱりしてるのがいい | c1 | aff=aoi:2
+> aoi_bento_garlic | ニンニク醤油。ガッツリ | c2 | aff=aoi:1
+*c1
+aoi: 了解！　あと卵焼きは……甘いのでいいんだよね？ {expr=happy}
+player: アオイの甘い卵焼き、好きだ
+aoi: ……っ、気合い入れちゃお {expr=komari}
+-> end
+*c2
+aoi: 午後の授業、隣の人に怒られないでね？ {expr=happy}
+-> end
+
+=== call aoi_call_umbrella | 小学生の時の黄色い傘
+character: aoi
+priority: 1
+model: /models/aoi/aoi-private.vrm
+avail: {"weather": ["rain"], "dayRange": {"from": 8, "to": 15}, "after": {"all": [{"scenarioId": "aoi_d02_library"}]}}
+---
+aoi: タカシくん、傘ありがとう。濡れずに帰れたよ。明日、綺麗に畳んで返すね {expr=happy}
+aoi: ……それでね。玄関で傘を干してたら、思い出しちゃったの {expr=relaxed}
+aoi: 小学生の時、急な雨で、タカシくんが自分の黄色い傘を貸してくれたよね。自分はランドセル頭に乗せて走って帰って {expr=happy}
+player: ……そんなこともあったっけな
+aoi: タカシくんは忘れてても、私は覚えてるよ {expr=relaxed}
+?
+> aoi_umbrella_cold | アオイが風邪ひかなきゃ、それでいいんだよ | c1 | aff=aoi:2
+> aoi_umbrella_grown | 今日はちゃんと置き傘あったからな。成長しただろ | c2 | aff=aoi:1
+*c1
+aoi: ……そういうとこ、昔からずるいんだから {expr=komari}
+-> merge
+*c2
+aoi: ふふっ、ほんとだ {expr=happy}
+*merge
+aoi: おやすみなさい、タカシくん {expr=relaxed}

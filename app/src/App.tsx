@@ -225,7 +225,7 @@ export const App: React.FC = () => {
   const activeLocationName = getLocationName(activeLocationId, lang);
   const cast = useMemo(() => resolveCast(stage, gameState.phase), [stage, gameState.phase]);
   const prewarm = useMemo(() => scenarioPrewarmAvatars(player.scenario, gameState.phase), [player.scenario, gameState.phase]);
-  const cameraShot = resolveCameraShot(currentScene, cast);
+  const cameraShot = resolveCameraShot(currentScene, cast, stage);
   const scrolling = useMemo(() => resolveScrollingBackground(stage, activeLocationId), [stage, activeLocationId]);
 
   // タイトル画面・進行フェーズ・シーンに応じたBGM（シーン個別指定があればそれを優先）
@@ -725,6 +725,7 @@ export const App: React.FC = () => {
               cg={stage.cg}
               cutin={stage.cutin}
               rain={stage.rain}
+              screenTransition={stage.screenTransition}
               onDialogueClick={player.advance}
               onChoiceClick={handleChoiceClick}
               onChoiceTimeout={player.timeoutChoice}

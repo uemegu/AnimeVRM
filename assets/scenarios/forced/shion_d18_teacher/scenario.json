@@ -38,12 +38,14 @@
           "position": "center",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "Standing Idle",
+          "motion": "pose_offer_can",
+          "heldItem": "can_coffee",
           "lookAtTarget": "camera"
         }
       },
       "camera": "medium",
       "cutin": "/cutins/items/canned_coffee.avif",
+      "seUrl": "/se/vending_can_drop.mp3",
       "voiceUrl": "v_s1_76194dfd.mp3"
     },
     {
@@ -75,7 +77,7 @@
         "teacher": {
           "expression": "relaxed",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "Standing Idle",
           "lookAtTarget": "forward"
         }
       },

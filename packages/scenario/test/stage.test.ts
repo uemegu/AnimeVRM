@@ -25,6 +25,42 @@ describe('舞台の状態', () => {
     expect(Object.keys(stageAtScene(scenario, 2).cast)).toEqual(['emili']);
   });
 
+  it('場所が変わったら一枚絵・カットインを下げて暗転し、白く光る切り替えや最初の場所の指定では暗転しないこと', () => {
+    const moving: ScenarioPackage = {
+      id: 'm',
+      title: 't',
+      location: 'shrine',
+      scenes: [
+        { id: 'm1', text: '', background: 'shrine', cutin: '/cutins/a.avif' },
+        { id: 'm2', text: '', cg: '/cg/b.avif' },
+        { id: 'm3', text: '', background: 'painted_library' },
+        { id: 'm4', text: '', background: 'god_realm', flashEffect: 'white', cutin: '/cutins/c.avif' },
+        { id: 'm5', text: '', background: 'shrine', screenTransition: 'eyelid_blink' },
+      ],
+    };
+    const stages = [0, 1, 2, 3, 4].map((i) => stageAtScene(moving, i));
+    expect(stages.map((s) => s.screenTransition)).toEqual([undefined, undefined, 'fade_black', undefined, 'eyelid_blink']);
+    expect(stages.map((s) => s.cutin?.url ?? null)).toEqual(['/cutins/a.avif', '/cutins/a.avif', null, '/cutins/c.avif', null]);
+    expect(stages.map((s) => s.cg?.url ?? null)).toEqual([null, '/cg/b.avif', null, null, null]);
+  });
+
+  it('小物は表情などの指定では引き継ぎ、モーションだけ変えたり false を指定したりすると手放すこと', () => {
+    const held: ScenarioPackage = {
+      id: 'h',
+      title: 't',
+      scenes: [
+        { id: 'h1', text: '', avatars: { aoi: { motion: 'pose_raise_can', heldItem: 'can_juice' } } },
+        { id: 'h2', text: '', avatars: { aoi: { expression: 'happy' } } },
+        { id: 'h3', text: '', avatars: { aoi: { motion: 'Standing Idle' } } },
+        { id: 'h4', text: '', avatars: { aoi: { motion: 'pose_phone_call', heldItem: { item: 'phone', hand: 'left' } } } },
+        { id: 'h5', text: '', avatars: { aoi: { heldItem: false } } },
+      ],
+    };
+    expect([0, 1, 2, 3, 4].map((i) => stageAtScene(held, i).cast.aoi.heldItem)).toEqual(['can_juice', 'can_juice', undefined, { item: 'phone', hand: 'left' }, undefined]);
+    const cast = resolveCast(stageAtScene(held, 0), { modelUrlFor: () => '/m.vrm', isLoopingMotion: () => true });
+    expect(cast[0].heldItem).toEqual({ item: 'can_juice' });
+  });
+
   it('特殊効果は指定したシーンから始め・止め、効果ごとに以降のシーンに引き継ぐこと', () => {
     const show: ScenarioPackage = {
       id: 'f',

@@ -4,6 +4,7 @@ import { soundManager } from '../../services/audio/SoundManager';
 import { useSoundMuted } from '../../hooks/useSoundMuted';
 import './TitleScreen.css';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { resolveAssetUrl } from '../../utils/path';
 
 export interface TitleScreenProps {
   hasSaveData: boolean;
@@ -246,7 +247,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               <div className="title-slit-inner">
                 <div className="title-slit-motion">
                   <img
-                    src={src}
+                    src={resolveAssetUrl(src)}
                     alt={CHARACTERS[id].name[lang]}
                     className="title-slit-img"
                     loading="eager"

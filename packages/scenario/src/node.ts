@@ -116,7 +116,14 @@ function buildCatalog(paths: WorkspacePaths, studio: Map<string, unknown>, scena
   const locations = studio.get('locations') as z.infer<typeof LocationFile> | undefined;
   const timesOfDay = studio.get('time-of-day') as z.infer<typeof TimeOfDayFile> | undefined;
   const bgm = studio.get('bgm') as z.infer<typeof BgmBook> | undefined;
+  const motions = studio.get('motions') as z.infer<typeof MotionBook> | undefined;
+  const motionsWith = (flag: 'seated' | 'locomotion') =>
+    motions && new Set(Object.entries(motions.motions).filter(([, m]) => m[flag]).map(([name]) => name));
   return {
+    seatPositions:
+      locations && new Map(Object.entries(locations.presets).map(([id, loc]) => [id, Object.values(loc.seats ?? {}).map((seat) => seat.position)])),
+    seatedMotions: motionsWith('seated'),
+    locomotionMotions: motionsWith('locomotion'),
     characterIds: characters && new Set(characters.characters.map((c) => c.id)),
     spriteKeys: characters && new Map(characters.characters.map((c) => [c.id, new Set((c.sprites ?? []).map((s) => s.key))])),
     locationIds: locations && new Set(Object.keys(locations.presets)),

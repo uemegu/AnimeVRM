@@ -48,7 +48,7 @@
           "position": "center",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "pose_hug_notebook",
           "lookAtTarget": "forward"
         }
       },
@@ -67,17 +67,21 @@
       "speaker": "シオン",
       "text": "まずいわ、ノートが――",
       "rain": true,
+      "timeOfDay": "rainy",
       "background": "shrine_rain",
       "avatars": {
         "shion": {
           "expression": "surprised",
           "expressionWeight": 1,
           "motion": "pose_hug_notebook",
+          "heldItem": "notebook",
           "effectText": "biku",
           "lookAtTarget": "camera"
         }
       },
       "focusLines": true,
+      "seUrl": "/se/sudden_rain.mp3",
+      "ambience": "/se/rain_loop.mp3",
       "voiceUrl": "v_s3_c27b9264.mp3"
     },
     {
@@ -156,7 +160,7 @@
       "avatars": {
         "shion": {
           "position": "center",
-          "motion": "chin_rest",
+          "motion": "pose_hug_notebook",
           "expression": "neutral",
           "expressionWeight": 1,
           "lookAtTarget": "forward",

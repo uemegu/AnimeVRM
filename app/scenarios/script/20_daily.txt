@@ -1,0 +1,723 @@
+#################### 第1章：タカシの清掃狂詩曲
+
+=== morning daily_taka_alkaline | 深夜三時のアルカリ電解水
+priority: -10
+location: home
+time: morning
+avail: {"dayRange": {"from": 2, "to": 20}}
+---
+takashi_mom: ……タカシ。換気扇の油受け、新品になってるんだけど {bg=home; time=morning; name=母}
+player: pH13.2の業務用アルカリ電解水が届いたんだ。夜中の三時に試した
+takashi_mom: 三時！？ {name=母}
+player: ひと拭きで、茶色い油の層がツルッと剥がれて……下から銀色のステンレスが…… {cutin=/cutins/takashi/halo_cleaning.avif}
+takashi_mom: ……あんた、またやったのね {cutin=off; name=母}
+?
+> daily_alkaline_gotoku | ついでにコンロの五徳も煮洗いしといた | c1
+> daily_alkaline_mirror | 次は風呂の鏡のウロコだ | c2
+*c1
+takashi_mom: ……助かるけど、ちゃんと寝なさい {name=母}
+-> end
+*c2
+takashi_mom: お願いだから学校では普通にしててね…… {name=母}
+-> end
+
+=== action daily_classroom_penbox | 筆箱のラインナップ
+priority: -10
+location: classroom
+time: day
+avail: {"timeSlots": ["morning"], "locations": ["classroom"]}
+hint: classroom | naruse | ナルセが机に突っ伏している
+---
+@ bg=painted_classroom; naruse.pos=center; naruse.expr=komari; naruse.motion=Standing Idle; naruse.look=camera; cam=medium
+naruse: ……タカシ。お前の筆箱から、なんか薬品の匂いすんだけど
+player: 無水エタノールのミニスプレーだな
+naruse: なんで筆箱に！？ {naruse.expr=surprised; naruse.fx=gaan}
+player: 机の溝の消しカスも、サッシの砂埃も、いつでもどこでも救出できる。即応清掃装備だ {cutin=/cutins/items/penbox.avif}
+naruse: 裁縫セットまで…… {naruse.expr=komari; naruse.sweat=jito}
+player: 雑巾の繕い用だ {cutin=off}
+?
+> daily_penbox_help | ナルセの机の溝もやってやろうか？ | c1
+> daily_penbox_close | 今日も異常なし（筆箱を閉じる） | c2
+*c1
+naruse: ……頼む。シャーペンの芯が三年分詰まってる {naruse.expr=relaxed; naruse.motion=Acknowledging}
+-> end
+*c2
+naruse: 異常なのはお前だよ {naruse.expr=angry; naruse.motion=Dismissing Gesture}
+-> end
+
+=== holiday daily_home_sneaker | スニーカーの白さの臨界点
+priority: -10
+location: home
+time: day
+avail: {"timeSlots": ["holiday"], "locations": ["home"]}
+hint: home | | ベランダのスニーカーが限界を迎えている
+---
+player: お前はまだ死んでいない。元の白さを取り戻してやる {bg=apartment_door; time=day; cutin=/cutins/takashi/halo_cleaning.avif}
+: （タライに過炭酸ナトリウムと重曹。改造した超音波歯ブラシで磨き、クエン酸で仕上げる） {cutin=off}
+: ――夕方。 {trans=fade_black; time=evening; cutin=/cutins/items/sneaker_shine.avif}
+takashi_mom: タカシ、お小遣いもないのに新しい靴買ったの？ {name=母}
+player: いつものやつだよ {cutin=off}
+?
+> daily_sneaker_pumps | 母さんのパンプスもやろうか？ | c1
+> daily_sneaker_drain | 明日はベランダの排水溝だ | c2
+*c1
+takashi_mom: ……お願いしようかしら {name=母}
+-> end
+*c2
+takashi_mom: ……あんた、将来クリーニング屋になりなさい {name=母}
+-> end
+
+=== morning daily_town_dirt | 街の汚れが呼んでいる
+priority: -10
+location: town
+time: morning
+avail: {"dayRange": {"from": 2, "to": 20}}
+---
+player: （歩道橋の手すりの継ぎ目……三年分の黒ずみが、痛いよぉと泣いている……） {bg=town; time=morning}
+player: 耐えろ、手すり……！　今は登校中なんだ……！ {focus}
+player: （自販機の返却レバーの裏……ヘドロ状のホコリが……）
+player: 放課後、綿棒とエタノールを持って必ず助けに来るからな……！ {cutin=/cutins/takashi/talk_to_vending.avif}
+kids: ママ、あのお兄ちゃん自販機とお喋りしてる…… {name=小学生（声）}
+?
+> daily_dirt_walk | （自販機に背を向けて歩き出す） | c1
+> daily_dirt_swab | （今すぐ綿棒を出す） | c2
+*c1
+player: （美化の道は、孤独との戦いだ……） {cutin=off}
+-> end
+*c2
+player: ……遅刻する！！ {cutin=off; focus; se=/se/school_chime_warning.mp3}
+-> end
+
+=== action daily_classroom_rain | 雨の日はボーナスタイム
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["classroom"], "weather": ["rain"]}
+hint: classroom | naruse | 窓の外は雨。教室にナルセが残っている
+---
+@ bg=painted_classroom; time=rainy; naruse.pos=center; naruse.expr=komari; naruse.motion=Standing Idle; naruse.look=camera; cam=medium; ambience=/se/rain_loop.mp3
+naruse: 雨だりー。髪うねるし、靴濡れるし
+player: 素晴らしい……湿度85パーセント……
+naruse: は？ {naruse.expr=surprised}
+player: 乾いてる日はカチカチの網戸の埃が、湿気で柔らかくなってる。濡れ雑巾一枚でスルッと落ちる。天の恵みだ {cutin=/cutins/takashi/halo_cleaning.avif}
+?
+> daily_rain_help | ナルセも手伝え | c1
+> daily_rain_wipe | （無言で拭き続ける） | c2
+*c1
+naruse: やだよ！！ {cutin=off; naruse.expr=angry; naruse.motion=Dismissing Gesture}
+-> end
+*c2
+naruse: ……雨の日のお前、一番危険だわ {cutin=off; naruse.expr=komari; naruse.sweat=jito}
+-> end
+
+#################### 第2章：悪友ナルセのモテ道
+
+=== action daily_rooftop_naruse_moves | モテ仕草大作戦
+priority: -10
+location: rooftop
+time: day
+avail: {"timeSlots": ["afternoon"], "locations": ["rooftop"]}
+hint: rooftop | naruse | ナルセが屋上へ続く階段で雑誌を読んでいる
+---
+@ bg=rooftop; naruse.pos=center; naruse.expr=happy; naruse.motion=Antada; naruse.look=camera; cam=medium
+naruse: タカシ！　『女子がキュン死する男子の無意識モテ仕草TOP3』だ！　お前、女子役やれ！
+player: なんで俺が……
+naruse: 第３位、『ネクタイを緩める仕草』！ {naruse.motion=pose_loosen_tie; naruse.expr=nima}
+naruse: グエッ……し、死ぬ……！ {naruse.expr=komari; naruse.fx=gaan; naruse.sweat=fly4}
+naruse: 第２位、『前髪をクシャッと掻き上げる』！ {naruse.expr=nima; naruse.motion=pose_hair_sweep}
+: （整髪料が変な方向に固まり、トサカ頭になった） {cutin=/cutins/naruse/tosaka.avif}
+?
+> daily_moves_first | ……第１位は？ | c1
+> daily_moves_suspect | お前のそれ、寝癖のすごい不審者だぞ | c2
+*c1
+naruse: 『不意に見せる真剣な横顔』…… {naruse.expr=neutral; naruse.look=forward; naruse.motion=torso_twist_left}
+player: とりあえず鏡見てこい
+-> end
+*c2
+naruse: まだ１位が残ってんだよ！！ {cutin=off; naruse.expr=angry; naruse.motion=Angry}
+-> end
+
+=== action daily_cafeteria_katsusando | カツサンド争奪戦の物理学
+priority: -10
+location: cafeteria
+time: day
+avail: {"timeSlots": ["afternoon"], "locations": ["cafeteria"], "days": [5, 12, 19]}
+hint: cafeteria | naruse | 金曜限定のカツサンドの日
+---
+@ bg=corridor; naruse.pos=center; naruse.expr=komari; naruse.motion=Jogging; naruse.look=forward; scroll=1.2; cam=side
+naruse: 金曜限定５食、幻のカツサンドだ！　……くそっ、人の壁で間に合わねえ！
+player: ナルセ、床を見ろ。春休みに俺が塗り重ねたアクリル樹脂ワックスだ。廊下の左側だけ、摩擦係数が極端に低い {cutin=/cutins/takashi/halo_cleaning.avif}
+?
+> daily_katsu_skate | 俺の背中を掴め！ | c1
+> daily_katsu_safe | ……いや、廊下を走るのは危ない | c2
+*c1
+naruse: タカシ……お前が掃除オタクで本当によかった……！ {cutin=off; scroll=1.6; naruse.fast; naruse.expr=happy; naruse.fx=yatta}
+-> merge
+*c2
+naruse: この期に及んで！？ {cutin=off; naruse.expr=angry; naruse.fx=gaan}
+: （結局、最後の二個をギリギリで確保した） {scroll=off; bg=cafeteria; naruse.motion=Standing Idle; trans=fade_black}
+*merge
+player: 掃除の成果を、こんなことに使うなよ…… {scroll=off; bg=cafeteria; naruse.fast=0; naruse.motion=Excited; cam=medium}
+
+=== action daily_classroom_locker | ロッカーの中身
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["classroom"]}
+hint: classroom | naruse | ナルセが教科書を探している
+---
+@ bg=painted_classroom; naruse.pos=center; naruse.expr=neutral; naruse.motion=Standing Idle; naruse.look=camera; cam=medium
+naruse: タカシ、古典の教科書貸して。ロッカー開けるぞー
+naruse: …………教科書は？ {cutin=/cutins/items/locker.avif; naruse.expr=surprised; naruse.fx=shiin}
+player: 右の棚の奥
+naruse: 学校にテロでも仕掛ける気か！？ {cutin=off; naruse.expr=angry; naruse.fx=gaan}
+?
+> daily_locker_stock | 突発的な汚れに対応するための常備品だ | c1
+> daily_locker_mask | 防塵マスク、一枚いるか？ | c2
+*c1
+naruse: 高校生のロッカーにそんな義務はねえんだよ！！ {naruse.motion=Angry}
+-> end
+*c2
+naruse: ……なんかちょっと欲しくなってきた自分が怖い {naruse.expr=komari; naruse.motion=Standing Idle}
+-> end
+
+=== action daily_courtyard_headlock | ラブコメの神様への八つ当たり
+priority: -10
+location: courtyard
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 5, "to": 20}, "locations": ["courtyard"], "minAffinity": {"aoi": 6}}
+hint: courtyard | aoi,naruse | 中庭でアオイがプリントを抱えている
+---
+@ bg=courtyard; aoi.pos=center; aoi.expr=happy; aoi.motion=Standing Greeting; aoi.look=camera; cam=medium
+aoi: タカシくん、明日の古典のプリントこれね。白石先生から
+player: おう、サンキュー
+naruse: おいタカシぃぃぃ！！　なんだ今の甘酸っぱい空気は！ {aoi.out; cutin=/cutins/naruse/headlock.avif; naruse.pos=center; naruse.expr=angry; naruse.motion=Angry; naruse.look=camera; naruse.fast; focus}
+naruse: 神崎とは昼に喋ってるし、図書室では月詠と残ってるし！　いつからラブコメ体質になったんだよ！！ {naruse.fast=0; naruse.anger}
+player: く、苦しい……プリントと掃除の話しかしてない……！
+?
+> daily_headlock_wax | お前も放課後のワックスがけ手伝えばモテるかもよ | c1
+> daily_headlock_life | ……実は、命がかかってるんだ | c2
+*c1
+naruse: ワックスで寄ってくるのはお前だけだバカヤロー！！ {cutin=off; naruse.fx=iraira}
+-> end
+*c2
+naruse: は？ {cutin=off; naruse.anger=0; naruse.expr=surprised}
+player: ……いや、なんでもない
+: （ナルセが、少しだけ腕をゆるめた） {naruse.expr=neutral}
+-> end
+
+=== holiday daily_shopping_karaoke | 男二人のカラオケ
+priority: -10
+location: shopping_street
+time: day
+avail: {"timeSlots": ["holiday"], "locations": ["shopping_street"]}
+hint: shopping_street | naruse | ナルセが商店街のカラオケの前にいる
+bgm: sunlight_on_cobblestones
+---
+@ bg=shopping_street_3d; naruse.pos=center; naruse.expr=happy; naruse.motion=Excited; naruse.look=camera; cam=medium
+naruse: いつ女子とカラオケ来てもいいように練習だ！
+naruse: どうよ、この切ない歌声 {cg=/cg/daily/karaoke.avif; trans=fade_black}
+player: 音程は合ってた
+naruse: 次、お前な！
+player: ♪ピカピカ〜　ツルツル〜　泡のチカラで〜　油汚れも〜♪
+naruse: 食器用洗剤のCMソングじゃねえか！！
+?
+> daily_karaoke_breath | テンポが良くてブレスが安定するんだ | c1
+> daily_karaoke_second | （二番も歌う） | c2
+*c1
+naruse: 採点狙いかよ！
+-> end
+*c2
+naruse: 除菌の効能を熱唱すんな！！
+-> end
+
+=== action daily_rooftop_naruse_confess | 告白シミュレーション
+priority: -10
+location: rooftop
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["rooftop"]}
+hint: rooftop | naruse | ナルセが夕日の屋上で黄昏れている
+---
+@ bg=rooftop; time=evening; naruse.pos=center; naruse.expr=relaxed; naruse.motion=Standing Idle; naruse.look=forward; cam=medium
+naruse: なあタカシ。告白するなら、放課後の屋上で夕日をバックに……が王道だよな
+player: ダメだな
+naruse: なんでだよ！ {naruse.look=camera; naruse.expr=angry}
+player: 屋上の床を見ろ。雨ざらしで苔が生えて、排水溝の周りはヘドロだ。足を滑らせたら大惨事だぞ
+?
+> daily_confess_clean | 前日にデッキブラシで苔を全滅させて、高圧洗浄してからにしろ | c1
+> daily_confess_words | ……告白は、場所より言葉だろ | c2
+*c1
+naruse: それ告白じゃなくて安全衛生点検な {naruse.expr=komari}
+-> merge
+*c2
+naruse: ……お前、たまに急に真面目になるよな {naruse.expr=surprised}
+*merge
+player: （５秒で、何を言うか、か……） {cam=wide}
+
+#################### 第3章：白石先生の定時退勤ロード
+
+=== action daily_classroom_teiji | 定時退勤の神速ルーティン
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["classroom"]}
+hint: classroom | teacher | 日直の日誌を職員室に届けないと
+---
+: （日直の日誌を職員室に届けに来た） {bg=staff_room; time=evening}
+@ teacher.pos=center; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=forward; cam=medium
+teacher_colleague: 白石先生、明日の時間割の件なんですが―― {name=隣の席の先生}
+teacher: お疲れ様でしたー！　質問は明朝8時15分以降に受け付けまーす！ {teacher.expr=happy; teacher.motion=Standing Greeting; teacher.look=camera; teacher.fast; se=/se/school_chime_5pm.mp3}
+: （残像を残して消えた。書類が風で舞う） {teacher.out; focus}
+?
+> daily_teiji_leave | （日誌を机に置いて帰る） | c1
+> daily_teiji_papers | （舞った書類を拾い集める） | c2
+*c1
+player: （……校門まで45秒って、本当だったんだ）
+-> end
+*c2
+teacher_colleague: ありがとう……君は良い子だね…… {name=隣の席の先生}
+-> end
+
+=== action daily_courtyard_ichigo | ブラックと微糖の境界
+priority: -10
+location: courtyard
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["courtyard"]}
+hint: courtyard | teacher | 白石先生が自販機の前で固まっている
+---
+@ bg=courtyard; teacher.pos=center; teacher.expr=surprised; teacher.motion=Standing Idle; teacher.look=forward; cam=medium; cutin=/cutins/items/ichigo_ole.avif
+teacher: ……押し間違えた
+teacher: ……あっま。……でも、疲れた脳に染みる…… {cutin=off; teacher.expr=relaxed; teacher.motion=Standing Idle; teacher.item=carton_ichigo; cam=close}
+naruse: あ、先生、こんなとこで何してるんすかー？ {naruse.pos=left; naruse.expr=happy; naruse.motion=Standing Greeting; naruse.look=teacher; teacher.expr=surprised; teacher.fx=biku; teacher.motion=Standing Idle; cam=wide}
+teacher: 成瀬。今見たものを口外したら、明日の小テストの範囲を三倍にするわよ {teacher.expr=angry; teacher.look=naruse; cam=medium}
+?
+> daily_ichigo_nothing | 俺は何も見てません | c1
+> daily_ichigo_tasty | いちごオレ、美味いっすよね | c2
+*c1
+teacher: ……タカシ、あんたは話が分かるわね {teacher.look=camera; teacher.expr=nima}
+-> end
+*c2
+teacher: ……タカシも範囲三倍ね {teacher.look=camera; teacher.expr=angry}
+-> end
+
+=== action daily_classroom_window | ガラスが嵌まっていない窓
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["classroom"]}
+hint: classroom | teacher | 白石先生が窓の前で首をかしげている
+---
+@ bg=painted_classroom; teacher.pos=center; teacher.expr=surprised; teacher.motion=Standing Idle; teacher.look=forward; cam=medium
+teacher: ……タカシ。この窓、ガラス嵌まってないの？
+player: 嵌まってますよ。電解水で油膜を落として、精製水で拭き上げて、スクイジーで水滴をミリ単位で切りました {cutin=/cutins/takashi/halo_cleaning.avif}
+teacher: ……生徒が『開いてる』と思って突っ込んだらどうすんの {cutin=off; teacher.expr=komari; teacher.motion=Standing Idle; teacher.look=camera}
+player: そんなバカいませんよ
+teacher: 成瀬あたりなら顔面からいくわよ {teacher.expr=neutral}
+?
+> daily_window_notice | 注意書き、貼っときます | c1
+> daily_window_naruse | ナルセで試してみますか | c2
+*c1
+teacher: よろしい。……で、週末の職員室大掃除、手伝ってくれる？ {teacher.expr=happy}
+player: キーボードの皮脂汚れ、全滅させます！
+-> end
+*c2
+teacher: やめなさい {teacher.expr=angry}
+-> end
+
+=== action daily_classroom_kyodoshi | 郷土史オタクの血
+priority: -10
+location: classroom
+time: day
+avail: {"timeSlots": ["morning"], "dayRange": {"from": 2, "to": 10}, "locations": ["classroom"]}
+hint: classroom | teacher | 古典の授業。白石先生の様子がいつもと違う
+---
+@ bg=painted_classroom; teacher.pos=center; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=camera; cam=medium
+teacher: はい、教科書82ページ。定時に帰りたいからサクサクいくよ〜
+teacher: ……この『境界の神』、実はこの街の裏山の神社にも似た伝承があってね {teacher.expr=relaxed}
+mob_student: あの寂れた神社ですか？
+teacher: ……よくぞ聞いてくれたわね。あそこは室町の創建で、本殿の木組みは当時のまま、裏手の神輿蔵の金具には―― {teacher.expr=happy; teacher.fx=kirakira; teacher.motion=Antada; cam=close}
+teacher: ――それでね、寛政の頃の巡検使の記録が郷土資料室にあってだな―― {teacher.motion=mob_chat_gesture; se=/se/school_chime_end.mp3}
+?
+> daily_kyodo_note | （ノートを取り続ける） | c1 | aff=shion:1
+> daily_kyodo_naruse | （ナルセと目を見合わせる） | c2
+*c1
+player: （……５秒様の手がかりが、あるかもしれない）
+-> end
+*c2
+naruse: 定時の鬼を定時に帰さない唯一の方法、神社の話を振ることだな {name=ナルセ（小声）}
+-> end
+
+=== action daily_classroom_shinro | 進路希望調査票
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 5, "to": 12}, "locations": ["classroom"]}
+hint: classroom | teacher | 白石先生が進路希望調査票を手に呼んでいる
+---
+@ bg=staff_room; time=evening; teacher.pos=center; teacher.expr=komari; teacher.motion=Standing Idle; teacher.look=camera; cam=medium
+teacher: タカシ。第一志望、『国立大学工学部・極限環境清掃工学科』って何？
+player: えっ、ないんですか！？
+teacher: ないわよ！　宇宙ステーションのトイレでも磨く気！？ {teacher.expr=angry; teacher.motion=Dismissing Gesture}
+player: 自己洗浄コーティングとか、歴史的建造物の非破壊汚れ除去とか、やりたいことは山ほどあって……
+teacher: ……狂気じみてるのに、妙に筋が通ってるのが腹立つわね {teacher.expr=komari}
+?
+> daily_shinro_serious | 本気なんです | c1
+> daily_shinro_anywhere | とりあえず、掃除ができればどこでも | c2
+*c1
+teacher: ……応用化学か材料工学。表面界面化学の研究室を探しなさい。あんたの執着、学問にできるわ {teacher.expr=relaxed; teacher.motion=Standing Idle}
+-> merge
+*c2
+teacher: どこでもはダメ。……表面界面化学、調べてきなさい {teacher.expr=neutral; teacher.motion=Standing Idle}
+*merge
+teacher: 礼はいいから、帰りに進路室の机拭いていって {teacher.expr=happy}
+player: 喜んで！
+
+#################### 第4章：ヒロインたちの素顔
+
+=== action daily_classroom_aoi_tamagoyaki | 卵焼きの隙間埋め
+priority: -5
+location: classroom
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 5, "to": 20}, "locations": ["classroom"], "minAffinity": {"aoi": 6}}
+hint: classroom | aoi | アオイがお弁当を広げている
+---
+@ bg=painted_classroom; aoi.pos=center; aoi.expr=happy; aoi.motion=Standing Greeting; aoi.look=camera; cam=medium
+aoi: タカシくん、お昼一緒に食べよ。……あ、これ。卵焼き作りすぎちゃって。隙間埋めるの手伝って
+player: いいのか？　……うまっ。甘さと出汁が絶妙 {cutin=/cutins/items/tamagoyaki.avif}
+aoi: ホント？　……よかった {cutin=off; aoi.expr=relaxed; aoi.motion=clasp_hands_front}
+aoi: （……昨日の夜、四個も卵使って焼き直したなんて、絶対言えない） {aoi.look=forward; aoi.expr=komari}
+?
+> daily_tamago_daily | アオイの卵焼き、毎日でも食べたい | c1 | aff=aoi:2
+> daily_tamago_again | 作りすぎたなら、また手伝うよ | c2 | aff=aoi:1
+*c1
+aoi: ……っ！　ま、毎日は……考えとく {aoi.look=camera; aoi.expr=surprised; aoi.blush; cam=close}
+-> end
+*c2
+aoi: ……うん。また、作りすぎちゃうかも {aoi.look=camera; aoi.expr=happy}
+-> end
+
+=== morning daily_balcony_aoi | 仕切り板越しのおはよう
+priority: -5
+location: apartment_door
+time: morning
+avail: {"dayRange": {"from": 3, "to": 20}, "minAffinity": {"aoi": 6}}
+---
+: （朝6時50分。ベランダの手すりを雑巾で拭いている） {bg=apartment_door; time=morning; cutin=/cutins/takashi/bedhead_balcony.avif}
+@ aoi.pos=right; aoi.expr=happy; aoi.motion=Standing Idle; aoi.look=camera; cam=medium
+aoi: ……ふふっ、朝から掃除してる {cutin=off}
+player: うおっ、アオイ！？ {aoi.fx=biku}
+aoi: おはよ、タカシくん。ハーブに水あげてたら、隣から雑巾の音がして {aoi.motion=Standing Greeting}
+aoi: 寝癖、昔と同じとこ跳ねてるよ {aoi.expr=relaxed; cam=close}
+?
+> daily_balcony_hair | （慌てて寝癖を押さえる） | c1 | aff=aoi:1
+> daily_balcony_wipe | アオイの手すりも拭こうか？ | c2 | aff=aoi:2
+*c1
+aoi: 直らないって、それ。ふふっ {aoi.expr=happy; aoi.motion=Ohoho}
+-> end
+*c2
+aoi: えっ……い、いいよ！　……でも、今度お願いしようかな {aoi.expr=komari; aoi.blush}
+-> end
+
+=== action daily_classroom_emili_yakisoba | 初めてのカップ焼きそば
+priority: -5
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 5, "to": 20}, "locations": ["classroom"], "minAffinity": {"emili": 6}}
+hint: classroom | emili | エミリがお腹を押さえている
+---
+@ bg=painted_classroom; time=evening; emili.pos=center; emili.expr=neutral; emili.motion=Ohoho; emili.look=camera; cam=medium
+emili: お腹空いたわ。庶民の簡便食、試してあげる
+: （商店街のコンビニのイートイン） {bg=shopping_street_3d; trans=fade_black; emili.motion=Standing Idle}
+player: ストップ！　ソースは後だ！ {focus; emili.fx=biku}
+emili: どうしてよ！？　ソースで麺を煮込むんでしょう！？ {emili.expr=surprised}
+player: 湯切りする時に全部流れるぞ
+emili: 湯切り！？　お湯を捨てるの！？　じゃあ最初のお湯は何のためにあるのよ！？ {emili.expr=angry; emili.motion=Angry; cam=close}
+?
+> daily_yakisoba_wait | 麺を戻すためだよ。三分待ってな | c1 | aff=emili:2
+> daily_yakisoba_hitech | 庶民のハイテク食品だからな | c2 | aff=emili:1
+*c1
+emili: ……なにこれ、めちゃくちゃ美味しいじゃない……！ {trans=fade_black; emili.expr=happy; emili.motion=Excited; emili.fx=kirakira}
+-> end
+*c2
+emili: 最初から私を試していたのね……！ {emili.expr=komari; emili.tears}
+-> end
+
+=== action daily_courtyard_emili_vending | 自販機ミッション
+priority: -5
+location: courtyard
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 3, "to": 20}, "locations": ["courtyard"], "minAffinity": {"emili": 6}}
+hint: courtyard | emili | エミリが自販機の前で真剣な顔をしている
+---
+@ bg=courtyard; emili.pos=center; emili.expr=komari; emili.motion=Standing Idle; emili.look=forward; cam=medium
+emili: この金属の円盤を、あの投入口に入れればいいのね？
+player: 爆弾処理みたいな顔すんな
+emili: きゃっ！？　……ほ、本当にジュースが出てきたわ！　コインが冷たい缶に変化した……現代の錬金術ね！ {emili.fx=biku; emili.expr=surprised; emili.motion=Excited; se=/se/vending_can_drop.mp3}
+: （缶を高く掲げて、八重歯を見せて笑う） {emili.expr=happy; emili.motion=pose_raise_can; emili.item=can_juice; emili.look=camera; cam=close}
+?
+> daily_vending_cute | 世界一可愛い錬金術師だな | c1 | aff=emili:2
+> daily_vending_normal | それ、みんな普通に買ってるからな | c2 | aff=emili:1
+*c1
+emili: か、か、かわっ……！？　う、うるさいわね！ {emili.blush; emili.expr=komari; emili.motion=Angry}
+-> end
+*c2
+emili: 私にとっては世紀の大発見なの！ {emili.expr=angry; emili.motion=Antada}
+-> end
+
+=== action daily_rooftop_emili_yaeba | 八重歯を隠す練習
+priority: -5
+location: rooftop
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 5, "to": 20}, "locations": ["rooftop"], "minAffinity": {"emili": 6}}
+hint: rooftop | emili | エミリがスマホを覗き込んで何かつぶやいている
+---
+@ bg=rooftop; emili.pos=center; emili.expr=angry; emili.motion=Standing Idle; emili.look=forward; cam=medium
+emili: ……ふん、愚民ども、頭が高いわ……
+emili: ……ダメね。語気が強くなると、すぐこれが出ちゃう {emili.expr=komari}
+player: ……何してんだ？
+emili: きゃあああっ！？　の、ノックしなさいよノックを！！ {emili.expr=surprised; emili.look=camera; emili.fx=biku; emili.motion=Angry; focus}
+player: 屋上にドアは一個しかないぞ
+emili: ……神崎家の令嬢は、もっと凛とした、威厳のあるクールな女性でいたいのよ。この八重歯のせいで、怒っても怖くないって言われるの {emili.expr=sad; emili.look=forward; emili.motion=clasp_hands_front}
+?
+> daily_yaeba_fine | 怒っても怖くないの、俺はいいと思うけど | c1 | aff=emili:2
+> daily_yaeba_kitten | 怒った子猫みたいだもんな | c2 | aff=emili:1
+*c1
+emili: ……っ、アンタがよくても、私は…… {emili.look=camera; emili.expr=happy; emili.blush; cam=close}
+-> end
+*c2
+emili: それを言ったのはアンタでしょ！！ {emili.look=camera; emili.expr=angry; emili.anger; emili.motion=Angry}
+-> end
+
+=== action daily_library_shion_truffle | 共犯者のトリュフ
+priority: -5
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 7, "to": 20}, "locations": ["library"], "after": {"all": [{"scenarioId": "shion_d06_parfait"}]}}
+hint: library | shion | 閉館間際の図書室に、シオンが残っている
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; time=evening; shion.pos=center; shion.expr=neutral; shion.motion=Standing Idle; shion.look=camera; cam=medium
+shion: ……タカシ。ちょっとこっちへ
+shion: 本日の糖分消費、推定40グラム。即座の補充が必要なの {cutin=/cutins/items/truffle.avif}
+shion: ……あなたも共犯よ。一粒どうぞ {cutin=off; shion.expr=nima}
+player: 図書室で飲食って、図書委員長が……
+shion: だから共犯なのよ {shion.expr=relaxed; shion.blush; cam=close}
+?
+> daily_truffle_eat | （一粒もらう）……うまっ | c1 | aff=shion:2
+> daily_truffle_watch | 俺は見張りに徹する | c2 | aff=shion:1
+*c1
+shion: でしょう。……誰かとこれを食べたの、初めてよ {shion.expr=happy}
+-> end
+*c2
+shion: ……律儀ね。じゃあ、あなたの分は取っておくわ {shion.expr=relaxed}
+-> end
+
+=== action daily_library_shion_notebook | 学校の怪異検証記録
+priority: -5
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 4, "to": 20}, "locations": ["library"], "after": {"all": [{"scenarioId": "shion_d03_library"}]}}
+hint: library | shion | 郷土資料室の机に、黒革の手帳が置きっぱなしになっている
+bgm: sunlight_on_ink
+---
+: （机に置かれた黒革の手帳。『学校の怪異現象に関する論理的検証記録』） {bg=painted_library; time=evening; cutin=/cutins/items/shion_notebook.avif}
+: （「理科室の動く人体模型→キャスターの摩耗と床の傾斜0.3度。タカシに注油を依頼し鎮圧」「音楽室の肖像画の視線→表面の埃の乱反射。タカシの拭き取りで解決」）
+player: （オカルト好きなのか、否定したいのか、どっちなんだ……）
+shion: ……他人の手帳を無断で覗くとは、知的好奇心の使い所を間違えているわね {cutin=off; shion.pos=center; shion.expr=angry; shion.motion=pose_hug_notebook; shion.item=notebook; shion.look=camera; cam=medium; shion.fx=shiin}
+?
+> daily_notebook_sorry | ごめん。でも、俺の掃除、役に立ってたんだな | c1 | aff=shion:2
+> daily_notebook_all | 怪異、全部俺が掃除で解決してない？ | c2 | aff=shion:1
+*c1
+shion: ……ええ。あなたは優秀な清掃担当よ。……許すわ、今回だけ {shion.expr=relaxed}
+-> end
+*c2
+shion: ……それは否定しないけれど、覗いた罪は別よ {shion.expr=neutral}
+-> end
+
+=== action daily_library_shion_bug | シオン、虫に敗北する
+priority: -5
+location: library
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 5, "to": 20}, "locations": ["library"], "minAffinity": {"shion": 6}}
+hint: library | shion | 窓辺の席でシオンが本を読んでいる
+bgm: sunlight_on_ink
+---
+@ bg=painted_library; shion.pos=center; shion.expr=neutral; shion.motion=pose_read_book; shion.item=book_open; shion.look=forward; cam=medium
+shion: ひっ……！？ {shion.expr=surprised; shion.fx=biku; shion.sweat=fly4; focus; se=/se/insect_buzz.mp3}
+shion: む、虫……！　硬い殻を持った飛行物体が……っ！ {cg=/cg/daily/shion_bug_cling.avif}
+?
+> daily_bug_window | （ノートで窓の外へ誘導する）もう大丈夫。飛んでった | c1 | aff=shion:2
+> daily_bug_weak | シオンにも苦手なものがあるんだな | c2 | aff=shion:1
+*c1
+shion: ………… {cg=off; shion.expr=komari; shion.blush; shion.look=camera; cam=close}
+shion: み、見なかったことにしなさい！　昆虫の飛行軌道は予測不能なのよ！ {shion.expr=angry; shion.motion=Dismissing Gesture}
+-> end
+*c2
+shion: いいから早く追い出して……！ {shion.expr=komari; shion.tears}
+-> end
+
+=== action daily_classroom_nikujaga | 家庭科の肉じゃが
+priority: -5
+location: classroom
+time: day
+avail: {"timeSlots": ["morning"], "dayRange": {"from": 3, "to": 20}, "locations": ["classroom"]}
+hint: classroom | aoi,emili | 家庭科の調理実習。アオイとエミリが同じ班だ
+---
+@ bg=painted_classroom; emili.pos=left; emili.expr=happy; emili.motion=Ohoho; emili.look=camera; aoi.pos=right; aoi.expr=neutral; aoi.motion=Standing Idle; aoi.look=emili; cam=wide
+emili: 料理は科学と芸術よ。フランス直輸入の冬トリュフを削って、仕上げに金箔を――
+aoi: ストップ！　エミリちゃん全力でストップ！！ {aoi.expr=surprised; aoi.motion=Dismissing Gesture; emili.fx=biku; cam=medium}
+aoi: 肉じゃがにトリュフ入れたら出汁の香りが消えちゃう！　家庭の黄金律は、お醤油、みりん、お酒、そして『めんつゆ』！ {aoi.expr=angry; aoi.motion=Antada}
+emili: め、めんつゆ！？　何よその怪しい万能薬は！ {emili.expr=surprised; emili.sweat=fly4}
+: （三十分後） {trans=fade_black; aoi.expr=happy; aoi.motion=Standing Idle; emili.motion=Standing Idle}
+emili: ……美味しい……お肉とジャガイモに、甘辛い味が染みてる…… {emili.expr=relaxed; cutin=/cutins/items/nikujaga.avif}
+aoi: でしょ？　家庭料理は、食べる人を思う気持ちが隠し味なんだよ {cutin=off; aoi.look=camera; aoi.motion=clasp_hands_front}
+?
+> daily_nikujaga_aoi | アオイの肉じゃが、前にもらったのと同じ味だ | c1 | aff=aoi:2
+> daily_nikujaga_emili | エミリ、ジャガイモの皮むき上手くなったな | c2 | aff=emili:2
+*c1
+aoi: えっ、覚えてたの！？ {aoi.expr=surprised; aoi.blush; cam=close}
+emili: ……前にも、もらった？ {emili.expr=neutral; emili.look=aoi; emili.fx=shiin; cam=wide}
+-> end
+*c2
+emili: ……ピーラーって便利ね。今度、パパにも作ってあげようかしら {emili.expr=happy; emili.look=camera; cam=close}
+-> end
+
+#################### 第5章：カオスな日常交流
+
+=== action daily_classroom_naruse_crepe | 女子トーク乱入未遂
+priority: -5
+location: classroom
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 5, "to": 20}, "locations": ["classroom"]}
+hint: classroom | aoi,emili,shion | アオイたちがクレープの話で盛り上がっている
+---
+@ bg=painted_classroom; aoi.pos=left; aoi.expr=happy; aoi.motion=Standing Idle; aoi.look=emili; emili.pos=center; emili.expr=neutral; emili.motion=Standing Idle; emili.look=aoi; shion.pos=right; shion.expr=neutral; shion.motion=Standing Idle; shion.look=emili; cam=wide
+aoi: 駅前に新しくできたクレープ屋さん、行った？
+emili: まだよ。庶民のスイーツ店に一人で並ぶのは、ハードルが高いわ {emili.expr=komari}
+shion: ……カスタードチョコバナナが、糖分純度が高くて優秀よ {shion.expr=relaxed}
+naruse: タカシ見ろ、天国だ！　俺がジェントルにあの輪に入って、クレープデートの権利を勝ち取る！ {name=ナルセ（小声）}
+player: やめとけ、自爆するぞ
+naruse: やあ、麗しきレディーたち。エスコートが必要なら、この成瀬が―― {aoi.look=camera; emili.look=camera; shion.look=camera}
+shion: ……静かにして。二酸化炭素が増えるわ {shion.expr=angry; cam=medium}
+emili: 誰かしらこの無礼者は。三百年早いわよ {emili.expr=angry; emili.motion=Ohoho}
+aoi: あはは……成瀬くん、お昼休みもう終わるよ？ {aoi.expr=komari; aoi.sweat=jito}
+?
+> daily_crepe_pat | （石像になったナルセの肩を叩く） | c1
+> daily_crepe_told | 言わんこっちゃない | c2
+*c1
+naruse: ……女子って、強敵だな……！ {cam=wide}
+-> end
+*c2
+naruse: 傷口に塩を塗るな……！ {cam=wide}
+-> end
+
+=== action daily_classroom_suito | 水筒の中身当てゲーム
+priority: -5
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 5, "to": 20}, "locations": ["classroom"]}
+hint: classroom | aoi,emili,shion,naruse | みんなが教室に残っている
+---
+@ bg=painted_classroom; time=evening; naruse.pos=[-1.1, 0, 0]; naruse.expr=nima; naruse.motion=Antada; naruse.look=camera; aoi.pos=left; aoi.expr=neutral; aoi.motion=Standing Idle; aoi.look=camera; emili.pos=center; emili.expr=neutral; emili.motion=Standing Idle; emili.look=camera; shion.pos=right; shion.expr=neutral; shion.motion=Standing Idle; shion.look=camera; cam=wide
+naruse: タカシの水筒、中身何？　液体洗剤じゃねえよな？
+player: 飲むわけないだろ
+aoi: 麦茶かほうじ茶かな？ {aoi.expr=happy}
+emili: ダージリンのファーストフラッシュ一択ね {emili.expr=nima; emili.motion=Ohoho}
+naruse: プロテイン入りブラックコーヒー！ {naruse.motion=Excited}
+shion: 疲労度から推測するに、クエン酸とアミノ酸を高濃度配合した特製補給液 {shion.motion=pose_hug_notebook}
+player: 正解は、母さんがベランダのプランターで育てた赤紫蘇の、自家製しそジュース {cutin=/cutins/items/shiso_juice.avif}
+?
+> daily_suito_share | （みんなに注ぎ分ける） | c1
+> daily_suito_shion | シオン、ほぼ正解 | c2
+*c1
+aoi: 美味しい！　お母さんの味だね {cutin=off; aoi.expr=happy}
+emili: 素朴だけど、悪くないわ {emili.expr=relaxed}
+shion: クエン酸の含有量は推測どおりね {shion.expr=nima}
+naruse: 母ちゃんすげえ！ {naruse.expr=happy; naruse.motion=Excited}
+-> end
+*c2
+shion: ……当然よ {cutin=off; shion.expr=nima; shion.motion=Standing Idle; cam=medium}
+-> end
+
+=== forced daily_rain_limo | 春の嵐とリムジン
+priority: -5
+consumesTurn: true
+location: entrance_rain
+time: evening
+avail: {"timeSlots": ["evening"], "weather": ["rain"], "dayRange": {"from": 3, "to": 20}}
+---
+@ bg=entrance_rain; time=rainy; aoi.pos=left; aoi.expr=komari; aoi.motion=Standing Idle; aoi.look=forward; shion.pos=right; shion.expr=neutral; shion.motion=Standing Idle; shion.look=forward; teacher.pos=center; teacher.expr=komari; teacher.motion=Standing Idle; teacher.look=forward; cam=wide; ambience=/se/rain_loop.mp3
+aoi: うわー、土砂降り。傘置いてきちゃった
+shion: 折りたたみを忘れたわ。本が濡れる {shion.expr=komari}
+naruse: 前髪が死ぬ！ {name=ナルセ}
+teacher: 定時で帰りたいのに、車まで走ったら白衣がびしょ濡れ……
+emili: 仕方のない庶民たちね。全員、駅まで乗せてあげるわ！ {cg=/cg/daily/limo_arrive.avif; emili.pos=[0, 0, 0.8]; emili.expr=happy; emili.motion=Ohoho; emili.look=camera}
+: （リムジンの車内。全員がシートの端で直立不動） {cg=/cg/daily/limo_inside.avif; trans=fade_black}
+aoi: ……エミリちゃん、シート汚したら弁償いくら……？
+shion: ……革の香りが高級すぎて息が詰まるわ
+naruse: 粗相したら東京湾に沈められるんじゃ……
+teacher: ……公務員の倫理規定、大丈夫かしら……
+?
+> daily_limo_thanks | エミリ、ありがとな。助かった | c1 | aff=emili:2
+> daily_limo_leather | このシート、どうやって手入れしてるんだ？ | c2
+*c1
+emili: ……ふん！　当然でしょ！ {name=エミリ}
+-> end
+*c2
+sp_leader: ……専用のレザーコンディショナーを月に一度
+player: 詳しく
+-> end
+
+=== action daily_classroom_hoshu | 居残り補習と詠嘆の「けり」
+priority: -10
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["classroom"], "days": [5, 12, 19]}
+hint: classroom | teacher,naruse | 教室に忘れ物をした気がする
+---
+: （忘れ物を取りに教室へ戻ると――） {bg=painted_classroom; time=evening}
+@ naruse.pos=left; naruse.expr=sad; naruse.motion=Standing Idle; naruse.look=teacher; teacher.pos=right; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=naruse; cam=wide
+naruse: 先生ぇ……なんで俺の華のフライデーナイトが補習なんすか……
+teacher: 授業中、『ネクタイ緩める仕草……グヘヘ』って寝言言って爆睡してたからでしょ {teacher.expr=nima; cam=medium}
+naruse: クラス中に聞かれてた！？ {naruse.expr=surprised; naruse.fx=gaan; naruse.motion=Standing Idle}
+teacher: いい？　この『けり』は過去じゃなくて詠嘆。『〜だなあ』って感動してるの {teacher.expr=neutral; teacher.motion=mob_chat_gesture}
+teacher: あんたが女子見て『可愛いなあ』って思う時の気持ちと一緒よ
+naruse: ……あ、分かりやすい {naruse.expr=happy; naruse.motion=Acknowledging}
+?
+> daily_hoshu_leave | （そっと教室を出る） | c1
+> daily_hoshu_join | 先生、俺も聞いていいですか | c2
+*c1
+teacher: タカシ、見なかったことにしなさいよ〜 {name=白石先生（背中越しに）}
+-> merge
+*c2
+teacher: ……あんたは寝てなかったでしょ。まあいいわ、座りなさい {teacher.look=camera; teacher.expr=relaxed}
+*merge
+teacher: 終わったらミスドでドーナツ奢ってあげるから {teacher.look=naruse; teacher.expr=happy}
+naruse: 先生一生ついていきます！ {naruse.expr=happy; naruse.motion=Excited; naruse.tears}
+
+=== action daily_classroom_peaceful | ある日の放課後
+priority: -5
+location: classroom
+time: evening
+avail: {"timeSlots": ["afterschool"], "dayRange": {"from": 5, "to": 20}, "locations": ["classroom"]}
+hint: classroom | aoi,emili,shion,naruse | 掃除当番の放課後。いつもの顔ぶれ
+---
+@ bg=painted_classroom; time=evening; naruse.pos=center; naruse.expr=happy; naruse.motion=Excited; naruse.look=camera; cam=medium
+naruse: タカシ聞けよ、俺の魂のシャウト！ {naruse.motion=pose_air_guitar}
+player: 埃が舞う、あっち行け
+aoi: ふふ。二人とも、中学の時からずっとこうなの？ {aoi.pos=left; aoi.expr=happy; aoi.motion=Ohoho; aoi.look=camera; naruse.pos=[1.0, 0, 0]; cam=wide}
+player: こいつが一方的に絡んでくるだけだ！ {name=タカシ・ナルセ; naruse.expr=angry; naruse.motion=Antada}
+emili: まったく、男子ってどうしてこう騒がしいのかしら。……退屈はしないけど {emili.pos=[-0.3, 0, -0.5]; emili.expr=nima; emili.motion=Standing Idle; emili.look=camera}
+shion: 資料室の鍵、返してきたわ。……まだ掃除終わってないの？　手伝ってあげてもいいけれど {shion.pos=right; shion.expr=neutral; shion.motion=Standing Idle; shion.look=camera}
+naruse: みんなで買い食い行こうぜ！ {naruse.expr=happy; naruse.motion=Excited}
+teacher: 寄り道するなら制服ちゃんとしてね〜。施錠はタカシ、頼んだわよ〜 {name=白石先生（廊下から）}
+?
+> daily_peaceful_go | よし、さっさと終わらせて行こう | c1
+> daily_peaceful_sash | あと十分。窓のサッシが…… | c2
+*c1
+: 全員「はーい！」 { aoi.expr=happy; emili.expr=happy; shion.expr=relaxed; naruse.motion=Excited}
+-> merge
+*c2
+: アオイ・エミリ・シオン・ナルセ「タカシ（くん）！！」 { aoi.expr=angry; emili.expr=angry; emili.anger; shion.expr=angry; naruse.expr=angry; focus}
+*merge
+player: （……あと何日、こうしていられるんだろう） {emili.anger=0; aoi.expr=happy; emili.expr=happy; shion.expr=relaxed; naruse.expr=happy}

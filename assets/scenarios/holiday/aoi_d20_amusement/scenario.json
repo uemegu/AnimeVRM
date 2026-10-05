@@ -27,6 +27,7 @@
     }
   },
   "location": "amusement_park",
+  "bgm": "sunlight_on_cobblestones",
   "timeOfDay": "evening",
   "actionHints": [
     {
@@ -136,34 +137,32 @@
       "id": "c1",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "……戻りたい、わけじゃない。でも、今のタカシくんといると胸が苦しくて、昔みたいに気楽にいられなくて",
+      "text": "……戻りたい、わけじゃない",
       "cg": false,
       "avatars": {
         "aoi": {
           "expression": "komari",
           "expressionWeight": 1,
-          "blush": true,
           "lookAtTarget": "forward",
           "motion": "clasp_hands_front"
         }
       },
-      "camera": "close",
-      "voiceUrl": "v_c1_b848631f.mp3"
+      "camera": "close"
     },
     {
       "id": "s10",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "それがちょっとだけ怖くて……嬉しいの",
+      "text": "引っ越す時ね、前の学校の友達には『またね』って言えたの。でも、タカシくんには何て言えばいいのか、ずっと分からないんだ",
       "avatars": {
         "aoi": {
           "lookAtTarget": "camera",
           "expression": "relaxed",
-          "expressionWeight": 1
+          "expressionWeight": 1,
+          "blush": true
         }
       },
-      "nextSceneId": "merge",
-      "voiceUrl": "v_s10_700e2cda.mp3"
+      "nextSceneId": "merge"
     },
     {
       "id": "c2",

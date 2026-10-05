@@ -74,3 +74,6 @@ export const CHARACTERS: Record<string, CharacterMaster> = {
 /** 好感度を持つヒロイン */
 export const HEROINE_IDS = ['aoi', 'emili', 'shion'] as const;
 
+/** 行き先の地図に「ここにいる」と出す人（顔の画像 /assets/characters/<id>_<normal|good|bad>.avif がある人） */
+export const MAP_CHARACTER_IDS: readonly string[] = [...HEROINE_IDS, 'naruse', 'teacher'];
+

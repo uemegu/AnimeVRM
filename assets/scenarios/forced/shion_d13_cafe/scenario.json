@@ -23,6 +23,7 @@
     }
   },
   "location": "shopping_street",
+  "bgm": "sunlight_on_cobblestones",
   "timeOfDay": "day",
   "consumesTurn": true,
   "scenes": [
@@ -32,10 +33,15 @@
       "speaker": "シオン",
       "text": "蔵のお礼よ。……特製ベリーパンケーキ",
       "background": "cafe_indoor",
-      "timeOfDay": "day",
+      "timeOfDay": "indoor_dark",
       "avatars": {
         "shion": {
-          "position": "center",
+          "position": [
+            0.3,
+            -0.12,
+            0.45
+          ],
+          "rotationY": -0.35,
           "expression": "neutral",
           "expressionWeight": 1,
           "blush": true,
@@ -43,7 +49,18 @@
           "lookAtTarget": "camera"
         }
       },
-      "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
       "cutin": "/cutins/items/berry_pancake.avif",
       "voiceUrl": "v_s1_4fb2b853.mp3"
     },
@@ -57,17 +74,53 @@
           "lookAtTarget": "forward"
         }
       },
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
       "voiceUrl": "v_s2_3807b7b5.mp3"
     },
     {
       "id": "s3",
       "text": "（カチャ……カチャ……）",
       "cutin": false,
-      "camera": "wide"
+      "cameraPose": {
+        "position": [
+          0.12,
+          1.15,
+          1.55
+        ],
+        "target": [
+          0.08,
+          1.15,
+          -1.0
+        ]
+      },
+      "seUrl": "/se/tableware_spoon.mp3"
     },
     {
       "id": "s4",
       "text": "",
+      "cameraPose": {
+        "position": [
+          0.12,
+          1.15,
+          1.55
+        ],
+        "target": [
+          0.08,
+          1.15,
+          -1.0
+        ]
+      },
       "choices": [
         {
           "id": "shion_d13_tasty",
@@ -99,7 +152,18 @@
           "lookAtTarget": "camera"
         }
       },
-      "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
       "voiceUrl": "v_c1_b667ce8a.mp3"
     },
     {
@@ -113,7 +177,18 @@
           "expressionWeight": 1
         }
       },
-      "camera": "close",
+      "cameraPose": {
+        "position": [
+          0.22,
+          1.16,
+          1.3
+        ],
+        "target": [
+          0.29,
+          1.15,
+          0.45
+        ]
+      },
       "end": true,
       "voiceUrl": "v_s6_65ce6d82.mp3"
     },
@@ -129,7 +204,18 @@
           "lookAtTarget": "camera"
         }
       },
-      "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.16,
+          1.45
+        ],
+        "target": [
+          0.28,
+          1.15,
+          0.45
+        ]
+      },
       "end": true,
       "voiceUrl": "v_c2_83124b41.mp3"
     }

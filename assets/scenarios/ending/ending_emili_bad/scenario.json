@@ -43,7 +43,8 @@
           "visible": false
         }
       },
-      "cutin": "/cutins/takashi/afro_smoke.avif"
+      "cutin": "/cutins/takashi/afro_smoke.avif",
+      "seUrl": "/se/thunder_bad_end.mp3"
     },
     {
       "id": "s3",

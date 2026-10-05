@@ -42,7 +42,7 @@
           "position": "center",
           "expression": "komari",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "Standing Idle",
           "lookAtTarget": "camera"
         }
       },
@@ -83,8 +83,7 @@
       "avatars": {
         "teacher": {
           "expression": "komari",
-          "expressionWeight": 1,
-          "motion": "chin_rest"
+          "expressionWeight": 1
         }
       },
       "voiceUrl": "v_s5_cf919ac9.mp3"

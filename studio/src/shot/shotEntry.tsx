@@ -10,6 +10,7 @@ import type { BgmBook, CharacterBook, LocationVisualPreset, MotionBook, Scenario
 import type { StudioData } from '../data/useStudioData';
 import { LanguageProvider } from '../i18n';
 import { CutPreview, type Outfit } from '../views/scenarios/CutPreview';
+import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 
 export interface ShotRequest {
   scenario: ScenarioPackage;
@@ -27,7 +28,13 @@ export interface ShotRequest {
 
 declare global {
   interface Window {
-    __shot?: { ready: boolean; error?: string; render: (request: ShotRequest) => Promise<void> };
+    __shot?: {
+      ready: boolean;
+      error?: string;
+      render: (request: ShotRequest) => Promise<void>;
+      /** 登場キャラの頭の画面上の位置（構図のチェック用。-1〜1、上が +1） */
+      heads?: () => { id: string; x: number; y: number; behind: boolean }[];
+    };
   }
 }
 
@@ -49,6 +56,7 @@ async function loadData(): Promise<StudioData> {
 }
 
 let resolveRendered: (() => void) | null = null;
+let stageManager: StageManager | null = null;
 
 function ShotPage({ data }: { data: StudioData }) {
   const [request, setRequest] = useState<ShotRequest | null>(null);
@@ -61,6 +69,7 @@ function ShotPage({ data }: { data: StudioData }) {
           resolveRendered = resolve;
           setRequest(next);
         }),
+      heads: () => stageManager?.headsOnScreen() ?? [],
     };
   }, []);
 
@@ -88,6 +97,7 @@ function ShotPage({ data }: { data: StudioData }) {
         playing={false}
         freeCamera={false}
         onCameraPose={() => {}}
+        onManager={(manager) => (stageManager = manager)}
       />
     </div>
   );

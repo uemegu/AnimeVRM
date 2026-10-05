@@ -81,16 +81,15 @@
       "id": "s4",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "……覚えてたんだ",
+      "text": "……そうだっけ？　私、てっぺんから見た夕焼けしか覚えてないや",
       "avatars": {
         "aoi": {
           "lookAtTarget": "camera",
-          "expression": "surprised",
+          "expression": "happy",
           "expressionWeight": 1
         }
       },
-      "camera": "close",
-      "voiceUrl": "v_s4_9cceedda.mp3"
+      "camera": "close"
     },
     {
       "id": "s5",
@@ -105,6 +104,7 @@
         }
       },
       "camera": "medium",
+      "seUrl": "/se/gentle_wind.mp3",
       "voiceUrl": "v_s5_cf82e755.mp3"
     },
     {
@@ -181,6 +181,7 @@
       },
       "camera": "wide",
       "focusLines": true,
+      "seUrl": "/se/strong_gust.mp3",
       "voiceUrl": "v_merge_8051aeb2.mp3"
     },
     {
@@ -218,34 +219,32 @@
       "id": "s13",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "この街、変わってないなって思ってたけど……タカシくんは、変わったね",
+      "text": "これ、前の街の友達がくれたの。引っ越しの日に",
       "avatars": {
         "aoi": {
           "lookAtTarget": "forward"
         }
       },
-      "camera": "medium",
-      "voiceUrl": "v_s13_55741961.mp3"
+      "camera": "medium"
     },
     {
       "id": "s14",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "……悪い意味で？"
+      "text": "……大事なやつだな"
     },
     {
       "id": "s15",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "ううん。……どうだろ。分かんない",
+      "text": "うん。……だから、なくさないようにしないと",
       "avatars": {
         "aoi": {
           "lookAtTarget": "camera",
           "expression": "relaxed",
           "expressionWeight": 1
         }
-      },
-      "voiceUrl": "v_s15_519c070e.mp3"
+      }
     }
   ]
 }

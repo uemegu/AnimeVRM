@@ -37,6 +37,7 @@
       },
       "camera": "wide",
       "cg": "/cg/emili/raid_five_sedans.avif",
+      "seUrl": "/se/tire_squeal.mp3",
       "voiceUrl": "v_s1_7b137c0f.mp3"
     },
     {
@@ -60,6 +61,7 @@
       "speakerCharacterId": "sp_leader",
       "speaker": "黒服リーダー",
       "text": "お嬢様が毎日我々の目を盗み、素性の知れない男子生徒と街を出歩いていることを、旦那様はご存じです",
+      "seUrl": "/se/car_door.mp3",
       "voiceUrl": "v_s3_320ecfc9.mp3"
     },
     {
@@ -150,7 +152,7 @@
       "speakerCharacterId": "sp_leader",
       "speaker": "黒服リーダー",
       "text": "ゴーグル、マスク、刃物……不審者だ！　お嬢様を保護せよ！　安全ネット展開！",
-      "background": "school_gate",
+      "background": "school_gate_2d",
       "scrollingBackground": {
         "speed": 1.6
       },

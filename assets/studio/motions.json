@@ -7,13 +7,16 @@
       "loop": true
     },
     "Walking": {
-      "loop": true
+      "loop": true,
+      "locomotion": true
     },
     "Jogging": {
-      "loop": true
+      "loop": true,
+      "locomotion": true
     },
     "chin_rest": {
-      "loop": true
+      "loop": true,
+      "seated": true
     },
     "clasp_hands_front": {
       "loop": true
@@ -94,7 +97,8 @@
       "loop": true
     },
     "pose_stretch_legs": {
-      "loop": true
+      "loop": true,
+      "seated": true
     }
   }
 }

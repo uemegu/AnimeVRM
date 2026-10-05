@@ -157,7 +157,9 @@ export class StageManager {
   /** 3D空間に置く遠景（場所の backdrop.mode が world のとき） */
   private backdropMesh!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
   /** 場所の3D背景（組み込みのセットや glb） */
-  private environment: { model: string; object: THREE.Object3D | null } | null = null;
+  private environment: { model: string; object: THREE.Object3D | null; ready: Promise<void> } | null = null;
+  /** 今の場所の遠景・3D背景を置き終えたら解決する（暗転はこれを待って明ける） */
+  private locationReady: Promise<void> = Promise.resolve();
   private effects: SceneEffects = {};
   /** 最後に指定された登場キャラ（場所が変わったら立ち位置を当て直す） */
   private castMembers: StageCastMember[] = [];
@@ -181,6 +183,8 @@ export class StageManager {
   private castDepths: Map<string, number> = new Map();
   /** 登場中のキャラの頭の高さ（構図をキャラの背丈に合わせる） */
   private castHeadHeights: Map<string, number> = new Map();
+  /** キャラ（モデル）ごとの立ち姿の頭の高さ（getHeadHeight） */
+  private standingHeadHeights = new WeakMap<StageAvatar, number>();
   /** 口パクさせるキャラ */
   private speakerId: string | null = null;
   /** setCast の呼び出し番号（非同期ロード中に次の指定が来たら古い指定を捨てる） */
@@ -576,19 +580,30 @@ export class StageManager {
     const locPreset = this.presets.locations[locationId] || this.presets.locations.classroom;
 
     // 1. 遠景画像 (SkyBackground の前面にアルファカット合成)
-    if (locPreset.layers.background.url) {
-      this.textureLoader.load(resolveAssetUrl(locPreset.layers.background.url), (texture) => {
-        if (this.isDisposed || this.currentLocationId !== locationId) return;
-        texture.colorSpace = THREE.SRGBColorSpace;
-        this.locationBackgroundTexture = texture;
-        this.applyBackdrop();
+    let backdropReady = Promise.resolve();
+    const backgroundUrl = locPreset.layers.background.url;
+    if (backgroundUrl) {
+      backdropReady = new Promise((resolve) => {
+        this.textureLoader.load(
+          resolveAssetUrl(backgroundUrl),
+          (texture) => {
+            resolve();
+            if (this.isDisposed || this.currentLocationId !== locationId) return;
+            texture.colorSpace = THREE.SRGBColorSpace;
+            this.locationBackgroundTexture = texture;
+            this.applyBackdrop();
+          },
+          undefined,
+          () => resolve()
+        );
       });
     } else {
       this.locationBackgroundTexture = null;
       this.applyBackdrop();
     }
 
-    this.applyEnvironment();
+    // 暗転（ScreenEffects の fade_black）は、これが終わるまで明けない
+    this.locationReady = Promise.all([backdropReady, this.applyEnvironment()]).then(() => {});
     this.applyKeyLight();
     this.crowd.setLocation(locPreset.stage?.crowd);
 
@@ -810,8 +825,8 @@ export class StageManager {
     this.environment?.object?.userData.setEffects?.(this.effects);
   }
 
-  /** 3D背景を読み込んで置く（同じモデルなら置き直すだけ） */
-  private applyEnvironment(): void {
+  /** 3D背景を読み込んで置く（同じモデルなら置き直すだけ）。置き終わったら解決する */
+  private applyEnvironment(): Promise<void> {
     const settings = this.presets.locations[this.currentLocationId]?.environment;
     if (this.environment && this.environment.model !== settings?.model) {
       if (this.environment.object) {
@@ -820,14 +835,14 @@ export class StageManager {
       }
       this.environment = null;
     }
-    if (!settings) return;
+    if (!settings) return Promise.resolve();
     if (this.environment) {
       if (this.environment.object) placeEnvironment(this.environment.object, settings);
-      return;
+      return this.environment.ready;
     }
-    const entry = { model: settings.model, object: null as THREE.Object3D | null };
+    const entry = { model: settings.model, object: null as THREE.Object3D | null, ready: Promise.resolve() };
     this.environment = entry;
-    loadEnvironment(settings.model)
+    entry.ready = loadEnvironment(settings.model)
       .then((object) => {
         // 読み込み中に場所が変わった・破棄された
         if (this.environment !== entry || this.isDisposed) {
@@ -842,6 +857,7 @@ export class StageManager {
         this.applyEffects();
       })
       .catch((err) => console.error(`3D背景を読み込めません: ${settings.model}`, err));
+    return entry.ready;
   }
 
   private applyCameraSettings(): void {
@@ -921,6 +937,11 @@ export class StageManager {
     });
 
     await avatar.load(modelUrl);
+    // 読み込み中に舞台が片付けられた（場面が終わった）。持ち続けないよう捨てる
+    if (this.isDisposed) {
+      avatar.dispose();
+      return avatar;
+    }
 
     // 現在の時間帯マテリアル設定を初期反映
     const currentPreset = this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day;
@@ -1018,6 +1039,7 @@ export class StageManager {
       avatar.vrm.scene.rotation.y = member.rotationY ?? -position[0] * 0.5;
       avatar.vrm.scene.visible = true;
       avatar.setDaylight(member.daylight ?? 0);
+      avatar.setHeldItem(member.heldItem);
       avatar.setExpression(member.expression, member.expressionWeight);
       this.playMotion(member.id, avatar, member.motion, member.motionLoop, member.motionCue);
       this.castIds.push(member.id);
@@ -1082,12 +1104,21 @@ export class StageManager {
   }
 
   /** 頭の高さ（直立時）。取得できなければ標準的な背丈を返す */
+  /**
+   * 構図の基準にする頭の高さ（立ち姿）。キャラごとに最初の1回だけ測る。
+   * 置き直すたびに測ると、モーションを切り替えた直後の前の姿勢（お辞儀・座り・しゃがみ）で低く測ってしまい、
+   * そのカットの間カメラが低い所を狙って顔が上に切れる
+   */
   private getHeadHeight(avatar: StageAvatar): number {
+    const cached = this.standingHeadHeights.get(avatar);
+    if (cached !== undefined) return cached;
     const head = avatar.vrm?.humanoid?.getRawBoneNode('head');
     if (!head) return 1.4;
     avatar.vrm!.scene.updateMatrixWorld(true);
     const y = head.getWorldPosition(new THREE.Vector3()).y - avatar.vrm!.scene.position.y;
-    return y > 0.8 && y < 2.2 ? y : 1.4;
+    const height = y > 0.8 && y < 2.2 ? y : 1.4;
+    this.standingHeadHeights.set(avatar, height);
+    return height;
   }
 
   /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す（止め絵のポーズは保つ） */
@@ -1156,6 +1187,22 @@ export class StageManager {
     this.cameraCurrentTarget.copy(target);
   }
 
+  /**
+   * 登場中のキャラの頭（の中心あたり）が画面のどこに映っているか（-1〜1。上が +1）。
+   * 撮影ツールで「話者の顔が画面に入っているか」を確かめるのに使う
+   */
+  public headsOnScreen(): { id: string; x: number; y: number; behind: boolean }[] {
+    this.camera.updateMatrixWorld();
+    return this.castIds.flatMap((id) => {
+      const head = this.loadedAvatars.get(id)?.vrm?.humanoid?.getNormalizedBoneNode('head');
+      if (!head) return [];
+      const point = head.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.08, 0));
+      const behind = point.clone().applyMatrix4(this.camera.matrixWorldInverse).z > 0;
+      point.project(this.camera);
+      return [{ id, x: point.x, y: point.y, behind }];
+    });
+  }
+
   /** 今の注視点（カメラを手で動かすときの初期値） */
   public get viewTarget(): THREE.Vector3 {
     return this.cameraCurrentTarget.clone();
@@ -1177,7 +1224,7 @@ export class StageManager {
     // 前のカットの文字演出・汗は消す
     this.firedOneShots.clear();
     this.loadedAvatars.forEach((avatar) => avatar.effects?.clearOneShots());
-    this.screenEffects?.playTransition(scene?.screenTransition ?? null);
+    this.screenEffects?.playTransition(scene?.screenTransition ?? null, false, () => this.locationReady);
     this.applyCutState(false);
   }
 

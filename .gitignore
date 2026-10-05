@@ -30,6 +30,7 @@ dist-ssr
 !/scripts/ardy-generate.ts
 !/scripts/validate.ts
 !/scripts/shot.ts
+!/scripts/check-framing.ts
 !/scripts/transplant-vrm-meshes.ts
 # ardy-generate.ts が読み込む
 !/scripts/lib/
@@ -45,4 +46,6 @@ dist-ssr
 /app/scripts/*
 !/app/scripts/generate-*.js
 !/app/scripts/scenario-voices.py
+!/app/scripts/compile-script.py
+!/app/scripts/voice-todo.py
 /trash

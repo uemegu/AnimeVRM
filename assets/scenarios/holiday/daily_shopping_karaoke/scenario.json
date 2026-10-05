@@ -13,6 +13,7 @@
     ]
   },
   "location": "shopping_street",
+  "bgm": "sunlight_on_cobblestones",
   "timeOfDay": "day",
   "actionHints": [
     {

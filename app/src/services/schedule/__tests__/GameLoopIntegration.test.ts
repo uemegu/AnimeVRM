@@ -147,6 +147,38 @@ describe('GameLoopIntegration (ゲームループ・21日間コアループ結�
     expect(firstLine({ finale_stay: true, finale_answered: true })).toContain('激しさには欠けますが');
   });
 
+  it('エミリ・シオンの GOOD END は、「好きだ」経由なら本文も告白を受けた形になること', async () => {
+    /** 最初の選択肢を選びながら最後まで読んだセリフと、出た選択肢 */
+    const readThrough = async (id: string, flags: Record<string, boolean>) => {
+      const engine = new ScenarioEngine(await loadScenario(id), flags, {});
+      const lines: string[] = [];
+      const choices: string[] = [];
+      for (let guard = 0; !engine.isFinished() && guard < 200; guard++) {
+        if (engine.isWaitingForChoice()) {
+          choices.push(...engine.getAvailableChoices().map((c) => c.id ?? c.goto));
+          engine.choose(0);
+        } else {
+          lines.push(engine.getCurrentScene()?.text ?? '');
+          engine.next();
+        }
+      }
+      return { text: lines.join('\n'), choices };
+    };
+    const love = { finale_love: true, finale_answered: true };
+    const stay = { finale_stay: true, finale_answered: true };
+    const emiliLove = await readThrough('ending_emili_good', love);
+    const emiliStay = await readThrough('ending_emili_good', stay);
+    expect(emiliLove.text).toContain('まだ『はい』とは言えない');
+    expect(emiliLove.text).not.toContain('相棒');
+    expect(emiliLove.choices).toEqual(['emili_good_harsh', 'emili_good_again']);
+    expect(emiliStay.text).toContain('……相棒、ね');
+    expect(emiliStay.choices).toEqual(['emili_good_harsh', 'emili_good_next']);
+    const shionLove = await readThrough('ending_shion_good', love);
+    expect(shionLove.text).toContain('偽りではないと立証された');
+    expect(shionLove.text).not.toContain('無理に『好き』と叫ばなかった');
+    expect((await readThrough('ending_shion_good', stay)).text).toContain('無理に『好き』と叫ばなかった');
+  });
+
   it('好感度が足りないと★の選択肢は出ないこと', async () => {
     const scenario = await loadScenario('aoi_d13_house');
     const choicesAt = (aoi: number) => {

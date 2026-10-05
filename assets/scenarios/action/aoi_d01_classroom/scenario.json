@@ -48,7 +48,7 @@
           "position": "center",
           "expression": "komari",
           "expressionWeight": 1,
-          "motion": "chin_rest",
+          "motion": "clasp_hands_front",
           "lookAtTarget": "camera"
         }
       },
@@ -120,33 +120,42 @@
       "id": "s8",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "ふふ。……実はね、今日ずっと緊張してたんだ。知らない教室、知らない人ばっかりで",
+      "text": "……あ、この裏道。駄菓子屋さんの横の空き地、もう抜けられないの？",
       "avatars": {
         "aoi": {
-          "expression": "komari",
+          "expression": "surprised",
           "expressionWeight": 1,
           "lookAtTarget": "camera"
         }
       },
-      "camera": "medium",
-      "voiceUrl": "v_s8_c3568adc.mp3"
+      "camera": "medium"
     },
     {
       "id": "s9",
-      "speakerCharacterId": "aoi",
-      "speaker": "アオイ",
-      "text": "だから、タカシくんが同じクラスで、ほんとによかった",
-      "avatars": {
-        "aoi": {
-          "expression": "happy",
-          "expressionWeight": 1,
-          "motion": "aoi_feminine_ear_tuck"
-        }
-      },
-      "voiceUrl": "v_s9_92f1973f.mp3"
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "去年マンションが建った。駄菓子屋も、もうない"
     },
     {
       "id": "s10",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……そっか。なくなっちゃったんだ",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "motion": "aoi_feminine_ear_tuck"
+        }
+      }
+    },
+    {
+      "id": "s11",
+      "text": "（アオイが、プリントの裏道に引いた線を消しゴムで消す）"
+    },
+    {
+      "id": "s12",
       "speakerCharacterId": "mob_boy",
       "speaker": "クラスの男子",
       "text": "うわっ、あぶねえっ！",
@@ -161,10 +170,10 @@
         }
       },
       "camera": "wide",
-      "voiceUrl": "v_s10_6f616339.mp3"
+      "seUrl": "/se/cleaning_tools_collapse.mp3"
     },
     {
-      "id": "s11",
+      "id": "s13",
       "text": "",
       "choices": [
         {
@@ -200,7 +209,7 @@
       }
     },
     {
-      "id": "s13",
+      "id": "s15",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "う、うん……タカシくんは……？",
@@ -211,8 +220,7 @@
           "eyeWander": true
         }
       },
-      "nextSceneId": "merge",
-      "voiceUrl": "v_s13_8c4f90ae.mp3"
+      "nextSceneId": "merge"
     },
     {
       "id": "c2",
@@ -222,7 +230,7 @@
       "camera": "wide"
     },
     {
-      "id": "s15",
+      "id": "s17",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "きゃっ……！",
@@ -233,11 +241,10 @@
           "effectText": "gaan"
         }
       },
-      "focusLines": true,
-      "voiceUrl": "v_s15_d28548d4.mp3"
+      "focusLines": true
     },
     {
-      "id": "s16",
+      "id": "s18",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "あっ"
@@ -255,7 +262,7 @@
       }
     },
     {
-      "id": "s18",
+      "id": "s20",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "う、ううん！　……助けてくれて、ありがと",
@@ -266,24 +273,31 @@
           "blush": true,
           "motion": "clasp_hands_front"
         }
-      },
-      "voiceUrl": "v_s18_add6e5fd.mp3"
+      }
     },
     {
-      "id": "s19",
-      "speakerCharacterId": "aoi",
-      "speaker": "アオイ",
-      "text": "（……タカシくんって、あんなに力強かったっけ）",
+      "id": "s21",
+      "text": "（アオイが、つかまれた手首をそっとさする）",
       "avatars": {
         "aoi": {
-          "expression": "relaxed",
-          "expressionWeight": 1,
           "lookAtTarget": "forward",
           "motion": "pose_hand_on_chest"
         }
+      }
+    },
+    {
+      "id": "s22",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……プリント、くしゃくしゃになっちゃった。転入初日から、忙しいなあ",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
       },
-      "camera": "close",
-      "voiceUrl": "v_s19_e7628478.mp3"
+      "camera": "close"
     }
   ]
 }

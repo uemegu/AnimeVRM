@@ -1,0 +1,180 @@
+{
+  "id": "daily_courtyard_aoi_lost",
+  "title": {
+    "ja": "移動教室の迷子"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "morning"
+    ],
+    "dayRange": {
+      "from": 2,
+      "to": 4
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "common_d01_homeroom"
+        }
+      ]
+    }
+  },
+  "location": "courtyard",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintCharacterIds": [
+        "aoi"
+      ],
+      "hintText": {
+        "ja": "中庭で誰かが校舎の見取り図とにらめっこしている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……あれ？　理科室って、こっちの校舎じゃなかったっけ",
+      "background": "courtyard",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s2",
+      "text": "（アオイが、校舎の見取り図のプリントを上下さかさまに持っている）"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "アオイ、それ逆さま",
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "camera",
+          "expression": "surprised",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "えっ。……あ",
+      "avatars": {
+        "aoi": {
+          "blush": true
+        }
+      }
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "この学校、渡り廊下が多すぎるんだよ……。小学校は一本道だったのに",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
+        }
+      }
+    },
+    {
+      "id": "s6",
+      "text": "",
+      "choices": [
+        {
+          "id": "d02_lost_run",
+          "text": "チャイムまで三分。走るぞ",
+          "goto": "c1",
+          "addAffinity": {
+            "aoi": 1
+          }
+        },
+        {
+          "id": "d02_lost_map",
+          "text": "（プリントに、近道を書き込んで渡す）",
+          "goto": "c2",
+          "addAffinity": {
+            "aoi": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "ま、待って、プリント落ち……！",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "sweat": "fly4"
+        }
+      },
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……ここの階段、通っていいの？",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "motion": "Standing Idle"
+        }
+      }
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "掃除当番しか使わない階段だ"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "詳しすぎない？",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……ありがと。明日からは一人で行けるように、覚えるね",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      }
+    }
+  ]
+}

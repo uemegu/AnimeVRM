@@ -1,41 +1,30 @@
 {
   "id": "morning_default",
   "title": {
-    "ja": "朝: いつもの通学路"
+    "ja": "いつもの通学路"
   },
+  "location": "town",
+  "timeOfDay": "morning",
   "fallback": true,
-  "location": "school_gate",
-  "bgm": "main_bgm",
   "scenes": [
     {
       "id": "s1",
-      "text": "いつもの通学路。今日もアオイと並んで歩く。",
-      "camera": "side",
+      "text": "（通学路。春の朝の光）",
       "background": "town",
-      "scrollingBackground": {},
       "timeOfDay": "morning",
-      "avatars": {
-        "aoi": {
-          "position": "center",
-          "expression": "happy",
-          "motion": "Walking"
-        }
-      }
+      "camera": "wide"
     },
     {
       "id": "s2",
-      "speaker": "アオイ",
-      "speakerCharacterId": "aoi",
-      "text": "ねえタカシくん、今日のお昼どうする？",
-      "camera": "side",
-      "voiceUrl": "v_s2_f6c911f1.mp3"
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……今日も、何事もなく一日が始まる。何事もないのが、一番困るんだが）"
     },
     {
       "id": "s3",
-      "speaker": "タカシ",
       "speakerCharacterId": "player",
-      "text": "（女神のタイムリミットは、刻一刻と迫っている。……今日も、できることをやるしかない）",
-      "camera": "side"
+      "speaker": "タカシ",
+      "text": "（女神のタイムリミットは、刻一刻と迫っている。……今日も、できることをやるしかない）"
     }
   ]
 }

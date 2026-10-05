@@ -24,6 +24,7 @@
     }
   },
   "location": "library",
+  "bgm": "sunlight_on_ink",
   "timeOfDay": "evening",
   "actionHints": [
     {
@@ -83,7 +84,8 @@
         "shion": {
           "visible": false
         }
-      }
+      },
+      "seUrl": "/se/stepladder_metal_clank.mp3"
     },
     {
       "id": "s5",
@@ -174,7 +176,7 @@
           "expression": "neutral",
           "expressionWeight": 1,
           "lookAtTarget": "camera",
-          "motion": "chin_rest"
+          "motion": "pose_hug_notebook"
         }
       },
       "voiceUrl": "v_merge_eef2408e.mp3"

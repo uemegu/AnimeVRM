@@ -38,7 +38,7 @@
       "id": "s2",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "あ、タカシくん。これ、肉じゃが。お母さんと作ったら作りすぎちゃって。おばさんと食べて？",
+      "text": "あ、タカシくん。これ、肉じゃが。お母さんに教わったレシピで作ったら、作りすぎちゃって。おばさんと食べて？",
       "avatars": {
         "aoi": {
           "position": "center",
@@ -50,8 +50,7 @@
         }
       },
       "camera": "medium",
-      "seUrl": "/se/door_rattle.mp3",
-      "voiceUrl": "v_s2_6d04ae38.mp3"
+      "seUrl": "/se/door_rattle.mp3"
     },
     {
       "id": "s3",
@@ -180,19 +179,32 @@
       "id": "merge",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
+      "text": "お母さん、今日も夜勤なんだ。……一人分って、作るの難しいね",
+      "avatars": {
+        "aoi": {
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
       "text": "タッパー、明日返してくれればいいからね。おやすみ！",
       "avatars": {
         "aoi": {
           "expression": "happy",
           "expressionWeight": 1,
+          "lookAtTarget": "camera",
           "motion": "Standing Greeting"
         }
-      },
-      "camera": "medium",
-      "voiceUrl": "v_merge_e792a010.mp3"
+      }
     },
     {
-      "id": "s13",
+      "id": "s14",
       "speakerCharacterId": "takashi_mom",
       "speaker": "母（声）",
       "text": "あんた、玄関で何ニヤけてんの",
@@ -201,11 +213,10 @@
         "aoi": {
           "visible": false
         }
-      },
-      "voiceUrl": "v_s13_4a5afcfa.mp3"
+      }
     },
     {
-      "id": "s14",
+      "id": "s15",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "ニヤけてない！"

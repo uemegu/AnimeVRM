@@ -1,0 +1,40 @@
+{
+  "id": "daily_sports_ground_ball",
+  "title": {
+    "ja": "ファウルボール"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "sports_ground"
+    ]
+  },
+  "location": "sports_ground",
+  "timeOfDay": "day",
+  "fallback": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（カキーン。野球部のファウルボールが、足元まで転がってくる）",
+      "background": "sports_ground",
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "text": "「すみませーん！」（遠くで、野球部員の声）"
+    },
+    {
+      "id": "s3",
+      "text": "（ボールを拾い、泥を親指で拭ってから投げ返す）"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……ボールまで拭いてしまうのは、もう職業病だな）"
+    }
+  ]
+}

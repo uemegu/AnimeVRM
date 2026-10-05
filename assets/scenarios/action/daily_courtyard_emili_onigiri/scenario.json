@@ -1,0 +1,163 @@
+{
+  "id": "daily_courtyard_emili_onigiri",
+  "title": {
+    "ja": "コンビニおにぎりの開け方"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 5,
+      "to": 20
+    },
+    "locations": [
+      "courtyard"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "emili_d03_cafeteria"
+        }
+      ]
+    }
+  },
+  "location": "courtyard",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "courtyard",
+      "hintCharacterIds": [
+        "emili"
+      ],
+      "hintText": {
+        "ja": "中庭の植え込みの陰に、見覚えのある深紅のボブが"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……っ、なによこれ。なんで海苔がビニールに挟まってるのよ",
+      "background": "courtyard",
+      "timeOfDay": "day",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……何やってんだ、こんなとこで",
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "camera",
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "effectText": "biku"
+        }
+      }
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "し、静かに！　SPに見つかったら『お嬢様が庶民の握り飯を』って大騒ぎになるのよ",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "sweat": "fly4"
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……で。これ、どうやって開けるの",
+      "avatars": {
+        "emili": {
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      }
+    },
+    {
+      "id": "s5",
+      "text": "",
+      "choices": [
+        {
+          "id": "d05_onigiri_steps",
+          "text": "①を引いて、②と③を左右に。番号の順だ（実演する）",
+          "goto": "c1",
+          "addAffinity": {
+            "emili": 2
+          }
+        },
+        {
+          "id": "d05_onigiri_hand",
+          "text": "ちぎれた海苔は、手で巻けばいいだろ",
+          "goto": "c2",
+          "addAffinity": {
+            "emili": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……！　海苔が、パリッとしたまま……",
+      "avatars": {
+        "emili": {
+          "expression": "happy",
+          "expressionWeight": 1,
+          "effectText": "kirakira",
+          "motion": "Excited"
+        }
+      },
+      "nextSceneId": "merge"
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……庶民の知恵ね。悪くないわ",
+      "avatars": {
+        "emili": {
+          "expression": "relaxed",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "merge",
+      "speakerCharacterId": "emili",
+      "speaker": "エミリ",
+      "text": "……このこと、誰にも言わないでよ。特にパパには",
+      "avatars": {
+        "emili": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "motion": "Standing Idle"
+        }
+      },
+      "camera": "close"
+    }
+  ]
+}

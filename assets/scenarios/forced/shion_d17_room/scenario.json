@@ -24,6 +24,7 @@
     }
   },
   "location": "library",
+  "bgm": "where_the_rain_stops",
   "timeOfDay": "evening",
   "consumesTurn": true,
   "scenes": [
@@ -65,21 +66,52 @@
       "cutin": false,
       "avatars": {
         "shion": {
-          "position": "center",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "chin_rest",
           "lookAtTarget": "camera"
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s3_b070442e.mp3"
     },
     {
       "id": "s4",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "それ……何を調べてるんだ？"
+      "text": "それ……何を調べてるんだ？",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s5",
@@ -88,15 +120,40 @@
       "text": "……勘違いしないで。被験者が黒焦げになったら、研究が未完で終わるからよ",
       "avatars": {
         "shion": {
-          "lookAtTarget": "forward",
-          "motion": "Standing Idle"
+          "lookAtTarget": "forward"
         }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
       },
       "voiceUrl": "v_s5_98ef8182.mp3"
     },
     {
       "id": "s6",
       "text": "",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "choices": [
         {
           "id": "shion_d17_know",
@@ -131,6 +188,19 @@
           "lookAtTarget": "camera"
         }
       },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "nextSceneId": "merge",
       "voiceUrl": "v_c1_66c44c78.mp3"
     },
@@ -146,6 +216,19 @@
           "lookAtTarget": "camera"
         }
       },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_c2_9216fb7b.mp3"
     },
     {
@@ -160,6 +243,19 @@
           "lookAtTarget": "forward"
         }
       },
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_merge_c756b545.mp3"
     },
     {
@@ -167,10 +263,18 @@
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "それでも、探さずにいられなかったの",
-      "avatars": {
-        "shion": {
-          "motion": "clasp_hands_front"
-        }
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
       },
       "voiceUrl": "v_s10_eac50d3c.mp3"
     },
@@ -186,6 +290,19 @@
         }
       },
       "camera": "close",
+      "cameraPose": {
+        "position": [
+          0.05,
+          1.1,
+          1.7
+        ],
+        "target": [
+          0,
+          1.0,
+          0
+        ],
+        "fov": 36
+      },
       "voiceUrl": "v_s11_ad3eae05.mp3"
     },
     {
@@ -201,6 +318,19 @@
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s12_c2b9451f.mp3"
     }
   ]

@@ -159,6 +159,21 @@ export const SceneTransition = z.strictObject({
 });
 export type SceneTransition = z.infer<typeof SceneTransition>;
 
+/**
+ * 手に持つ小物（形と持ち方はエンジンの heldItem.ts）。
+ * 缶・紙パックは片手で握る、スマホは手のひらに沿わせる、本は両手で開いて持つ、ノートは胸に抱える
+ */
+export const HeldItemId = z.enum(['can_coffee', 'can_juice', 'carton_ichigo', 'phone', 'book_open', 'notebook']);
+export type HeldItemId = z.infer<typeof HeldItemId>;
+
+/** 小物の指定。文字列は小物の ID だけ（持つ手は小物ごとの既定）。false で手放す */
+export const HeldItemConfig = z.union([
+  HeldItemId,
+  z.literal(false),
+  z.strictObject({ item: HeldItemId, hand: z.enum(['left', 'right']).optional() }),
+]);
+export type HeldItemConfig = z.infer<typeof HeldItemConfig>;
+
 /** シーン内のアバター指定。前のシーンの指定を引き継ぎ、書いた項目だけ上書きする（effectText・sweat はそのシーンだけ） */
 export const SceneAvatarConfig = z.strictObject({
   /** 省略時はキー名をキャラ ID として使う */
@@ -183,6 +198,8 @@ export const SceneAvatarConfig = z.strictObject({
   fastMotion: z.boolean().optional(),
   /** 日なたの明るさ（暗い店内から見た窓の外の人物など。0 で室内の光だけ、1 を超えると白く飛ぶ） */
   daylight: z.number().min(0).max(3).optional(),
+  /** 手に持つ小物。モーションを変えたシーンで指定がなければ手放す */
+  heldItem: HeldItemConfig.optional(),
   ...AvatarLookFields,
   ...AvatarOneShotFields,
   transitions: z.array(AvatarTransition).optional(),

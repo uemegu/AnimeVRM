@@ -59,7 +59,7 @@
         {
           "id": "shion_resume_cute",
           "text": {
-            "ja": "変じゃない。すごく似合ってる"
+            "ja": "それ、勉強に入るスイッチみたいだな"
           },
           "goto": "c1",
           "addAffinity": {
@@ -82,7 +82,7 @@
       "id": "c1",
       "speaker": "",
       "text": {
-        "ja": "（シオンが無言でレジュメを持ち上げ、顔の下半分を隠す）"
+        "ja": "（シオンが髪をほどこうと手を伸ばし、途中で止める）"
       },
       "motion": "pose_hide_mouth_shy",
       "nextStepId": "step_6"
@@ -91,12 +91,11 @@
       "id": "step_6",
       "speaker": "シオン",
       "text": {
-        "ja": "……不意打ちの非論理的な発言は慎みなさい。思考回路が乱れるわ"
+        "ja": "……分析しないで。ほどくと集中が切れるの。今は、このままにしておくわ"
       },
       "expression": "komari",
       "expressionWeight": 1,
-      "nextStepId": "merge",
-      "voiceUrl": "v_step_6_d481f0ba.mp3"
+      "nextStepId": "merge"
     },
     "c2": {
       "id": "c2",
