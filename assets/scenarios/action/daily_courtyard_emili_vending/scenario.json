@@ -70,6 +70,7 @@
           "motion": "Excited"
         }
       },
+      "seUrl": "/se/vending_can_drop.mp3",
       "voiceUrl": "v_s3_2e4b5cca.mp3"
     },
     {
@@ -79,6 +80,8 @@
         "emili": {
           "expression": "happy",
           "expressionWeight": 1,
+          "motion": "pose_raise_can",
+          "heldItem": "can_juice",
           "lookAtTarget": "camera"
         }
       },

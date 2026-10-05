@@ -1,0 +1,37 @@
+{
+  "id": "daily_classroom_nap",
+  "title": {
+    "ja": "五時間目の前"
+  },
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "fallback": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（昼休みの教室。弁当の匂いと、春の日差し）",
+      "background": "classroom",
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……あと二十分で五時間目か。俺も、少しだけ……）"
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（いや。寝てる間に二十一日が終わったら笑えない）"
+    }
+  ]
+}

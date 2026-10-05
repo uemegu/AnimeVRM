@@ -64,7 +64,7 @@
         {
           "id": "shion_fivesec_thanks",
           "text": {
-            "ja": "シオンがいてくれるから、ちゃんと前を向けてるよ"
+            "ja": "じゃあ、５秒で言えるように、今のうちに考えとく"
           },
           "goto": "c1",
           "addAffinity": {
@@ -87,28 +87,25 @@
       "id": "c1",
       "speaker": "シオン",
       "text": {
-        "ja": "……買い被りよ"
+        "ja": "……考えすぎたら、それこそ安全装置に引っかかるわよ"
       },
-      "nextStepId": "step_7",
-      "voiceUrl": "v_c1_e01c092b.mp3"
+      "nextStepId": "step_7"
     },
     "step_7": {
       "id": "step_7",
       "speaker": "シオン",
       "text": {
-        "ja": "……あなたを黒焦げにさせるわけにはいかないの。……私が、困るもの"
+        "ja": "……でも、そうね。考えるのは、悪いことじゃない"
       },
-      "nextStepId": "step_8",
-      "voiceUrl": "v_step_7_df2d2843.mp3"
+      "nextStepId": "step_8"
     },
     "step_8": {
       "id": "step_8",
       "speaker": "シオン",
       "text": {
-        "ja": "……独り言よ。おやすみなさい"
+        "ja": "旧記の続きは明日読むわ。おやすみなさい"
       },
-      "nextStepId": null,
-      "voiceUrl": "v_step_8_0d072f25.mp3"
+      "nextStepId": null
     },
     "c2": {
       "id": "c2",

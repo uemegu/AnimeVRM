@@ -243,6 +243,8 @@ export interface ScenarioIndexEntry extends ScenarioMeta {
   time?: string;
   /** シナリオディレクトリのURL（末尾スラッシュ付き）。相対指定のボイス等はここを基準に解決する */
   baseUrl: string;
+  /** 登場するキャラ（舞台に立つか話す。主人公は除く）。行き先の地図に誰がいるかの表示に使う */
+  cast?: string[];
 }
 
 /** シナリオパッケージ（1本のイベントシナリオ。scenario.json の中身） */

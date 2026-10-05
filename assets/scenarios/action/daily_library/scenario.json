@@ -1,9 +1,8 @@
 {
   "id": "daily_library",
   "title": {
-    "ja": "図書室: 静かな時間"
+    "ja": "静かな図書室"
   },
-  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -14,30 +13,20 @@
       "library"
     ]
   },
-  "bgm": "main_bgm",
+  "location": "library",
+  "timeOfDay": "day",
+  "fallback": true,
   "scenes": [
     {
       "id": "s1",
-      "text": "図書室は静まり返っている。窓際の席で、シオンがページをめくる音だけが響く。",
-      "avatars": {
-        "shion": {
-          "position": "center",
-          "expression": "neutral",
-          "motion": "chin_rest"
-        }
-      }
+      "text": "（図書室は静まり返っている。ページをめくる音と、時計の音だけ）",
+      "background": "library",
+      "camera": "wide"
     },
     {
       "id": "s2",
-      "speaker": "シオン",
-      "speakerCharacterId": "shion",
-      "text": "……何か用？ 用がないなら、静かにしてて。",
-      "voiceUrl": "v_s2_11a661ca.mp3"
-    },
-    {
-      "id": "s3",
-      "speaker": "タカシ",
       "speakerCharacterId": "player",
+      "speaker": "タカシ",
       "text": "（目当ての本を探して、今日は大人しく過ごした）"
     }
   ]

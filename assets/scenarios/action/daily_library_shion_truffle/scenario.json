@@ -24,6 +24,7 @@
     }
   },
   "location": "library",
+  "bgm": "sunlight_on_ink",
   "timeOfDay": "evening",
   "actionHints": [
     {

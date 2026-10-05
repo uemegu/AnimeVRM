@@ -1,0 +1,289 @@
+#################### 第6章：いつもの風景と小さな出来事（原稿：エピソード_日常/06_いつもの風景と小さな出来事.md）
+
+=== forced common_d01_homeroom | 転入生は隣の部屋の
+priority: 20
+consumesTurn: true
+location: classroom
+time: day
+avail: {"timeSlots": ["morning"], "days": [1], "after": {"all": [{"scenarioId": "prologue_day1"}]}}
+---
+@ bg=classroom; time=day; teacher.pos=center; teacher.expr=neutral; teacher.motion=Standing Idle; teacher.look=camera; cam=medium
+teacher: はい静かに。新学期早々だけど、転入生を紹介するよ。……入って
+: （アオイが教室に入ってくる。ざわめき） {teacher.pos=left; teacher.look=aoi; aoi.pos=right; aoi.expr=komari; aoi.motion=clasp_hands_front; aoi.look=camera; cam=wide}
+aoi: 水瀬アオイです。小学校の途中まで、この街に住んでました。……よろしくお願いします {aoi.motion=Quick Formal Bow; cam=medium}
+yui: かわいー {aoi.motion=Standing Idle; aoi.expr=happy}
+kana: どこ住み？
+teacher: 質問は休み時間にね。席は……窓際の空いてるとこ。タカシの隣 {teacher.look=camera; teacher.motion=Dismissing Gesture; cam=wide}
+naruse: おいタカシ、知り合いか？　さっき一緒に登校してたろ {clear; naruse.pos=center; naruse.expr=nima; naruse.motion=Standing Idle; naruse.look=camera; cam=medium; name=ナルセ（小声）}
+player: 幼馴染。隣の部屋に越してきた
+naruse: ……隣の部屋？　お前それ、もうラブコメの導入だろ {naruse.expr=surprised; name=ナルセ（小声）}
+player: （ラブコメどころか、こっちは黒焦げの導入なんだが……） {naruse.expr=neutral}
+aoi: ……同じクラスだったね {naruse.out; aoi.pos=center; aoi.expr=happy; aoi.motion=Standing Greeting; aoi.look=camera; cam=medium; name=アオイ（小声）}
+?
+> d01_homeroom_textbook | 教科書、まだ届いてないだろ。見せるよ | c1 | aff=aoi:2
+> d01_homeroom_wave | （小さく手を振り返す） | c2 | aff=aoi:1
+*c1
+aoi: ……ありがと。助かる {aoi.expr=relaxed; aoi.motion=Standing Idle; name=アオイ（小声）}
+-> merge
+*c2
+: （アオイが、ほっとしたように笑う） {aoi.expr=happy; aoi.motion=Standing Idle}
+*merge
+teacher: はい、そこ。転入初日から仲良くしない。……いや、するのはいいけど授業中はやめな {teacher.pos=left; teacher.expr=nima; teacher.motion=Dismissing Gesture; teacher.look=camera; aoi.pos=right; cam=wide}
+aoi: し、してません！ {aoi.expr=surprised; aoi.blush; aoi.look=teacher}
+
+=== action daily_classroom_aoi_crowd | 囲まれる転入生
+priority: 5
+location: classroom
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 1, "to": 2}, "locations": ["classroom"], "after": {"all": [{"scenarioId": "common_d01_homeroom"}]}}
+hint: classroom | aoi | アオイがクラスの女子に囲まれている
+---
+@ bg=classroom; time=day; aoi.pos=center; aoi.expr=komari; aoi.motion=clasp_hands_front; aoi.look=yui; yui.pos=left; yui.expr=happy; yui.motion=mob_chat_gesture; yui.look=aoi; kana.pos=right; kana.expr=happy; kana.motion=mob_listen_nod; kana.look=aoi; cam=wide
+yui: 水瀬さん、前の学校どこ？
+kana: 部活は？　何部だった？ {aoi.look=kana}
+yui: 彼氏いる？ {aoi.look=yui; aoi.sweat=fly4}
+aoi: え、えっと…… {aoi.look=camera; cam=medium}
+?
+> d01_crowd_guard | 質問は一人ひとつまでな。昼休み終わるぞ | c1 | aff=aoi:2
+> d01_crowd_watch | （購買に行くふりをして、入口から見守る） | c2 | aff=aoi:1
+*c1
+yui: なにそれ、保護者？ {yui.look=camera; cam=wide}
+: （アオイが、くすっと笑う） {aoi.expr=happy; aoi.motion=Standing Idle}
+-> merge
+*c2
+: （アオイが、質問に一つずつ答えていく） {cam=wide}
+aoi: ……ふう。タカシくん、見てたでしょ {aoi.expr=relaxed; aoi.motion=Standing Idle; aoi.look=camera; cam=medium}
+*merge
+kana: ていうか朝、一緒に来てたよね。幼馴染ってほんと？ {kana.look=aoi; cam=wide}
+aoi: うん。小学校の時、毎日一緒に帰ってたの {aoi.expr=happy; aoi.look=kana}
+yui: へえ〜 {yui.look=camera; kana.look=camera; yui.expr=nima; kana.expr=nima}
+player: （……視線が痛い）
+
+=== action daily_courtyard_aoi_lost | 移動教室の迷子
+priority: -5
+location: courtyard
+time: day
+avail: {"timeSlots": ["morning"], "dayRange": {"from": 2, "to": 4}, "locations": ["courtyard"], "after": {"all": [{"scenarioId": "common_d01_homeroom"}]}}
+hint: courtyard | aoi | 中庭で誰かが校舎の見取り図とにらめっこしている
+---
+@ bg=courtyard; time=day; aoi.pos=center; aoi.expr=komari; aoi.motion=Standing Idle; aoi.look=forward; cam=medium
+aoi: ……あれ？　理科室って、こっちの校舎じゃなかったっけ
+: （アオイが、校舎の見取り図のプリントを上下さかさまに持っている）
+player: アオイ、それ逆さま {aoi.look=camera; aoi.expr=surprised}
+aoi: えっ。……あ {aoi.blush}
+aoi: この学校、渡り廊下が多すぎるんだよ……。小学校は一本道だったのに {aoi.expr=komari; aoi.motion=clasp_hands_front}
+?
+> d02_lost_run | チャイムまで三分。走るぞ | c1 | aff=aoi:1
+> d02_lost_map | （プリントに、近道を書き込んで渡す） | c2 | aff=aoi:2
+*c1
+aoi: ま、待って、プリント落ち……！ {aoi.expr=surprised; aoi.sweat=fly4}
+-> merge
+*c2
+aoi: ……ここの階段、通っていいの？ {aoi.expr=surprised; aoi.motion=Standing Idle}
+player: 掃除当番しか使わない階段だ
+aoi: 詳しすぎない？ {aoi.expr=happy}
+*merge
+aoi: ……ありがと。明日からは一人で行けるように、覚えるね {aoi.expr=relaxed; aoi.look=camera}
+
+=== action daily_library_shion_shelf | 届かない棚
+priority: -5
+location: library
+time: day
+avail: {"timeSlots": ["morning"], "dayRange": {"from": 4, "to": 20}, "locations": ["library"], "after": {"all": [{"scenarioId": "shion_d01_library"}]}}
+hint: library | shion | シオンが返却された本を棚に戻している
+---
+@ bg=library; time=day; shion.pos=center; shion.expr=neutral; shion.motion=pose_hug_notebook; shion.look=forward; cam=medium
+player: 月詠、上の段か？　取ってやろうか
+: （シオンが背伸びもせずに、一番上の段へ本を差し込む） {shion.motion=Standing Idle}
+shion: 何か言った？ {shion.look=camera}
+player: ……いや。背、高いんだな
+shion: あなたが言いたかったのは、そういうことじゃないでしょう {shion.expr=nima}
+?
+> d04_shelf_rely | ……一回くらい、頼られてみたかった | c1 | aff=shion:2
+> d04_shelf_work | 休み時間まで委員の仕事、大変だな | c2 | aff=shion:1
+*c1
+shion: ……じゃあ、これ。『郷土史』の棚に。分類番号は２９１よ {shion.expr=relaxed; shion.motion=pose_hug_notebook}
+-> end
+*c2
+shion: 静かな時間に戻しておけば、放課後は読むだけで済むもの。合理的でしょう {shion.expr=neutral}
+-> end
+
+=== action daily_courtyard_emili_onigiri | コンビニおにぎりの開け方
+priority: -5
+location: courtyard
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 5, "to": 20}, "locations": ["courtyard"], "after": {"all": [{"scenarioId": "emili_d03_cafeteria"}]}}
+hint: courtyard | emili | 中庭の植え込みの陰に、見覚えのある深紅のボブが
+---
+@ bg=courtyard; time=day; emili.pos=center; emili.expr=angry; emili.motion=Standing Idle; emili.look=forward; cam=medium
+emili: ……っ、なによこれ。なんで海苔がビニールに挟まってるのよ
+player: ……何やってんだ、こんなとこで {emili.look=camera; emili.expr=surprised; emili.fx=biku}
+emili: し、静かに！　SPに見つかったら『お嬢様が庶民の握り飯を』って大騒ぎになるのよ {emili.expr=komari; emili.sweat=fly4}
+emili: ……で。これ、どうやって開けるの {emili.expr=neutral; emili.blush}
+?
+> d05_onigiri_steps | ①を引いて、②と③を左右に。番号の順だ（実演する） | c1 | aff=emili:2
+> d05_onigiri_hand | ちぎれた海苔は、手で巻けばいいだろ | c2 | aff=emili:1
+*c1
+emili: ……！　海苔が、パリッとしたまま…… {emili.expr=happy; emili.fx=kirakira; emili.motion=Excited}
+-> merge
+*c2
+emili: ……庶民の知恵ね。悪くないわ {emili.expr=relaxed}
+*merge
+emili: ……このこと、誰にも言わないでよ。特にパパには {emili.expr=komari; emili.look=camera; emili.motion=Standing Idle; cam=close}
+
+=== action daily_cafeteria_shion_sweets | 脳の燃料
+priority: -5
+location: cafeteria
+time: day
+avail: {"timeSlots": ["afternoon"], "dayRange": {"from": 6, "to": 20}, "locations": ["cafeteria"], "after": {"all": [{"scenarioId": "shion_d06_parfait"}]}}
+hint: cafeteria | shion | 購買の菓子パンの棚の前で、誰かが長いこと迷っている
+---
+@ bg=cafeteria; time=day; shion.pos=center; shion.expr=komari; shion.motion=Standing Idle; shion.look=forward; cam=medium
+: （シオンが菓子パンの棚の前で、メロンパンとチョコデニッシュを見比べている）
+player: ……月詠
+: （シオンが何事もなかったように、隣の棚の野菜ジュースを手に取る） {shion.expr=neutral}
+shion: 何かしら {shion.look=camera}
+player: 今、メロンパン持ってただろ
+shion: 午後は数学が二時間続くの。糖分は脳の燃料よ。合理的な補給だわ {shion.look=forward}
+?
+> d06_sweets_choco | （チョコデニッシュの方を取って渡す） | c1 | aff=shion:2
+> d06_sweets_secret | パフェのことは黙っとくって | c2 | aff=shion:1
+*c1
+shion: ……どうして、そっちだと分かったの {shion.look=camera; shion.expr=surprised}
+player: パフェの時、チョコから食べてた
+shion: ……観察されていたのは、私の方だったのね {shion.expr=komari; shion.blush}
+-> end
+*c2
+shion: その話を、ここで出さないで {shion.expr=angry; shion.blush; shion.look=forward}
+-> end
+
+#################### 汎用（何も起きない時間）。ヒロインは出さない
+
+=== action daily_classroom_eraser | 黒板消しクリーナー
+fallback: true
+location: classroom
+time: day
+avail: {"timeSlots": ["morning", "afternoon", "afterschool"], "locations": ["classroom"]}
+---
+: （休み時間の教室。黒板消しクリーナーが、ガガガと唸っている） {bg=classroom; cam=wide}
+player: （……吸引力が落ちてる。フィルターに粉が詰まってるな）
+: （フィルターを外して窓の外で叩く。白い粉が、春の風に流れていく）
+player: （……よし。音が澄んだ）
+naruse: 休み時間に家電を整備する高校生、お前くらいだぞ {naruse.pos=center; naruse.expr=nima; naruse.motion=Standing Idle; naruse.look=camera; cam=medium}
+
+=== action daily_classroom_nap | 五時間目の前
+fallback: true
+location: classroom
+time: day
+avail: {"timeSlots": ["afternoon"], "locations": ["classroom"]}
+---
+: （昼休みの教室。弁当の匂いと、春の日差し） {bg=classroom; cam=wide}
+player: （……あと二十分で五時間目か。俺も、少しだけ……）
+player: （いや。寝てる間に二十一日が終わったら笑えない）
+
+=== action daily_courtyard | 中庭のベンチ
+fallback: true
+location: courtyard
+time: day
+avail: {"timeSlots": ["morning", "afternoon", "afterschool"], "locations": ["courtyard"]}
+---
+: （中庭。植え込みの向こうで、一年生がバレーボールのパスを続けている） {bg=courtyard; cam=wide}
+player: （……落ち葉、まだ掃いてないな。用務員さん、今週は忙しいのか）
+player: （いや、今は落ち葉より、自分の心配だ）
+
+=== action daily_courtyard_pigeon | 鳩とパンくず
+fallback: true
+location: courtyard
+time: day
+avail: {"timeSlots": ["afternoon"], "locations": ["courtyard"]}
+---
+: （ベンチの足元に、鳩が三羽。誰かが落としたパンくずをつついている） {bg=courtyard; cam=wide}
+player: （……パンくずは鳩が片付ける。中庭の生態系、意外とよくできてるな）
+: （鳩が一斉に飛び立つ）
+player: （……俺も、あれくらい思い切りよく飛べたらな）
+
+=== action daily_library | 静かな図書室
+fallback: true
+location: library
+time: day
+avail: {"timeSlots": ["morning", "afternoon", "afterschool"], "locations": ["library"]}
+---
+: （図書室は静まり返っている。ページをめくる音と、時計の音だけ） {bg=library; cam=wide}
+player: （目当ての本を探して、今日は大人しく過ごした）
+
+=== action daily_library_return | 返却ポスト
+fallback: true
+location: library
+time: evening
+avail: {"timeSlots": ["afterschool"], "locations": ["library"]}
+---
+: （カウンターの返却ポストから、本があふれそうになっている） {bg=library; cam=wide}
+player: （……委員の人、今日は来てないのか）
+: （背表紙の番号順に並べて、カウンターに積んでおく）
+player: （これで明日の委員の人が少し楽になる。……よし、帰ろう）
+
+=== action daily_rooftop_town | 屋上から見える神社
+fallback: true
+location: rooftop
+time: day
+avail: {"timeSlots": ["afternoon", "afterschool"], "locations": ["rooftop"]}
+---
+: （フェンス越しに、街と裏山が見える。山の中腹に、小さく神社の屋根） {bg=rooftop; cam=wide}
+player: （……あそこで、２１日目の夕方に）
+player: （今はまだ、ただの古い神社にしか見えないのにな）
+
+=== action daily_sports_ground_ball | ファウルボール
+fallback: true
+location: sports_ground
+time: day
+avail: {"timeSlots": ["afternoon", "afterschool"], "locations": ["sports_ground"]}
+---
+: （カキーン。野球部のファウルボールが、足元まで転がってくる） {bg=sports_ground; cam=wide}
+: 「すみませーん！」（遠くで、野球部員の声）
+: （ボールを拾い、泥を親指で拭ってから投げ返す）
+player: （……ボールまで拭いてしまうのは、もう職業病だな）
+
+=== action daily_cafeteria_milk | 紙パックの角
+fallback: true
+location: cafeteria
+time: day
+avail: {"timeSlots": ["morning", "afternoon"], "locations": ["cafeteria"]}
+---
+: （購買の前のゴミ箱。紙パックが、潰されないまま山になっている） {bg=cafeteria; cam=wide}
+player: （……開いて、洗って、たためば三分の一になるのに）
+: （紙パックを一つずつ開いていく）
+cafeteria_lady: あら、また来てくれたの。助かるわあ
+player: （……なぜか、購買のおばちゃんにだけはモテている）
+
+#################### 朝の汎用（アオイは出ない）
+
+=== morning morning_default | いつもの通学路
+fallback: true
+location: town
+time: morning
+---
+: （通学路。春の朝の光） {bg=town; time=morning; cam=wide}
+player: （……今日も、何事もなく一日が始まる。何事もないのが、一番困るんだが）
+player: （女神のタイムリミットは、刻一刻と迫っている。……今日も、できることをやるしかない）
+
+=== morning morning_naruse | 寝ぐせのナルセ
+fallback: true
+location: town
+time: morning
+avail: {"dayRange": {"from": 2, "to": 20}}
+---
+naruse: よおタカシ！　見ろこの髪、今日は『無造作ヘア』だ {bg=town; time=morning; naruse.pos=center; naruse.expr=happy; naruse.motion=Standing Greeting; naruse.look=camera; cam=medium}
+player: 寝ぐせだろ
+naruse: ……雑誌には、無造作こそモテるって書いてあったんだよ {naruse.expr=komari; naruse.motion=Standing Idle}
+player: （……その雑誌、たぶん無造作の意味が違う）
+
+=== morning morning_shrine_steps | 石段の下
+fallback: true
+location: shrine
+time: morning
+avail: {"dayRange": {"from": 2, "to": 20}}
+---
+: （神社の石段の下を通りかかる。鳥居の向こうは、朝もやで白い） {bg=shrine; time=morning; cam=wide}
+player: （……あの日から、ここを通るたびに足が速くなる）
+: （一瞬、境内の奥で、金色の光がちらついた気がする） {flash}
+player: （……気のせいだ。気のせいってことにしておこう）

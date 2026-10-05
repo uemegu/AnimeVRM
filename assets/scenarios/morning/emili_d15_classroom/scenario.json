@@ -148,7 +148,8 @@
           "visible": false
         }
       },
-      "screenTransition": "fade_black"
+      "screenTransition": "fade_black",
+      "bgm": "where_the_rain_stops"
     },
     {
       "id": "s10",

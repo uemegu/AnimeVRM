@@ -63,23 +63,19 @@
       "id": "step_5",
       "speaker": "エミリ",
       "text": {
-        "ja": "私、くじに当たったの人生で初めてかもしれないわ！"
+        "ja": "……交換したら、この楊枝は返すの？"
       },
-      "expression": "happy",
+      "expression": "komari",
       "expressionWeight": 1,
-      "nextStepId": "step_6",
-      "voiceUrl": "v_step_5_242a5f2c.mp3"
+      "nextStepId": "step_6"
     },
     "step_6": {
       "id": "step_6",
-      "speaker": "エミリ",
+      "speaker": "タカシ",
       "text": {
-        "ja": "……アンタが選んでくれたからかしらね"
+        "ja": "そりゃそうだろ"
       },
-      "expression": "relaxed",
-      "expressionWeight": 1,
-      "nextStepId": "c7",
-      "voiceUrl": "v_step_6_fcf6d59f.mp3"
+      "nextStepId": "c7"
     },
     "c7": {
       "id": "c7",
@@ -112,23 +108,21 @@
       "id": "c1",
       "speaker": "エミリ",
       "text": {
-        "ja": "行くわ！　放課後、付き合いなさいよね！"
+        "ja": "行くわ！　……でも、交換するのは明日決める。返すの、ちょっともったいないもの"
       },
       "expression": "happy",
       "expressionWeight": 1,
-      "nextStepId": null,
-      "voiceUrl": "v_c1_7d2aba04.mp3"
+      "nextStepId": null
     },
     "c2": {
       "id": "c2",
       "speaker": "エミリ",
       "text": {
-        "ja": "……分かってるわよ。でも、嬉しいの"
+        "ja": "偶然でもいいの。くじに当たったの、生まれて初めてなんだから"
       },
       "expression": "relaxed",
       "expressionWeight": 1,
-      "nextStepId": null,
-      "voiceUrl": "v_c2_bdb01594.mp3"
+      "nextStepId": null
     }
   }
 }

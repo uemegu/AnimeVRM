@@ -6,7 +6,8 @@ import {
   isHoliday,
   FINAL_DAY,
 } from '../../types/game';
-import { ScenarioCategory, ScenarioIndexEntry, ScenarioMeta, ScenarioTimeSlot } from '../../types/scenario';
+import { ActionLocationHint, ScenarioCategory, ScenarioIndexEntry, ScenarioMeta, ScenarioTimeSlot } from '../../types/scenario';
+import { MAP_CHARACTER_IDS } from '../../data/characters';
 import { HeroineId, NightCommunication } from '../../types/communication';
 import {
   LOCATION_DEFINITIONS,
@@ -15,6 +16,13 @@ import {
 } from '../../data/locations';
 import { scenarioRepository } from '../scenario/ScenarioRepository';
 import { weatherOf } from '../../data/calendar';
+
+/** 汎用シナリオの並びを日と時間帯で入れ替えるための値（同じ日・時間帯なら同じ値） */
+function rotationKey(id: string, gameState: Pick<GameState, 'day' | 'phase'>): number {
+  let hash = 2166136261;
+  for (const ch of `${id}:${gameState.day}:${gameState.phase}`) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619);
+  return hash >>> 0;
+}
 
 /** 一度見たら再び選ばれない種類（汎用シナリオは何度でも選ばれる） */
 const ONCE_CATEGORIES: ReadonlySet<ScenarioCategory> = new Set(['morning', 'action', 'holiday', 'forced']);
@@ -69,37 +77,48 @@ export class ScheduleManager {
    * シナリオデータ（ScenarioPackage.actionHints）から情報を解決
    */
   public static getActionLocationOptions(gameState: GameState): ActionLocationOption[] {
-    const locations: ActionLocationId[] =
-      gameState.phase === 'holiday_action'
-        ? HOLIDAY_ACTION_LOCATIONS
-            .filter((location) => !location.unlockFlag || Boolean(gameState.flags[location.unlockFlag]))
-            .map((location) => location.id)
-        : SCHOOL_ACTION_LOCATIONS;
-
-    return locations.map((locId) => {
-      const base = LOCATION_DEFINITIONS[locId];
-      let hintCharacterIds: string[] = [];
-      let hintText: { ja: string; en?: string } | undefined;
-
-      const selectedScenario = this.getEligibleActionScenarios(locId, gameState)[0];
-      const matchingHint = selectedScenario?.actionHints?.find((hint) => {
-        if (hint.locationId !== locId) return false;
-        return !hint.phases || hint.phases.includes(gameState.phase);
-      });
-
-      if (matchingHint?.hintCharacterIds) {
-        hintCharacterIds = [...matchingHint.hintCharacterIds];
-      }
-      if (matchingHint?.hintText) {
-        hintText = matchingHint.hintText;
-      }
-
+    const plan = this.planActionLocations(gameState);
+    return this.actionLocations(gameState).map((locId) => {
+      const { hint, characters } = plan.get(locId)!;
       return {
-        ...base,
-        hintCharacterIds,
-        hintText,
+        ...LOCATION_DEFINITIONS[locId],
+        hintCharacterIds: characters,
+        hintText: hint?.hintText,
       };
     });
+  }
+
+  /** 今の行動フェーズで選べる場所 */
+  private static actionLocations(gameState: GameState): ActionLocationId[] {
+    return gameState.phase === 'holiday_action'
+      ? HOLIDAY_ACTION_LOCATIONS
+          .filter((location) => !location.unlockFlag || Boolean(gameState.flags[location.unlockFlag]))
+          .map((location) => location.id)
+      : SCHOOL_ACTION_LOCATIONS;
+  }
+
+  /**
+   * 場所ごとに、選んだら流れるシナリオと、地図に出す人を決める（地図の表示と実際の場面を一致させる）。
+   * 地図に出す人は、場所のヒントに書いた人。ヒントがなければそのシナリオに登場する人（汎用シナリオも含む）。
+   * 同じ人が同じ時間に複数の場所に出てもよい（期間の短いイベントを取りこぼさないため）
+   */
+  private static planActionLocations(
+    gameState: GameState
+  ): Map<ActionLocationId, { scenario: ScenarioIndexEntry; hint?: ActionLocationHint; characters: string[] }> {
+    const plan = new Map<ActionLocationId, { scenario: ScenarioIndexEntry; hint?: ActionLocationHint; characters: string[] }>();
+    for (const locationId of this.actionLocations(gameState)) {
+      const scenario =
+        this.getEligibleActionScenarios(locationId, gameState)[0] ??
+        this.getFallbackScenario(gameState.phase === 'holiday_action' ? 'holiday' : 'action');
+      const hint = scenario.actionHints?.find(
+        (h) => h.locationId === locationId && (!h.phases || h.phases.includes(gameState.phase))
+      );
+      const characters = hint?.hintCharacterIds
+        ? [...hint.hintCharacterIds]
+        : (scenario.cast ?? []).filter((id) => MAP_CHARACTER_IDS.includes(id));
+      plan.set(locationId, { scenario, hint, characters });
+    }
+    return plan;
   }
 
   /**
@@ -177,6 +196,7 @@ export class ScheduleManager {
    */
   public static getScenarioForLocation(locationId: ActionLocationId, gameState: GameState): ScenarioIndexEntry {
     return (
+      this.planActionLocations(gameState).get(locationId)?.scenario ??
       this.getEligibleActionScenarios(locationId, gameState)[0] ??
       this.getFallbackScenario(gameState.phase === 'holiday_action' ? 'holiday' : 'action')
     );
@@ -216,7 +236,12 @@ export class ScheduleManager {
       .filter(({ scenario }) => this.matchesScenarioAvailability(scenario, gameState, locationId, ignoreTimeSlots, evening))
       .sort((a, b) => {
         const priorityDifference = this.getScenarioPriority(b.scenario) - this.getScenarioPriority(a.scenario);
-        return priorityDifference || a.index - b.index;
+        if (priorityDifference) return priorityDifference;
+        // 汎用どうしは、日と時間帯で並びを変える（同じ場所でも日によって違う一コマが流れる）
+        if (a.scenario.fallback && b.scenario.fallback) {
+          return rotationKey(a.scenario.id, gameState) - rotationKey(b.scenario.id, gameState) || a.index - b.index;
+        }
+        return a.index - b.index;
       })
       .map(({ scenario }) => scenario);
   }

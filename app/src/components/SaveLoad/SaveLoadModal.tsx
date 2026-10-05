@@ -86,7 +86,6 @@ export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
             const phaseKey = slot.data?.gameState.phase ?? 'morning';
             const phaseLabel = PHASE_NAMES[phaseKey][lang];
             const savedAt = formatSavedAt(slot.data?.savedAt);
-            const affinities = slot.data?.gameState.affinities;
 
             return (
               <button
@@ -113,29 +112,6 @@ export const SaveLoadModal: React.FC<SaveLoadModalProps> = ({
                         </span>
                         <span className="slot-phase-tag">{phaseLabel}</span>
                       </div>
-
-                      {affinities && (
-                        <div className="slot-affinity-row">
-                          <span
-                            className="affinity-badge badge-aoi"
-                            title={lang === 'ja' ? `アオイ: Lv.${affinities.aoi ?? 0}` : `Aoi: Lv.${affinities.aoi ?? 0}`}
-                          >
-                            Lv.{affinities.aoi ?? 0}
-                          </span>
-                          <span
-                            className="affinity-badge badge-emili"
-                            title={lang === 'ja' ? `エミリ: Lv.${affinities.emili ?? 0}` : `Emili: Lv.${affinities.emili ?? 0}`}
-                          >
-                            Lv.{affinities.emili ?? 0}
-                          </span>
-                          <span
-                            className="affinity-badge badge-shion"
-                            title={lang === 'ja' ? `シオン: Lv.${affinities.shion ?? 0}` : `Shion: Lv.${affinities.shion ?? 0}`}
-                          >
-                            Lv.{affinities.shion ?? 0}
-                          </span>
-                        </div>
-                      )}
 
                       {savedAt && (
                         <span className="slot-date-label">{savedAt}</span>

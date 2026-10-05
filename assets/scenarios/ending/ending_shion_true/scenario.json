@@ -173,7 +173,7 @@
           "visible": false
         }
       },
-      "bgm": "main_bgm"
+      "bgm": "walking_with_you"
     },
     {
       "id": "s14",
@@ -191,16 +191,34 @@
           "lookAtTarget": "camera"
         },
         "shion": {
-          "position": "right",
           "tears": false,
           "blush": false,
           "expression": "neutral",
           "expressionWeight": 1,
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
           "motion": "chin_rest",
           "lookAtTarget": "forward"
         }
       },
       "camera": "wide",
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      },
       "voiceUrl": "v_s14_d53dcb3f.mp3"
     },
     {
@@ -211,12 +229,22 @@
       "avatars": {
         "teacher": {
           "visible": false
-        },
-        "shion": {
-          "position": "center"
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s15_4d177dc1.mp3"
     },
     {
@@ -250,6 +278,19 @@
         }
       },
       "camera": "wide",
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      },
       "voiceUrl": "v_s16_75ba5387.mp3"
     },
     {
@@ -257,6 +298,19 @@
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "シオンさん、雰囲気柔らかくなったね",
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      },
       "voiceUrl": "v_s17_1c83684c.mp3"
     },
     {
@@ -272,6 +326,19 @@
       },
       "camera": "medium",
       "cutin": "/cutins/shion/sleeve_pinch.avif",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s18_e0b28cbb.mp3"
     }
   ]

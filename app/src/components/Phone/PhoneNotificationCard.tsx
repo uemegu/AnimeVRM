@@ -5,6 +5,7 @@ import { CHARACTERS } from '../../data/characters';
 import { soundManager } from '../../services/audio/SoundManager';
 import './Phone.css';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { resolveAssetUrl } from '../../utils/path';
 
 export interface PhoneNotificationCardProps {
   communication: NightCommunication;
@@ -25,7 +26,7 @@ export const PhoneNotificationCard: React.FC<PhoneNotificationCardProps> = ({
   const char = CHARACTERS[communication.characterId];
   const charName = char ? resolveLocalizedText(char.name, lang) : communication.characterId;
   const heroineColor = char?.themeColor || '#38bdf8';
-  const avatarImgUrl = `/assets/characters/${communication.characterId}_normal.avif`;
+  const avatarImgUrl = resolveAssetUrl(`/assets/characters/${communication.characterId}_normal.avif`);
 
   const isCall = communication.kind === 'call';
   const stopVibeRef = useRef<(() => void) | null>(null);

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ScheduleManager } from '../ScheduleManager';
+import { MAP_CHARACTER_IDS } from '../../../data/characters';
 import { GameState, ScenarioHistoryEntry } from '../../../types/game';
 
 describe('ScheduleManager (ゲームループ・スケジュール管理)', () => {
@@ -17,9 +18,18 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
   it('1日目の朝はプロローグ、ほかの日は条件に合う朝のイベント（なければいつもの登校）になること', () => {
     expect(ScheduleManager.getMorningScenario(at({ day: 1 })).id).toBe('prologue_day1');
     expect(ScheduleManager.getMorningScenario(at({ day: 5, scenarioHistory: done('aoi_d04_rooftop') })).id).toBe('aoi_d05_stairs');
-    // 日常の朝をすべて見終えたら、いつもの登校
+    // 日常の朝をすべて見終えたら、汎用の登校（アオイは出ない）が日替わりで流れる
     const allSeen = done('daily_taka_alkaline', 'daily_town_dirt', 'daily_balcony_aoi');
-    expect(ScheduleManager.getMorningScenario(at({ day: 4, scenarioHistory: allSeen })).id).toBe('morning_default');
+    const mornings = new Set([3, 4, 5, 6, 7, 8, 9, 10].map((day) => ScheduleManager.getMorningScenario(at({ day, scenarioHistory: allSeen })).id));
+    expect([...mornings].every((id) => ['morning_default', 'morning_naruse', 'morning_shrine_steps'].includes(id))).toBe(true);
+    expect(mornings.size).toBeGreaterThan(1);
+  });
+
+  it('同じ場所の汎用シナリオは、日によって違うものが流れること', () => {
+    const ids = new Set(
+      [2, 3, 4, 5, 8, 9, 10].map((day) => ScheduleManager.getScenarioForLocation('sports_ground', at({ day, phase: 'lunch_action', scenarioHistory: done('prologue_day1') }))).map((e) => e.id)
+    );
+    expect(ids.size).toBeGreaterThan(1);
   });
 
   it('一度見たイベントは繰り返さず、次のイベントやその場所の日常になること', () => {
@@ -37,6 +47,24 @@ describe('ScheduleManager (ゲームループ・スケジュール管理)', () =
     const classroom = options.find((opt) => opt.id === 'classroom');
     expect(classroom?.hintCharacterIds).toContain('aoi');
     expect(classroom?.hintText?.ja).toContain('アオイ');
+  });
+
+  it('地図に出る人は、その場所で実際に流れるシナリオの登場人物であること（ヒントがなければ登場する人）', () => {
+    const phases = ['morning_action', 'lunch_action', 'afterschool_action'] as const;
+    for (const day of [1, 2, 5, 9, 16]) {
+      for (const phase of phases) {
+        const state = at({ day, phase, scenarioHistory: done('prologue_day1') });
+        for (const opt of ScheduleManager.getActionLocationOptions(state)) {
+          const scenario = ScheduleManager.getScenarioForLocation(opt.id, state);
+          const hinted = scenario.actionHints?.some((h) => h.locationId === opt.id && h.hintCharacterIds);
+          // ヒントのない（汎用の）シナリオで登場する人は、地図にも出ている
+          if (!hinted) {
+            const missing = (scenario.cast ?? []).filter((id) => MAP_CHARACTER_IDS.includes(id) && !(opt.hintCharacterIds ?? []).includes(id));
+            expect(missing, `Day ${day} ${phase} ${opt.id} → ${scenario.id}`).toEqual([]);
+          }
+        }
+      }
+    }
   });
 
   it('Day 11 の午前の前に、ルート分岐の強制イベントが割り込むこと', () => {

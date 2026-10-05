@@ -48,7 +48,8 @@
           "visible": false
         }
       },
-      "focusLines": true
+      "focusLines": true,
+      "seUrl": "/se/strong_gust.mp3"
     },
     {
       "id": "s3",
@@ -140,7 +141,8 @@
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "刃厚0.3ミリ……テコの原理で、外の閂を押し上げる……！",
-      "cutin": "/cutins/items/thin_spatula.avif"
+      "cutin": "/cutins/items/thin_spatula.avif",
+      "seUrl": "/se/wooden_bar_unlatch.mp3"
     },
     {
       "id": "s14",
@@ -149,7 +151,8 @@
       "text": "開いたぞ！",
       "cutin": false,
       "cg": "/cg/shion/kura_open.avif",
-      "flashEffect": "white"
+      "flashEffect": "white",
+      "seUrl": "/se/old_wooden_door_open.mp3"
     },
     {
       "id": "s15",

@@ -1,9 +1,8 @@
 {
   "id": "daily_courtyard",
   "title": {
-    "ja": "中庭: 昼下がりのベンチ"
+    "ja": "中庭のベンチ"
   },
-  "fallback": true,
   "availability": {
     "timeSlots": [
       "morning",
@@ -14,34 +13,27 @@
       "courtyard"
     ]
   },
-  "bgm": "main_bgm",
+  "location": "courtyard",
+  "timeOfDay": "day",
+  "fallback": true,
   "scenes": [
     {
       "id": "s1",
-      "speaker": "ナルセ",
-      "speakerCharacterId": "naruse",
-      "text": "なあタカシ。恋ってなんなんだろうな。",
-      "avatars": {
-        "naruse": {
-          "position": "center",
-          "expression": "relaxed",
-          "motion": "Standing Idle"
-        }
-      },
-      "voiceUrl": "v_s1_587dafaf.mp3"
+      "text": "（中庭。植え込みの向こうで、一年生がバレーボールのパスを続けている）",
+      "background": "courtyard",
+      "camera": "wide"
     },
     {
       "id": "s2",
-      "speaker": "タカシ",
       "speakerCharacterId": "player",
-      "text": "急にどうした。"
+      "speaker": "タカシ",
+      "text": "（……落ち葉、まだ掃いてないな。用務員さん、今週は忙しいのか）"
     },
     {
       "id": "s3",
-      "speaker": "ナルセ",
-      "speakerCharacterId": "naruse",
-      "text": "いや、パンの袋を開けるのに失敗しただけだ。気にするな。",
-      "voiceUrl": "v_s3_32ca3d82.mp3"
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（いや、今は落ち葉より、自分の心配だ）"
     }
   ]
 }

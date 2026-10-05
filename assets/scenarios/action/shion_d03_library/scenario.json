@@ -24,6 +24,7 @@
     }
   },
   "location": "library",
+  "bgm": "sunlight_on_ink",
   "timeOfDay": "evening",
   "actionHints": [
     {
@@ -46,21 +47,52 @@
       "timeOfDay": "evening",
       "avatars": {
         "shion": {
-          "position": "center",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "chin_rest",
           "lookAtTarget": "camera"
         }
       },
       "camera": "medium",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
       "voiceUrl": "v_s1_3be287ee.mp3"
     },
     {
       "id": "s2",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "俺だって嘘なら笑い飛ばしたいよ！"
+      "text": "俺だって嘘なら笑い飛ばしたいよ！",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
       "id": "s3",
@@ -254,7 +286,7 @@
         "shion": {
           "expression": "relaxed",
           "expressionWeight": 1,
-          "motion": "chin_rest"
+          "motion": "pose_hug_notebook"
         }
       },
       "voiceUrl": "v_s16_2bcdd60c.mp3"

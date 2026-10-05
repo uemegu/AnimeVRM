@@ -658,6 +658,166 @@
         "density": 0.03
       }
     },
+    "rainy": {
+      "id": "rainy",
+      "name": "雨（曇天）",
+      "description": "厚い雨雲の下の薄暗さ。日差し・フレアなし、青みがかった灰色、低い彩度",
+      "lighting": {
+        "hairRingTint": "#b8c2d4",
+        "directional": {
+          "color": "#c4cede",
+          "intensity": 0.95,
+          "position": {
+            "x": -1.9,
+            "y": 1.5,
+            "z": 2.6
+          }
+        },
+        "ambient": {
+          "color": "#6a7488",
+          "intensity": 0.75
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#dde8ff",
+          "intensity": 0.05,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": false,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 3.2,
+            "y": 4.3,
+            "z": -3.8
+          },
+          "exposure": 0.22,
+          "decay": 0.83,
+          "density": 0.35,
+          "weight": 0.08,
+          "color": "#fff2db",
+          "shimmer": 0.25
+        },
+        "lensFlare": {
+          "enabled": false,
+          "sunSize": 1.3,
+          "sunColor": "#fffbf5",
+          "glowIntensity": 0.95,
+          "starburstIntensity": 0.05,
+          "anamorphicIntensity": 1.15,
+          "ghostIntensity": 0.35,
+          "haloIntensity": 0.5
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.03,
+          "radius": 0.7,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.12,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#1c2433",
+            "highlightTint": "#9aa8bd",
+            "strength": 0.35,
+            "contrast": 0.08,
+            "gamma": 1.0
+          },
+          "adjustments": {
+            "saturation": -0.25,
+            "brightness": -0.12,
+            "contrast": 0.02
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.35,
+            "color": "#0e1420"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0015
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#d49ea3",
+          "shadingToonyFactor": 0.9895,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.2,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.997,
+          "shadingShiftFactor": -0.05,
+          "darkLitLift": 1,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 4,
+          "parametricRimLiftFactor": 0.02,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#e2f0ff",
+        "density": 0.01
+      }
+    },
     "divine": {
       "id": "divine",
       "name": "神聖・後光",

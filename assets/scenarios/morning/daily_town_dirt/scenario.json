@@ -79,6 +79,7 @@
       "text": "……遅刻する！！",
       "cutin": false,
       "focusLines": true,
+      "seUrl": "/se/school_chime_warning.mp3",
       "end": true
     }
   ]

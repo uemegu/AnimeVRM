@@ -16,16 +16,19 @@ import { SpringWind, type WindSettings } from '../avatar/springWind';
 import { AvatarEffects } from './AvatarEffects';
 import { resolveAssetUrl } from '../utils/path';
 import { setDaylight } from '../scene/Daylight';
+import { HeldItem } from '../avatar/heldItem';
+import type { HeldItemId } from '@anime-vrm/scenario';
 
 const animationAssetCache = new Map<string, THREE.Group>();
-const animationClipCache = new Map<string, THREE.AnimationClip>();
+/** モデルごとに変換したモーション。モデルを捨てたら一緒に消えるよう、モデルをキーにする */
+const animationClipCache = new WeakMap<VRM, Map<string, THREE.AnimationClip>>();
 
 export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.AnimationClip> {
   url = resolveAssetUrl(url);
-  const cacheKey = `${url}:${vrm.scene.uuid}`;
-  if (animationClipCache.has(cacheKey)) {
-    return animationClipCache.get(cacheKey)!;
-  }
+  let clips = animationClipCache.get(vrm);
+  if (!clips) animationClipCache.set(vrm, (clips = new Map()));
+  const cached = clips.get(url);
+  if (cached) return cached;
 
   let asset = animationAssetCache.get(url);
   if (!asset) {
@@ -180,7 +183,7 @@ export async function loadMixamoAnimation(url: string, vrm: VRM): Promise<THREE.
   }
 
   const resultClip = new THREE.AnimationClip('vrmAnimation', clip.duration, tracks);
-  animationClipCache.set(cacheKey, resultClip);
+  clips.set(url, resultClip);
   return resultClip;
 }
 
@@ -231,7 +234,7 @@ function softenShoulder(tracks: THREE.KeyframeTrack[], vrm: VRM, shoulderBone: s
 /** 読み込んだモーションのキャッシュを捨てる（書き出したばかりの FBX を読み直して確かめたあとなど） */
 export function releaseMixamoAnimation(url: string, vrm: VRM): void {
   const resolved = resolveAssetUrl(url);
-  animationClipCache.delete(`${resolved}:${vrm.scene.uuid}`);
+  animationClipCache.get(vrm)?.delete(resolved);
   animationAssetCache.delete(resolved);
 }
 
@@ -272,6 +275,9 @@ export class StageAvatar {
   public shaderController: ToonShaderController | null = null;
   /** 感情演出（頬赤・涙・汗・文字演出など）。モデルの読み込み後に作る */
   public effects: AvatarEffects | null = null;
+  /** 手に持つ小物 */
+  private heldItem: HeldItem | null = null;
+  private pendingHeldItem: { item: HeldItemId; hand?: 'left' | 'right' } | null = null;
   private motionSpeed = 1;
 
   private currentAction: THREE.AnimationAction | null = null;
@@ -447,6 +453,14 @@ export class StageAvatar {
   /** 髪とスカートを揺らす風（場所の wind）。null で止む */
   public setWind(wind: WindSettings | null | undefined): void {
     this.wind = wind ?? null;
+  }
+
+  /** 手に持つ小物（null で手放す） */
+  public setHeldItem(spec: { item: HeldItemId; hand?: 'left' | 'right' } | null | undefined): void {
+    this.pendingHeldItem = spec ?? null;
+    if (!this.vrm) return;
+    this.heldItem ??= new HeldItem(this.vrm);
+    this.heldItem.set(this.pendingHeldItem);
   }
 
   public setDaylight(amount: number): void {
@@ -681,9 +695,13 @@ export class StageAvatar {
     for (const { bone, rotation } of this.appliedTurn) bone.quaternion.multiply(rotation.invert());
     this.appliedTurn = [];
     this.handClearance?.restore();
+    this.heldItem?.restore();
     if (this.mixer) {
       this.mixer.update(delta);
     }
+
+    // 1.2 小物を握る手は指を曲げる
+    this.heldItem?.applyGrip();
 
     // 1.5 顔を視線の先へ向ける（モーションの姿勢に足す）
     this.updateHeadTurn(delta);
@@ -706,6 +724,9 @@ export class StageAvatar {
 
     // 4.5 手に押されてスカートがへこむ（腕と揺れものが決まってから）
     this.clothDent?.update();
+
+    // 4.6 小物を手の位置へ
+    this.heldItem?.place();
 
     // 5. 感情演出
     if (frame) {
@@ -768,6 +789,8 @@ export class StageAvatar {
   }
 
   public dispose(): void {
+    this.heldItem?.dispose();
+    this.heldItem = null;
     this.effects?.dispose();
     this.effects = null;
     if (this.vrm) {
@@ -776,6 +799,8 @@ export class StageAvatar {
     }
     if (this.mixer) {
       this.mixer.stopAllAction();
+      // 再生したモーションの束縛（クリップごとのアクション）を手放す
+      if (this.vrm) this.mixer.uncacheRoot(this.vrm.scene);
     }
     if (this.shaderController) {
       this.shaderController.dispose();

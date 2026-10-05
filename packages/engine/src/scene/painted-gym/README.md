@@ -1,6 +1,6 @@
 # 体育館（簡易3D）
 
-場所 `painted_gym`、背景 `builtin:painted-gym`、デモ `demo/painted_gym`。
+場所 `gym`（app の体育館イベントで使用）と `painted_gym`（デモ用、同じ設定）、背景 `builtin:painted-gym`、デモ `demo/painted_gym`。
 元絵 `assets/textures/gym_far.avif` の夕日、大窓、木の床、赤い舞台幕、鉄骨天井を再構成した室内セット。
 
 - 床 y=0、北は -z。幅24m、奥行32m、壁高8.5m、屋根の棟10.7m。寸法と撮影点は `layout.ts`。

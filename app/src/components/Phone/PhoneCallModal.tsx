@@ -197,6 +197,8 @@ export const PhoneCallModal: React.FC<PhoneCallModalProps> = ({
       setCurrentStepId(step.nextStepId);
     } else {
       // 全ステップ完了 -> 通話終了
+      soundManager.stopVoice();
+      soundManager.playUiSe('callEnd');
       onClose({
         flags: accumulatedFlagsRef.current,
         affinityDelta: accumulatedAffinityRef.current,

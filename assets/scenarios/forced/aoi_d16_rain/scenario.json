@@ -22,8 +22,8 @@
       ]
     }
   },
-  "location": "school_gate",
-  "bgm": "love",
+  "location": "entrance_rain",
+  "bgm": "where_the_rain_stops",
   "timeOfDay": "evening",
   "consumesTurn": true,
   "scenes": [
@@ -32,9 +32,8 @@
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……タカシくん",
-      "background": "painted_gate",
-      "timeOfDay": "evening",
-      "rain": true,
+      "background": "entrance_rain",
+      "timeOfDay": "rainy",
       "avatars": {
         "aoi": {
           "position": "center",
@@ -45,6 +44,7 @@
         }
       },
       "camera": "medium",
+      "ambience": "/se/rain_loop.mp3",
       "voiceUrl": "v_s1_5e26996f.mp3"
     },
     {
@@ -167,6 +167,8 @@
       "speaker": "アオイ",
       "text": "……避けてて、ごめんね",
       "background": "town",
+      "timeOfDay": "rainy",
+      "rain": true,
       "scrollingBackground": {
         "speed": 0.5
       },
@@ -193,17 +195,28 @@
       "id": "s12",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "違うの。みんなに言われて、タカシくんの顔見るのが急に恥ずかしくなっただけ。嫌いになったんじゃないよ",
+      "text": "違うの。……ユイちゃんたちと、やっと普通に話せるようになったところだったの。それが全部『膝裏の人』になっちゃって",
+      "avatars": {
+        "aoi": {
+          "expression": "sad",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s13",
+      "speakerCharacterId": "aoi",
+      "speaker": "アオイ",
+      "text": "……でも、避けてたのは、それだけじゃない",
       "avatars": {
         "aoi": {
           "expression": "relaxed",
           "expressionWeight": 1
         }
-      },
-      "voiceUrl": "v_s12_97e90584.mp3"
+      }
     },
     {
-      "id": "s13",
+      "id": "s14",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……体育館で言ったこと。守るって。本気だった？",
@@ -213,20 +226,20 @@
           "expression": "neutral",
           "expressionWeight": 1
         }
-      },
-      "voiceUrl": "v_s13_fbe26446.mp3"
+      }
     },
     {
-      "id": "s14",
+      "id": "s15",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "本気だ。変なこと言ったのは反省してる。でも、そこは一ミリも嘘じゃない"
     },
     {
-      "id": "s15",
+      "id": "s16",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……そっか",
+      "bgm": "love",
       "avatars": {
         "aoi": {
           "expression": "happy",
@@ -234,11 +247,10 @@
           "blush": true,
           "lookAtTarget": "forward"
         }
-      },
-      "voiceUrl": "v_s15_3f553a5e.mp3"
+      }
     },
     {
-      "id": "s16",
+      "id": "s17",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……肩、濡れてるよ。もうちょっとこっち",
@@ -246,9 +258,7 @@
         "aoi": {
           "lookAtTarget": "camera"
         }
-      },
-      "camera": "medium",
-      "voiceUrl": "v_s16_780b2bda.mp3"
+      }
     }
   ]
 }

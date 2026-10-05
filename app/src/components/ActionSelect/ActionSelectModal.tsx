@@ -6,6 +6,7 @@ import { ConfirmModal } from '../Common/ConfirmModal';
 import { soundManager } from '../../services/audio/SoundManager';
 import './ActionSelectModal.css';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { resolveAssetUrl } from '../../utils/path';
 
 interface ActionSelectModalProps {
   options: ActionLocationOption[];
@@ -124,7 +125,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
         charId,
         name: CHARACTERS[charId]?.name[lang] || CHARACTERS[charId]?.name.ja || charId,
         emotion,
-        imgUrl: `/assets/characters/${charId}_${emotion}.avif`,
+        imgUrl: resolveAssetUrl(`/assets/characters/${charId}_${emotion}.avif`),
         bgClass: `heroine-bg-${charId}`,
       };
     } else if (hoveredOption.hintText) {
@@ -161,7 +162,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
         <div className="action-map-wrapper">
           <div className="action-map-clip">
             <img
-              src={isHolidayMap ? '/assets/backgrounds/town_map.avif' : '/assets/backgrounds/school_aerial.avif'}
+              src={resolveAssetUrl(isHolidayMap ? '/assets/backgrounds/town_map.avif' : '/assets/backgrounds/school_aerial.avif')}
               alt={
                 isHolidayMap
                   ? lang === 'ja' ? '街の俯瞰マップ' : 'Town aerial map'
@@ -299,7 +300,7 @@ export const ActionSelectModal: React.FC<ActionSelectModalProps> = ({
                 onClick={() => handleClickLocation(opt)}
               >
                 {thumbnailUrl && (
-                  <img className="location-thumbnail" src={thumbnailUrl} alt="" />
+                  <img className="location-thumbnail" src={thumbnailUrl && resolveAssetUrl(thumbnailUrl)} alt="" />
                 )}
                 <span className="location-card-content">
                   <span className="location-item-main">

@@ -64,8 +64,12 @@ function scenarioIndexPlugin(): Plugin {
   };
 }
 
-export default defineConfig({
+/** 公開先のサブディレクトリ（ビルドと vite preview のときだけ付ける。開発サーバーは / のまま） */
+const BASE = '/confess_in_5sec/';
+
+export default defineConfig(({ command, isPreview }) => ({
   plugins: [react(), licenseGeneratorPlugin(), preloadManifestPlugin(), scenarioIndexPlugin()],
+  base: command === 'build' || isPreview ? BASE : '/',
   publicDir: '../assets',
   server: {
     port: 5174,
@@ -76,5 +80,4 @@ export default defineConfig({
     globals: true,
     environment: 'node',
   },
-});
-
+}));

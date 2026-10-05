@@ -5,6 +5,9 @@ export type ScreenTransitionKind = 'fade_black' | 'eyelid_close' | 'eyelid_blink
 
 const EYELID_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const EYELID_CLOSE_SEC = 0.95;
+/** 暗転で黒を保つ最短の秒数と、場所の読み込みを待つ上限 */
+const FADE_BLACK_HOLD_SEC = 0.35;
+const FADE_BLACK_MAX_WAIT_SEC = 3;
 
 /**
  * 舞台の上に重ねる画面演出（集中線・瞼・暗転）。canvas の親要素の中に置くので、
@@ -19,6 +22,8 @@ export class ScreenEffects {
   private focusLinesOn = false;
   private eyelidsClosed = false;
   private timers: number[] = [];
+  /** 切り替え演出を呼ぶたびに増やす（読み込み待ちの間に次の演出が始まったら、前の暗転明けを捨てる） */
+  private transitionId = 0;
 
   constructor(container: HTMLElement) {
     if (getComputedStyle(container).position === 'static') container.style.position = 'relative';
@@ -77,8 +82,9 @@ export class ScreenEffects {
    * カットの切り替え演出。カットが変わるたびに呼ぶ（null なら瞼を開けて何もしない）。
    * instant が true なら動きを見せずに最終の状態にする（Studio で途中の時刻へ飛んだとき）
    */
-  public playTransition(kind: ScreenTransitionKind | null, instant = false): void {
+  public playTransition(kind: ScreenTransitionKind | null, instant = false, ready?: () => Promise<void>): void {
     this.clearTimers();
+    this.transitionId++;
     this.blackout.style.transition = 'none';
     this.blackout.style.opacity = '0';
     if (kind === 'eyelid_close') {
@@ -94,11 +100,19 @@ export class ScreenEffects {
         this.later(start + 0.16, () => this.setEyelids(false, 0.2));
       });
     } else if (kind === 'fade_black') {
-      // 暗転したところから新しいカットを映す（モデルの切り替えが見えないよう少し黒で待つ）
+      // 暗転したところから新しいカットを映す（モデルの切り替えが見えないよう少し黒で待つ。
+      // ready があれば、場所の読み込みが終わるまで黒のまま待つ。待ちすぎないよう上限を置く）
       this.blackout.style.opacity = '1';
-      this.later(0.35, () => {
-        this.blackout.style.transition = 'opacity 0.5s ease-out';
-        this.blackout.style.opacity = '0';
+      const id = this.transitionId;
+      this.later(FADE_BLACK_HOLD_SEC, () => {
+        const reveal = () => {
+          if (id !== this.transitionId) return;
+          this.blackout.style.transition = 'opacity 0.5s ease-out';
+          this.blackout.style.opacity = '0';
+        };
+        if (!ready) return reveal();
+        const timeout = new Promise<void>((resolve) => this.later(FADE_BLACK_MAX_WAIT_SEC, resolve));
+        Promise.race([ready().catch(() => {}), timeout]).then(reveal);
       });
     }
   }

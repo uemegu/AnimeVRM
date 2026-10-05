@@ -55,7 +55,8 @@
         "teacher": {
           "expression": "relaxed",
           "expressionWeight": 1,
-          "motion": "chin_rest"
+          "motion": "Standing Idle",
+          "heldItem": "carton_ichigo"
         }
       },
       "camera": "close",

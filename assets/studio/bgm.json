@@ -72,6 +72,46 @@
         "ja": "Holiday",
         "en": "Holiday"
       }
+    },
+    "where_the_rain_stops": {
+      "url": "/bgm/Where_the_Rain_Stops.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "冷やかし後の気まずさ",
+        "en": "where_the_rain_stops"
+      }
+    },
+    "before_the_pendulum_falls": {
+      "url": "/bgm/Before_the_Pendulum_Falls.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "告白の決断",
+        "en": "before_the_pendulum_falls"
+      }
+    },
+    "walking_with_you": {
+      "url": "/bgm/walking_with_you.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "エピローグ",
+        "en": "walking_with_you"
+      }
+    },
+    "sunlight_on_ink": {
+      "url": "/bgm/Sunlight_on_Ink.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "放課後の資料室",
+        "en": "sunlight_on_ink"
+      }
+    },
+    "sunlight_on_cobblestones": {
+      "url": "/bgm/Sunlight_on_Cobblestones.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "休日のデート",
+        "en": "sunlight_on_cobblestones"
+      }
     }
   }
 }

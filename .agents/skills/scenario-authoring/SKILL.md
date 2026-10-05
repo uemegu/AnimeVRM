@@ -28,6 +28,7 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 | 時間帯（`timeOfDay`） | `assets/studio/time-of-day.json` の `presets` のキー |
 | BGM（`bgm`） | `assets/studio/bgm.json` の `bgm` のキー、または `silence` |
 | モーション（`motion`） | `assets/animations/<名前>.fbx` の `<名前>`（拡張子なし）。ループさせるものは `assets/studio/motions.json` |
+| 手に持つ小物（`heldItem`） | `schema.ts` の `HeldItemId`（缶・紙パック・スマホ・本・ノート）。形と持ち方は `packages/engine/src/avatar/heldItem.ts`。モーションだけ変えると手放す |
 | ファイル（`voiceUrl`・`seUrl`・`ambience`・`modelUrl`・画像） | `/` 始まりは `assets/` 基準、それ以外はシナリオのディレクトリ基準 |
 
 ## 3. 編集の決まり
@@ -38,6 +39,9 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 - 音量の倍率（`voiceVolume`・`seVolume`・`bgmVolume`、0〜1、省略時 1）とチャネル（`voicePan`・`sePan`・`bgmPan`、`stereo` / `left` / `right`、省略時 `stereo`）。ボイス・効果音はそのシーンだけ、BGM は BGM が変わるまで引き継ぐ
 - 知らない項目はスキーマで拒否される。綴りを確かめる
 - ボイスはここでは作らない。必要なら Studio の音声生成か `irodori-tts` Skill を使う
+- 座る・机に肘をつくモーション（`motions.json` の `seated`）は、場所の席（`locations.json` の `seats`）の位置・向きで使う。席のない場所や立ち位置（`left` など）で使わない。座っている間のカメラは席の `cameras` を `cameraPose` に書く
+- 流れる背景（`scrollingBackground`）の間は、構図を省略すると横から（`side`）撮る。歩き・走り（`motions.json` の `locomotion`）を正面の構図（`medium`・`close` など）で撮らない
+- 背景（場所）が変わるシーンは自動で暗転し、一枚絵・カットインは下がる。続けて出したいときはそのシーンで指定し直す
 
 ## 4. 検証する
 
@@ -67,6 +71,16 @@ npm run shot -- demo/trio --file draft.json          # 保存前の下書き
 - モーションは撮影時点の1コマなので、身振りの途中を見たいときは `--time` と `--settle` で時刻をずらす
 - 音は鳴らない（`--mute-audio`）。ブラウザで確かめるときも音を出さない（`GEMINI.md`）
 
+### 構図のチェック（話者の顔が映っているか）
+
+```bash
+npm run check:framing                               # ゲーム本編のシナリオ全部（時間がかかる）
+npm run check:framing -- forced/shion_d15_reveal    # <種類>/<ID> か <種類> で絞る
+npm run check:framing -- action --shots             # 外れたカットを scratch/shots/framing/ に撮る
+```
+
+話者の頭が画面の外・上端・セリフ枠に隠れる高さにあるカットを一覧にする。直したら同じシナリオで再実行する。
+
 ## 6. サーバーの API で保存する場合
 
 Studio のサーバー（`npm run server`、`127.0.0.1:5190`）が動いていれば API でも保存できる。`?strict=1` を付けると、参照先にエラーがあるとき保存しない。
@@ -81,4 +95,5 @@ API の一覧は `server/README.md`。ファイルを直接編集した場合は
 
 - `npm run validate` がエラー 0
 - 直したカットを撮影して確認した
+- 構図を変えたシナリオは `npm run check:framing -- <種類>/<ID>` で外れが 0
 - スキーマや検証のコードを変えたときは `npm test -w packages/scenario`

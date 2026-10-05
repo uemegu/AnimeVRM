@@ -51,7 +51,7 @@ export const PhoneMailModal: React.FC<PhoneMailModalProps> = ({
   const char = CHARACTERS[scenario.characterId];
   const charName = char ? resolveLocalizedText(char.name, lang) : scenario.characterId;
   const heroineColor = char?.themeColor || '#38bdf8';
-  const avatarImgUrl = `/assets/characters/${scenario.characterId}_normal.avif`;
+  const avatarImgUrl = resolveAssetUrl(`/assets/characters/${scenario.characterId}_normal.avif`);
   const replyOptions = availableChoices(scenario.replyOptions, context ?? { flags: {} });
 
   const later = (ms: number, run: () => void) => {

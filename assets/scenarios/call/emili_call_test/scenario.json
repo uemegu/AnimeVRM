@@ -52,12 +52,11 @@
       "id": "step_4",
       "speaker": "エミリ",
       "text": {
-        "ja": "……アンタの連絡先が一番上にあったから、試してあげただけなんだから"
+        "ja": "……登録してるの、四件しかないの。パパ、セバスチャン、運転手、アンタ。アンタだけ、まだ通話の履歴がなかったから"
       },
       "expression": "komari",
       "expressionWeight": 1,
-      "nextStepId": "c5",
-      "voiceUrl": "v_step_4_de85f3c7.mp3"
+      "nextStepId": "c5"
     },
     "c5": {
       "id": "c5",
@@ -77,7 +76,7 @@
         {
           "id": "emili_test_only",
           "text": {
-            "ja": "連絡先、俺しか入ってないのか？"
+            "ja": "四件って、少なくないか？"
           },
           "goto": "c2",
           "addAffinity": {
@@ -101,12 +100,21 @@
       "id": "c2",
       "speaker": "エミリ",
       "text": {
-        "ja": "っ！？　う、うるさいわね！　切るわよ！"
+        "ja": "……SPが付いてると、みんな遠慮して交換してくれないのよ"
+      },
+      "expression": "sad",
+      "expressionWeight": 1,
+      "nextStepId": "step_8"
+    },
+    "step_8": {
+      "id": "step_8",
+      "speaker": "エミリ",
+      "text": {
+        "ja": "い、今のは忘れなさい！　切るわよ！"
       },
       "expression": "angry",
       "expressionWeight": 1,
-      "nextStepId": null,
-      "voiceUrl": "v_c2_c68633bf.mp3"
+      "nextStepId": null
     }
   }
 }

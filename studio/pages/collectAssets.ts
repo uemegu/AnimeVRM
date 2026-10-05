@@ -20,6 +20,8 @@ const ALWAYS = [
   'textures/girl_face_anger.png',
   'textures/girl_face_sweat.png',
   'animations/Standing Idle.fbx',
+  // 手に持つ小物の絵柄（heldItem.ts が名前を決め打ちで読む）
+  'textures/props',
   // 場所の選択で選べる海の見える公園（簡易3D）。どのシナリオからも参照されないため固定で入れる
   'textures/painted-seaside',
   'textures/painted-classroom/sky-only.png',

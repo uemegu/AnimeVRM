@@ -1,0 +1,41 @@
+{
+  "id": "morning_shrine_steps",
+  "title": {
+    "ja": "石段の下"
+  },
+  "availability": {
+    "dayRange": {
+      "from": 2,
+      "to": 20
+    }
+  },
+  "location": "shrine",
+  "timeOfDay": "morning",
+  "fallback": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（神社の石段の下を通りかかる。鳥居の向こうは、朝もやで白い）",
+      "background": "shrine",
+      "timeOfDay": "morning",
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……あの日から、ここを通るたびに足が速くなる）"
+    },
+    {
+      "id": "s3",
+      "text": "（一瞬、境内の奥で、金色の光がちらついた気がする）",
+      "flashEffect": "white"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……気のせいだ。気のせいってことにしておこう）"
+    }
+  ]
+}

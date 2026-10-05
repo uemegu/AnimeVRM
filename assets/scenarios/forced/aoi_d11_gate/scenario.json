@@ -37,6 +37,7 @@
       },
       "camera": "wide",
       "cg": "/cg/aoi/sedans_at_gate.avif",
+      "seUrl": "/se/tire_squeal.mp3",
       "voiceUrl": "v_s1_3e5897d9.mp3"
     },
     {
@@ -45,6 +46,7 @@
       "speaker": "黒服リーダー",
       "text": "……お嬢様ではない。失礼、そちらはお嬢様のブレザーですね。お嬢様はどちらに？",
       "cg": false,
+      "seUrl": "/se/car_door.mp3",
       "voiceUrl": "v_s2_49fefeda.mp3"
     },
     {
@@ -131,9 +133,9 @@
       "scrollingBackground": {
         "speed": 1.6
       },
-      "background": "school_gate",
+      "background": "school_gate_2d",
       "cutin": false,
-      "camera": "medium",
+      "camera": "side",
       "nextSceneId": "merge",
       "voiceUrl": "v_c1_a21e7b76.mp3"
     },
@@ -159,15 +161,15 @@
       "scrollingBackground": {
         "speed": 1.6
       },
-      "background": "school_gate",
-      "cutin": false
+      "background": "school_gate_2d",
+      "cutin": false,
+      "camera": "side"
     },
     {
       "id": "merge",
       "speakerCharacterId": "sp_leader",
       "speaker": "黒服リーダー",
       "text": "タオル、ゴーグル、マスク、手には刃物、腰には劇薬……完全武装の不審者だ！",
-      "camera": "medium",
       "voiceUrl": "v_merge_2877fedb.mp3"
     },
     {
@@ -190,7 +192,6 @@
           "sweat": "fly4"
         }
       },
-      "camera": "close",
       "voiceUrl": "v_s13_7629fb0b.mp3"
     },
     {

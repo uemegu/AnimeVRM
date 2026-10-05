@@ -46,7 +46,8 @@
           "visible": false
         }
       },
-      "camera": "wide"
+      "camera": "wide",
+      "seUrl": "/se/thunder_bad_end.mp3"
     },
     {
       "id": "s3",

@@ -54,9 +54,9 @@
             -6
           ],
           "rotationY": -1.5708,
+          "motion": "pose_stretch_legs",
           "expression": "komari",
           "expressionWeight": 1,
-          "motion": "pose_stretch_legs",
           "lookAtTarget": "camera",
           "sweat": "jito"
         }

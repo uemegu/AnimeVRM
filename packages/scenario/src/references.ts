@@ -40,6 +40,12 @@ export interface Catalog {
   bgmIds?: ReadonlySet<string>;
   /** すべてのシナリオ（先行シナリオの参照先。ID → 中身） */
   scenarios?: ReadonlyMap<string, { category: ScenarioCategory; data: unknown }>;
+  /** 場所 ID → 座れる席の位置（locations.json の seats） */
+  seatPositions?: ReadonlyMap<string, readonly (readonly [number, number, number])[]>;
+  /** 座りのモーション（motions.json の seated） */
+  seatedMotions?: ReadonlySet<string>;
+  /** 歩く・走るモーション（motions.json の locomotion） */
+  locomotionMotions?: ReadonlySet<string>;
   /** assets/ 以下のファイルがあるか（引数は先頭の / を除いた assets/ 基準のパス） */
   assetExists?: (assetPath: string) => boolean;
   /** リポジトリ直下からの相対パスのファイルがあるか（参照音声など） */
@@ -259,6 +265,45 @@ function checkStory(c: Checker, data: ScenarioPackage) {
   }
   data.scenes.forEach((scene, i) => {
     if (!reached.has(scene.id)) c.warn(['scenes', i], `シーン "${scene.id}" には先頭からたどり着けません`);
+  });
+  checkPosing(c, data);
+}
+
+/**
+ * 立ち位置とモーションの組み合わせ（GEMINI.md の「シーンとポージングの規則」）。シーンを配列の順にたどる
+ * - 座りのモーションは、その場所の席の位置でだけ使う（立ち位置のままだと空中に座る・何もない所に頬杖をつく）
+ * - 流れる背景の間、歩き・走りを正面の構図で撮らない（進む向きと背景の流れが食い違う）
+ */
+function checkPosing(c: Checker, data: ScenarioPackage) {
+  const { seatPositions, seatedMotions, locomotionMotions } = c.catalog;
+  if (!seatedMotions && !locomotionMotions) return;
+  let background = data.location;
+  let scrolling = false;
+  let cast: Record<string, SceneAvatarConfig> = {};
+  const near = (a: readonly number[], b: readonly number[]) => a.every((v, k) => Math.abs(v - b[k]) < 0.05);
+  data.scenes.forEach((scene, i) => {
+    if (scene.background !== undefined) background = scene.background;
+    if (scene.scrollingBackground !== undefined) scrolling = scene.scrollingBackground !== false;
+    if (scene.clearCast) cast = {};
+    for (const [id, config] of Object.entries(scene.avatars ?? {})) {
+      if (config.visible === false) delete cast[id];
+      else cast[id] = { ...cast[id], ...config };
+    }
+    for (const [id, config] of Object.entries(cast)) {
+      const motion = config.motion;
+      if (!motion) continue;
+      if (seatedMotions?.has(motion)) {
+        const seats = (background && seatPositions?.get(background)) || [];
+        const position = Array.isArray(config.position) ? config.position : null;
+        if (!position || !seats.some((seat) => near(position, seat))) {
+          const where = seats.length ? '席の位置ではありません' : `場所 "${background ?? '?'}" には席がありません`;
+          c.warn(['scenes', i, 'avatars', id, 'motion'], `座りのモーション "${motion}" は席でだけ使います（${where}。locations.json の seats）`);
+        }
+      }
+      if (locomotionMotions?.has(motion) && scrolling && scene.camera && scene.camera !== 'side' && !scene.cameraPose) {
+        c.warn(['scenes', i, 'camera'], `流れる背景で "${motion}" のキャラを正面の構図（${scene.camera}）で撮っています。横からの構図（side）にします`);
+      }
+    }
   });
 }
 

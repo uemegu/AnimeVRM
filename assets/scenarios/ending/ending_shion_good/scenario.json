@@ -89,13 +89,23 @@
           "lookAtTarget": "forward"
         }
       },
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
       "voiceUrl": "v_s4_0b36eaa0.mp3"
     },
     {
       "id": "s5",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "……ごめん。シオンが言ってたこと、俺もまだ答えが出せなくて"
+      "text": "……ごめん。シオンが言ってたこと、俺もまだ答えが出せなくて",
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      }
     },
     {
       "id": "s6",
@@ -106,6 +116,11 @@
         "shion": {
           "lookAtTarget": "camera"
         }
+      },
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
       },
       "voiceUrl": "v_s6_45f154a8.mp3"
     },
@@ -121,10 +136,82 @@
         }
       },
       "camera": "close",
+      "condition": {
+        "unlessFlags": [
+          "finale_love"
+        ]
+      },
       "voiceUrl": "v_s7_81482476.mp3"
     },
     {
       "id": "s8",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……あなたの『好き』は、偽りではないと立証されたわけね",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward"
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s8_9d9d5b71.mp3"
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……返事は、今じゃなくていい",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      }
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……ずるいわ。こっちはまだ、自分の心拍数の原因すら特定できていないのに",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera"
+        }
+      },
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s10_65268503.mp3"
+    },
+    {
+      "id": "s11",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "でも、少し安心したの。雷を前にしても、あなたの言葉は揺らがなかった。……それは、有力なデータよ",
+      "avatars": {
+        "shion": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      },
+      "camera": "close",
+      "condition": {
+        "requireFlags": [
+          "finale_love"
+        ]
+      },
+      "voiceUrl": "v_s11_82846225.mp3"
+    },
+    {
+      "id": "s12",
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "神様の仕掛けがなくなった今なら、ちゃんと検証できるはずよ。時間をかけて、正確に",
@@ -133,10 +220,10 @@
           "motion": "Standing Idle"
         }
       },
-      "voiceUrl": "v_s8_4e93cf80.mp3"
+      "voiceUrl": "v_s12_4e93cf80.mp3"
     },
     {
-      "id": "s9",
+      "id": "s13",
       "text": "",
       "choices": [
         {
@@ -186,7 +273,7 @@
       "bgm": "main_bgm"
     },
     {
-      "id": "s13",
+      "id": "s17",
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "この頁、なんて読めるかしら",
@@ -194,24 +281,55 @@
       "timeOfDay": "evening",
       "avatars": {
         "shion": {
-          "position": "center",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
           "expression": "neutral",
           "expressionWeight": 1,
-          "motion": "chin_rest",
           "lookAtTarget": "forward"
         }
       },
       "camera": "medium",
-      "voiceUrl": "v_s13_171160b4.mp3"
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
+      "voiceUrl": "v_s17_171160b4.mp3"
     },
     {
-      "id": "s14",
+      "id": "s18",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "『此の社の神、時を司りて戯れを好む』……かな"
+      "text": "『此の社の神、時を司りて戯れを好む』……かな",
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      }
     },
     {
-      "id": "s15",
+      "id": "s19",
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "正解。助手のくせに、読むのが早くなったじゃない",
@@ -222,10 +340,23 @@
           "expressionWeight": 1
         }
       },
-      "voiceUrl": "v_s15_8f81ec03.mp3"
+      "cameraPose": {
+        "position": [
+          0,
+          1.12,
+          2.05
+        ],
+        "target": [
+          0,
+          0.98,
+          0
+        ],
+        "fov": 40
+      },
+      "voiceUrl": "v_s19_8f81ec03.mp3"
     },
     {
-      "id": "s16",
+      "id": "s20",
       "speakerCharacterId": "teacher",
       "speaker": "白石先生",
       "text": "鍵閉めに来たんだけど……相変わらず息ぴったりだねえ",
@@ -236,16 +367,26 @@
           "expressionWeight": 1,
           "motion": "Standing Idle",
           "lookAtTarget": "shion"
-        },
-        "shion": {
-          "position": "right"
         }
       },
       "camera": "wide",
-      "voiceUrl": "v_s16_6bb7b75e.mp3"
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      },
+      "voiceUrl": "v_s20_6bb7b75e.mp3"
     },
     {
-      "id": "s17",
+      "id": "s21",
       "speakerCharacterId": "shion",
       "speaker": "シオン",
       "text": "余計な茶化しは不要です。純粋な学術調査ですから",
@@ -257,12 +398,38 @@
           "blush": true
         }
       },
-      "voiceUrl": "v_s17_048d736b.mp3"
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      },
+      "voiceUrl": "v_s21_048d736b.mp3"
     },
     {
-      "id": "s18",
+      "id": "s22",
       "text": "（シオンの手帳の新しいページ：『検証記録 No.1：仕掛けがなくても、隣にいると心拍数が上がる。――要継続観察』）",
-      "cutin": "/cutins/items/shion_notebook.avif"
+      "cutin": "/cutins/items/shion_notebook.avif",
+      "cameraPose": {
+        "position": [
+          0.4,
+          1.45,
+          3.1
+        ],
+        "target": [
+          0,
+          0.95,
+          -0.6
+        ],
+        "fov": 50
+      }
     }
   ]
 }

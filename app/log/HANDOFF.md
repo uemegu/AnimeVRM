@@ -60,14 +60,20 @@
 
 ## 直近のNext Action
 
+- 公開は `app/dist` を `/confess_in_5sec/` に置く（base はビルド時のみ。`npm --prefix app run build`）。dist には app で使わない Studio 用素材（約 290MB）も入る
+
 - リポジトリ分離（app → confession_in_5_seconds、Studio はサブモジュール）は方針のみ決定、作業は保留。`plans/app-split/PLAN.md`
 
+1. [ ] 通しプレイの指摘対応の残り（`plans/5byou-feedback/PLAN.md`）
+   - 新しい・変わったセリフのボイス生成（`app/scenarios/voice_todo.md`）
+   - 演出台本は `app/scenarios/script/*.txt`（原稿 → 台本 → `python3 app/scripts/compile-script.py` でシナリオを作る）
 1. [ ] 『5秒の告白』の仕上げ
-   - codex の利用上限で止まった画像（エミリ・シオン編の一枚絵・カットイン・スタンプ）を描く。手順は `app/scenarios/5byou_resources.md`
+   - ナルセのモデルが黒髪・眼鏡でタカシと紛らわしい（ナルセの絵4枚も眼鏡）。モデルを作ったら絵も描き直す。`app/scenarios/5byou_resources.md` の「ナルセの見た目」
    - ボイスは Colab（Irodori-TTS Large）で全794件を生成し取り込み済み。実音声の聞き取り確認は未実施。
-   - ポーズ FBX 24本は登録・差し替え済み。残り：小物を持つポーズ（缶・本・電話）の扱い、ナルセのヘッドロックはカットインで見せる（未生成）、アオイの体操着モデル（d08 運動場。ベンチ・座り・カメラは対応済みでモデル指定を足すだけ）
-   - 原稿との差（★不足で「好きだ」→ GOOD の女神の一言など）をユーザーに確認する
-   - 簡易3Dの体育館・神社など、`5byou_resources.md` の背景を優先度順に作る
+   - ポーズ FBX 24本は登録・差し替え済み。小物（`heldItem`）とヘッドロックのカットインも対応済み。残り：アオイの体操着モデル（d08 運動場。ベンチ・座り・カメラは対応済みでモデル指定を足すだけ）
+   - 効果音の差し替え：チャイム3種・電話の終話音・虫の羽音（`5byou_resources.md` の 4）
+   - 原稿との差のうち、傘・きな粉棒の前提の場面がないことは未対応（`5byou_resources.md` の 8）。GOOD END の書き分けは対応済み
+   - 簡易3Dの神社・屋上など、`5byou_resources.md` の背景を優先度順に作る（体育館は 2026-10-05 に対応済み）
 2. [ ] シナリオコンテンツ・個別キャライベントの拡充
    - 映画館・遊園地・水族館の専用背景（現在は既存背景で代用）、移動先選択のヒロイン画像の私服版
 3. [ ] 基本操作・遊び方ヘルプ案内（オプション）
@@ -85,5 +91,7 @@
 - **デザイン先行確認**: UI変更時は自動テスト前に画面キャプチャでユーザー承認を得る。
 - **Studio との共有**: 素材はリポジトリ直下の `assets/` を Studio・Pages 版と共有する（旧ルートのビューアは 2026-09-27 に削除）。描画（`StageManager`・`StageAvatar`・`ScrollingBackground`・シェーダー・ポストプロセス）は `packages/engine` にあり、Studio のプレビューと共有する（app 側に複製を置かない）。時間帯・場所の見た目は `assets/studio/time-of-day.json`・`locations.json`（Studio のシーン設定）で、app は `data/timeOfDayPresets.ts` などから読むだけ。キャラ定義の正は `assets/studio/characters.json`（`characters.ts` とずれるとテストが失敗する）。シナリオ JSON の形式は `packages/scenario` のスキーマが正。シーンの演出（アバター・カメラ・タイムライン）の型はアプリでもスキーマの型をそのまま使い、それ以外のアプリの型はスキーマとずれると型チェックで失敗する。
 - **囁き声・開口度**: WASM で音声の PCM の特徴だけから計算する。キャラ名・ファイル名による補正や JS 解析へのフォールバックは使わない。旧データの `voiceWhisper` は読み込み互換のため残すが開口度には適用しない。WASM のソース・バイナリ・Worklet はセットで更新する。
+- **ポージング・構図の規則**: 座りは席（`locations.json` の `seats`）でだけ、流れる背景は横から、場所が変わると自動で暗転。`npm run validate` と `npm run check:framing` で確かめる（GEMINI.md）。
+- **メモリ**: three.js のキャッシュは上限付き（`services/loader/assetCache.ts`）。`THREE.Cache.enabled` を直接いじらない。
 - **シナリオ発生条件**: 未指定項目は制限なし。優先順位は大きい値を優先し、同値時は定義順。休日時間帯は土日として判定。
 - **簡潔な記録**: 作業ログや引き継ぎメモにコードを見ればわかる細部・数値を書かない。

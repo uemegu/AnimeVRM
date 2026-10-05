@@ -118,7 +118,7 @@
         "naruse": {
           "expression": "komari",
           "expressionWeight": 1,
-          "motion": "chin_rest"
+          "motion": "Standing Idle"
         }
       },
       "end": true,

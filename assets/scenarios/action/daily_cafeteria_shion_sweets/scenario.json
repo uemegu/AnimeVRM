@@ -1,0 +1,171 @@
+{
+  "id": "daily_cafeteria_shion_sweets",
+  "title": {
+    "ja": "脳の燃料"
+  },
+  "priority": -5,
+  "availability": {
+    "timeSlots": [
+      "afternoon"
+    ],
+    "dayRange": {
+      "from": 6,
+      "to": 20
+    },
+    "locations": [
+      "cafeteria"
+    ],
+    "after": {
+      "all": [
+        {
+          "scenarioId": "shion_d06_parfait"
+        }
+      ]
+    }
+  },
+  "location": "cafeteria",
+  "timeOfDay": "day",
+  "actionHints": [
+    {
+      "locationId": "cafeteria",
+      "hintCharacterIds": [
+        "shion"
+      ],
+      "hintText": {
+        "ja": "購買の菓子パンの棚の前で、誰かが長いこと迷っている"
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（シオンが菓子パンの棚の前で、メロンパンとチョコデニッシュを見比べている）",
+      "background": "cafeteria",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "position": "center",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "forward"
+        }
+      },
+      "camera": "medium"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……月詠"
+    },
+    {
+      "id": "s3",
+      "text": "（シオンが何事もなかったように、隣の棚の野菜ジュースを手に取る）",
+      "avatars": {
+        "shion": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "何かしら",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera"
+        }
+      }
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "今、メロンパン持ってただろ"
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "午後は数学が二時間続くの。糖分は脳の燃料よ。合理的な補給だわ",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "forward"
+        }
+      }
+    },
+    {
+      "id": "s7",
+      "text": "",
+      "choices": [
+        {
+          "id": "d06_sweets_choco",
+          "text": "（チョコデニッシュの方を取って渡す）",
+          "goto": "c1",
+          "addAffinity": {
+            "shion": 2
+          }
+        },
+        {
+          "id": "d06_sweets_secret",
+          "text": "パフェのことは黙っとくって",
+          "goto": "c2",
+          "addAffinity": {
+            "shion": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "c1",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……どうして、そっちだと分かったの",
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "expression": "surprised",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "s9",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "パフェの時、チョコから食べてた"
+    },
+    {
+      "id": "s10",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "……観察されていたのは、私の方だったのね",
+      "avatars": {
+        "shion": {
+          "expression": "komari",
+          "expressionWeight": 1,
+          "blush": true
+        }
+      },
+      "end": true
+    },
+    {
+      "id": "c2",
+      "speakerCharacterId": "shion",
+      "speaker": "シオン",
+      "text": "その話を、ここで出さないで",
+      "avatars": {
+        "shion": {
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "forward"
+        }
+      },
+      "end": true
+    }
+  ]
+}

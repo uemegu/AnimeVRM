@@ -1,0 +1,59 @@
+{
+  "id": "daily_classroom_eraser",
+  "title": {
+    "ja": "黒板消しクリーナー"
+  },
+  "availability": {
+    "timeSlots": [
+      "morning",
+      "afternoon",
+      "afterschool"
+    ],
+    "locations": [
+      "classroom"
+    ]
+  },
+  "location": "classroom",
+  "timeOfDay": "day",
+  "fallback": true,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "（休み時間の教室。黒板消しクリーナーが、ガガガと唸っている）",
+      "background": "classroom",
+      "camera": "wide"
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……吸引力が落ちてる。フィルターに粉が詰まってるな）"
+    },
+    {
+      "id": "s3",
+      "text": "（フィルターを外して窓の外で叩く。白い粉が、春の風に流れていく）"
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……よし。音が澄んだ）"
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "naruse",
+      "speaker": "ナルセ",
+      "text": "休み時間に家電を整備する高校生、お前くらいだぞ",
+      "avatars": {
+        "naruse": {
+          "position": "center",
+          "expression": "nima",
+          "expressionWeight": 1,
+          "motion": "Standing Idle",
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "medium"
+    }
+  ]
+}

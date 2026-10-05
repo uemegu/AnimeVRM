@@ -3,7 +3,7 @@ import { resolveLocalizedText } from '../../types/scenario';
 import { ScenarioResolvedScene } from '../../services/scenario/ScenarioEngine';
 import { TimeOfDayId } from '../../types/visual';
 import { CameraShot } from '../../types/scenario';
-import type { CutinConfig, SceneEffects, StillImageConfig } from '@anime-vrm/scenario';
+import type { CutinConfig, SceneEffects, ScreenTransition, StillImageConfig } from '@anime-vrm/scenario';
 import { StageCastMember } from '../../services/stage/sceneView';
 import { ScrollingBackgroundSettings } from '@anime-vrm/engine/stage/ScrollingBackground';
 import { StageView } from '../../components/Stage/StageView';
@@ -26,6 +26,8 @@ export interface ScenarioPageProps {
   cg?: StillImageConfig | null;
   cutin?: CutinConfig | null;
   rain?: boolean;
+  /** このシーンの切り替え演出（場所が変わったときの暗転を含む。sceneView の舞台状態から） */
+  screenTransition?: ScreenTransition;
   onDialogueClick: () => void;
   onChoiceClick: (index: number) => void;
   onChoiceTimeout: () => void;
@@ -45,6 +47,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   cg,
   cutin,
   rain,
+  screenTransition,
   onDialogueClick,
   onChoiceClick,
   onChoiceTimeout,
@@ -67,7 +70,7 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           cutin={cutin}
           rain={rain}
           speakerId={currentScene?.speakerCharacterId ?? null}
-          cut={currentScene}
+          cut={currentScene && { ...currentScene, screenTransition }}
         />
       </main>
 

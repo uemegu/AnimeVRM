@@ -30,6 +30,10 @@
     },
     {
       "id": "s2",
+      "text": "（段ボールは全部片付いている。壁に、前の学校の寄せ書きの色紙が一枚だけ貼ってある）"
+    },
+    {
+      "id": "s3",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……どうぞ。手作りのイチゴパフェ",
@@ -43,24 +47,24 @@
           "blush": true
         }
       },
-      "camera": "medium",
-      "voiceUrl": "v_s2_b7a9f6e4.mp3"
-    },
-    {
-      "id": "s3",
-      "speakerCharacterId": "player",
-      "speaker": "タカシ",
-      "text": "い、いただきます"
+      "camera": "medium"
     },
     {
       "id": "s4",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
-      "text": "（……距離が、1メートルある）",
-      "camera": "wide"
+      "text": "い、いただきます"
     },
     {
       "id": "s5",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "（……距離が、1メートルある）",
+      "camera": "wide",
+      "seUrl": "/se/tableware_spoon.mp3"
+    },
+    {
+      "id": "s6",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……あのさ",
@@ -69,17 +73,16 @@
           "lookAtTarget": "camera"
         }
       },
-      "camera": "medium",
-      "voiceUrl": "v_s5_0b605bff.mp3"
+      "camera": "medium"
     },
     {
-      "id": "s6",
+      "id": "s7",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "は、はい"
     },
     {
-      "id": "s7",
+      "id": "s8",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "膝裏って……本当に、普段から見てたの？",
@@ -89,18 +92,17 @@
           "expressionWeight": 1
         }
       },
-      "camera": "close",
-      "voiceUrl": "v_s7_d455a3cc.mp3"
+      "camera": "close"
     },
     {
-      "id": "s8",
+      "id": "s9",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "ぶふっ！？",
       "focusLines": true
     },
     {
-      "id": "s9",
+      "id": "s10",
       "text": "",
       "choices": [
         {
@@ -142,7 +144,7 @@
       "voiceUrl": "v_c1_efcc78e9.mp3"
     },
     {
-      "id": "s11",
+      "id": "s12",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "……そういうとこ、正直すぎ",
@@ -153,8 +155,7 @@
           "motion": "aoi_feminine_hair_tuck"
         }
       },
-      "nextSceneId": "merge",
-      "voiceUrl": "v_s11_8da0c7cf.mp3"
+      "nextSceneId": "merge"
     },
     {
       "id": "c2",
@@ -174,24 +175,30 @@
       "id": "merge",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "……あの時ね。タカシくんが手を引いて走ってくれた時、すごく心強かった",
+      "text": "……あの時、手首つかまれたところ。まだちょっと赤いの",
       "avatars": {
         "aoi": {
           "eyeWander": 0,
           "expression": "relaxed",
           "expressionWeight": 1,
-          "lookAtTarget": "forward"
+          "lookAtTarget": "forward",
+          "motion": "pose_hand_on_chest"
         }
       },
       "bgm": "love",
-      "camera": "medium",
-      "voiceUrl": "v_merge_09d1dc29.mp3"
+      "camera": "medium"
     },
     {
-      "id": "s14",
+      "id": "s15",
+      "speakerCharacterId": "player",
+      "speaker": "タカシ",
+      "text": "……ごめん。強く引きすぎた"
+    },
+    {
+      "id": "s16",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "昔から、いざって時は絶対来てくれるよね",
+      "text": "ううん。……痛いくらいでちょうどよかった。離されないって分かったから",
       "avatars": {
         "aoi": {
           "lookAtTarget": "camera",
@@ -199,23 +206,25 @@
           "expressionWeight": 1
         }
       },
-      "voiceUrl": "v_s14_fb60eae1.mp3"
+      "camera": "close"
     },
     {
-      "id": "s15",
+      "id": "s17",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
-      "text": "……ありがとう。それだけは、ちゃんと言いたかったの",
+      "text": "前の学校の子たちにね、昨日やっと返事したの。『こっちでも、ちゃんとやれてる』って",
       "avatars": {
         "aoi": {
-          "motion": "Quick Formal Bow"
+          "lookAtTarget": "forward",
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "motion": "clasp_hands_front"
         }
       },
-      "camera": "close",
-      "voiceUrl": "v_s15_c540c2bf.mp3"
+      "camera": "medium"
     },
     {
-      "id": "s16",
+      "id": "s18",
       "speakerCharacterId": "aoi_mom",
       "speaker": "アオイの母（声）",
       "text": "アオイー、紅茶おかわりいるー？",
@@ -225,11 +234,10 @@
           "expressionWeight": 1,
           "effectText": "biku"
         }
-      },
-      "voiceUrl": "v_s16_38c24442.mp3"
+      }
     },
     {
-      "id": "s17",
+      "id": "s19",
       "speakerCharacterId": "aoi",
       "speaker": "アオイ",
       "text": "い、いらない！",
@@ -239,11 +247,10 @@
           "expressionWeight": 1,
           "motion": "Dismissing Gesture"
         }
-      },
-      "voiceUrl": "v_s17_a8beebb6.mp3"
+      }
     },
     {
-      "id": "s18",
+      "id": "s20",
       "speakerCharacterId": "player",
       "speaker": "タカシ",
       "text": "（……膝裏のことは、許されたのか許されてないのか、結局よく分からなかった）",
