@@ -20,6 +20,26 @@ import './player.css';
 
 const TYPE_SPEED = 40; // 1秒に出す文字数
 const AUTO_WAIT_MS = 1200;
+/** キャラの先読みを待つ上限（回線が遅くても「はじめる」が押せなくならないように） */
+const PREWARM_TIMEOUT_MS = 15000;
+
+/** シナリオに出る3Dキャラ（同じキャラが別モデルに替わる場合は最初に出る方）と、使うモーション */
+function scenarioPrewarmList(scenario: ScenarioPackage, modelUrlFor: (characterId: string) => string | undefined) {
+  const byId = new Map<string, { id: string; modelUrl: string; motions: Set<string> }>();
+  for (const scene of scenario.scenes) {
+    for (const [id, avatar] of Object.entries(scene.avatars ?? {})) {
+      if (avatar.sprite) continue;
+      const modelUrl = avatar.modelUrl ?? modelUrlFor(avatar.characterId ?? id);
+      if (!modelUrl) continue;
+      const entry = byId.get(id);
+      if (entry && entry.modelUrl !== modelUrl) continue;
+      const item = entry ?? { id, modelUrl, motions: new Set<string>() };
+      if (avatar.motion) item.motions.add(avatar.motion);
+      byId.set(id, item);
+    }
+  }
+  return [...byId.values()].map((item) => ({ ...item, motions: [...item.motions] }));
+}
 
 function localize(text: TextContent | undefined, language: Language): string {
   if (text === undefined) return '';
@@ -59,6 +79,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   const [remaining, setRemaining] = useState<number | null>(null);
   /** 画面の向き（シナリオの指定から始め、ヘッダーで切り替えられる） */
   const [aspect, setAspect] = useState<ScreenAspect>(scenario.aspect ?? 'landscape');
+  /** 先読みを済ませたキャラの一覧（今のシナリオの一覧と同じになるまで「はじめる」を押せない） */
+  const [prewarmedKey, setPrewarmedKey] = useState<string | null>(null);
   /** 今のカットに入った時刻（ムービーの尺の計算に使う） */
   const cutStartRef = useRef(0);
 
@@ -84,6 +106,18 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
     setStep((s) => s + 1);
     setAspect(scenario.aspect ?? 'landscape');
   }, [scenario, audio]);
+
+  // 後のカットで出るキャラも、はじめる前に読み込んで描画の準備まで済ませる
+  const prewarm = useMemo(
+    () => scenarioPrewarmList(scenario, (id) => data.characters.characters.find((c) => c.id === id)?.models[0]?.url),
+    [scenario, data]
+  );
+  const prewarmKey = JSON.stringify(prewarm);
+  const prewarmed = prewarmedKey === prewarmKey;
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPrewarmedKey(prewarmKey), PREWARM_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+  }, [prewarmKey]);
 
   const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
   const cast = useMemo(
@@ -133,6 +167,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
 
   const advance = useCallback(() => {
     if (phase === 'title') {
+      if (!prewarmed) return;
       setPhase('playing');
       return;
     }
@@ -148,7 +183,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
       return;
     }
     setStep((s) => s + 1);
-  }, [phase, textDone, text.length, runner, audio]);
+  }, [phase, prewarmed, textDone, text.length, runner, audio]);
 
   const choose = (index: number) => {
     if (runner.choose(index)) {
@@ -255,6 +290,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         getSpeakerPhoneme={() => audio.getPhoneme()}
         getSpeakerMouthOpen={() => audio.getMouthOpen()}
         onCanvas={onCanvas}
+        prewarm={prewarm}
+        onPrewarmed={setPrewarmedKey}
       />
       {flash > 0 && <div key={flash} className="player-flash" />}
 
@@ -287,12 +324,12 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
       </header>
 
       {phase === 'title' && (
-        <button type="button" className="player-cover" onClick={advance}>
+        <button type="button" className="player-cover" onClick={advance} aria-busy={!prewarmed}>
           <span className="player-cover-title">{localize(scenario.title, language)}</span>
           {scenario.description && <span className="player-cover-desc">{localize(scenario.description, language)}</span>}
-          <span className="player-cover-start">
-            <Icon name="play" size={16} />
-            {tp.start}
+          <span className={`player-cover-start${prewarmed ? '' : ' preparing'}`}>
+            {prewarmed && <Icon name="play" size={16} />}
+            {prewarmed ? tp.start : tp.preparing}
           </span>
         </button>
       )}

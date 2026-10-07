@@ -34,6 +34,10 @@ export interface StageViewProps {
   cut?: ScenarioResolvedScene | null;
   className?: string;
   onLoaded?: () => void;
+  /** 先読みの依頼番号。変わったら（内容が同じでも）読み終えたことを onPrewarmed で知らせ直す */
+  prewarmToken?: number;
+  /** prewarm のキャラを読み込み終えた（幕間で画面を覆っている間に済ませるため、呼び出し側が待つ） */
+  onPrewarmed?: (token: number) => void;
 }
 
 export const StageView: React.FC<StageViewProps> = ({
@@ -51,6 +55,8 @@ export const StageView: React.FC<StageViewProps> = ({
   cut = null,
   className = '',
   onLoaded,
+  prewarmToken = 0,
+  onPrewarmed,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageManagerRef = useRef<StageManager | null>(null);
@@ -120,9 +126,15 @@ export const StageView: React.FC<StageViewProps> = ({
   // 後のシーンで登場するキャラを、表示せずに先に読み込んで描画の準備まで済ませる
   const prewarmKey = JSON.stringify(prewarm);
   useEffect(() => {
-    if (prewarm.length > 0) void stageManagerRef.current?.prewarmAvatars(prewarm);
+    const done = () => onPrewarmed?.(prewarmToken);
+    const manager = stageManagerRef.current;
+    if (!manager || prewarm.length === 0) {
+      done();
+      return;
+    }
+    void manager.prewarmAvatars(prewarm).finally(done);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prewarmKey]);
+  }, [prewarmKey, prewarmToken]);
 
   // 特殊効果（シナリオの「あ、花火」から花火を上げるなど。内容が同じなら何もしない）
   const effectsKey = JSON.stringify(effects ?? {});

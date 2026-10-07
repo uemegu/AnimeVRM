@@ -20,6 +20,9 @@ export interface ScenarioPageProps {
   activeLocationId: string;
   cast: StageCastMember[];
   prewarm?: { id: string; modelUrl: string; motions?: string[] }[];
+  /** 先読みの依頼番号と、読み込み終えた知らせ */
+  prewarmToken?: number;
+  onPrewarmed?: (token: number) => void;
   cameraShot: CameraShot;
   scrolling: ScrollingBackgroundSettings | null;
   effects?: SceneEffects;
@@ -41,6 +44,8 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
   activeLocationId,
   cast,
   prewarm,
+  prewarmToken,
+  onPrewarmed,
   cameraShot,
   scrolling,
   effects,
@@ -63,6 +68,8 @@ export const ScenarioPage: React.FC<ScenarioPageProps> = ({
           locationId={activeLocationId}
           cast={cast}
           prewarm={prewarm}
+          prewarmToken={prewarmToken}
+          onPrewarmed={onPrewarmed}
           cameraShot={cameraShot}
           scrolling={scrolling}
           effects={effects}

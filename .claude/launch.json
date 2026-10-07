@@ -74,6 +74,18 @@
         "--strictPort"
       ],
       "port": 5186
+    },
+    {
+      "name": "home-splat",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "5199",
+        "--directory",
+        "scratch/home-splat"
+      ],
+      "port": 5199
     }
   ]
 }

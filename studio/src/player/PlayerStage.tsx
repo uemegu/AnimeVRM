@@ -26,12 +26,16 @@ interface Props {
   getSpeakerPhoneme: () => string | undefined;
   getSpeakerMouthOpen: () => number;
   onCanvas?: (canvas: HTMLCanvasElement | null) => void;
+  /** シナリオに出る全キャラ。表示せずに先に読み込み、描画の準備まで済ませる（初登場の瞬間に止まらないように） */
+  prewarm?: { id: string; modelUrl: string; motions?: string[] }[];
+  /** prewarm を済ませた（済ませた一覧の JSON を渡す） */
+  onPrewarmed?: (prewarmKey: string) => void;
 }
 
 /**
  * 再生画面の舞台。カットが変わるたびにタイムラインを渡し、時刻はボイスに合わせて描画側が進める
  */
-export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas }: Props) {
+export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas, prewarm = [], onPrewarmed }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { loading, run: runSetCast } = useCastLoading(managerRef);
@@ -80,6 +84,23 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     runSetCast(cast);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [castKey]);
+
+  const prewarmKey = JSON.stringify(prewarm);
+  const onPrewarmedRef = useRef(onPrewarmed);
+  onPrewarmedRef.current = onPrewarmed;
+  useEffect(() => {
+    const manager = managerRef.current;
+    let cancelled = false;
+    const done = () => {
+      if (!cancelled) onPrewarmedRef.current?.(prewarmKey);
+    };
+    if (!manager || prewarm.length === 0) done();
+    else void manager.prewarmAvatars(prewarm).finally(done);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prewarmKey]);
 
   const effectsKey = JSON.stringify(effects ?? {});
   useEffect(() => {

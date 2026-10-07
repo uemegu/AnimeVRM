@@ -954,29 +954,36 @@ export class StageManager {
 
   /**
    * 不可視のままだと three.js はシェーダーのコンパイルもテクスチャのGPUアップロードもしないため、
-   * 初登場の瞬間に処理が走って表示が遅れる。非表示のまま先に済ませておく
-   * （同期処理の中で可視化→戻すので、1フレームも描画されない）
+   * 初登場の瞬間に処理が走って表示が数百ms止まる。非表示のまま先に済ませておく。
+   * 髪の影・キャラのマスクの描画はライトの数や描画先が本描画と違い、シェーダーが別に作られるので、
+   * renderer.compile だけでは足りない。毎フレームと同じ描画を画面に出さずに1回通す
+   * （同期処理の中で可視化→戻すので、画面には出ない）
    */
   private warmUpAvatar(avatar: StageAvatar): void {
     const root = avatar.vrm?.scene;
     if (!root) return;
     const wasVisible = root.visible;
+    const renderToScreen = this.composer.renderToScreen;
+    // カメラの外にいると描画が省かれて準備されないので、この1回だけ視錐台カリングを外す
+    const culled: THREE.Object3D[] = [];
+    root.traverse((obj) => {
+      if (obj.frustumCulled) {
+        obj.frustumCulled = false;
+        culled.push(obj);
+      }
+    });
     root.visible = true;
     try {
-      this.renderer.compile(this.scene, this.camera);
-      root.traverse((obj) => {
-        const mesh = obj as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        for (const material of materials) {
-          for (const value of Object.values(material)) {
-            if (value && (value as THREE.Texture).isTexture) this.renderer.initTexture(value as THREE.Texture);
-          }
-        }
-      });
+      this.hairShadow.render(this.renderer, this.scene, this.camera, this.directionalLight);
+      this.characterMask.render(this.renderer, this.scene, this.camera);
+      this.eyeMask.render(this.renderer, this.scene, this.camera);
+      this.composer.renderToScreen = false;
+      this.composer.render(0);
     } catch (err) {
       console.warn(`Failed to warm up avatar ${avatar.id}:`, err);
     } finally {
+      this.composer.renderToScreen = renderToScreen;
+      for (const obj of culled) obj.frustumCulled = true;
       root.visible = wasVisible;
     }
   }

@@ -422,6 +422,7 @@ export const ja = {
     landscape: '横型にする',
     portrait: '縦型にする',
     start: 'はじめる',
+    preparing: '準備中…',
     end: 'おわり',
     replay: 'もう一度',
     backToList: '一覧へ戻る',
