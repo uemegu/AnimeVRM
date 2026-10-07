@@ -364,6 +364,9 @@ export class StageAvatar {
           registerShapeKeyExpressions(vrm);
           addHandColliders(vrm);
           this.handClearance = HandClearance.create(vrm, this.handClearanceMode);
+          // 手と頭の形は読み込み時の姿勢で測る
+          this.heldItem = new HeldItem(vrm);
+          this.heldItem.set(this.pendingHeldItem);
           this.clothDent = ClothDent.create(vrm, this.clothDentEnabled);
           this.springWind = SpringWind.create(vrm);
 
@@ -702,6 +705,7 @@ export class StageAvatar {
 
     // 1.2 小物を握る手は指を曲げる
     this.heldItem?.applyGrip();
+    this.handClearance?.setItem(this.heldItem?.itemProbes() ?? null);
 
     // 1.5 顔を視線の先へ向ける（モーションの姿勢に足す）
     this.updateHeadTurn(delta);

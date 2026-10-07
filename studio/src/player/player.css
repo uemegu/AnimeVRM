@@ -292,6 +292,10 @@
   color: #ffffff;
   font-weight: 700;
 }
+.player-cover-start.preparing {
+  background: #94a3b8;
+  cursor: progress;
+}
 .player-end-actions {
   display: flex;
   gap: 12px;

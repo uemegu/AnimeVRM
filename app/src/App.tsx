@@ -41,6 +41,8 @@ import {
 
 const ACTION_PHASES: DayPhase[] = ['morning_action', 'lunch_action', 'afterschool_action', 'holiday_action'];
 const GOD_EXPERIMENT_SCENARIO_ID = 'god_prologue_experiment';
+/** 幕間でキャラの先読みを待つ上限（回線が遅くても幕間が明けなくならないように） */
+const STAGE_PREWARM_TIMEOUT_MS = 8000;
 
 /** 夜の電話・メールの結果をゲーム状態に反映（フラグ・好感度を加算し、選択と完了を履歴に残す） */
 function applyCommunicationResult(state: GameState, result: CommunicationResult): GameState {
@@ -177,15 +179,48 @@ export const App: React.FC = () => {
     [lang, showNotice]
   );
 
+  // 舞台の先読み（次のシナリオに出るキャラのモデル読み込みと描画の準備）。
+  // 読み込みやシェーダーの準備で画面が止まるので、幕間で画面を覆っている間に済ませる
+  const [prewarmToken, setPrewarmToken] = useState(0);
+  const prewarmTokenRef = useRef(0);
+  const prewarmWaitersRef = useRef(new Map<number, () => void>());
+  const requestStagePrewarm = useCallback(() => {
+    prewarmTokenRef.current += 1;
+    setPrewarmToken(prewarmTokenRef.current);
+  }, []);
+  const handleStagePrewarmed = useCallback((token: number) => {
+    prewarmWaitersRef.current.forEach((resolve, waiting) => {
+      if (waiting > token) return;
+      prewarmWaitersRef.current.delete(waiting);
+      resolve();
+    });
+  }, []);
+  /** 先読みの完了を待つ（回線が遅いときに幕間が明けなくならないよう上限を設ける） */
+  const waitForStagePrewarm = useCallback((token: number) => {
+    return new Promise<void>((resolve) => {
+      const timer = window.setTimeout(() => {
+        prewarmWaitersRef.current.delete(token);
+        resolve();
+      }, STAGE_PREWARM_TIMEOUT_MS);
+      prewarmWaitersRef.current.set(token, () => {
+        window.clearTimeout(timer);
+        resolve();
+      });
+    });
+  }, []);
+
   /** 幕間演出で画面を覆っている間に run を実行する。失敗したらお知らせを出す */
   const playInterlude = useCallback(
     (run: () => Promise<void> | void, options?: { title?: string; subtitle?: string }) => {
       const guarded = async () => {
+        const tokenBefore = prewarmTokenRef.current;
         try {
           await run();
         } catch (err) {
           handleDataLoadError(err);
         }
+        // シナリオを始めたら、出てくるキャラの準備が済むまで幕間を明けない
+        if (prewarmTokenRef.current !== tokenBefore) await waitForStagePrewarm(prewarmTokenRef.current);
       };
       if (interludeRef.current) {
         interludeRef.current.playTransition({ ...options, onCovered: guarded });
@@ -193,7 +228,7 @@ export const App: React.FC = () => {
         guarded();
       }
     },
-    [handleDataLoadError]
+    [handleDataLoadError, waitForStagePrewarm]
   );
 
   // シナリオ進行の反映と、シナリオ終了後のフェーズ遷移（handleScenarioFinished は後で定義するため参照経由）
@@ -296,8 +331,9 @@ export const App: React.FC = () => {
     (scenario: ScenarioPackage, state: GameState) => {
       startPlayer(scenario, state.flags, state.affinities);
       setGameState({ ...state, currentScenarioId: scenario.id });
+      requestStagePrewarm();
     },
-    [startPlayer]
+    [startPlayer, requestStagePrewarm]
   );
 
   // URLクエリパラメータ指定による直接シナリオ再生（テスト・検証用）
@@ -719,6 +755,8 @@ export const App: React.FC = () => {
               activeLocationId={activeLocationId}
               cast={cast}
               prewarm={prewarm}
+              prewarmToken={prewarmToken}
+              onPrewarmed={handleStagePrewarmed}
               cameraShot={cameraShot}
               scrolling={scrolling}
               effects={stage.effects}

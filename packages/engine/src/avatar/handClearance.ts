@@ -230,6 +230,7 @@ interface Probe {
 }
 
 interface Arm {
+  side: 'left' | 'right';
   upper: THREE.Object3D;
   lower: THREE.Object3D;
   hand: THREE.Object3D;
@@ -256,7 +257,7 @@ function buildArm(vrm: VRM, side: 'left' | 'right', skin: THREE.SkinnedMesh | nu
   }
   const wrist = hand.getWorldPosition(new THREE.Vector3());
   const reach = Math.max(...probes.map((probe) => probe.bone.localToWorld(probe.local.clone()).distanceTo(wrist) + probe.radius));
-  return { upper, lower, hand, probes, reach };
+  return { side, upper, lower, hand, probes, reach };
 }
 
 // ---- 本体 ----
@@ -267,6 +268,8 @@ export class HandClearance {
   /** 形ごとの、ワールド → 骨のローカルの行列と、包む球の中心（ワールド）。毎フレーム作り直さないよう持っておく */
   private readonly inverses: THREE.Matrix4[];
   private readonly centers: THREE.Vector3[];
+  /** 手に持つ小物の形を調べる点（手の骨のローカル座標）。小物も肌に入らないよう、手の一部として扱う */
+  private item: { side: 'left' | 'right'; points: THREE.Vector3[] } | null = null;
 
   private constructor(
     private readonly vrm: VRM,
@@ -297,6 +300,11 @@ export class HandClearance {
     this.mode = mode;
   }
 
+  /** 手に持つ小物の形（毎フレーム、apply の前に渡す） */
+  setItem(item: { side: 'left' | 'right'; points: THREE.Vector3[] } | null): void {
+    this.item = item;
+  }
+
   /** モーションを当てる前に呼ぶ。前のフレームでずらした腕を戻す */
   restore(): void {
     for (const [bone, quaternion] of this.saved) bone.quaternion.copy(quaternion);
@@ -316,11 +324,13 @@ export class HandClearance {
     }
 
     for (const arm of this.arms) {
+      const itemPoints = this.item?.side === arm.side ? this.item.points : [];
+      const itemReach = Math.max(0, ...itemPoints.map((point) => point.length() * arm.hand.matrixWorld.getMaxScaleOnAxis()));
       // 手の届く範囲にある形だけを調べる
       const wrist = arm.hand.getWorldPosition(_w);
       const near: number[] = [];
       for (let h = 0; h < hulls.length; h++) {
-        const reach = hulls[h].reach * hulls[h].bone.matrixWorld.getMaxScaleOnAxis() + arm.reach;
+        const reach = hulls[h].reach * hulls[h].bone.matrixWorld.getMaxScaleOnAxis() + Math.max(arm.reach, itemReach);
         if (wrist.distanceToSquared(centers[h]) < reach * reach) near.push(h);
       }
       if (near.length === 0) continue;
@@ -334,6 +344,17 @@ export class HandClearance {
           const world = _v.copy(probe.local).applyMatrix4(probe.bone.matrixWorld);
           for (const h of near) {
             const depth = hulls[h].depth(_local.copy(world).applyMatrix4(inverses[h]), probe.radius, _normal);
+            if (depth > deepest) {
+              deepest = depth;
+              deepestHull = h;
+              _shift.copy(_normal);
+            }
+          }
+        }
+        for (const point of itemPoints) {
+          const world = _v.copy(point).applyMatrix4(arm.hand.matrixWorld);
+          for (const h of near) {
+            const depth = hulls[h].depth(_local.copy(world).applyMatrix4(inverses[h]), 0, _normal);
             if (depth > deepest) {
               deepest = depth;
               deepestHull = h;
@@ -364,7 +385,7 @@ export class HandClearance {
 }
 
 /** 2ボーン IK。肘は今曲がっている側に保つ */
-function reach(upper: THREE.Object3D, lower: THREE.Object3D, hand: THREE.Object3D, target: THREE.Vector3): void {
+export function reach(upper: THREE.Object3D, lower: THREE.Object3D, hand: THREE.Object3D, target: THREE.Vector3): void {
   const shoulder = upper.getWorldPosition(new THREE.Vector3());
   const elbow = lower.getWorldPosition(new THREE.Vector3());
   const wrist = hand.getWorldPosition(new THREE.Vector3());

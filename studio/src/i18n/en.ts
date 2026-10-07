@@ -424,6 +424,7 @@ export const en: Dictionary = {
     landscape: 'Landscape',
     portrait: 'Portrait',
     start: 'Start',
+    preparing: 'Preparing…',
     end: 'The End',
     replay: 'Play again',
     backToList: 'Back to list',
