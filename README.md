@@ -1,6 +1,8 @@
 # AnimeVRM
 
-VRM のキャラクターをセルルック（アニメ調）で描き、会話シナリオを演じさせるプロジェクトです。シナリオやシーンを作る **Studio**、ギャルゲーの **app**、シナリオ再生だけの **Pages 版** が、同じ描画とシナリオ形式を使います。
+VRM のキャラクターをセルルック（アニメ調）で描き、会話シナリオを演じさせるプロジェクトです。シナリオやシーンを作る **Studio** と、シナリオ再生だけの **Pages 版** が、同じ描画とシナリオ形式を使います。
+
+作品はそれぞれのリポジトリに置き、このリポジトリをサブモジュールとして使います（ギャルゲー『5秒の告白』は [confession_in_5_seconds](https://github.com/uemegu/confession_in_5_seconds)）。作品のシナリオは Studio の外部プロジェクトとして開けます（下の「外部プロジェクト」）。
 
 - シナリオ再生（Pages）: [https://uemegu.github.io/AnimeVRM/](https://uemegu.github.io/AnimeVRM/)
 
@@ -12,7 +14,6 @@ npm workspaces のモノレポです。
 | :--- | :--- |
 | `studio/` | Studio（React、ローカル専用）。ビューア・シーン設定・シナリオ編集・シナリオ再生・キャラクター管理・モーション。`studio/pages/` は Pages 版（再生だけ） |
 | `server/` | Studio 用のローカルサーバー（Hono、localhost のみ）。シナリオや設定の保存、素材の一覧、音声生成。[server/README.md](server/README.md) |
-| `app/` | ギャルゲー本体。[app/FEATURES.md](app/FEATURES.md) |
 | `packages/engine/` | 描画（Three.js / VRM）。舞台（`stage/`）、トゥーンシェーダー、ポストプロセス、感情演出 |
 | `packages/scenario/` | シナリオ・シーン設定・キャラクターの形式（zod スキーマ）と、舞台の状態を決める処理・分岐の進行 |
 | `packages/motion/` | ardy-mini によるモーション生成、体型への合わせ込み、接触の補正、FBX 書き出し。[README](packages/motion/src/ardy/README.md) |
@@ -20,7 +21,7 @@ npm workspaces のモノレポです。
 | `assets/` | 素材（モデル・モーション・背景・BGM・SE・ボイス・シナリオ）。`assets/studio/*.json` は Studio で編集する設定（場所・時間帯・キャラクター・モーション・BGM） |
 | `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない）。`docs/pool/` はプールのビルド |
 | `tools/eye-editor/` | Eye Atelier（モデルを作るときに使う、目元の調整ツール。Blender 連携） |
-| `assembly/` | app の口パク解析の WASM（`npm run build:wasm`） |
+| `assembly/` | 口パク解析の WASM（`npm run build:wasm`） |
 | `plans/` | 計画と決定事項 |
 
 ## 使い方
@@ -31,9 +32,6 @@ npm install
 # Studio（http://localhost:5175）。保存や音声生成のためにサーバーも起動する
 npm run server
 npm run studio
-
-# app（ギャルゲー）
-npm run app
 
 # ミニゲーム（プール。http://localhost:5178）
 npm run pool
@@ -59,14 +57,18 @@ npm test
 
 ### シナリオ
 
-`assets/scenarios/<種類>/<ID>/scenario.json`。形式は `packages/scenario/src/schema.ts` が正で、書き方は [app/FEATURES.md](app/FEATURES.md) にあります。`demo/` は演出の見本（Pages で再生する。ゲーム本編の目次には載らない）です。
+演出の見本は `assets/scenarios/demo/<ID>/scenario.json`（Pages で再生する）。形式は `packages/scenario/src/schema.ts` が正です。演出の書き方の説明は作品側の FEATURES.md（confession_in_5_seconds の `app/FEATURES.md`）にあります。
+
+### 外部プロジェクト
+
+作品のシナリオと素材は、作品のリポジトリに置いたまま Studio・検証・撮影で扱えます。作品のディレクトリに `studio-project.json`（ID・名前・シナリオの種類・置き場 `assetsDir`・保存後の処理 `hooks`）を置き、環境変数 `STUDIO_PROJECTS`（: 区切り。このリポジトリ直下からの相対パス）か `studio-projects.txt` で読み込みます。素材は `assets/` と同じ URL の並びで重ねて配信します。
 
 ### サーバーなしで確かめる（AI での編集向け）
 
 JSON を直接編集したあとは、検証と撮影で確かめます。どちらもサーバー・Studio を起動しなくても動きます。
 
 ```bash
-# スキーマ・参照先（シーン・キャラ・場所・モーション・ファイルなど）・app の目次を検証する。エラーがあれば終了コード 1
+# スキーマ・参照先（シーン・キャラ・場所・モーション・ファイルなど）と、外部プロジェクトの検証（hooks）を行う。エラーがあれば終了コード 1
 npm run validate
 npm run validate -- demo/trio --json
 

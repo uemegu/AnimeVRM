@@ -1,15 +1,17 @@
 import path from 'node:path';
 import { serve } from '@hono/node-server';
+import { loadExternalProjects, runAfterScenarioSaved } from '@anime-vrm/scenario/node';
 import { createApp } from './app.ts';
 import { DEFAULT_PORT, REPO_ROOT } from './config.ts';
 import { createVoiceTools } from './tts/voiceTools.ts';
 import { ensureVrmThumbnails } from './vrmThumbnail.ts';
-// app のシナリオ目次（scenarioIndex.json）を、シナリオ保存のたびに作り直す
-import { generateScenarioIndex } from '../../app/scripts/generate-scenario-index.js';
 
 const port = Number(process.env.STUDIO_SERVER_PORT ?? DEFAULT_PORT);
 const irodoriRoot = process.env.IRODORI_TTS_ROOT ?? '/Users/ueda/git/practice/tts/Irodori-TTS';
 const assetsDir = path.join(REPO_ROOT, 'assets');
+// Studio の外にあるプロジェクト（app など）。studio-projects.txt（または環境変数 STUDIO_PROJECTS）にディレクトリを並べる
+const projects = loadExternalProjects(REPO_ROOT);
+for (const p of projects) console.log(`プロジェクト ${p.id}: ${path.relative(REPO_ROOT, p.dir) || '.'}（素材 ${path.relative(REPO_ROOT, p.assetsDir) || '.'}）`);
 
 // 未作成のサムネイルがあれば抽出しておく（既存のものはスキップ）
 await ensureVrmThumbnails(assetsDir);
@@ -17,10 +19,10 @@ await ensureVrmThumbnails(assetsDir);
 const app = createApp({
   repoRoot: REPO_ROOT,
   assetsDir,
+  projects,
   workDir: path.join(REPO_ROOT, 'scratch', 'studio-tts'),
-  onScenarioSaved: () => {
-    generateScenarioIndex();
-  },
+  // 外部プロジェクトの保存後の処理（app なら目次 scenarioIndex.json の作り直し）
+  onScenarioSaved: (category) => runAfterScenarioSaved({ repoRoot: REPO_ROOT, assetsDir, projects }, category),
   voiceTools: createVoiceTools({
     python: process.env.IRODORI_TTS_PYTHON ?? path.join(irodoriRoot, '.venv', 'bin', 'python'),
     synthesizeScript: path.join(REPO_ROOT, '.agents', 'skills', 'irodori-tts', 'scripts', 'synthesize.py'),

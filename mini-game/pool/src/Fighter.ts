@@ -8,8 +8,8 @@ import type { HairShadowUniforms } from '@anime-vrm/engine/shader/HairShadow';
 import type { FloatingIsland } from './FloatingIsland';
 import { LegIK, lookAtWithNeckAndHead } from './BodyIK';
 // アプリと同じリップシンク（AudioWorklet 上の WASM で母音を解析）
-import { AudioLipSync, PHONEMES } from '../../../app/src/services/audio/AudioLipSync';
-import { resolveAssetUrl } from '../../../app/src/utils/path';
+import { AudioLipSync, PHONEMES } from '@anime-vrm/engine/audio/AudioLipSync';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 export type FighterId = 'aoi' | 'emili';
 export type FighterState = 'ready' | 'attack' | 'stumble' | 'falling' | 'in_water' | 'won';

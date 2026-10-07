@@ -40,7 +40,7 @@ export function scenarioRoutes(config: ServerConfig, store: ScenarioStore) {
       return c.json({ error: '参照先に問題があります', issues: problems.filter((p) => p.severity === 'error'), problems }, 400);
     }
     await store.write(category, id, body);
-    await config.onScenarioSaved();
+    await config.onScenarioSaved(category as ScenarioCategory);
     return c.json({ ok: true, problems });
   });
 

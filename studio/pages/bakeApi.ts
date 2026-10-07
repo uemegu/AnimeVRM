@@ -10,6 +10,7 @@ import path from 'node:path';
 import { Hono } from 'hono';
 import { ASSET_KINDS, assetRoutes } from '../../server/src/routes/assets.ts';
 import { characterRoutes } from '../../server/src/routes/characters.ts';
+import { projectRoutes } from '../../server/src/routes/projects.ts';
 import { scenarioRoutes } from '../../server/src/routes/scenarios.ts';
 import { studioDataRoutes } from '../../server/src/routes/studioData.ts';
 import { ScenarioStore } from '../../server/src/scenarioStore.ts';
@@ -56,8 +57,9 @@ writeJson(studio('projects'), projects);
 
 // 2. サーバーの読み取りルートを呼んで書き出す
 const config = { assetsDir: out, repoRoot: out } as ServerConfig;
-const store = new ScenarioStore(out);
+const store = new ScenarioStore(config);
 const app = new Hono();
+app.route('/projects', projectRoutes(config));
 app.route('/scenarios', scenarioRoutes(config, store));
 app.route('/assets', assetRoutes(config));
 app.route('/studio-data', studioDataRoutes(config));
@@ -77,6 +79,7 @@ async function bake(route: string): Promise<unknown> {
   return JSON.parse(text);
 }
 
+await bake('/projects');
 const scenarios = (await bake('/scenarios')) as { category: string; id: string }[];
 for (const { category, id } of scenarios) await bake(`/scenarios/${category}/${encodeURIComponent(id)}`);
 const book = (await bake('/characters')) as { characters: { id: string }[] };

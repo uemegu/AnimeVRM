@@ -30,6 +30,13 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
+/**
+ * 場所を表す画像。簡易3Dの場所は遠景が空だけ（sky-only.png）でぼかすと無地になるので、サムネイルを優先する
+ */
+export function locationBackdropUrl(location?: { thumbnail?: string; layers?: { background?: { url?: string } } } | null): string | undefined {
+  return location?.thumbnail ?? location?.layers?.background?.url;
+}
+
 /** この画面で背景を敷く。url を渡すとそれに切り替え（覚える）、渡さなければ最後に使った遠景のまま */
 export function useBackdrop(url?: string | null) {
   useEffect(() => {

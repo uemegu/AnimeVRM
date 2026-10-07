@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ProjectBook, ScenarioCategory, scenarioLinks } from '../src/index.ts';
+import { ProjectBook, scenarioLinks } from '../src/index.ts';
+import { listProjects, loadExternalProjects } from '../src/node.ts';
 
-const ASSETS = path.resolve(import.meta.dirname, '../../../assets');
+const REPO_ROOT = path.resolve(import.meta.dirname, '../../..');
+const ASSETS = path.join(REPO_ROOT, 'assets');
 const book = JSON.parse(fs.readFileSync(path.join(ASSETS, 'studio/projects.json'), 'utf8'));
 
 describe('assets/studio/projects.json', () => {
@@ -12,9 +14,9 @@ describe('assets/studio/projects.json', () => {
     expect(result.success ? [] : result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)).toEqual([]);
   });
 
-  it('シナリオの種類がすべてどれかのプロジェクトに入っていること', () => {
-    const covered = new Set(ProjectBook.parse(book).projects.flatMap((p) => p.categories));
-    expect(ScenarioCategory.options.filter((c) => !covered.has(c))).toEqual([]);
+  it('演出の見本（demo）が Studio のプロジェクトに入っていること', () => {
+    const projects = listProjects({ repoRoot: REPO_ROOT, assetsDir: ASSETS, projects: loadExternalProjects(REPO_ROOT, '') });
+    expect(projects.flatMap((p) => p.categories)).toContain('demo');
   });
 
   it('同じ種類を2つのプロジェクトに入れると検証で落ちること', () => {

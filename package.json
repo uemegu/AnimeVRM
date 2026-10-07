@@ -6,7 +6,6 @@
   "scripts": {
     "studio": "npm run dev -w studio",
     "server": "npm run dev -w server",
-    "app": "npm run dev -w app",
     "pool": "vite --config mini-game/pool/vite.config.ts",
     "build:pool": "vite build --config mini-game/pool/vite.config.ts",
     "build:pages": "npm run build:pages -w studio && npm run build:pool",
@@ -18,7 +17,7 @@
     "check:framing": "node scripts/check-framing.ts",
     "ogp:studio": "node scripts/generate-ogp-studio.mjs",
     "test": "npm run test --workspaces --if-present",
-    "typecheck": "tsc --noEmit -p app && npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
@@ -27,7 +26,6 @@
     "vite": "^8.0.1"
   },
   "workspaces": [
-    "app",
     "packages/*",
     "server",
     "studio"

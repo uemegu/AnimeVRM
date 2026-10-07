@@ -20,7 +20,7 @@ import { DirectorView } from '../../stage/DirectorView';
 import { StageCanvas } from '../../stage/StageCanvas';
 import { CameraAdjust } from '../../stage/CameraAdjust';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
-import { useBackdrop } from '../../components/Backdrop';
+import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import './scenes.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -117,7 +117,7 @@ export function ScenesView() {
     }));
   }, [book, previewCharacter, castCount]);
   // 画面の背面には、プレビュー中の場所の遠景を敷く
-  useBackdrop(locations?.presets[tab === 'locations' ? selectedId : previewLocation]?.layers.background.url);
+  useBackdrop(locationBackdropUrl(locations?.presets[tab === 'locations' ? selectedId : previewLocation]));
   const colors = useMemo(() => Object.fromEntries((book?.characters ?? []).map((c) => [c.id, c.themeColor])), [book]);
 
   if (loadError) return <div className="scenes-message">{t.common.loadFailed}</div>;

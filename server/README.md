@@ -39,7 +39,7 @@ npm run validate -- --fix           # app の scenarioIndex.json が古ければ
 
 ## 音声生成
 
-Irodori-TTS（`.agents/skills/irodori-tts`）を子プロセスで動かす。ジョブは1本ずつ順に実行し、候補は `scratch/studio-tts/` に置く。ボイスのファイル名は `app/scripts/scenario-voices.py` と同じ規則（話者と本文のハッシュ付き）。
+Irodori-TTS（`.agents/skills/irodori-tts`）を子プロセスで動かす。ジョブは1本ずつ順に実行し、候補は `scratch/studio-tts/` に置く。ボイスのファイル名は『5秒の告白』（confession_in_5_seconds）の `app/scripts/scenario-voices.py` と同じ規則（話者と本文のハッシュ付き）。
 
 環境変数で場所を変えられる: `IRODORI_TTS_ROOT`（既定 `/Users/ueda/git/practice/tts/Irodori-TTS`）、`IRODORI_TTS_PYTHON`、`IRODORI_TTS_DEVICE`（既定 `mps`）、`FFMPEG`、`STUDIO_SERVER_PORT`。
 
