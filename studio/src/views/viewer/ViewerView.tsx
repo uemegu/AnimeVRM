@@ -45,6 +45,9 @@ export function ViewerView() {
   const [locationId, setLocationId] = useState('school_gate');
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDayId>('day');
   const [shot, setShot] = useState<CameraShot>('speaker');
+  // マウス操作でカメラを動かしたら構図ボタンは全て選択解除にする（shot は最後に選んだ構図）
+  const [shotSelected, setShotSelected] = useState(true);
+  const [viewResetKey, setViewResetKey] = useState(0);
   const [shift, setShift] = useState<CameraShift | null>(null);
   const [expression, setExpression] = useState<string>('neutral');
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, anger: false, tears: false, faceSweat: false });
@@ -350,7 +353,16 @@ export function ViewerView() {
           </div>
           <div className="segmented five">
             {SHOTS.map((s) => (
-              <button key={s} type="button" className={s === shot ? 'active' : ''} onClick={() => setShot(s)}>
+              <button
+                key={s}
+                type="button"
+                className={shotSelected && s === shot ? 'active' : ''}
+                onClick={() => {
+                  setShot(s);
+                  setShotSelected(true);
+                  setViewResetKey((n) => n + 1);
+                }}
+              >
                 {t.viewer.shots[s]}
               </button>
             ))}
@@ -366,7 +378,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} freeCamera viewResetKey={viewResetKey} onFreeCameraTake={() => setShotSelected(false)} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
         </div>
 
         <p className="viewer-caption">
