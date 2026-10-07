@@ -1,7 +1,7 @@
 ---
 name: scenario-authoring
 description: >-
-  シナリオ（assets/scenarios/<種類>/<ID>/scenario.json）と Studio データ（assets/studio/*.json：キャラ・場所・時間帯・BGM・モーション・プロジェクト）を
+  シナリオ（<置き場>/scenarios/<種類>/<ID>/scenario.json。Studio のデモは assets/scenarios/demo/、作品は作品のリポジトリ。『5秒の告白』は app/assets/scenarios/）と Studio データ（assets/studio/*.json：キャラ・場所・時間帯・BGM・モーション・プロジェクト）を
   作る・直すときの手順。JSON を直接編集し、npm run validate で検証し、npm run shot で撮影して見た目を確かめる。
   セリフ・カット・分岐・カメラ・表情・モーション・背景・発生条件の追加や修正、新しいシナリオの作成、場所やキャラの設定変更のときに使う。
 ---
@@ -13,7 +13,7 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 ## 1. 書く前に読むもの
 
 - 形式の正は `packages/scenario/src/schema.ts`（シナリオ）、`scene.ts`（場所・時間帯）、`characters.ts`、`stage.ts`（BGM・モーション）、`projects.ts`。各項目のコメントに意味が書いてある
-- 書き方と演出の説明：`app/FEATURES.md` の「シナリオファイル」「シーンの書き方」「発生条件」
+- 書き方と演出の説明：作品側の FEATURES.md（confession_in_5_seconds では `app/FEATURES.md`）の「シナリオファイル」「シーンの書き方」「発生条件」
 - 近い既存シナリオを1本読んで真似る（演出の見本は `assets/scenarios/demo/`）
 - 開発ルール（表情の強さ・カメラ・選択肢のシーンなど）は `GEMINI.md`
 
@@ -29,11 +29,11 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 | BGM（`bgm`） | `assets/studio/bgm.json` の `bgm` のキー、または `silence` |
 | モーション（`motion`） | `assets/animations/<名前>.fbx` の `<名前>`（拡張子なし）。ループさせるものは `assets/studio/motions.json` |
 | 手に持つ小物（`heldItem`） | `schema.ts` の `HeldItemId`（缶・紙パック・スマホ・本・ノート）。形と持ち方は `packages/engine/src/avatar/heldItem.ts`。モーションだけ変えると手放す |
-| ファイル（`voiceUrl`・`seUrl`・`ambience`・`modelUrl`・画像） | `/` 始まりは `assets/` 基準、それ以外はシナリオのディレクトリ基準 |
+| ファイル（`voiceUrl`・`seUrl`・`ambience`・`modelUrl`・画像） | `/` 始まりは素材の置き場（Studio の `assets/` と、作品の置き場。同じ URL の並びで重なる）基準、それ以外はシナリオのディレクトリ基準。一枚絵・カットイン・スタンプなど作品だけで使う素材は作品の置き場（『5秒の告白』は `app/assets/`）に置く |
 
 ## 3. 編集の決まり
 
-- 新しいシナリオは `assets/scenarios/<種類>/<ID>/scenario.json`。`id` はディレクトリ名と同じにする。種類とプロジェクトの対応は `assets/studio/projects.json`
+- 新しいシナリオは `<置き場>/scenarios/<種類>/<ID>/scenario.json`。デモは `assets/scenarios/demo/`（`assets/studio/projects.json`）。作品（外部プロジェクト。`STUDIO_PROJECTS` か `studio-projects.txt` で読み込んだもの）の種類は、その `studio-project.json` の `assetsDir` の下に置く（『5秒の告白』は `app/assets/scenarios/`）。作品のリポジトリでは、そちらの `npm run validate`・`npm run shot` を使う（外部プロジェクトを読み込んだ状態で動く）。`id` はディレクトリ名と同じにする。validate・shot は `<種類>/<ID>` で指定すれば置き場を自動で選ぶ
 - セリフの話者は必ず `speakerCharacterId` で指定する（声だけの話者も）。`speaker` は表示名の上書きだけ
 - 背景・時間帯・BGM・登場キャラは、書いた項目だけ変わり、前のシーンから引き継ぐ
 - 音量の倍率（`voiceVolume`・`seVolume`・`bgmVolume`、0〜1、省略時 1）とチャネル（`voicePan`・`sePan`・`bgmPan`、`stereo` / `left` / `right`、省略時 `stereo`）。ボイス・効果音はそのシーンだけ、BGM は BGM が変わるまで引き継ぐ
@@ -49,11 +49,11 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 npm run validate                    # 全体。エラーがあれば終了コード 1
 npm run validate -- demo/trio       # 表示を <種類>/<ID> に絞る
 npm run validate -- --json          # 機械向け（problems[].severity / file / path / message）
-npm run validate -- --fix           # app の目次 scenarioIndex.json が古ければ作り直す
+npm run validate -- --fix           # 作品の検証（hooks）で直せるもの（『5秒の告白』の目次 scenarioIndex.json など）を直す
 ```
 
 - エラーは必ず直す。`path`（例 `scenes.3.avatars.aoi.motion`）が JSON の中の場所
-- 警告（たどり着けないシーン、話者 ID のないセリフ、どこでも立てていないフラグ）は、意図したものか確かめる。app のコードで立てるフラグもある
+- 警告（たどり着けないシーン、話者 ID のないセリフ、どこでも立てていないフラグ）は、意図したものか確かめる。作品のコードで立てるフラグもある
 - シナリオを足したり発生条件を変えたりしたら `--fix` で目次を作り直す
 
 ## 5. 撮影して見た目を確かめる

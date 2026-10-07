@@ -422,7 +422,7 @@ const SeatCamera = z.strictObject({
 
 /**
  * 座れる席（机に肘をつく・ベンチに座るなど）。座りのモーションはこの席の位置でだけ使う（GEMINI.md）。
- * 台本では `<キャラ>.seat=<席の ID>` で座らせる（app/scripts/compile-script.py）
+ * 台本では `<キャラ>.seat=<席の ID>` で座らせる（confession_in_5_seconds の app/scripts/compile-script.py）
  */
 export const LocationSeat = z.strictObject({
   name: z.string(),

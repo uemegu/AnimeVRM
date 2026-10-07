@@ -1,4 +1,4 @@
-import type { CharacterBook, ScenarioCategory, ScenarioLinks } from '@anime-vrm/scenario';
+import type { CharacterBook, ScenarioCategory, ScenarioLinks, ScenarioProject } from '@anime-vrm/scenario';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 /**
@@ -111,6 +111,8 @@ export const api = {
       `/tts/lines/${category}/${encodeURIComponent(id)}/${encodeURIComponent(lineId)}/upload?ext=${encodeURIComponent(extensionOf(file.name))}`,
       file
     ),
+  /** プロジェクト（Studio のものと、studio-projects.txt・STUDIO_PROJECTS で読み込んだ外部のもの） */
+  projects: () => request<ScenarioProject[]>('/projects'),
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   scenario: (category: string, id: string) => request<unknown>(`/scenarios/${category}/${encodeURIComponent(id)}`),
   saveScenario: (category: string, id: string, data: unknown) => putJson<{ ok: true }>(`/scenarios/${category}/${encodeURIComponent(id)}`, data),

@@ -5,16 +5,17 @@
  *   npm run validate                          すべて
  *   npm run validate -- demo/test_demo        指定したシナリオ（<種類>/<ID>）やファイルのパスに絞って表示
  *   npm run validate -- --json                機械向けの JSON で出す
- *   npm run validate -- --fix                 app の目次（scenarioIndex.json）が古ければ作り直す
+ *   npm run validate -- --fix                 外部プロジェクトの検証で直せるもの（app の目次 scenarioIndex.json など）を直す
+ *
+ * 外部プロジェクト（studio-projects.txt・STUDIO_PROJECTS）のシナリオと、そのプロジェクトの検証（studio-project.json の hooks）も含む
  *
  * エラーがあれば終了コード 1。警告だけなら 0（--strict で警告も 1）
  */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { validateWorkspace } from '../packages/scenario/src/node.ts';
+import { assetsDirOfCategory, checkProjects, loadExternalProjects, validateWorkspace } from '../packages/scenario/src/node.ts';
 import type { Problem } from '../packages/scenario/src/references.ts';
-import { buildScenarioIndex, generateScenarioIndex } from '../app/scripts/generate-scenario-index.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -33,32 +34,23 @@ if (options.help) {
   process.exit(0);
 }
 
-const report = validateWorkspace({ repoRoot: REPO_ROOT, assetsDir: path.join(REPO_ROOT, 'assets') });
-const problems: Problem[] = [...report.problems];
+const paths = { repoRoot: REPO_ROOT, assetsDir: path.join(REPO_ROOT, 'assets'), projects: loadExternalProjects(REPO_ROOT) };
+const report = validateWorkspace(paths);
+const projectCheck = await checkProjects(paths, { fix: options.fix });
+const problems: Problem[] = [...report.problems, ...projectCheck.problems];
+if (!options.json) for (const message of projectCheck.fixed ?? []) console.log(message);
 
-// app の目次が古いと、ゲーム側でシナリオの追加・変更が反映されない
-const indexFile = 'app/src/data/scenarioIndex.json';
-try {
-  const index = buildScenarioIndex();
-  if (index.current !== index.json) {
-    if (options.fix) {
-      generateScenarioIndex();
-      if (!options.json) console.log(`${indexFile} を作り直しました`);
-    } else {
-      problems.push({ severity: 'error', file: indexFile, path: '', message: 'シナリオの目次が古くなっています（npm run validate -- --fix で作り直す）' });
-    }
-  }
-} catch (err) {
-  problems.push({ severity: 'error', file: indexFile, path: '', message: (err as Error).message });
+/** <種類>/<ID> の指定なら、そのシナリオのディレクトリ（リポジトリ直下からの相対パス） */
+function scenarioPrefix(filter: string): string | null {
+  const m = /^([a-z_]+)\/([^/]+)$/.exec(filter);
+  if (!m || filter.startsWith('assets/') || filter.startsWith('app/')) return null;
+  return path.relative(REPO_ROOT, path.join(assetsDirOfCategory(paths, m[1]), 'scenarios', m[1], m[2])) + '/';
 }
 
 /** 絞り込み（<種類>/<ID> はそのシナリオのディレクトリ、それ以外はパスの前方一致） */
 const matches = (problem: Problem) =>
   filters.length === 0 ||
-  filters.some((f) => {
-    const prefix = /^[a-z_]+\/[^/]+$/.test(f) && !f.startsWith('assets/') && !f.startsWith('app/') ? `assets/scenarios/${f}/` : f.replace(/^\.\//, '');
-    return problem.file.startsWith(prefix);
-  });
+  filters.some((f) => problem.file.startsWith(scenarioPrefix(f) ?? f.replace(/^\.\//, '')));
 const shown = problems.filter(matches);
 const errors = shown.filter((p) => p.severity === 'error').length;
 const warnings = shown.length - errors;

@@ -7,7 +7,7 @@ import { useI18n } from '../../i18n';
 import { ScenarioPlayer } from '../../player/ScenarioPlayer';
 import { ScenarioCatalog } from '../../player/ScenarioCatalog';
 import { loadPlayerData, type PlayerData } from '../../player/playerData';
-import { useBackdrop } from '../../components/Backdrop';
+import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import { setAmbientSource, StageGlowLayer } from '../../components/Ambient';
 import '../../player/player.css';
 
@@ -40,7 +40,7 @@ export function PlayerView() {
 
   // 再生中のシナリオの舞台を背面に敷く（一覧では最後に使った遠景）
   const scenarioLocation = scenario && category && id ? (scenario.location ?? scenario.scenes.find((s) => s.background)?.background) : undefined;
-  useBackdrop(scenarioLocation ? data?.locations[scenarioLocation]?.layers.background.url : undefined);
+  useBackdrop(scenarioLocation ? locationBackdropUrl(data?.locations[scenarioLocation]) : undefined);
 
   // 選んだプロジェクトのシナリオを種類の順に並べる。電話・メールは再生できないので除く
   const entries = useMemo(() => {

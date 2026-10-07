@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { ScenarioCategory, scenarioLinks, schemaForCategory, type ScenarioLinks, type TextContent } from '@anime-vrm/scenario';
+import { assetsDirOfCategory, type WorkspacePaths } from '@anime-vrm/scenario/node';
 import { isSafeSegment } from './safePath.ts';
 
 export type ScenarioKind = 'story' | 'call' | 'mail';
@@ -42,18 +43,25 @@ export function textOf(text: TextContent | undefined): string {
   return typeof text === 'string' ? text : text.ja;
 }
 
-/** assets/scenarios/<category>/<id>/scenario.json の読み書き */
+/**
+ * <置き場>/scenarios/<category>/<id>/scenario.json の読み書き。
+ * 置き場は種類で決まる（外部プロジェクトに入っている種類はその置き場、それ以外は Studio の assets/）
+ */
 export class ScenarioStore {
-  readonly scenariosDir: string;
+  readonly paths: WorkspacePaths;
 
-  constructor(assetsDir: string) {
-    this.scenariosDir = path.join(assetsDir, 'scenarios');
+  constructor(paths: WorkspacePaths) {
+    this.paths = paths;
+  }
+
+  categoryDir(category: ScenarioCategory): string {
+    return path.join(assetsDirOfCategory(this.paths, category), 'scenarios', category);
   }
 
   /** 不正なカテゴリ・ID なら null */
   filePath(category: string, id: string): string | null {
     if (!ScenarioCategory.safeParse(category).success || !isSafeSegment(id)) return null;
-    return path.join(this.scenariosDir, category, id, 'scenario.json');
+    return path.join(this.categoryDir(category as ScenarioCategory), id, 'scenario.json');
   }
 
   dirPath(category: string, id: string): string | null {
@@ -64,7 +72,7 @@ export class ScenarioStore {
   async list(): Promise<ScenarioSummary[]> {
     const result: ScenarioSummary[] = [];
     for (const category of ScenarioCategory.options) {
-      const categoryDir = path.join(this.scenariosDir, category);
+      const categoryDir = this.categoryDir(category);
       const ids = await fs.readdir(categoryDir).catch(() => [] as string[]);
       for (const id of ids.sort()) {
         const file = path.join(categoryDir, id, 'scenario.json');

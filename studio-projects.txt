@@ -1,0 +1,3 @@
+# Studio で扱う外部プロジェクト（studio-project.json のあるディレクトリ）。1行に1つ、このファイルからの相対パス。
+# 環境変数 STUDIO_PROJECTS（: 区切り）を指定すると、こちらの代わりにそれを使う。
+# 作品のリポジトリからサブモジュールとして使うときは、そちらで STUDIO_PROJECTS を指定する（例：confession_in_5_seconds は ../app）

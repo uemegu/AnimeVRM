@@ -34,6 +34,18 @@ export const ProjectBook = z
   });
 export type ProjectBook = z.infer<typeof ProjectBook>;
 
+/**
+ * Studio の外にあるプロジェクトの設定（プロジェクトのディレクトリ直下の studio-project.json）。
+ * シナリオと素材を自分の置き場に持ち、Studio はリポジトリ直下の studio-projects.txt（または環境変数 STUDIO_PROJECTS）で読み込む
+ */
+export const ProjectManifest = ScenarioProject.extend({
+  /** シナリオ（scenarios/<種類>/<ID>/）と素材の置き場。assets/ と同じ並びで、配信する URL も同じ。studio-project.json からの相対パス */
+  assetsDir: z.string().min(1).default('assets'),
+  /** 保存後の処理と検証を書いたモジュール（studio-project.json からの相対パス） */
+  hooks: z.string().min(1).optional(),
+});
+export type ProjectManifest = z.infer<typeof ProjectManifest>;
+
 /** 種類が入っているプロジェクト。どこにも入っていなければ undefined */
 export function projectOfCategory(book: ProjectBook, category: string): ScenarioProject | undefined {
   return book.projects.find((p) => (p.categories as string[]).includes(category));

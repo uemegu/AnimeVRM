@@ -11,7 +11,7 @@ import { PlayerAudio } from '../../player/PlayerAudio';
 import { VoiceLibrary } from './VoiceLibrary';
 import { BgmLibrary } from './BgmLibrary';
 import { SeLibrary } from './SeLibrary';
-import { useBackdrop } from '../../components/Backdrop';
+import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import { ShiftPicker } from '../../components/ShiftPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
@@ -169,7 +169,7 @@ export function ViewerView() {
     [characterId, model, expression, motion, motionLoop, motionCue, faceEffects]
   );
 
-  useBackdrop(presets?.locations[locationId]?.layers?.background?.url);
+  useBackdrop(locationBackdropUrl(presets?.locations[locationId]));
 
   const filteredMotions = motions.filter((m) => motionName(m.url).toLowerCase().includes(motionFilter.toLowerCase()));
 

@@ -24,32 +24,6 @@
       "port": 5175
     },
     {
-      "name": "app",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "--prefix",
-        "app",
-        "run",
-        "dev"
-      ],
-      "port": 5174
-    },
-    {
-      "name": "app-verify",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "--prefix",
-        "app",
-        "run",
-        "dev",
-        "--",
-        "--port",
-        "5184",
-        "--strictPort"
-      ],
-      "port": 5184
-    },
-    {
       "name": "pages-preview",
       "runtimeExecutable": "npx",
       "runtimeArgs": [
@@ -59,21 +33,6 @@
         "studio/vite.pages.config.ts"
       ],
       "port": 5177
-    },
-    {
-      "name": "app-preview",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "--prefix",
-        "app",
-        "run",
-        "preview",
-        "--",
-        "--port",
-        "5186",
-        "--strictPort"
-      ],
-      "port": 5186
     },
     {
       "name": "home-splat",

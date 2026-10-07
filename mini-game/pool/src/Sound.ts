@@ -4,7 +4,7 @@
  * ボイスは Fighter 側（HTMLAudioElement）が鳴らすので、ここでは扱わない。
  */
 
-import { resolveAssetUrl } from '../../../app/src/utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const URLS = {
   bgm: '/assets/bgm/bgm.mp3',

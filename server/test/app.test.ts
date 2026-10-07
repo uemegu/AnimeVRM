@@ -13,7 +13,7 @@ const FIXTURES = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtur
 
 let root: string;
 let assetsDir: string;
-let onScenarioSaved: ReturnType<typeof vi.fn<() => void>>;
+let onScenarioSaved: ReturnType<typeof vi.fn<(category: string) => void>>;
 let app: ReturnType<typeof createApp>;
 
 /** 合成せず、出力先に中身の決まったファイルを書くだけの偽物 */
@@ -58,7 +58,7 @@ beforeEach(async () => {
   // 参照音声はパスが存在すればよい
   await fs.mkdir(path.join(root, 'assets', 'voices'), { recursive: true });
   await fs.writeFile(path.join(root, 'assets', 'voices', '001.mp3'), 'ref');
-  onScenarioSaved = vi.fn<() => void>();
+  onScenarioSaved = vi.fn<(category: string) => void>();
   app = createApp({ repoRoot: root, assetsDir, workDir: path.join(root, 'work'), onScenarioSaved, voiceTools: fakeVoiceTools });
 });
 
@@ -104,6 +104,7 @@ describe('シナリオ', () => {
     const saved = JSON.parse(await fs.readFile(path.join(assetsDir, 'scenarios/ending/ending_good/scenario.json'), 'utf8'));
     expect(saved.scenes[0].text).toBe('書き換えたセリフ');
     expect(onScenarioSaved).toHaveBeenCalledTimes(1);
+    expect(onScenarioSaved).toHaveBeenCalledWith('ending');
   });
 
   it('新しいシナリオを作れる', async () => {
@@ -142,6 +143,39 @@ describe('シナリオ', () => {
     const data = await json(request('/api/scenarios/ending/ending_good'));
     const res = await putJson('/api/scenarios/ending/ending_good', { ...data, id: 'other' });
     expect(res.status).toBe(400);
+  });
+});
+
+describe('外部プロジェクト', () => {
+  let gameAssets: string;
+
+  /** ending・call を外部プロジェクト（game/。置き場は game/content）に移す */
+  beforeEach(async () => {
+    const dir = path.join(root, 'game');
+    gameAssets = path.join(dir, 'content');
+    await fs.mkdir(gameAssets, { recursive: true });
+    await fs.rename(path.join(assetsDir, 'scenarios'), path.join(gameAssets, 'scenarios'));
+    await fs.writeFile(path.join(assetsDir, 'studio', 'projects.json'), JSON.stringify({ projects: [{ id: 'demo', name: { ja: 'デモ' }, categories: ['demo'] }] }));
+    const projects = [{ id: 'game', name: { ja: '本編' }, categories: ['ending', 'call', 'action'] as const, dir, assetsDir: gameAssets }];
+    app = createApp({ repoRoot: root, assetsDir, projects: projects as never, workDir: path.join(root, 'work'), onScenarioSaved, voiceTools: fakeVoiceTools });
+  });
+
+  it('プロジェクトの一覧に外部プロジェクトが入る', async () => {
+    expect((await json(request('/api/projects'))).map((p: { id: string }) => p.id)).toEqual(['demo', 'game']);
+  });
+
+  it('外部プロジェクトの置き場のシナリオを一覧・読み込みできる', async () => {
+    const list = await json(request('/api/scenarios'));
+    expect(list.map((s: { category: string; id: string }) => `${s.category}/${s.id}`)).toEqual(['ending/ending_good', 'call/aoi_call_d14']);
+    expect((await request('/api/scenarios/ending/ending_good')).status).toBe(200);
+  });
+
+  it('保存・新規作成は外部プロジェクトの置き場に書く', async () => {
+    const res = await putJson('/api/scenarios/action/new_one', { id: 'new_one', title: '新規', scenes: [{ id: 's1', text: 'はじめ' }] });
+    expect(res.status).toBe(200);
+    await expect(fs.stat(path.join(gameAssets, 'scenarios/action/new_one/scenario.json'))).resolves.toBeTruthy();
+    await expect(fs.stat(path.join(assetsDir, 'scenarios/action'))).rejects.toThrow();
+    expect(onScenarioSaved).toHaveBeenCalledWith('action');
   });
 });
 

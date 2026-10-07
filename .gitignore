@@ -42,10 +42,6 @@ dist-ssr
 .env
 /assets/thumbnails
 /mini-game/pool/test-output
-# app/scripts の使い捨て撮影・検証スクリプト
-/app/scripts/*
-!/app/scripts/generate-*.js
-!/app/scripts/scenario-voices.py
-!/app/scripts/compile-script.py
-!/app/scripts/voice-todo.py
 /trash
+/tmp
+__pycache__/

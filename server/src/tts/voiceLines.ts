@@ -39,7 +39,7 @@ export interface VoiceLine {
 }
 
 /**
- * シナリオから指定セリフの本文・話者・表情を取り出す（app/scripts/scenario-voices.py と同じ決め方）。
+ * シナリオから指定セリフの本文・話者・表情を取り出す（confession_in_5_seconds の app/scripts/scenario-voices.py と同じ決め方）。
  * 通常シナリオは scenes[].id、電話は steps のキー。
  */
 export function findVoiceLine(

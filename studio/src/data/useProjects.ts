@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ProjectBook, type ScenarioProject } from '@anime-vrm/scenario';
-import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import type { ScenarioProject } from '@anime-vrm/scenario';
+import { api } from '../api/client';
 
 const STORAGE_KEY = 'studio_project';
 
@@ -13,7 +13,7 @@ function savedProjectId(): string | null {
 }
 
 /**
- * シナリオのプロジェクト（assets/studio/projects.json）と、いま選んでいるプロジェクト。
+ * シナリオのプロジェクト（assets/studio/projects.json と、studio-projects.txt・STUDIO_PROJECTS で読み込んだ外部プロジェクト）と、いま選んでいるプロジェクト。
  * 選択はシナリオ編集と再生で共通にし、ブラウザに覚えておく
  */
 export function useProjects(): { projects: ScenarioProject[] | null; current: ScenarioProject | null; select: (id: string) => void; error: boolean } {
@@ -22,9 +22,9 @@ export function useProjects(): { projects: ScenarioProject[] | null; current: Sc
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    fetch(resolveAssetUrl('/studio/projects.json'), { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('projects.json を読めません'))))
-      .then((json) => setProjects(ProjectBook.parse(json).projects))
+    api
+      .projects()
+      .then(setProjects)
       .catch(() => setError(true));
   }, []);
 

@@ -18,6 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium, type Browser } from '@playwright/test';
+import { assetsDirOfCategory, loadExternalProjects } from '../packages/scenario/src/node.ts';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -53,7 +54,11 @@ if (options.help || positionals.length !== 1) {
 const [category, id] = positionals[0].split('/');
 if (!category || !id) fail('シナリオは <種類>/<ID> で指定してください（例: demo/test_demo）');
 if (category === 'call' || category === 'mail') fail('電話・メールは撮影できません');
-const scenarioFile = options.file ? path.resolve(options.file) : path.join(REPO_ROOT, 'assets/scenarios', category, id, 'scenario.json');
+// 外部プロジェクト（studio-projects.txt・STUDIO_PROJECTS）の種類なら、そのプロジェクトの置き場から読む
+const workspace = { repoRoot: REPO_ROOT, assetsDir: path.join(REPO_ROOT, 'assets'), projects: loadExternalProjects(REPO_ROOT) };
+const scenarioFile = options.file
+  ? path.resolve(options.file)
+  : path.join(assetsDirOfCategory(workspace, category), 'scenarios', category, id, 'scenario.json');
 if (!fs.existsSync(scenarioFile)) fail(`シナリオがありません: ${path.relative(REPO_ROOT, scenarioFile)}`);
 const scenario = JSON.parse(fs.readFileSync(scenarioFile, 'utf8')) as { scenes?: { id: string }[]; aspect?: string };
 const scenes = scenario.scenes ?? [];

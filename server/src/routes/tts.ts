@@ -121,7 +121,7 @@ export function ttsRoutes(config: ServerConfig, store: ScenarioStore) {
     if (previous && previous !== fileName && !previous.startsWith('/') && !used.has(previous)) {
       await fs.rm(path.join(dir, previous), { force: true });
     }
-    await config.onScenarioSaved();
+    await config.onScenarioSaved(category as ScenarioCategory);
     return { voiceUrl: fileName } as const;
   }
 
