@@ -43,6 +43,8 @@ interface Props {
   shotRigMode?: boolean;
   /** shotRigMode で動かしたときの構図の値（done は操作を終えたとき） */
   onShotRig?: (shot: CameraShot, rig: ShotRig, done: boolean) => void;
+  /** 手動操作で構図から外れた（最初に触った）とき */
+  onFreeCameraTake?: () => void;
   /** 描画の準備ができたとき（俯瞰表示などから配置を読むため） */
   onManager?: (manager: StageManager | null) => void;
   /** 話者（focusId）の口の形。ボイスを鳴らしている間だけ返す */
@@ -75,6 +77,7 @@ export function StageCanvas({
   onCameraPose,
   shotRigMode = false,
   onShotRig,
+  onFreeCameraTake,
   onManager,
   getSpeakerPhoneme,
   getSpeakerMouthOpen,
@@ -192,6 +195,8 @@ export function StageCanvas({
   onCameraPoseRef.current = onCameraPose;
   const onShotRigRef = useRef(onShotRig);
   onShotRigRef.current = onShotRig;
+  const onFreeCameraTakeRef = useRef(onFreeCameraTake);
+  onFreeCameraTakeRef.current = onFreeCameraTake;
   useEffect(() => {
     const manager = managerRef.current;
     const canvas = canvasRef.current;
@@ -223,6 +228,7 @@ export function StageCanvas({
       taken = true;
       controls.target.copy(manager.viewTarget);
       manager.setFreeCamera(true);
+      onFreeCameraTakeRef.current?.();
     };
     const round = (v: number) => Math.round(v * 100) / 100;
     const reportRig = (done: boolean) => {
