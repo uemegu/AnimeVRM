@@ -8,6 +8,11 @@ function cylinder(parent: THREE.Group, radiusTop: number, radiusBottom: number, 
   mesh.position.set(...at); parent.add(mesh); return mesh;
 }
 
+/** 地面に影を落とす小物（影は StageManager が場所を置いたときに一度だけ描く） */
+function castShadows(group: THREE.Object3D): void {
+  group.traverse(o => { if (o instanceof THREE.Mesh) o.castShadow = true; });
+}
+
 export function planter(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number, rotation = 0): void {
   const group = new THREE.Group(); group.name = 'Flower box | hollow timber and crossed foliage';
   for (const sx of [-0.68, 0.68]) box(group, 'Planter end', [0.08, 0.5, 0.73], [sx, 0.25, 0], m.wood);
@@ -20,7 +25,7 @@ export function planter(parent: THREE.Group, m: FurnitureMaterials, x: number, z
     const flowers = new THREE.Mesh(new THREE.PlaneGeometry(1.45, 0.97), m.flowers);
     flowers.position.y = 0.85; flowers.rotation.y = i * Math.PI / 3; group.add(flowers);
   }
-  group.position.set(x, 0, z); group.rotation.y = rotation; parent.add(group);
+  group.position.set(x, 0, z); group.rotation.y = rotation; castShadows(group); parent.add(group);
 }
 
 export function bench(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number, rotation: number): void {
@@ -33,7 +38,7 @@ export function bench(parent: THREE.Group, m: FurnitureMaterials, x: number, z: 
     const curve = new THREE.CatmullRomCurve3([[sx, 0.47, 0.2], [sx, 0.72, 0.2], [sx, 0.76, 0], [sx, 0.74, -0.25]].map(p => new THREE.Vector3(...p)));
     group.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 14, 0.027, 6, false), m.iron));
   }
-  group.position.set(x, 0, z); group.rotation.y = rotation; parent.add(group);
+  group.position.set(x, 0, z); group.rotation.y = rotation; castShadows(group); parent.add(group);
 }
 
 export function lamp(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number): void {
@@ -48,7 +53,7 @@ export function lamp(parent: THREE.Group, m: FurnitureMaterials, x: number, z: n
   box(group, 'Lantern rim', [0.38, 0.05, 0.38], [0, 3.16, 0], m.iron);
   cylinder(group, 0.03, 0.31, 0.24, [0, 3.74, 0], m.iron);
   cylinder(group, 0.028, 0.055, 0.18, [0, 3.92, 0], m.gold);
-  group.position.set(x, 0, z); parent.add(group);
+  group.position.set(x, 0, z); castShadows(group); parent.add(group);
 }
 
 export function chalkboard(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number, rotation: number): void {
@@ -68,7 +73,7 @@ export function chalkboard(parent: THREE.Group, m: FurnitureMaterials, x: number
     leg.rotation.x = side * 0.22;
   }
   box(group, 'A-frame hinge', [0.73, 0.055, 0.05], [0, 1.2, -0.13], m.iron);
-  group.position.set(x, 0, z); group.rotation.y = rotation; parent.add(group);
+  group.position.set(x, 0, z); group.rotation.y = rotation; castShadows(group); parent.add(group);
 }
 
 export function bookTable(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number, rotation: number): void {
@@ -82,5 +87,5 @@ export function bookTable(parent: THREE.Group, m: FurnitureMaterials, x: number,
     box(group, 'Book pages', [0.28, 0.065, 0.22], [px, y, pz], paper);
     for (const dy of [-0.04, 0.04]) box(group, 'Book cover', [0.3, 0.012, 0.24], [px, y + dy, pz], covers[i % 4]);
   }
-  group.position.set(x, 0, z); group.rotation.y = rotation; parent.add(group);
+  group.position.set(x, 0, z); group.rotation.y = rotation; castShadows(group); parent.add(group);
 }
