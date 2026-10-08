@@ -16,6 +16,7 @@ import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
 import { OverlayPass } from '../postprocessing/OverlayPass';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
+import { applyCelShading, setCelLight } from '../scene/celShading';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
@@ -323,6 +324,15 @@ export class StageManager {
       new THREE.PlaneGeometry(160, 160),
       new THREE.ShadowMaterial({ transparent: true, depthWrite: false })
     );
+    // セル調に、影の濃さを2段階にする（ぼかした縁の中ほどで切り、境目は1画素ほどだけなめらかにする）
+    this.groundShadow.material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        'gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );',
+        `float shadowAmount = 1.0 - getShadowMask();
+  float shadowEdge = max(fwidth(shadowAmount), 1e-4);
+  gl_FragColor = vec4( color, opacity * smoothstep(0.5 - shadowEdge, 0.5 + shadowEdge, shadowAmount) );`
+      );
+    };
     this.groundShadow.name = 'Ground shadow';
     this.groundShadow.rotation.x = -Math.PI / 2;
     this.groundShadow.position.y = 0.002;
@@ -779,6 +789,10 @@ export class StageManager {
     if (this.directionalLight.castShadow !== !!shadow) this.directionalLight.castShadow = !!shadow;
     this.groundShadow.visible = !!shadow;
     if (shadow) {
+    // 3D背景の影の面は、地面の影と同じ色・濃さで塗る
+    const shade = new THREE.Color(1, 1, 1);
+    if (shadow) shade.lerp(new THREE.Color(shadow.color), shadow.opacity);
+    setCelLight(this.directionalLight.position, shade);
       this.groundShadow.material.color.set(shadow.color);
       this.groundShadow.material.opacity = shadow.opacity;
       this.directionalLight.shadow.radius = shadow.softness;
@@ -940,6 +954,7 @@ export class StageManager {
         }
         entry.object = object;
         // 3D背景に入っている空は使わず、時間帯で変わる空（SkyBackground）を描く
+        applyCelShading(object);
         object.traverse((child) => { if (child.userData.setSky) child.visible = false; });
         placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
         this.scene.add(object);
