@@ -273,18 +273,7 @@ export function ScenesView() {
                   ))}
               </select>
             </label>
-            {tab === 'time-of-day' ? (
-              <label className="field">
-                <span className="field-label">{t.scenes.previewLocation}</span>
-                <select className="select" value={previewLocation} onChange={(e) => setPreviewLocation(e.target.value)}>
-                  {Object.values(locations.presets).map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
+            {tab === 'locations' && (
               <div className="field wide">
                 <span className="field-label">{t.scenes.previewTimeOfDay}</span>
                 <div className="segmented six">

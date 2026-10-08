@@ -50,6 +50,9 @@ export function ViewerView() {
   const [viewResetKey, setViewResetKey] = useState(0);
   const [shift, setShift] = useState<CameraShift | null>(null);
   const [expression, setExpression] = useState<string>('neutral');
+  // カメラの方を見る（目線だけ／顔ごと）。顔を向けると目線もカメラへ向く
+  const [lookAtCamera, setLookAtCamera] = useState(false);
+  const [faceCamera, setFaceCamera] = useState(false);
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
   const [motionLoop, setMotionLoop] = useState(true);
@@ -162,11 +165,13 @@ export function ViewerView() {
               motion,
               motionLoop,
               motionCue: String(motionCue),
+              lookAtTarget: lookAtCamera || faceCamera ? 'camera' : undefined,
+              headTurn: faceCamera ? 1 : 0,
               look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects },
             },
           ]
         : [],
-    [characterId, model, expression, motion, motionLoop, motionCue, faceEffects]
+    [characterId, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects]
   );
 
   useBackdrop(locationBackdropUrl(presets?.locations[locationId]));
@@ -249,6 +254,18 @@ export function ViewerView() {
                       {t.viewer.expressions[e]}
                     </button>
                   ))}
+                </div>
+              </section>
+
+              <section className="viewer-section">
+                <h2>{t.viewer.gaze}</h2>
+                <div className="viewer-chip-grid single">
+                  <button type="button" className={`viewer-chip${lookAtCamera ? ' active' : ''}`} aria-pressed={lookAtCamera} onClick={() => setLookAtCamera((v) => !v)}>
+                    {t.viewer.lookAtCamera}
+                  </button>
+                  <button type="button" className={`viewer-chip${faceCamera ? ' active' : ''}`} aria-pressed={faceCamera} onClick={() => setFaceCamera((v) => !v)}>
+                    {t.viewer.faceCamera}
+                  </button>
                 </div>
               </section>
 
@@ -368,13 +385,6 @@ export function ViewerView() {
             ))}
           </div>
           <ShiftPicker value={shift} onChange={setShift} />
-          <select className="select viewer-location-select" value={locationId} onChange={(e) => setLocationId(e.target.value)}>
-            {Object.values(presets.locations).map((loc) => (
-              <option key={loc.id} value={loc.id}>
-                {loc.name}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div className="viewer-frame">
