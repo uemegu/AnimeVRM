@@ -101,9 +101,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.9895,
+          "shadeMultiply": "#e0a08e",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff8a70",
+          "terminatorStrength": 0.5,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -423,9 +425,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.985,
+          "shadeMultiply": "#d89a96",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff7a55",
+          "terminatorStrength": 0.7,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -601,8 +605,10 @@
         "body": {
           "color": "#ffffff",
           "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.991,
+          "shadingToonyFactor": 0.96,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff9a8a",
+          "terminatorStrength": 0.3,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -760,9 +766,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.9895,
+          "shadeMultiply": "#dca29a",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff8a70",
+          "terminatorStrength": 0.35,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
