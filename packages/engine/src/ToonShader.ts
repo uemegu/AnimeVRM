@@ -15,6 +15,9 @@ import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from
 import { attachFaceSdf, createFaceSdfFrame, injectFaceSdf } from './shader/FaceSdf';
 import { CHARACTER_LAYER, EYE_LAYER } from './postprocessing/LightWrap';
 
+/** 輪郭線を視線方向の奥へずらす量（m）。関節の凹みで殻が表に出るのを隠す */
+const OUTLINE_DEPTH_OFFSET = 0.01;
+
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
   hairPattern?: RegExp;
@@ -381,6 +384,16 @@ export function applyToonShader(
             float dotNV = abs(dot(normalize(transformedNormal), vec3(0.0, 0.0, 1.0)));
             float lineWeight = mix(1.0, 1.0 + (1.0 - dotNV) * 0.45, uAutoLineWeight);
             outlineOffset *= lineWeight;
+            `
+          );
+          // 輪郭線を視線方向の奥へずらす。肘・膝を深く曲げた凹みで、殻が向かいの面を突き抜けて
+          // 暗い三角形として見えるのを、体の表面の後ろに隠す（画面上の位置・太さは変わらない）
+          shader.vertexShader = shader.vertexShader.replace(
+            'gl_Position = projectionMatrix * modelViewMatrix * vec4( outlineOffset + transformed, 1.0 );',
+            /* glsl */ `
+            vec4 outlineMvPosition = modelViewMatrix * vec4( outlineOffset + transformed, 1.0 );
+            outlineMvPosition.xyz += normalize( outlineMvPosition.xyz ) * ${OUTLINE_DEPTH_OFFSET.toFixed(4)};
+            gl_Position = projectionMatrix * outlineMvPosition;
             `
           );
         };
