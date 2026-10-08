@@ -108,6 +108,11 @@ export interface StageOptions {
   language?: 'ja' | 'en';
   /** 描画・計算の重さ。段階名か項目ごとの上書き。省略時は端末から決める（stage/quality.ts） */
   quality?: StageQualityLevel | Partial<StageQuality>;
+  /**
+   * 描画の画素比。canvas を transform で縮めて表示するときは、縮めた分を掛けた値を返す（省略時は端末の画素比、上限2）。
+   * 値が変わったら resize を呼び直す
+   */
+  getPixelRatio?: () => number;
 }
 
 /** 口パクで口を開く大きさ（普通の声） */
@@ -119,6 +124,7 @@ export class StageManager {
   private readonly getSpeakerPhoneme?: () => string | undefined;
   private readonly getSpeakerMouthOpen?: () => number;
   private readonly getCutTime?: () => number | undefined;
+  private readonly getPixelRatio: () => number;
   private cutStartedAt = 0;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -268,7 +274,8 @@ export class StageManager {
     this.camera.lookAt(new THREE.Vector3(0, 1.15, 0));
 
     // 3. レンダラー初期化
-    const pixelRatio = Math.min(window.devicePixelRatio, 2);
+    this.getPixelRatio = options.getPixelRatio ?? (() => Math.min(window.devicePixelRatio, 2));
+    const pixelRatio = this.getPixelRatio();
     const initialWidth = Math.max(1, this.canvas.clientWidth || window.innerWidth);
     const initialHeight = Math.max(1, this.canvas.clientHeight || window.innerHeight);
 
@@ -1563,7 +1570,7 @@ export class StageManager {
 
   public resize(width: number, height: number): void {
     if (height <= 0 || width <= 0) return;
-    const pr = Math.min(window.devicePixelRatio, 2);
+    const pr = this.getPixelRatio();
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
