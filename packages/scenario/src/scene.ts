@@ -166,6 +166,10 @@ export const MaterialStyleParams = z.strictObject({
   darkLitLift: num('暗い色の明るい側の持ち上げ', 'Dark color lit lift', 0, 4, 0.1, 0).optional(),
   /** 白に近い色の光が当たる側に掛ける倍率（1 でそのまま）。白いシャツが光って見えないように抑える */
   brightLitScale: num('白に近い色の明るい側の倍率', 'Bright color lit scale', 0.5, 1, 0.01, 1).optional(),
+  /** 明暗の境目に乗せる色（乗算、sRGB）。肌の中で光が散ったような、境目だけ赤みの強い帯にする */
+  terminatorColor: color('境目の色', 'Terminator color').optional(),
+  /** 境目の色の強さ（0 で無効）。帯の幅は影の硬さで決まる */
+  terminatorStrength: num('境目の色の強さ', 'Terminator strength', 0, 1, 0.01, 0).optional(),
   giEqualizationFactor: num('環境光のならし', 'GI equalization', 0, 1, 0.01),
   matcapEnabled: bool('マットキャップ', 'Matcap'),
   emissiveIntensity: num('発光', 'Emissive', 0, 5, 0.1),
