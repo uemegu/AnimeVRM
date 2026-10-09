@@ -19,7 +19,7 @@ import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark', 'divine'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
-const FACE_EFFECTS = ['blush', 'anger', 'tears', 'faceSweat'] as const;
+const FACE_EFFECTS = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'faceSweat'] as const;
 type FaceEffect = (typeof FACE_EFFECTS)[number];
 const TABS = ['expression', 'motion', 'voice', 'sound'] as const;
 const SOUND_KINDS = ['bgm', 'se'] as const;
@@ -53,7 +53,7 @@ export function ViewerView() {
   // カメラの方を見る（目線だけ／顔ごと）。顔を向けると目線もカメラへ向く
   const [lookAtCamera, setLookAtCamera] = useState(false);
   const [faceCamera, setFaceCamera] = useState(false);
-  const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, anger: false, tears: false, faceSweat: false });
+  const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, redface: false, tearyEyes: false, awawaMouth: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
   const [motionLoop, setMotionLoop] = useState(true);
   const [motionCue, setMotionCue] = useState(0);
@@ -167,11 +167,11 @@ export function ViewerView() {
               motionCue: String(motionCue),
               lookAtTarget: lookAtCamera || faceCamera ? 'camera' : undefined,
               headTurn: faceCamera ? 1 : 0,
-              look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects },
+              look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects, ...(character?.tearDrops === false ? { tearDrops: false } : {}) },
             },
           ]
         : [],
-    [characterId, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects]
+    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects]
   );
 
   useBackdrop(locationBackdropUrl(presets?.locations[locationId]));

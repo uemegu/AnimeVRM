@@ -247,6 +247,9 @@ export const en: Dictionary = {
     effects: {
       title: 'Effects',
       blush: 'Blush',
+      redface: 'Red face',
+      tearyEyes: 'Teary eyes',
+      awawaMouth: 'Flustered mouth (face the camera)',
       anger: 'Anger mark',
       tears: 'Tears',
       fastMotion: 'Afterimages (fast moves)',

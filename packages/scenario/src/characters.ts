@@ -55,6 +55,8 @@ export const Character = z.strictObject({
   /** 2D のデフォルメ画像 */
   sprites: z.array(CharacterSprite).optional(),
   voice: CharacterVoice.optional(),
+  /** 涙目（tearyEyes）で目尻に涙の粒を出すか（省略時 true。髪が目尻にかかって粒が髪の上に見えるキャラは false） */
+  tearDrops: z.boolean().optional(),
   /** キャラ設定（自由記述） */
   profile: z.string(),
 });

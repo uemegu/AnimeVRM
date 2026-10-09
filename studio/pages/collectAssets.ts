@@ -17,6 +17,7 @@ const ALWAYS = [
   'studio/motions.json',
   'studio/projects.json',
   'textures/girl_face_blush.png',
+  'textures/girl_face_redface.avif',
   'textures/girl_face_anger.png',
   'textures/girl_face_sweat.png',
   'animations/Standing Idle.fbx',

@@ -245,6 +245,9 @@ export const ja = {
     effects: {
       title: '演出',
       blush: '頬を赤らめる',
+      redface: '赤面',
+      tearyEyes: '涙目',
+      awawaMouth: 'あわあわ口（正面向きで）',
       anger: '怒りマーク',
       tears: '涙',
       fastMotion: '残像（速い動き）',

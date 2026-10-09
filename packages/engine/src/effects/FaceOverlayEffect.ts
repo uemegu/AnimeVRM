@@ -5,6 +5,8 @@ export const FACE_OVERLAY_TEXTURES = {
   blush: '/textures/girl_face_blush.png',
   sweat: '/textures/girl_face_sweat.png',
   anger: '/textures/girl_face_anger.png',
+  /** 泣き叫ぶときの強い赤面（blush より濃く広い） */
+  redface: '/textures/girl_face_redface.avif',
 } as const;
 
 export type FaceOverlayKind = keyof typeof FACE_OVERLAY_TEXTURES;
@@ -13,7 +15,7 @@ export const FACE_OVERLAY_KINDS = Object.keys(FACE_OVERLAY_TEXTURES) as FaceOver
 
 /** Accept old scenario paths too; the former per-avatar blush maps have been removed. */
 export function getFaceOverlayKindForTexture(url: string): FaceOverlayKind | null {
-  const match = url.split(/[?#]/)[0].match(/(?:^|\/)(?:girl2?_|)face_(blush|sweat|anger)\.(?:png|avif)$/i);
+  const match = url.split(/[?#]/)[0].match(/(?:^|\/)(?:girl2?_|)face_(blush|sweat|anger|redface)\.(?:png|avif)$/i);
   return match ? match[1].toLowerCase() as FaceOverlayKind : null;
 }
 
