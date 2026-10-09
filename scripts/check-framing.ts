@@ -50,7 +50,7 @@ const browser = await chromium.launch({ args: ['--mute-audio', '--use-angle=meta
 const findings: { scenario: string; scene: string; index: number; speaker: string; x: number; y: number; reason: string }[] = [];
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-  await page.goto(`http://127.0.0.1:${address.port}/shot.html`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`http://127.0.0.1:${address.port}/shot.html?quality=high`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__shot?.ready || window.__shot?.error, undefined, { timeout: 60_000 });
   for (const { category, id, scenario } of targets) {
     for (const [index, scene] of scenario.scenes.entries()) {

@@ -34,6 +34,8 @@ declare global {
       render: (request: ShotRequest) => Promise<void>;
       /** 登場キャラの頭の画面上の位置（構図のチェック用。-1〜1、上が +1） */
       heads?: () => { id: string; x: number; y: number; behind: boolean }[];
+      /** 描画の重さの計測用（scripts/profile-render.ts） */
+      manager?: () => StageManager | null;
     };
   }
 }
@@ -70,6 +72,7 @@ function ShotPage({ data }: { data: StudioData }) {
           setRequest(next);
         }),
       heads: () => stageManager?.headsOnScreen() ?? [],
+      manager: () => stageManager,
     };
   }, []);
 

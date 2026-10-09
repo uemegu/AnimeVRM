@@ -9,7 +9,8 @@
  *
  * そのほか: --outfit default|private|commute、--width / --height（既定 1280x720。縦型のシナリオは 720x1280）、--no-dialogue（セリフ枠を消す）、
  * --no-hud（左上の場所・時間帯・構図の表示を消す）、--settle 秒（読み込み後に待つ時間。既定 1.5）、
- * --url http://127.0.0.1:5175/（起動中の Studio の開発サーバーを使う）、--headed
+ * --url http://127.0.0.1:5175/（起動中の Studio の開発サーバーを使う）、--headed、
+ * --quality high|low（描画の品質。既定 high。撮影中に描画チェックで切り替わらないよう固定する）
  *
  * 音は鳴らさない（ブラウザを --mute-audio で起動する）
  */
@@ -37,6 +38,7 @@ const { values: options, positionals } = parseArgs({
     settle: { type: 'string', default: '1.5' },
     url: { type: 'string' },
     headed: { type: 'boolean', default: false },
+    quality: { type: 'string', default: 'high' },
     help: { type: 'boolean', short: 'h', default: false },
   },
 });
@@ -81,6 +83,7 @@ const width = Number(options.width ?? (portrait ? 720 : 1280));
 const height = Number(options.height ?? (portrait ? 1280 : 720));
 if (![time, settleMs, width, height].every(Number.isFinite)) fail('--time・--settle・--width・--height は数値で指定してください');
 if (!['default', 'private', 'commute'].includes(options.outfit)) fail('--outfit は default / private / commute のいずれかです');
+if (!['high', 'low'].includes(options.quality)) fail('--quality は high / low のいずれかです');
 
 const outputDir = path.join(REPO_ROOT, 'scratch/shots', category, id);
 const outputOf = (index: number) =>
@@ -110,7 +113,7 @@ try {
     if (msg.type() === 'error') errors.push(msg.text());
   });
 
-  await page.goto(new URL('shot.html', baseUrl).href, { waitUntil: 'domcontentloaded' });
+  await page.goto(new URL(`shot.html?quality=${options.quality}`, baseUrl).href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__shot?.ready || window.__shot?.error, undefined, { timeout: 60_000 });
   const setupError = await page.evaluate(() => window.__shot?.error);
   if (setupError) throw new Error(setupError);

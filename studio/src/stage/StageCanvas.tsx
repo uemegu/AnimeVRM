@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CameraPose, CameraShift, CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
+import { useRenderQuality } from './renderQuality';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import { useI18n } from '../i18n';
@@ -88,6 +89,10 @@ export function StageCanvas({
   const { loading, run: runSetCast } = useCastLoading(managerRef);
   const phonemeRef = useRef(getSpeakerPhoneme);
   const mouthOpenRef = useRef(getSpeakerMouthOpen);
+  // 描画の品質（設定）。描画が間に合わないと知らされたら、設定側で軽量に下げる
+  const renderQuality = useRenderQuality();
+  const slowFramesRef = useRef(renderQuality.onSlowFrames);
+  slowFramesRef.current = renderQuality.onSlowFrames;
   phonemeRef.current = getSpeakerPhoneme;
   mouthOpenRef.current = getSpeakerMouthOpen;
 
@@ -99,6 +104,8 @@ export function StageCanvas({
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
       language,
+      quality: renderQuality.level,
+      onSlowFrames: renderQuality.level ? () => slowFramesRef.current() : undefined,
       getSpeakerPhoneme: () => phonemeRef.current?.(),
       getSpeakerMouthOpen: () => mouthOpenRef.current?.() ?? 1,
     });
@@ -115,6 +122,14 @@ export function StageCanvas({
     // 作り直すと VRM を読み直すので、最初の1回だけ作る。以降の変更は下の effect で当てる
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const qualityLevel = renderQuality.level;
+  const appliedQuality = useRef(qualityLevel);
+  useEffect(() => {
+    if (!qualityLevel || qualityLevel === appliedQuality.current) return;
+    appliedQuality.current = qualityLevel;
+    managerRef.current?.setQuality(qualityLevel);
+  }, [qualityLevel]);
 
   // シーン設定の編集をその場で反映する
   useEffect(() => managerRef.current?.setPresets(presets), [presets]);

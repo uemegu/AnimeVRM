@@ -9,6 +9,7 @@ export const en: Dictionary = {
     player: 'Playback',
     characters: 'Characters',
     motions: 'Motions',
+    settings: 'Settings',
     comingSoon: 'Soon',
     collapse: 'Collapse sidebar',
     expand: 'Expand sidebar',
@@ -29,6 +30,17 @@ export const en: Dictionary = {
     play: 'Play',
     cancel: 'Cancel',
     stop: 'Stop',
+  },
+  settings: {
+    title: 'Settings',
+    quality: 'Rendering quality',
+    qualityHint: 'How heavy the 3D stage rendering is. Saved on this device. If high quality cannot keep up, it switches to light automatically.',
+    levels: { high: 'High quality', low: 'Light' },
+    levelHints: {
+      high: 'Renders at the device resolution with depth of field and detailed light shafts.',
+      low: 'Slightly lower resolution and skips heavy effects such as depth of field. About half the load of high quality.',
+    },
+    qualityLowered: 'Rendering could not keep up, so the quality was switched to Light. You can switch back in Settings.',
   },
   comingSoon: {
     title: 'This view is not ready yet',

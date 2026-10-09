@@ -7,6 +7,7 @@ export const ja = {
     player: 'シナリオ再生',
     characters: 'キャラクター',
     motions: 'モーション',
+    settings: '設定',
     comingSoon: '準備中',
     collapse: 'サイドバーを閉じる',
     expand: 'サイドバーを開く',
@@ -27,6 +28,17 @@ export const ja = {
     play: '再生',
     cancel: 'キャンセル',
     stop: '停止',
+  },
+  settings: {
+    title: '設定',
+    quality: '描画の品質',
+    qualityHint: '舞台（3D）の描画の重さ。この端末に保存します。高品質で描画が間に合わないときは、自動で軽量に切り替えます。',
+    levels: { high: '高品質', low: '軽量' },
+    levelHints: {
+      high: '端末の解像度で描き、背景ぼかしや光の筋も細かく描きます。',
+      low: '解像度を少し下げ、背景ぼかしなどの重い処理を省きます。重さは高品質の半分ほどです。',
+    },
+    qualityLowered: '描画が間に合わないため、描画の品質を「軽量」に切り替えました。設定で高品質に戻せます。',
   },
   comingSoon: {
     title: 'この画面は準備中です',

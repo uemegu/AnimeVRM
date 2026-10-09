@@ -15,6 +15,7 @@
     "validate": "node scripts/validate.ts",
     "shot": "node scripts/shot.ts",
     "check:framing": "node scripts/check-framing.ts",
+    "profile": "node scripts/profile-render.ts",
     "ogp:studio": "node scripts/generate-ogp-studio.mjs",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present"

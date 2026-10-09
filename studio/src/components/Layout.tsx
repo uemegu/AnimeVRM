@@ -4,6 +4,7 @@ import { READ_ONLY } from '../api/client';
 import { useI18n, type Language } from '../i18n';
 import { Icon, type IconName } from './Icon';
 import { ToastProvider } from './Toast';
+import { RenderQualityProvider } from '../stage/renderQuality';
 import { BackdropLayer, useBackdropActive } from './Backdrop';
 import { AmbientLayer, useAmbientActive } from './Ambient';
 import './Layout.css';
@@ -22,6 +23,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: '/player', icon: 'player', label: (t) => t.nav.player, ready: true },
   { path: '/characters', icon: 'characters', label: (t) => t.nav.characters, ready: true },
   { path: '/motions', icon: 'motions', label: (t) => t.nav.motions, ready: true },
+  { path: '/settings', icon: 'settings', label: (t) => t.nav.settings, ready: true },
 ];
 
 const COLLAPSED_KEY = 'studio_sidebar_collapsed';
@@ -124,7 +126,9 @@ export function Layout() {
         <BackdropLayer />
         <div className="studio-page">
           <ToastProvider>
-            <Outlet />
+            <RenderQualityProvider>
+              <Outlet />
+            </RenderQualityProvider>
           </ToastProvider>
         </div>
       </main>

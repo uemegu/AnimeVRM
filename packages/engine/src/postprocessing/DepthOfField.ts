@@ -124,9 +124,12 @@ export class DepthOfFieldPass extends Pass {
     this.material.uniforms.uResolution.value.set(width, height);
   }
 
+  /** 本描画の深度（SceneRenderPass.depthTexture）。なければ readBuffer の深度を読む */
+  public sceneDepth: THREE.Texture | null = null;
+
   public render(renderer: THREE.WebGLRenderer, writeBuffer: THREE.WebGLRenderTarget, readBuffer: THREE.WebGLRenderTarget): void {
     this.material.uniforms.tDiffuse.value = readBuffer.texture;
-    this.material.uniforms.tDepth.value = readBuffer.depthTexture;
+    this.material.uniforms.tDepth.value = this.sceneDepth ?? readBuffer.depthTexture;
     renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer);
     if (this.clear) renderer.clear();
     this.quad.render(renderer);

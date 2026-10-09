@@ -11,6 +11,8 @@ import * as THREE from 'three';
  */
 export const GodRaysShader = {
   name: 'GodRaysShader',
+  // 1画素あたり画面を読む回数（品質 StageQuality.godRaysSamples。変えたら material.needsUpdate）
+  defines: { NUM_SAMPLES: 45 },
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
     // キャラのマスク（CharacterMaskRenderer.texture）。キャラがある所は深度 < 1。未指定なら画面全体を拾う
@@ -72,8 +74,11 @@ export const GodRaysShader = {
       vec2 deltaTexCoord = (vUv - uSunPosition);
       float distToSun = length(deltaTexCoord);
 
-      const int NUM_SAMPLES = 45;
       vec2 step = deltaTexCoord * (1.0 / float(NUM_SAMPLES)) * uDensity;
+      // 回数を減らしても筋の長さと明るさが変わらないよう、1回あたりの減衰と重みを 45回のときに合わせる
+      float sampleScale = 45.0 / float(NUM_SAMPLES);
+      float decay = pow(uDecay, sampleScale);
+      float weight = uWeight * sampleScale;
 
       // Subtle sub-pixel dither offset to break banding artifacts without grain noise
       float dither = hash(gl_FragCoord.xy);
@@ -110,9 +115,9 @@ export const GodRaysShader = {
             sampleLight = vec3(0.0);
           }
 
-          sampleLight *= illuminationDecay * uWeight;
+          sampleLight *= illuminationDecay * weight;
           accumulatedRays += sampleLight;
-          illuminationDecay *= uDecay;
+          illuminationDecay *= decay;
         }
       }
 

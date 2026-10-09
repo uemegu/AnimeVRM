@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
+import { useRenderQuality } from '../stage/renderQuality';
 import { StageLoading, useCastLoading } from '../stage/StageLoading';
 
 interface Props {
@@ -42,6 +43,10 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
   const timeRef = useRef(getCutTime);
   const phonemeRef = useRef(getSpeakerPhoneme);
   const mouthOpenRef = useRef(getSpeakerMouthOpen);
+  // 描画の品質（設定）。描画が間に合わないと知らされたら、設定側で軽量に下げる
+  const renderQuality = useRenderQuality();
+  const slowFramesRef = useRef(renderQuality.onSlowFrames);
+  slowFramesRef.current = renderQuality.onSlowFrames;
   timeRef.current = getCutTime;
   phonemeRef.current = getSpeakerPhoneme;
   mouthOpenRef.current = getSpeakerMouthOpen;
@@ -54,6 +59,8 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
       initialTimeOfDay: timeOfDay,
       initialLocationId: locationId,
       language,
+      quality: renderQuality.level,
+      onSlowFrames: renderQuality.level ? () => slowFramesRef.current() : undefined,
       getCutTime: () => timeRef.current(),
       getSpeakerPhoneme: () => phonemeRef.current(),
       getSpeakerMouthOpen: () => mouthOpenRef.current(),
@@ -70,6 +77,14 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const qualityLevel = renderQuality.level;
+  const appliedQuality = useRef(qualityLevel);
+  useEffect(() => {
+    if (!qualityLevel || qualityLevel === appliedQuality.current) return;
+    appliedQuality.current = qualityLevel;
+    managerRef.current?.setQuality(qualityLevel);
+  }, [qualityLevel]);
 
   useEffect(() => {
     managerRef.current?.setTimeOfDay(timeOfDay);

@@ -19,10 +19,12 @@ class SceneDepthCapture extends Pass {
   });
   private quad = new FullScreenQuad(this.material);
   get texture(): THREE.Texture { return this.target.texture; }
+  /** 本描画の深度（SceneRenderPass.depthTexture）。なければ read の深度を読む */
+  sceneDepth: THREE.Texture | null = null;
   constructor() { super(); this.needsSwap = false; this.enabled = false; }
   setSize(width: number, height: number): void { this.target.setSize(width, height); }
   render(renderer: THREE.WebGLRenderer, _write: THREE.WebGLRenderTarget, read: THREE.WebGLRenderTarget): void {
-    this.material.uniforms.tDepth.value = read.depthTexture;
+    this.material.uniforms.tDepth.value = this.sceneDepth ?? read.depthTexture;
     renderer.setRenderTarget(this.target);
     this.quad.render(renderer);
   }
