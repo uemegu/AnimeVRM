@@ -17,19 +17,23 @@ async function texture(file: string, repeat = false): Promise<THREE.Texture> {
 /** Batch static details by their shared material, retaining UVs and all world transforms. */
 function batch(root: THREE.Group): void {
   root.updateMatrixWorld(true);
-  const groups = new Map<THREE.Material, THREE.Mesh[]>();
+  // Shadow casters stay apart from the buildings that share their materials.
+  const groups = new Map<string, THREE.Mesh[]>();
   root.traverse(o => {
     if (!(o instanceof THREE.Mesh) || Array.isArray(o.material) || o.material instanceof THREE.ShaderMaterial) return;
-    const list = groups.get(o.material) ?? []; list.push(o); groups.set(o.material, list);
+    const key = `${o.material.uuid}:${o.castShadow}`;
+    const list = groups.get(key) ?? []; list.push(o); groups.set(key, list);
   });
-  for (const [material, objects] of groups) {
+  for (const objects of groups.values()) {
+    const material = objects[0].material as THREE.Material;
     if (objects.length < 2) continue;
     const parts = objects.map(o => (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld));
     const merged = mergeGeometries(parts);
     parts.forEach(p => p.dispose());
     if (!merged) continue;
     for (const o of objects) { o.removeFromParent(); o.geometry.dispose(); }
-    const mesh = new THREE.Mesh(merged, material); mesh.name = `Shopping street | ${objects.length} static pieces`; root.add(mesh);
+    const mesh = new THREE.Mesh(merged, material); mesh.name = `Shopping street | ${objects.length} static pieces`;
+    mesh.castShadow = objects[0].castShadow; root.add(mesh);
   }
 }
 
@@ -93,7 +97,7 @@ export async function loadShoppingStreet(): Promise<THREE.Group> {
     const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.61, 0.61, 0.015, 20), furniture.soil); soil.position.set(x, 0.208, z); root.add(soil);
     for (let angle = 0; angle < 3; angle++) {
       const card = new THREE.Mesh(new THREE.PlaneGeometry(height * 1043 / 1450, height), treeMaterial);
-      card.position.set(x, height / 2 + 0.21, z); card.rotation.y = angle * Math.PI / 3 + i * 0.21; root.add(card);
+      card.position.set(x, height / 2 + 0.21, z); card.rotation.y = angle * Math.PI / 3 + i * 0.21; card.castShadow = true; root.add(card);
     }
     const shadow = new THREE.Mesh(new THREE.PlaneGeometry(7.4, 9), shade);
     shadow.rotation.x = -Math.PI / 2; shadow.rotation.z = -0.35; shadow.position.set(x + 0.5, 0.012, z - 1.5); root.add(shadow);

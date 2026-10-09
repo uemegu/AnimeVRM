@@ -14,6 +14,9 @@ export interface MaterialStyleParams {
   darkLitLift?: number;
   // 白に近い色の光が当たる側に掛ける倍率（1 でそのまま）。白いシャツが光って見えないように抑える
   brightLitScale?: number;
+  // 明暗の境目に乗せる色（乗算、sRGB）と強さ。肌の中で光が散ったような、境目だけ赤みの強い帯にする
+  terminatorColor?: string;
+  terminatorStrength?: number;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;

@@ -16,6 +16,7 @@ import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
 import { OverlayPass } from '../postprocessing/OverlayPass';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
+import { applyCelShading, setCelLight } from '../scene/celShading';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
@@ -56,6 +57,8 @@ import { resolveStageQuality, type StageQuality, type StageQualityLevel } from '
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 /** これより短いモーションは止め絵のポーズとして扱う（待機に戻さず保つ） */
+// 3D背景の動かない小物の影を描くときだけ使うレイヤー（staticShadowCamera が見る）
+const STATIC_SHADOW_LAYER = 8;
 const POSE_CLIP_MAX_SEC = 0.2;
 const CAMERA_TRANSITION_SEC = 0.6;
 /** 横からの構図：カメラと注視点を話者より少し手前に、注視点を話者の少し前（左）に置く */
@@ -155,6 +158,11 @@ export class StageManager {
   private rimLight: THREE.DirectionalLight;
   /** 平行光が落とすキャラの影を受ける地面（場所の light.shadow があるときだけ出す） */
   private groundShadow: THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial>;
+  /** 3D背景の動かない小物（castShadow のメッシュ）の影。光の向きは場所ごとに固定なので、置いたときに一度だけ描く */
+  private staticShadowLight: THREE.DirectionalLight;
+  /** 影の写真に描く物は、描くときのカメラのレイヤーで選ばれる。小物だけを見るカメラで描いて、キャラを写し込まない */
+  private readonly staticShadowCamera = new THREE.Camera();
+  private readonly staticShadowTarget = new THREE.WebGLRenderTarget(1, 1);
   private ambientLight: THREE.AmbientLight;
   private skyBackground: SkyBackground;
   private scrollingBackground: ScrollingBackground;
@@ -309,14 +317,33 @@ export class StageManager {
     shadow.camera.updateProjectionMatrix();
     shadow.bias = -0.0005;
     shadow.normalBias = 0.02;
+    // 強さ0で照らさず、影だけを落とす
+    this.staticShadowLight = new THREE.DirectionalLight('#ffffff', 0);
+    this.staticShadowLight.name = 'Static prop shadow';
+    this.staticShadowLight.shadow.autoUpdate = false;
+    this.staticShadowLight.layers.enable(STATIC_SHADOW_LAYER);
+    this.staticShadowLight.shadow.bias = -0.0005;
+    this.staticShadowLight.shadow.normalBias = 0.02;
+    this.scene.add(this.staticShadowLight);
 
+    // セット全体（商店街は南北 80m 余り）の影を受けられる広さにする
     this.groundShadow = new THREE.Mesh(
-      new THREE.PlaneGeometry(40, 40),
+      new THREE.PlaneGeometry(160, 160),
       new THREE.ShadowMaterial({ transparent: true, depthWrite: false })
     );
+    // セル調に、影の濃さを2段階にする（ぼかした縁の中ほどで切り、境目は1画素ほどだけなめらかにする）
+    this.groundShadow.material.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace(
+        'gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );',
+        `float shadowAmount = 1.0 - getShadowMask();
+  float shadowEdge = max(fwidth(shadowAmount), 1e-4);
+  gl_FragColor = vec4( color, opacity * smoothstep(0.5 - shadowEdge, 0.5 + shadowEdge, shadowAmount) );`
+      );
+    };
     this.groundShadow.name = 'Ground shadow';
     this.groundShadow.rotation.x = -Math.PI / 2;
-    this.groundShadow.position.y = 0.002;
+    // 3D背景の床は少し浮かせて重ねてあるもの（土・参道・駐輪場 0.01〜0.02m）があるので、その上に出す
+    this.groundShadow.position.y = 0.025;
     this.groundShadow.receiveShadow = true;
     this.groundShadow.visible = false;
     this.scene.add(this.groundShadow);
@@ -769,11 +796,85 @@ export class StageManager {
     // castShadow を切り替えるとシェーダーが作り直されるので、変わるときだけ触る
     if (this.directionalLight.castShadow !== !!shadow) this.directionalLight.castShadow = !!shadow;
     this.groundShadow.visible = !!shadow;
+    // 3D背景の影の面は、地面の影と同じ色・濃さで塗る
+    const shade = new THREE.Color(1, 1, 1);
+    if (shadow) shade.lerp(new THREE.Color(shadow.color), shadow.opacity);
+    setCelLight(this.directionalLight.position, shade);
     if (shadow) {
       this.groundShadow.material.color.set(shadow.color);
       this.groundShadow.material.opacity = shadow.opacity;
       this.directionalLight.shadow.radius = shadow.softness;
     }
+    this.bakeStaticShadow();
+  }
+
+  /**
+   * 3D背景の castShadow のメッシュの影を、光から見たその範囲にぴったり合わせて一度だけ描く。
+   * 範囲には影が地面に届く先も含める（含めないと地面が影の写真の奥行きの外になる）
+   */
+  private bakeStaticShadow(): void {
+    const light = this.staticShadowLight;
+    const casters: THREE.Mesh[] = [];
+    if (this.directionalLight.castShadow) {
+      this.environment?.object?.traverseVisible((child) => {
+        if (child instanceof THREE.Mesh && child.castShadow) casters.push(child);
+      });
+    }
+    const enabled = casters.length > 0;
+    // castShadow を切り替えるとシェーダーが作り直されるので、変わるときだけ触る
+    if (light.castShadow !== enabled) light.castShadow = enabled;
+    if (!enabled) return;
+
+    const toSun = this.directionalLight.position.clone().normalize();
+    light.position.copy(toSun);
+    light.updateMatrixWorld();
+    const shadow = light.shadow;
+    const camera = shadow.camera;
+    camera.position.copy(toSun);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld();
+    const bounds = new THREE.Box3();
+    const point = new THREE.Vector3();
+    for (const mesh of casters) {
+      mesh.updateWorldMatrix(true, false);
+      const position = mesh.geometry.getAttribute('position');
+      for (let i = 0; i < position.count; i++) {
+        point.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld);
+        const height = Math.max(0, point.y);
+        bounds.expandByPoint(point.clone().applyMatrix4(camera.matrixWorldInverse));
+        // 地面（y=0）に落ちる先
+        if (toSun.y > 0.01) bounds.expandByPoint(point.addScaledVector(toSun, -height / toSun.y).applyMatrix4(camera.matrixWorldInverse));
+      }
+    }
+    const margin = 0.5;
+    Object.assign(camera, {
+      left: bounds.min.x - margin, right: bounds.max.x + margin,
+      bottom: bounds.min.y - margin, top: bounds.max.y + margin,
+      // 視線は -z 向き
+      near: -bounds.max.z - margin, far: -bounds.min.z + margin,
+    });
+    camera.updateProjectionMatrix();
+
+    // 1マスがキャラの影の写真と同程度（高画質で約2.5cm）になる大きさ。長い辺は 4096 まで
+    const texel = 0.025 * 2048 / this.quality.shadowMapSize;
+    const size = (length: number) => THREE.MathUtils.clamp(Math.ceil(length / texel), 256, 4096);
+    const width = size(camera.right - camera.left), height = size(camera.top - camera.bottom);
+    if (shadow.mapSize.x !== width || shadow.mapSize.y !== height) {
+      shadow.mapSize.set(width, height);
+      shadow.map?.dispose();
+      shadow.map = null;
+    }
+    // ぼかしはマス数で効くので、実際の幅がキャラの影と同じになるように割り戻す（そのままだと細い柱の影が溶ける）
+    const key = this.directionalLight.shadow;
+    const keyTexel = (key.camera.right - key.camera.left) / key.mapSize.x;
+    shadow.radius = Math.max(1, key.radius * keyTexel / texel);
+    for (const mesh of casters) mesh.layers.enable(STATIC_SHADOW_LAYER);
+    shadow.needsUpdate = true;
+    this.staticShadowCamera.layers.set(STATIC_SHADOW_LAYER);
+    const previousTarget = this.renderer.getRenderTarget();
+    this.renderer.setRenderTarget(this.staticShadowTarget);
+    this.renderer.render(this.scene, this.staticShadowCamera);
+    this.renderer.setRenderTarget(previousTarget);
   }
 
   /** ブルームは時間帯を基本に、場所に書かれた項目だけを上書きする */
@@ -844,7 +945,10 @@ export class StageManager {
     }
     if (!settings) return Promise.resolve();
     if (this.environment) {
-      if (this.environment.object) placeEnvironment(this.environment.object, settings);
+      if (this.environment.object) {
+        placeEnvironment(this.environment.object, settings);
+        this.bakeStaticShadow();
+      }
       return this.environment.ready;
     }
     const entry = { model: settings.model, object: null as THREE.Object3D | null, ready: Promise.resolve() };
@@ -857,11 +961,13 @@ export class StageManager {
           return;
         }
         entry.object = object;
+        applyCelShading(object);
         // 3D背景に入っている空は使わず、時間帯で変わる空（SkyBackground）を描く
         object.traverse((child) => { if (child.userData.setSky) child.visible = false; });
         placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
         this.scene.add(object);
         this.applyEffects();
+        this.bakeStaticShadow();
       })
       .catch((err) => console.error(`3D背景を読み込めません: ${settings.model}`, err));
     return entry.ready;
@@ -1267,6 +1373,7 @@ export class StageManager {
       shadow.map?.dispose();
       shadow.map = null;
     }
+    this.bakeStaticShadow();
   }
 
   public getQuality(): StageQuality {
@@ -1727,6 +1834,8 @@ export class StageManager {
     this.characterGlowPass.dispose();
     this.groundShadow.geometry.dispose();
     this.groundShadow.material.dispose();
+    this.staticShadowLight.shadow.dispose();
+    this.staticShadowTarget.dispose();
     this.renderer.dispose();
   }
 }

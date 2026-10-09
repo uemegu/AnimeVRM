@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
+import { castShadowsOfAdded } from '../castShadows';
 import { COURT, GYM, STAGE, WINDOW_BAYS } from './layout';
 
 const paint = (color: string, map?: THREE.Texture) =>
@@ -123,18 +124,22 @@ function equipment(root: THREE.Group, wood: THREE.Material, iron: THREE.Material
 /** Keep this batch local to an identity root, before Stage applies location placement. */
 function batch(root: THREE.Group): void {
   root.updateMatrixWorld(true);
-  const groups = new Map<THREE.Material, THREE.Mesh[]>();
+  // Shadow casters stay apart from the walls that share their materials.
+  const groups = new Map<string, THREE.Mesh[]>();
   root.traverse(o => {
     if (!(o instanceof THREE.Mesh) || Array.isArray(o.material) || o.material.transparent) return;
-    const list = groups.get(o.material) ?? []; list.push(o); groups.set(o.material, list);
+    const key = `${o.material.uuid}:${o.castShadow}`;
+    const list = groups.get(key) ?? []; list.push(o); groups.set(key, list);
   });
-  for (const [material, objects] of groups) {
+  for (const objects of groups.values()) {
+    const material = objects[0].material as THREE.Material;
     if (objects.length < 2) continue;
     const parts = objects.map(o => (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(o.matrixWorld));
     const merged = mergeGeometries(parts); parts.forEach(p => p.dispose());
     if (!merged) continue;
     for (const o of objects) { o.removeFromParent(); o.geometry.dispose(); }
-    const mesh = new THREE.Mesh(merged, material); mesh.name = `Gym | ${objects.length} static pieces`; root.add(mesh);
+    const mesh = new THREE.Mesh(merged, material); mesh.name = `Gym | ${objects.length} static pieces`;
+    mesh.castShadow = objects[0].castShadow; root.add(mesh);
   }
 }
 
@@ -179,7 +184,7 @@ export async function loadPaintedGym(): Promise<THREE.Group> {
     for (const y of [2.98, 3.6]) box(root, 'Gallery continuous rail', [0.045, 0.045, 32], [side * 11.08, y, 0], iron);
     for (let z = -15.8; z <= 16; z += 0.55) box(root, 'Gallery baluster', [0.028, 0.82, 0.028], [side * 11.08, 3.19, z], iron);
     for (let bay = 0; bay <= 7; bay++) box(root, 'Structural wall column', [0.14, 8.5, 0.2], [side * 11.86, 4.25, -16 + bay * 32 / 7], iron);
-    goal(root, side, iron, white);
+    castShadowsOfAdded(root, () => goal(root, side, iron, white));
   }
   // Pitched roof planes, closed gables and real steel trusses visible from the gallery.
   for (const side of [-1, 1]) {
@@ -217,7 +222,7 @@ export async function loadPaintedGym(): Promise<THREE.Group> {
     const height = (step + 1) * STAGE.height / 7;
     box(root, 'Stage side stairs', [0.95, height, 0.35], [side * 7.53, height / 2, -12.6 - step * 0.35], wood);
   }
-  equipment(root, wood, iron);
+  castShadowsOfAdded(root, () => equipment(root, wood, iron));
   const courtPaint = paint('#e8ddba'), yellow = paint('#b9a154'), green = paint('#667d65');
   floorLine(root, [[-10, -8.5], [10, -8.5], [10, 3.5], [-10, 3.5], [-10, -8.5]], courtPaint);
   floorLine(root, [[0, -8.5], [0, 3.5]], courtPaint); circle(root, 0, COURT.z, 1.8, courtPaint);
