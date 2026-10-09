@@ -335,7 +335,8 @@ export class StageManager {
     };
     this.groundShadow.name = 'Ground shadow';
     this.groundShadow.rotation.x = -Math.PI / 2;
-    this.groundShadow.position.y = 0.002;
+    // 3D背景の床は少し浮かせて重ねてあるもの（土・参道・駐輪場 0.01〜0.02m）があるので、その上に出す
+    this.groundShadow.position.y = 0.025;
     this.groundShadow.receiveShadow = true;
     this.groundShadow.visible = false;
     this.scene.add(this.groundShadow);
@@ -788,11 +789,11 @@ export class StageManager {
     // castShadow を切り替えるとシェーダーが作り直されるので、変わるときだけ触る
     if (this.directionalLight.castShadow !== !!shadow) this.directionalLight.castShadow = !!shadow;
     this.groundShadow.visible = !!shadow;
-    if (shadow) {
     // 3D背景の影の面は、地面の影と同じ色・濃さで塗る
     const shade = new THREE.Color(1, 1, 1);
     if (shadow) shade.lerp(new THREE.Color(shadow.color), shadow.opacity);
     setCelLight(this.directionalLight.position, shade);
+    if (shadow) {
       this.groundShadow.material.color.set(shadow.color);
       this.groundShadow.material.opacity = shadow.opacity;
       this.directionalLight.shadow.radius = shadow.softness;
@@ -953,8 +954,8 @@ export class StageManager {
           return;
         }
         entry.object = object;
-        // 3D背景に入っている空は使わず、時間帯で変わる空（SkyBackground）を描く
         applyCelShading(object);
+        // 3D背景に入っている空は使わず、時間帯で変わる空（SkyBackground）を描く
         object.traverse((child) => { if (child.userData.setSky) child.visible = false; });
         placeEnvironment(object, this.presets.locations[this.currentLocationId]?.environment ?? settings);
         this.scene.add(object);

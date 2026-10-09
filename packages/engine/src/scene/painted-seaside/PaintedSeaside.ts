@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
 import { boxMesh, farStandee, groundPlane, projectedMaterial, skyDome, type Projection } from '../painted-gate/PaintedGate';
+import { castShadows } from '../castShadows';
 import {
   EDGE_Z, FAR, GROUND, GROUND_PAINTING_FADE, ISLANDS, KERB, LAMPS, LAMP_HEIGHT, RAILING, REFERENCE_CAMERA, SEA_RADIUS, SEA_Y, SUN_DIRECTION, TILES, TREES, referenceCamera,
 } from './layout';
@@ -137,7 +138,8 @@ export async function loadPaintedSeaside(): Promise<THREE.Group> {
   group.add(groundPlane('Ground', projectedMaterial(scene, projection, { map: paving, size: [TILES.paving, TILES.paving], fadeDistance: [...GROUND_PAINTING_FADE] }),
     GROUND.minX, GROUND.maxX, GROUND.nearZ, GROUND.farZ));
   group.add(boxMesh(KERB, projectedMaterial(scene, projection, { map: stone, size: [TILES.stone, TILES.stone] })));
-  group.add(railing());
+  // Trees and lamps are standees turning to the camera, so they keep their contact shadows instead.
+  group.add(castShadows(railing()));
 
   const shadow = radialTexture();
   const trees = { 'tree-a': treeA, 'tree-b': treeB };

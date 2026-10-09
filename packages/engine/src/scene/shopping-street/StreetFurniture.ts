@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { castShadows } from '../castShadows';
 import { box, canvasTexture, paint } from './materials';
 
 export type FurnitureMaterials = { wood: THREE.Material; iron: THREE.Material; gold: THREE.Material; stone: THREE.Material; soil: THREE.Material; flowers: THREE.Material };
@@ -6,11 +7,6 @@ export type FurnitureMaterials = { wood: THREE.Material; iron: THREE.Material; g
 function cylinder(parent: THREE.Group, radiusTop: number, radiusBottom: number, height: number, at: [number, number, number], material: THREE.Material): THREE.Mesh {
   const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radiusTop, radiusBottom, height, 12), material);
   mesh.position.set(...at); parent.add(mesh); return mesh;
-}
-
-/** 地面に影を落とす小物（影は StageManager が場所を置いたときに一度だけ描く） */
-function castShadows(group: THREE.Object3D): void {
-  group.traverse(o => { if (o instanceof THREE.Mesh) o.castShadow = true; });
 }
 
 export function planter(parent: THREE.Group, m: FurnitureMaterials, x: number, z: number, rotation = 0): void {
