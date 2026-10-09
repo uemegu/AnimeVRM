@@ -13,6 +13,7 @@ const PATHS = {
   landscape: 'M3 8.5A1.5 1.5 0 0 1 4.5 7h15A1.5 1.5 0 0 1 21 8.5v7a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 15.5Z',
   stop: 'M7 7h10v10H7z',
   chevron: 'M9 6l6 6-6 6',
+  settings: 'M4 7h10M18 7h2M4 17h2M10 17h10M16 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM8 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
   sidebar: 'M4 5h16v14H4zM9.5 5v14',
   copy: 'M9 9h10v10H9zM5 15V5h10',
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',

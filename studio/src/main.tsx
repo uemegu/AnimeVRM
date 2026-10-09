@@ -10,6 +10,7 @@ import { ScenesView } from './views/scenes/ScenesView';
 import { ScenariosView } from './views/scenarios/ScenariosView';
 import { PlayerView } from './views/player/PlayerView';
 import { MotionsView } from './views/motions/MotionsView';
+import { SettingsView } from './views/settings/SettingsView';
 
 // 本番（GitHub Pages）は直リンクの 404 を返すので、URL は #/ 形式にする
 const createRouter = import.meta.env.PROD ? createHashRouter : createBrowserRouter;
@@ -25,6 +26,7 @@ const router = createRouter([
       { path: 'scenarios/:category?/:id?/:cut?', element: <ScenariosView /> },
       { path: 'player/:category?/:id?', element: <PlayerView /> },
       { path: 'motions/:tab?', element: <MotionsView /> },
+      { path: 'settings', element: <SettingsView /> },
       ...NAV_ITEMS.filter((item) => !item.ready).map((item) => ({ path: item.path.slice(1), element: <ComingSoon /> })),
     ],
   },

@@ -31,6 +31,7 @@ dist-ssr
 !/scripts/validate.ts
 !/scripts/shot.ts
 !/scripts/check-framing.ts
+!/scripts/profile-render.ts
 !/scripts/transplant-vrm-meshes.ts
 # ardy-generate.ts が読み込む
 !/scripts/lib/

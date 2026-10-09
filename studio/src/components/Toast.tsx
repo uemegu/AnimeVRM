@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import './Toast.css';
 
-type ToastKind = 'success' | 'error';
+type ToastKind = 'success' | 'error' | 'info';
 interface ToastItem {
   id: number;
   kind: ToastKind;
@@ -17,7 +17,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback((message: string, kind: ToastKind = 'success') => {
     const id = nextId.current++;
     setItems((prev) => [...prev, { id, kind, message }]);
-    setTimeout(() => setItems((prev) => prev.filter((i) => i.id !== id)), kind === 'error' ? 6000 : 2500);
+    setTimeout(() => setItems((prev) => prev.filter((i) => i.id !== id)), kind === 'success' ? 2500 : 6000);
   }, []);
   return (
     <ToastContext.Provider value={show}>

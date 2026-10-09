@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
@@ -14,6 +13,7 @@ import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
 import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
 import { OverlayPass } from '../postprocessing/OverlayPass';
+import { SceneRenderPass } from '../postprocessing/SceneRenderPass';
 import { SunEffect } from '../postprocessing/SunEffect';
 import { SkyBackground } from '../scene/SkyBackground';
 import { applyCelShading, setCelLight } from '../scene/celShading';
@@ -53,7 +53,7 @@ import {
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
 import { StageSpriteActor } from './StageSprite';
-import { resolveStageQuality, type StageQuality, type StageQualityLevel } from './quality';
+import { FrameRateCheck, resolveStageQuality, stageQualityOf, type StageQuality, type StageQualityLevel } from './quality';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 /** これより短いモーションは止め絵のポーズとして扱う（待機に戻さず保つ） */
@@ -112,6 +112,11 @@ export interface StageOptions {
   /** 描画・計算の重さ。段階名か項目ごとの上書き。省略時は端末から決める（stage/quality.ts） */
   quality?: StageQualityLevel | Partial<StageQuality>;
   /**
+   * 描画が間に合わないとき（直近のフレームの間隔の中央値が 1/45 秒を超えたとき）に呼ぶ。品質は変えないので、
+   * 使う側が setQuality で下げる。1回呼んだら、次に setQuality するまで呼ばない（指定したときだけ測る）
+   */
+  onSlowFrames?: () => void;
+  /**
    * 描画の画素比。canvas を transform で縮めて表示するときは、縮めた分を掛けた値を返す（省略時は端末の画素比、上限2）。
    * 値が変わったら resize を呼び直す
    */
@@ -135,7 +140,7 @@ export class StageManager {
   private composer: EffectComposer;
 
   // ポストプロセスパス群
-  private renderPass: RenderPass;
+  private renderPass: SceneRenderPass;
   private depthOfFieldPass: DepthOfFieldPass;
   private lightWrapPass: ShaderPass;
   private paraPass: ShaderPass;
@@ -144,6 +149,8 @@ export class StageManager {
   private characterGlowPass: CharacterGlowPass;
   private characterFinishPass: ShaderPass;
   private godRaysPass: ShaderPass;
+  /** 時間帯のゴッドレイの設定。太陽が見えないフレームはパスごと飛ばす */
+  private sunShaftsEnabled = false;
   private cinematicAnimePass: ShaderPass;
   private smaaPass: SMAAPass;
 
@@ -244,6 +251,10 @@ export class StageManager {
   private stillImages: StillImages | null = null;
   private language: 'ja' | 'en';
   private quality: StageQuality;
+  private readonly qualityOption: StageOptions['quality'];
+  /** 描画チェック（onSlowFrames を指定したときだけ）。知らせたら、次の setQuality まで止める */
+  private frameRateCheck: FrameRateCheck | null = null;
+  private readonly onSlowFrames?: () => void;
   private cameraFrom: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraTo: CameraPose = { position: new THREE.Vector3(0, 1.25, 1.6), target: new THREE.Vector3(0, 1.15, 0) };
   private cameraCurrentTarget = new THREE.Vector3(0, 1.15, 0);
@@ -265,7 +276,10 @@ export class StageManager {
     this.getSpeakerMouthOpen = options.getSpeakerMouthOpen;
     this.getCutTime = options.getCutTime;
     this.language = options.language ?? 'ja';
+    this.qualityOption = options.quality;
     this.quality = resolveStageQuality(options.quality);
+    this.onSlowFrames = options.onSlowFrames;
+    if (this.onSlowFrames) this.frameRateCheck = new FrameRateCheck();
     this.clock = new THREE.Clock();
     if (this.canvas.parentElement) {
       this.stillImages = new StillImages(this.canvas.parentElement);
@@ -283,7 +297,7 @@ export class StageManager {
 
     // 3. レンダラー初期化
     this.getPixelRatio = options.getPixelRatio ?? (() => Math.min(window.devicePixelRatio, 2));
-    const pixelRatio = this.getPixelRatio();
+    const pixelRatio = this.pixelRatio();
     const initialWidth = Math.max(1, this.canvas.clientWidth || window.innerWidth);
     const initialHeight = Math.max(1, this.canvas.clientHeight || window.innerHeight);
 
@@ -363,31 +377,27 @@ export class StageManager {
     const targetW = Math.floor(initialWidth * pixelRatio);
     const targetH = Math.floor(initialHeight * pixelRatio);
 
-    const composerRenderTarget = new THREE.WebGLRenderTarget(
-      targetW,
-      targetH,
-      {
-        type: THREE.HalfFloatType,
-        format: THREE.RGBAFormat,
-        samples: 4,
-        // 背景ぼかしで本描画の深度を読む
-        depthTexture: new THREE.DepthTexture(targetW, targetH),
-      }
-    );
+    // 後段の全画面パスは MSAA なしの的に書く（MSAA はシーンの描画だけ。SceneRenderPass）
+    const composerRenderTarget = new THREE.WebGLRenderTarget(targetW, targetH, {
+      type: THREE.HalfFloatType,
+      format: THREE.RGBAFormat,
+    });
     this.composer = new EffectComposer(this.renderer, composerRenderTarget);
     this.composer.setPixelRatio(pixelRatio);
 
-    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.renderPass = new SceneRenderPass(this.scene, this.camera, targetW, targetH, 4);
     this.composer.addPass(this.renderPass);
     this.characterMask = new CharacterMaskRenderer(targetW, targetH);
     this.eyeMask = new CharacterMaskRenderer(targetW, targetH, EYE_LAYER);
     this.characterGlowPass = new CharacterGlowPass(this.characterMask.texture, this.eyeMask.texture);
     this.characterGlowPass.setSize(targetW, targetH);
+    this.characterGlowPass.depthCapture.sceneDepth = this.renderPass.depthTexture;
     this.composer.addPass(this.characterGlowPass.depthCapture);
 
     // 背景ぼかし（本描画の深度を読むので RenderPass の直後に置く）
     this.depthOfFieldPass = new DepthOfFieldPass();
     this.depthOfFieldPass.enabled = false;
+    this.depthOfFieldPass.sceneDepth = this.renderPass.depthTexture;
     this.composer.addPass(this.depthOfFieldPass);
     this.composer.addPass(this.characterGlowPass);
     // 文字演出・汗は、ぼかしのあとに重ねる（ぼかしの対象にしない）
@@ -408,6 +418,7 @@ export class StageManager {
     this.composer.addPass(this.bloomPass);
 
     this.godRaysPass = new ShaderPass(GodRaysShader);
+    this.godRaysPass.material.defines.NUM_SAMPLES = this.quality.godRaysSamples;
     // 光源として拾うのは背景だけ（服の明暗から筋が出ないように）
     this.godRaysPass.uniforms['tMask'].value = this.characterMask.texture;
     this.godRaysPass.uniforms['uUseMask'].value = 1.0;
@@ -540,7 +551,8 @@ export class StageManager {
 
     // 5. ゴッドレイ（サンシャフト）
     const sunShafts = preset.lighting.sunShafts;
-    this.godRaysPass.enabled = sunShafts?.enabled ?? false;
+    // 実際に描くかは、太陽が画面に見えているかでフレームごとに決める（描画ループ）
+    this.sunShaftsEnabled = sunShafts?.enabled ?? false;
     if (sunShafts) {
       this.godRaysPass.uniforms['uExposure'].value = sunShafts.exposure;
       this.godRaysPass.uniforms['uDecay'].value = sunShafts.decay;
@@ -1358,24 +1370,6 @@ export class StageManager {
     this.language = language;
   }
 
-  /** 描画・計算の重さを切り替える（段階名か項目ごとの上書き） */
-  public setQuality(quality: StageQualityLevel | Partial<StageQuality>): void {
-    this.quality = resolveStageQuality(quality);
-    for (const avatar of this.loadedAvatars.values()) {
-      avatar.setHandClearance(this.quality.handClearance);
-      avatar.setClothDent(this.quality.clothDent);
-    }
-    this.applyDepthOfField();
-    const shadow = this.directionalLight.shadow;
-    if (shadow.mapSize.x !== this.quality.shadowMapSize) {
-      shadow.mapSize.setScalar(this.quality.shadowMapSize);
-      // 次に影を描くときに作り直される
-      shadow.map?.dispose();
-      shadow.map = null;
-    }
-    this.bakeStaticShadow();
-  }
-
   public getQuality(): StageQuality {
     return { ...this.quality };
   }
@@ -1675,9 +1669,46 @@ export class StageManager {
     }
   }
 
+  /** 描画の画素比（指定の画素比を、品質の上限で抑える） */
+  private pixelRatio(): number {
+    return Math.min(this.getPixelRatio(), this.quality.maxPixelRatio);
+  }
+
+  /**
+   * 描画・計算の重さを切り替える（段階名か項目ごとの上書き）。段階名なら、コンストラクタの quality の項目ごとの上書きを引き継ぐ。
+   * 描画チェックは測り直す
+   */
+  public setQuality(quality: StageQualityLevel | Partial<StageQuality>): void {
+    const previous = this.quality;
+    this.quality = typeof quality === 'string' ? stageQualityOf(quality, this.qualityOption) : { ...this.quality, ...quality };
+    if (this.onSlowFrames) this.frameRateCheck = new FrameRateCheck();
+
+    this.loadedAvatars.forEach((avatar) => {
+      avatar.setHandClearance(this.quality.handClearance);
+      avatar.setClothDent(this.quality.clothDent);
+    });
+    this.applyDepthOfField();
+    if (previous.godRaysSamples !== this.quality.godRaysSamples) {
+      this.godRaysPass.material.defines.NUM_SAMPLES = this.quality.godRaysSamples;
+      this.godRaysPass.material.needsUpdate = true;
+    }
+    if (previous.shadowMapSize !== this.quality.shadowMapSize) {
+      const shadow = this.directionalLight.shadow;
+      shadow.mapSize.setScalar(this.quality.shadowMapSize);
+      shadow.map?.dispose();
+      shadow.map = null;
+      // 置物の影の写真の解像度もキャラの影に合わせて決めているので、撮り直す
+      this.bakeStaticShadow();
+    }
+    if (previous.maxPixelRatio !== this.quality.maxPixelRatio) {
+      const size = this.renderer.getSize(new THREE.Vector2());
+      this.resize(size.x, size.y);
+    }
+  }
+
   public resize(width: number, height: number): void {
     if (height <= 0 || width <= 0) return;
-    const pr = this.getPixelRatio();
+    const pr = this.pixelRatio();
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
@@ -1711,6 +1742,11 @@ export class StageManager {
 
       const delta = this.clock.getDelta();
       const elapsed = this.clock.getElapsedTime();
+      // 描画チェック：間に合っていなければ知らせる（品質を下げるかは使う側が決める）
+      if (this.frameRateCheck && !document.hidden && this.frameRateCheck.add(delta)) {
+        this.frameRateCheck = null;
+        this.onSlowFrames?.();
+      }
 
       const currentPreset = resolveLocationVisuals(this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day, this.presets.locations[this.currentLocationId]?.stage);
 
@@ -1760,7 +1796,8 @@ export class StageManager {
         !!location?.environment && !location.isIndoor
       );
 
-      // 3. ゴッドレイ（サンシャフト）のユニフォーム更新
+      // 3. ゴッドレイ（サンシャフト）のユニフォーム更新。太陽が見えないときは描いても何も足されないので飛ばす
+      this.godRaysPass.enabled = this.sunShaftsEnabled && sunInfo.sunVisibility > 0.001 && this.godRaysPass.uniforms['uExposure'].value > 0.001;
       if (this.godRaysPass.enabled) {
         this.godRaysPass.uniforms['uSunPosition'].value.copy(sunInfo.sunScreenPosition);
         this.godRaysPass.uniforms['uSunVisibility'].value = sunInfo.sunVisibility;
@@ -1791,6 +1828,9 @@ export class StageManager {
         (finish['uRimColor'].value as THREE.Color).setRGB(0, 0, 0);
       }
       this.characterFinishPass.enabled = !!rim || finish['uCapTop'].value < 1;
+      // 切ってあるときは画面をそのまま写すだけなので、パスごと飛ばす
+      this.lightWrapPass.enabled = this.lightWrapPass.uniforms['uEnabled'].value > 0.5;
+      this.paraPass.enabled = this.paraPass.uniforms['uEnabled'].value > 0.5;
       if (this.characterFinishPass.enabled || this.characterGlowPass.enabled || this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled) {
         this.characterMask.render(this.renderer, this.scene, this.camera);
         if (this.characterGlowPass.uniforms.uEyeCare.value > 0.5 || this.characterFinishPass.uniforms['uEyeCare'].value > 0.5) this.eyeMask.render(this.renderer, this.scene, this.camera);
@@ -1825,6 +1865,7 @@ export class StageManager {
 
     this.composer.renderTarget1?.dispose();
     this.composer.renderTarget2?.dispose();
+    this.renderPass.dispose();
     this.hairShadow.dispose();
     this.crowd.dispose();
     this.characterMask.dispose();
