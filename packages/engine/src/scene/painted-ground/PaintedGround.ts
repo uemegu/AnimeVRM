@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
+import { castShadows } from '../castShadows';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
 import { BENCH, CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, TRACK, TREES, WING, type Planter } from './layout';
 
@@ -96,7 +97,8 @@ function goal(x: number, z: number, facing: number): THREE.Group {
   }
   for (let y = 0.2; y < 2.4; y += 0.2) net.push(beam(6, 0.009, 0.009, 0, y, -1.3));
   for (let nz = -1.3; nz < 0; nz += 0.2) net.push(beam(6, 0.009, 0.009, 0, 2.4, nz));
-  group.add(bars('Goal | frame', frame, '#eeeadd'), bars('Goal | net', net, '#cbd1c3'));
+  // The 9 mm net strings would blur away in the shadow map; only the frame casts.
+  group.add(castShadows(bars('Goal | frame', frame, '#eeeadd')), bars('Goal | net', net, '#cbd1c3'));
   group.position.set(x, 0, z);
   group.rotation.y = facing;
   return group;
@@ -119,10 +121,7 @@ function bench(): THREE.Group {
     frame.push(new THREE.BoxGeometry(0.04, 0.03, 0.36).translate(x, 0.08, -0.03));
   }
   group.add(bars('Bench | steel frame', frame, '#3f5f67'));
-  const shade = new THREE.Mesh(new THREE.PlaneGeometry(length + 0.3, 0.7).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#5b4a36', transparent: true, opacity: 0.18, depthWrite: false, toneMapped: false, fog: false }));
-  shade.name = 'Bench | ground shade';
-  shade.position.set(0.12, 0.015, 0.05);
-  group.add(shade);
+  castShadows(group);
   group.position.set(BENCH.x, 0, BENCH.z);
   group.rotation.y = BENCH.facing;
   return group;
@@ -138,7 +137,7 @@ function fence(from: [number, number], to: [number, number], height: number): TH
     frame.push(new THREE.BoxGeometry(0.09, height + 0.1, 0.09).translate(x, height / 2, 0));
   }
   for (const y of [0.2, height / 2, height]) frame.push(new THREE.BoxGeometry(length, 0.055, 0.055).translate(length / 2, y, 0));
-  group.add(bars('Fence | posts', frame, '#527a76'));
+  group.add(castShadows(bars('Fence | posts', frame, '#527a76')));
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
@@ -294,7 +293,8 @@ function cycleParking(): THREE.Group {
   roof.name = 'Cycle parking | sloping silver roof';
   group.add(roof);
   for (let x = x0 - 0.25; x <= x1 + 0.25; x += 0.55) roofRibs.push(beam(new THREE.Vector3(x, 2.77, z0 - 0.4), new THREE.Vector3(x, 2.4, z1 + 0.4), 0.014));
-  group.add(bars('Cycle parking | steel columns and beams', steel, '#596e77'));
+  castShadows(roof);
+  group.add(castShadows(bars('Cycle parking | steel columns and beams', steel, '#596e77')));
   group.add(bars('Cycle parking | roof seams', roofRibs, '#f1f2ea'));
   for (let z = p.minZ + 1; z < p.maxZ; z += 2.2) {
     markings.push(new THREE.BoxGeometry(p.maxX - p.minX - 1.5, 0.004, 0.06).translate((p.minX + p.maxX) / 2, 0.03, z));
@@ -441,8 +441,6 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
   const image = tree.image as { width: number; height: number };
   const aspect = image.width / image.height;
   const treeGeometry = new THREE.PlaneGeometry(aspect, 1);
-  const shadowMaterial = new THREE.MeshBasicMaterial({ color: '#526954', transparent: true, opacity: 0.12, depthWrite: false, toneMapped: false });
-  const shadowGeometry = new THREE.CircleGeometry(1, 16).rotateX(-Math.PI / 2);
   // Three intersecting cards keep foliage visible from all four sides; canopy layers have real depth.
   for (const [x, z, height] of TREES) {
     for (let angle = 0; angle < 3; angle++) {
@@ -451,13 +449,8 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
       mesh.position.set(x, CENTRAL_TREE.base + height / 2, z);
       mesh.scale.setScalar(height);
       mesh.rotation.y = angle * Math.PI / 3;
-      group.add(mesh);
+      group.add(castShadows(mesh));
     }
-    const shadow = new THREE.Mesh(shadowGeometry, shadowMaterial);
-    shadow.name = 'Tree | ground shade';
-    shadow.position.set(x + 1.2, CENTRAL_TREE.base + 0.003, z + 1.5);
-    shadow.scale.set(height * 0.45, 1, height * 0.3);
-    group.add(shadow);
   }
   const coniferImage = conifer.image as { width: number; height: number };
   const coniferGeometry = new THREE.PlaneGeometry(CENTRAL_TREE.height * coniferImage.width / coniferImage.height, CENTRAL_TREE.height);
@@ -467,7 +460,7 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
     tree.name = 'Courtyard | central conifer in round enclosure';
     tree.position.set(CENTRAL_TREE.x, CENTRAL_TREE.base + CENTRAL_TREE.height / 2, CENTRAL_TREE.z);
     tree.rotation.y = angle * Math.PI / 3;
-    group.add(tree);
+    group.add(castShadows(tree));
   }
   for (const [name, from, to] of [
     ['Far | west tree belt', [FAR.west, FAR.south], [FAR.west, FAR.north]],

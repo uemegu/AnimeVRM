@@ -15,6 +15,9 @@ import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from
 import { attachFaceSdf, createFaceSdfFrame, injectFaceSdf } from './shader/FaceSdf';
 import { CHARACTER_LAYER, EYE_LAYER } from './postprocessing/LightWrap';
 
+/** 輪郭線を視線方向の奥へずらす量（m）。関節の凹みで殻が表に出るのを隠す */
+const OUTLINE_DEPTH_OFFSET = 0.01;
+
 export type ToonShaderOptions = {
   bodyPattern?: RegExp;
   hairPattern?: RegExp;
@@ -383,6 +386,16 @@ export function applyToonShader(
             outlineOffset *= lineWeight;
             `
           );
+          // 輪郭線を視線方向の奥へずらす。肘・膝を深く曲げた凹みで、殻が向かいの面を突き抜けて
+          // 暗い三角形として見えるのを、体の表面の後ろに隠す（画面上の位置・太さは変わらない）
+          shader.vertexShader = shader.vertexShader.replace(
+            'gl_Position = projectionMatrix * modelViewMatrix * vec4( outlineOffset + transformed, 1.0 );',
+            /* glsl */ `
+            vec4 outlineMvPosition = modelViewMatrix * vec4( outlineOffset + transformed, 1.0 );
+            outlineMvPosition.xyz += normalize( outlineMvPosition.xyz ) * ${OUTLINE_DEPTH_OFFSET.toFixed(4)};
+            gl_Position = projectionMatrix * outlineMvPosition;
+            `
+          );
         };
         material.needsUpdate = true;
       }
@@ -392,6 +405,10 @@ export function applyToonShader(
       const brightLitScale = { value: 1 };
       material.userData.darkLitLift = darkLitLift;
       material.userData.brightLitScale = brightLitScale;
+      const terminatorColor = { value: new THREE.Color(1, 1, 1) };
+      const terminatorStrength = { value: 0 };
+      material.userData.terminatorColor = terminatorColor;
+      material.userData.terminatorStrength = terminatorStrength;
 
       // Inject Bottom Gradient (Vertical Shading / Grounding shadow) into fragment shader for ALL MToon materials
       const prevOnBeforeCompile = material.onBeforeCompile;
@@ -413,12 +430,21 @@ export function applyToonShader(
         // 白に近い色は抑える（白いシャツが表示できる明るさを超えて光って見えないように）
         shader.uniforms.uDarkLitLift = darkLitLift;
         shader.uniforms.uBrightLitScale = brightLitScale;
+        // 明暗の境目（shading が 0〜1 の間）だけ色を掛ける。帯の幅は影の硬さで決まる
+        shader.uniforms.uTerminatorColor = terminatorColor;
+        shader.uniforms.uTerminatorStrength = terminatorStrength;
         shader.fragmentShader = shader.fragmentShader
           .replace(
             'uniform vec3 litFactor;',
             /* glsl */ `uniform vec3 litFactor;
           uniform float uDarkLitLift;
           uniform float uBrightLitScale;
+          uniform vec3 uTerminatorColor;
+          uniform float uTerminatorStrength;
+          vec3 mtoonTerminator( const in vec3 col, const in float shading ) {
+            float band = 4.0 * shading * ( 1.0 - shading );
+            return mix( col, col * uTerminatorColor, band * uTerminatorStrength );
+          }
           const float DARK_LIT_TARGET = 0.03;
           vec3 mtoonLitTone( const in vec3 albedo ) {
             float luma = dot( albedo, vec3( 0.2126, 0.7152, 0.0722 ) );
@@ -429,7 +455,7 @@ export function applyToonShader(
           )
           .replace(
             'mix( material.shadeColor, material.diffuseColor, shading )',
-            'mix( material.shadeColor, mtoonLitTone( material.diffuseColor ), shading )'
+            'mtoonTerminator( mix( material.shadeColor, mtoonLitTone( material.diffuseColor ), shading ), shading )'
           );
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
@@ -683,6 +709,10 @@ export function applyToonShader(
         if (lift) lift.value = params.darkLitLift ?? 0;
         const dim = material.userData.brightLitScale as { value: number } | undefined;
         if (dim) dim.value = params.brightLitScale ?? 1;
+        const termColor = material.userData.terminatorColor as { value: THREE.Color } | undefined;
+        if (termColor) termColor.value.set(params.terminatorColor ?? '#ffffff');
+        const termStrength = material.userData.terminatorStrength as { value: number } | undefined;
+        if (termStrength) termStrength.value = params.terminatorStrength ?? 0;
 
         // GI Equalization
         if (typeof params.giEqualizationFactor === 'number') {

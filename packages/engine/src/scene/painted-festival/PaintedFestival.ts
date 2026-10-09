@@ -4,6 +4,7 @@ import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { resolveAssetUrl } from '../../utils/path';
 import { farStandee } from '../painted-gate/PaintedGate';
+import { castShadows } from '../castShadows';
 import { Fireworks } from './Fireworks';
 import {
   ANDON_POSTS, BANNER, EDGE_Z, EMBANKMENT, FAR, FAR_BANK, GROUND, LANTERN_STRINGS, RAILING, RIVER_Y, STALL_COLORS, TILES, type StallKind,
@@ -198,7 +199,7 @@ function railing(tile: THREE.Texture): THREE.Group {
   wood.concat(stone).forEach((g) => g.dispose());
   woodMesh.name = 'Railing | wood';
   stoneMesh.name = 'Railing | posts';
-  group.add(woodMesh, stoneMesh);
+  group.add(castShadows(woodMesh), castShadows(stoneMesh));
 
   // Andons: glowing paper boxes under a dark wooden cap.
   const paper = new THREE.MeshBasicMaterial({ map: shojiTexture(), color: new THREE.Color(1.8, 1.8, 1.8), toneMapped: false, fog: false });
@@ -214,7 +215,7 @@ function railing(tile: THREE.Texture): THREE.Group {
     andon.position.set(x, top + 0.19, RAILING.z);
     const cap = new THREE.Mesh(capGeometry, frame);
     cap.position.set(x, top + 0.41, RAILING.z);
-    group.add(andon, cap);
+    group.add(castShadows(andon), castShadows(cap));
   }
   return group;
 }
@@ -257,7 +258,7 @@ function lanternStrings(): THREE.Group {
     poles.forEach((g) => g.dispose());
     pole.name = 'Lantern poles';
     (pole.material as THREE.Material).name = 'Lantern poles';
-    group.add(pole);
+    group.add(castShadows(pole));
   }
   return group;
 }
@@ -310,7 +311,7 @@ export async function loadPaintedFestival(): Promise<THREE.Group> {
   bannerMesh.name = 'Banner';
   bannerMesh.position.set(BANNER.x, BANNER.height / 2, BANNER.z);
   bannerMesh.rotation.y = -0.35;
-  group.add(bannerMesh);
+  group.add(castShadows(bannerMesh));
 
   // Far bank: its bottom edge on the water line.
   const bank = farStandee('Far | bank', farBank, [FAR_BANK.minX, FAR_BANK.z], [FAR_BANK.maxX, FAR_BANK.z], FAR_BANK.repeat);

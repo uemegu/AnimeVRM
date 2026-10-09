@@ -254,6 +254,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
+.viewer-chip-grid.single {
+  grid-template-columns: 1fr;
+}
 .viewer-chip {
   height: 30px;
   box-sizing: border-box;
@@ -408,18 +411,6 @@
   z-index: 1;
 }
 
-.viewer-location-select {
-  height: 34px;
-  width: 140px;
-  padding: 0 10px;
-  font-size: 13px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-  cursor: pointer;
-  flex-shrink: 0;
-}
 
 .viewer-frame {
   position: relative;
