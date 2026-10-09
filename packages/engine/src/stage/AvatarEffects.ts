@@ -3,6 +3,7 @@ import type { VRM } from '@pixiv/three-vrm';
 import { FaceOverlayEffect } from '../effects/FaceOverlayEffect';
 import { WateryEyeEffect } from '../effects/eye/WateryEyeEffect';
 import { TearEffect } from '../effects/tears/TearEffect';
+import { CryFaceEffect } from '../effects/cry/CryFaceEffect';
 import { SweatEffect } from '../effects/sweat/SweatEffect';
 import { EffectTextManager } from '../effects/text/EffectTextManager';
 import type { EffectPresetName } from '../effects/text/types';
@@ -30,7 +31,7 @@ interface EyeMaterialBackup {
 type EyeMaterial = EyeMaterialBackup['material'];
 
 /**
- * アバター1人分の感情演出（頬赤・怒りマーク・涙・汗・目が泳ぐ・文字演出・高速アクションの残像）
+ * アバター1人分の感情演出（頬赤・赤面・涙目・あわあわ口・怒りマーク・涙・汗・目が泳ぐ・文字演出・高速アクションの残像）
  */
 export class AvatarEffects {
   private readonly vrm: VRM;
@@ -39,6 +40,7 @@ export class AvatarEffects {
   private readonly wateryEyes: WateryEyeEffect;
   private readonly tears: TearEffect;
   private readonly sweat: SweatEffect;
+  private readonly cryFace: CryFaceEffect;
   private readonly texts: EffectTextManager;
   private fastMotion: FastMotionEffect | null = null;
 
@@ -46,6 +48,9 @@ export class AvatarEffects {
   private anger = false;
   private faceSweat = false;
   private tearsOn = false;
+  private redface = false;
+  private tearyEyes = false;
+  private awawaMouth = false;
   private highlights: EyeMaterialBackup[] = [];
   private irises: EyeMaterialBackup[] = [];
 
@@ -63,6 +68,7 @@ export class AvatarEffects {
     this.wateryEyes = new WateryEyeEffect(vrm, { enabled: false });
     this.tears = new TearEffect(vrm, { enabled: false });
     this.sweat = new SweatEffect(vrm, { enabled: false });
+    this.cryFace = new CryFaceEffect(vrm);
     this.texts = new EffectTextManager(scene);
   }
 
@@ -71,6 +77,34 @@ export class AvatarEffects {
     if (this.blush === enabled) return;
     this.blush = enabled;
     void this.faceOverlay.setEnabled('blush', enabled).catch((err) => console.warn('Failed to show blush:', err));
+    this.updateEyeShine();
+  }
+
+  /** 赤面（頬を赤らめるより濃く広い） */
+  public setRedface(enabled: boolean): void {
+    if (this.redface === enabled) return;
+    this.redface = enabled;
+    void this.faceOverlay.setEnabled('redface', enabled).catch((err) => console.warn('Failed to show red face:', err));
+  }
+
+  /** 涙目（目を潤ませ、目尻に涙の粒をためる）。drops が false なら粒は出さない（髪が目尻にかかるキャラ） */
+  public setTearyEyes(enabled: boolean, drops = true): void {
+    this.cryFace.setDrops(enabled && drops);
+    if (this.tearyEyes === enabled) return;
+    this.tearyEyes = enabled;
+    this.updateEyeShine();
+  }
+
+  /** あわあわ口（口の前に波打つ大きな口を貼る。正面から見たときだけ出る） */
+  public setAwawaMouth(enabled: boolean): void {
+    if (this.awawaMouth === enabled) return;
+    this.awawaMouth = enabled;
+    this.cryFace.setMouth(enabled);
+  }
+
+  /** 頬赤・涙目の間は目を潤ませる */
+  private updateEyeShine(): void {
+    const enabled = this.blush || this.tearyEyes;
     this.wateryEyes.setEnabled(enabled);
     if (enabled) this.backupEyeMaterials();
     else this.restoreEyeMaterials();
@@ -188,8 +222,9 @@ export class AvatarEffects {
     this.texts.update(delta, camera);
     this.tears.update(delta);
     this.sweat.update(delta);
+    this.cryFace.update(delta, elapsed, camera);
     this.wateryEyes.update(delta, elapsed, blinkWeight);
-    if (this.blush) this.wobbleEyeMaterials(elapsed);
+    if (this.blush || this.tearyEyes) this.wobbleEyeMaterials(elapsed);
     this.fastMotion?.update(delta, elapsed, camera, renderer);
   }
 
@@ -254,6 +289,7 @@ export class AvatarEffects {
     this.wateryEyes.dispose();
     this.tears.dispose();
     this.sweat.dispose();
+    this.cryFace.dispose();
     this.texts.dispose();
     this.fastMotion?.dispose();
     this.fastMotion = null;

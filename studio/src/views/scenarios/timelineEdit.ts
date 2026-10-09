@@ -47,7 +47,7 @@ export function keyKinds(key: AvatarTransition | SceneTransition): string[] {
   if ('lookAtTarget' in key && (key.lookAtTarget !== undefined || key.headTurn !== undefined)) kinds.push('gaze');
   if ('visible' in key && key.visible !== undefined) kinds.push('visible');
   if ('camera' in key && (key.camera !== undefined || key.cameraPose !== undefined)) kinds.push('camera');
-  const effectKeys = ['blush', 'anger', 'tears', 'eyeWander', 'motionSpeed', 'effectText', 'sweat', 'focusLines'] as const;
+  const effectKeys = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'eyeWander', 'motionSpeed', 'effectText', 'sweat', 'focusLines'] as const;
   if (effectKeys.some((k) => k in key && (key as Record<string, unknown>)[k] !== undefined)) kinds.push('effect');
   return kinds;
 }

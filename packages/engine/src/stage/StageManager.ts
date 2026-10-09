@@ -1403,6 +1403,10 @@ export class StageManager {
         headTurn: key.headTurn ?? member.headTurn,
         visible: key.visible ?? true,
         blush: key.blush ?? look.blush,
+        redface: key.redface ?? look.redface ?? false,
+        tearyEyes: key.tearyEyes ?? look.tearyEyes ?? false,
+        tearDrops: look.tearDrops ?? true,
+        awawaMouth: key.awawaMouth ?? look.awawaMouth ?? false,
         anger: key.anger ?? look.anger,
         tears: key.tears ?? look.tears,
         faceSweat: look.faceSweat ?? false,
@@ -1432,6 +1436,9 @@ export class StageManager {
       const effects = avatar.effects;
       if (effects) {
         effects.setBlush(effective.blush);
+        effects.setRedface(effective.redface);
+        effects.setTearyEyes(effective.tearyEyes, effective.tearDrops);
+        effects.setAwawaMouth(effective.awawaMouth);
         effects.setAnger(effective.anger);
         effects.setTears(effective.tears);
         effects.setFaceSweat(effective.faceSweat);

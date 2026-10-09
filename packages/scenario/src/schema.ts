@@ -101,6 +101,12 @@ const EyeWander = z.union([z.boolean(), z.number().min(0).max(2)]);
 const AvatarLookFields = {
   /** 頬を赤らめる（目も潤む） */
   blush: z.boolean().optional(),
+  /** 赤面（blush より濃く広い。強い反応のとき） */
+  redface: z.boolean().optional(),
+  /** 涙目（目が潤み、目尻に涙の粒がたまる） */
+  tearyEyes: z.boolean().optional(),
+  /** あわあわ口（波打つ大きな口。板なので正面を向いた構図で使う）。赤面・涙目と組み合わせると泣き叫ぶ顔になる */
+  awawaMouth: z.boolean().optional(),
   /** 怒りマーク */
   anger: z.boolean().optional(),
   /** 涙を流す */

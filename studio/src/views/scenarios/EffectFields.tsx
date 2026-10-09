@@ -3,10 +3,10 @@ import { useI18n } from '../../i18n';
 import { textJa } from './scenarioEdit';
 
 /** 演出の項目（カットのキャラ指定とタイムラインのキーで共通） */
-export type EffectValues = Pick<SceneAvatarConfig, 'blush' | 'anger' | 'tears' | 'fastMotion' | 'eyeWander' | 'motionSpeed' | 'effectText' | 'sweat'>;
+export type EffectValues = Pick<SceneAvatarConfig, 'blush' | 'redface' | 'tearyEyes' | 'awawaMouth' | 'anger' | 'tears' | 'fastMotion' | 'eyeWander' | 'motionSpeed' | 'effectText' | 'sweat'>;
 type Key = keyof EffectValues;
 
-const TOGGLES = ['blush', 'anger', 'tears', 'fastMotion'] as const;
+const TOGGLES = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'fastMotion'] as const;
 const WANDER_LEVELS = [0, 0.6, 1, 1.6] as const;
 
 interface Props {
@@ -19,7 +19,7 @@ interface Props {
 }
 
 /**
- * 感情演出の入力欄（頬赤・怒りマーク・涙・残像・目が泳ぐ・モーション速度・文字演出・汗）。
+ * 感情演出の入力欄（頬赤・赤面・涙目・あわあわ口・怒りマーク・涙・残像・目が泳ぐ・モーション速度・文字演出・汗）。
  * 置いた先のグリッドにそのまま並ぶよう、欄だけを返す
  */
 export function EffectFields({ value, unsetLabel, onChange, withFastMotion = false }: Props) {

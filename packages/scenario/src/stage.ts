@@ -87,6 +87,12 @@ export interface StageCastMember {
 /** 顔・体の演出の状態 */
 export interface AvatarLook {
   blush: boolean;
+  /** 赤面・涙目・あわあわ口（省略は false） */
+  redface?: boolean;
+  tearyEyes?: boolean;
+  awawaMouth?: boolean;
+  /** 涙目で目尻の涙の粒を出すか（キャラの設定。省略は出す） */
+  tearDrops?: boolean;
   anger: boolean;
   tears: boolean;
   /** 顔に汗のテクスチャを重ねる（今はビューアの試し用で、シナリオからは指定できない） */
@@ -190,6 +196,8 @@ export interface CastOptions {
   isLoopingMotion: (motion: string) => boolean;
   /** キャラの 2D デフォルメ画像（characters.json の sprites）。なければ sprite の指定は無視する */
   spriteFor?: (characterId: string, spriteKey: string) => CharacterSprite | undefined;
+  /** 涙目で目尻の涙の粒を出すか（characters.json の tearDrops。省略時は出す） */
+  tearDropsFor?: (characterId: string) => boolean;
 }
 
 /** 2D 画像の高さの既定（メートル。座り込んだ子どものデフォルメくらい） */
@@ -243,6 +251,10 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       ...(config.heldItem ? { heldItem: typeof config.heldItem === 'string' ? { item: config.heldItem } : config.heldItem } : {}),
       look: {
         blush: config.blush ?? false,
+        ...(config.redface ? { redface: true } : {}),
+        ...(config.tearyEyes ? { tearyEyes: true } : {}),
+        ...(config.awawaMouth ? { awawaMouth: true } : {}),
+        ...(options.tearDropsFor?.(characterId) === false ? { tearDrops: false } : {}),
         anger: config.anger ?? false,
         tears: config.tears ?? false,
         eyeWander: eyeWanderIntensity(config.eyeWander),
@@ -328,6 +340,9 @@ export interface CutAvatarState {
   headTurn?: number;
   visible?: boolean;
   blush?: boolean;
+  redface?: boolean;
+  tearyEyes?: boolean;
+  awawaMouth?: boolean;
   anger?: boolean;
   tears?: boolean;
   eyeWander?: number;
@@ -388,6 +403,9 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       if (key.headTurn !== undefined) state.headTurn = key.headTurn;
       if (key.visible !== undefined) state.visible = key.visible;
       if (key.blush !== undefined) state.blush = key.blush;
+      if (key.redface !== undefined) state.redface = key.redface;
+      if (key.tearyEyes !== undefined) state.tearyEyes = key.tearyEyes;
+      if (key.awawaMouth !== undefined) state.awawaMouth = key.awawaMouth;
       if (key.anger !== undefined) state.anger = key.anger;
       if (key.tears !== undefined) state.tears = key.tears;
       if (key.eyeWander !== undefined) state.eyeWander = eyeWanderIntensity(key.eyeWander);

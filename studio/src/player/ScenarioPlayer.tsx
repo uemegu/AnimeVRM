@@ -126,6 +126,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         modelUrlFor: (id) => data.characters.characters.find((c) => c.id === id)?.models[0]?.url,
         isLoopingMotion: (motion) => !!data.motions[motion]?.loop,
         spriteFor: (characterId, key) => data.characters.characters.find((c) => c.id === characterId)?.sprites?.find((s) => s.key === key),
+        tearDropsFor: (characterId) => data.characters.characters.find((c) => c.id === characterId)?.tearDrops ?? true,
       }),
     [stage, data]
   );
