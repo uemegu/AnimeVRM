@@ -294,7 +294,7 @@ export class Fighter {
       hit_spin: '/assets/motions/hit_spin.fbx',
       hit_light: '/assets/motions/hit_light.fbx',
       fall: '/assets/motions/fall_water.fbx',
-      win: '/animations/ardy_victory.fbx',
+      win: '/assets/motions/ardy_victory.fbx',
     };
 
     for (const [name, url] of Object.entries(motionUrls)) {

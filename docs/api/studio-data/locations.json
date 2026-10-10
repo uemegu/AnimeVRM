@@ -1,6 +1,35 @@
 {
   "description": "場所ごとの背景（遠景・中景・近景）。シーンの background / シナリオの location から参照する",
   "presets": {
+    "classroom": {
+      "id": "classroom",
+      "name": "教室（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-classroom/thumb-classroom.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-classroom",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.9
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
     "corridor": {
       "id": "corridor",
       "name": "廊下",
@@ -11,13 +40,297 @@
         }
       }
     },
-    "school_gate": {
-      "id": "school_gate",
-      "name": "校門",
+    "courtyard": {
+      "id": "courtyard",
+      "name": "中庭（簡易3D）",
       "isIndoor": false,
+      "thumbnail": "/textures/painted-ground/thumb-courtyard.avif",
       "layers": {
         "background": {
-          "url": "/textures/school-gate-far.avif"
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-ground",
+        "position": {
+          "x": -27,
+          "y": 0,
+          "z": -8
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#63738a",
+          "opacity": 0.65,
+          "softness": 4
+        }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.4
+        },
+        "strength": 0.055,
+        "gust": 0.6
+      },
+      "stage": {
+        "camera": {
+          "far": 200,
+          "fov": 48,
+          "depthOfField": {
+            "aperture": 0.01,
+            "maxBlur": 0.004,
+            "sharpRange": 10
+          }
+        }
+      }
+    },
+    "library": {
+      "id": "library",
+      "name": "図書室（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-classroom/thumb-library.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-library",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 1.8
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      },
+      "seats": {
+        "library_desk": {
+          "name": "窓際の閲覧席",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
+          "cameras": {
+            "close": {
+              "position": [
+                0.05,
+                1.1,
+                1.7
+              ],
+              "target": [
+                0,
+                1,
+                0
+              ],
+              "fov": 36
+            },
+            "medium": {
+              "position": [
+                0,
+                1.12,
+                2.05
+              ],
+              "target": [
+                0,
+                0.98,
+                0
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                0.4,
+                1.45,
+                3.1
+              ],
+              "target": [
+                0,
+                0.95,
+                -0.6
+              ],
+              "fov": 50
+            }
+          }
+        }
+      }
+    },
+    "sports_ground": {
+      "id": "sports_ground",
+      "name": "運動場（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-ground/thumb.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-ground",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#63738a",
+          "opacity": 0.65,
+          "softness": 4
+        }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.4
+        },
+        "strength": 0.055,
+        "gust": 0.6
+      },
+      "stage": {
+        "camera": {
+          "far": 200,
+          "depthOfField": {
+            "aperture": 0.015,
+            "maxBlur": 0.008,
+            "sharpRange": 4
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      },
+      "seats": {
+        "ground_bench": {
+          "name": "グラウンドのベンチ",
+          "position": [
+            2.9,
+            0,
+            -6
+          ],
+          "rotationY": -1.5708,
+          "motion": "pose_stretch_legs",
+          "cameras": {
+            "medium": {
+              "position": [
+                1.2,
+                1.15,
+                -3
+              ],
+              "target": [
+                2.8,
+                0.8,
+                -6
+              ],
+              "fov": 40
+            },
+            "close": {
+              "position": [
+                1.6,
+                1.1,
+                -4.2
+              ],
+              "target": [
+                2.8,
+                0.85,
+                -6
+              ],
+              "fov": 36
+            },
+            "wide": {
+              "position": [
+                0.4,
+                1.4,
+                -1.6
+              ],
+              "target": [
+                2.6,
+                0.8,
+                -6
+              ],
+              "fov": 48
+            }
+          }
+        }
+      }
+    },
+    "school_gate": {
+      "id": "school_gate",
+      "name": "校門（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-classroom/thumb-gate.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gate",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#526690",
+          "opacity": 0.8,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "depthOfField": {
+            "aperture": 0.02,
+            "maxBlur": 0.01,
+            "sharpRange": 4
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
         }
       }
     },
@@ -51,6 +364,123 @@
         }
       }
     },
+    "gym": {
+      "id": "gym",
+      "name": "体育館（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-gym/thumb.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gym",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -3,
+          "y": 2.2,
+          "z": 1.2
+        },
+        "color": "#ffd4a0",
+        "intensity": 1.2,
+        "ambient": {
+          "color": "#e2cbbb",
+          "intensity": 0.75
+        },
+        "shadow": {
+          "color": "#665348",
+          "opacity": 0.3,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 100,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.1,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          },
+          "bloom": {
+            "strength": 0.06,
+            "radius": 0.3,
+            "threshold": 1.1
+          }
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "postProcessing": {
+          "sunShafts": false,
+          "lensFlare": false,
+          "cinematic": {
+            "diffusion": {
+              "enabled": false,
+              "strength": 0.12,
+              "radius": 1.8
+            },
+            "colorGrading": {
+              "enabled": false,
+              "shadowTint": "#11103b",
+              "highlightTint": "#fa6600",
+              "strength": 0.44,
+              "contrast": 0.15,
+              "gamma": 0.95
+            },
+            "vignette": {
+              "enabled": false,
+              "offset": 1.15,
+              "darkness": 0.12,
+              "color": "#2a1418"
+            },
+            "chromaticAberration": {
+              "enabled": false,
+              "offset": 0.002
+            },
+            "adjustments": {
+              "saturation": 0,
+              "brightness": 0,
+              "contrast": 0
+            }
+          }
+        }
+      }
+    },
     "home": {
       "id": "home",
       "name": "自宅",
@@ -58,6 +488,123 @@
       "layers": {
         "background": {
           "url": "/textures/myroom_far.avif"
+        }
+      }
+    },
+    "painted_gym": {
+      "id": "painted_gym",
+      "name": "体育館（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-gym/thumb.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gym",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -3,
+          "y": 2.2,
+          "z": 1.2
+        },
+        "color": "#ffd4a0",
+        "intensity": 1.2,
+        "ambient": {
+          "color": "#e2cbbb",
+          "intensity": 0.75
+        },
+        "shadow": {
+          "color": "#665348",
+          "opacity": 0.3,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 100,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.1,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          },
+          "bloom": {
+            "strength": 0.06,
+            "radius": 0.3,
+            "threshold": 1.1
+          }
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "postProcessing": {
+          "sunShafts": false,
+          "lensFlare": false,
+          "cinematic": {
+            "diffusion": {
+              "enabled": false,
+              "strength": 0.12,
+              "radius": 1.8
+            },
+            "colorGrading": {
+              "enabled": false,
+              "shadowTint": "#11103b",
+              "highlightTint": "#fa6600",
+              "strength": 0.44,
+              "contrast": 0.15,
+              "gamma": 0.95
+            },
+            "vignette": {
+              "enabled": false,
+              "offset": 1.15,
+              "darkness": 0.12,
+              "color": "#2a1418"
+            },
+            "chromaticAberration": {
+              "enabled": false,
+              "offset": 0.002
+            },
+            "adjustments": {
+              "saturation": 0,
+              "brightness": 0,
+              "contrast": 0
+            }
+          }
         }
       }
     },
@@ -117,6 +664,59 @@
           "height": 7.5,
           "offsetY": 1
         }
+      },
+      "seats": {
+        "library_desk": {
+          "name": "窓際の閲覧席",
+          "position": [
+            0,
+            -0.2,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "chin_rest",
+          "cameras": {
+            "close": {
+              "position": [
+                0.05,
+                1.1,
+                1.7
+              ],
+              "target": [
+                0,
+                1,
+                0
+              ],
+              "fov": 36
+            },
+            "medium": {
+              "position": [
+                0,
+                1.12,
+                2.05
+              ],
+              "target": [
+                0,
+                0.98,
+                0
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                0.4,
+                1.45,
+                3.1
+              ],
+              "target": [
+                0,
+                0.95,
+                -0.6
+              ],
+              "fov": 50
+            }
+          }
+        }
       }
     },
     "painted_gate": {
@@ -164,6 +764,117 @@
           "distance": 8,
           "height": 7.5,
           "offsetY": 1
+        }
+      }
+    },
+    "painted_ground": {
+      "id": "painted_ground",
+      "name": "運動場（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-ground/thumb.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-ground",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#63738a",
+          "opacity": 0.65,
+          "softness": 4
+        }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.4
+        },
+        "strength": 0.055,
+        "gust": 0.6
+      },
+      "stage": {
+        "camera": {
+          "far": 200,
+          "depthOfField": {
+            "aperture": 0.015,
+            "maxBlur": 0.008,
+            "sharpRange": 4
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      },
+      "seats": {
+        "ground_bench": {
+          "name": "グラウンドのベンチ",
+          "position": [
+            2.9,
+            0,
+            -6
+          ],
+          "rotationY": -1.5708,
+          "motion": "pose_stretch_legs",
+          "cameras": {
+            "medium": {
+              "position": [
+                1.2,
+                1.15,
+                -3
+              ],
+              "target": [
+                2.8,
+                0.8,
+                -6
+              ],
+              "fov": 40
+            },
+            "close": {
+              "position": [
+                1.6,
+                1.1,
+                -4.2
+              ],
+              "target": [
+                2.8,
+                0.85,
+                -6
+              ],
+              "fov": 36
+            },
+            "wide": {
+              "position": [
+                0.4,
+                1.4,
+                -1.6
+              ],
+              "target": [
+                2.6,
+                0.8,
+                -6
+              ],
+              "fov": 48
+            }
+          }
         }
       }
     },
@@ -221,6 +932,140 @@
           "distance": 8,
           "height": 7.5,
           "offsetY": 1
+        }
+      }
+    },
+    "painted_festival": {
+      "id": "painted_festival",
+      "name": "夏祭り（簡易3D）",
+      "isIndoor": false,
+      "thumbnail": "/textures/painted-classroom/thumb-festival.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-festival",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1,
+        "festival": {
+          "smokeStrength": 0.65,
+          "smokeLifetime": 12,
+          "stallLightBalance": 0.65
+        }
+      },
+      "light": {
+        "direction": {
+          "x": -0.95,
+          "y": 0.65,
+          "z": 0.25
+        },
+        "color": "#a9b6ff",
+        "intensity": 2.1,
+        "ambient": {
+          "color": "#4a4f86",
+          "intensity": 0.32
+        },
+        "shadow": {
+          "color": "#1a1d3a",
+          "opacity": 0.35,
+          "softness": 6
+        }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.6,
+          "y": 0,
+          "z": 0.8
+        },
+        "strength": 0.04,
+        "gust": 0.5
+      },
+      "stage": {
+        "camera": {
+          "depthOfField": {
+            "aperture": 0.007,
+            "maxBlur": 0.003,
+            "sharpRange": 5
+          },
+          "bloom": {
+            "strength": 0.55,
+            "radius": 0.5,
+            "threshold": 0.8,
+            "deepGlow": {
+              "enabled": false,
+              "core": 1.1,
+              "halo": 0.6,
+              "haze": 0.22
+            }
+          }
+        },
+        "character": {
+          "eyeCare": true,
+          "lightWrapBody": 1,
+          "highlightCap": 0.86
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "crowd": {
+          "models": [
+            "/models/mob/boy.vrm",
+            "/models/mob/classmate_kana.vrm",
+            "/models/mob/classmate_yui.vrm",
+            "/models/boy.vrm"
+          ],
+          "motions": [
+            "Standing Idle",
+            "mob_chat_gesture",
+            "mob_listen_nod",
+            "Idle"
+          ],
+          "areas": [
+            {
+              "min": [
+                -2,
+                -5
+              ],
+              "max": [
+                2,
+                1
+              ],
+              "count": 10
+            },
+            {
+              "min": [
+                -2,
+                1
+              ],
+              "max": [
+                2,
+                3
+              ],
+              "count": 2
+            },
+            {
+              "min": [
+                -6,
+                -10.8
+              ],
+              "max": [
+                6,
+                -7.6
+              ],
+              "count": 3
+            }
+          ],
+          "seed": 11
         }
       }
     },
@@ -293,6 +1138,150 @@
           "offsetY": 1
         }
       }
+    },
+    "shopping_street_3d": {
+      "id": "shopping_street_3d",
+      "name": "商店街（簡易3D）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:shopping-street",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#526690",
+          "opacity": 0.5,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 180,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.25,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        }
+      },
+      "thumbnail": "/textures/shopping-street/thumb.avif"
+    },
+    "shrine_3d": {
+      "id": "shrine_3d",
+      "name": "神社（簡易3D）",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-shrine",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -1.6,
+          "y": 2.2,
+          "z": 2.4
+        },
+        "shadow": {
+          "color": "#526690",
+          "opacity": 0.5,
+          "softness": 4
+        }
+      },
+      "stage": {
+        "camera": {
+          "fov": 50,
+          "far": 180,
+          "wide": {
+            "distance": 4.5,
+            "height": 0.25,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 3,
+            "height": 0,
+            "targetHeight": -0.3
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        },
+        "slots": {
+          "left": [
+            -0.8,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.8,
+            0,
+            0
+          ]
+        }
+      },
+      "thumbnail": "/textures/painted-shrine/thumb.avif"
     }
   }
 }

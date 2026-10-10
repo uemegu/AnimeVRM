@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_ground",
+  "title": {
+    "ja": "運動場 — 学校地図から作った簡易3D",
+    "en": "School sports ground (painted 3D)"
+  },
+  "description": "学校俯瞰地図を参考に、グラウンドの防球ネットの外に植栽・通路・樹木帯、中庭に石の囲い付きの植栽と中央の円形花壇、その向こうに屋根付き駐輪場を置いた撮影セット。",
+  "location": "painted_ground",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "school",
+      "text": "運動場の東側。防球ネット越しに、時計のある校舎と囲い付きの並木が見える。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1.5,
+          1.5,
+          5.2
+        ],
+        "target": [
+          0,
+          1.2,
+          -2
+        ],
+        "fov": 52
+      }
+    },
+    {
+      "id": "track",
+      "text": "防球ネットの外には植栽と通路、その奥に樹木帯が続いている。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 1.3962634015954636,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          4,
+          1.5,
+          1
+        ],
+        "target": [
+          -8,
+          1.3,
+          -1
+        ],
+        "fov": 54
+      }
+    },
+    {
+      "id": "courtyard",
+      "text": "中庭は石の囲い付きの植栽を通路が結ぶ。向こうの並木越しには、屋根付きの駐輪場が見える。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": -1.1344640137963142,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -4,
+          1.5,
+          3
+        ],
+        "target": [
+          40,
+          2.5,
+          5
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "gate",
+      "text": "囲い付きの植栽の間を通ると、校門と守衛室へつながる。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 3.141592653589793,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.6,
+          -5
+        ],
+        "target": [
+          27,
+          2,
+          30
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "parking",
+      "text": "グラウンドから中庭越しに見る駐輪場。植栽の向こうに、校舎の正面と平行な長い屋根と自転車の列がある。",
+      "timeOfDay": "day",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          -5,
+          1.65,
+          -8
+        ],
+        "target": [
+          55,
+          1.7,
+          1
+        ],
+        "fov": 44
+      }
+    },
+    {
+      "id": "overview",
+      "text": "運動場の右に中庭。その向こうに植栽に囲まれた駐輪場、奥に校舎と体育館。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -30,
+          39,
+          48
+        ],
+        "target": [
+          16,
+          0,
+          -7
+        ],
+        "fov": 66
+      }
+    },
+    {
+      "id": "conversation",
+      "text": "「校舎の時計、ここからでもよく見えるね」",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1.5,
+          1.35,
+          2.8
+        ],
+        "target": [
+          0,
+          1.15,
+          0
+        ],
+        "fov": 44
+      },
+      "speakerCharacterId": "aoi"
+    },
+    {
+      "id": "evening",
+      "text": "放課後。広い運動場を眺めながら、帰りの時間を待つ。",
+      "timeOfDay": "evening",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1.5,
+          1.5,
+          5.2
+        ],
+        "target": [
+          0,
+          1.2,
+          -2
+        ],
+        "fov": 52
+      }
+    }
+  ]
+}

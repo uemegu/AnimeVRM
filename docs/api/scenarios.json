@@ -5,7 +5,7 @@
     "kind": "story",
     "title": "窓越しの二重存在 〜カフェ監視任務〜",
     "lineCount": 7,
-    "updatedAt": "2026-10-03T01:24:49.615Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "cafe_indoor",
     "description": "暗いカフェの店内から、日差しの強い外の通りを歩く「もう一人の自分」を監視する日本アニメ映画風の高コントラスト短編シナリオ。",
     "links": {
@@ -22,7 +22,7 @@
     "kind": "story",
     "title": "疾風怒濤！高速アクション特訓",
     "lineCount": 6,
-    "updatedAt": "2026-10-03T01:24:49.615Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "school_gate",
     "description": "アニメ作画風の残像やスピードリボン、ダイナミックブラーを駆使した高速アクション演出。",
     "links": {
@@ -39,7 +39,7 @@
     "kind": "story",
     "title": "放課後全力ジェスチャー！ 〜アオイとエミリの表現力バトル〜",
     "lineCount": 9,
-    "updatedAt": "2026-10-03T01:24:49.616Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "school_gate",
     "description": "アオイとエミリが昼の校門前で全身ジェスチャー対決！ひらめき、歓喜、おねだり、ツッコミが炸裂する多彩なモーションシナリオ。",
     "links": {
@@ -56,7 +56,7 @@
     "kind": "story",
     "title": "放課後大波乱!? 一体誰が本命なのよ〜！",
     "lineCount": 19,
-    "updatedAt": "2026-10-03T01:24:49.616Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "corridor",
     "description": "4人のヒロインが勢揃い！修羅場と選択肢が待ち受けるマルチキャラクター裁判シナリオ。",
     "links": {
@@ -78,7 +78,7 @@
     "kind": "story",
     "title": "夕暮れの校門とオルカンの憂鬱",
     "lineCount": 11,
-    "updatedAt": "2026-10-03T01:24:49.616Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "school_gate",
     "description": "夕暮れの校門前で繰り広げられる、全力で真面目な新NISA・全世界株式インデックス投資相談ストーリー。",
     "links": {
@@ -99,9 +99,26 @@
     "kind": "story",
     "title": "昼休みの教室 — 簡易3Dの教室で会話",
     "lineCount": 9,
-    "updatedAt": "2026-10-03T01:24:49.616Z",
+    "updatedAt": "2026-10-10T09:16:54.356Z",
     "location": "painted_classroom",
     "description": "床・壁・天井の1枚絵と机のアクスタで組んだ簡易3Dの昼の教室で、背景モブの生徒たちが談笑する中、アオイとエミリが午後の小テストや放課後の約束を交わす日常シーン。",
+    "links": {
+      "sets": [],
+      "requires": [],
+      "unless": [],
+      "conditions": [],
+      "after": []
+    }
+  },
+  {
+    "category": "demo",
+    "id": "painted_courtyard",
+    "kind": "story",
+    "title": "中庭 — 運動場と共有する簡易3D",
+    "lineCount": 7,
+    "updatedAt": "2026-10-10T09:16:54.357Z",
+    "location": "courtyard",
+    "description": "学校地図の校舎・植栽・中庭・駐輪場を運動場と共有する。対称の植栽、途切れない舗装、運動場への入口を中庭の目線で確認する。",
     "links": {
       "sets": [],
       "requires": [],
@@ -116,9 +133,43 @@
     "kind": "story",
     "title": "校門のシオン — 簡易3Dの校門",
     "lineCount": 6,
-    "updatedAt": "2026-10-03T01:24:49.617Z",
+    "updatedAt": "2026-10-10T09:16:54.357Z",
     "location": "painted_gate",
     "description": "下書きの上に描いた1枚絵を箱に投影した簡易3Dの校門。門の前に立つシオンを、朝・昼・放課後の光で見る。",
+    "links": {
+      "sets": [],
+      "requires": [],
+      "unless": [],
+      "conditions": [],
+      "after": []
+    }
+  },
+  {
+    "category": "demo",
+    "id": "painted_ground",
+    "kind": "story",
+    "title": "運動場 — 学校地図から作った簡易3D",
+    "lineCount": 8,
+    "updatedAt": "2026-10-10T09:16:54.357Z",
+    "location": "painted_ground",
+    "description": "学校俯瞰地図を参考に、グラウンドの防球ネットの外に植栽・通路・樹木帯、中庭に石の囲い付きの植栽と中央の円形花壇、その向こうに屋根付き駐輪場を置いた撮影セット。",
+    "links": {
+      "sets": [],
+      "requires": [],
+      "unless": [],
+      "conditions": [],
+      "after": []
+    }
+  },
+  {
+    "category": "demo",
+    "id": "painted_gym",
+    "kind": "story",
+    "title": "夕日の体育館 — 簡易3D",
+    "lineCount": 10,
+    "updatedAt": "2026-10-10T09:16:54.357Z",
+    "location": "painted_gym",
+    "description": "四方の壁・透過した窓・木の床と、立体の舞台・階段・ギャラリー・鉄骨・バスケットゴール・跳び箱・マット・ボールかご。空はThree.jsのSkyBackgroundで描画。",
     "links": {
       "sets": [],
       "requires": [],
@@ -133,9 +184,26 @@
     "kind": "story",
     "title": "図書室のシオン — 簡易3Dの図書室",
     "lineCount": 9,
-    "updatedAt": "2026-10-03T01:24:49.617Z",
+    "updatedAt": "2026-10-10T09:16:54.357Z",
     "location": "painted_library",
     "description": "床・壁・天井の1枚絵と家具のアクスタで組んだ簡易3Dの図書室。窓際の閲覧机で頬杖をつくシオンを、向かいの席から朝・昼・放課後の光で見る。",
+    "links": {
+      "sets": [],
+      "requires": [],
+      "unless": [],
+      "conditions": [],
+      "after": []
+    }
+  },
+  {
+    "category": "demo",
+    "id": "painted_shrine",
+    "kind": "story",
+    "title": "夏の神社 — 簡易3D",
+    "lineCount": 10,
+    "updatedAt": "2026-10-10T09:16:54.358Z",
+    "location": "shrine_3d",
+    "description": "元絵の神社を、拝殿・社務所の立面、銅板と瓦の屋根、石の鳥居・灯籠・玉垣、手水舎、鎮守の森で立体に組み直した簡易3D。参道の前後と左右を見渡せる。",
     "links": {
       "sets": [],
       "requires": [],
@@ -150,7 +218,7 @@
     "kind": "story",
     "title": "夕暮れの公園と放課後の期待",
     "lineCount": 15,
-    "updatedAt": "2026-10-03T01:24:49.617Z",
+    "updatedAt": "2026-10-10T09:16:54.358Z",
     "location": "modern_park",
     "description": "夕暮れの公園に呼び出されたあなた。茜色に染まる並木道で、アオイが伝えたかった想いとは――。",
     "links": {
@@ -171,9 +239,26 @@
     "kind": "story",
     "title": "休日デート〜私服のエミリと街歩き〜",
     "lineCount": 27,
-    "updatedAt": "2026-10-03T01:24:49.617Z",
+    "updatedAt": "2026-10-10T09:16:54.358Z",
     "location": "home",
     "description": "休日に私服のエミリと待ち合わせ。カフェテラスでの特別なひとときを過ごすデートシナリオ。",
+    "links": {
+      "sets": [],
+      "requires": [],
+      "unless": [],
+      "conditions": [],
+      "after": []
+    }
+  },
+  {
+    "category": "demo",
+    "id": "shopping_street",
+    "kind": "story",
+    "title": "木漏れ日の商店街 — 簡易3D",
+    "lineCount": 9,
+    "updatedAt": "2026-10-10T09:16:54.358Z",
+    "location": "shopping_street_3d",
+    "description": "元絵の石造り・蔦・店内の明かりを店舗立面に再構成した簡易3D。屋根・ひさし・街灯・ベンチ・花壇を立体で作り、通りの前後と左右を自由に見渡せる。",
     "links": {
       "sets": [],
       "requires": [],
@@ -188,7 +273,7 @@
     "kind": "story",
     "title": "シルバーウィークの黄昏 〜アオイとエミリの帰り道〜",
     "lineCount": 8,
-    "updatedAt": "2026-10-03T01:24:49.618Z",
+    "updatedAt": "2026-10-10T09:16:54.359Z",
     "location": "town",
     "description": "連休最終日の夕暮れ。私服のアオイとエミリが街を歩きながら、名残惜しそうに語り合うショートシナリオ。",
     "links": {
@@ -205,7 +290,7 @@
     "kind": "story",
     "title": "校門の邂逅 〜シオンと桐島先生の秘密の推し〜",
     "lineCount": 19,
-    "updatedAt": "2026-10-03T01:24:49.618Z",
+    "updatedAt": "2026-10-10T09:16:54.359Z",
     "location": "school_gate",
     "description": "眠そうに登校するシオンと校門で待ち受けるクールな桐島先生。2人がまさかのニッチな古生物トークで意気投合！？",
     "links": {
@@ -227,7 +312,7 @@
     "kind": "story",
     "title": "放課後の並木道 〜君と歩く帰り道〜",
     "lineCount": 13,
-    "updatedAt": "2026-10-03T01:24:49.618Z",
+    "updatedAt": "2026-10-10T09:16:54.359Z",
     "location": "town",
     "description": "放課後の美しい並木道をアオイと一緒に歩く、臨場感あふれるスクロール背景シナリオ。",
     "links": {
@@ -249,7 +334,7 @@
     "kind": "story",
     "title": "放課後トライアングル〜アオイとエミリとあなた〜",
     "lineCount": 16,
-    "updatedAt": "2026-10-03T01:24:49.618Z",
+    "updatedAt": "2026-10-10T09:16:54.359Z",
     "location": "corridor",
     "description": "アオイとエミリとあなたの3人。放課後どこに行くかをめぐるドキドキ作戦会議！",
     "links": {
@@ -270,7 +355,7 @@
     "kind": "story",
     "title": "放課後の寄り道〜アオイとエミリ〜",
     "lineCount": 11,
-    "updatedAt": "2026-10-03T01:24:49.618Z",
+    "updatedAt": "2026-10-10T09:16:54.359Z",
     "location": "school_gate",
     "description": "アオイとエミリの放課後カフェトーク。2人の掛け合いを楽しめるインタラクティブシナリオ。",
     "links": {

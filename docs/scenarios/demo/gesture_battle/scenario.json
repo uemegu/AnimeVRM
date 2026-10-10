@@ -23,15 +23,15 @@
             {
               "at": 1.8,
               "expression": "happy",
-              "motion": "ardy_idea",
+              "motion": "Acknowledging",
               "motionLoop": false,
               "effectText": "kirakira"
             },
             {
               "at": 5,
               "expression": "happy",
-              "motion": "ardy_point",
-              "motionLoop": false,
+              "motion": "pose_point_go",
+              "motionLoop": true,
               "lookAtTarget": "partner"
             }
           ]
@@ -63,13 +63,13 @@
             {
               "at": 1,
               "expression": "happy",
-              "motion": "ardy_proud",
-              "motionLoop": false
+              "motion": "pose_hands_on_hips_proud",
+              "motionLoop": true
             },
             {
               "at": 3.2,
               "expression": "happy",
-              "motion": "ardy_victory",
+              "motion": "Excited",
               "motionLoop": false,
               "effectText": "yatta"
             }
@@ -92,15 +92,15 @@
             {
               "at": 1.2,
               "expression": "sad",
-              "motion": "ardy_beg",
-              "motionLoop": false,
+              "motion": "pose_pray_hands",
+              "motionLoop": true,
               "lookAtTarget": "partner"
             },
             {
               "at": 5.5,
               "expression": "relaxed",
-              "motion": "ardy_troubled",
-              "motionLoop": false,
+              "motion": "clasp_hands_front",
+              "motionLoop": true,
               "lookAtTarget": "partner"
             }
           ]
@@ -112,7 +112,7 @@
             {
               "at": 6,
               "expression": "happy",
-              "motion": "ardy_laugh",
+              "motion": "Excited",
               "motionLoop": false
             }
           ]
@@ -134,13 +134,13 @@
             {
               "at": 4,
               "expression": "relaxed",
-              "motion": "ardy_shrug",
+              "motion": "Dismissing Gesture",
               "motionLoop": false
             },
             {
               "at": 7.2,
               "expression": "happy",
-              "motion": "ardy_laugh",
+              "motion": "Excited",
               "motionLoop": false,
               "effectText": "kirakira"
             }
@@ -153,21 +153,21 @@
             {
               "at": 1,
               "expression": "happy",
-              "motion": "ardy_proud",
-              "motionLoop": false
+              "motion": "pose_hands_on_hips_proud",
+              "motionLoop": true
             },
             {
               "at": 3.5,
               "expression": "happy",
-              "motion": "ardy_cheer",
+              "motion": "Excited",
               "motionLoop": false,
               "effectText": "kirakira"
             },
             {
               "at": 6.8,
               "expression": "angry",
-              "motion": "ardy_pout",
-              "motionLoop": false
+              "motion": "pose_arms_crossed_pout",
+              "motionLoop": true
             }
           ]
         }
@@ -182,12 +182,12 @@
       "voiceUrl": "/voices/gb_5.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_shrug",
+          "motion": "Dismissing Gesture",
           "expression": "happy",
           "lookAtTarget": "player"
         },
         "emili": {
-          "motion": "ardy_proud",
+          "motion": "pose_hands_on_hips_proud",
           "expression": "happy",
           "lookAtTarget": "player"
         }
@@ -199,11 +199,11 @@
       "text": "",
       "avatars": {
         "aoi": {
-          "motion": "ardy_beg",
+          "motion": "pose_pray_hands",
           "expression": "happy"
         },
         "emili": {
-          "motion": "ardy_victory",
+          "motion": "Excited",
           "expression": "happy"
         }
       },
@@ -227,27 +227,27 @@
       "voiceUrl": "/voices/gb_reaction_aoi.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_victory",
+          "motion": "Excited",
           "expression": "happy",
           "transitions": [
             {
               "at": 3.5,
               "expression": "happy",
-              "motion": "ardy_wave",
+              "motion": "Standing Greeting",
               "motionLoop": false,
               "effectText": "kirakira"
             }
           ]
         },
         "emili": {
-          "motion": "ardy_troubled",
+          "motion": "clasp_hands_front",
           "expression": "sad",
           "transitions": [
             {
               "at": 3.5,
               "expression": "angry",
-              "motion": "ardy_pout",
-              "motionLoop": false
+              "motion": "pose_arms_crossed_pout",
+              "motionLoop": true
             }
           ]
         }
@@ -262,26 +262,26 @@
       "voiceUrl": "/voices/gb_reaction_emili.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_laugh",
+          "motion": "Excited",
           "expression": "happy",
           "transitions": [
             {
               "at": 3.2,
               "expression": "relaxed",
-              "motion": "ardy_stretch",
-              "motionLoop": false
+              "motion": "Standing Idle",
+              "motionLoop": true
             }
           ]
         },
         "emili": {
-          "motion": "ardy_cheer",
+          "motion": "Excited",
           "expression": "happy",
           "transitions": [
             {
               "at": 3.2,
               "expression": "happy",
-              "motion": "ardy_proud",
-              "motionLoop": false,
+              "motion": "pose_hands_on_hips_proud",
+              "motionLoop": true,
               "effectText": "kirakira"
             }
           ]
@@ -297,11 +297,11 @@
       "voiceUrl": "/voices/gb_end.mp3",
       "avatars": {
         "aoi": {
-          "motion": "ardy_wave",
+          "motion": "Standing Greeting",
           "expression": "happy"
         },
         "emili": {
-          "motion": "ardy_wave",
+          "motion": "Standing Greeting",
           "expression": "happy"
         }
       },

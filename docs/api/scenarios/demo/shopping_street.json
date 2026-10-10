@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "id": "shopping_street",
+  "title": {
+    "ja": "木漏れ日の商店街 — 簡易3D",
+    "en": "Sunlit shopping street (painted 3D)"
+  },
+  "description": "元絵の石造り・蔦・店内の明かりを店舗立面に再構成した簡易3D。屋根・ひさし・街灯・ベンチ・花壇を立体で作り、通りの前後と左右を自由に見渡せる。",
+  "location": "shopping_street_3d",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "forward",
+      "text": "正面の商店街",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          2.3,
+          -24
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "left_90",
+      "text": "同じ場所から左90度・書店",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          -14,
+          2.5,
+          3
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "right_90",
+      "text": "同じ場所から右90度・ギャラリー",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          14,
+          2.5,
+          3
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "back_180",
+      "text": "同じ場所から後ろ180度",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          2.3,
+          30
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "bookshop",
+      "text": "書店の店先を横から",
+      "cameraPose": {
+        "position": [
+          -2.7,
+          1.65,
+          7
+        ],
+        "target": [
+          -5.6,
+          1.8,
+          0
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "boutique",
+      "text": "ギャラリーの店先を横から",
+      "cameraPose": {
+        "position": [
+          2.7,
+          1.65,
+          -4
+        ],
+        "target": [
+          5.6,
+          1.8,
+          0
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "north_end",
+      "text": "通りの奥から入口へ振り返る",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          -28
+        ],
+        "target": [
+          0,
+          2.2,
+          12
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "overview",
+      "text": "店舗・屋根・並木の俯瞰",
+      "cameraPose": {
+        "position": [
+          26,
+          28,
+          33
+        ],
+        "target": [
+          0,
+          1,
+          -4
+        ],
+        "fov": 62
+      }
+    },
+    {
+      "id": "with_avatar",
+      "text": "お店の灯り、あったかいね。少し見ていこうよ。",
+      "speakerCharacterId": "aoi",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.55,
+          3
+        ],
+        "target": [
+          0,
+          1.45,
+          0
+        ],
+        "fov": 50
+      }
+    }
+  ]
+}

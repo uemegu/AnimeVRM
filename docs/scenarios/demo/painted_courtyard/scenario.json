@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_courtyard",
+  "title": {
+    "ja": "中庭 — 運動場と共有する簡易3D",
+    "en": "School courtyard (shared painted 3D)"
+  },
+  "description": "学校地図の校舎・植栽・中庭・駐輪場を運動場と共有する。対称の植栽、途切れない舗装、運動場への入口を中庭の目線で確認する。",
+  "location": "courtyard",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "axis",
+      "text": "時計・中央の円形花壇を結ぶ軸に、左右対称の植栽と並木が並ぶ。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          4,
+          1.65,
+          21
+        ],
+        "target": [
+          4,
+          3,
+          -26
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "field_entry",
+      "text": "中庭から運動場へ。植栽と防球ネットの開口を揃え、舗装の通路から土のグラウンドへ入れる。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -9,
+          1.65,
+          -8
+        ],
+        "target": [
+          -33,
+          1.3,
+          -8
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "entrance",
+      "text": "中庭から校舎の入口まで舗装が続く。本館と横の校舎棟は、3階部分の屋上高さを揃えている。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          4,
+          1.65,
+          -25
+        ],
+        "target": [
+          4,
+          2.5,
+          -44
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "bikes",
+      "text": "中庭の東側。並木の切れ目を通って、屋根付きの駐輪場へつながる。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          19,
+          1.65,
+          -8
+        ],
+        "target": [
+          42,
+          1.8,
+          -7
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "conversation",
+      "text": "「中庭からも、運動場がよく見えるね」",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "visible": true
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -1.5,
+          1.4,
+          3.2
+        ],
+        "target": [
+          0,
+          1.2,
+          0
+        ],
+        "fov": 48
+      },
+      "speakerCharacterId": "aoi"
+    },
+    {
+      "id": "overview",
+      "text": "左右対称の植栽と、校舎入口・運動場・駐輪場へ抜ける通路。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -14,
+          23,
+          33
+        ],
+        "target": [
+          4,
+          0,
+          -9
+        ],
+        "fov": 65
+      }
+    },
+    {
+      "id": "default_conversation",
+      "text": "通常の中庭シナリオでも、いつもの立ち位置と会話カメラでこのマップを使える。",
+      "timeOfDay": "day",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "visible": true,
+          "rotationY": 0,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "player"
+        }
+      },
+      "camera": "wide"
+    }
+  ]
+}

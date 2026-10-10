@@ -163,7 +163,7 @@
             0.0
           ],
           "rotationY": 0.55,
-          "motion": "ardy_laugh",
+          "motion": "Excited",
           "expression": "happy"
         }
       },
@@ -364,7 +364,7 @@
             0.0
           ],
           "rotationY": -0.55,
-          "motion": "ardy_wave",
+          "motion": "Standing Greeting",
           "expression": "happy"
         },
         "emili": {

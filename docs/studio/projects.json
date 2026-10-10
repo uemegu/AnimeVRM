@@ -1,5 +1,5 @@
 {
-  "description": "シナリオのプロジェクト。シナリオの種類（assets/scenarios/<種類>/）でどのプロジェクトに入るかを決める",
+  "description": "Studio に入っているシナリオのプロジェクト。シナリオの種類（assets/scenarios/<種類>/）でどのプロジェクトに入るかを決める。Studio の外にあるプロジェクト（app など）は、そのディレクトリの studio-project.json に書き、リポジトリ直下の studio-projects.txt（または環境変数 STUDIO_PROJECTS）で読み込む",
   "projects": [
     {
       "id": "demo",

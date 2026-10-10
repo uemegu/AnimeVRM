@@ -192,6 +192,58 @@
   },
   {
     "category": "demo",
+    "id": "painted_courtyard",
+    "title": "中庭 — 運動場と共有する簡易3D",
+    "appearances": 7,
+    "lines": [
+      {
+        "lineId": "conversation",
+        "text": "「中庭からも、運動場がよく見えるね」"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_ground",
+    "title": "運動場 — 学校地図から作った簡易3D",
+    "appearances": 7,
+    "lines": [
+      {
+        "lineId": "conversation",
+        "text": "「校舎の時計、ここからでもよく見えるね」"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_gym",
+    "title": "夕日の体育館 — 簡易3D",
+    "appearances": 2,
+    "lines": [
+      {
+        "lineId": "with_avatar",
+        "text": "夕日の体育館で会話する。"
+      },
+      {
+        "lineId": "conversation",
+        "text": "既定の会話カメラで立ち位置と光を確認。"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_shrine",
+    "title": "夏の神社 — 簡易3D",
+    "appearances": 1,
+    "lines": [
+      {
+        "lineId": "with_avatar",
+        "text": "ここの神社、夏は木陰が涼しいんだ。お参りしていこうよ。"
+      }
+    ]
+  },
+  {
+    "category": "demo",
     "id": "park_confession",
     "title": "夕暮れの公園と放課後の期待",
     "appearances": 14,
@@ -278,6 +330,18 @@
         "lineId": "cafe_5",
         "text": "「ふふ、誘ってくれてありがとう。でも私はこれから約束があるから……ふたりでゆっくり楽しんできてね？」",
         "voiceUrl": "/voices/date_aoi_03.mp3"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "shopping_street",
+    "title": "木漏れ日の商店街 — 簡易3D",
+    "appearances": 1,
+    "lines": [
+      {
+        "lineId": "with_avatar",
+        "text": "お店の灯り、あったかいね。少し見ていこうよ。"
       }
     ]
   },

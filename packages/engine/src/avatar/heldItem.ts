@@ -196,7 +196,6 @@ interface HandFrame {
 
 const _m = new THREE.Matrix4();
 const _q = new THREE.Quaternion();
-const _r = new THREE.Quaternion();
 
 export class HeldItem {
   private item: { id: HeldItemId; hand: Side } | null = null;
