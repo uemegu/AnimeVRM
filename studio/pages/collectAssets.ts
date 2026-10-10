@@ -33,6 +33,7 @@ const ALWAYS = [
 const BUILTIN_ENVIRONMENTS: Record<string, string> = {
   'builtin:painted-classroom': 'textures/painted-classroom',
   'builtin:painted-library': 'textures/painted-library',
+  'builtin:painted-aoi-room': 'textures/painted-aoi-room',
   'builtin:painted-gym': 'textures/painted-gym',
   'builtin:painted-gate': 'textures/painted-gate',
   'builtin:painted-ground': 'textures/painted-ground',

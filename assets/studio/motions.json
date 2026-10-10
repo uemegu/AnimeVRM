@@ -18,6 +18,10 @@
       "loop": true,
       "seated": true
     },
+    "desk_chin_rest": {
+      "loop": true,
+      "seated": true
+    },
     "clasp_hands_front": {
       "loop": true
     },
