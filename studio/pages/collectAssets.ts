@@ -69,7 +69,8 @@ export function collectPagesAssets(assetsDir: string, scenarioIds: string[], ext
     const model = location.environment?.model as string | undefined;
     if (model) found.add(BUILTIN_ENVIRONMENTS[model] ?? strip(model));
     if (model === 'builtin:painted-ground') {
-      found.add('textures/painted-gate/tile-paving.avif');
+      // 校門の旧セットの舗装・塀・門柱の石・道路・家並みを共用する
+      for (const file of ['tile-paving', 'tile-wall', 'tile-stone', 'tile-road', 'far-houses']) found.add(`textures/painted-gate/${file}.avif`);
     }
   };
   const addMotion = (motion: string | undefined) => {

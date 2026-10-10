@@ -310,18 +310,18 @@
       "id": "school_gate",
       "name": "校門（簡易3D）",
       "isIndoor": false,
-      "thumbnail": "/textures/painted-classroom/thumb-gate.avif",
+      "thumbnail": "/textures/painted-ground/thumb-gate.avif",
       "layers": {
         "background": {
           "url": "/textures/painted-classroom/sky-only.png"
         }
       },
       "environment": {
-        "model": "builtin:painted-gate",
+        "model": "builtin:painted-ground",
         "position": {
-          "x": 0,
+          "x": -31,
           "y": 0,
-          "z": 0
+          "z": -38.5
         },
         "rotationY": 0,
         "scale": 1
@@ -340,6 +340,7 @@
       },
       "stage": {
         "camera": {
+          "far": 200,
           "depthOfField": {
             "aperture": 0.02,
             "maxBlur": 0.01,
@@ -352,6 +353,15 @@
           "height": 7.5,
           "offsetY": 1
         }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.4
+        },
+        "strength": 0.055,
+        "gust": 0.6
       }
     },
     "school_gate_2d": {
@@ -883,18 +893,18 @@
       "id": "painted_gate",
       "name": "校門（簡易3D）",
       "isIndoor": false,
-      "thumbnail": "/textures/painted-classroom/thumb-gate.avif",
+      "thumbnail": "/textures/painted-ground/thumb-gate.avif",
       "layers": {
         "background": {
           "url": "/textures/painted-classroom/sky-only.png"
         }
       },
       "environment": {
-        "model": "builtin:painted-gate",
+        "model": "builtin:painted-ground",
         "position": {
-          "x": 0,
+          "x": -31,
           "y": 0,
-          "z": 0
+          "z": -38.5
         },
         "rotationY": 0,
         "scale": 1
@@ -913,6 +923,7 @@
       },
       "stage": {
         "camera": {
+          "far": 200,
           "depthOfField": {
             "aperture": 0.02,
             "maxBlur": 0.01,
@@ -925,6 +936,15 @@
           "height": 7.5,
           "offsetY": 1
         }
+      },
+      "wind": {
+        "direction": {
+          "x": 0.8,
+          "y": 0,
+          "z": 0.4
+        },
+        "strength": 0.055,
+        "gust": 0.6
       }
     },
     "painted_ground": {
