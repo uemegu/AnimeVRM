@@ -368,6 +368,7 @@ export function resolveBloomConfig(
 export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-classroom': { ja: '簡易3D 教室', en: 'Painted classroom' },
   'builtin:painted-library': { ja: '簡易3D 図書室', en: 'Painted library' },
+  'builtin:painted-aoi-room': { ja: '簡易3D アオイの部屋', en: "Painted Aoi's room" },
   'builtin:painted-gym': { ja: '簡易3D 体育館', en: 'Painted gymnasium' },
   'builtin:painted-gate': { ja: '簡易3D 校門', en: 'Painted school gate' },
   'builtin:painted-ground': { ja: '簡易3D 運動場', en: 'Painted sports ground' },

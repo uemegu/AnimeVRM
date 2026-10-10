@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { disposePaintedAoiRoom, loadPaintedAoiRoom } from '../scene/painted-aoi-room/PaintedAoiRoom';
 import { disposePaintedFestival, loadPaintedFestival } from '../scene/painted-festival/PaintedFestival';
 import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
 import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
@@ -16,6 +17,7 @@ import { resolveAssetUrl } from '../utils/path';
 const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (group: THREE.Group) => void }> = {
   'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
   'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
+  'builtin:painted-aoi-room': { load: loadPaintedAoiRoom, dispose: disposePaintedAoiRoom },
   'builtin:painted-gym': { load: loadPaintedGym, dispose: disposePaintedGym },
   'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
   'builtin:painted-ground': { load: loadPaintedGround, dispose: disposePaintedGround },

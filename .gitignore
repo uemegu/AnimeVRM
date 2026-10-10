@@ -33,6 +33,8 @@ dist-ssr
 !/scripts/check-framing.ts
 !/scripts/profile-render.ts
 !/scripts/transplant-vrm-meshes.ts
+# Blender で作るモーション（desk_chin_rest.fbx など）
+!/scripts/blender/
 # ardy-generate.ts が読み込む
 !/scripts/lib/
 /blender
