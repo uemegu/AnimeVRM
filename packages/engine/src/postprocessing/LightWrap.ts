@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FullScreenQuad, Pass } from 'three/examples/jsm/postprocessing/Pass.js';
 import { createLayerDepthTarget, renderLayerDepth } from '../shader/LayerDepth';
 
 /**
@@ -41,6 +42,59 @@ export class CharacterMaskRenderer {
   public dispose(): void {
     this.renderTarget.depthTexture?.dispose();
     this.renderTarget.dispose();
+  }
+}
+
+/**
+ * キャラのマスクから、手前の物（教卓・近景など）に隠れた所を除く（隠れた所は深度 1 にする）。
+ * マスクはキャラだけを描くので、そのままだと隠れた脚の形に明部の抑え・パラ・ライトラップがかかり、
+ * 手前の物の上に人物の形が透けて見える。本描画の深度（SceneRenderPass.depthTexture）と比べるので、
+ * composer では本描画の直後に置く。マスクを読むパスには texture を渡す。
+ */
+export class VisibleMaskPass extends Pass {
+  private readonly target: THREE.WebGLRenderTarget;
+  private readonly material = new THREE.ShaderMaterial({
+    uniforms: { tMask: { value: null as THREE.Texture | null }, tScene: { value: null as THREE.Texture | null } },
+    vertexShader: `varying vec2 vUv;
+      void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: `uniform sampler2D tMask, tScene; varying vec2 vUv;
+      void main() {
+        float character = texture2D(tMask, vUv).r;
+        gl_FragDepth = character <= texture2D(tScene, vUv).r + 0.000002 ? character : 1.0;
+      }`,
+    // 深度だけを書く（深度テストを切ると深度も書かれないので、常に通す）
+    depthTest: true, depthFunc: THREE.AlwaysDepth, depthWrite: true, colorWrite: false,
+  });
+  private readonly quad = new FullScreenQuad(this.material);
+
+  constructor(mask: THREE.Texture, sceneDepth: THREE.Texture, width: number, height: number) {
+    super();
+    this.needsSwap = false;
+    this.target = createLayerDepthTarget(width, height);
+    this.material.uniforms.tMask.value = mask;
+    this.material.uniforms.tScene.value = sceneDepth;
+  }
+
+  /** 見えているキャラの所は深度 < 1、ほかは 1 */
+  get texture(): THREE.DepthTexture {
+    return this.target.depthTexture!;
+  }
+
+  setSize(width: number, height: number): void {
+    this.target.setSize(width, height);
+  }
+
+  render(renderer: THREE.WebGLRenderer): void {
+    renderer.setRenderTarget(this.target);
+    renderer.clear(false, true, false);
+    this.quad.render(renderer);
+  }
+
+  dispose(): void {
+    this.target.depthTexture?.dispose();
+    this.target.dispose();
+    this.material.dispose();
+    this.quad.dispose();
   }
 }
 

@@ -1,0 +1,237 @@
+{
+ "schemaVersion": 1,
+ "id": "painted_classroom_podium",
+ "title": {
+  "ja": "教壇の白石先生 — 簡易3Dの教室の教壇",
+  "en": "Ms. Shiraishi at the podium"
+ },
+ "description": "簡易3Dの教室に足した教壇（段と教卓）の見え方の確認。教壇の場所 classroom_podium から、正面・左右・後ろと会話の構図を撮る。",
+ "location": "classroom_podium",
+ "bgm": "/bgm/bgm.mp3",
+ "timeOfDay": "day",
+ "scenes": [
+  {
+   "id": "dir_front",
+   "text": "",
+   "avatars": {},
+   "cameraPose": {
+    "position": [
+     0,
+     1.55,
+     3.0
+    ],
+    "target": [
+     0,
+     1.55,
+     -17
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "dir_left",
+   "text": "",
+   "avatars": {},
+   "cameraPose": {
+    "position": [
+     0,
+     1.55,
+     3.0
+    ],
+    "target": [
+     -20,
+     1.55,
+     3.0
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "dir_right",
+   "text": "",
+   "avatars": {},
+   "cameraPose": {
+    "position": [
+     0,
+     1.55,
+     3.0
+    ],
+    "target": [
+     20,
+     1.55,
+     3.0
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "dir_back",
+   "text": "",
+   "avatars": {},
+   "cameraPose": {
+    "position": [
+     0,
+     1.55,
+     3.0
+    ],
+    "target": [
+     0,
+     1.55,
+     23
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "overview",
+   "text": "",
+   "avatars": {},
+   "cameraPose": {
+    "position": [
+     0.5,
+     1.45,
+     5.4
+    ],
+    "target": [
+     0,
+     1.15,
+     0
+    ],
+    "fov": 45
+   }
+  },
+  {
+   "id": "t_speaker",
+   "speaker": "白石先生",
+   "speakerCharacterId": "teacher",
+   "text": "はい静かに。出席取るよ",
+   "clearCast": true,
+   "avatars": {
+    "teacher": {
+     "position": "center",
+     "motion": "Standing Idle",
+     "expression": "neutral",
+     "expressionWeight": 1,
+     "lookAtTarget": "camera"
+    }
+   },
+   "camera": "speaker"
+  },
+  {
+   "id": "t_medium",
+   "speaker": "白石先生",
+   "speakerCharacterId": "teacher",
+   "text": "今日の連絡は二つ。",
+   "avatars": {
+    "teacher": {
+     "motion": "Dismissing Gesture"
+    }
+   },
+   "camera": "medium"
+  },
+  {
+   "id": "t_wide",
+   "speaker": "白石先生",
+   "speakerCharacterId": "teacher",
+   "text": "教壇から教室全体へ。",
+   "avatars": {
+    "teacher": {
+     "motion": "Standing Idle"
+    }
+   },
+   "camera": "wide"
+  },
+  {
+   "id": "t_close",
+   "speaker": "白石先生",
+   "speakerCharacterId": "teacher",
+   "text": "……聞いてる？",
+   "avatars": {
+    "teacher": {
+     "expression": "angry"
+    }
+   },
+   "camera": "close"
+  },
+  {
+   "id": "pair_wide",
+   "text": "（転入生が教壇に上がる）",
+   "avatars": {
+    "teacher": {
+     "position": "left",
+     "expression": "neutral",
+     "lookAtTarget": "aoi"
+    },
+    "aoi": {
+     "position": "right",
+     "motion": "clasp_hands_front",
+     "expression": "neutral",
+     "expressionWeight": 1,
+     "lookAtTarget": "camera"
+    }
+   },
+   "camera": "wide"
+  },
+  {
+   "id": "pair_medium",
+   "speaker": "アオイ",
+   "speakerCharacterId": "aoi",
+   "text": "水瀬アオイです。よろしくお願いします",
+   "avatars": {
+    "aoi": {
+     "motion": "Quick Formal Bow"
+    }
+   },
+   "camera": "medium"
+  },
+  {
+   "id": "reverse",
+   "text": "教壇の後ろから教室を見る",
+   "clearCast": true,
+   "avatars": {
+    "teacher": {
+     "position": "center",
+     "motion": "Standing Idle",
+     "expression": "neutral",
+     "expressionWeight": 1,
+     "lookAtTarget": "forward"
+    }
+   },
+   "cameraPose": {
+    "position": [
+     0.5,
+     1.6,
+     -0.45
+    ],
+    "target": [
+     -0.3,
+     1.1,
+     5
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "side",
+   "text": "窓側から教壇を斜めに",
+   "avatars": {
+    "teacher": {
+     "lookAtTarget": "camera"
+    }
+   },
+   "cameraPose": {
+    "position": [
+     -2.6,
+     1.5,
+     2.2
+    ],
+    "target": [
+     0,
+     1.0,
+     0
+    ],
+    "fov": 50
+   }
+  }
+ ]
+}

@@ -26,7 +26,7 @@ import { StillImages, type CutinSettings, type StillImageSettings } from './Stil
 import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
 import { HairShadowRenderer } from '../shader/HairShadow';
-import { CharacterMaskRenderer, DEFAULT_LIGHT_WRAP_PARAMS, EYE_LAYER, LightWrapShader } from '../postprocessing/LightWrap';
+import { CharacterMaskRenderer, DEFAULT_LIGHT_WRAP_PARAMS, EYE_LAYER, LightWrapShader, VisibleMaskPass } from '../postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
 import { setHairRingTint } from '../shader/HairRing';
 import {
@@ -159,6 +159,9 @@ export class StageManager {
   // キャラのマスク（ライトラップ用）
   private characterMask: CharacterMaskRenderer;
   private eyeMask: CharacterMaskRenderer;
+  /** マスクから手前の物に隠れた所を除いたもの（マスクを読むパスはこちらを使う） */
+  private visibleCharacterMask: VisibleMaskPass;
+  private visibleEyeMask: VisibleMaskPass;
 
   // 光源・環境・空
   private directionalLight: THREE.DirectionalLight;
@@ -389,7 +392,12 @@ export class StageManager {
     this.composer.addPass(this.renderPass);
     this.characterMask = new CharacterMaskRenderer(targetW, targetH);
     this.eyeMask = new CharacterMaskRenderer(targetW, targetH, EYE_LAYER);
-    this.characterGlowPass = new CharacterGlowPass(this.characterMask.texture, this.eyeMask.texture);
+    this.visibleCharacterMask = new VisibleMaskPass(this.characterMask.texture, this.renderPass.depthTexture, targetW, targetH);
+    this.visibleEyeMask = new VisibleMaskPass(this.eyeMask.texture, this.renderPass.depthTexture, targetW, targetH);
+    this.composer.addPass(this.visibleCharacterMask);
+    this.composer.addPass(this.visibleEyeMask);
+    const characterMask = this.visibleCharacterMask.texture;
+    this.characterGlowPass = new CharacterGlowPass(characterMask, this.visibleEyeMask.texture);
     this.characterGlowPass.setSize(targetW, targetH);
     this.characterGlowPass.depthCapture.sceneDepth = this.renderPass.depthTexture;
     this.composer.addPass(this.characterGlowPass.depthCapture);
@@ -406,7 +414,7 @@ export class StageManager {
     // ライトラップ（背景の光をキャラの輪郭の内側ににじませる。リニア空間で行う）
     this.lightWrapPass = new ShaderPass(LightWrapShader);
     this.lightWrapPass.uniforms['uResolution'].value.set(targetW, targetH);
-    this.lightWrapPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.lightWrapPass.uniforms['tMask'].value = characterMask;
     this.composer.addPass(this.lightWrapPass);
 
     this.bloomPass = new UnrealBloomPass(
@@ -420,7 +428,7 @@ export class StageManager {
     this.godRaysPass = new ShaderPass(GodRaysShader);
     this.godRaysPass.material.defines.NUM_SAMPLES = this.quality.godRaysSamples;
     // 光源として拾うのは背景だけ（服の明暗から筋が出ないように）
-    this.godRaysPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.godRaysPass.uniforms['tMask'].value = characterMask;
     this.godRaysPass.uniforms['uUseMask'].value = 1.0;
     this.composer.addPass(this.godRaysPass);
 
@@ -432,7 +440,7 @@ export class StageManager {
 
     // パラ（背景の空気の色をキャラの上だけにグラデーションで重ねる。スクリーン合成なので sRGB で行う）
     this.paraPass = new ShaderPass(ParaShader);
-    this.paraPass.uniforms['tMask'].value = this.characterMask.texture;
+    this.paraPass.uniforms['tMask'].value = characterMask;
     this.composer.addPass(this.paraPass);
 
     // 色調補正（明度0.5基準の影/ハイライト判定・S字カーブ）とSMAAのエッジ検出は sRGB 値を前提にする
@@ -442,8 +450,8 @@ export class StageManager {
 
     // 人物の仕上げ（逆光のリムライトと明部の上限）。色調補正の後の表示用の値で行う
     this.characterFinishPass = new ShaderPass(CharacterFinishShader);
-    this.characterFinishPass.uniforms['tMask'].value = this.characterMask.texture;
-    this.characterFinishPass.uniforms['tEye'].value = this.eyeMask.texture;
+    this.characterFinishPass.uniforms['tMask'].value = characterMask;
+    this.characterFinishPass.uniforms['tEye'].value = this.visibleEyeMask.texture;
     this.characterFinishPass.uniforms['uResolution'].value.set(targetW, targetH);
     this.characterFinishPass.enabled = false;
     this.composer.addPass(this.characterFinishPass);
@@ -1838,9 +1846,13 @@ export class StageManager {
       // 切ってあるときは画面をそのまま写すだけなので、パスごと飛ばす
       this.lightWrapPass.enabled = this.lightWrapPass.uniforms['uEnabled'].value > 0.5;
       this.paraPass.enabled = this.paraPass.uniforms['uEnabled'].value > 0.5;
-      if (this.characterFinishPass.enabled || this.characterGlowPass.enabled || this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled) {
+      const masked = this.characterFinishPass.enabled || this.characterGlowPass.enabled || this.lightWrapPass.uniforms['uEnabled'].value > 0.5 || this.paraPass.uniforms['uEnabled'].value > 0.5 || this.godRaysPass.enabled;
+      const eyeCare = masked && (this.characterGlowPass.uniforms.uEyeCare.value > 0.5 || this.characterFinishPass.uniforms['uEyeCare'].value > 0.5);
+      this.visibleCharacterMask.enabled = masked;
+      this.visibleEyeMask.enabled = eyeCare;
+      if (masked) {
         this.characterMask.render(this.renderer, this.scene, this.camera);
-        if (this.characterGlowPass.uniforms.uEyeCare.value > 0.5 || this.characterFinishPass.uniforms['uEyeCare'].value > 0.5) this.eyeMask.render(this.renderer, this.scene, this.camera);
+        if (eyeCare) this.eyeMask.render(this.renderer, this.scene, this.camera);
       }
 
       // 7. ポストプロセスパイプライン経由でレンダリング
@@ -1877,6 +1889,8 @@ export class StageManager {
     this.crowd.dispose();
     this.characterMask.dispose();
     this.eyeMask.dispose();
+    this.visibleCharacterMask.dispose();
+    this.visibleEyeMask.dispose();
     this.depthOfFieldPass.dispose();
     this.highlightShoulderPass.dispose();
     this.characterGlowPass.dispose();

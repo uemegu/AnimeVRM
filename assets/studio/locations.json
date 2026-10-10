@@ -30,6 +30,74 @@
         }
       }
     },
+    "classroom_podium": {
+      "id": "classroom_podium",
+      "name": "教室・教壇（簡易3D）",
+      "isIndoor": true,
+      "thumbnail": "/textures/painted-classroom/thumb-classroom-podium.avif",
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png"
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-classroom",
+        "position": {
+          "x": 0,
+          "y": -0.2,
+          "z": 8.45
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "stage": {
+        "slots": {
+          "left": [
+            -0.95,
+            0,
+            0.15
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.95,
+            0,
+            0.15
+          ]
+        },
+        "camera": {
+          "wide": {
+            "distance": 3.6,
+            "height": -0.3,
+            "targetHeight": -0.5
+          },
+          "medium": {
+            "distance": 2.9,
+            "height": -0.28,
+            "targetHeight": -0.4
+          },
+          "speaker": {
+            "distance": 2.2,
+            "height": -0.25,
+            "targetHeight": -0.32
+          },
+          "close": {
+            "distance": 1.5,
+            "height": -0.12,
+            "targetHeight": -0.16
+          }
+        },
+        "backdrop": {
+          "mode": "screen",
+          "distance": 8,
+          "height": 7.5,
+          "offsetY": 1
+        }
+      }
+    },
     "corridor": {
       "id": "corridor",
       "name": "廊下",

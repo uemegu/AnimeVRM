@@ -106,3 +106,11 @@ export function rowGeometry(z: number, fit?: { guide: number[]; painting: number
   geometry.computeBoundingSphere();
   return geometry;
 }
+
+/** Raised wooden platform (教壇) in front of the blackboard, flush with the front wall.
+ * It spans the blackboard (x -2.33..2.35 in wall-front.avif) and stops short of the cabinet. */
+export const PLATFORM = { halfWidth: 2.35, frontZ: -7.4, height: 0.2 } as const;
+/** Teacher's desk (教卓) on the platform, centred; z of its front face. */
+export const TEACHER_DESK_FRONT_Z = -7.65;
+/** Where the teacher stands behind the desk, on the platform. The 教壇 location puts this at its origin. */
+export const TEACHER_POSITION: [number, number, number] = [0, PLATFORM.height, -8.45];
