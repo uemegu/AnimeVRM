@@ -46,6 +46,7 @@ export const ja = {
   },
   viewer: {
     tabs: { expression: '表情', motion: 'モーション', voice: 'ボイス', sound: 'サウンド' },
+    locationGroups: { painted3d: '簡易3D', illustration: '一枚絵' },
     gaze: 'カメラ目線',
     lookAtCamera: '目線をカメラに向ける',
     faceCamera: '顔をカメラに向ける',

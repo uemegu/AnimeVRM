@@ -13,6 +13,7 @@ import { BgmLibrary } from './BgmLibrary';
 import { SeLibrary } from './SeLibrary';
 import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import { ShiftPicker } from '../../components/ShiftPicker';
+import { LocationPicker } from '../../components/LocationPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -397,26 +398,7 @@ export function ViewerView() {
 
         <div className="viewer-stage-bottom">
           <div className="viewer-location-grid">
-            {Object.values(presets.locations).map((loc) => {
-              const bgUrl = loc.thumbnail ?? loc.layers?.background?.url;
-              const isActive = loc.id === locationId;
-              return (
-                <button
-                  key={loc.id}
-                  type="button"
-                  className={`viewer-location-thumb${isActive ? ' active' : ''}`}
-                  title={loc.name}
-                  onClick={() => setLocationId(loc.id)}
-                >
-                  {bgUrl ? (
-                    <img src={resolveAssetUrl(bgUrl)} alt={loc.name} loading="lazy" />
-                  ) : (
-                    <div className="viewer-location-thumb-fallback">{loc.name}</div>
-                  )}
-                  <span className="viewer-location-thumb-name">{loc.name}</span>
-                </button>
-              );
-            })}
+            <LocationPicker locations={presets.locations} selectedId={locationId} onSelect={setLocationId} />
           </div>
         </div>
       </section>

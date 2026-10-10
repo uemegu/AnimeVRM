@@ -6,7 +6,7 @@
     "en": "Shion at the gate (shared painted 3D campus)"
   },
   "description": "運動場・中庭と同じ簡易3Dの学校の南の校門。門の前に立つシオンを朝・昼・放課後の光で見て、同じ位置から四方と、門の内側から確認する。",
-  "location": "painted_gate",
+  "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "morning",
   "scenes": [
