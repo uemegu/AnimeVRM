@@ -133,6 +133,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
@@ -295,6 +298,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
@@ -457,6 +463,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.9955,
           "shadingShiftFactor": -0.05,
@@ -636,6 +645,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.9955,
           "shadingShiftFactor": -0.05,
@@ -798,6 +810,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
@@ -961,6 +976,9 @@
         },
         "cloth": {
           "color": "#080a12",
+          "litHighlightStrength": 0,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#0d0608",
           "shadingToonyFactor": 1,
           "shadingShiftFactor": -1,
@@ -1132,6 +1150,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,

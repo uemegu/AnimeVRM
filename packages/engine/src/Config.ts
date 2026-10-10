@@ -17,6 +17,12 @@ export interface MaterialStyleParams {
   // 明暗の境目に乗せる色（乗算、sRGB）と強さ。肌の中で光が散ったような、境目だけ赤みの強い帯にする
   terminatorColor?: string;
   terminatorStrength?: number;
+  // 光が真っすぐ当たる面にもう一段明るい色を重ねる（肩・袖の上面、プリーツの山など）。
+  // 強さは光が当たる側の色に足す割合（0 で無効）、しきい値は光の向きとの角度（法線・光の内積、-1〜1）。
+  // 色はキーライトの色を掛けて足すので、時間帯の色が乗る（濃い服でも明るい面が見えるように）
+  litHighlightStrength?: number;
+  litHighlightThreshold?: number;
+  litHighlightColor?: string;
   giEqualizationFactor: number;
   matcapEnabled: boolean;
   emissiveIntensity: number;

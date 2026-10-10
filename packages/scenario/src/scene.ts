@@ -170,6 +170,12 @@ export const MaterialStyleParams = z.strictObject({
   terminatorColor: color('境目の色', 'Terminator color').optional(),
   /** 境目の色の強さ（0 で無効）。帯の幅は影の硬さで決まる */
   terminatorStrength: num('境目の色の強さ', 'Terminator strength', 0, 1, 0.01, 0).optional(),
+  /** 光が真っすぐ当たる面に重ねる明るい段の強さ（0 で無効）。肩・袖の上面やプリーツの山が明るくなる */
+  litHighlightStrength: num('光が当たる面の明るさ', 'Lit highlight strength', 0, 2, 0.01, 0).optional(),
+  /** 明るい段が始まる角度（法線と光の向きの内積）。大きいほど光の正面に近い面だけになる */
+  litHighlightThreshold: num('光が当たる面の範囲', 'Lit highlight threshold', -1, 1, 0.01, 0.5).optional(),
+  /** 明るい段に足す色（sRGB、キーライトの色を掛ける）。濃い服でも明るい面が見えるようにする */
+  litHighlightColor: color('光が当たる面に足す色', 'Lit highlight color').optional(),
   giEqualizationFactor: num('環境光のならし', 'GI equalization', 0, 1, 0.01),
   matcapEnabled: bool('マットキャップ', 'Matcap'),
   emissiveIntensity: num('発光', 'Emissive', 0, 5, 0.1),
