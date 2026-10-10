@@ -409,6 +409,12 @@ export function applyToonShader(
       const terminatorStrength = { value: 0 };
       material.userData.terminatorColor = terminatorColor;
       material.userData.terminatorStrength = terminatorStrength;
+      const litHighlightStrength = { value: 0 };
+      const litHighlightThreshold = { value: 0.5 };
+      const litHighlightColor = { value: new THREE.Color(0, 0, 0) };
+      material.userData.litHighlightStrength = litHighlightStrength;
+      material.userData.litHighlightThreshold = litHighlightThreshold;
+      material.userData.litHighlightColor = litHighlightColor;
 
       // Inject Bottom Gradient (Vertical Shading / Grounding shadow) into fragment shader for ALL MToon materials
       const prevOnBeforeCompile = material.onBeforeCompile;
@@ -433,6 +439,10 @@ export function applyToonShader(
         // 明暗の境目（shading が 0〜1 の間）だけ色を掛ける。帯の幅は影の硬さで決まる
         shader.uniforms.uTerminatorColor = terminatorColor;
         shader.uniforms.uTerminatorStrength = terminatorStrength;
+        // 光が真っすぐ当たる面だけ、もう一段明るくする（光の色を掛けるので時間帯の色が乗る）
+        shader.uniforms.uLitHighlightStrength = litHighlightStrength;
+        shader.uniforms.uLitHighlightThreshold = litHighlightThreshold;
+        shader.uniforms.uLitHighlightColor = litHighlightColor;
         shader.fragmentShader = shader.fragmentShader
           .replace(
             'uniform vec3 litFactor;',
@@ -441,6 +451,9 @@ export function applyToonShader(
           uniform float uBrightLitScale;
           uniform vec3 uTerminatorColor;
           uniform float uTerminatorStrength;
+          uniform float uLitHighlightStrength;
+          uniform float uLitHighlightThreshold;
+          uniform vec3 uLitHighlightColor;
           vec3 mtoonTerminator( const in vec3 col, const in float shading ) {
             float band = 4.0 * shading * ( 1.0 - shading );
             return mix( col, col * uTerminatorColor, band * uTerminatorStrength );
@@ -456,6 +469,18 @@ export function applyToonShader(
           .replace(
             'mix( material.shadeColor, material.diffuseColor, shading )',
             'mtoonTerminator( mix( material.shadeColor, mtoonLitTone( material.diffuseColor ), shading ), shading )'
+          )
+          // 段の境目は影と同じくらい硬くする（ぼかすと PBR の照り返しのように見える）。影の中には出さない
+          .replaceAll(
+            'reflectedLight.directDiffuse += getDiffuse( material, shading, directLight.color );',
+            /* glsl */ `reflectedLight.directDiffuse += getDiffuse( material, shading, directLight.color );
+            if ( uLitHighlightStrength > 0.0 ) {
+              float litHighlight = smoothstep( uLitHighlightThreshold - 0.04, uLitHighlightThreshold + 0.04, dotNL + material.shadingShift ) * shadow;
+              // 白に近い色（シャツ）は元から明るいので足さない（白飛びする）
+              litHighlight *= 1.0 - smoothstep( 0.35, 0.75, dot( material.diffuseColor, vec3( 0.2126, 0.7152, 0.0722 ) ) );
+              vec3 litHighlightAlbedo = mtoonLitTone( material.diffuseColor ) + uLitHighlightColor;
+              reflectedLight.directDiffuse += directLight.color * BRDF_Lambert( litHighlightAlbedo ) * litHighlight * uLitHighlightStrength;
+            }`
           );
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
@@ -713,6 +738,12 @@ export function applyToonShader(
         if (termColor) termColor.value.set(params.terminatorColor ?? '#ffffff');
         const termStrength = material.userData.terminatorStrength as { value: number } | undefined;
         if (termStrength) termStrength.value = params.terminatorStrength ?? 0;
+        const hiStrength = material.userData.litHighlightStrength as { value: number } | undefined;
+        if (hiStrength) hiStrength.value = params.litHighlightStrength ?? 0;
+        const hiThreshold = material.userData.litHighlightThreshold as { value: number } | undefined;
+        if (hiThreshold) hiThreshold.value = params.litHighlightThreshold ?? 0.5;
+        const hiColor = material.userData.litHighlightColor as { value: THREE.Color } | undefined;
+        if (hiColor) hiColor.value.set(params.litHighlightColor ?? '#000000');
 
         // GI Equalization
         if (typeof params.giEqualizationFactor === 'number') {
