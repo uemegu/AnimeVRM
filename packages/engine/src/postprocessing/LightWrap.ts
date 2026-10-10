@@ -54,20 +54,30 @@ export class CharacterMaskRenderer {
 export class VisibleMaskPass extends Pass {
   private readonly target: THREE.WebGLRenderTarget;
   private readonly material = new THREE.ShaderMaterial({
-    uniforms: { tMask: { value: null as THREE.Texture | null }, tScene: { value: null as THREE.Texture | null } },
+    uniforms: {
+      tMask: { value: null as THREE.Texture | null },
+      tScene: { value: null as THREE.Texture | null },
+      uNearFar: { value: new THREE.Vector2(0.1, 100) },
+    },
     vertexShader: `varying vec2 vUv;
       void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
-    fragmentShader: `uniform sampler2D tMask, tScene; varying vec2 vUv;
+    // 深度の値のままだと、本描画（MSAA）とマスクで画素内の測る位置が違うだけで顔の三角形の境目が「隠れた」になり、
+    // そこに背景がにじんで筋になる。奥行き（m）に直し、2cm か奥行きの2%より奥にあるときだけ隠れたとする
+    fragmentShader: `#include <packing>
+      uniform sampler2D tMask, tScene; uniform vec2 uNearFar; varying vec2 vUv;
       void main() {
         float character = texture2D(tMask, vUv).r;
-        gl_FragDepth = character <= texture2D(tScene, vUv).r + 0.000002 ? character : 1.0;
+        if (character >= 1.0) { gl_FragDepth = 1.0; return; }
+        float characterZ = -perspectiveDepthToViewZ(character, uNearFar.x, uNearFar.y);
+        float sceneZ = -perspectiveDepthToViewZ(texture2D(tScene, vUv).r, uNearFar.x, uNearFar.y);
+        gl_FragDepth = characterZ <= sceneZ + max(0.02, sceneZ * 0.02) ? character : 1.0;
       }`,
     // 深度だけを書く（深度テストを切ると深度も書かれないので、常に通す）
     depthTest: true, depthFunc: THREE.AlwaysDepth, depthWrite: true, colorWrite: false,
   });
   private readonly quad = new FullScreenQuad(this.material);
 
-  constructor(mask: THREE.Texture, sceneDepth: THREE.Texture, width: number, height: number) {
+  constructor(mask: THREE.Texture, sceneDepth: THREE.Texture, private readonly camera: THREE.PerspectiveCamera, width: number, height: number) {
     super();
     this.needsSwap = false;
     this.target = createLayerDepthTarget(width, height);
@@ -85,6 +95,7 @@ export class VisibleMaskPass extends Pass {
   }
 
   render(renderer: THREE.WebGLRenderer): void {
+    this.material.uniforms.uNearFar.value.set(this.camera.near, this.camera.far);
     renderer.setRenderTarget(this.target);
     renderer.clear(false, true, false);
     this.quad.render(renderer);

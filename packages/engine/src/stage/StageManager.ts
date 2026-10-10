@@ -392,8 +392,8 @@ export class StageManager {
     this.composer.addPass(this.renderPass);
     this.characterMask = new CharacterMaskRenderer(targetW, targetH);
     this.eyeMask = new CharacterMaskRenderer(targetW, targetH, EYE_LAYER);
-    this.visibleCharacterMask = new VisibleMaskPass(this.characterMask.texture, this.renderPass.depthTexture, targetW, targetH);
-    this.visibleEyeMask = new VisibleMaskPass(this.eyeMask.texture, this.renderPass.depthTexture, targetW, targetH);
+    this.visibleCharacterMask = new VisibleMaskPass(this.characterMask.texture, this.renderPass.depthTexture, this.camera, targetW, targetH);
+    this.visibleEyeMask = new VisibleMaskPass(this.eyeMask.texture, this.renderPass.depthTexture, this.camera, targetW, targetH);
     this.composer.addPass(this.visibleCharacterMask);
     this.composer.addPass(this.visibleEyeMask);
     const characterMask = this.visibleCharacterMask.texture;
@@ -1343,6 +1343,32 @@ export class StageManager {
     });
   }
 
+  /**
+   * 背景ぼかしのピントの距離（カメラの向きに沿った奥行き m）。
+   * 画面に映っているキャラの顔に合わせる（話者を優先し、いなければ一番手前の顔）。
+   * 注視点で測ると、注視点を奥にしたまま顔に寄ったときに顔がぼけて背景にピントが合う。
+   * 顔が映っていなければ注視点で測る
+   */
+  private focusDistance(): number {
+    const forward = this.camera.getWorldDirection(new THREE.Vector3());
+    const depthOf = (point: THREE.Vector3) => point.clone().sub(this.camera.position).dot(forward);
+    this.camera.updateMatrixWorld();
+    let speaker: number | null = null;
+    let nearest: number | null = null;
+    for (const id of this.castIds) {
+      const head = this.loadedAvatars.get(id)?.vrm?.humanoid?.getNormalizedBoneNode('head');
+      if (!head) continue;
+      const point = head.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.08, 0));
+      const depth = depthOf(point);
+      if (depth <= this.camera.near) continue;
+      const ndc = point.clone().project(this.camera);
+      if (Math.abs(ndc.x) > 1.1 || Math.abs(ndc.y) > 1.1) continue;
+      if (id === this.speakerId) speaker = depth;
+      if (nearest === null || depth < nearest) nearest = depth;
+    }
+    return speaker ?? nearest ?? depthOf(this.cameraCurrentTarget);
+  }
+
   /** 今の注視点（カメラを手で動かすときの初期値） */
   public get viewTarget(): THREE.Vector3 {
     return this.cameraCurrentTarget.clone();
@@ -1773,10 +1799,7 @@ export class StageManager {
       if (!this.freeCamera) this.updateCamera(delta);
       this.updateLayerPlacement();
       if (this.depthOfFieldPass.enabled) {
-        // ピントは注視点（話者の顔あたり）。カメラの向きに沿った奥行きで測る
-        const forward = this.camera.getWorldDirection(new THREE.Vector3());
-        const focus = new THREE.Vector3().subVectors(this.cameraCurrentTarget, this.camera.position).dot(forward);
-        this.depthOfFieldPass.setFocus(this.camera, focus);
+        this.depthOfFieldPass.setFocus(this.camera, this.focusDistance());
       }
       this.scrollingBackground.update(delta);
 
