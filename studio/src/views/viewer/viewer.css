@@ -446,10 +446,9 @@
 }
 
 .viewer-location-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  align-content: start;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
   height: 100%;
   flex: 1;

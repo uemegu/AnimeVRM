@@ -8,7 +8,7 @@
   "playMode": "movie",
   "aspect": "portrait",
   "description": "縦型ショート動画風のムービー。運動場で制服のアオイがダンスを踊り、斜め後ろでエミリが盛り上げる。カメラは少し上から見下ろす位置で固定。",
-  "location": "painted_ground",
+  "location": "sports_ground",
   "bgm": "action",
   "timeOfDay": "day",
   "scenes": [

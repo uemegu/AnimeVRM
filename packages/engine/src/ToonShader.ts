@@ -10,6 +10,7 @@ export interface ToonShaderAvatarConfig {
   bottomGradient?: BottomGradientConfig;
 }
 import { toggleSmoothNormalsInHierarchy } from './shader/SmoothNormalHelper';
+import { injectHairCrown } from './shader/HairCrown';
 import { createHairShadowUniforms, injectHairShadow, HAIR_SHADOW_LAYER, HairShadowUniforms } from './shader/HairShadow';
 import { injectHairRing, createHairRingHeadFrame, updateHairRingHeadFrame } from './shader/HairRing';
 import { attachFaceSdf, createFaceSdfFrame, injectFaceSdf } from './shader/FaceSdf';
@@ -320,7 +321,7 @@ export function applyToonShader(
       const hairShadowReceiver = {
         value: !material.isOutline && (kind === 'face' || kind === 'eye' || kind === 'body') ? 1 : 0,
       };
-      // 天使の輪を描くのは髪（アウトラインを除く）
+      // 天使の輪・頭頂のなめらかな陰影を描くのは髪（アウトラインを除く）
       const hairRingTarget = { value: !material.isOutline && kind === 'hair' ? 1 : 0 };
       // 顔の陰影を SDF マップで決めるのは顔の肌・口まわり（アウトラインを除く）。マップは走査後にまとめて作る
       const faceSdfTarget = { value: 0 };
@@ -485,6 +486,7 @@ export function applyToonShader(
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
         injectHairRing(shader, hairRingTarget, hairRingHeadFrame);
+        injectHairCrown(shader, hairRingTarget, hairRingHeadFrame);
         injectFaceSdf(shader, faceSdfTarget, faceSdfFrame);
 
         shader.fragmentShader = shader.fragmentShader.replace(

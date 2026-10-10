@@ -48,6 +48,7 @@ export const en: Dictionary = {
   },
   viewer: {
     tabs: { expression: 'Expression', motion: 'Motion', voice: 'Voice', sound: 'Sound' },
+    locationGroups: { painted3d: 'Simple 3D', illustration: 'Illustration' },
     gaze: 'Look at camera',
     lookAtCamera: 'Eyes to camera',
     faceCamera: 'Face to camera',

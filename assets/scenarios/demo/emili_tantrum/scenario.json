@@ -132,7 +132,7 @@
         "fov": 42
       },
       "nextSceneId": "s2",
-      "background": "painted_gate",
+      "background": "school_gate",
       "scrollingBackground": false,
       "ambience": false,
       "voiceUrl": "v_s1_0051c048.mp3",

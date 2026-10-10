@@ -21,6 +21,7 @@ import { StageCanvas } from '../../stage/StageCanvas';
 import { CameraAdjust } from '../../stage/CameraAdjust';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
+import { LocationPicker } from '../../components/LocationPicker';
 import './scenes.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -385,26 +386,7 @@ export function ScenesView() {
           {tab === 'time-of-day' && (
             <div className="scenes-locations-panel">
               <div className="scenes-locations-grid">
-                {Object.values(locations.presets).map((loc) => {
-                  const bgUrl = loc.thumbnail ?? loc.layers?.background?.url;
-                  const isActive = loc.id === previewLocation;
-                  return (
-                    <button
-                      key={loc.id}
-                      type="button"
-                      className={`viewer-location-thumb${isActive ? ' active' : ''}`}
-                      title={loc.name}
-                      onClick={() => setPreviewLocation(loc.id)}
-                    >
-                      {bgUrl ? (
-                        <img src={resolveAssetUrl(bgUrl)} alt={loc.name} loading="lazy" />
-                      ) : (
-                        <div className="viewer-location-thumb-fallback">{loc.name}</div>
-                      )}
-                      <span className="viewer-location-thumb-name">{loc.name}</span>
-                    </button>
-                  );
-                })}
+                <LocationPicker locations={locations.presets} selectedId={previewLocation} onSelect={setPreviewLocation} />
               </div>
             </div>
           )}
