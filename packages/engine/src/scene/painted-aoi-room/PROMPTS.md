@@ -171,3 +171,10 @@ Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and mate
 Asset: texture of ONE whole throw blanket laid perfectly flat, for a 3D cloth mesh in a game. Save as PNG to scratch/aoi-room/gen/throw.png, size 1536x1024, transparent_background=true.
 TRUE TOP-DOWN ORTHOGRAPHIC view. The blanket is a rectangle filling the image width and height edge to edge (about 1.4 m x 1.0 m), sunny yellow chunky knit with a subtle cable/rib texture, soft painted shading but NO folds, NO wrinkles and NO perspective (the folds come from the 3D mesh). Along the LEFT and RIGHT short edges only, a row of hanging tassel fringe about 6% of the width long, ending in the image's left and right borders. Uniform soft light, no cast shadows, no bed, no floor. Everything between the tassels GENUINELY FULLY TRANSPARENT.
 ```
+
+### table-top2（上の物を消した版）
+
+```text
+Precise edit of Image 2 (scratch/aoi-room/gen/table-top-with-items.png, a top-down cut-out texture of an oval wooden low table top on transparent background). Image 1 is the art-style reference. Save as PNG to scratch/aoi-room/gen/table-top.png, size 1536x1024, transparent_background=true.
+Remove EVERY object standing on the table: the glass flower vase and flowers, the stacked books and the mug of tea, and any shadows they cast. Keep only the flat things: the glossy honey wood top with its grain and soft sunlight sheen, and the flat yellow gingham table runner (continue the runner's check pattern where the objects were). Keep the exact same canvas size, oval outline, position and top-down orthographic view, and everything outside the oval GENUINELY FULLY TRANSPARENT.
+```
