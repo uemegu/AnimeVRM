@@ -3,9 +3,11 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { resolveAssetUrl } from '../../utils/path';
 import { castShadows } from '../castShadows';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
-import { BENCH, CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, TRACK, TREES, WING, type Planter } from './layout';
+import { BENCH, CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GUARDHOUSE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, STREET, TRACK, TREES, WING, type Planter } from './layout';
 
 const TEXTURES = '/textures/painted-ground';
+/** Tiles and far houses shared with the former painted gate set. */
+const GATE_TEXTURES = '/textures/painted-gate';
 
 async function texture(url: string, repeat = false): Promise<THREE.Texture> {
   const map = await new THREE.TextureLoader().loadAsync(resolveAssetUrl(url));
@@ -380,32 +382,66 @@ function campus(facade: THREE.Texture, side: THREE.Texture, foliage: THREE.Textu
   for (const bed of beds) group.add(planter(bed, curbTop, curbSide, plantedSoil));
   group.add(shrubs(beds, foliage), cycleParking());
   // Paths and courtyard are part of the continuous paved base, including both entry gaps.
-  // Gate faces the street to the south. Leave the opening empty and keep the guardhouse to its east.
-  for (const x of [GATE.x - GATE.opening / 2 - 0.4, GATE.x + GATE.opening / 2 + 0.4]) {
-    group.add(box('Gate pillar', [0.8, GATE.height + 0.4, 0.8], [x, (GATE.height + 0.4) / 2, GATE.z], wall));
+  return group;
+}
+
+interface GateMaps { pillarWest: THREE.Texture; pillarEast: THREE.Texture; panel: THREE.Texture; guardFront: THREE.Texture; guardSide: THREE.Texture; wall: THREE.Texture; stone: THREE.Texture; road: THREE.Texture; houses: THREE.Texture }
+
+/** Repeating tile clone sized for one face, in metres. */
+function tiled(map: THREE.Texture, width: number, height: number, tileWidth: number, tileHeight: number, color = '#ffffff'): THREE.MeshBasicMaterial {
+  const tile = map.clone();
+  tile.repeat.set(width / tileWidth, height / tileHeight);
+  return paint(color, tile);
+}
+
+/**
+ * South gate and the street outside it, taken over from the former painted gate
+ * set: the pillars, sliding gate and guardhouse faces are orthographic cut-outs
+ * of that painting (README), the wall, road and houses are its tiles.
+ */
+function gateAndStreet(maps: GateMaps): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'South gate | wall, pillars, guardhouse and street';
+  const { x, z, opening, pillar, pillarHeight, wallHeight, wallThickness } = GATE;
+  const cap = paint('#e6dfcf'), stoneTop = paint('#cfcac0');
+  const westEnd = x - opening / 2 - pillar, eastEnd = x + opening / 2 + pillar;
+  for (const [left, right] of [[FIELD.minX, westEnd], [eastEnd, FAR.east]]) {
+    const face = tiled(maps.wall, right - left, wallHeight, 2.85, wallHeight);
+    group.add(box('South perimeter wall | tiled', [right - left, wallHeight, wallThickness], [(left + right) / 2, wallHeight / 2, z - wallThickness / 2], [cap, cap, cap, cap, face, face]));
   }
-  for (const [left, right] of [[FIELD.minX, GATE.x - GATE.opening / 2 - 0.8], [GATE.x + GATE.opening / 2 + 0.8, FAR.east]]) {
-    group.add(box('South perimeter wall', [right - left, 0.7, 0.3], [(left + right) / 2, 0.35, GATE.z], wall));
+  const pillarSide = tiled(maps.stone, pillar, pillarHeight, 1.2, 1.2);
+  const plain = paint('#ffffff', maps.pillarEast);
+  for (const [px, front] of [[x - opening / 2 - pillar / 2, paint('#ffffff', maps.pillarWest)], [x + opening / 2 + pillar / 2, plain]] as const) {
+    group.add(box('Gate pillar | painted granite', [pillar, pillarHeight, pillar], [px, pillarHeight / 2, z], [pillarSide, pillarSide, stoneTop, stoneTop, front, plain]));
   }
-  const gateBars: THREE.BufferGeometry[] = [];
-  const start = GATE.x - GATE.opening / 2, end = GATE.x - 1;
-  for (let x = start; x <= end; x += 0.18) gateBars.push(new THREE.BoxGeometry(0.04, 1.8, 0.04).translate(x, 0.95, GATE.z));
-  for (const y of [0.1, 1.85]) gateBars.push(new THREE.BoxGeometry(end - start, 0.07, 0.06).translate((start + end) / 2, y, GATE.z));
-  group.add(bars('Gate | half-open sliding bars', gateBars, '#495c63'));
-  const guardWindows = facadeTile(4.5, 3.3);
-  group.add(box('Guardhouse', [4.5, 2.6, 4], [41, 1.3, 33], [guardWindows, guardWindows, wall, wall, guardWindows, guardWindows]));
-  group.add(box('Guardhouse roof', [5, 0.16, 4.5], [41, 2.7, 33], wall));
-  const street = groundPlane('South | street outside the gate', paint('#7a8592'), FAR.west, FAR.east, 45, 38);
-  street.position.y = 0.02;
-  group.add(street);
-  for (let x = FAR.west; x < FAR.east; x += 8) group.add(box('Street | centre marking', [4, 0.01, 0.08], [x + 2, 0.035, 41.5], paint('#d7d8c8')));
+  // Painted lattice with see-through gaps; slid half open against the west pillar.
+  const panel = new THREE.Mesh(new THREE.PlaneGeometry(GATE.panel, GATE.panelHeight), new THREE.MeshBasicMaterial({ map: maps.panel, alphaTest: 0.5, side: THREE.DoubleSide, toneMapped: false, fog: false }));
+  panel.name = 'Gate | half-open sliding gate';
+  panel.position.set(x - opening / 2 + GATE.panel / 2, GATE.panelHeight / 2, z - 0.2);
+  group.add(panel);
+  const g = GUARDHOUSE;
+  const front = paint('#ffffff', maps.guardFront), side = paint('#ffffff', maps.guardSide);
+  group.add(box('Guardhouse | painted walls and windows', [g.maxX - g.minX, g.height, g.maxZ - g.minZ], [(g.minX + g.maxX) / 2, g.height / 2, (g.minZ + g.maxZ) / 2], [side, side, paint('#a3a7a8'), cap, front, front]));
+  const road = groundPlane('Street | kerbs, road and far pavement', paint('#ffffff', maps.road), FAR.west, FAR.east, STREET.roadFar, STREET.roadNear);
+  road.position.y = 0.02;
+  const roadImage = maps.road.image as { width: number; height: number };
+  maps.road.repeat.set((FAR.east - FAR.west) / ((STREET.roadFar - STREET.roadNear) * roadImage.width / roadImage.height), 1);
+  group.add(road);
+  const houses = farStandee('Street | houses across the road', maps.houses, [FAR.east, STREET.houses], [FAR.west, STREET.houses], STREET.houseRepeat);
+  (houses.material as THREE.MeshBasicMaterial).fog = false;
+  group.add(houses);
   return group;
 }
 
 export async function loadPaintedGround(): Promise<THREE.Group> {
   const [facade, tree, conifer, dirt, side, paving, treeBelt] = await Promise.all([
     texture(`${TEXTURES}/school-front.avif`), texture(`${TEXTURES}/tree.avif`), texture(`${TEXTURES}/conifer.avif`),
-    texture(`${TEXTURES}/tile-soil.avif`, true), texture(`${TEXTURES}/school-side.avif`, true), texture('/textures/painted-gate/tile-paving.avif', true), texture(`${TEXTURES}/far-tree-belt.avif`),
+    texture(`${TEXTURES}/tile-soil.avif`, true), texture(`${TEXTURES}/school-side.avif`, true), texture(`${GATE_TEXTURES}/tile-paving.avif`, true), texture(`${TEXTURES}/far-tree-belt.avif`),
+  ]);
+  const [pillarWest, pillarEast, panel, guardFront, guardSide, wall, stone, road, houses] = await Promise.all([
+    texture(`${TEXTURES}/gate-pillar-west.avif`), texture(`${TEXTURES}/gate-pillar-east.avif`), texture(`${TEXTURES}/gate-panel.avif`),
+    texture(`${TEXTURES}/guardhouse-front.avif`), texture(`${TEXTURES}/guardhouse-side.avif`),
+    texture(`${GATE_TEXTURES}/tile-wall.avif`, true), texture(`${GATE_TEXTURES}/tile-stone.avif`, true), texture(`${GATE_TEXTURES}/tile-road.avif`, true), texture(`${GATE_TEXTURES}/far-houses.avif`),
   ]);
   side.repeat.set(2, 1);
   paving.repeat.set((FAR.east - FAR.west) / 4, (FAR.south - FAR.north) / 4);
@@ -422,7 +458,7 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
     ['West tree-belt floor', FAR.west, -64, FIELD.maxZ, FAR.north],
     ['North tree-belt floor', FAR.west, FIELD.maxX, -49, FAR.north],
     ['East tree-belt floor', 67, FAR.east, 38, -8],
-    ['South tree-belt floor', FAR.west, FAR.east, FAR.south, 48],
+    ['South tree-belt floor behind the houses', FAR.west, FAR.east, FAR.south, STREET.houses],
   ] as const) {
     const floor = groundPlane(name, greenBelt, minX, maxX, nearZ, farZ);
     floor.position.y = 0.02;
@@ -430,7 +466,11 @@ export async function loadPaintedGround(): Promise<THREE.Group> {
   }
   group.add(track(), goal(-25, -24, 0), goal(-25, 20, Math.PI), bench());
   group.add(campus(facade, side, tree));
-  side.dispose(); // Only the per-wall clones are used by the meshes.
+  group.add(gateAndStreet({ pillarWest, pillarEast, panel, guardFront, guardSide, wall, stone, road, houses }));
+  // Only the per-face clones are used by the meshes.
+  side.dispose();
+  wall.dispose();
+  stone.dispose();
   group.add(fence([FIELD.minX, FIELD.maxZ], [FIELD.minX, FIELD.minZ], 6));
   group.add(fence([FIELD.minX, FIELD.minZ], [FIELD.maxX, FIELD.minZ], 6));
   group.add(fence([FIELD.minX, FIELD.maxZ], [FIELD.maxX, FIELD.maxZ], 3));

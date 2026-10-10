@@ -2,8 +2,9 @@
 
 校門の前の歩道にアバターが立ち、開いた門の奥に構内の広場・守衛室・校舎が見える撮影用セット。景色全体を基準カメラから見た1枚絵として描き、同じカメラから下書きの箱（地面・塀・門柱・門扉・守衛室・奥の面）へ投影する（マットペイントのカメラ投影）。カメラが少し動くと箱の奥行きに応じて視差が出る。空は絵に描かず透過にし、ビューアの空（SkyBackground）を後ろに描く。
 
-- 場所: `painted_gate`（`assets/studio/locations.json` の組み込み3D背景 `builtin:painted-gate`）
-- シナリオ: `assets/scenarios/demo/painted_gate/`（朝・昼・放課後）
+> **場所では使っていない。** 中庭・運動場と校門の見た目が食い違うため、場所 `school_gate` / `painted_gate` は共有マップ `builtin:painted-ground` の南の校門に切り替えた（`../painted-ground/README.md` の「校門」）。門柱・門扉・守衛室の絵と塀・道路・家並みの素材はそちらで再利用している。このセットは `builtin:painted-gate` として残し、`groundPlane`・`farStandee`・`skyDome` はほかのセットが共用している。
+
+- 旧デモ：`assets/scenarios/demo/painted_gate/` は共有マップの校門に移った
 - 素材: `assets/textures/painted-gate/`
   - `gate.avif`: 門の層（塀・門柱・門扉）。全体の絵を門の層のマスクで切り抜き、門扉の格子の間も透明にしたもの（奥は `scene.avif` が見える）
   - `guardhouse.avif`: 守衛室の層。門・塀を消した絵を守衛室のマスクで切り抜いたもの

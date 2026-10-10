@@ -12,7 +12,17 @@ export const SCHOOL = { x: 31, z: -36, width: 46, depth: 9, height: 14.5 } as co
 export const WING = { x: 59, z: -28.25, width: 10, depth: 33.5, height: SCHOOL_ROOF_HEIGHT } as const;
 export const GYM = { x: 72, z: -24, width: 16, depth: 24, wallHeight: SCHOOL_ROOF_HEIGHT, roofRise: 5 } as const;
 export const COURTYARD = { minX: 5.2, maxX: 56.8, minZ: -36, maxZ: 35.5 } as const;
-export const GATE = { x: 31, z: 35.5, opening: 7, height: 2 } as const;
+/**
+ * South gate, sized like the former painted gate set: 1.9m wall, 2.3m granite
+ * pillars and a 2m half-open sliding gate. `z` is the wall's street face.
+ */
+export const GATE = { x: 31, z: 35.5, opening: 5.8, pillar: 0.8, pillarHeight: 2.3, wallHeight: 1.9, wallThickness: 0.3, panel: 2, panelHeight: 1.6 } as const;
+/** Guardhouse just inside the east pillar; its west face (door) looks onto the gate opening. */
+export const GUARDHOUSE = { minX: 35.2, maxX: 38.36, minZ: 30.5, maxZ: 34.5, height: 2.9 } as const;
+/** Street outside the gate: sidewalk up to `roadNear`, tile-road (kerb, road, far pavement) to `roadFar`, then houses. */
+export const STREET = { roadNear: 44, roadFar: 55, houses: 55.6, houseRepeat: 41 } as const;
+/** Dialogue origin for the gate locations: on the sidewalk, 3m in front of the gate. */
+export const GATE_ORIGIN = { x: 31, z: 38.5 } as const;
 export const FIELD_ENTRY = { z: 0, halfWidth: 4 } as const;
 /** This point becomes the dialogue origin for the existing courtyard location. */
 export const COURTYARD_ORIGIN = { x: 27, z: 8 } as const;
@@ -33,8 +43,9 @@ export const PLANTERS: readonly Planter[] = [
   ...[20, 42].flatMap((x): Planter[] => [
     { id: `${x === 20 ? 'west' : 'east'}-front island`, x, z: 19, width: 8.5, depth: 12, radius: 1.1 },
     { id: `${x === 20 ? 'west' : 'east'}-rear island`, x, z: -23, width: 8.5, depth: 4.5, radius: 0.8 },
-    { id: `${x === 20 ? 'west' : 'east'}-gate strip`, x, z: 30.5, width: 10, depth: 3.2, radius: 0.6 },
   ]),
+  // Narrower than the islands so the east strip clears the guardhouse.
+  ...[19, 43].map((x): Planter => ({ id: `${x < 31 ? 'west' : 'east'}-gate strip`, x, z: 30.5, width: 8, depth: 3.2, radius: 0.6 })),
   { id: 'central round island', x: 31, z: -10, width: 9, depth: 9, radius: 4.5, circular: true },
   ...[19, 43].map((x): Planter => ({ id: `school-front ${x === 19 ? 'west' : 'east'}`, x, z: -29.5, width: 16, depth: 3.2, radius: 0.6 })),
   ...[7.3, 54.7].flatMap((x): Planter[] => [-1, 1].map((sign): Planter => ({
@@ -60,7 +71,7 @@ export const CENTRAL_TREE = { x: 31, z: -10, height: 8, base: 0.14 } as const;
 /** Cutout trees are separate from buildings, so their silhouettes have parallax. */
 export const TREES: readonly (readonly [number, number, number])[] = [
   ...[7.3, 54.7].flatMap((x) => [-29, -17, -8, 8, 17, 29].map((z) => [x, z, 6.8] as const)),
-  ...[20, 42].flatMap((x) => [[x + (x < 31 ? -1.2 : 1.2), 18, 7.4], [x + (x < 31 ? 1.2 : -1.2), 21, 6.2], [x, -23, 6.8], [x, 30.5, 6.8]] as const),
+  ...[20, 42].flatMap((x) => [[x + (x < 31 ? -1.2 : 1.2), 18, 7.4], [x + (x < 31 ? 1.2 : -1.2), 21, 6.2], [x, -23, 6.8], [x + (x < 31 ? -1 : 1), 30.5, 6.8]] as const),
   ...[13, 23, 39, 49].map((x) => [x, -29.5, 6.8] as const),
   ...[-1, 12, 24].map((z) => [82, z, 6.8] as const),
   ...[61, 69, 77].map((x) => [x, -8, 6.8] as const),
@@ -77,6 +88,13 @@ export const COURTYARD_SHOTS = [
   { id: 'bikes', label: '中庭から駐輪場へ', position: [19, 1.65, -8], target: [42, 1.8, -7], fov: 55 },
   { id: 'conversation', label: '中庭の会話', position: [-1.5, 1.4, 3.2], target: [0, 1.2, 0], fov: 48 },
   { id: 'overview', label: '校舎・対称の植栽・運動場への通路', position: [-14, 23, 33], target: [4, 0, -9], fov: 65 },
+] as const;
+
+/** Coordinates relative to GATE_ORIGIN (camera south of the avatar, looking north into the campus). */
+export const GATE_SHOTS = [
+  { id: 'front', label: '門の前で', position: [0, 1.35, 2.2], target: [0, 1.15, 0], fov: 44 },
+  { id: 'wide', label: '引き：門の奥に中庭と時計の校舎', position: [0.3, 1.5, 4.2], target: [0, 1.1, -2], fov: 50 },
+  { id: 'street', label: '歩道から向かいの家並み', position: [0, 1.65, 0], target: [0, 1.65, 20], fov: 55 },
 ] as const;
 
 export const GROUND_SHOTS = [
