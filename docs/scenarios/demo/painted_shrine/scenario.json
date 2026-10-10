@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_shrine",
+  "title": {
+    "ja": "夏の神社 — 簡易3D",
+    "en": "Summer shrine (painted 3D)"
+  },
+  "description": "元絵の神社を、拝殿・社務所の立面、銅板と瓦の屋根、石の鳥居・灯籠・玉垣、手水舎、鎮守の森で立体に組み直した簡易3D。参道の前後と左右を見渡せる。",
+  "location": "shrine_3d",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "forward",
+      "text": "正面・拝殿",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          3.2,
+          -17
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "left_90",
+      "text": "同じ場所から左90度・絵馬掛けと社務所",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          -20,
+          2.4,
+          3
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "right_90",
+      "text": "同じ場所から右90度・手水舎",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          20,
+          2.4,
+          3
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "back_180",
+      "text": "同じ場所から後ろ180度・鳥居",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          2.6,
+          23
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "haiden_close",
+      "text": "拝殿の階段と賽銭箱",
+      "cameraPose": {
+        "position": [
+          2.5,
+          1.6,
+          -5
+        ],
+        "target": [
+          0,
+          2.4,
+          -12.5
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "temizuya",
+      "text": "手水舎を斜めから",
+      "cameraPose": {
+        "position": [
+          3,
+          1.6,
+          -5.5
+        ],
+        "target": [
+          6.4,
+          1.2,
+          -2.2
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "haiden_side",
+      "text": "拝殿の横から本殿へ",
+      "cameraPose": {
+        "position": [
+          7.5,
+          1.65,
+          -9
+        ],
+        "target": [
+          0,
+          3,
+          -24
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "from_haiden",
+      "text": "拝殿の前から鳥居へ振り返る",
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          -7
+        ],
+        "target": [
+          0,
+          2.4,
+          20
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "overview",
+      "text": "屋根・境内の俯瞰",
+      "cameraPose": {
+        "position": [
+          -4,
+          30,
+          30
+        ],
+        "target": [
+          0,
+          2,
+          -10
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "with_avatar",
+      "text": "ここの神社、夏は木陰が涼しいんだ。お参りしていこうよ。",
+      "speakerCharacterId": "aoi",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotationY": 0,
+          "motion": "pose_drink_can",
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "player",
+          "heldItem": "can_juice",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.465,
+          1.32,
+          0.446
+        ],
+        "target": [
+          -0.003,
+          1.312,
+          0.005
+        ],
+        "fov": 50
+      },
+      "camera": "close"
+    }
+  ]
+}

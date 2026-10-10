@@ -2,296 +2,516 @@
   {
     "url": "/textures/apartment_door_far.avif",
     "size": 269440,
-    "updatedAt": "2026-10-03T01:24:49.623Z"
+    "updatedAt": "2026-10-10T09:16:54.364Z"
   },
   {
     "url": "/textures/cafe_far.avif",
     "size": 397258,
-    "updatedAt": "2026-10-03T01:24:49.626Z"
+    "updatedAt": "2026-10-10T09:16:54.365Z"
   },
   {
     "url": "/textures/cafe_indoor_far.avif",
     "size": 534459,
-    "updatedAt": "2026-10-03T01:24:49.628Z"
+    "updatedAt": "2026-10-10T09:16:54.366Z"
   },
   {
     "url": "/textures/cafe_indoor_mid.avif",
     "size": 127878,
-    "updatedAt": "2026-10-03T01:24:49.629Z"
+    "updatedAt": "2026-10-10T09:16:54.367Z"
   },
   {
     "url": "/textures/cafe_near.avif",
     "size": 127403,
-    "updatedAt": "2026-10-03T01:24:49.630Z"
+    "updatedAt": "2026-10-10T09:16:54.367Z"
   },
   {
     "url": "/textures/girl_face_anger.png",
     "size": 24526,
-    "updatedAt": "2026-10-03T01:24:49.630Z"
+    "updatedAt": "2026-10-10T09:16:54.369Z"
   },
   {
     "url": "/textures/girl_face_blush.png",
     "size": 66327,
-    "updatedAt": "2026-10-03T01:24:49.631Z"
+    "updatedAt": "2026-10-10T09:16:54.369Z"
+  },
+  {
+    "url": "/textures/girl_face_redface.avif",
+    "size": 50413,
+    "updatedAt": "2026-10-10T09:16:54.370Z"
   },
   {
     "url": "/textures/girl_face_sweat.png",
     "size": 20394,
-    "updatedAt": "2026-10-03T01:24:49.631Z"
+    "updatedAt": "2026-10-10T09:16:54.370Z"
   },
   {
     "url": "/textures/modern-park-far.avif",
     "size": 413575,
-    "updatedAt": "2026-10-03T01:24:49.632Z"
+    "updatedAt": "2026-10-10T09:16:54.371Z"
   },
   {
     "url": "/textures/modern-park-mid.avif",
     "size": 260318,
-    "updatedAt": "2026-10-03T01:24:49.633Z"
+    "updatedAt": "2026-10-10T09:16:54.372Z"
   },
   {
     "url": "/textures/myroom_far.avif",
     "size": 316275,
-    "updatedAt": "2026-10-03T01:24:49.634Z"
+    "updatedAt": "2026-10-10T09:16:54.373Z"
   },
   {
     "url": "/textures/painted-classroom/cabinet.avif",
     "size": 143625,
-    "updatedAt": "2026-10-03T01:24:49.641Z"
+    "updatedAt": "2026-10-10T09:16:54.379Z"
   },
   {
     "url": "/textures/painted-classroom/ceiling.avif",
     "size": 179335,
-    "updatedAt": "2026-10-03T01:24:49.639Z"
+    "updatedAt": "2026-10-10T09:16:54.377Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-1.avif",
     "size": 196776,
-    "updatedAt": "2026-10-03T01:24:49.635Z"
+    "updatedAt": "2026-10-10T09:16:54.373Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-2.avif",
     "size": 192219,
-    "updatedAt": "2026-10-03T01:24:49.642Z"
+    "updatedAt": "2026-10-10T09:16:54.380Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-3.avif",
     "size": 183077,
-    "updatedAt": "2026-10-03T01:24:49.639Z"
+    "updatedAt": "2026-10-10T09:16:54.378Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-4.avif",
     "size": 174778,
-    "updatedAt": "2026-10-03T01:24:49.639Z"
+    "updatedAt": "2026-10-10T09:16:54.377Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-5.avif",
     "size": 196776,
-    "updatedAt": "2026-10-03T01:24:49.638Z"
+    "updatedAt": "2026-10-10T09:16:54.376Z"
   },
   {
     "url": "/textures/painted-classroom/desk-row-6.avif",
     "size": 174778,
-    "updatedAt": "2026-10-03T01:24:49.638Z"
+    "updatedAt": "2026-10-10T09:16:54.376Z"
   },
   {
     "url": "/textures/painted-classroom/floor.avif",
     "size": 79744,
-    "updatedAt": "2026-10-03T01:24:49.636Z"
+    "updatedAt": "2026-10-10T09:16:54.374Z"
   },
   {
     "url": "/textures/painted-classroom/podium.avif",
     "size": 96118,
-    "updatedAt": "2026-10-03T01:24:49.639Z"
+    "updatedAt": "2026-10-10T09:16:54.377Z"
   },
   {
     "url": "/textures/painted-classroom/sky-only.png",
     "size": 97,
-    "updatedAt": "2026-10-03T01:24:49.642Z"
+    "updatedAt": "2026-10-10T09:16:54.380Z"
   },
   {
     "url": "/textures/painted-classroom/thumb-classroom.avif",
     "size": 40786,
-    "updatedAt": "2026-10-03T01:24:49.637Z"
+    "updatedAt": "2026-10-10T09:16:54.375Z"
+  },
+  {
+    "url": "/textures/painted-classroom/thumb-festival.avif",
+    "size": 42819,
+    "updatedAt": "2026-10-10T09:16:54.376Z"
   },
   {
     "url": "/textures/painted-classroom/thumb-gate.avif",
     "size": 41507,
-    "updatedAt": "2026-10-03T01:24:49.642Z"
+    "updatedAt": "2026-10-10T09:16:54.380Z"
   },
   {
     "url": "/textures/painted-classroom/thumb-library.avif",
     "size": 51287,
-    "updatedAt": "2026-10-03T01:24:49.641Z"
+    "updatedAt": "2026-10-10T09:16:54.379Z"
   },
   {
     "url": "/textures/painted-classroom/thumb-seaside.avif",
     "size": 30906,
-    "updatedAt": "2026-10-03T01:24:49.642Z"
+    "updatedAt": "2026-10-10T09:16:54.380Z"
   },
   {
     "url": "/textures/painted-classroom/wall-front.avif",
     "size": 62740,
-    "updatedAt": "2026-10-03T01:24:49.638Z"
+    "updatedAt": "2026-10-10T09:16:54.376Z"
   },
   {
     "url": "/textures/painted-classroom/wall-left.avif",
     "size": 334856,
-    "updatedAt": "2026-10-03T01:24:49.637Z"
+    "updatedAt": "2026-10-10T09:16:54.375Z"
   },
   {
     "url": "/textures/painted-classroom/wall-right.avif",
     "size": 74686,
-    "updatedAt": "2026-10-03T01:24:49.639Z"
+    "updatedAt": "2026-10-10T09:16:54.377Z"
   },
   {
     "url": "/textures/painted-gate/far-campus.avif",
     "size": 134444,
-    "updatedAt": "2026-10-03T01:24:49.647Z"
+    "updatedAt": "2026-10-10T09:16:54.384Z"
   },
   {
     "url": "/textures/painted-gate/far-houses.avif",
     "size": 165600,
-    "updatedAt": "2026-10-03T01:24:49.647Z"
+    "updatedAt": "2026-10-10T09:16:54.384Z"
   },
   {
     "url": "/textures/painted-gate/gate.avif",
     "size": 260423,
-    "updatedAt": "2026-10-03T01:24:49.646Z"
+    "updatedAt": "2026-10-10T09:16:54.383Z"
   },
   {
     "url": "/textures/painted-gate/guardhouse.avif",
     "size": 240057,
-    "updatedAt": "2026-10-03T01:24:49.643Z"
+    "updatedAt": "2026-10-10T09:16:54.381Z"
   },
   {
     "url": "/textures/painted-gate/scene.avif",
     "size": 285791,
-    "updatedAt": "2026-10-03T01:24:49.646Z"
+    "updatedAt": "2026-10-10T09:16:54.382Z"
   },
   {
     "url": "/textures/painted-gate/tile-facade.avif",
     "size": 116588,
-    "updatedAt": "2026-10-03T01:24:49.647Z"
+    "updatedAt": "2026-10-10T09:16:54.384Z"
   },
   {
     "url": "/textures/painted-gate/tile-paving.avif",
     "size": 167274,
-    "updatedAt": "2026-10-03T01:24:49.647Z"
+    "updatedAt": "2026-10-10T09:16:54.385Z"
   },
   {
     "url": "/textures/painted-gate/tile-road.avif",
     "size": 456000,
-    "updatedAt": "2026-10-03T01:24:49.643Z"
+    "updatedAt": "2026-10-10T09:16:54.381Z"
   },
   {
     "url": "/textures/painted-gate/tile-stone.avif",
     "size": 333867,
-    "updatedAt": "2026-10-03T01:24:49.644Z"
+    "updatedAt": "2026-10-10T09:16:54.381Z"
   },
   {
     "url": "/textures/painted-gate/tile-wall.avif",
     "size": 311546,
-    "updatedAt": "2026-10-03T01:24:49.648Z"
+    "updatedAt": "2026-10-10T09:16:54.384Z"
+  },
+  {
+    "url": "/textures/painted-ground/conifer.avif",
+    "size": 461666,
+    "updatedAt": "2026-10-10T09:16:54.387Z"
+  },
+  {
+    "url": "/textures/painted-ground/far-tree-belt.avif",
+    "size": 706219,
+    "updatedAt": "2026-10-10T09:16:54.389Z"
+  },
+  {
+    "url": "/textures/painted-ground/school-front.avif",
+    "size": 217623,
+    "updatedAt": "2026-10-10T09:16:54.389Z"
+  },
+  {
+    "url": "/textures/painted-ground/school-side.avif",
+    "size": 41205,
+    "updatedAt": "2026-10-10T09:16:54.390Z"
+  },
+  {
+    "url": "/textures/painted-ground/thumb-courtyard.avif",
+    "size": 70195,
+    "updatedAt": "2026-10-10T09:16:54.390Z"
+  },
+  {
+    "url": "/textures/painted-ground/thumb.avif",
+    "size": 49852,
+    "updatedAt": "2026-10-10T09:16:54.390Z"
+  },
+  {
+    "url": "/textures/painted-ground/tile-soil.avif",
+    "size": 418348,
+    "updatedAt": "2026-10-10T09:16:54.386Z"
+  },
+  {
+    "url": "/textures/painted-ground/tree.avif",
+    "size": 822676,
+    "updatedAt": "2026-10-10T09:16:54.387Z"
+  },
+  {
+    "url": "/textures/painted-gym/floor-tile.avif",
+    "size": 249396,
+    "updatedAt": "2026-10-10T09:16:54.392Z"
+  },
+  {
+    "url": "/textures/painted-gym/rear-wall.avif",
+    "size": 320942,
+    "updatedAt": "2026-10-10T09:16:54.392Z"
+  },
+  {
+    "url": "/textures/painted-gym/stage-wall.avif",
+    "size": 124804,
+    "updatedAt": "2026-10-10T09:16:54.392Z"
+  },
+  {
+    "url": "/textures/painted-gym/thumb.avif",
+    "size": 170271,
+    "updatedAt": "2026-10-10T09:16:54.393Z"
+  },
+  {
+    "url": "/textures/painted-gym/window-wall.avif",
+    "size": 407804,
+    "updatedAt": "2026-10-10T09:16:54.392Z"
   },
   {
     "url": "/textures/painted-library/ceiling.avif",
     "size": 48652,
-    "updatedAt": "2026-10-03T01:24:49.652Z"
+    "updatedAt": "2026-10-10T09:16:54.396Z"
   },
   {
     "url": "/textures/painted-library/chair.avif",
     "size": 143849,
-    "updatedAt": "2026-10-03T01:24:49.648Z"
+    "updatedAt": "2026-10-10T09:16:54.393Z"
   },
   {
     "url": "/textures/painted-library/far-table.avif",
     "size": 147595,
-    "updatedAt": "2026-10-03T01:24:49.651Z"
+    "updatedAt": "2026-10-10T09:16:54.395Z"
   },
   {
     "url": "/textures/painted-library/floor.avif",
     "size": 180508,
-    "updatedAt": "2026-10-03T01:24:49.650Z"
+    "updatedAt": "2026-10-10T09:16:54.393Z"
   },
   {
     "url": "/textures/painted-library/shelf-row.avif",
     "size": 217605,
-    "updatedAt": "2026-10-03T01:24:49.650Z"
+    "updatedAt": "2026-10-10T09:16:54.395Z"
   },
   {
     "url": "/textures/painted-library/table-top.avif",
     "size": 157659,
-    "updatedAt": "2026-10-03T01:24:49.651Z"
+    "updatedAt": "2026-10-10T09:16:54.396Z"
   },
   {
     "url": "/textures/painted-library/wall-front.avif",
     "size": 187597,
-    "updatedAt": "2026-10-03T01:24:49.651Z"
+    "updatedAt": "2026-10-10T09:16:54.395Z"
   },
   {
     "url": "/textures/painted-library/wall-left.avif",
     "size": 325755,
-    "updatedAt": "2026-10-03T01:24:49.650Z"
+    "updatedAt": "2026-10-10T09:16:54.395Z"
   },
   {
     "url": "/textures/painted-library/wall-right.avif",
     "size": 196985,
-    "updatedAt": "2026-10-03T01:24:49.651Z"
+    "updatedAt": "2026-10-10T09:16:54.396Z"
   },
   {
     "url": "/textures/painted-seaside/far-islands.avif",
     "size": 51063,
-    "updatedAt": "2026-10-03T01:24:49.652Z"
+    "updatedAt": "2026-10-10T09:16:54.396Z"
   },
   {
     "url": "/textures/painted-seaside/far-park.avif",
     "size": 227278,
-    "updatedAt": "2026-10-03T01:24:49.654Z"
+    "updatedAt": "2026-10-10T09:16:54.397Z"
   },
   {
     "url": "/textures/painted-seaside/lamp.avif",
     "size": 55251,
-    "updatedAt": "2026-10-03T01:24:49.653Z"
+    "updatedAt": "2026-10-10T09:16:54.396Z"
   },
   {
     "url": "/textures/painted-seaside/scene.avif",
     "size": 240134,
-    "updatedAt": "2026-10-03T01:24:49.655Z"
+    "updatedAt": "2026-10-10T09:16:54.399Z"
   },
   {
     "url": "/textures/painted-seaside/tile-paving.avif",
     "size": 170741,
-    "updatedAt": "2026-10-03T01:24:49.656Z"
+    "updatedAt": "2026-10-10T09:16:54.400Z"
   },
   {
     "url": "/textures/painted-seaside/tile-stone.avif",
     "size": 333867,
-    "updatedAt": "2026-10-03T01:24:49.655Z"
+    "updatedAt": "2026-10-10T09:16:54.398Z"
   },
   {
     "url": "/textures/painted-seaside/tree-a.avif",
     "size": 556284,
-    "updatedAt": "2026-10-03T01:24:49.657Z"
+    "updatedAt": "2026-10-10T09:16:54.400Z"
   },
   {
     "url": "/textures/painted-seaside/tree-b.avif",
     "size": 634786,
-    "updatedAt": "2026-10-03T01:24:49.654Z"
+    "updatedAt": "2026-10-10T09:16:54.397Z"
+  },
+  {
+    "url": "/textures/painted-shrine/annex-front.avif",
+    "size": 304282,
+    "updatedAt": "2026-10-10T09:16:54.401Z"
+  },
+  {
+    "url": "/textures/painted-shrine/ema.avif",
+    "size": 369800,
+    "updatedAt": "2026-10-10T09:16:54.405Z"
+  },
+  {
+    "url": "/textures/painted-shrine/far-tree-belt.avif",
+    "size": 706219,
+    "updatedAt": "2026-10-10T09:16:54.409Z"
+  },
+  {
+    "url": "/textures/painted-shrine/gable.avif",
+    "size": 234657,
+    "updatedAt": "2026-10-10T09:16:54.405Z"
+  },
+  {
+    "url": "/textures/painted-shrine/ground-gravel.avif",
+    "size": 627151,
+    "updatedAt": "2026-10-10T09:16:54.403Z"
+  },
+  {
+    "url": "/textures/painted-shrine/haiden-front.avif",
+    "size": 349374,
+    "updatedAt": "2026-10-10T09:16:54.403Z"
+  },
+  {
+    "url": "/textures/painted-shrine/haiden-side.avif",
+    "size": 377339,
+    "updatedAt": "2026-10-10T09:16:54.406Z"
+  },
+  {
+    "url": "/textures/painted-shrine/roof-copper.avif",
+    "size": 363735,
+    "updatedAt": "2026-10-10T09:16:54.403Z"
+  },
+  {
+    "url": "/textures/painted-shrine/roof-kawara.avif",
+    "size": 267271,
+    "updatedAt": "2026-10-10T09:16:54.405Z"
+  },
+  {
+    "url": "/textures/painted-shrine/sando-stone.avif",
+    "size": 608010,
+    "updatedAt": "2026-10-10T09:16:54.401Z"
+  },
+  {
+    "url": "/textures/painted-shrine/shrub.avif",
+    "size": 608083,
+    "updatedAt": "2026-10-10T09:16:54.409Z"
+  },
+  {
+    "url": "/textures/painted-shrine/stone-granite.avif",
+    "size": 623056,
+    "updatedAt": "2026-10-10T09:16:54.408Z"
+  },
+  {
+    "url": "/textures/painted-shrine/thumb.avif",
+    "size": 301222,
+    "updatedAt": "2026-10-10T09:16:54.409Z"
+  },
+  {
+    "url": "/textures/painted-shrine/tree.avif",
+    "size": 822676,
+    "updatedAt": "2026-10-10T09:16:54.406Z"
+  },
+  {
+    "url": "/textures/painted-shrine/wood-timber.avif",
+    "size": 363094,
+    "updatedAt": "2026-10-10T09:16:54.403Z"
+  },
+  {
+    "url": "/textures/props/book_cover.avif",
+    "size": 43834,
+    "updatedAt": "2026-10-10T09:16:54.410Z"
+  },
+  {
+    "url": "/textures/props/book_pages.avif",
+    "size": 53316,
+    "updatedAt": "2026-10-10T09:16:54.411Z"
+  },
+  {
+    "url": "/textures/props/can_coffee_label.avif",
+    "size": 24365,
+    "updatedAt": "2026-10-10T09:16:54.410Z"
+  },
+  {
+    "url": "/textures/props/can_juice_label.avif",
+    "size": 39007,
+    "updatedAt": "2026-10-10T09:16:54.410Z"
+  },
+  {
+    "url": "/textures/props/carton_ichigo.avif",
+    "size": 38903,
+    "updatedAt": "2026-10-10T09:16:54.412Z"
+  },
+  {
+    "url": "/textures/props/notebook_cover.avif",
+    "size": 21343,
+    "updatedAt": "2026-10-10T09:16:54.412Z"
   },
   {
     "url": "/textures/school-corridor-far.avif",
     "size": 148534,
-    "updatedAt": "2026-10-03T01:24:49.658Z"
+    "updatedAt": "2026-10-10T09:16:54.413Z"
   },
   {
-    "url": "/textures/school-gate-far.avif",
-    "size": 313476,
-    "updatedAt": "2026-10-03T01:24:49.659Z"
+    "url": "/textures/shopping-street/bookshop-front.avif",
+    "size": 710916,
+    "updatedAt": "2026-10-10T09:16:54.417Z"
+  },
+  {
+    "url": "/textures/shopping-street/far-tree-belt.avif",
+    "size": 706219,
+    "updatedAt": "2026-10-10T09:16:54.419Z"
+  },
+  {
+    "url": "/textures/shopping-street/florist-front.avif",
+    "size": 776596,
+    "updatedAt": "2026-10-10T09:16:54.413Z"
+  },
+  {
+    "url": "/textures/shopping-street/flowers.avif",
+    "size": 781598,
+    "updatedAt": "2026-10-10T09:16:54.414Z"
+  },
+  {
+    "url": "/textures/shopping-street/gallery-front.avif",
+    "size": 623893,
+    "updatedAt": "2026-10-10T09:16:54.416Z"
+  },
+  {
+    "url": "/textures/shopping-street/thumb.avif",
+    "size": 282793,
+    "updatedAt": "2026-10-10T09:16:54.419Z"
+  },
+  {
+    "url": "/textures/shopping-street/tile-paving.avif",
+    "size": 167274,
+    "updatedAt": "2026-10-10T09:16:54.414Z"
+  },
+  {
+    "url": "/textures/shopping-street/tile-wall.avif",
+    "size": 311546,
+    "updatedAt": "2026-10-10T09:16:54.417Z"
+  },
+  {
+    "url": "/textures/shopping-street/tree.avif",
+    "size": 822676,
+    "updatedAt": "2026-10-10T09:16:54.417Z"
   },
   {
     "url": "/textures/town_far.avif",
     "size": 445726,
-    "updatedAt": "2026-10-03T01:24:49.660Z"
+    "updatedAt": "2026-10-10T09:16:54.420Z"
   }
 ]

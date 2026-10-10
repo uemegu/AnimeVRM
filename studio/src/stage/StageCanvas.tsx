@@ -309,7 +309,7 @@ export function StageCanvas({
   // 画面演出（集中線・瞼・暗転）はこの枠の中に重なる。枠の外のセリフ表示などはその上に出る
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', isolation: 'isolate' }}>
-      <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined }} />
+      <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%', cursor: freeCamera ? 'grab' : undefined, ...(freeCamera ? { touchAction: 'none', userSelect: 'none', WebkitUserSelect: 'none', WebkitTouchCallout: 'none' } : null) }} />
       <StageLoading show={loading} />
     </div>
   );

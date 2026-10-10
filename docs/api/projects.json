@@ -1,0 +1,13 @@
+[
+  {
+    "id": "demo",
+    "name": {
+      "ja": "デモ",
+      "en": "Demo"
+    },
+    "description": "演出の見本。Pages で再生する",
+    "categories": [
+      "demo"
+    ]
+  }
+]

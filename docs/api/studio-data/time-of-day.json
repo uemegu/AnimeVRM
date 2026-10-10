@@ -101,9 +101,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.9895,
+          "shadeMultiply": "#e0a08e",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff8a70",
+          "terminatorStrength": 0.5,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -131,6 +133,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
@@ -261,9 +266,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.9895,
+          "shadeMultiply": "#e0a08e",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff8a70",
+          "terminatorStrength": 0.6,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -291,6 +298,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
@@ -421,9 +431,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.985,
+          "shadeMultiply": "#d89a96",
+          "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff7a55",
+          "terminatorStrength": 0.7,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -451,6 +463,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.9955,
           "shadingShiftFactor": -0.05,
@@ -484,12 +499,12 @@
     "night": {
       "id": "night",
       "name": "夜",
-      "description": "静寂の夜空、淡い月明かり、深いコントラスト",
+      "description": "アニメ映画の夜。青紫の影、灯りのにじみ、フィルムの粒子",
       "lighting": {
         "hairRingTint": "#b8c4ff",
         "directional": {
-          "color": "#fffcf5",
-          "intensity": 2.7,
+          "color": "#dfe4ff",
+          "intensity": 1.25,
           "position": {
             "x": 0.5,
             "y": 2,
@@ -497,8 +512,8 @@
           }
         },
         "ambient": {
-          "color": "#f0f1ff",
-          "intensity": 2
+          "color": "#c4c8ff",
+          "intensity": 0.75
         },
         "sunShafts": {
           "enabled": false,
@@ -538,53 +553,72 @@
       },
       "postProcessing": {
         "bloom": {
-          "enabled": false,
-          "strength": 0.05,
-          "radius": 0.12,
-          "threshold": 0.9
+          "enabled": true,
+          "strength": 0.3,
+          "radius": 0.35,
+          "threshold": 0.95,
+          "deepGlow": {
+            "enabled": true,
+            "core": 1.1,
+            "halo": 0.6,
+            "haze": 0.22
+          }
         },
         "cinematic": {
           "diffusion": {
             "enabled": true,
-            "strength": 0.28,
+            "strength": 0.38,
             "radius": 2
           },
           "colorGrading": {
             "enabled": true,
-            "shadowTint": "#000000",
-            "highlightTint": "#635e87",
-            "strength": 0.5,
-            "contrast": 0.09,
-            "gamma": 0.9
+            "shadowTint": "#1c1646",
+            "highlightTint": "#fff4e8",
+            "strength": 0.88,
+            "contrast": 0.31,
+            "gamma": 0.82
           },
           "adjustments": {
-            "saturation": 0.2,
-            "brightness": -0.02,
-            "contrast": -0.05
+            "saturation": 0.4,
+            "brightness": 0,
+            "contrast": 0
           },
           "vignette": {
             "enabled": true,
             "offset": 1.15,
-            "darkness": 0.15,
+            "darkness": 0.16,
             "color": "#101220"
           },
           "chromaticAberration": {
             "enabled": true,
-            "offset": 0.0018
+            "offset": 0.0003
           },
           "sharpen": {
             "enabled": false,
             "amount": 0.2
+          },
+          "filmGrain": {
+            "enabled": true,
+            "strength": 0.022,
+            "size": 1.6
           }
+        },
+        "characterGlow": {
+          "enabled": true,
+          "strength": 1.3,
+          "radius": 0.014,
+          "threshold": 0.1
         }
       },
       "materials": {
         "body": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
           "shadeMultiply": "#d49ea3",
-          "shadingToonyFactor": 0.991,
-          "shadingShiftFactor": -0.08,
-          "giEqualizationFactor": 0.85,
+          "shadingToonyFactor": 0.96,
+          "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff9a8a",
+          "terminatorStrength": 0.3,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
           "rimEnabled": false,
@@ -595,11 +629,11 @@
           "outlineWidthFactor": 0.0016
         },
         "hair": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
           "shadeMultiply": "#8474a4",
           "shadingToonyFactor": 0.994,
-          "shadingShiftFactor": -0.08,
-          "giEqualizationFactor": 0.85,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
           "rimEnabled": false,
@@ -610,12 +644,15 @@
           "outlineWidthFactor": 0.0016
         },
         "cloth": {
-          "color": "#d0d8ff",
+          "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.9955,
-          "shadingShiftFactor": -0.08,
-          "darkLitLift": 1,
-          "giEqualizationFactor": 0.85,
+          "shadingShiftFactor": -0.05,
+          "darkLitLift": 1.5,
+          "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
           "rimEnabled": false,
@@ -639,6 +676,171 @@
         "enabled": true,
         "color": "#292843",
         "density": 0.03
+      }
+    },
+    "rainy": {
+      "id": "rainy",
+      "name": "雨（曇天）",
+      "description": "厚い雨雲の下の薄暗さ。日差し・フレアなし、青みがかった灰色、低い彩度",
+      "lighting": {
+        "hairRingTint": "#b8c2d4",
+        "directional": {
+          "color": "#c4cede",
+          "intensity": 0.95,
+          "position": {
+            "x": -1.9,
+            "y": 1.5,
+            "z": 2.6
+          }
+        },
+        "ambient": {
+          "color": "#6a7488",
+          "intensity": 0.75
+        },
+        "rim": {
+          "enabled": false,
+          "color": "#dde8ff",
+          "intensity": 0.05,
+          "position": {
+            "x": 0,
+            "y": 1.5,
+            "z": 2.5
+          }
+        },
+        "sunShafts": {
+          "enabled": false,
+          "followDirectionalLight": false,
+          "sunPosition": {
+            "x": 3.2,
+            "y": 4.3,
+            "z": -3.8
+          },
+          "exposure": 0.22,
+          "decay": 0.83,
+          "density": 0.35,
+          "weight": 0.08,
+          "color": "#fff2db",
+          "shimmer": 0.25
+        },
+        "lensFlare": {
+          "enabled": false,
+          "sunSize": 1.3,
+          "sunColor": "#fffbf5",
+          "glowIntensity": 0.95,
+          "starburstIntensity": 0.05,
+          "anamorphicIntensity": 1.15,
+          "ghostIntensity": 0.35,
+          "haloIntensity": 0.5
+        }
+      },
+      "postProcessing": {
+        "bloom": {
+          "enabled": true,
+          "strength": 0.03,
+          "radius": 0.7,
+          "threshold": 0.9
+        },
+        "cinematic": {
+          "diffusion": {
+            "enabled": true,
+            "strength": 0.12,
+            "radius": 2
+          },
+          "colorGrading": {
+            "enabled": true,
+            "shadowTint": "#1c2433",
+            "highlightTint": "#9aa8bd",
+            "strength": 0.35,
+            "contrast": 0.08,
+            "gamma": 1
+          },
+          "adjustments": {
+            "saturation": -0.25,
+            "brightness": -0.12,
+            "contrast": 0.02
+          },
+          "vignette": {
+            "enabled": true,
+            "offset": 1.15,
+            "darkness": 0.35,
+            "color": "#0e1420"
+          },
+          "chromaticAberration": {
+            "enabled": true,
+            "offset": 0.0015
+          },
+          "sharpen": {
+            "enabled": false,
+            "amount": 0.22
+          }
+        }
+      },
+      "materials": {
+        "body": {
+          "color": "#ffffff",
+          "shadeMultiply": "#dca29a",
+          "shadingToonyFactor": 0.95,
+          "shadingShiftFactor": -0.05,
+          "terminatorColor": "#ff8a70",
+          "terminatorStrength": 0.35,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": true,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 5,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.1,
+          "outlineWidthFactor": 0.0016
+        },
+        "hair": {
+          "color": "#ffffff",
+          "shadeMultiply": "#8474a4",
+          "shadingToonyFactor": 0.994,
+          "shadingShiftFactor": -0.05,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#ffffff",
+          "parametricRimFresnelPowerFactor": 0,
+          "parametricRimLiftFactor": 0.1,
+          "rimLightingMixFactor": 0.2,
+          "outlineWidthFactor": 0.0016
+        },
+        "cloth": {
+          "color": "#ffffff",
+          "litHighlightStrength": 0.7,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
+          "shadeMultiply": "#b8bcd8",
+          "shadingToonyFactor": 0.997,
+          "shadingShiftFactor": -0.05,
+          "darkLitLift": 1,
+          "giEqualizationFactor": 0.9,
+          "matcapEnabled": false,
+          "emissiveIntensity": 0,
+          "rimEnabled": false,
+          "rimColor": "#202942",
+          "parametricRimFresnelPowerFactor": 4,
+          "parametricRimLiftFactor": 0.02,
+          "rimLightingMixFactor": 1,
+          "outlineWidthFactor": 0.0016
+        }
+      },
+      "outline": {
+        "enabled": true,
+        "useSmoothNormal": true,
+        "screenSpaceWidth": true,
+        "autoLineWeight": true,
+        "darknessFactor": 0.1,
+        "widthFactor": 0.0016,
+        "lightingMixFactor": 0
+      },
+      "fog": {
+        "enabled": true,
+        "color": "#e2f0ff",
+        "density": 0.01
       }
     },
     "divine": {
@@ -774,6 +976,9 @@
         },
         "cloth": {
           "color": "#080a12",
+          "litHighlightStrength": 0,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#0d0608",
           "shadingToonyFactor": 1,
           "shadingShiftFactor": -1,
@@ -945,6 +1150,9 @@
         },
         "cloth": {
           "color": "#ffffff",
+          "litHighlightStrength": 0,
+          "litHighlightThreshold": 0.78,
+          "litHighlightColor": "#2a2116",
           "shadeMultiply": "#b8bcd8",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,

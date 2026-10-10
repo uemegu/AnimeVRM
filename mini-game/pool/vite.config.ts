@@ -18,7 +18,7 @@ function collectAssets(): Array<{ from: string; to: string }> {
   const list: Array<{ from: string; to: string }> = [];
   const add = (fromDir: string, toDir: string, file: string) => list.push({ from: path.join(fromDir, file), to: path.join(OUT, toDir, file) });
 
-  for (const f of ['models/aoi/aoi-swim.vrm', 'models/emili/emili-swim.vrm', 'animations/ardy_victory.fbx', 'worklets/lipsync-processor.js', 'wasm/lipsync.wasm']) {
+  for (const f of ['models/aoi/aoi-swim.vrm', 'models/emili/emili-swim.vrm', 'worklets/lipsync-processor.js', 'wasm/lipsync.wasm']) {
     add(ROOT_ASSETS, '', f);
   }
   const each = (sub: string, keep: (name: string) => boolean) => {
