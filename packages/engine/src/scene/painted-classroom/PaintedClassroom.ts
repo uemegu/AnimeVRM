@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { resolveAssetUrl } from '../../utils/path';
-import { BACK_Z, DESK, DESK_COLUMNS_X, DESK_ROWS_Z, FRONT_Z, HALF_WIDTH, HEIGHT, PLACED_DESK_ROWS, ROW_PAINTING_FIT, rowGeometry } from './layout';
+import { BACK_Z, DESK, DESK_COLUMNS_X, DESK_ROWS_Z, FRONT_Z, HALF_WIDTH, HEIGHT, PLACED_DESK_ROWS, PLATFORM, ROW_PAINTING_FIT, TEACHER_DESK_FRONT_Z, rowGeometry } from './layout';
 
 /**
  * Painted 2.5D classroom: every surface is one generated painting, and furniture
@@ -57,33 +57,140 @@ function deskRows(materials: THREE.Material[]): THREE.Group {
 }
 
 /**
- * podium.avif (1374x1145, 1208px wide podium = 1.2m, feet at y=1083) was painted
- * looking down on it, but from the back of the room the top is seen almost edge-on.
- * The top surface band (y 150-276) is squashed vertically; the front edge and body keep their size.
+ * podium.avif (1374x1145, feet at y=1083) is the teacher's desk seen from the front:
+ * a slightly-from-above top (y 157-277), the front edge of the top (y 277-320, 1208px = 1.2 m)
+ * and the body (y 320-1083). Each band goes on its own face of a desk-shaped solid so the
+ * top keeps its depth from the 教壇 cameras; sides and back are plain panels.
  */
-function podiumStandee(material: THREE.Material): THREE.Mesh {
-  const [imageWidth, imageHeight] = [1374, 1145];
-  const metresPerPx = 1.2 / 1208;
-  const feet = 1083, fold = 276, top = 150, topSquash = 0.25;
-  const geometry = new THREE.PlaneGeometry(imageWidth * metresPerPx, 1, 1, 2);
+const PODIUM_IMAGE = [1374, 1145] as const;
+const PODIUM_FEET = 1083;
+const PODIUM_M_PER_PX = 1.2 / 1208;
+const DESK_TOP = (PODIUM_FEET - 277) * PODIUM_M_PER_PX;
+const DESK_SLAB_BOTTOM = (PODIUM_FEET - 320) * PODIUM_M_PER_PX;
+const TEACHER_DESK_DEPTH = 0.6;
+
+/** Quad with its four corners (front-left, front-right, back-left, back-right in world space)
+ * taking podium.avif pixels at the matching corners; bilinear over a grid so it does not kink. */
+function podiumQuad(name: string, material: THREE.Material, corners: THREE.Vector3[], pixels: [number, number][]): THREE.Mesh {
+  const geometry = new THREE.PlaneGeometry(1, 1, 8, 8);
   const positions = geometry.getAttribute('position');
   const uv = geometry.getAttribute('uv');
-  // PlaneGeometry rows run top to bottom: squashed top, fold, image bottom.
-  const rows = [
-    { imageY: top, y: (feet - fold + (fold - top) * topSquash) * metresPerPx },
-    { imageY: fold, y: (feet - fold) * metresPerPx },
-    { imageY: imageHeight, y: (feet - imageHeight) * metresPerPx },
-  ];
+  const [p00, p10, p01, p11] = corners;
+  const point = new THREE.Vector3(), far = new THREE.Vector3();
   for (let i = 0; i < positions.count; i++) {
-    const row = rows[Math.floor(i / 2)];
-    positions.setY(i, row.y);
-    uv.setY(i, 1 - row.imageY / imageHeight);
+    const u = uv.getX(i), v = uv.getY(i);
+    point.lerpVectors(p00, p10, u);
+    far.lerpVectors(p01, p11, u);
+    point.lerp(far, v);
+    positions.setXYZ(i, point.x, point.y, point.z);
+    const near = pixels[0][0] + (pixels[1][0] - pixels[0][0]) * u, nearY = pixels[0][1] + (pixels[1][1] - pixels[0][1]) * u;
+    const back = pixels[2][0] + (pixels[3][0] - pixels[2][0]) * u, backY = pixels[2][1] + (pixels[3][1] - pixels[2][1]) * u;
+    uv.setXY(i, (near + (back - near) * v) / PODIUM_IMAGE[0], 1 - (nearY + (backY - nearY) * v) / PODIUM_IMAGE[1]);
   }
+  geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
-  const podium = new THREE.Mesh(geometry, material);
-  podium.name = 'Teacher podium';
-  podium.position.set(0, 0, -7.9);
-  return podium;
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.name = name;
+  return mesh;
+}
+
+/** Teacher's desk on the platform; local origin is the floor under the middle of its front edge. */
+function teacherDesk(material: THREE.Material): THREE.Group {
+  const desk = new THREE.Group();
+  desk.name = 'Teacher desk';
+  const half = 0.6, d = TEACHER_DESK_DEPTH, v = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+  desk.add(podiumQuad('Teacher desk top', material,
+    [v(-half, DESK_TOP, 0), v(half, DESK_TOP, 0), v(-half, DESK_TOP, -d), v(half, DESK_TOP, -d)],
+    [[83, 277], [1291, 277], [199, 157], [1176, 157]]));
+  desk.add(podiumQuad('Teacher desk edge', material,
+    [v(-half, DESK_SLAB_BOTTOM, 0), v(half, DESK_SLAB_BOTTOM, 0), v(-half, DESK_TOP, 0), v(half, DESK_TOP, 0)],
+    [[83, 320], [1291, 320], [83, 277], [1291, 277]]));
+  // The body is recessed under the top's overhang; its picture runs down to the feet.
+  const bodyHalf = (1206 - 168) / 2 * PODIUM_M_PER_PX, bodyZ = -0.03;
+  desk.add(podiumQuad('Teacher desk body', material,
+    [v(-bodyHalf, 0, bodyZ), v(bodyHalf, 0, bodyZ), v(-bodyHalf, DESK_SLAB_BOTTOM, bodyZ), v(bodyHalf, DESK_SLAB_BOTTOM, bodyZ)],
+    [[168, PODIUM_FEET], [1206, PODIUM_FEET], [168, 320], [1206, 320]]));
+  // Top's side and back edges, and the steel side frames / modesty panel behind the painted front.
+  const wood = new THREE.MeshBasicMaterial({ color: '#94664a', toneMapped: false });
+  const steel = new THREE.MeshBasicMaterial({ color: '#9aa3b6', toneMapped: false });
+  const box = (name: string, mat: THREE.Material, size: [number, number, number], at: [number, number, number]) => {
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), mat);
+    mesh.name = name;
+    mesh.position.set(...at);
+    desk.add(mesh);
+  };
+  const slab = DESK_TOP - DESK_SLAB_BOTTOM;
+  box('Teacher desk top sides', wood, [half * 2 - 0.004, slab - 0.002, d - 0.004], [0, DESK_SLAB_BOTTOM + slab / 2, -d / 2]);
+  for (const side of [-1, 1]) {
+    box('Teacher desk side frame', steel, [0.04, DESK_SLAB_BOTTOM, d - 0.1], [side * (bodyHalf - 0.02), DESK_SLAB_BOTTOM / 2, bodyZ - (d - 0.1) / 2]);
+  }
+  box('Teacher desk back rail', steel, [bodyHalf * 2, 0.12, 0.03], [0, DESK_SLAB_BOTTOM - 0.06, -d + 0.08]);
+  return desk;
+}
+
+/** Wood-plank texture for the platform (planks run along x); tiled 1 plank-set per metre. */
+function plankTexture(): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext('2d')!;
+  const planks = 4;
+  const random = (seed: number) => { const x = Math.sin(seed * 127.1) * 43758.5453; return x - Math.floor(x); };
+  for (let i = 0; i < planks; i++) {
+    const shade = 0.92 + random(i + 1) * 0.12;
+    context.fillStyle = `rgb(${Math.round(176 * shade)}, ${Math.round(138 * shade)}, ${Math.round(108 * shade)})`;
+    context.fillRect(0, i * 64, 256, 64);
+    // Faint grain.
+    for (let g = 0; g < 7; g++) {
+      context.strokeStyle = `rgba(110, 76, 52, ${0.06 + random(i * 13 + g) * 0.06})`;
+      context.lineWidth = 1 + random(g + i * 7) * 1.5;
+      const y = i * 64 + 6 + random(i * 31 + g) * 52;
+      context.beginPath();
+      context.moveTo(0, y);
+      context.bezierCurveTo(85, y + random(g) * 4 - 2, 170, y - random(g + 3) * 4 + 2, 256, y);
+      context.stroke();
+    }
+    context.fillStyle = 'rgba(80, 54, 38, 0.45)';
+    context.fillRect(0, i * 64, 256, 1.5);
+    // Butt joint, staggered per plank.
+    context.fillRect(Math.round(random(i + 9) * 256), i * 64, 1.5, 64);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 8;
+  return texture;
+}
+
+/** The 教壇: a 20 cm wooden platform from the front wall to PLATFORM.frontZ, with a darker riser. */
+function platform(): THREE.Group {
+  const group = new THREE.Group();
+  group.name = 'Platform';
+  const width = PLATFORM.halfWidth * 2, depth = PLATFORM.frontZ - FRONT_Z, h = PLATFORM.height;
+  const topMap = plankTexture();
+  topMap.repeat.set(width / 1.6, depth / 0.6);
+  const top = plane('Platform top', new THREE.MeshBasicMaterial({ map: topMap, toneMapped: false }),
+    width, depth, [0, h, (FRONT_Z + PLATFORM.frontZ) / 2], [-Math.PI / 2, 0, 0]);
+  group.add(top);
+  const riserMap = plankTexture();
+  riserMap.repeat.set(width / 1.6, h / 0.6);
+  const riser = new THREE.MeshBasicMaterial({ map: riserMap, color: '#9a8c84', toneMapped: false });
+  group.add(plane('Platform front', riser, width, h, [0, h / 2, PLATFORM.frontZ]));
+  for (const side of [-1, 1]) {
+    group.add(plane('Platform side', riser, depth, h, [side * PLATFORM.halfWidth, h / 2, (FRONT_Z + PLATFORM.frontZ) / 2], [0, side * Math.PI / 2, 0]));
+  }
+  // Nosing strip along the front edge catches the light.
+  const nosing = new THREE.Mesh(new THREE.BoxGeometry(width + 0.01, 0.02, 0.03),
+    new THREE.MeshBasicMaterial({ color: '#c49b74', toneMapped: false }));
+  nosing.name = 'Platform nosing';
+  nosing.position.set(0, h - 0.01, PLATFORM.frontZ - 0.01);
+  group.add(nosing);
+  // Contact shade along the riser foot (the generated floor has no platform shadow).
+  const shade = plane('Platform foot shade', new THREE.MeshBasicMaterial({
+    color: '#3c4658', transparent: true, opacity: 0.18, depthWrite: false, toneMapped: false,
+  }), width + 0.1, 0.12, [0, 0.002, PLATFORM.frontZ + 0.06], [-Math.PI / 2, 0, 0]);
+  group.add(shade);
+  return group;
 }
 
 /** Soft floor shadow under each desk; the generated floor has no furniture shadows. */
@@ -142,7 +249,10 @@ export async function loadPaintedClassroom(): Promise<THREE.Group> {
     width, HEIGHT, [0, HEIGHT / 2, BACK_Z], [0, Math.PI, 0]));
   group.add(deskRows(desks));
   group.add(deskShadows());
-  group.add(podiumStandee(podium));
+  group.add(platform());
+  const desk = teacherDesk(podium);
+  desk.position.set(0, PLATFORM.height, TEACHER_DESK_FRONT_Z);
+  group.add(desk);
   // cabinet.avif 1024x1536: 629px wide cabinet = 0.9m.
   group.add(plane('Cabinet', cabinet, 1024 * 0.9 / 629, 1536 * 0.9 / 629, [-2.85, 1.006, -8.6]));
   return group;
