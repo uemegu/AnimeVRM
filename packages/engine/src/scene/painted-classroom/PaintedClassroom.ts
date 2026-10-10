@@ -120,9 +120,10 @@ function teacherDesk(material: THREE.Material): THREE.Group {
     desk.add(mesh);
   };
   const slab = DESK_TOP - DESK_SLAB_BOTTOM;
-  box('Teacher desk top sides', wood, [half * 2 - 0.004, slab - 0.002, d - 0.004], [0, DESK_SLAB_BOTTOM + slab / 2, -d / 2]);
+  // Kept 1-2 cm inside the painted faces so they never z-fight from a distance.
+  box('Teacher desk top sides', wood, [half * 2 - 0.01, slab - 0.012, d - 0.02], [0, DESK_SLAB_BOTTOM + (slab - 0.012) / 2, -d / 2 - 0.01]);
   for (const side of [-1, 1]) {
-    box('Teacher desk side frame', steel, [0.04, DESK_SLAB_BOTTOM, d - 0.1], [side * (bodyHalf - 0.02), DESK_SLAB_BOTTOM / 2, bodyZ - (d - 0.1) / 2]);
+    box('Teacher desk side frame', steel, [0.04, DESK_SLAB_BOTTOM - 0.005, d - 0.1], [side * (bodyHalf - 0.02), (DESK_SLAB_BOTTOM - 0.005) / 2, bodyZ - 0.015 - (d - 0.1) / 2]);
   }
   box('Teacher desk back rail', steel, [bodyHalf * 2, 0.12, 0.03], [0, DESK_SLAB_BOTTOM - 0.06, -d + 0.08]);
   return desk;
