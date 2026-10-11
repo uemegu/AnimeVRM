@@ -204,6 +204,8 @@ export const SceneAvatarConfig = z.strictObject({
   fastMotion: z.boolean().optional(),
   /** 日なたの明るさ（暗い店内から見た窓の外の人物など。0 で室内の光だけ、1 を超えると白く飛ぶ） */
   daylight: z.number().min(0).max(3).optional(),
+  /** 雨で濡れた具合（0 = 乾いている、1 = ずぶ濡れ）。シャツが襟から裾へ濡れ（濡れた布越しに肌の色がうっすら出る）、あご・指先から水滴が落ちる。変えると数秒かけて濡れる */
+  wet: z.number().min(0).max(1).optional(),
   /** 手に持つ小物。モーションを変えたシーンで指定がなければ手放す */
   heldItem: HeldItemConfig.optional(),
   ...AvatarLookFields,
