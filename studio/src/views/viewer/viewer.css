@@ -431,6 +431,21 @@
   flex-shrink: 0;
 }
 
+/* プレビュー直下: カメラの動き（左）とキャプション（右） */
+.viewer-frame-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(100%, calc((100vh - 280px) * 16 / 9));
+  z-index: 1;
+  flex-shrink: 0;
+}
+.viewer-frame-meta .viewer-caption {
+  margin-left: auto;
+  text-align: right;
+}
+
 /* プレビュー直下のキャプション */
 .viewer-caption {
   margin: 0;
@@ -622,4 +637,49 @@
   height: 22px;
   flex: 1;
   padding: 0;
+}
+
+/* iPad などタッチ端末・狭い画面では、設定パネルを狭い1列表示にしてプレビューを大きく見せる */
+@media (pointer: coarse), (max-width: 1100px) {
+  .viewer {
+    grid-template-columns: 188px 1fr;
+  }
+  .viewer-panel-header,
+  .viewer-section {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .viewer-character-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .viewer-chip-grid {
+    grid-template-columns: 1fr;
+  }
+  .viewer-tabs {
+    flex-wrap: wrap;
+  }
+  .viewer-tab {
+    flex: 1 1 50%;
+  }
+  .viewer-panel .segmented {
+    width: 100%;
+  }
+  .viewer-panel .segmented button {
+    flex: 1 1 100%;
+  }
+  /* 見出し＋操作ボタンは折り返す。BGM/効果音の切替は横並びのまま */
+  .viewer-section-title {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .viewer-panel .viewer-sound-switch {
+    width: 100%;
+  }
+  .viewer-panel .viewer-sound-switch button {
+    flex: 1;
+  }
+  /* カメラの位置ずらし・カメラの動きは iPad では出さない */
+  .viewer-camera-tools {
+    display: none;
+  }
 }
