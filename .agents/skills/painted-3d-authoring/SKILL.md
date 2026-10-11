@@ -61,7 +61,11 @@ description: >-
 
 描き込みに光が含まれる素材は `MeshBasicMaterial`、`SRGBColorSpace`、`toneMapped: false` を基本とする。二重の照明・トーンマッピングや霧で、元絵を白く薄くしない。素材に必要な陰影は残し、人物の照明は場所の `light` で元絵の方向・色に合わせる。
 
-地面の影は、場所の `light.shadow` があるときに描く。家具・街灯・柵・木の交差板など、建物以外の小物は `scene/castShadows.ts` の `castShadows`（部品をじかに足す関数なら `castShadowsOfAdded`）で影を落とす目印を付ける。影は場所を置いたときに一度だけ描くので、動く物・カメラを向いて回る板には付けない。日差しが描き込まれた建物や、元絵を投影した地面に描かれた影と重なる物にも付けない。偽の接地影の板とは二重になるので、目印を付けたら外す。同じ素材の部品をまとめるときは、目印の有無で分ける。網・紙垂のような数mmの細い部品は影がぼけて消えるので、付けなくてよい。床を地面より浮かせて重ねる場合は、影の板（高さ 0.025m）より低くする。
+**影は必ず付ける。** 屋外も室内も、場所に `light`（`direction` は元絵の日差しの来る向き。室内なら窓の方）と `light.shadow`（色・濃さ・ぼかし）を設定する。設定しないと床に家具・人物の影が一切落ちず、物が浮いて見える。地面の影は `light.shadow` があるときだけ描かれる。
+
+`light` を付けると、不透明な `MeshBasicMaterial` に面の向きで2段階の明暗（セル調）が付く。光が描き込まれた絵の面（壁・床・家具の正面の絵など）は `material.userData.cel = false` で外し、明暗は木の箱・枕など無地の立体にだけ付ける（外さないと、日の反対を向いた壁の絵が暗く沈む）。
+
+家具・街灯・柵・木の交差板など、建物以外の小物は `scene/castShadows.ts` の `castShadows`（部品をじかに足す関数なら `castShadowsOfAdded`）で影を落とす目印を付ける。影は場所を置いたときに一度だけ描くので、動く物・カメラを向いて回る板には付けない。日差しが描き込まれた建物や、元絵を投影した地面に描かれた影と重なる物にも付けない。偽の接地影の板とは二重になるので、目印を付けたら外す。同じ素材の部品をまとめるときは、目印の有無で分ける。網・紙垂のような数mmの細い部品は影がぼけて消えるので、付けなくてよい。床を地面より浮かせて重ねる場合は、影の板（高さ 0.025m）より低くする。
 
 木や花は通常3枚を60度ずつ交差させる。板は世界に固定し、カメラを向くたびに回さない。箱や幹の足元を地面／土に接地する。看板は必要な両面を読めるようにする。
 
@@ -74,7 +78,7 @@ description: >-
 1. `packages/engine/src/scene/<セット名>/` に非同期の `load...(): Promise<THREE.Group>` と `dispose...()` を作る。
 2. `packages/engine/src/stage/environments.ts` の `BUILTINS` に load/dispose を登録する。
 3. `packages/scenario/src/scene.ts` の `BUILTIN_ENVIRONMENTS` にIDと表示名を登録する。
-4. `assets/studio/locations.json` の `presets` に場所を追加する。`environment.model`、配置、人物の光、camera、slots、thumbnail を設定する。屋外と窓から空が見える屋内は `layers.background.url` に `/textures/painted-classroom/sky-only.png` を使う。
+4. `assets/studio/locations.json` の `presets` に場所を追加する。`environment.model`、配置、光と影（`light` と `light.shadow`。4章）、camera、slots、thumbnail を設定する。屋外と窓から空が見える屋内は `layers.background.url` に `/textures/painted-classroom/sky-only.png` を使う。
 5. `assets/scenarios/demo/<デモID>/scenario.json` に方向確認用のカットを作る。場所・シナリオ編集は `.agents/skills/scenario-authoring/SKILL.md` の形式・検証方法に従う。
 6. Pagesに出す場合は `studio/pages/catalog.ts` と `studio/pages/collectAssets.ts` にデモと素材を登録する。別ディレクトリの共有素材も収集対象にする。
 
@@ -103,7 +107,7 @@ npm run typecheck
 npm run shot -- demo/<デモID> --no-dialogue --no-hud
 ```
 
-出力は `scratch/shots/demo/<デモID>/`。画像を実際に開き、側面の空白、絵の引き伸ばし、家具の重複、透過の四角、足元の浮き、遠景の切れ、人物への被りを確認して直す。撮影スクリプトは無音。描画距離が不足する場合は `stage.camera.far` をセットの大きさに合わせる。
+出力は `scratch/shots/demo/<デモID>/`。画像を実際に開き、側面の空白、絵の引き伸ばし、家具の重複、透過の四角、足元の浮き、床に家具・人物の影が落ちているか、遠景の切れ、人物への被りを確認して直す。撮影スクリプトは無音。描画距離が不足する場合は `stage.camera.far` をセットの大きさに合わせる。
 
 Pages連携を変更した場合は、`PAGES_OUT_DIR="$PWD/scratch/<セット名>-pages" npm run build:pages -w studio` で素材込みのビルドを確認する。生成される `docs/` を手で編集しない。スキーマや検証処理を変更した場合は scenario の関連テストも実行する。
 
