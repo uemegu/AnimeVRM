@@ -7,6 +7,10 @@ const AMBIENCE_VOLUME = 0.25;
 const SE_VOLUME = 0.7;
 const VOICE_VOLUME = 1;
 const MUTE_KEY = 'player_audio_muted';
+/** カット内の時計がボイスの再生位置からこれ以上ずれたら、寄せずに合わせる／待つ（秒） */
+const VOICE_CLOCK_JUMP = 0.3;
+/** カット内の時計をボイスの再生位置へ寄せる割合（1 回の読み出しごと） */
+const VOICE_CLOCK_FOLLOW = 0.1;
 
 /** 音量の倍率とチャネル（シナリオのカットで指定する） */
 export interface AudioMix {
@@ -122,6 +126,8 @@ export class PlayerAudio {
   private voiceFinished = false;
   private voiceMix: AudioMix = {};
   private voiceAnalyser: VoiceAnalyser | null = null;
+  /** カット内の時計（ボイスの再生位置に寄せながら実時間で進める） */
+  private voiceClock: { audio: HTMLAudioElement; anchor: number; last: number } | null = null;
   private mutedState: boolean;
   private onVoiceEnd: (() => void) | null = null;
 
@@ -221,22 +227,50 @@ export class PlayerAudio {
     this.voiceAnalyser = null;
   }
 
-  /** ボイスの再生位置（再生していなければ undefined） */
+  /**
+   * ボイスの再生位置（再生していなければ undefined）。
+   * currentTime は鳴り始めや読み込み中に止まったり飛んだりする（iPad の Safari で目立つ）ので、
+   * 実時間で滑らかに進め、ボイスとずれたときだけ寄せる
+   */
   getVoiceTime(): number | undefined {
     const voice = this.voice?.audio;
-    return voice && !this.voiceFinished && !voice.paused && !voice.ended ? voice.currentTime : undefined;
+    if (!voice || !this.voicePlaying()) return undefined;
+    const now = performance.now() / 1000;
+    const actual = voice.currentTime;
+    const clock = this.voiceClock;
+    if (!clock || clock.audio !== voice) {
+      this.voiceClock = { audio: voice, anchor: now - actual, last: actual };
+      return actual;
+    }
+    // 鳴り始める前は 0 のまま待つ
+    if (actual === 0) clock.anchor = now;
+    const error = actual - (now - clock.anchor);
+    if (error > VOICE_CLOCK_JUMP) {
+      clock.anchor = now - actual; // ボイスが大きく先へ進んだら合わせる
+    } else if (error < -VOICE_CLOCK_JUMP) {
+      clock.anchor = now - clock.last; // ボイスが止まっていたら待つ
+    } else {
+      clock.anchor -= error * VOICE_CLOCK_FOLLOW; // 少しずつ寄せる
+    }
+    clock.last = Math.max(clock.last, now - clock.anchor);
+    return clock.last;
+  }
+
+  private voicePlaying(): boolean {
+    const voice = this.voice?.audio;
+    return !!voice && !this.voiceFinished && !voice.paused && !voice.ended;
   }
 
   /** WASM が解析した口の形。ミュート中も口は動かす */
   getPhoneme(): string | undefined {
-    if (this.getVoiceTime() === undefined) return undefined;
+    if (!this.voicePlaying()) return undefined;
     const phoneme = this.voiceAnalyser?.getFrame().phoneme;
     return phoneme === 'nn' ? undefined : phoneme;
   }
 
   /** WASM が解析した録音の特徴による口の開き。再生音量やミュートには影響されない */
   getMouthOpen(): number {
-    if (this.getVoiceTime() === undefined) return 0;
+    if (!this.voicePlaying()) return 0;
     return this.voiceAnalyser?.getFrame().mouthOpen ?? 0;
   }
 

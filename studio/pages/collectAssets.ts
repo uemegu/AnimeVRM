@@ -3,6 +3,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { collectScenarioAssets, type ScenarioAssetBooks } from '@anime-vrm/scenario';
 
 interface Json {
   [key: string]: any;
@@ -21,6 +22,11 @@ const ALWAYS = [
   'textures/girl_face_anger.png',
   'textures/girl_face_sweat.png',
   'animations/Standing Idle.fbx',
+  // ボイスの口パク解析（VoiceAnalyser.ts が読む AudioWorklet と WASM）
+  'worklets/lipsync-processor.js',
+  'wasm/lipsync.wasm',
+  // 雨で濡れた服の絵柄（WetCloth.ts が名前を決め打ちで読む）
+  'textures/wet',
   // 手に持つ小物の絵柄（heldItem.ts が名前を決め打ちで読む）
   'textures/props',
   // 場所の選択で選べる海の見える公園（簡易3D）。どのシナリオからも参照されないため固定で入れる
@@ -52,60 +58,23 @@ const strip = (url: string) => url.replace(/^\//, '');
  */
 export function collectPagesAssets(assetsDir: string, scenarioIds: string[], extra: string[] = []): string[] {
   const found = new Set<string>([...ALWAYS, ...extra.map(strip)]);
-  const characters = readJson(path.join(assetsDir, 'studio/characters.json')).characters as Json[];
-  const locations = readJson(path.join(assetsDir, 'studio/locations.json')).presets as Record<string, Json>;
-  const bgmBook = readJson(path.join(assetsDir, 'studio/bgm.json')).bgm as Record<string, Json>;
-
-  const addUrl = (url: string | undefined | false, base = '') => {
-    if (!url) return;
-    found.add(url.startsWith('/') ? strip(url) : `${base}${url}`);
+  const books: ScenarioAssetBooks = {
+    locations: readJson(path.join(assetsDir, 'studio/locations.json')).presets,
+    bgm: readJson(path.join(assetsDir, 'studio/bgm.json')).bgm,
+    motions: readJson(path.join(assetsDir, 'studio/motions.json')).motions,
+    characters: readJson(path.join(assetsDir, 'studio/characters.json')).characters,
   };
-  const addBgm = (bgm: string | undefined) => {
-    if (!bgm || bgm === 'silence') return;
-    addUrl(bgmBook[bgm]?.url ?? bgm);
-  };
-  const addLocation = (id: string | undefined) => {
-    const location = id ? locations[id] : undefined;
-    if (!location) return;
-    for (const layer of Object.values(location.layers ?? {}) as Json[]) addUrl(layer?.url);
-    const model = location.environment?.model as string | undefined;
-    if (model) found.add(BUILTIN_ENVIRONMENTS[model] ?? strip(model));
-    if (model === 'builtin:painted-ground') {
-      // 校門の旧セットの舗装・塀・門柱の石・道路・家並みを共用する
-      for (const file of ['tile-paving', 'tile-wall', 'tile-stone', 'tile-road', 'far-houses']) found.add(`textures/painted-gate/${file}.avif`);
-    }
-  };
-  const addMotion = (motion: string | undefined) => {
-    if (motion) found.add(`animations/${motion}.fbx`);
-  };
-
+  // 再生の先読み（collectScenarioAssets）と同じ一覧をコピーする。組み込みの3D背景はテクスチャのディレクトリごと
   for (const id of scenarioIds) {
     const base = `scenarios/demo/${id}/`;
     found.add(`${base}scenario.json`);
-    const scenario = readJson(path.join(assetsDir, base, 'scenario.json'));
-    addBgm(scenario.bgm);
-    addUrl(scenario.ambience);
-    addLocation(scenario.location);
-    // 登場中のキャラのモデル（シーンの指定を引き継ぐ。指定がなければ characters.json の1番目の服装）
-    let cast: Record<string, string | undefined> = {};
-    for (const scene of scenario.scenes as Json[]) {
-      addBgm(scene.bgm);
-      addUrl(scene.ambience);
-      addUrl(scene.seUrl);
-      addUrl(scene.voiceUrl, base);
-      addLocation(scene.background);
-      if (scene.scrollingBackground) addUrl(scene.scrollingBackground.textureUrl);
-      if (scene.clearCast) cast = {};
-      for (const [key, avatar] of Object.entries((scene.avatars ?? {}) as Record<string, Json>)) {
-        if (avatar.visible === false) {
-          delete cast[key];
-          continue;
-        }
-        cast[key] = avatar.modelUrl ?? cast[key];
-        const characterId = avatar.characterId ?? key;
-        addUrl(cast[key] ?? characters.find((c) => c.id === characterId)?.models[0]?.url);
-        addMotion(avatar.motion);
-        for (const k of avatar.transitions ?? []) addMotion(k.motion);
+    const assets = collectScenarioAssets(readJson(path.join(assetsDir, base, 'scenario.json')), books, `/${base}`);
+    for (const file of assets.files) found.add(strip(file));
+    for (const model of assets.environments) {
+      found.add(BUILTIN_ENVIRONMENTS[model] ?? strip(model));
+      if (model === 'builtin:painted-ground') {
+        // 校門の旧セットの舗装・塀・門柱の石・道路・家並みを共用する
+        for (const file of ['tile-paving', 'tile-wall', 'tile-stone', 'tile-road', 'far-houses']) found.add(`textures/painted-gate/${file}.avif`);
       }
     }
   }

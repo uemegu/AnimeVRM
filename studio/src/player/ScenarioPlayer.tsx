@@ -6,6 +6,7 @@ import {
   resolveCast,
   resolveScrollingBackground,
   ScenarioRunner,
+  collectScenarioAssets,
   type ScenarioPackage,
   type ScreenAspect,
   type TextContent,
@@ -21,25 +22,17 @@ import './player.css';
 
 const TYPE_SPEED = 40; // 1秒に出す文字数
 const AUTO_WAIT_MS = 1200;
-/** キャラの先読みを待つ上限（回線が遅くても「はじめる」が押せなくならないように） */
-const PREWARM_TIMEOUT_MS = 15000;
+/** 素材の先読みを待つ上限（読み込みが止まっても「はじめる」が押せなくならないように） */
+const PREWARM_TIMEOUT_MS = 90000;
 
-/** シナリオに出る3Dキャラ（同じキャラが別モデルに替わる場合は最初に出る方）と、使うモーション */
-function scenarioPrewarmList(scenario: ScenarioPackage, modelUrlFor: (characterId: string) => string | undefined) {
-  const byId = new Map<string, { id: string; modelUrl: string; motions: Set<string> }>();
-  for (const scene of scenario.scenes) {
-    for (const [id, avatar] of Object.entries(scene.avatars ?? {})) {
-      if (avatar.sprite) continue;
-      const modelUrl = avatar.modelUrl ?? modelUrlFor(avatar.characterId ?? id);
-      if (!modelUrl) continue;
-      const entry = byId.get(id);
-      if (entry && entry.modelUrl !== modelUrl) continue;
-      const item = entry ?? { id, modelUrl, motions: new Set<string>() };
-      if (avatar.motion) item.motions.add(avatar.motion);
-      byId.set(id, item);
-    }
-  }
-  return [...byId.values()].map((item) => ({ ...item, motions: [...item.motions] }));
+/** 再生画面の文字（Web フォントは使う文字の分だけ後から読まれるので、シナリオと画面の文言の文字をまとめて先に読む） */
+const PLAYER_FONTS = ['400 16px "Kiwi Maru"', '500 16px "Kiwi Maru"'];
+
+/** シナリオに出てくる文字（重複を除く） */
+function scenarioCharacters(value: unknown, chars = new Set<string>()): Set<string> {
+  if (typeof value === 'string') for (const ch of value) chars.add(ch);
+  else if (typeof value === 'object' && value !== null) for (const child of Object.values(value)) scenarioCharacters(child, chars);
+  return chars;
 }
 
 function localize(text: TextContent | undefined, language: Language): string {
@@ -108,13 +101,40 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
     setAspect(scenario.aspect ?? 'landscape');
   }, [scenario, audio]);
 
-  // 後のカットで出るキャラも、はじめる前に読み込んで描画の準備まで済ませる
+  // このシナリオが使う素材を、はじめる前にすべて読み込む（キャラは描画の準備まで）
   const prewarm = useMemo(
-    () => scenarioPrewarmList(scenario, (id) => data.characters.characters.find((c) => c.id === id)?.models[0]?.url),
-    [scenario, data]
+    () => collectScenarioAssets(scenario, { locations: data.locations, bgm: data.bgm, motions: data.motions, characters: data.characters.characters }, baseUrl),
+    [scenario, data, baseUrl]
   );
   const prewarmKey = JSON.stringify(prewarm);
-  const prewarmed = prewarmedKey === prewarmKey;
+  const fontText = useMemo(() => [...scenarioCharacters([scenario, tp])].join(''), [scenario, tp]);
+  const [fontsLoaded, setFontsLoaded] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    // 見えない所に一度描いて読ませる（Safari は fonts.load だけでは読まない文字がある）
+    const probe = document.createElement('div');
+    probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none;';
+    for (const font of PLAYER_FONTS) {
+      const line = document.createElement('span');
+      line.style.font = font;
+      line.textContent = fontText;
+      probe.appendChild(line);
+    }
+    document.body.appendChild(probe);
+    void Promise.all(PLAYER_FONTS.map((font) => document.fonts?.load(font, fontText)))
+      .then(() => document.fonts?.ready)
+      .catch(() => undefined)
+      .finally(() => {
+        probe.remove();
+        if (!cancelled) setFontsLoaded(fontText);
+      });
+    return () => {
+      cancelled = true;
+      probe.remove();
+    };
+  }, [fontText]);
+  const prewarmed = prewarmedKey === prewarmKey && fontsLoaded === fontText;
   useEffect(() => {
     const timer = window.setTimeout(() => setPrewarmedKey(prewarmKey), PREWARM_TIMEOUT_MS);
     return () => window.clearTimeout(timer);
