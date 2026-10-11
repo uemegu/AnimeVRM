@@ -164,6 +164,38 @@
   },
   {
     "category": "demo",
+    "id": "painted_aoi_room",
+    "title": "アオイの部屋 — 簡易3D",
+    "appearances": 8,
+    "lines": [
+      {
+        "lineId": "standing",
+        "text": "……どうぞ。散らかってるけど"
+      },
+      {
+        "lineId": "standing_wide",
+        "text": "座ってていいよ"
+      },
+      {
+        "lineId": "bed_medium",
+        "text": "……あのさ"
+      },
+      {
+        "lineId": "bed_close",
+        "text": "ちゃんと、来てくれたんだ"
+      },
+      {
+        "lineId": "desk_medium",
+        "text": "宿題、ここでやってるの"
+      },
+      {
+        "lineId": "desk_close",
+        "text": "……見ないでよ"
+      }
+    ]
+  },
+  {
+    "category": "demo",
     "id": "painted_classroom",
     "title": "昼休みの教室 — 簡易3Dの教室で会話",
     "appearances": 9,
@@ -199,6 +231,34 @@
       {
         "lineId": "conversation",
         "text": "「中庭からも、運動場がよく見えるね」"
+      }
+    ]
+  },
+  {
+    "category": "demo",
+    "id": "painted_gondola",
+    "title": "観覧車のゴンドラ — 簡易3D",
+    "appearances": 6,
+    "lines": [
+      {
+        "lineId": "front_seat_medium",
+        "text": "……すごい。海まで全部見える"
+      },
+      {
+        "lineId": "front_seat_close",
+        "text": "ねえ、もうすぐてっぺんだよ"
+      },
+      {
+        "lineId": "front_seat_wide",
+        "text": "夕日、きれい"
+      },
+      {
+        "lineId": "back_seat_medium",
+        "text": "こっち側は、観覧車の骨組みが見えるんだね"
+      },
+      {
+        "lineId": "standing",
+        "text": "揺れるから、立つとちょっと怖いね"
       }
     ]
   },

@@ -2,106 +2,121 @@
   {
     "url": "/animations/Acknowledging.fbx",
     "size": 481648,
-    "updatedAt": "2026-10-10T09:16:54.180Z"
+    "updatedAt": "2026-10-11T14:51:45.655Z"
   },
   {
     "url": "/animations/Angry.fbx",
     "size": 1688752,
-    "updatedAt": "2026-10-10T09:16:54.181Z"
+    "updatedAt": "2026-10-11T14:51:45.657Z"
   },
   {
     "url": "/animations/Dismissing Gesture.fbx",
     "size": 515664,
-    "updatedAt": "2026-10-10T09:16:54.185Z"
+    "updatedAt": "2026-10-11T14:51:45.659Z"
   },
   {
     "url": "/animations/Excited.fbx",
     "size": 826000,
-    "updatedAt": "2026-10-10T09:16:54.186Z"
+    "updatedAt": "2026-10-11T14:51:45.662Z"
   },
   {
     "url": "/animations/Idle.fbx",
     "size": 998880,
-    "updatedAt": "2026-10-10T09:16:54.187Z"
+    "updatedAt": "2026-10-11T14:51:45.665Z"
   },
   {
     "url": "/animations/Punching.fbx",
     "size": 496304,
-    "updatedAt": "2026-10-10T09:16:54.189Z"
+    "updatedAt": "2026-10-11T14:51:45.671Z"
   },
   {
     "url": "/animations/Quick Formal Bow.fbx",
     "size": 569424,
-    "updatedAt": "2026-10-10T09:16:54.191Z"
+    "updatedAt": "2026-10-11T14:51:45.673Z"
   },
   {
     "url": "/animations/Salute.fbx",
     "size": 580656,
-    "updatedAt": "2026-10-10T09:16:54.192Z"
+    "updatedAt": "2026-10-11T14:51:45.674Z"
   },
   {
     "url": "/animations/Standing Greeting.fbx",
     "size": 711008,
-    "updatedAt": "2026-10-10T09:16:54.194Z"
+    "updatedAt": "2026-10-11T14:51:45.677Z"
   },
   {
     "url": "/animations/Standing Idle.fbx",
     "size": 728160,
-    "updatedAt": "2026-10-10T09:16:54.195Z"
+    "updatedAt": "2026-10-11T14:51:45.678Z"
   },
   {
     "url": "/animations/Walking.fbx",
     "size": 440080,
-    "updatedAt": "2026-10-10T09:16:54.197Z"
+    "updatedAt": "2026-10-11T14:51:45.680Z"
   },
   {
     "url": "/animations/chin_rest.fbx",
     "size": 592448,
-    "updatedAt": "2026-10-10T09:16:54.198Z"
+    "updatedAt": "2026-10-11T14:51:45.682Z"
   },
   {
     "url": "/animations/clasp_hands_front.fbx",
     "size": 585328,
-    "updatedAt": "2026-10-10T09:16:54.199Z"
+    "updatedAt": "2026-10-11T14:51:45.684Z"
+  },
+  {
+    "url": "/animations/desk_chin_rest.fbx",
+    "size": 1173148,
+    "updatedAt": "2026-10-11T14:51:45.688Z"
   },
   {
     "url": "/animations/mob_chat_gesture.fbx",
     "size": 442768,
-    "updatedAt": "2026-10-10T09:16:54.201Z"
+    "updatedAt": "2026-10-11T14:51:45.690Z"
   },
   {
     "url": "/animations/pose_arms_crossed_pout.fbx",
     "size": 410204,
-    "updatedAt": "2026-10-10T09:16:54.202Z"
+    "updatedAt": "2026-10-11T14:51:45.692Z"
   },
   {
     "url": "/animations/pose_drink_can.fbx",
     "size": 409660,
-    "updatedAt": "2026-10-10T09:16:54.203Z"
+    "updatedAt": "2026-10-11T14:51:45.694Z"
   },
   {
     "url": "/animations/pose_hand_on_chest.fbx",
     "size": 412508,
-    "updatedAt": "2026-10-10T09:16:54.204Z"
+    "updatedAt": "2026-10-11T14:51:45.695Z"
   },
   {
     "url": "/animations/pose_hands_on_hips_proud.fbx",
     "size": 409004,
-    "updatedAt": "2026-10-10T09:16:54.206Z"
+    "updatedAt": "2026-10-11T14:51:45.696Z"
   },
   {
     "url": "/animations/pose_offer_hand.fbx",
     "size": 409788,
-    "updatedAt": "2026-10-10T09:16:54.207Z"
+    "updatedAt": "2026-10-11T14:51:45.698Z"
   },
   {
     "url": "/animations/pose_point_go.fbx",
     "size": 409244,
-    "updatedAt": "2026-10-10T09:16:54.209Z"
+    "updatedAt": "2026-10-11T14:51:45.700Z"
   },
   {
     "url": "/animations/pose_pray_hands.fbx",
     "size": 408908,
-    "updatedAt": "2026-10-10T09:16:54.210Z"
+    "updatedAt": "2026-10-11T14:51:45.704Z"
+  },
+  {
+    "url": "/animations/pose_sit_seat.fbx",
+    "size": 409772,
+    "updatedAt": "2026-10-11T14:51:45.709Z"
+  },
+  {
+    "url": "/animations/pose_stretch_legs.fbx",
+    "size": 414252,
+    "updatedAt": "2026-10-11T14:51:45.711Z"
   }
 ]

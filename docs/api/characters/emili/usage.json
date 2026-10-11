@@ -146,6 +146,13 @@
   },
   {
     "category": "demo",
+    "id": "painted_gondola",
+    "title": "観覧車のゴンドラ — 簡易3D",
+    "appearances": 1,
+    "lines": []
+  },
+  {
+    "category": "demo",
     "id": "private_date",
     "title": "休日デート〜私服のエミリと街歩き〜",
     "appearances": 25,

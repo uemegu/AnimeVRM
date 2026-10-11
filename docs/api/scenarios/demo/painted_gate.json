@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "painted_gate",
   "title": {
-    "ja": "校門のシオン — 簡易3Dの校門",
-    "en": "Shion at the gate (painted 3D)"
+    "ja": "校門のシオン — 中庭と共有する簡易3Dの校門",
+    "en": "Shion at the gate (shared painted 3D campus)"
   },
-  "description": "下書きの上に描いた1枚絵を箱に投影した簡易3Dの校門。門の前に立つシオンを、朝・昼・放課後の光で見る。",
-  "location": "painted_gate",
+  "description": "運動場・中庭と同じ簡易3Dの学校の南の校門。門の前に立つシオンを朝・昼・放課後の光で見て、同じ位置から四方と、門の内側から確認する。",
+  "location": "school_gate",
   "bgm": "/bgm/bgm.mp3",
   "timeOfDay": "morning",
   "scenes": [
@@ -205,6 +205,167 @@
           0
         ],
         "fov": 44
+      }
+    },
+    {
+      "id": "look_north",
+      "text": "門の前の歩道から北：門の奥に中庭の軸と時計の校舎。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          1.65,
+          -17
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "look_west",
+      "text": "同じ位置から西：塀沿いの歩道と運動場側の並木。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          -20,
+          1.65,
+          3
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "look_east",
+      "text": "同じ位置から東：塀越しの守衛室と植栽。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          20,
+          1.65,
+          3
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "look_south",
+      "text": "同じ位置から南：道路と向かいの家並み。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          3
+        ],
+        "target": [
+          0,
+          1.65,
+          23
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "guardhouse",
+      "text": "門をくぐって守衛室の扉側を見る。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.5,
+          1.6,
+          -1
+        ],
+        "target": [
+          5.5,
+          1.4,
+          -6
+        ],
+        "fov": 50
+      }
+    },
+    {
+      "id": "from_courtyard",
+      "text": "中庭から校門と塀の向こうの家並みを振り返る。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.65,
+          -22
+        ],
+        "target": [
+          0,
+          1.5,
+          0
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "overview",
+      "text": "校門・守衛室・中庭・道路の俯瞰。",
+      "timeOfDay": "day",
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -14,
+          16,
+          14
+        ],
+        "target": [
+          2,
+          0,
+          -10
+        ],
+        "fov": 60
       }
     }
   ]

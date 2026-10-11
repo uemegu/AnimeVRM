@@ -18,6 +18,10 @@
       "loop": true,
       "seated": true
     },
+    "desk_chin_rest": {
+      "loop": true,
+      "seated": true
+    },
     "clasp_hands_front": {
       "loop": true
     },
@@ -97,6 +101,10 @@
       "loop": true
     },
     "pose_stretch_legs": {
+      "loop": true,
+      "seated": true
+    },
+    "pose_sit_seat": {
       "loop": true,
       "seated": true
     }

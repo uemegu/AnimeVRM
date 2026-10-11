@@ -35,8 +35,8 @@
   {
     "category": "demo",
     "id": "painted_gate",
-    "title": "校門のシオン — 簡易3Dの校門",
-    "appearances": 6,
+    "title": "校門のシオン — 中庭と共有する簡易3Dの校門",
+    "appearances": 13,
     "lines": [
       {
         "lineId": "morning_2",
