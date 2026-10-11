@@ -18,7 +18,7 @@ import { LocationPicker } from '../../components/LocationPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
-const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark', 'divine'];
+const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const FACE_EFFECTS = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'faceSweat'] as const;
@@ -380,7 +380,7 @@ export function ViewerView() {
           <div className="segmented five">
             {TIMES.map((time) => (
               <button key={time} type="button" className={time === timeOfDay ? 'active' : ''} onClick={() => setTimeOfDay(time)}>
-                {presets.timeOfDay[time]?.name ?? time}
+                {time === 'rainy' ? t.viewer.rain : (presets.timeOfDay[time]?.name ?? time)}
               </button>
             ))}
           </div>
@@ -399,8 +399,17 @@ export function ViewerView() {
               </button>
             ))}
           </div>
-          <ShiftPicker value={shift} onChange={setShift} />
-          <div className="viewer-camera-move">
+          <div className="viewer-camera-tools">
+            <ShiftPicker value={shift} onChange={setShift} />
+          </div>
+        </div>
+
+        <div className="viewer-frame">
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} rain={rain} freeCamera viewResetKey={viewResetKey} onFreeCameraTake={() => setShotSelected(false)} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
+        </div>
+
+        <div className="viewer-frame-meta">
+          <div className="viewer-camera-move viewer-camera-tools">
             <select className="select" aria-label={t.scenarios.cameraMove} value={cameraMove ?? ''} onChange={(e) => playCameraMove((e.target.value || null) as CameraMoveType | null)}>
               <option value="">{`${t.scenarios.cameraMove}: ${t.scenarios.cameraMoveNone}`}</option>
               {CameraMoveType.options.map((type) => (
@@ -413,15 +422,10 @@ export function ViewerView() {
               <Icon name="play" size={14} />
             </button>
           </div>
+          <p className="viewer-caption">
+            {character?.name.ja} ・ {model?.label.ja} ／ {presets.locations[locationId]?.name} ・ {presets.timeOfDay[timeOfDay]?.name} ／ {motion}
+          </p>
         </div>
-
-        <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} rain={rain} freeCamera viewResetKey={viewResetKey} onFreeCameraTake={() => setShotSelected(false)} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
-        </div>
-
-        <p className="viewer-caption">
-          {character?.name.ja} ・ {model?.label.ja} ／ {presets.locations[locationId]?.name} ・ {presets.timeOfDay[timeOfDay]?.name} ／ {motion}
-        </p>
 
         <div className="viewer-stage-bottom">
           <div className="viewer-location-grid">
