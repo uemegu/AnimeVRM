@@ -161,6 +161,10 @@ describe('カット内のタイムライン', () => {
     expect(cutStateAt(scene, 2.5).camera.move).toBeUndefined();
     expect(cutStateAt(scene, 3.5).camera.move?.type).toBe('handheld');
     expect(cutStateAt(scene, 4.5).camera.move).toBeUndefined();
+    // 手持ち風は終わりがないので数えず、オービット（1秒から2秒）の終わりがカメラの動きの終わり
+    expect(lastKeyframeAt(scene)).toBe(4);
+    expect(lastKeyframeAt({ id: 'd', text: '', cameraMove: 'orbit_left' })).toBe(6);
+    expect(lastKeyframeAt({ id: 'h', text: '', cameraMove: 'handheld' })).toBe(0);
   });
 });
 
