@@ -13,6 +13,7 @@ import { addHandColliders } from '../avatar/handColliders';
 import { HandClearance, type HandClearanceMode } from '../avatar/handClearance';
 import { ClothDent } from '../avatar/clothDent';
 import { SpringWind, type WindSettings } from '../avatar/springWind';
+import { WetDrips } from '../avatar/wetDrips';
 import { AvatarEffects } from './AvatarEffects';
 import { resolveAssetUrl } from '../utils/path';
 import { setDaylight } from '../scene/Daylight';
@@ -271,6 +272,10 @@ export class StageAvatar {
   private clothDentEnabled: boolean;
   /** 風で髪とスカートを揺らす */
   private springWind: SpringWind | null = null;
+  private wetDrips: WetDrips | null = null;
+  /** 雨で濡れた具合（今の値と、近づけていく値） */
+  private wetness = 0;
+  private wetnessTarget = 0;
   private wind: WindSettings | null = null;
   public shaderController: ToonShaderController | null = null;
   /** 感情演出（頬赤・涙・汗・文字演出など）。モデルの読み込み後に作る */
@@ -369,6 +374,7 @@ export class StageAvatar {
           this.heldItem.set(this.pendingHeldItem);
           this.clothDent = ClothDent.create(vrm, this.clothDentEnabled);
           this.springWind = SpringWind.create(vrm);
+          this.wetDrips = WetDrips.create(vrm, this.scene);
 
           // 1. スムース法線の事前計算（綺麗なアニメアウトライン用）
           applySmoothNormalsToHierarchy(vrm.scene);
@@ -388,6 +394,7 @@ export class StageAvatar {
             camera: this.camera,
             hairShadow: this.hairShadow,
           });
+          this.applyWetness();
 
           // 4. アニメーションミキサー初期化
           this.mixer = new THREE.AnimationMixer(vrm.scene);
@@ -468,6 +475,23 @@ export class StageAvatar {
 
   public setDaylight(amount: number): void {
     if (this.vrm) setDaylight(this.vrm.scene, amount);
+  }
+
+  /**
+   * 雨で濡れた具合（0 = 乾いている、1 = ずぶ濡れ）。シャツが襟から裾へ濡れ、あご・指先から水滴が落ちる。
+   * immediate でなければ、濡れるときは数秒、乾くときはゆっくり変わる
+   */
+  public setWetness(wetness: number, immediate = false): void {
+    this.wetnessTarget = THREE.MathUtils.clamp(wetness, 0, 1);
+    if (immediate) {
+      this.wetness = this.wetnessTarget;
+      this.applyWetness();
+    }
+  }
+
+  private applyWetness(): void {
+    this.shaderController?.setWetness(this.wetness);
+    this.wetDrips?.setWetness(this.wetness);
   }
 
   /** 全体の不透明度（1 で通常。去っていくキャラを薄くして消すとき） */
@@ -722,8 +746,8 @@ export class StageAvatar {
     // 3.5 目が泳ぐ（視線にずれを足す）
     this.effects?.applyEyeWander(delta, this.gazeTarget);
 
-    // 4. VRM SpringBone・Humanoid更新（風は揺れものの重力に足す）
-    this.springWind?.update(delta, this.wind);
+    // 4. VRM SpringBone・Humanoid更新（風は揺れものの重力に足す。濡れた髪・服は重いので風に揺らさない）
+    this.springWind?.update(delta, this.wetnessTarget > 0 ? null : this.wind);
     this.vrm.update(delta);
 
     // 4.5 手に押されてスカートがへこむ（腕と揺れものが決まってから）
@@ -731,6 +755,17 @@ export class StageAvatar {
 
     // 4.6 小物を手の位置へ
     this.heldItem?.place();
+
+    // 4.7 雨で濡れる（濡れるのは 3 秒ほど、乾くのは 30 秒ほどで変わる）
+    if (this.wetness !== this.wetnessTarget) {
+      const rate = this.wetnessTarget > this.wetness ? 1 / 3 : 1 / 30;
+      const step = rate * delta;
+      this.wetness = Math.abs(this.wetnessTarget - this.wetness) <= step
+        ? this.wetnessTarget
+        : this.wetness + Math.sign(this.wetnessTarget - this.wetness) * step;
+      this.applyWetness();
+    }
+    this.wetDrips?.update(delta);
 
     // 5. 感情演出
     if (frame) {
@@ -797,6 +832,8 @@ export class StageAvatar {
     this.heldItem = null;
     this.effects?.dispose();
     this.effects = null;
+    this.wetDrips?.dispose();
+    this.wetDrips = null;
     if (this.vrm) {
       VRMUtils.deepDispose(this.vrm.scene);
       this.scene.remove(this.vrm.scene);

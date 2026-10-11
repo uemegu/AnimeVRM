@@ -80,6 +80,8 @@ export interface StageCastMember {
   look?: AvatarLook;
   /** 日なたの明るさ（窓の外の人物など） */
   daylight?: number;
+  /** 雨で濡れた具合（0〜1） */
+  wet?: number;
   /** 手に持つ小物（hand を省略したら小物ごとの既定の手） */
   heldItem?: { item: HeldItemId; hand?: 'left' | 'right' };
 }
@@ -248,6 +250,7 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       lookAtTarget: config.lookAtTarget,
       headTurn: config.headTurn,
       ...(config.daylight !== undefined ? { daylight: config.daylight } : {}),
+      ...(config.wet !== undefined ? { wet: config.wet } : {}),
       ...(config.heldItem ? { heldItem: typeof config.heldItem === 'string' ? { item: config.heldItem } : config.heldItem } : {}),
       look: {
         blush: config.blush ?? false,

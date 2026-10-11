@@ -56,6 +56,8 @@ export function ViewerView() {
   const [faceCamera, setFaceCamera] = useState(false);
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, redface: false, tearyEyes: false, awawaMouth: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
+  const [wet, setWet] = useState(0);
+  const [rain, setRain] = useState(false);
   const [motionLoop, setMotionLoop] = useState(true);
   const [motionCue, setMotionCue] = useState(0);
   const [motionFilter, setMotionFilter] = useState('');
@@ -169,10 +171,11 @@ export function ViewerView() {
               lookAtTarget: lookAtCamera || faceCamera ? 'camera' : undefined,
               headTurn: faceCamera ? 1 : 0,
               look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects, ...(character?.tearDrops === false ? { tearDrops: false } : {}) },
+              wet,
             },
           ]
         : [],
-    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects]
+    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects, wet]
   );
 
   useBackdrop(locationBackdropUrl(presets?.locations[locationId]));
@@ -284,7 +287,15 @@ export function ViewerView() {
                       {key === 'faceSweat' ? t.viewer.faceSweat : t.scenarios.effects[key]}
                     </button>
                   ))}
+                  <button type="button" className={`viewer-chip${rain ? ' active' : ''}`} aria-pressed={rain} onClick={() => setRain((v) => !v)}>
+                    {t.viewer.rain}
+                  </button>
                 </div>
+                <label className="viewer-wet">
+                  {t.viewer.wet}
+                  <input type="range" min={0} max={1} step={0.05} value={wet} onChange={(e) => setWet(Number(e.target.value))} />
+                  <span>{wet.toFixed(2)}</span>
+                </label>
               </section>
 
               <section className="viewer-section">
@@ -389,7 +400,7 @@ export function ViewerView() {
         </div>
 
         <div className="viewer-frame">
-          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} freeCamera viewResetKey={viewResetKey} onFreeCameraTake={() => setShotSelected(false)} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
+          <StageCanvas presets={presets} timeOfDay={timeOfDay} locationId={locationId} cast={cast} cameraShot={shot} cameraShift={shift} focusId={characterId} rain={rain} freeCamera viewResetKey={viewResetKey} onFreeCameraTake={() => setShotSelected(false)} getSpeakerPhoneme={getPhoneme} getSpeakerMouthOpen={getMouthOpen} onManager={onManager} />
         </div>
 
         <p className="viewer-caption">

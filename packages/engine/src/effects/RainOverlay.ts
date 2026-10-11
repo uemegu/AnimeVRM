@@ -33,8 +33,8 @@ export class RainOverlay {
     this.canvas.width = Math.max(1, Math.round(rect.width * ratio));
     this.canvas.height = Math.max(1, Math.round(rect.height * ratio));
     // 画面の広さに合わせた粒の数
-    const count = Math.round((rect.width * rect.height) / 2600);
-    this.drops = Array.from({ length: Math.min(count, 900) }, () => this.newDrop(true));
+    const count = Math.round((rect.width * rect.height) / 1500);
+    this.drops = Array.from({ length: Math.min(count, 1500) }, () => this.newDrop(true));
   }
 
   private newDrop(anywhere: boolean) {
@@ -43,9 +43,9 @@ export class RainOverlay {
     return {
       x: Math.random() * width * 1.2,
       y: anywhere ? Math.random() * height : -Math.random() * height * 0.2,
-      length: (18 + Math.random() * 26) * scale,
+      length: (22 + Math.random() * 34) * scale,
       speed: (1300 + Math.random() * 900) * scale,
-      alpha: 0.18 + Math.random() * 0.3,
+      alpha: 0.3 + Math.random() * 0.4,
     };
   }
 
@@ -56,7 +56,7 @@ export class RainOverlay {
     if (ctx) {
       const { width, height } = this.canvas;
       ctx.clearRect(0, 0, width, height);
-      ctx.lineWidth = Math.max(1, height / 700);
+      ctx.lineWidth = Math.max(1, height / 520);
       ctx.lineCap = 'round';
       // 少し左へ流れる斜めの雨
       const slant = 0.22;

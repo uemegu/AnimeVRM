@@ -68,6 +68,8 @@ export const ja = {
     motion: 'モーション',
     loop: 'ループ',
     searchMotion: 'モーションを検索',
+    wet: '濡れ',
+    rain: '雨',
     voice: 'ボイス',
     searchVoice: 'ボイスを検索',
     voiceUpload: '登録',

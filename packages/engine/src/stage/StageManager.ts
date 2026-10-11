@@ -22,6 +22,7 @@ import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
 import { resolveAssetUrl } from '../utils/path';
 import { ScreenEffects } from './ScreenEffects';
+import { RainGround } from './RainGround';
 import { StillImages, type CutinSettings, type StillImageSettings } from './StillImages';
 import type { EffectPresetName } from '../effects/text/types';
 import { disposeEnvironment, loadEnvironment, placeEnvironment } from './environments';
@@ -168,6 +169,9 @@ export class StageManager {
   private rimLight: THREE.DirectionalLight;
   /** 平行光が落とすキャラの影を受ける地面（場所の light.shadow があるときだけ出す） */
   private groundShadow: THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial>;
+  /** 雨の地面（濡れて暗い地面・跳ね返り） */
+  private rainGround: RainGround;
+  private raining = false;
   /** 3D背景の動かない小物（castShadow のメッシュ）の影。光の向きは場所ごとに固定なので、置いたときに一度だけ描く */
   private staticShadowLight: THREE.DirectionalLight;
   /** 影の写真に描く物は、描くときのカメラのレイヤーで選ばれる。小物だけを見るカメラで描いて、キャラを写し込まない */
@@ -364,6 +368,7 @@ export class StageManager {
     this.groundShadow.receiveShadow = true;
     this.groundShadow.visible = false;
     this.scene.add(this.groundShadow);
+    this.rainGround = new RainGround(this.scene);
 
     this.ambientLight = new THREE.AmbientLight('#776e74', 0.8);
     this.scene.add(this.ambientLight);
@@ -1177,6 +1182,8 @@ export class StageManager {
       const position = this.resolvePosition(member);
       avatar.vrm.scene.position.set(...position);
       avatar.vrm.scene.rotation.y = member.rotationY ?? -position[0] * 0.5;
+      // 登場したときはその濡れ具合で出す（出ているあいだに変えたら数秒かけて濡れる）
+      avatar.setWetness(member.wet ?? 0, !avatar.vrm.scene.visible);
       avatar.vrm.scene.visible = true;
       avatar.setDaylight(member.daylight ?? 0);
       avatar.setHeldItem(member.heldItem);
@@ -1302,9 +1309,11 @@ export class StageManager {
     this.stillImages?.setCutin(cutin);
   }
 
-  /** 画面に雨を降らせる（場所によらない 2D の雨） */
+  /** 雨を降らせる（画面に重ねる 2D の雨と、濡れて暗い地面・跳ね返り）。雨のあいだは風を止める */
   public setRain(active: boolean): void {
+    this.raining = active;
     this.stillImages?.setRain(active);
+    this.rainGround.setActive(active);
   }
 
   /** 口パクさせるキャラ（話者） */
@@ -1815,12 +1824,13 @@ export class StageManager {
         avatar.updateLipSync(id === this.speakerId ? phoneme : undefined, LIP_SYNC_GAIN * mouthOpen);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
-        avatar.setWind(this.presets.locations[this.currentLocationId]?.wind);
+        avatar.setWind(this.raining ? null : this.presets.locations[this.currentLocationId]?.wind);
         avatar.update(delta, { elapsed, camera: this.camera, renderer: this.renderer });
         activeMeshes.push(avatar.vrm.scene);
       }
 
       this.sprites.forEach((actor) => actor.update(delta, this.camera));
+      this.rainGround.update(delta, this.cameraCurrentTarget);
 
       // 2. 太陽・レンズフレア・オクルージョン計算
       const location = this.presets.locations[this.currentLocationId];
@@ -1889,6 +1899,7 @@ export class StageManager {
     this.isDisposed = true;
     this.screenEffects?.dispose();
     this.stillImages?.dispose();
+    this.rainGround.dispose();
     this.motionReturnTimers.forEach((timer) => window.clearTimeout(timer));
     this.motionReturnTimers.clear();
     if (this.animationFrameId !== null) {
