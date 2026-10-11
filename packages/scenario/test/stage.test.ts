@@ -143,6 +143,25 @@ describe('カット内のタイムライン', () => {
     expect(cutStateAt(scene, 5).camera.pose?.position).toEqual([0, 1.4, 1.5]);
     expect(lastKeyframeAt(scene)).toBe(4);
   });
+
+  it('カメラの動きはカットの頭から始まり、キーで差し替え・止める。構図だけのキーでも止まる', () => {
+    const scene: ScenarioScene = {
+      id: 'c',
+      text: '',
+      cameraMove: 'dolly_in',
+      transitions: [
+        { at: 1, cameraMove: { type: 'orbit_left', duration: 2, amount: 0.5 } },
+        { at: 2, camera: 'wide' },
+        { at: 3, cameraMove: 'handheld' },
+        { at: 4, cameraMove: false },
+      ],
+    };
+    expect(cutStateAt(scene, 0).camera.move).toEqual({ type: 'dolly_in', duration: 3, amount: 1, at: 0 });
+    expect(cutStateAt(scene, 1.5).camera.move).toEqual({ type: 'orbit_left', duration: 2, amount: 0.5, at: 1 });
+    expect(cutStateAt(scene, 2.5).camera.move).toBeUndefined();
+    expect(cutStateAt(scene, 3.5).camera.move?.type).toBe('handheld');
+    expect(cutStateAt(scene, 4.5).camera.move).toBeUndefined();
+  });
 });
 
 describe('感情演出', () => {

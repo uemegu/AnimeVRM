@@ -16,6 +16,7 @@ import {
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { ShiftPicker } from '../../components/ShiftPicker';
+import { CameraMoveFields } from '../../components/CameraMoveFields';
 import { format, useI18n } from '../../i18n';
 import { cutWarnings, makeText, textEn, textJa } from './scenarioEdit';
 import { VoicePanel } from './VoicePanel';
@@ -291,6 +292,7 @@ function StageTab({
           <ShiftPicker value={scene.cameraShift} onChange={(shift) => set('cameraShift', shift ?? undefined)} />
         </span>
       </label>
+      <CameraMoveFields value={scene.cameraMove} onChange={(move) => set('cameraMove', move || undefined)} />
       <label className="inspector-check">
         <input type="checkbox" checked={!!scene.clearCast} onChange={(e) => set('clearCast', e.target.checked || undefined)} />
         {t.scenarios.clearCast}

@@ -411,6 +411,13 @@
   z-index: 1;
 }
 
+/* カメラの動きを試す */
+.viewer-camera-move {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* 演出: 濡れ具合のスライダー */
 .viewer-wet {
   display: flex;

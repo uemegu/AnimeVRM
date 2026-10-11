@@ -175,7 +175,7 @@ export function StageCanvas({
 
   // カットの切り替え（カメラの直接指定とタイムライン）。中身が変わったときも当て直す
   const cutKey = JSON.stringify(
-    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, cameraShift: cut.cameraShift, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines } : null
+    cut ? { avatars: cut.avatars, transitions: cut.transitions, cameraPose: cut.cameraPose, cameraShift: cut.cameraShift, cameraMove: cut.cameraMove, id: cut.id, screenTransition: cut.screenTransition, focusLines: cut.focusLines } : null
   );
   useEffect(() => {
     const manager = managerRef.current;

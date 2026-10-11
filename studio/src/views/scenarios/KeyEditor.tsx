@@ -2,6 +2,7 @@ import type { AvatarTransition, CameraPose, CameraShot, SceneTransition } from '
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
 import { ShiftPicker } from '../../components/ShiftPicker';
+import { CameraMoveFields } from '../../components/CameraMoveFields';
 import { useI18n } from '../../i18n';
 import { EffectFields } from './EffectFields';
 
@@ -97,6 +98,7 @@ export function KeyEditor({ kind, value, data, castIds, currentPose, onChange, o
             onChange={(e) => set('cameraTransitionDuration', e.target.value === '' ? undefined : Number(e.target.value))}
           />
         </label>
+        <CameraMoveFields value={key.cameraMove} allowStop onChange={(move) => set('cameraMove', move)} />
         <label className="field">
           <span className="field-label">{t.scenarios.focusLines}</span>
           <select className="select" value={key.focusLines === undefined ? '' : key.focusLines ? 'on' : 'off'} onChange={(e) => set('focusLines', e.target.value === '' ? undefined : e.target.value === 'on')}>

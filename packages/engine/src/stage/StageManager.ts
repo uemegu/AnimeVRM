@@ -48,12 +48,14 @@ import {
   type AvatarOneShot,
   type CutAvatarState,
   type CutState,
+  type ResolvedCameraMove,
   type ScenarioScene,
   type SceneEffects,
   type TextContent,
 } from '@anime-vrm/scenario';
 import type { StageCastMember } from './types';
 import { StageSpriteActor } from './StageSprite';
+import { applyCameraMove } from './cameraMove';
 import { FrameRateCheck, resolveStageQuality, stageQualityOf, type StageQuality, type StageQualityLevel } from './quality';
 
 const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
@@ -233,6 +235,13 @@ export class StageManager {
   private timelineShift: CameraShift | null = null;
   private timelinePose: { pose: CameraPoseSetting; duration?: number } | null = null;
   private cameraTransitionSec = CAMERA_TRANSITION_SEC;
+  /** カットのカメラの動き（パン・ドリーなど。構図に重ねる） */
+  private cameraMove: ResolvedCameraMove | null = null;
+  /** Studio のビューアで試すカメラの動き（at は clock の時刻。カットの動きがあればそちらが優先） */
+  private previewMove: ResolvedCameraMove | null = null;
+  /** 構図の画角（ズームなどの動きはこれを基準に変える） */
+  private baseFov = DEFAULT_CAMERA_FOV;
+  private readonly cameraBasePosition = new THREE.Vector3();
   /** Studio でカメラを手で動かしている間は、構図によるカメラの移動を止める */
   private freeCamera = false;
 
@@ -1389,6 +1398,11 @@ export class StageManager {
     this.updateCameraTarget();
   }
 
+  /** Studio のビューア用：カットとは別に、カメラの動きを今から試す（null で止める） */
+  public previewCameraMove(move: ResolvedCameraMove | null): void {
+    this.previewMove = move ? { ...move, at: this.clock.elapsedTime } : null;
+  }
+
   /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
   public setCutTimeline(scene: ScenarioScene | null): void {
     this.cutScene = scene;
@@ -1500,6 +1514,7 @@ export class StageManager {
       this.timelineShot = camera.pose ? null : (camera.shot ?? null);
       this.timelineShift = camera.shift ?? null;
       this.timelinePose = camera.pose ? { pose: camera.pose, duration: seek ? 0 : camera.duration } : null;
+      this.cameraMove = camera.move ?? null;
       this.updateCameraTarget();
     }
   }
@@ -1679,6 +1694,7 @@ export class StageManager {
       ? { position: new THREE.Vector3(...direct.position), target: new THREE.Vector3(...direct.target) }
       : this.shiftPose(this.shotPose(frame), this.currentShift());
     const fov = direct?.fov ?? this.locationStage?.camera?.fov ?? DEFAULT_CAMERA_FOV;
+    this.baseFov = fov;
     if (this.camera.fov !== fov) {
       this.camera.fov = fov;
       this.camera.updateProjectionMatrix();
@@ -1704,9 +1720,22 @@ export class StageManager {
     const duration = Math.max(1e-3, this.cameraTransitionSec);
     this.cameraElapsed = Math.min(duration, this.cameraElapsed + delta);
     const t = easeInOutCubic(this.cameraElapsed / duration);
-    this.camera.position.lerpVectors(this.cameraFrom.position, this.cameraTo.position, t);
+    this.cameraBasePosition.lerpVectors(this.cameraFrom.position, this.cameraTo.position, t);
     this.cameraCurrentTarget.lerpVectors(this.cameraFrom.target, this.cameraTo.target, t);
+    const move = this.cameraMove ?? this.previewMove;
+    if (move) {
+      const time = this.cameraMove ? this.cutTime : this.clock.elapsedTime;
+      const frame = this.shotFrame();
+      const face = this.castIds.length > 0 ? new THREE.Vector3(frame.x, frame.head, frame.z) : null;
+      applyCameraMove(this.camera, { position: this.cameraBasePosition, target: this.cameraCurrentTarget }, face, this.baseFov, move, time);
+      return;
+    }
+    this.camera.position.copy(this.cameraBasePosition);
     this.camera.lookAt(this.cameraCurrentTarget);
+    if (this.camera.fov !== this.baseFov) {
+      this.camera.fov = this.baseFov;
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   /**

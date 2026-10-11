@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "id": "camera_moves",
+  "title": {
+    "ja": "カメラの動き — 見本",
+    "en": "Camera moves — samples"
+  },
+  "description": "cameraMove の全種類を1カットずつ見せる。中庭（簡易3D）なので回り込んでも背景が切れない。",
+  "location": "courtyard",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "intro",
+      "text": "カメラの動きの見本。各カットの頭からカメラが動きます。Studio のタイムラインで再生し直せます。",
+      "camera": "speaker",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera"
+        }
+      }
+    },
+    {
+      "id": "pan_left",
+      "text": "パン（左へ振る）：その場で横に振って、構図で止まる。",
+      "camera": "speaker",
+      "cameraMove": "pan_left"
+    },
+    {
+      "id": "pan_right",
+      "text": "パン（右へ振る）：その場で横に振って、構図で止まる。",
+      "camera": "speaker",
+      "cameraMove": "pan_right"
+    },
+    {
+      "id": "tilt_up",
+      "text": "ティルト（下から上へ）：足元から顔へ振り上げる。最後は必ず顔が映る。",
+      "camera": "speaker",
+      "cameraMove": "tilt_up"
+    },
+    {
+      "id": "tilt_down",
+      "text": "ティルト（上から下へ）：空から顔へ振り下ろす。",
+      "camera": "speaker",
+      "cameraMove": "tilt_down"
+    },
+    {
+      "id": "dolly_in",
+      "text": "ドリーイン：遠くからカメラごと近づいて、構図（ここではバストアップ）で止まる。",
+      "camera": "speaker",
+      "cameraMove": "dolly_in",
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "dolly_out",
+      "text": "ドリーアウト：構図からカメラごと離れていく。",
+      "camera": "speaker",
+      "cameraMove": "dolly_out"
+    },
+    {
+      "id": "zoom_in",
+      "text": "ズームイン：位置はそのまま、画角で顔のアップまで寄っていく。ドリーインと違い背景の見え方（遠近感）は変わらない。",
+      "camera": "speaker",
+      "cameraMove": "zoom_in"
+    },
+    {
+      "id": "zoom_out",
+      "text": "ズームアウト：位置はそのまま、画角を広げて引いていく。",
+      "camera": "speaker",
+      "cameraMove": "zoom_out"
+    },
+    {
+      "id": "orbit_left",
+      "text": "オービット（左回りに1周）：被写体の周りを1周して、元の構図に戻る。",
+      "camera": "speaker",
+      "cameraMove": "orbit_left"
+    },
+    {
+      "id": "orbit_right",
+      "text": "オービット（右回りに1周）：被写体の周りを1周して、元の構図に戻る。",
+      "camera": "speaker",
+      "cameraMove": "orbit_right"
+    },
+    {
+      "id": "crane_up",
+      "text": "クレーンアップ：昇りながら引いていく。場面の締めくくりに。",
+      "camera": "speaker",
+      "cameraMove": "crane_up"
+    },
+    {
+      "id": "dolly_zoom",
+      "text": "ドリーズーム：人物の大きさはそのまま、背景だけが寄ってくる。衝撃の瞬間に。",
+      "camera": "speaker",
+      "cameraMove": "dolly_zoom",
+      "avatars": {
+        "aoi": {
+          "expression": "surprised",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "handheld",
+      "text": "手持ち風：わずかに揺らし続ける。緊張・臨場感に。",
+      "camera": "speaker",
+      "cameraMove": "handheld",
+      "avatars": {
+        "aoi": {
+          "expression": "neutral",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "dutch_left",
+      "text": "ダッチアングル（左に傾ける）：画面を斜めにして不安・違和感を出す。",
+      "camera": "speaker",
+      "cameraMove": "dutch_left",
+      "avatars": {
+        "aoi": {
+          "expression": "komari",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "dutch_right",
+      "text": "ダッチアングル（右に傾ける）。",
+      "camera": "speaker",
+      "cameraMove": "dutch_right"
+    },
+    {
+      "id": "slow_orbit",
+      "text": "秒数と大きさを変えた例：オービットを10秒で2周（amount が周回数）。",
+      "camera": "speaker",
+      "cameraMove": {
+        "type": "orbit_right",
+        "duration": 10,
+        "amount": 2
+      },
+      "avatars": {
+        "aoi": {
+          "expression": "happy",
+          "expressionWeight": 1
+        }
+      }
+    },
+    {
+      "id": "mid_key",
+      "text": "途中から動かす例：引きで始め、1.5秒のキーでバストアップに切り替えてドリーインする。",
+      "camera": "wide",
+      "transitions": [
+        {
+          "at": 1.5,
+          "camera": "close",
+          "cameraMove": {
+            "type": "dolly_in",
+            "duration": 2
+          }
+        }
+      ]
+    }
+  ]
+}

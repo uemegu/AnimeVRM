@@ -48,6 +48,51 @@ export type CameraShot = z.infer<typeof CameraShot>;
 export const CameraShift = z.enum(['up_left', 'up', 'up_right', 'left', 'right', 'down_left', 'down', 'down_right']);
 export type CameraShift = z.infer<typeof CameraShift>;
 
+/**
+ * カメラの動き（構図・直接指定に重ねて、カットの間に動かす）。多くは動いた末に指定した構図へ着地する
+ * - pan_left / pan_right: その場で横に振って構図へ着地する（左へ振る / 右へ振る）
+ * - tilt_up / tilt_down: その場で縦に振って構図へ着地する（下から上へ / 上から下へ）
+ * - dolly_in: 遠くからカメラごと被写体へ近づいて構図へ着地する
+ * - dolly_out: 構図からカメラごと離れていく
+ * - zoom_in / zoom_out: 位置はそのまま、構図から画角で寄っていく / 引いていく
+ * - orbit_left / orbit_right: 被写体の周りを1周して構図へ戻る（カメラが左へ / 右へ回る。amount が周回数）
+ * - crane_up: 構図からカメラが上へ昇りながら引いていく（被写体は見続ける）
+ * - dolly_zoom: 被写体の大きさはそのまま、背景だけ寄って見える（カメラは離れ、画角を狭める）
+ * - handheld: 手持ち風にわずかに揺らし続ける
+ * - dutch_left / dutch_right: 画面を斜めに傾ける（画面の左側が下がる / 右側が下がる）
+ */
+export const CameraMoveType = z.enum([
+  'pan_left',
+  'pan_right',
+  'tilt_up',
+  'tilt_down',
+  'dolly_in',
+  'dolly_out',
+  'zoom_in',
+  'zoom_out',
+  'orbit_left',
+  'orbit_right',
+  'crane_up',
+  'dolly_zoom',
+  'handheld',
+  'dutch_left',
+  'dutch_right',
+]);
+export type CameraMoveType = z.infer<typeof CameraMoveType>;
+
+/** カメラの動き。種類だけ、または秒数（duration）・大きさの倍率（amount）付き */
+export const CameraMove = z.union([
+  CameraMoveType,
+  z.strictObject({
+    type: CameraMoveType,
+    /** 動きにかける秒数（handheld では使わない） */
+    duration: z.number().positive().optional(),
+    /** 動きの大きさの倍率（1 で標準） */
+    amount: z.number().positive().max(3).optional(),
+  }),
+]);
+export type CameraMove = z.infer<typeof CameraMove>;
+
 /** 'player' | 'speaker' | 'partner' | 'camera' | 'forward' またはキャラ ID */
 const LookAtTarget = z.string();
 
@@ -160,6 +205,8 @@ export const SceneTransition = z.strictObject({
   /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
   cameraPose: CameraPose.optional(),
   cameraTransitionDuration: z.number().nonnegative().optional(),
+  /** この時刻からカメラを動かす（false で止める。構図を切り替えて動きを書かないときも止まる） */
+  cameraMove: z.union([CameraMove, z.literal(false)]).optional(),
   /** この時刻から集中線を出す・消す */
   focusLines: z.boolean().optional(),
 });
@@ -353,6 +400,8 @@ export const ScenarioScene = z.strictObject({
   cameraShift: CameraShift.optional(),
   /** カメラを直接指定する（camera の構図より優先。このカットだけに効く） */
   cameraPose: CameraPose.optional(),
+  /** カットの頭からカメラを動かす（パン・ドリー・オービットなど） */
+  cameraMove: CameraMove.optional(),
   /** true なら前のシーンの登場キャラを全員下げてから avatars を適用する */
   clearCast: z.boolean().optional(),
   /** 以降のシーンに引き継ぐ。false で止めて通常の背景に戻す */
