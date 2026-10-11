@@ -30,6 +30,7 @@ export const PAGES_ENTRIES: PagesEntry[] = [
   { id: 'painted_shrine', slug: 'painted-shrine', ogp: '/textures/painted-shrine/thumb.avif' },
   { id: 'painted_courtyard', slug: 'painted-courtyard', ogp: '/textures/painted-ground/thumb-courtyard.avif' },
   { id: 'painted_aoi_room', slug: 'painted-aoi-room', ogp: '/textures/painted-aoi-room/thumb.avif' },
+  { id: 'painted_gondola', slug: 'painted-gondola', ogp: '/textures/painted-gondola/thumb.avif' },
   { id: 'cafe_monitoring', slug: 'cafe-monitoring' },
 ];
 

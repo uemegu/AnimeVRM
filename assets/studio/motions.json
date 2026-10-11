@@ -103,6 +103,10 @@
     "pose_stretch_legs": {
       "loop": true,
       "seated": true
+    },
+    "pose_sit_seat": {
+      "loop": true,
+      "seated": true
     }
   }
 }

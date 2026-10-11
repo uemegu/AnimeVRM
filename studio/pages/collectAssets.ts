@@ -40,6 +40,7 @@ const BUILTIN_ENVIRONMENTS: Record<string, string> = {
   'builtin:painted-seaside': 'textures/painted-seaside',
   'builtin:shopping-street': 'textures/shopping-street',
   'builtin:painted-shrine': 'textures/painted-shrine',
+  'builtin:painted-gondola': 'textures/painted-gondola',
 };
 
 const readJson = (file: string): Json => JSON.parse(fs.readFileSync(file, 'utf8'));

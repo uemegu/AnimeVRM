@@ -37,6 +37,8 @@ dist-ssr
 !/scripts/blender/
 # ardy-generate.ts が読み込む
 !/scripts/lib/
+# 観覧車のゴンドラのパノラマの継ぎ足し・合成（painted-gondola/README.md）
+!/scripts/painted-gondola/
 /blender
 /output
 /renders
