@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
+import type { ScenarioAssets, CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { useRenderQuality } from '../stage/renderQuality';
 import { StageLoading, useCastLoading } from '../stage/StageLoading';
@@ -27,8 +27,8 @@ interface Props {
   getSpeakerPhoneme: () => string | undefined;
   getSpeakerMouthOpen: () => number;
   onCanvas?: (canvas: HTMLCanvasElement | null) => void;
-  /** シナリオに出る全キャラ。表示せずに先に読み込み、描画の準備まで済ませる（初登場の瞬間に止まらないように） */
-  prewarm?: { id: string; modelUrl: string; motions?: string[] }[];
+  /** シナリオが使う素材。はじめる前にまとめて読み込み、キャラは描画の準備まで済ませる（途中で読み込み待ちにならないように） */
+  prewarm?: ScenarioAssets | null;
   /** prewarm を済ませた（済ませた一覧の JSON を渡す） */
   onPrewarmed?: (prewarmKey: string) => void;
 }
@@ -36,7 +36,7 @@ interface Props {
 /**
  * 再生画面の舞台。カットが変わるたびにタイムラインを渡し、時刻はボイスに合わせて描画側が進める
  */
-export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas, prewarm = [], onPrewarmed }: Props) {
+export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas, prewarm = null, onPrewarmed }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { loading, run: runSetCast } = useCastLoading(managerRef);
@@ -109,8 +109,8 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     const done = () => {
       if (!cancelled) onPrewarmedRef.current?.(prewarmKey);
     };
-    if (!manager || prewarm.length === 0) done();
-    else void manager.prewarmAvatars(prewarm).finally(done);
+    if (!manager || !prewarm) done();
+    else void manager.preloadScenario(prewarm).finally(done);
     return () => {
       cancelled = true;
     };

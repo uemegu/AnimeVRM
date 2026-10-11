@@ -22,7 +22,8 @@ import { applyCelShading, setCelLight } from '../scene/celShading';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
-import { resolveAssetUrl } from '../utils/path';
+import { preloadAssets, resolveAssetUrl } from '../utils/path';
+import { preloadVoiceAnalyser } from '../audio/VoiceAnalyser';
 import { ScreenEffects } from './ScreenEffects';
 import { RainGround } from './RainGround';
 import { StillImages, type CutinSettings, type StillImageSettings } from './StillImages';
@@ -194,6 +195,10 @@ export class StageManager {
   private backdropMesh!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
   /** 場所の3D背景（組み込みのセットや glb） */
   private environment: { model: string; object: THREE.Object3D | null; ready: Promise<void> } | null = null;
+  /** 先に読み込んだ3D背景（その場所へ移るときに使う） */
+  private preloadedEnvironments = new Map<string, Promise<THREE.Object3D>>();
+  /** 先に読み込んだファイルを手放す */
+  private releasePreloadedAssets: (() => void) | null = null;
   /** 今の場所の遠景・3D背景を置き終えたら解決する（暗転はこれを待って明ける） */
   private locationReady: Promise<void> = Promise.resolve();
   private effects: SceneEffects = {};
@@ -1001,7 +1006,9 @@ export class StageManager {
     }
     const entry = { model: settings.model, object: null as THREE.Object3D | null, ready: Promise.resolve() };
     this.environment = entry;
-    entry.ready = loadEnvironment(settings.model)
+    const preloaded = this.preloadedEnvironments.get(settings.model);
+    this.preloadedEnvironments.delete(settings.model);
+    entry.ready = (preloaded ?? loadEnvironment(settings.model))
       .then((object) => {
         // 読み込み中に場所が変わった・破棄された
         if (this.environment !== entry || this.isDisposed) {
@@ -1153,6 +1160,49 @@ export class StageManager {
    * 後で登場するキャラのモデルとモーションを、表示せずに先に読み込んで準備しておく。
    * すでに同じキャラが別のモデルで読み込み済みなら（入れ替えになるので）触らない
    */
+  /**
+   * シナリオ1本が使う素材（collectScenarioAssets の結果）を、再生を始める前にまとめて読み込む。
+   * 3Dキャラとモーションは描画の準備まで、3D背景は組み立てまで、そのほかのファイルはメモリへ。
+   * 前のシナリオの分は手放す
+   */
+  public async preloadScenario(assets: { files: string[]; motions: string[]; environments: string[]; avatars: { id: string; modelUrl: string }[] }): Promise<void> {
+    const releasePrevious = this.releasePreloadedAssets;
+    this.releasePreloadedAssets = null;
+    const parsed = new Set(assets.avatars.map((a) => a.modelUrl));
+    const files = assets.files.filter((file) => !parsed.has(file));
+    // 前のシナリオの分は、同じ素材を読み直さないよう新しい分を押さえてから手放す
+    const release = preloadAssets(files).then((fn) => {
+      releasePrevious?.();
+      if (this.isDisposed) fn();
+      else this.releasePreloadedAssets = fn;
+    });
+    this.preloadedEnvironments.forEach((pending, model) => {
+      if (assets.environments.includes(model)) return;
+      this.preloadedEnvironments.delete(model);
+      void pending.then((object) => disposeEnvironment(model, object), () => undefined);
+    });
+    for (const model of assets.environments) {
+      if (this.preloadedEnvironments.has(model) || this.environment?.model === model) continue;
+      const pending = loadEnvironment(model);
+      pending.catch((err) => console.warn(`3D背景を先読みできません: ${model}`, err));
+      this.preloadedEnvironments.set(model, pending);
+    }
+    await release;
+    await Promise.all([
+      preloadVoiceAnalyser(),
+      this.prewarmAvatars(assets.avatars.map((a) => ({ ...a, motions: assets.motions }))),
+      ...[...this.preloadedEnvironments.values()].map((p) => p.catch(() => undefined)),
+    ]);
+  }
+
+  /** preloadScenario で読み込んだものを手放す */
+  public releaseScenarioAssets(): void {
+    this.releasePreloadedAssets?.();
+    this.releasePreloadedAssets = null;
+    this.preloadedEnvironments.forEach((pending, model) => void pending.then((object) => disposeEnvironment(model, object), () => undefined));
+    this.preloadedEnvironments.clear();
+  }
+
   public async prewarmAvatars(items: { id: string; modelUrl: string; motions?: string[] }[]): Promise<void> {
     for (const item of items) {
       if (this.isDisposed) return;
@@ -1969,6 +2019,7 @@ export class StageManager {
     this.sprites.clear();
     if (this.environment?.object) disposeEnvironment(this.environment.model, this.environment.object);
     this.environment = null;
+    this.releaseScenarioAssets();
     this.scrollingBackground.dispose();
 
     this.composer.renderTarget1?.dispose();

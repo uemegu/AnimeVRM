@@ -9,12 +9,18 @@ const wasmLoads = new Map<string, Promise<ArrayBuffer>>();
 function loadWorkletModule(context: AudioContext): Promise<void> {
   const existing = moduleLoads.get(context);
   if (existing) return existing;
-  const loading = context.audioWorklet.addModule(resolveAssetUrl('/worklets/lipsync-processor.js')).catch((error) => {
+  const loading = workletSource().then((url) => context.audioWorklet.addModule(url)).catch((error) => {
     moduleLoads.delete(context);
     throw error;
   });
   moduleLoads.set(context, loading);
   return loading;
+}
+
+/** Worklet のソース（先読みしてあればメモリ上の blob URL） */
+let workletBlobUrl: Promise<string> | null = null;
+function workletSource(): Promise<string> {
+  return workletBlobUrl ?? Promise.resolve(resolveAssetUrl('/worklets/lipsync-processor.js'));
 }
 
 function loadWasmBytes(): Promise<ArrayBuffer> {
@@ -30,6 +36,22 @@ function loadWasmBytes(): Promise<ArrayBuffer> {
   });
   wasmLoads.set(url, loading);
   return loading;
+}
+
+/** ボイスより先に解析の準備（WASM はメモリへ、Worklet はキャッシュへ）を済ませる */
+export async function preloadVoiceAnalyser(): Promise<void> {
+  await Promise.all([
+    loadWasmBytes(),
+    (workletBlobUrl ??= fetch(resolveAssetUrl('/worklets/lipsync-processor.js'))
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`LipSync worklet request failed: ${res.status}`);
+        return URL.createObjectURL(new Blob([await res.text()], { type: 'text/javascript' }));
+      })
+      .catch((error) => {
+        workletBlobUrl = null;
+        throw error;
+      })),
+  ]).catch((error) => console.warn('口パク解析を先読みできません:', error));
 }
 
 export const VOICE_PHONEMES = ['aa', 'ee', 'ih', 'oh', 'ou'] as const;
