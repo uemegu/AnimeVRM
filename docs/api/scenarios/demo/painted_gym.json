@@ -6,7 +6,7 @@
     "en": "Sunset gymnasium (painted 3D)"
   },
   "description": "四方の壁・透過した窓・木の床と、立体の舞台・階段・ギャラリー・鉄骨・バスケットゴール・跳び箱・マット・ボールかご。空はThree.jsのSkyBackgroundで描画。",
-  "location": "painted_gym",
+  "location": "gym",
   "bgm": "silence",
   "timeOfDay": "evening",
   "scenes": [

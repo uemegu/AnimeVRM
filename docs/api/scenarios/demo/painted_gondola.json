@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "id": "painted_gondola",
+  "title": {
+    "ja": "観覧車のゴンドラ — 簡易3D",
+    "en": "Ferris wheel gondola (painted 3D)"
+  },
+  "description": "夕暮れの観覧車のゴンドラの簡易3D。正面・左右・後ろ、見下ろし・見上げの見え方と、向かい合うベンチに座る場面を確認する。",
+  "location": "ferris_gondola",
+  "bgm": "/bgm/bgm.mp3",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "dir_front",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          0
+        ],
+        "target": [
+          0,
+          1.3,
+          -20
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "dir_left",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          0
+        ],
+        "target": [
+          -20,
+          1.3,
+          0
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "dir_right",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          0
+        ],
+        "target": [
+          20,
+          1.3,
+          0
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "dir_back",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          0
+        ],
+        "target": [
+          0,
+          1.3,
+          20
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "reference_view",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.3,
+          1
+        ],
+        "target": [
+          0,
+          1,
+          -1.2
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "rail_close",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          -0.35,
+          1.25,
+          0.7
+        ],
+        "target": [
+          1,
+          1,
+          -0.6
+        ],
+        "fov": 55
+      }
+    },
+    {
+      "id": "door",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          -0.65,
+          1.3,
+          0.15
+        ],
+        "target": [
+          1,
+          0.85,
+          -0.05
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "look_down_left",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.4,
+          0
+        ],
+        "target": [
+          -20,
+          -8,
+          -6
+        ],
+        "fov": 60
+      }
+    },
+    {
+      "id": "look_up_back",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0,
+          1.2,
+          -0.9
+        ],
+        "target": [
+          3,
+          12,
+          20
+        ],
+        "fov": 65
+      }
+    },
+    {
+      "id": "overview",
+      "text": "",
+      "avatars": {},
+      "cameraPose": {
+        "position": [
+          0.75,
+          1.95,
+          1.05
+        ],
+        "target": [
+          -0.3,
+          0.4,
+          -0.9
+        ],
+        "fov": 70
+      }
+    },
+    {
+      "id": "front_seat_medium",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "……すごい。海まで全部見える",
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.126,
+          1.2,
+          0.75
+        ],
+        "target": [
+          -0.42,
+          0.95,
+          -0.9
+        ],
+        "fov": 45
+      },
+      "clearCast": true
+    },
+    {
+      "id": "front_seat_close",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ねえ、もうすぐてっぺんだよ",
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "expression": "happy",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          -0.21,
+          1.15,
+          0.35
+        ],
+        "target": [
+          -0.42,
+          1.05,
+          -0.9
+        ],
+        "fov": 40
+      }
+    },
+    {
+      "id": "front_seat_wide",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "夕日、きれい",
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "expression": "relaxed",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.252,
+          1.45,
+          1.1
+        ],
+        "target": [
+          -0.21,
+          0.8,
+          -0.9
+        ],
+        "fov": 58
+      }
+    },
+    {
+      "id": "back_seat_medium",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "こっち側は、観覧車の骨組みが見えるんだね",
+      "avatars": {
+        "aoi": {
+          "position": [
+            0.42,
+            0,
+            0.9
+          ],
+          "rotationY": 3.1416,
+          "motion": "pose_sit_seat",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.126,
+          1.2,
+          -0.75
+        ],
+        "target": [
+          0.42,
+          0.95,
+          0.9
+        ],
+        "fov": 45
+      },
+      "clearCast": true
+    },
+    {
+      "id": "side_two_shot",
+      "text": "向かい合って座る二人。",
+      "avatars": {
+        "aoi": {
+          "position": [
+            -0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        },
+        "emili": {
+          "position": [
+            -0.42,
+            0,
+            0.9
+          ],
+          "rotationY": 3.1416,
+          "motion": "pose_sit_seat",
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "forward",
+          "modelUrl": "/models/emili/emili-private.vrm"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.88,
+          1.35,
+          0
+        ],
+        "target": [
+          -0.6,
+          0.85,
+          0
+        ],
+        "fov": 62
+      }
+    },
+    {
+      "id": "standing",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "揺れるから、立つとちょっと怖いね",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "clasp_hands_front",
+          "expression": "komari",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "modelUrl": "/models/aoi/aoi-private.vrm"
+        }
+      },
+      "camera": "medium",
+      "clearCast": true
+    }
+  ]
+}

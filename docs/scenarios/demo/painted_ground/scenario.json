@@ -6,7 +6,7 @@
     "en": "School sports ground (painted 3D)"
   },
   "description": "学校俯瞰地図を参考に、グラウンドの防球ネットの外に植栽・通路・樹木帯、中庭に石の囲い付きの植栽と中央の円形花壇、その向こうに屋根付き駐輪場を置いた撮影セット。",
-  "location": "painted_ground",
+  "location": "sports_ground",
   "bgm": "silence",
   "timeOfDay": "day",
   "scenes": [
