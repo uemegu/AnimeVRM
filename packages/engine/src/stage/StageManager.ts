@@ -12,6 +12,8 @@ import { HighlightShoulderShader } from '../postprocessing/HighlightShoulder';
 import { CinematicAnimeShader } from '../postprocessing/CinematicAnimeShader';
 import { GodRaysShader } from '../postprocessing/GodRaysShader';
 import { DepthOfFieldPass } from '../postprocessing/DepthOfField';
+import { LensDroplets } from '../postprocessing/LensDroplets';
+import { WetReflectionPass } from '../postprocessing/WetReflection';
 import { OverlayPass } from '../postprocessing/OverlayPass';
 import { SceneRenderPass } from '../postprocessing/SceneRenderPass';
 import { SunEffect } from '../postprocessing/SunEffect';
@@ -145,6 +147,8 @@ export class StageManager {
   // ポストプロセスパス群
   private renderPass: SceneRenderPass;
   private depthOfFieldPass: DepthOfFieldPass;
+  /** 雨の地面の映り込み（画面空間の反射。wetGroundSheen のときだけ） */
+  private wetReflectionPass: WetReflectionPass;
   private lightWrapPass: ShaderPass;
   private paraPass: ShaderPass;
   private bloomPass: UnrealBloomPass;
@@ -152,6 +156,8 @@ export class StageManager {
   private characterGlowPass: CharacterGlowPass;
   private characterFinishPass: ShaderPass;
   private godRaysPass: ShaderPass;
+  /** レンズに付く雨粒（雨のあいだ） */
+  private lensDroplets: LensDroplets;
   /** 時間帯のゴッドレイの設定。太陽が見えないフレームはパスごと飛ばす */
   private sunShaftsEnabled = false;
   private cinematicAnimePass: ShaderPass;
@@ -377,7 +383,7 @@ export class StageManager {
     this.groundShadow.receiveShadow = true;
     this.groundShadow.visible = false;
     this.scene.add(this.groundShadow);
-    this.rainGround = new RainGround(this.scene);
+    this.rainGround = new RainGround(this.scene, this.quality.wetGroundSheen);
 
     this.ambientLight = new THREE.AmbientLight('#776e74', 0.8);
     this.scene.add(this.ambientLight);
@@ -422,6 +428,10 @@ export class StageManager {
     this.depthOfFieldPass.sceneDepth = this.renderPass.depthTexture;
     this.composer.addPass(this.depthOfFieldPass);
     this.composer.addPass(this.characterGlowPass);
+
+    this.wetReflectionPass = new WetReflectionPass(this.camera);
+    this.wetReflectionPass.sceneDepth = this.renderPass.depthTexture;
+    this.composer.addPass(this.wetReflectionPass);
     // 文字演出・汗は、ぼかしのあとに重ねる（ぼかしの対象にしない）
     this.composer.addPass(new OverlayPass(this.scene, this.camera));
 
@@ -451,6 +461,10 @@ export class StageManager {
     this.highlightShoulderPass.enabled = false;
     this.composer.addPass(this.highlightShoulderPass);
     this.composer.addPass(new OutputPass());
+
+    // 雨粒は表示用の色になった絵を屈折させるので、OutputPass のあとに置く
+    this.lensDroplets = new LensDroplets(targetW, targetH);
+    this.composer.addPass(this.lensDroplets.pass);
 
     // パラ（背景の空気の色をキャラの上だけにグラデーションで重ねる。スクリーン合成なので sRGB で行う）
     this.paraPass = new ShaderPass(ParaShader);
@@ -1323,6 +1337,13 @@ export class StageManager {
     this.raining = active;
     this.stillImages?.setRain(active);
     this.rainGround.setActive(active);
+    this.updateWetReflection();
+    if (active) this.lensDroplets.splash(0.45);
+    else this.lensDroplets.clear();
+  }
+
+  private updateWetReflection(): void {
+    this.wetReflectionPass.enabled = this.raining && this.quality.wetGroundSheen;
   }
 
   /** 口パクさせるキャラ（話者） */
@@ -1767,6 +1788,8 @@ export class StageManager {
       avatar.setClothDent(this.quality.clothDent);
     });
     this.applyDepthOfField();
+    this.rainGround.setSheen(this.quality.wetGroundSheen);
+    this.updateWetReflection();
     if (previous.godRaysSamples !== this.quality.godRaysSamples) {
       this.godRaysPass.material.defines.NUM_SAMPLES = this.quality.godRaysSamples;
       this.godRaysPass.material.needsUpdate = true;
@@ -1802,6 +1825,7 @@ export class StageManager {
     this.bloomPass.resolution.set(targetW, targetH);
     this.cinematicAnimePass.uniforms['uResolution'].value.set(targetW, targetH);
     this.smaaPass.setSize(targetW, targetH);
+    this.lensDroplets.setSize(targetW, targetH);
     this.hairShadow.setSize(targetW, targetH);
     this.characterMask.setSize(targetW, targetH);
     this.eyeMask.setSize(targetW, targetH);
@@ -1860,6 +1884,8 @@ export class StageManager {
 
       this.sprites.forEach((actor) => actor.update(delta, this.camera));
       this.rainGround.update(delta, this.cameraCurrentTarget);
+      this.wetReflectionPass.update(delta);
+      this.lensDroplets.update(delta);
 
       // 2. 太陽・レンズフレア・オクルージョン計算
       const location = this.presets.locations[this.currentLocationId];
@@ -1955,6 +1981,7 @@ export class StageManager {
     this.visibleCharacterMask.dispose();
     this.visibleEyeMask.dispose();
     this.depthOfFieldPass.dispose();
+    this.wetReflectionPass.dispose();
     this.highlightShoulderPass.dispose();
     this.characterGlowPass.dispose();
     this.groundShadow.geometry.dispose();

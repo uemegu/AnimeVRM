@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import { PUDDLE_GLSL } from '../postprocessing/WetReflection';
 
 /**
  * 雨の地面: 濡れて暗くなった地面と、雨粒の跳ね返り。
  *
+ * 高品質（wetGroundSheen）では、水たまり（暗さ）と波紋も重ねる。映り込みは postprocessing/WetReflection.ts。
  * 暗くするのは、地面すれすれに置いた板を乗算で重ねるだけ（3D背景の素材は変えない）。
  * 板は地面（高さ 0）の上にだけ見え、遠くは薄くして奥の背景の絵と自然につなぐ。
  * 跳ね返りは、カメラの注視点のまわりの地面に、広がる輪と小さく跳ねる粒を出す。
@@ -11,8 +13,8 @@ import * as THREE from 'three';
 /** 暗くした地面の明るさ（1 = 元のまま） */
 const WET_GROUND_SHADE = 0.5;
 /** 暗くする範囲（注視点からの距離、m）。inner までは全部、outer で元の明るさに戻る */
-const DARKEN_INNER = 7;
-const DARKEN_OUTER = 14;
+const DARKEN_INNER = 30;
+const DARKEN_OUTER = 90;
 /** 跳ね返りを出す範囲（注視点からの距離、m）と、1 秒に出す数 */
 const SPLASH_RADIUS = 4.5;
 const SPLASHES_PER_SECOND = 70;
@@ -44,27 +46,62 @@ export class RainGround {
   private active = false;
   private untilNext = 0;
 
-  constructor(private readonly scene: THREE.Scene) {
+  constructor(private readonly scene: THREE.Scene, sheen = true) {
     // 中心から離れるほど薄くなる乗算の板
+    // out = 波紋（加算）+ 元の地面 × 暗さ。alpha に暗さを入れ、blendDst = SrcAlpha で 1 枚で両方行う
     this.darken = new THREE.Mesh(
       new THREE.CircleGeometry(DARKEN_OUTER, 64),
       new THREE.ShaderMaterial({
-        uniforms: { uShade: { value: WET_GROUND_SHADE }, uInner: { value: DARKEN_INNER }, uOuter: { value: DARKEN_OUTER } },
+        uniforms: {
+          uShade: { value: WET_GROUND_SHADE },
+          uInner: { value: DARKEN_INNER },
+          uOuter: { value: DARKEN_OUTER },
+          uSheen: { value: sheen ? 1 : 0 },
+          uTime: { value: 0 },
+        },
         vertexShader: /* glsl */ `
           varying vec2 vLocal;
+          varying vec3 vWorld;
           void main() {
             vLocal = position.xy;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            vec4 world = modelMatrix * vec4( position, 1.0 );
+            vWorld = world.xyz;
+            gl_Position = projectionMatrix * viewMatrix * world;
           }`,
         fragmentShader: /* glsl */ `
-          uniform float uShade, uInner, uOuter;
+          uniform float uShade, uInner, uOuter, uSheen, uTime;
           varying vec2 vLocal;
+          varying vec3 vWorld;
+
+          ${PUDDLE_GLSL}
+
           void main() {
             float fade = 1.0 - smoothstep( uInner, uOuter, length( vLocal ) );
-            gl_FragColor = vec4( vec3( mix( 1.0, uShade, fade ) ), 1.0 );
+            float shade = mix( 1.0, uShade, fade );
+            vec3 add = vec3( 0.0 );
+            if ( uSheen > 0.5 ) {
+              vec2 p = vWorld.xz;
+              // 水たまり: たまりの中ほど暗い（映り込みは WetReflectionPass）
+              float puddle = puddleMask( p );
+              shade *= mix( 1.0, 0.5, puddle );
+
+              // 波紋: 一辺 0.4m の格子ごとに、広がって消える輪を 1 つ（たまりの中だけ）
+              vec2 cell = floor( p / 0.4 );
+              vec2 local = fract( p / 0.4 ) - 0.5;
+              float seed = puddleHash( cell );
+              vec2 centre = ( vec2( puddleHash( cell + 3.1 ), puddleHash( cell + 8.7 ) ) - 0.5 ) * 0.4;
+              float age = fract( uTime * ( 0.9 + seed * 0.8 ) + seed * 7.0 );
+              float radius = age * 0.42;
+              float ring = smoothstep( 0.05, 0.0, abs( length( local - centre ) - radius ) ) * ( 1.0 - age ) * step( 0.35, seed );
+              add = vec3( 0.55, 0.62, 0.72 ) * ring * puddle * 0.6;
+              add *= fade;
+            }
+            gl_FragColor = vec4( add, shade );
           }`,
-        blending: THREE.MultiplyBlending,
-        premultipliedAlpha: true,
+        blending: THREE.CustomBlending,
+        blendEquation: THREE.AddEquation,
+        blendSrc: THREE.OneFactor,
+        blendDst: THREE.SrcAlphaFactor,
         transparent: true,
         depthWrite: false,
       })
@@ -90,6 +127,11 @@ export class RainGround {
     }
   }
 
+  /** 水たまり・空の映り込み・波紋を出すか（重いので端末によって切る） */
+  setSheen(sheen: boolean): void {
+    this.darken.material.uniforms.uSheen.value = sheen ? 1 : 0;
+  }
+
   setActive(active: boolean): void {
     this.active = active;
     this.darken.visible = active;
@@ -103,6 +145,7 @@ export class RainGround {
   update(delta: number, center: THREE.Vector3): void {
     if (!this.active) return;
     this.darken.position.set(center.x, GROUND_Y, center.z);
+    this.darken.material.uniforms.uTime.value += delta;
 
     this.untilNext -= delta;
     while (this.untilNext <= 0) {
