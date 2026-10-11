@@ -1320,6 +1320,293 @@
         }
       },
       "thumbnail": "/textures/painted-shrine/thumb.avif"
+    },
+    "ferris_gondola": {
+      "id": "ferris_gondola",
+      "name": "観覧車のゴンドラ（簡易3D）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/painted-classroom/sky-only.png",
+          "exposure": 0.8
+        }
+      },
+      "environment": {
+        "model": "builtin:painted-gondola",
+        "position": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        },
+        "rotationY": 0,
+        "scale": 1
+      },
+      "light": {
+        "direction": {
+          "x": -0.35,
+          "y": 0.55,
+          "z": -1.0
+        },
+        "shadow": {
+          "color": "#5b4170",
+          "opacity": 0.4,
+          "softness": 3
+        }
+      },
+      "stage": {
+        "postProcessing": {
+          "sunShafts": false,
+          "lensFlare": false
+        },
+        "camera": {
+          "far": 260,
+          "fov": 55,
+          "wide": {
+            "distance": 1.15,
+            "height": -0.1,
+            "targetHeight": -0.25
+          },
+          "medium": {
+            "distance": 1.1,
+            "height": -0.1,
+            "targetHeight": -0.2
+          },
+          "speaker": {
+            "distance": 1.0,
+            "height": -0.1,
+            "targetHeight": -0.18
+          },
+          "close": {
+            "distance": 0.9,
+            "height": -0.07,
+            "targetHeight": -0.1
+          }
+        },
+        "slots": {
+          "left": [
+            -0.45,
+            0,
+            0
+          ],
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "right": [
+            0.45,
+            0,
+            0
+          ]
+        }
+      },
+      "seats": {
+        "gondola_front_left": {
+          "name": "前のベンチ（左）",
+          "position": [
+            -0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "cameras": {
+            "medium": {
+              "position": [
+                -0.126,
+                1.2,
+                0.75
+              ],
+              "target": [
+                -0.42,
+                0.95,
+                -0.9
+              ],
+              "fov": 45
+            },
+            "close": {
+              "position": [
+                -0.21,
+                1.15,
+                0.35
+              ],
+              "target": [
+                -0.42,
+                1.05,
+                -0.9
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                0.252,
+                1.45,
+                1.1
+              ],
+              "target": [
+                -0.21,
+                0.8,
+                -0.9
+              ],
+              "fov": 58
+            }
+          }
+        },
+        "gondola_front_right": {
+          "name": "前のベンチ（右）",
+          "position": [
+            0.42,
+            0,
+            -0.9
+          ],
+          "rotationY": 0,
+          "motion": "pose_sit_seat",
+          "cameras": {
+            "medium": {
+              "position": [
+                0.126,
+                1.2,
+                0.75
+              ],
+              "target": [
+                0.42,
+                0.95,
+                -0.9
+              ],
+              "fov": 45
+            },
+            "close": {
+              "position": [
+                0.21,
+                1.15,
+                0.35
+              ],
+              "target": [
+                0.42,
+                1.05,
+                -0.9
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                -0.252,
+                1.45,
+                1.1
+              ],
+              "target": [
+                0.21,
+                0.8,
+                -0.9
+              ],
+              "fov": 58
+            }
+          }
+        },
+        "gondola_back_left": {
+          "name": "後ろのベンチ（左）",
+          "position": [
+            -0.42,
+            0,
+            0.9
+          ],
+          "rotationY": 3.1416,
+          "motion": "pose_sit_seat",
+          "cameras": {
+            "medium": {
+              "position": [
+                -0.126,
+                1.2,
+                -0.75
+              ],
+              "target": [
+                -0.42,
+                0.95,
+                0.9
+              ],
+              "fov": 45
+            },
+            "close": {
+              "position": [
+                -0.21,
+                1.15,
+                -0.35
+              ],
+              "target": [
+                -0.42,
+                1.05,
+                0.9
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                0.252,
+                1.45,
+                -1.1
+              ],
+              "target": [
+                -0.21,
+                0.8,
+                0.9
+              ],
+              "fov": 58
+            }
+          }
+        },
+        "gondola_back_right": {
+          "name": "後ろのベンチ（右）",
+          "position": [
+            0.42,
+            0,
+            0.9
+          ],
+          "rotationY": 3.1416,
+          "motion": "pose_sit_seat",
+          "cameras": {
+            "medium": {
+              "position": [
+                0.126,
+                1.2,
+                -0.75
+              ],
+              "target": [
+                0.42,
+                0.95,
+                0.9
+              ],
+              "fov": 45
+            },
+            "close": {
+              "position": [
+                0.21,
+                1.15,
+                -0.35
+              ],
+              "target": [
+                0.42,
+                1.05,
+                0.9
+              ],
+              "fov": 40
+            },
+            "wide": {
+              "position": [
+                -0.252,
+                1.45,
+                -1.1
+              ],
+              "target": [
+                0.21,
+                0.8,
+                0.9
+              ],
+              "fov": 58
+            }
+          }
+        }
+      },
+      "thumbnail": "/textures/painted-gondola/thumb.avif"
     }
   }
 }

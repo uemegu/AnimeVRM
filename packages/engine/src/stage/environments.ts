@@ -8,6 +8,7 @@ import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/Paint
 import { disposePaintedGround, loadPaintedGround } from '../scene/painted-ground/PaintedGround';
 import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
 import { disposePaintedGym, loadPaintedGym } from '../scene/painted-gym/PaintedGym';
+import { disposePaintedGondola, loadPaintedGondola } from '../scene/painted-gondola/PaintedGondola';
 import { disposePaintedSeaside, loadPaintedSeaside } from '../scene/painted-seaside/PaintedSeaside';
 import { disposeShoppingStreet, loadShoppingStreet } from '../scene/shopping-street/ShoppingStreet';
 import { disposePaintedShrine, loadPaintedShrine } from '../scene/painted-shrine/PaintedShrine';
@@ -25,6 +26,7 @@ const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (gro
   'builtin:painted-festival': { load: loadPaintedFestival, dispose: disposePaintedFestival },
   'builtin:shopping-street': { load: loadShoppingStreet, dispose: disposeShoppingStreet },
   'builtin:painted-shrine': { load: loadPaintedShrine, dispose: disposePaintedShrine },
+  'builtin:painted-gondola': { load: loadPaintedGondola, dispose: disposePaintedGondola },
 };
 
 /** 場所の3D背景を読み込む。model は builtin:<名前> か glb の URL */
