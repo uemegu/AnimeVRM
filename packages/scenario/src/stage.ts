@@ -476,13 +476,22 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
   return { avatars, camera, focusLines, oneShots };
 }
 
-/** カットの最後のキーフレームの時刻（タイムラインの長さの目安） */
+/** カットのカメラの動きが終わる時刻（動きがなければ 0。揺らし続ける手持ち風は数えない） */
+export function cameraMoveEndAt(scene: ScenarioScene): number {
+  const moves = [
+    ...(scene.cameraMove ? [resolveCameraMove(scene.cameraMove)] : []),
+    ...(scene.transitions ?? []).flatMap((k) => (k.cameraMove ? [resolveCameraMove(k.cameraMove, k.at)] : [])),
+  ];
+  return Math.max(0, ...moves.filter((m) => m.type !== 'handheld').map((m) => m.at + m.duration));
+}
+
+/** カットの最後のキーフレームの時刻か、カメラの動きが終わる時刻の遅い方（タイムラインの長さの目安） */
 export function lastKeyframeAt(scene: ScenarioScene): number {
   const times = [
     ...(scene.transitions ?? []).map((k) => k.at),
     ...Object.values(scene.avatars ?? {}).flatMap((a) => (a.transitions ?? []).map((k) => k.at)),
   ];
-  return times.length ? Math.max(...times) : 0;
+  return Math.max(0, ...times, cameraMoveEndAt(scene));
 }
 
 /** ムービーで、ボイスもキーもないカットの長さ（秒） */

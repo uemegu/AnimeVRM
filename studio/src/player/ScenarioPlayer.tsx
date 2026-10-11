@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import {
+  lastKeyframeAt,
   movieCutDuration,
   resolveCameraShot,
   resolveCast,
@@ -214,11 +215,13 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
     return () => window.clearTimeout(timer);
   }, [movie, phase, step, voiceDone, scene, runner, audio]);
 
-  // オート：文字とボイスが終わったら少し待って進める
+  // オート：文字とボイスが終わり、キーとカメラの動きも終わったら少し待って進める
   useEffect(() => {
     if (movie) return;
     if (!auto || phase !== 'playing' || !textDone || !voiceDone || choices.length > 0) return;
-    const wait = scene.autoNextSec !== undefined ? scene.autoNextSec * 1000 : AUTO_WAIT_MS;
+    const elapsed = (performance.now() - cutStartRef.current) / 1000;
+    const remaining = Math.max(0, lastKeyframeAt(scene) - elapsed);
+    const wait = remaining * 1000 + (scene.autoNextSec !== undefined ? scene.autoNextSec * 1000 : AUTO_WAIT_MS);
     const timer = window.setTimeout(advance, wait);
     return () => window.clearTimeout(timer);
   }, [movie, auto, phase, textDone, voiceDone, choices.length, scene, advance]);
