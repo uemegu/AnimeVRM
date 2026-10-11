@@ -70,7 +70,6 @@ export const en: Dictionary = {
     motion: 'Motion',
     loop: 'Loop',
     searchMotion: 'Search motions',
-    wet: 'Wet',
     rain: 'Rain',
     voice: 'Voices',
     searchVoice: 'Search voices',

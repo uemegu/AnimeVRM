@@ -58,7 +58,6 @@ export function ViewerView() {
   const [faceCamera, setFaceCamera] = useState(false);
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, redface: false, tearyEyes: false, awawaMouth: false, anger: false, tears: false, faceSweat: false });
   const [motion, setMotion] = useState(IDLE);
-  const [wet, setWet] = useState(0);
   const [rain, setRain] = useState(false);
   const [motionLoop, setMotionLoop] = useState(true);
   const [motionCue, setMotionCue] = useState(0);
@@ -181,11 +180,11 @@ export function ViewerView() {
               lookAtTarget: lookAtCamera || faceCamera ? 'camera' : undefined,
               headTurn: faceCamera ? 1 : 0,
               look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects, ...(character?.tearDrops === false ? { tearDrops: false } : {}) },
-              wet,
+              wet: rain ? 1 : 0,
             },
           ]
         : [],
-    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects, wet]
+    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects, rain]
   );
 
   useBackdrop(locationBackdropUrl(presets?.locations[locationId]));
@@ -301,11 +300,6 @@ export function ViewerView() {
                     {t.viewer.rain}
                   </button>
                 </div>
-                <label className="viewer-wet">
-                  {t.viewer.wet}
-                  <input type="range" min={0} max={1} step={0.05} value={wet} onChange={(e) => setWet(Number(e.target.value))} />
-                  <span>{wet.toFixed(2)}</span>
-                </label>
               </section>
 
               <section className="viewer-section">
