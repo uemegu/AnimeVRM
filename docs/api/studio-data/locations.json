@@ -559,6 +559,16 @@
         }
       }
     },
+    "shopping_street": {
+      "id": "shopping_street",
+      "name": "商店街",
+      "isIndoor": false,
+      "layers": {
+        "background": {
+          "url": "/textures/town2_far.avif"
+        }
+      }
+    },
     "aoi_house": {
       "id": "aoi_house",
       "name": "アオイの部屋（簡易3D）",
@@ -880,7 +890,7 @@
             "/models/mob/boy.vrm",
             "/models/mob/classmate_kana.vrm",
             "/models/mob/classmate_yui.vrm",
-            "/models/naruse/naruse-school.vrm"
+            "/models/boy.vrm"
           ],
           "motions": [
             "Standing Idle",
