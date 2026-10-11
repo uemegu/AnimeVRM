@@ -3,7 +3,7 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraPose, CameraShift, CameraShot, EffectText, HeldItemId, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraMove, CameraMoveType, CameraPose, CameraShift, CameraShot, EffectText, HeldItemId, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
 
@@ -355,6 +355,38 @@ export interface CutAvatarState {
   fadeOut?: { at: number; duration: number };
 }
 
+/** カメラの動きの種類ごとの既定の秒数 */
+export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
+  pan_left: 3,
+  pan_right: 3,
+  tilt_up: 3,
+  tilt_down: 3,
+  dolly_in: 3,
+  dolly_out: 3,
+  zoom_in: 2.5,
+  zoom_out: 2.5,
+  orbit_left: 6,
+  orbit_right: 6,
+  crane_up: 4,
+  dolly_zoom: 3,
+  handheld: 0,
+  dutch_left: 1,
+  dutch_right: 1,
+};
+
+/** 秒数・大きさを埋めたカメラの動きと、動き始める時刻 */
+export interface ResolvedCameraMove {
+  type: CameraMoveType;
+  duration: number;
+  amount: number;
+  at: number;
+}
+
+export function resolveCameraMove(move: CameraMove, at = 0): ResolvedCameraMove {
+  const spec = typeof move === 'string' ? { type: move } : move;
+  return { type: spec.type, duration: spec.duration ?? CAMERA_MOVE_DEFAULT_SEC[spec.type], amount: spec.amount ?? 1, at };
+}
+
 /** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
 export interface CutCameraState {
   shot?: CameraShot;
@@ -364,6 +396,8 @@ export interface CutCameraState {
   /** 切り替えた時刻と、動かすのにかける秒数 */
   at?: number;
   duration?: number;
+  /** 今のカメラの動き（カットの指定、またはキーで始めた動き） */
+  move?: ResolvedCameraMove;
 }
 
 /** カットに書いた文字演出・汗を出すまでの秒数（カメラが落ち着いてから出す） */
@@ -421,7 +455,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
     }
     if (Object.keys(state).length) avatars[id] = state;
   }
-  const camera: CutCameraState = {};
+  const camera: CutCameraState = scene.cameraMove ? { move: resolveCameraMove(scene.cameraMove) } : {};
   let focusLines = scene.focusLines ?? false;
   for (const key of [...(scene.transitions ?? [])].sort((a, b) => a.at - b.at)) {
     if (key.at > t) break;
@@ -432,8 +466,13 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       camera.pose = key.cameraPose;
       camera.at = key.at;
       camera.duration = key.cameraTransitionDuration;
+      // 構図を切り替えたら、前の動き（離れた・傾けたまま）を新しい構図へ持ち越さない
+      if (key.cameraMove === undefined) camera.move = undefined;
     }
+    if (key.cameraMove === false) camera.move = undefined;
+    else if (key.cameraMove !== undefined) camera.move = resolveCameraMove(key.cameraMove, key.at);
   }
+  if (!camera.move) delete camera.move;
   return { avatars, camera, focusLines, oneShots };
 }
 

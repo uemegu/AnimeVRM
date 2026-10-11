@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DEFAULT_AVATAR_LOOK, EffectTextPreset, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
+import { CameraMoveType, DEFAULT_AVATAR_LOOK, EffectTextPreset, resolveCameraMove, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
@@ -13,6 +13,7 @@ import { BgmLibrary } from './BgmLibrary';
 import { SeLibrary } from './SeLibrary';
 import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import { ShiftPicker } from '../../components/ShiftPicker';
+import { Icon } from '../../components/Icon';
 import { LocationPicker } from '../../components/LocationPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
@@ -50,6 +51,7 @@ export function ViewerView() {
   const [shotSelected, setShotSelected] = useState(true);
   const [viewResetKey, setViewResetKey] = useState(0);
   const [shift, setShift] = useState<CameraShift | null>(null);
+  const [cameraMove, setCameraMove] = useState<CameraMoveType | null>(null);
   const [expression, setExpression] = useState<string>('neutral');
   // カメラの方を見る（目線だけ／顔ごと）。顔を向けると目線もカメラへ向く
   const [lookAtCamera, setLookAtCamera] = useState(false);
@@ -148,6 +150,14 @@ export function ViewerView() {
     audio.setMuted(!audio.muted);
     setMuted(audio.muted);
   };
+  /** カメラの動きを今の構図から試す（手で動かしたカメラは構図へ戻す） */
+  const playCameraMove = (type: CameraMoveType | null) => {
+    setCameraMove(type);
+    setShotSelected(true);
+    setViewResetKey((n) => n + 1);
+    managerRef.current?.previewCameraMove(type ? resolveCameraMove(type) : null);
+  };
+
   const getPhoneme = useCallback(() => audioRef.current?.getPhoneme(), []);
   const getMouthOpen = useCallback(() => audioRef.current?.getMouthOpen() ?? 0, []);
 
@@ -388,8 +398,7 @@ export function ViewerView() {
                 className={shotSelected && s === shot ? 'active' : ''}
                 onClick={() => {
                   setShot(s);
-                  setShotSelected(true);
-                  setViewResetKey((n) => n + 1);
+                  playCameraMove(cameraMove);
                 }}
               >
                 {t.viewer.shots[s]}
@@ -397,6 +406,19 @@ export function ViewerView() {
             ))}
           </div>
           <ShiftPicker value={shift} onChange={setShift} />
+          <div className="viewer-camera-move">
+            <select className="select" aria-label={t.scenarios.cameraMove} value={cameraMove ?? ''} onChange={(e) => playCameraMove((e.target.value || null) as CameraMoveType | null)}>
+              <option value="">{`${t.scenarios.cameraMove}: ${t.scenarios.cameraMoveNone}`}</option>
+              {CameraMoveType.options.map((type) => (
+                <option key={type} value={type}>
+                  {t.scenarios.cameraMoves[type]}
+                </option>
+              ))}
+            </select>
+            <button type="button" className="btn icon" disabled={!cameraMove} title={t.common.play} onClick={() => playCameraMove(cameraMove)}>
+              <Icon name="play" size={14} />
+            </button>
+          </div>
         </div>
 
         <div className="viewer-frame">
