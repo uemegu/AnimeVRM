@@ -45,7 +45,7 @@ description: >-
 
 ## 3. 絵の素材を用意する
 
-画像生成が必要なら、その環境で利用できる `imagegen` スキルを読み、元絵を参照画像として渡す。生成指示の雛形は [references/texture-prompts.md](references/texture-prompts.md)。今回の元絵に合わせて具体的な材料・色・密度を記述する。
+画像生成が必要なら、その環境で利用できる `imagegen` スキルを読み、元絵を参照画像として渡す。Claude Code などから `codex exec` で生成を頼むときは、モデルを `-m gpt-6.1-sol`（推論は既定の `xhigh`）と明示する（未指定だと `~/.codex/config.toml` の既定モデルになる）。生成指示の雛形は [references/texture-prompts.md](references/texture-prompts.md)。今回の元絵に合わせて具体的な材料・色・密度を記述する。
 
 - 建物は透視図ではなく、真正面の正投影立面。画面の端まで建物を描き、空・地面・立体で作る家具を含めない。
 - 地面は上から見た継ぎ目のないタイル。遠近感、地平線、家具の固定影を描かない。
