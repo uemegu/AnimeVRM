@@ -85,14 +85,8 @@ export class RainGround {
               float puddle = puddleMask( p );
               shade *= mix( 1.0, 0.5, puddle );
 
-              // 波紋: 一辺 0.4m の格子ごとに、広がって消える輪を 1 つ（たまりの中だけ）
-              vec2 cell = floor( p / 0.4 );
-              vec2 local = fract( p / 0.4 ) - 0.5;
-              float seed = puddleHash( cell );
-              vec2 centre = ( vec2( puddleHash( cell + 3.1 ), puddleHash( cell + 8.7 ) ) - 0.5 ) * 0.4;
-              float age = fract( uTime * ( 0.9 + seed * 0.8 ) + seed * 7.0 );
-              float radius = age * 0.42;
-              float ring = smoothstep( 0.05, 0.0, abs( length( local - centre ) - radius ) ) * ( 1.0 - age ) * step( 0.35, seed );
+              // 波紋（たまりの中だけ）。映り込みのゆがみも同じ式（WetReflectionPass）
+              float ring = puddleRipple( p, uTime ).x;
               add = vec3( 0.55, 0.62, 0.72 ) * ring * puddle * 0.6;
               add *= fade;
             }
@@ -130,6 +124,11 @@ export class RainGround {
   /** 水たまり・空の映り込み・波紋を出すか（重いので端末によって切る） */
   setSheen(sheen: boolean): void {
     this.darken.material.uniforms.uSheen.value = sheen ? 1 : 0;
+  }
+
+  /** 波紋の時間（秒）。映り込みのゆがみをそろえるのに使う */
+  get time(): number {
+    return this.darken.material.uniforms.uTime.value;
   }
 
   setActive(active: boolean): void {
