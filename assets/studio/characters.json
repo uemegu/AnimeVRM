@@ -351,6 +351,22 @@
       }
     },
     {
+      "id": "iincho",
+      "name": {
+        "ja": "委員長",
+        "en": "Class Rep"
+      },
+      "role": "mob",
+      "themeColor": "#94a3b8",
+      "models": [],
+      "profile": "2年A組のクラス委員長（女子）。提出物を集める真面目な生徒。",
+      "voice": {
+        "ref": "assets/voices/iincho_ref.mp3",
+        "caption": "少しダウナーで皮肉っぽい、真面目な女子高校生の声。",
+        "direction": ""
+      }
+    },
+    {
       "id": "kids",
       "name": {
         "ja": "小学生",
