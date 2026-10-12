@@ -24,6 +24,25 @@ export const PUDDLE_GLSL = /* glsl */ `
     float n = puddleNoise( p * 0.9 ) * 0.65 + puddleNoise( p * 2.3 + 7.0 ) * 0.35;
     return smoothstep( 0.40, 0.50, n );
   }
+  /**
+   * 雨粒の波紋: 一辺 0.4m の格子ごとに、広がって消える輪を 1 つ。
+   * x = 輪の明るさ、yz = 水面の傾き（輪の山の手前と奥で向きが逆になり、映り込みがゆがむ）
+   */
+  vec3 puddleRipple( vec2 p, float time ) {
+    vec2 cell = floor( p / 0.4 );
+    vec2 local = fract( p / 0.4 ) - 0.5;
+    float seed = puddleHash( cell );
+    vec2 centre = ( vec2( puddleHash( cell + 3.1 ), puddleHash( cell + 8.7 ) ) - 0.5 ) * 0.4;
+    float age = fract( time * ( 0.9 + seed * 0.8 ) + seed * 7.0 );
+    vec2 d = local - centre;
+    float dist = max( length( d ), 1e-4 );
+    float x = dist - age * 0.42;
+    float life = ( 1.0 - age ) * step( 0.35, seed );
+    float ring = smoothstep( 0.05, 0.0, abs( x ) ) * life;
+    float g = x / 0.04;
+    vec2 slope = d / dist * ( -g * exp( -g * g ) ) * life;
+    return vec3( ring, slope );
+  }
 `;
 
 const WetReflectionShader = {
@@ -59,6 +78,8 @@ const WetReflectionShader = {
     /** これより低い画素を地面とみなす（m） */
     const float GROUND_HEIGHT = 0.06;
     const int STEPS = 30;
+    /** 波紋で水面を傾ける強さ */
+    const float RIPPLE_TILT = 0.35;
 
     float viewDepth( float d ) { return -perspectiveDepthToViewZ( d, uNearFar.x, uNearFar.y ); }
 
@@ -75,12 +96,18 @@ const WetReflectionShader = {
 
       vec3 camPos = uCamWorld[ 3 ].xyz;
       vec3 toCamera = normalize( camPos - world );
-      vec3 refl = reflect( -toCamera, vec3( 0.0, 1.0, 0.0 ) );
+      float puddle = puddleMask( world.xz );
+      // 波紋で水面を傾け、映り込みをゆがめる（輪を描く RainGround と同じ式・同じ時間）
+      vec2 slope = puddleRipple( world.xz, uTime ).yz * puddle * RIPPLE_TILT;
+      vec3 normal = normalize( vec3( slope.x, 1.0, slope.y ) );
+      vec3 refl = reflect( -toCamera, normal );
+      // 傾けすぎて地面の下へ向いたら、地面すれすれに戻す
+      refl.y = max( refl.y, 0.02 );
+      refl = normalize( refl );
       // 地面から見て、カメラの方へ戻る向きの反射は画面に映っていないので何もしない
       float cosT = clamp( toCamera.y, 0.0, 1.0 );
       float fresnel = 0.06 + 0.94 * pow( 1.0 - cosT, 3.0 );
 
-      float puddle = puddleMask( world.xz );
       float gloss = 0.3 + 0.7 * puddle;
 
       // 水面のゆれ（たまりの中ほど大きく）
@@ -161,8 +188,9 @@ export class WetReflectionPass extends Pass {
   /** 本描画の深度（SceneRenderPass.depthTexture） */
   public sceneDepth: THREE.Texture | null = null;
 
-  public update(delta: number): void {
-    this.time += delta;
+  /** 波紋の時間。地面の輪（RainGround.time）とそろえる */
+  public setTime(time: number): void {
+    this.time = time;
   }
 
   public render(renderer: THREE.WebGLRenderer, writeBuffer: THREE.WebGLRenderTarget, readBuffer: THREE.WebGLRenderTarget): void {

@@ -1935,7 +1935,7 @@ export class StageManager {
 
       this.sprites.forEach((actor) => actor.update(delta, this.camera));
       this.rainGround.update(delta, this.cameraCurrentTarget);
-      this.wetReflectionPass.update(delta);
+      this.wetReflectionPass.setTime(this.rainGround.time);
       this.lensDroplets.update(delta);
 
       // 2. 太陽・レンズフレア・オクルージョン計算

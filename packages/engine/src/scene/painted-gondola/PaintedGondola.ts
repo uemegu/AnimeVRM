@@ -256,9 +256,11 @@ function handrails(steel: THREE.Material): THREE.Group {
 }
 
 export async function loadPaintedGondola(): Promise<THREE.Group> {
-  const [steelMap, cushionMap, floorMap, groundMap, ...panorama] = await Promise.all([
-    'steel.avif', 'cushion.avif', 'floor.avif', 'ground.avif', 'pano-0.avif', 'pano-1.avif', 'pano-2.avif', 'pano-3.avif',
-  ].map(texture));
+  const [[steelMap, cushionMap, floorMap, groundMap, ...panorama], seaMask] = await Promise.all([
+    Promise.all(['steel.avif', 'cushion.avif', 'floor.avif', 'ground.avif', 'pano-0.avif', 'pano-1.avif', 'pano-2.avif', 'pano-3.avif'].map(texture)),
+    // Data, not colour: the water mask and the waterline rows (Panorama.ts).
+    new THREE.TextureLoader().loadAsync(resolveAssetUrl(`${TEXTURE_DIR}/sea-mask.avif`)),
+  ]);
   const group = new THREE.Group();
   group.name = 'Painted gondola';
 
@@ -280,7 +282,7 @@ export async function loadPaintedGondola(): Promise<THREE.Group> {
   group.add(castShadows(handrails(steel)));
 
   group.add(buildWheel());
-  group.add(buildPanorama(panorama, groundMap));
+  group.add(buildPanorama(panorama, groundMap, seaMask));
   return group;
 }
 
