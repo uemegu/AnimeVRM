@@ -1478,7 +1478,8 @@ export class StageManager {
   public setCutTimeline(scene: ScenarioScene | null): void {
     this.cutScene = scene;
     this.cutTime = 0;
-    this.cutStartedAt = this.clock.getElapsedTime();
+    // getElapsedTime() は時計を進めて描画ループの delta を食うので、読むだけにする
+    this.cutStartedAt = this.clock.elapsedTime;
     this.appliedCut.clear();
     this.appliedCutCamera = '';
     // 前のカットの文字演出・汗は消す

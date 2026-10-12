@@ -161,6 +161,13 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   const shot = resolveCameraShot(scene, cast, stage);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
 
+  // カットが変わったときだけ作り直す（文字送りの再描画のたびに舞台がカットを始め直さないように）
+  const cut = useMemo(
+    () => (phase === 'playing' ? { ...scene, screenTransition: stage.screenTransition } : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [phase, step, scene, stage.screenTransition]
+  );
+
   /** '/' で始まらないファイルはシナリオのディレクトリから */
   const resolveSceneUrl = (url: string) => (url.startsWith('/') ? url : `${baseUrl}${url}`);
 
@@ -308,7 +315,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         cg={stage.cg}
         cutin={stage.cutin}
         rain={stage.rain}
-        cut={phase === 'playing' ? { ...scene, screenTransition: stage.screenTransition } : null}
+        cut={cut}
         language={language}
         getCutTime={() => audio.getVoiceTime()}
         getSpeakerPhoneme={() => audio.getPhoneme()}
