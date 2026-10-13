@@ -18,6 +18,12 @@ export type LocalizedString = z.infer<typeof LocalizedString>;
 export const TextContent = z.union([z.string(), LocalizedString]);
 export type TextContent = z.infer<typeof TextContent>;
 
+/** 心の声（全角かっこで囲んだセリフ）か。話者がいても口を動かさない */
+export function isInnerVoice(text: TextContent | undefined): boolean {
+  const s = (typeof text === 'string' ? text : text?.ja ?? '').trim();
+  return s.startsWith('（') && s.endsWith('）');
+}
+
 export const FlagValue = z.union([z.boolean(), z.number(), z.string()]);
 export const FlagMap = z.record(z.string(), FlagValue);
 /** キャラ ID → 好感度の加算値 */
@@ -216,7 +222,7 @@ export type SceneTransition = z.infer<typeof SceneTransition>;
  * 手に持つ小物（形と持ち方はエンジンの heldItem.ts）。
  * 缶・紙パックは片手で握る、スマホは手のひらに沿わせる、本は両手で開いて持つ、ノートは胸に抱える
  */
-export const HeldItemId = z.enum(['can_coffee', 'can_juice', 'carton_ichigo', 'phone', 'book_open', 'notebook']);
+export const HeldItemId = z.enum(['can_coffee', 'can_juice', 'carton_ichigo', 'phone', 'book_open', 'book', 'notebook']);
 export type HeldItemId = z.infer<typeof HeldItemId>;
 
 /** 小物の指定。文字列は小物の ID だけ（持つ手は小物ごとの既定）。false で手放す */
@@ -261,8 +267,8 @@ export const SceneAvatarConfig = z.strictObject({
 });
 export type SceneAvatarConfig = z.infer<typeof SceneAvatarConfig>;
 
-/** 画面の切り替え演出（fade_black = 暗転してから映す、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
-export const ScreenTransition = z.enum(['fade_black', 'eyelid_close', 'eyelid_blink']);
+/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま次のカットまで映さない、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
+export const ScreenTransition = z.enum(['fade_black', 'black', 'eyelid_close', 'eyelid_blink']);
 export type ScreenTransition = z.infer<typeof ScreenTransition>;
 
 /**
@@ -557,6 +563,8 @@ export const CallChoice = z.strictObject({
 export const CallSceneStep = z.strictObject({
   id: z.string(),
   speaker: TextContent,
+  /** 話者のキャラ ID（電話の相手のほか、そばにいる人の声も）。口を動かすのは電話の相手のときだけ */
+  speakerCharacterId: z.string().optional(),
   text: TextContent,
   expression: Expression.optional(),
   expressionWeight: z.number().min(0).max(1).optional(),

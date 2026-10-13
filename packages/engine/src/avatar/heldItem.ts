@@ -6,7 +6,7 @@ import { forEachVertex, mainBone, measureHand, restPosition, skinPart } from './
 import { reach } from './handClearance';
 
 /**
- * 手に持つ小物（缶・紙パック・スマホ・本・ノート）。
+ * 手に持つ小物（缶・紙パック・スマホ・本（開いた本・閉じた本）・ノート）。
  * 骨の向きはモデルごとに違うので、毎フレーム、手首と指の付け根の位置から手のひらの向きを求めて置く。
  * 持つ手の指（親指を含む）は、モーションの指の形を捨てて小物に合わせた形にする。
  * 寸法は実物の大きさで作り、キャラの手の大きさに合わせて縮める（アニメ調のモデルは手が小さい）。
@@ -34,6 +34,8 @@ const EAR_SNAP_DISTANCE = 0.25;
 const EAR_TILT = 0.5;
 /** 飲み物を立てるために手首をひねる上限（ラジアン） */
 const MAX_TWIST = 1.2;
+/** 両手で開いて持つ本の背表紙側と、手のひら（指の曲がり）との間 */
+const BOOK_CLEARANCE = 0.03;
 const loader = new THREE.TextureLoader();
 
 function texture(name: string): THREE.Texture {
@@ -131,6 +133,14 @@ function notebook(): THREE.Object3D {
   return withOutline(new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.25, 0.018), [paper, dark, paper, paper, cover, dark]));
 }
 
+/** 閉じた本（ハードカバー）：y 軸が縦、z 軸が表紙の向き */
+function closedBook(): THREE.Object3D {
+  const cover = toon('#ffffff', texture('book_cover'));
+  const spine = toon('#2f4a33');
+  const paper = toon('#efe6cf');
+  return withOutline(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.21, 0.03), [paper, spine, paper, paper, cover, cover]));
+}
+
 const ITEMS: Record<HeldItemId, ItemSpec> = {
   can_coffee: { grip: 'fist', hand: 'right', build: () => can('can_coffee_label'), radius: CAN_RADIUS, shape: 'cylinder' },
   can_juice: { grip: 'fist', hand: 'right', build: () => can('can_juice_label'), radius: CAN_RADIUS, shape: 'cylinder' },
@@ -138,6 +148,7 @@ const ITEMS: Record<HeldItemId, ItemSpec> = {
   phone: { grip: 'palm', hand: 'right', build: phone },
   book_open: { grip: 'both', hand: 'right', build: openBook },
   notebook: { grip: 'chest', hand: 'right', build: notebook },
+  book: { grip: 'chest', hand: 'right', build: closedBook },
 };
 
 /** 実物の手（手首から中指の付け根まで）の長さ。小物はこの手に合わせた寸法で作ってある */
@@ -865,12 +876,20 @@ export class HeldItem {
       const l = palmCenter(left);
       const r = palmCenter(right);
       const center = l.clone().add(r).multiplyScalar(0.5);
-      // ページは顔へ向け、見開きの左右は体の左右に合わせる（手の上下の並びには依らない）
+      // ページは顔へ向け、見開きの左右は体の左右に合わせる（手の上下の並びには依らない）。
+      // 面は両手を結ぶ線に沿って傾け、両手から同じ距離の表紙の側に手が来るようにする
+      // （両手の高さ・前後がずれたポーズで、片方の手が本に入らないように）
       const normal = head.clone().sub(center).normalize();
+      const between = r.clone().sub(l);
+      if (between.lengthSq() > 1e-6) {
+        between.normalize();
+        const tilted = normal.clone().addScaledVector(between, -normal.dot(between));
+        if (tilted.lengthSq() > 0.05) normal.copy(tilted.normalize());
+      }
       const bodyRight = this.forward().cross(new THREE.Vector3(0, 1, 0)).normalize();
       const x = bodyRight.addScaledVector(normal, -bodyRight.dot(normal)).normalize();
       const y = new THREE.Vector3().crossVectors(normal, x).normalize();
-      center.addScaledVector(normal, 0.015);
+      center.addScaledVector(normal, BOOK_CLEARANCE);
       return this.compose(x, y, center);
     }
     // chest：胸の前、表紙を前に向けて立てる
