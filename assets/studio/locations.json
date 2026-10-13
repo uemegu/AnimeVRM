@@ -629,6 +629,40 @@
         }
       }
     },
+    "archive_room": {
+      "id": "archive_room",
+      "name": "郷土資料室（掃除のあと）",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/archive_room_clean.avif"
+        }
+      },
+      "stage": {
+        "camera": {
+          "wide": {
+            "distance": 1.8,
+            "height": -0.2,
+            "targetHeight": -0.3
+          },
+          "medium": {
+            "distance": 1.6,
+            "height": -0.12,
+            "targetHeight": -0.18
+          },
+          "speaker": {
+            "distance": 1.3,
+            "height": -0.15,
+            "targetHeight": -0.22
+          },
+          "close": {
+            "distance": 1.05,
+            "height": -0.09,
+            "targetHeight": -0.14
+          }
+        }
+      }
+    },
     "gate_ambush": {
       "id": "gate_ambush",
       "name": "校門前",
@@ -1248,6 +1282,16 @@
         }
       },
       "thumbnail": "/textures/shopping-street/thumb.avif"
+    },
+    "game_center": {
+      "id": "game_center",
+      "name": "ゲームセンター",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/game_center.avif"
+        }
+      }
     },
     "shrine_3d": {
       "id": "shrine_3d",

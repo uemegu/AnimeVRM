@@ -1,7 +1,7 @@
 import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
 
-/** 画面の切り替え演出（fade_black = 暗転してから映す、eyelid_close = 瞼を閉じる、eyelid_blink = まばたき） */
-export type ScreenTransitionKind = 'fade_black' | 'eyelid_close' | 'eyelid_blink';
+/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま、eyelid_close = 瞼を閉じる、eyelid_blink = まばたき） */
+export type ScreenTransitionKind = 'fade_black' | 'black' | 'eyelid_close' | 'eyelid_blink';
 
 const EYELID_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const EYELID_CLOSE_SEC = 0.95;
@@ -92,6 +92,12 @@ export class ScreenEffects {
       return;
     }
     if (this.eyelidsClosed) this.setEyelids(false, instant ? 0 : 0.6);
+    if (kind === 'black') {
+      // 暗転して、次のカットまで黒のまま（セリフだけを見せる）
+      this.blackout.style.transition = instant ? 'none' : 'opacity 0.5s ease-in';
+      this.blackout.style.opacity = '1';
+      return;
+    }
     if (instant) return;
     if (kind === 'eyelid_blink') {
       // パチ、パチと2回まばたく

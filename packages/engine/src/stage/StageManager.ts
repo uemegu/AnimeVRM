@@ -43,6 +43,7 @@ import {
   DEFAULT_DEPTH_OF_FIELD,
   DEFAULT_SHOT_RIGS,
   DEFAULT_SLOT_POSITIONS,
+  isInnerVoice,
   type CameraPose as CameraPoseSetting,
   type CameraShift,
   type CameraShot,
@@ -1920,12 +1921,14 @@ export class StageManager {
       const activeMeshes: THREE.Object3D[] = [];
       const phoneme = this.getSpeakerPhoneme?.();
       const mouthOpen = this.getSpeakerMouthOpen?.() ?? 1;
+      // 心の声（かっこで囲んだセリフ）は、ボイスがあっても口を動かさない
+      const innerVoice = isInnerVoice(this.cutScene?.text);
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm) continue;
         this.applyCutMotion(id, avatar);
         if (!avatar.vrm.scene.visible) continue;
-        avatar.updateLipSync(id === this.speakerId ? phoneme : undefined, LIP_SYNC_GAIN * mouthOpen);
+        avatar.updateLipSync(id === this.speakerId && !innerVoice ? phoneme : undefined, LIP_SYNC_GAIN * mouthOpen);
         const gaze = this.gaze.get(id);
         avatar.setGaze(this.gazeTargetFor(id, gaze?.target), gaze?.headTurn ?? 0.5);
         avatar.setWind(this.raining ? null : this.presets.locations[this.currentLocationId]?.wind);
