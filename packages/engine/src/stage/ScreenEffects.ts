@@ -1,7 +1,7 @@
 import { FocusLinesOverlay } from '../effects/FocusLinesOverlay';
 
-/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま、eyelid_close = 瞼を閉じる、eyelid_blink = まばたき） */
-export type ScreenTransitionKind = 'fade_black' | 'black' | 'eyelid_close' | 'eyelid_blink';
+/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま、white = 白く飛ばしたまま、eyelid_close = 瞼を閉じる、eyelid_blink = まばたき） */
+export type ScreenTransitionKind = 'fade_black' | 'black' | 'white' | 'eyelid_close' | 'eyelid_blink';
 
 const EYELID_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const EYELID_CLOSE_SEC = 0.95;
@@ -21,6 +21,8 @@ export class ScreenEffects {
   private readonly blackout: HTMLDivElement;
   private focusLinesOn = false;
   private eyelidsClosed = false;
+  /** 白く飛ばしたまま（white）か。次のカットでは白からゆっくり戻す */
+  private whiteout = false;
   private timers: number[] = [];
   /** 切り替え演出を呼ぶたびに増やす（読み込み待ちの間に次の演出が始まったら、前の暗転明けを捨てる） */
   private transitionId = 0;
@@ -85,8 +87,29 @@ export class ScreenEffects {
   public playTransition(kind: ScreenTransitionKind | null, instant = false, ready?: () => Promise<void>): void {
     this.clearTimers();
     this.transitionId++;
-    this.blackout.style.transition = 'none';
-    this.blackout.style.opacity = '0';
+    const wasWhite = this.whiteout;
+    this.whiteout = kind === 'white';
+    if (kind === 'white') {
+      // 白く飛ばして、次のカットまで白のまま（神が消えるなど。効果音はこの間に鳴る）
+      this.blackout.style.background = '#fff';
+      this.blackout.style.transition = instant || wasWhite ? 'none' : 'opacity 0.35s ease-out';
+      this.blackout.style.opacity = '1';
+      if (this.eyelidsClosed) this.setEyelids(false, 0);
+      return;
+    }
+    if (wasWhite && !instant && kind !== 'fade_black' && kind !== 'black') {
+      // 白から戻す
+      this.blackout.style.transition = 'opacity 0.8s ease-in';
+      this.blackout.style.opacity = '0';
+      const id = this.transitionId;
+      this.later(0.8, () => {
+        if (id === this.transitionId) this.blackout.style.background = '#000';
+      });
+    } else {
+      this.blackout.style.transition = 'none';
+      this.blackout.style.opacity = '0';
+      this.blackout.style.background = '#000';
+    }
     if (kind === 'eyelid_close') {
       this.setEyelids(true, instant ? 0 : EYELID_CLOSE_SEC);
       return;

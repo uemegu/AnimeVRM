@@ -31,7 +31,7 @@ const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised',
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 /** 次のカットの選択肢で「ここで終わる」を表す値 */
 const END = '__end__';
-const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'black', 'eyelid_close', 'eyelid_blink'];
+const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'black', 'white', 'eyelid_close', 'eyelid_blink'];
 
 /** 音声生成に必要な、シナリオの場所と保存状態 */
 export interface VoiceContext {

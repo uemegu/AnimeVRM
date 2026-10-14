@@ -273,6 +273,7 @@ function checkStory(c: Checker, data: ScenarioPackage) {
  * 立ち位置とモーションの組み合わせ（GEMINI.md の「シーンとポージングの規則」）。シーンを配列の順にたどる
  * - 座りのモーションは、その場所の席の位置でだけ使う（立ち位置のままだと空中に座る・何もない所に頬杖をつく）
  * - 流れる背景の間、歩き・走りを正面の構図で撮らない（進む向きと背景の流れが食い違う）
+ * - 背景が止まったまま歩き・走りをさせない（その場で足踏みしてカメラへ向かってくるように見える）
  */
 function checkPosing(c: Checker, data: ScenarioPackage) {
   const { seatPositions, seatedMotions, locomotionMotions } = c.catalog;
@@ -283,6 +284,7 @@ function checkPosing(c: Checker, data: ScenarioPackage) {
   const near = (a: readonly number[], b: readonly number[]) => a.every((v, k) => Math.abs(v - b[k]) < 0.05);
   data.scenes.forEach((scene, i) => {
     if (scene.background !== undefined) background = scene.background;
+    const scrollStopped = scene.scrollingBackground === false && scrolling;
     if (scene.scrollingBackground !== undefined) scrolling = scene.scrollingBackground !== false;
     if (scene.clearCast) cast = {};
     for (const [id, config] of Object.entries(scene.avatars ?? {})) {
@@ -299,6 +301,11 @@ function checkPosing(c: Checker, data: ScenarioPackage) {
           const where = seats.length ? '席の位置ではありません' : `場所 "${background ?? '?'}" には席がありません`;
           c.warn(['scenes', i, 'avatars', id, 'motion'], `座りのモーション "${motion}" は席でだけ使います（${where}。locations.json の seats）`);
         }
+      }
+      // このシーンで歩き・走りにした、または背景を止めたのに歩き・走りのまま
+      const startsHere = scene.avatars?.[id]?.motion === motion || scrollStopped;
+      if (locomotionMotions?.has(motion) && !scrolling && startsHere && !scene.cg) {
+        c.warn(['scenes', i, 'avatars', id, 'motion'], `背景が止まったまま "${motion}" にしています。走らせるなら流れる背景（scrollingBackground）にし、そうでなければ立ちのモーションにします`);
       }
       if (locomotionMotions?.has(motion) && scrolling && scene.camera && scene.camera !== 'side' && !scene.cameraPose) {
         c.warn(['scenes', i, 'camera'], `流れる背景で "${motion}" のキャラを正面の構図（${scene.camera}）で撮っています。横からの構図（side）にします`);

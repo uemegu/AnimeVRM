@@ -268,7 +268,7 @@ export const en: Dictionary = {
       nothing: 'None',
     },
     screenTransition: 'Screen transition',
-    screenTransitions: { none: 'None', fade_black: 'Fade from black', black: 'Stay black', eyelid_close: 'Close eyelids', eyelid_blink: 'Blink' },
+    screenTransitions: { none: 'None', fade_black: 'Fade from black', black: 'Stay black', white: 'Stay white', eyelid_close: 'Close eyelids', eyelid_blink: 'Blink' },
     cameraMove: 'Camera move',
     cameraMoveNone: 'None',
     cameraMoveStop: 'Stop',
