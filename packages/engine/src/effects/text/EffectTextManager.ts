@@ -304,6 +304,11 @@ export class EffectTextManager {
     }
   }
 
+  /** 表示・非表示（出ている演出は消さずに隠す） */
+  public setVisible(visible: boolean): void {
+    this.container.visible = visible;
+  }
+
   /**
    * Remove and dispose all active effects immediately
    */

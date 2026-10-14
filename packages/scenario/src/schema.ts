@@ -267,8 +267,8 @@ export const SceneAvatarConfig = z.strictObject({
 });
 export type SceneAvatarConfig = z.infer<typeof SceneAvatarConfig>;
 
-/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま次のカットまで映さない、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
-export const ScreenTransition = z.enum(['fade_black', 'black', 'eyelid_close', 'eyelid_blink']);
+/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま次のカットまで映さない、white = 白く飛ばしたまま次のカットまで映さない、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
+export const ScreenTransition = z.enum(['fade_black', 'black', 'white', 'eyelid_close', 'eyelid_blink']);
 export type ScreenTransition = z.infer<typeof ScreenTransition>;
 
 /**

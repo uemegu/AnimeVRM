@@ -14,6 +14,10 @@ export type SweatMode = 'fly4' | 'jito';
 
 const SWEAT_SECONDS = 4;
 
+/** カメラが頭からこれより近い（アップの構図）ときは文字演出を出さない（頭の上の文字が画面の外に切れるため） */
+const TEXT_HIDE_DISTANCE = 1.45;
+const _headPos = new THREE.Vector3();
+
 /** 目のハイライト・瞳のマテリアル（頬赤のとき揺らして潤ませる。元の値に戻せるよう控えておく） */
 interface EyeMaterialBackup {
   material: THREE.Material & {
@@ -219,6 +223,8 @@ export class AvatarEffects {
 
   /** 毎フレームの更新（vrm.update の後） */
   public update(delta: number, elapsed: number, camera: THREE.Camera, renderer: THREE.WebGLRenderer, blinkWeight: number): void {
+    const head = this.vrm.humanoid?.getNormalizedBoneNode('head');
+    if (head) this.texts.setVisible(camera.position.distanceTo(head.getWorldPosition(_headPos)) >= TEXT_HIDE_DISTANCE);
     this.texts.update(delta, camera);
     this.tears.update(delta);
     this.sweat.update(delta);

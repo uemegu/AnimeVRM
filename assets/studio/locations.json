@@ -1283,6 +1283,16 @@
       },
       "thumbnail": "/textures/shopping-street/thumb.avif"
     },
+    "home_ec": {
+      "id": "home_ec",
+      "name": "家庭科室",
+      "isIndoor": true,
+      "layers": {
+        "background": {
+          "url": "/textures/home_ec.avif"
+        }
+      }
+    },
     "game_center": {
       "id": "game_center",
       "name": "ゲームセンター",

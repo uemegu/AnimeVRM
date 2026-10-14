@@ -266,7 +266,7 @@ export const ja = {
       nothing: '出さない',
     },
     screenTransition: '画面の切り替え',
-    screenTransitions: { none: 'なし', fade_black: '暗転', black: '暗転したまま', eyelid_close: '瞼を閉じる', eyelid_blink: 'まばたき' },
+    screenTransitions: { none: 'なし', fade_black: '暗転', black: '暗転したまま', white: '白く飛ばしたまま', eyelid_close: '瞼を閉じる', eyelid_blink: 'まばたき' },
     cameraMove: 'カメラの動き',
     cameraMoveNone: 'なし',
     cameraMoveStop: '止める',
