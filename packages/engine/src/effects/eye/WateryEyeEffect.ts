@@ -59,17 +59,18 @@ export class WateryEyeEffect {
   }
 
   private init(): void {
-    // 1. ボーンの探索 (NormalizedBone または RawBone)
+    // 1. ボーンの探索
     this.headBone = this.vrm.humanoid?.getNormalizedBoneNode('head') ??
       this.vrm.humanoid?.getRawBoneNode('head') ??
       this.vrm.scene;
 
-    this.leftEyeBone = this.vrm.humanoid?.getNormalizedBoneNode('leftEye') ??
-      this.vrm.humanoid?.getRawBoneNode('leftEye') ??
+    // 目は描画用の実ボーンに付ける。正規化リグはポーズ中に実モデルの目の位置とずれる。
+    this.leftEyeBone = this.vrm.humanoid?.getRawBoneNode('leftEye') ??
+      this.vrm.humanoid?.getNormalizedBoneNode('leftEye') ??
       null;
 
-    this.rightEyeBone = this.vrm.humanoid?.getNormalizedBoneNode('rightEye') ??
-      this.vrm.humanoid?.getRawBoneNode('rightEye') ??
+    this.rightEyeBone = this.vrm.humanoid?.getRawBoneNode('rightEye') ??
+      this.vrm.humanoid?.getNormalizedBoneNode('rightEye') ??
       null;
 
     // 2. マテリアルとメッシュの生成
@@ -282,7 +283,12 @@ export class WateryEyeEffect {
 
     this.material.uniforms.uTime.value = this.elapsedTime;
     this.material.uniforms.uIntensity.value = this.currentIntensity;
-    this.material.uniforms.uBlinkWeight.value = blinkWeight;
+    // happy・komari は blink を 0 にしたまま目を閉じるため、表情の重みも含める。
+    this.material.uniforms.uBlinkWeight.value = Math.max(
+      blinkWeight,
+      this.vrm.expressionManager?.getValue('happy') ?? 0,
+      this.vrm.expressionManager?.getValue('komari') ?? 0,
+    );
     this.material.uniforms.uWaveSpeed.value = this.config.waveSpeed;
     this.material.uniforms.uWaveScale.value = this.config.waveScale;
     this.material.uniforms.uMeniscusIntensity.value = this.config.meniscusIntensity;
