@@ -112,6 +112,14 @@
         "ja": "休日のデート",
         "en": "sunlight_on_cobblestones"
       }
+    },
+    "true_ending": {
+      "url": "/bgm/true_ending.mp3",
+      "volumeScale": 1,
+      "title": {
+        "ja": "エンディング（TRUE END のスタッフロール）",
+        "en": "Ending (TRUE END Staff Roll)"
+      }
     }
   }
 }
