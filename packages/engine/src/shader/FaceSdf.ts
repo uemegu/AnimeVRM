@@ -19,7 +19,7 @@ export interface FaceSdfParams {
   enabled: boolean;
   /** 明暗の境目のぼかし幅（光の角度, 度） */
   softness: number;
-  /** 鼻の影の大きさ（0 = なし, 1 = 最大。最大は顔の半幅の 3 割の三角） */
+  /** 鼻の影の大きさ（0 = なし, 1 = 最大。最大は顔の半幅の 3 割の三角）。既定は 0（鼻筋の上に三角の先端だけが点として残るため） */
   noseSize: number;
   /** 鼻の影が出始める光の角度（度）。ここから 90° にかけて広がる */
   noseStart: number;
@@ -33,7 +33,7 @@ export interface FaceSdfParams {
 export const DEFAULT_FACE_SDF_PARAMS: FaceSdfParams = {
   enabled: true,
   softness: 0,
-  noseSize: 0.5,
+  noseSize: 0,
   noseStart: 30,
   skipStart: 45,
   skipEnd: 135,
