@@ -20,6 +20,23 @@ const FADE_SEC = 0.35;
 const SLIDE_SEC = 0.32;
 const DEFAULT_CUTIN_SIZE = 0.24;
 
+/** CSS の object-fit と同じ切り抜き・収め方で絵を描く（alignY は縦の寄せ。0 = 上、0.5 = 中央） */
+function drawImageFit(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  fit: 'cover' | 'contain',
+  alignY: number
+): void {
+  const ratio = (fit === 'cover' ? Math.max : Math.min)(w / img.naturalWidth, h / img.naturalHeight);
+  const dw = img.naturalWidth * ratio;
+  const dh = img.naturalHeight * ratio;
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) * alignY, dw, dh);
+}
+
 /**
  * 舞台の上に重ねる雨と一枚絵（画面いっぱいのイベント絵と、端に載せるカットイン）。
  * 集中線・瞼などの画面演出と同じく canvas の親要素の中に置くので、メッセージウィンドウより下に描かれる
@@ -140,6 +157,57 @@ export class StillImages {
     (this.cutin.children[1] as HTMLElement).style.clipPath = innerClip;
     style.transform = shown ? 'translateX(0)' : `translateX(${side === 'right' ? 105 : -105}%)`;
     style.opacity = shown ? '1' : '0';
+  }
+
+  /**
+   * 一枚絵とカットインを、舞台を写した 2D canvas に重ねて描く（画面の保存・シェア用）。
+   * width・height は描く先の画素数。表示中の大きさとの比で、縁の太さなどを合わせる
+   */
+  public drawTo(ctx: CanvasRenderingContext2D, width: number, height: number): void {
+    const scale = width / (this.layer.clientWidth || width);
+    if (this.cutinKey && this.cutinImage.complete && this.cutinImage.naturalWidth) {
+      const side = this.cutin.dataset.side === 'left' ? 'left' : 'right';
+      const w = width * (Number(this.cutin.dataset.size) || DEFAULT_CUTIN_SIZE);
+      const x = side === 'right' ? width - w : 0;
+      const slant = w * 0.18;
+      const inset = 10 * scale;
+      const polygon = (points: [number, number][]) => {
+        ctx.beginPath();
+        points.forEach(([px, py], i) => (i ? ctx.lineTo(x + px, py) : ctx.moveTo(x + px, py)));
+        ctx.closePath();
+      };
+      const frame: [number, number][] =
+        side === 'right' ? [[slant, 0], [w, 0], [w, height], [0, height]] : [[0, 0], [w, 0], [w - slant, height], [0, height]];
+      const inner: [number, number][] =
+        side === 'right'
+          ? [[slant + inset, 0], [w, 0], [w, height], [inset, height]]
+          : [[0, 0], [w - inset, 0], [w - slant - inset, height], [0, height]];
+      ctx.save();
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.35)';
+      ctx.shadowBlur = 22 * scale;
+      ctx.shadowOffsetY = 8 * scale;
+      ctx.fillStyle = '#ffffff';
+      polygon(frame);
+      ctx.fill();
+      ctx.restore();
+      ctx.save();
+      polygon(inner);
+      ctx.clip();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fill();
+      // object-fit: cover・上寄せ
+      drawImageFit(ctx, this.cutinImage, x, 0, w, height, 'cover', 0);
+      ctx.restore();
+    }
+    const cgOpacity = Number(getComputedStyle(this.cg).opacity);
+    if (this.cgKey && cgOpacity > 0 && this.cgImage.complete && this.cgImage.naturalWidth) {
+      ctx.save();
+      ctx.globalAlpha = cgOpacity;
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, width, height);
+      drawImageFit(ctx, this.cgImage, 0, 0, width, height, this.cgImage.style.objectFit === 'contain' ? 'contain' : 'cover', 0.5);
+      ctx.restore();
+    }
   }
 
   /** 画面に雨を降らせる */
