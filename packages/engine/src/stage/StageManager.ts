@@ -1383,6 +1383,31 @@ export class StageManager {
     this.stillImages?.setCutin(cutin);
   }
 
+  /**
+   * 今の画面（舞台と、重ねている一枚絵・カットイン）を写した canvas を返す（画面の保存・シェア用）。
+   * 舞台は描いた直後（同じフレームの中）に写す。Android では次のフレームまでに描画バッファが読めなくなり
+   * （preserveDrawingBuffer が効かず）真っ黒に写ることがある。描画も requestAnimationFrame で回っているので、
+   * ここで登録した分はその描画のあとに呼ばれる
+   */
+  public captureFrame(): Promise<HTMLCanvasElement> {
+    return new Promise((resolve) =>
+      requestAnimationFrame(() => {
+        const out = document.createElement('canvas');
+        out.width = this.canvas.width;
+        out.height = this.canvas.height;
+        const ctx = out.getContext('2d');
+        if (ctx) {
+          // 透過が残ると、シェア先（X など）で黒く表示されるので白で塗ってから重ねる
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, out.width, out.height);
+          ctx.drawImage(this.canvas, 0, 0, out.width, out.height);
+          this.stillImages?.drawTo(ctx, out.width, out.height);
+        }
+        resolve(out);
+      })
+    );
+  }
+
   /** 雨を降らせる（画面に重ねる 2D の雨と、濡れて暗い地面・跳ね返り）。雨のあいだは風を止める */
   public setRain(active: boolean): void {
     this.raining = active;
