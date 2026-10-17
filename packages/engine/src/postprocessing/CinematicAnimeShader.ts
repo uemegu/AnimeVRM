@@ -230,25 +230,47 @@ export const CinematicAnimeShader = {
       vec3 color = clamp(baseColor.rgb, 0.0, 1.0);
 
       // ----------------------------------------------------
-      // 2. Soft Diffusion Glow (Anime Film Paraffin Glow)
+      // 2. Soft Diffusion Glow & Film Halation (Anime Film Paraffin & Warm Edge Halation)
       // ----------------------------------------------------
       if (uDiffusionEnabled > 0.5 && uDiffusionStrength > 0.001) {
         vec2 texel = (1.0 / uResolution) * uDiffusionRadius;
-        // 9-tap cross/diagonal sampling for soft diffusion glow
-        vec3 blur = vec3(0.0);
-        blur += texture2D(tDiffuse, uv + vec2(-texel.x, -texel.y) * 1.5).rgb * 0.08;
-        blur += texture2D(tDiffuse, uv + vec2( 0.0,     -texel.y) * 2.0).rgb * 0.12;
-        blur += texture2D(tDiffuse, uv + vec2( texel.x, -texel.y) * 1.5).rgb * 0.08;
-        blur += texture2D(tDiffuse, uv + vec2(-texel.x,  0.0    ) * 2.0).rgb * 0.12;
-        blur += texture2D(tDiffuse, uv                                 ).rgb * 0.20;
-        blur += texture2D(tDiffuse, uv + vec2( texel.x,  0.0    ) * 2.0).rgb * 0.12;
-        blur += texture2D(tDiffuse, uv + vec2(-texel.x,  texel.y) * 1.5).rgb * 0.08;
-        blur += texture2D(tDiffuse, uv + vec2( 0.0,      texel.y) * 2.0).rgb * 0.12;
-        blur += texture2D(tDiffuse, uv + vec2( texel.x,  texel.y) * 1.5).rgb * 0.08;
+        vec2 offsets[9];
+        offsets[0] = vec2(-texel.x, -texel.y) * 1.5;
+        offsets[1] = vec2( 0.0,     -texel.y) * 2.0;
+        offsets[2] = vec2( texel.x, -texel.y) * 1.5;
+        offsets[3] = vec2(-texel.x,  0.0    ) * 2.0;
+        offsets[4] = vec2( 0.0,      0.0    );
+        offsets[5] = vec2( texel.x,  0.0    ) * 2.0;
+        offsets[6] = vec2(-texel.x,  texel.y) * 1.5;
+        offsets[7] = vec2( 0.0,      texel.y) * 2.0;
+        offsets[8] = vec2( texel.x,  texel.y) * 1.5;
 
-        // Soft screen/lighten blend to give the characteristic anime glowing air look
-        vec3 glow = 1.0 - (1.0 - color) * (1.0 - min(blur, vec3(1.0)) * 0.85);
-        color = mix(color, glow, clamp(uDiffusionStrength * 0.7, 0.0, 1.0));
+        float weights[9];
+        weights[0] = 0.08; weights[1] = 0.12; weights[2] = 0.08;
+        weights[3] = 0.12; weights[4] = 0.20; weights[5] = 0.12;
+        weights[6] = 0.08; weights[7] = 0.12; weights[8] = 0.08;
+
+        // 明部を中心に拡散させ、1影・2影の深い暗部が自分自身の中間調で白浮きしないようにする
+        vec3 blur = vec3(0.0);
+        vec3 hiBlur = vec3(0.0);
+        for (int i = 0; i < 9; i++) {
+          vec3 tap = clamp(texture2D(tDiffuse, uv + offsets[i]).rgb, 0.0, 1.0);
+          float tapLuma = getLuma(tap);
+          blur += tap * weights[i];
+          hiBlur += tap * smoothstep(0.32, 0.92, tapLuma) * weights[i];
+        }
+
+        // パラフィン撮影の空気感（ハイライト主体でディフュージョン）
+        vec3 effectiveBlur = mix(blur, hiBlur * 1.25, 0.62);
+        vec3 glow = 1.0 - (1.0 - color) * (1.0 - min(effectiveBlur, vec3(1.0)) * 0.85);
+        color = mix(color, glow, clamp(uDiffusionStrength * 0.68, 0.0, 1.0));
+
+        // フィルム・ハレーション: 強い光（空・窓・逆光ハイライト）と暗い輪郭・髪の境界に赤橙色の暖かな光滲みを添える
+        float baseLuma = getLuma(color);
+        float blurLuma = getLuma(blur);
+        float halationEdge = max(0.0, blurLuma - baseLuma) * smoothstep(0.48, 0.90, blurLuma) * (1.0 - smoothstep(0.50, 0.85, baseLuma));
+        vec3 halationTint = vec3(1.0, 0.44, 0.26);
+        color = clamp(color + halationTint * halationEdge * uDiffusionStrength * 0.65, 0.0, 1.0);
       }
 
       // ----------------------------------------------------
