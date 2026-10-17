@@ -175,48 +175,34 @@ export const LightWrapShader = {
         return;
       }
 
-      // 周囲を円盤状にサンプルし、背景（キャラ以外）の明るい光ほど強く拾う（透過光・色トレス）
+      // 周囲を円盤状にサンプルし、背景（キャラ以外）の色だけを平均する
       float aspect = uResolution.x / uResolution.y;
       vec3 background = vec3(0.0);
       float backgroundWeight = 0.0;
-      float bgCoverage = 0.0;
       for (int i = 0; i < TAPS; i++) {
         float fi = float(i) + 0.5;
         float r = sqrt(fi / float(TAPS)) * uRadius;
         float a = fi * 2.39996323; // 黄金角
         vec2 uv = vUv + vec2(cos(a) / aspect, sin(a)) * r;
         float isBackground = 1.0 - characterAt(uv);
-        vec3 sampleBg = texture2D(tDiffuse, uv).rgb;
-        float sampleLuma = dot(sampleBg, vec3(0.2126, 0.7152, 0.0722));
-        // 窓枠や枝葉の暗部よりも、背後の空や夕日の高輝度光を優先して回り込ませる
-        float lumaWeight = 1.0 + smoothstep(0.45, 1.8, sampleLuma) * 1.8;
-        float w = isBackground * lumaWeight;
-        background += sampleBg * w;
-        backgroundWeight += w;
-        bgCoverage += isBackground;
+        background += texture2D(tDiffuse, uv).rgb * isBackground;
+        backgroundWeight += isBackground;
       }
-      if (bgCoverage < 0.5) {
+      if (backgroundWeight < 0.5) {
         gl_FragColor = color;
         return;
       }
-      background /= max(backgroundWeight, 1e-4);
+      background /= backgroundWeight;
 
-      // 輪郭の鋭い回り込み（リム）と、強い逆光時のやわらかい空気感（ディフュージョンラップ）の2層合成
-      float coverage = clamp(bgCoverage / float(TAPS) * 2.0, 0.0, 1.0);
-      float bgLuma = dot(background, vec3(0.2126, 0.7152, 0.0722));
-      float tightEdge = pow(coverage, uEdgePower);
-      float softEdge = pow(coverage, max(0.85, uEdgePower * 0.55)) * smoothstep(0.55, 1.4, bgLuma) * 0.32;
-      float edge = clamp(tightEdge + softEdge, 0.0, 1.0);
+      // 背景の割合が多い所（輪郭に近い所）ほど強く足す
+      float edge = pow(clamp(backgroundWeight / float(TAPS) * 2.0, 0.0, 1.0), uEdgePower);
 
       // 髪が一番手前にある所（髪の深度とキャラの深度が一致）だけ本来の強さ、それ以外は弱める
       float hairDepth = texture2D(tHair, vUv).r;
       float isHair = step(hairDepth, texture2D(tMask, vUv).r + 1e-6) * step(hairDepth, 0.99999);
       float strength = uStrength * mix(uBodyStrength, 1.0, isHair);
 
-      vec3 wrapLight = background * edge * strength;
-      // 暗い輪郭線・髪のフチにはスクリーン調で色トレスとしてなじませ、明部も自然に持ち上げる
-      vec3 screenBlend = 1.0 - (1.0 - clamp(color.rgb, 0.0, 1.0)) * (1.0 - clamp(wrapLight, 0.0, 1.0));
-      color.rgb = mix(color.rgb + wrapLight * 0.85, max(color.rgb, screenBlend), 0.45);
+      color.rgb += background * edge * strength;
       gl_FragColor = color;
     }
   `,
