@@ -58,43 +58,19 @@ const DepthOfFieldShader = {
         gl_FragColor = center;
         return;
       }
-      // 画面四隅の口径食（レモン型・猫目ボケ）用の中心からの方向と距離
-      vec2 lensVec = (vUv - 0.5) * 2.0;
-      float lensDist = length(lensVec);
-      vec2 lensDir = lensDist > 1e-4 ? lensVec / lensDist : vec2(1.0, 0.0);
-
-      float centerLuma = dot(center.rgb, vec3(0.2126, 0.7152, 0.0722));
-      float centerBoost = 1.0 + smoothstep(0.75, 2.2, centerLuma) * 1.4 * smoothstep(1.5, 6.0, radius);
-      vec3 sum = center.rgb * centerBoost;
-      float weight = centerBoost;
-
+      vec3 sum = center.rgb;
+      float weight = 1.0;
       for (int i = 0; i < SAMPLES; i++) {
         float t = (float(i) + 0.5) / float(SAMPLES);
-        float normR = sqrt(t);
-        float r = normR * radius;
+        float r = sqrt(t) * radius;
         float a = float(i) * GOLDEN_ANGLE;
-        vec2 unitDir = vec2(cos(a), sin(a));
-        vec2 uv = vUv + unitDir * r / uResolution;
-
-        // 口径食（Cat's-eye vignetting）: 画面四隅の極端な端だけ放射方向をわずかに絞る（全体のボケ量は落とさない）
-        float radialProj = abs(dot(unitDir * normR, lensDir));
-        float catsEye = mix(1.0, 1.0 - 0.35 * smoothstep(0.78, 1.0, radialProj), smoothstep(0.75, 1.35, lensDist));
-
+        vec2 uv = vUv + vec2(cos(a), sin(a)) * r / uResolution;
         // 集める先のぼけがここまで届くときだけ混ぜる
-        float cocW = smoothstep(r - 1.0, r + 1.0, cocAt(uv)) * catsEye;
-        if (cocW > 1e-4) {
-          vec3 sampleCol = texture2D(tDiffuse, uv).rgb;
-          float sampleLuma = dot(sampleCol, vec3(0.2126, 0.7152, 0.0722));
-          // 光学玉ボケ強調: 高輝度の点光源（木漏れ日・窓の反射・街灯）が円盤状に輝くように重みを持ち上げ、
-          // レンズ球面収差によるわずかな輪郭リング（エッジ強調）を加える
-          float bokehHighlight = 1.0 + smoothstep(0.75, 2.2, sampleLuma) * 2.2 * smoothstep(1.5, 6.0, radius);
-          float ringWeight = mix(1.0, 1.18, smoothstep(0.70, 0.98, normR));
-          float w = cocW * bokehHighlight * ringWeight;
-          sum += sampleCol * w;
-          weight += w;
-        }
+        float w = smoothstep(r - 1.0, r + 1.0, cocAt(uv));
+        sum += texture2D(tDiffuse, uv).rgb * w;
+        weight += w;
       }
-      gl_FragColor = vec4(sum / max(weight, 1e-4), center.a);
+      gl_FragColor = vec4(sum / weight, center.a);
     }
   `,
 };

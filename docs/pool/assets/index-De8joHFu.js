@@ -4807,47 +4807,25 @@ void main() {
       vec3 color = clamp(baseColor.rgb, 0.0, 1.0);
 
       // ----------------------------------------------------
-      // 2. Soft Diffusion Glow & Film Halation (Anime Film Paraffin & Warm Edge Halation)
+      // 2. Soft Diffusion Glow (Anime Film Paraffin Glow)
       // ----------------------------------------------------
       if (uDiffusionEnabled > 0.5 && uDiffusionStrength > 0.001) {
         vec2 texel = (1.0 / uResolution) * uDiffusionRadius;
-        vec2 offsets[9];
-        offsets[0] = vec2(-texel.x, -texel.y) * 1.5;
-        offsets[1] = vec2( 0.0,     -texel.y) * 2.0;
-        offsets[2] = vec2( texel.x, -texel.y) * 1.5;
-        offsets[3] = vec2(-texel.x,  0.0    ) * 2.0;
-        offsets[4] = vec2( 0.0,      0.0    );
-        offsets[5] = vec2( texel.x,  0.0    ) * 2.0;
-        offsets[6] = vec2(-texel.x,  texel.y) * 1.5;
-        offsets[7] = vec2( 0.0,      texel.y) * 2.0;
-        offsets[8] = vec2( texel.x,  texel.y) * 1.5;
-
-        float weights[9];
-        weights[0] = 0.08; weights[1] = 0.12; weights[2] = 0.08;
-        weights[3] = 0.12; weights[4] = 0.20; weights[5] = 0.12;
-        weights[6] = 0.08; weights[7] = 0.12; weights[8] = 0.08;
-
-        // 明部を中心に拡散させ、1影・2影の深い暗部が自分自身の中間調で白浮きしないようにする
+        // 9-tap cross/diagonal sampling for soft diffusion glow
         vec3 blur = vec3(0.0);
-        vec3 hiBlur = vec3(0.0);
-        for (int i = 0; i < 9; i++) {
-          vec3 tap = clamp(texture2D(tDiffuse, uv + offsets[i]).rgb, 0.0, 1.0);
-          float tapLuma = getLuma(tap);
-          blur += tap * weights[i];
-          hiBlur += tap * smoothstep(0.32, 0.92, tapLuma) * weights[i];
-        }
+        blur += texture2D(tDiffuse, uv + vec2(-texel.x, -texel.y) * 1.5).rgb * 0.08;
+        blur += texture2D(tDiffuse, uv + vec2( 0.0,     -texel.y) * 2.0).rgb * 0.12;
+        blur += texture2D(tDiffuse, uv + vec2( texel.x, -texel.y) * 1.5).rgb * 0.08;
+        blur += texture2D(tDiffuse, uv + vec2(-texel.x,  0.0    ) * 2.0).rgb * 0.12;
+        blur += texture2D(tDiffuse, uv                                 ).rgb * 0.20;
+        blur += texture2D(tDiffuse, uv + vec2( texel.x,  0.0    ) * 2.0).rgb * 0.12;
+        blur += texture2D(tDiffuse, uv + vec2(-texel.x,  texel.y) * 1.5).rgb * 0.08;
+        blur += texture2D(tDiffuse, uv + vec2( 0.0,      texel.y) * 2.0).rgb * 0.12;
+        blur += texture2D(tDiffuse, uv + vec2( texel.x,  texel.y) * 1.5).rgb * 0.08;
 
-        // パラフィン撮影の空気感（ハイライト主体でディフュージョン）
-        vec3 effectiveBlur = mix(blur, hiBlur * 1.25, 0.62);
-        vec3 glow = 1.0 - (1.0 - color) * (1.0 - min(effectiveBlur, vec3(1.0)) * 0.85);
-        color = mix(color, glow, clamp(uDiffusionStrength * 0.68, 0.0, 1.0));
-
-        // フィルム・ハレーション: 強い光（空・窓・逆光ハイライト）と暗い輪郭・髪の境界に赤橙色の暖かな光滲みを添える
-        float baseLuma = getLuma(color);
-        float blurLuma = getLuma(blur);
-        float halationEdge = max(0.0, blurLuma - baseLuma) * smoothstep(0.48, 0.90, blurLuma) * (1.0 - smoothstep(0.50, 0.85, baseLuma));
-        vec3 halationTint = vec3(1.0, 0.44, 0.26);
-        color = clamp(color + halationTint * halationEdge * uDiffusionStrength * 0.65, 0.0, 1.0);
+        // Soft screen/lighten blend to give the characteristic anime glowing air look
+        vec3 glow = 1.0 - (1.0 - color) * (1.0 - min(blur, vec3(1.0)) * 0.85);
+        color = mix(color, glow, clamp(uDiffusionStrength * 0.7, 0.0, 1.0));
       }
 
       // ----------------------------------------------------
@@ -5130,48 +5108,34 @@ float getShading(`),e.fragmentShader=e.fragmentShader.replace(`shading *= shadow
         return;
       }
 
-      // 周囲を円盤状にサンプルし、背景（キャラ以外）の明るい光ほど強く拾う（透過光・色トレス）
+      // 周囲を円盤状にサンプルし、背景（キャラ以外）の色だけを平均する
       float aspect = uResolution.x / uResolution.y;
       vec3 background = vec3(0.0);
       float backgroundWeight = 0.0;
-      float bgCoverage = 0.0;
       for (int i = 0; i < TAPS; i++) {
         float fi = float(i) + 0.5;
         float r = sqrt(fi / float(TAPS)) * uRadius;
         float a = fi * 2.39996323; // 黄金角
         vec2 uv = vUv + vec2(cos(a) / aspect, sin(a)) * r;
         float isBackground = 1.0 - characterAt(uv);
-        vec3 sampleBg = texture2D(tDiffuse, uv).rgb;
-        float sampleLuma = dot(sampleBg, vec3(0.2126, 0.7152, 0.0722));
-        // 窓枠や枝葉の暗部よりも、背後の空や夕日の高輝度光を優先して回り込ませる
-        float lumaWeight = 1.0 + smoothstep(0.45, 1.8, sampleLuma) * 1.8;
-        float w = isBackground * lumaWeight;
-        background += sampleBg * w;
-        backgroundWeight += w;
-        bgCoverage += isBackground;
+        background += texture2D(tDiffuse, uv).rgb * isBackground;
+        backgroundWeight += isBackground;
       }
-      if (bgCoverage < 0.5) {
+      if (backgroundWeight < 0.5) {
         gl_FragColor = color;
         return;
       }
-      background /= max(backgroundWeight, 1e-4);
+      background /= backgroundWeight;
 
-      // 輪郭の鋭い回り込み（リム）と、強い逆光時のやわらかい空気感（ディフュージョンラップ）の2層合成
-      float coverage = clamp(bgCoverage / float(TAPS) * 2.0, 0.0, 1.0);
-      float bgLuma = dot(background, vec3(0.2126, 0.7152, 0.0722));
-      float tightEdge = pow(coverage, uEdgePower);
-      float softEdge = pow(coverage, max(0.85, uEdgePower * 0.55)) * smoothstep(0.55, 1.4, bgLuma) * 0.32;
-      float edge = clamp(tightEdge + softEdge, 0.0, 1.0);
+      // 背景の割合が多い所（輪郭に近い所）ほど強く足す
+      float edge = pow(clamp(backgroundWeight / float(TAPS) * 2.0, 0.0, 1.0), uEdgePower);
 
       // 髪が一番手前にある所（髪の深度とキャラの深度が一致）だけ本来の強さ、それ以外は弱める
       float hairDepth = texture2D(tHair, vUv).r;
       float isHair = step(hairDepth, texture2D(tMask, vUv).r + 1e-6) * step(hairDepth, 0.99999);
       float strength = uStrength * mix(uBodyStrength, 1.0, isHair);
 
-      vec3 wrapLight = background * edge * strength;
-      // 暗い輪郭線・髪のフチにはスクリーン調で色トレスとしてなじませ、明部も自然に持ち上げる
-      vec3 screenBlend = 1.0 - (1.0 - clamp(color.rgb, 0.0, 1.0)) * (1.0 - clamp(wrapLight, 0.0, 1.0));
-      color.rgb = mix(color.rgb + wrapLight * 0.85, max(color.rgb, screenBlend), 0.45);
+      color.rgb += background * edge * strength;
       gl_FragColor = color;
     }
   `},yp={enabled:!0,topOpacity:.3,bottomOpacity:.05,desaturate:.2,tintAmount:1},bp={name:`ParaShader`,uniforms:{tDiffuse:{value:null},tMask:{value:null},uEnabled:{value:1},uTopOpacity:{value:yp.topOpacity},uBottomOpacity:{value:yp.bottomOpacity},uDesaturate:{value:yp.desaturate},uTintAmount:{value:yp.tintAmount}},vertexShader:`
