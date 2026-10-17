@@ -84,10 +84,10 @@ export function stageQualityOf(level: StageQualityLevel, option?: StageQualityLe
  * 60Hz の画面で間に合わないと、間隔は 1/30 秒付近に落ちるので、中央値で見れば一時的な引っかかりには反応しない。
  */
 export class FrameRateCheck {
-  /** これより遅いと不合格（45fps 相当） */
-  static readonly BUDGET_SEC = 1 / 45;
-  /** 判定に使うフレーム数（60fps で1秒。20fps の端末でも、数え始めから3秒で落とせる） */
-  static readonly WINDOW = 60;
+  /** これより遅いと不合格（25fps 相当。すぐ下げないよう、30fps 前後なら許す） */
+  static readonly BUDGET_SEC = 1 / 25;
+  /** 判定に使うフレーム数（60fps で2秒。10fps の端末でも、数え始めから12秒以内に落とせる） */
+  static readonly WINDOW = 120;
   /** 始めのフレームは、読み込み直後で落ち着かないので数えない */
   static readonly WARMUP = 30;
   /** これより長い間隔は、止まっていたものとして数えない */
