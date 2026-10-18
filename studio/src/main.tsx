@@ -1,3 +1,4 @@
+import '@anime-vrm/content/register';
 import './styles/global.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

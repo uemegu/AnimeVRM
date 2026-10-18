@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { boxMesh, farStandee, groundPlane, projectedMaterial, skyDome, type Projection } from '../painted-gate/PaintedGate';
-import { castShadows } from '../castShadows';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import {
   EDGE_Z, FAR, GROUND, GROUND_PAINTING_FADE, ISLANDS, KERB, LAMPS, LAMP_HEIGHT, RAILING, REFERENCE_CAMERA, SEA_RADIUS, SEA_Y, SUN_DIRECTION, TILES, TREES, referenceCamera,
 } from './layout';

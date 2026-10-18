@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { BACK_Z, DESK, DESK_COLUMNS_X, DESK_ROWS_Z, FRONT_Z, HALF_WIDTH, HEIGHT, PLACED_DESK_ROWS, PLATFORM, ROW_PAINTING_FIT, TEACHER_DESK_FRONT_Z, rowGeometry } from './layout';
 
 /**

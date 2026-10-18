@@ -18,9 +18,9 @@ description: >-
 
 - `GEMINI.md`。画像形式、無音での検証など、このプロジェクトのルール。
 - 元絵を**実際に画像として開く**。既存の場所なら `assets/studio/locations.json` の layers と、その画像ファイルから探す。AVIFを表示できなければ `avifdec 元絵.avif scratch/<作業名>/reference.png` で確認する。
-- 基本の見本：`packages/engine/src/scene/shopping-street/` の `README.md`、`layout.ts`、`ShoppingStreet.ts`、`Buildings.ts`、`StreetFurniture.ts`。
-- 校舎・中庭・広い屋外：`packages/engine/src/scene/painted-ground/README.md`、`layout.ts`、`PaintedGround.ts`。`courtyard` は同じセットを位置をずらして使用している。
-- 開放した屋台や夜景が必要なら `packages/engine/src/scene/painted-festival/Stalls.ts` と `README.md`。READMEの説明とコードが食い違う場合、現在のコード・スキーマを確認する。
+- 基本の見本：`packages/content/src/sets/shopping-street/` の `README.md`、`layout.ts`、`ShoppingStreet.ts`、`Buildings.ts`、`StreetFurniture.ts`。
+- 校舎・中庭・広い屋外：`packages/content/src/sets/painted-ground/README.md`、`layout.ts`、`PaintedGround.ts`。`courtyard` は同じセットを位置をずらして使用している。
+- 開放した屋台や夜景が必要なら `packages/content/src/sets/painted-festival/Stalls.ts` と `README.md`。READMEの説明とコードが食い違う場合、現在のコード・スキーマを確認する。
 
 元絵から、建築様式、壁と床の素材、窓の中身、店先の道具、植栽の密度、色、光の方向を短く整理してから作り始める。寸法や隠れた面は推定してよいが、元絵にない別の街・建築様式に置き換えない。
 
@@ -75,8 +75,8 @@ description: >-
 
 新しい組み込み背景では次を揃える。既存セットの調整なら必要な箇所だけ変更する。
 
-1. `packages/engine/src/scene/<セット名>/` に非同期の `load...(): Promise<THREE.Group>` と `dispose...()` を作る。
-2. `packages/engine/src/stage/environments.ts` の `BUILTINS` に load/dispose を登録する。
+1. `packages/content/src/sets/<セット名>/` に非同期の `load...(): Promise<THREE.Group>` と `dispose...()` を作る。
+2. `packages/content/src/sets.ts` の `registerSets` に `registerEnvironment` で load/dispose を登録する（engine の `stage/environments.ts` は登録口だけ）。
 3. `packages/scenario/src/scene.ts` の `BUILTIN_ENVIRONMENTS` にIDと表示名を登録する。
 4. `assets/studio/locations.json` の `presets` に場所を追加する。`environment.model`、配置、光と影（`light` と `light.shadow`。4章）、camera、slots、thumbnail を設定する。屋外と窓から空が見える屋内は `layers.background.url` に `/textures/painted-classroom/sky-only.png` を使う。
 5. `assets/scenarios/demo/<デモID>/scenario.json` に方向確認用のカットを作る。場所・シナリオ編集は `.agents/skills/scenario-authoring/SKILL.md` の形式・検証方法に従う。

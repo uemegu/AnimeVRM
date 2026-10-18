@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { resolveAssetUrl } from '../../utils/path';
-import { castShadows } from '../castShadows';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import {
   BACK_Z, BED, BED_TOP_LENGTH, BOOKCASE, DESK, DESK_CHAIR, FRONT_Z, HEIGHT, LEFT_X, LOW_TABLE, NIGHTSTAND, RIGHT_X, RUG,
 } from './layout';

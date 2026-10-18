@@ -2,6 +2,7 @@
  * カットの撮影ページ（studio/shot.html）。scripts/shot.ts が Playwright で開き、window.__shot.render で1カットずつ映す。
  * 見え方はシナリオ編集のプレビュー（CutPreview）と同じ。サーバー（server/）なしで動くよう、マスターデータは静的に読む
  */
+import '@anime-vrm/content/register';
 import '../styles/global.css';
 import '../views/scenarios/scenarios.css';
 import { useEffect, useState } from 'react';

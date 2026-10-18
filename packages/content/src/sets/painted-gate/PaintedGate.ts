@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import {
   BACKDROP, BUILDING, FACADE_TILE_TOP, FAR, GATE_BOXES, GROUND, GROUND_PAINTING_FADE, GUARDHOUSE, REFERENCE_CAMERA, ROAD, SKY_RADIUS, TILES, referenceCamera, type Box,
 } from './layout';

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
-import { castShadows, castShadowsOfAdded } from '../castShadows';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { castShadows, castShadowsOfAdded } from '@anime-vrm/engine/scene/castShadows';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
 import { annex, haiden, temizuya } from './Buildings';
 import { box, paint, ropeTexture, shideTexture, waterTexture, worldUvs, type ShrineMaterials } from './geometry';

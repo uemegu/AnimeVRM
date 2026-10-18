@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { resolveAssetUrl } from '../../utils/path';
-import { castShadows } from '../castShadows';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import { BENCH, CORNER, DOOR, FRAME, HALF_DEPTH, HALF_WIDTH, HANDRAIL, HEIGHT, SILL, WINDOW_TOP } from './layout';
 import { buildPanorama } from './Panorama';
 import { buildWheel } from './Wheel';

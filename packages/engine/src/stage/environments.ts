@@ -1,44 +1,31 @@
 import * as THREE from 'three';
 import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { disposePaintedAoiRoom, loadPaintedAoiRoom } from '../scene/painted-aoi-room/PaintedAoiRoom';
-import { disposePaintedFestival, loadPaintedFestival } from '../scene/painted-festival/PaintedFestival';
-import { disposePaintedClassroom, loadPaintedClassroom } from '../scene/painted-classroom/PaintedClassroom';
-import { disposePaintedGate, loadPaintedGate } from '../scene/painted-gate/PaintedGate';
-import { disposePaintedGround, loadPaintedGround } from '../scene/painted-ground/PaintedGround';
-import { disposePaintedLibrary, loadPaintedLibrary } from '../scene/painted-library/PaintedLibrary';
-import { disposePaintedGym, loadPaintedGym } from '../scene/painted-gym/PaintedGym';
-import { disposePaintedGondola, loadPaintedGondola } from '../scene/painted-gondola/PaintedGondola';
-import { disposePaintedSeaside, loadPaintedSeaside } from '../scene/painted-seaside/PaintedSeaside';
-import { disposeShoppingStreet, loadShoppingStreet } from '../scene/shopping-street/ShoppingStreet';
-import { disposePaintedShrine, loadPaintedShrine } from '../scene/painted-shrine/PaintedShrine';
 import { resolveAssetUrl } from '../utils/path';
 
-/** 組み込みの3D背景（builtin:<名前>） */
-const BUILTINS: Record<string, { load: () => Promise<THREE.Group>; dispose: (group: THREE.Group) => void }> = {
-  'builtin:painted-classroom': { load: loadPaintedClassroom, dispose: disposePaintedClassroom },
-  'builtin:painted-library': { load: loadPaintedLibrary, dispose: disposePaintedLibrary },
-  'builtin:painted-aoi-room': { load: loadPaintedAoiRoom, dispose: disposePaintedAoiRoom },
-  'builtin:painted-gym': { load: loadPaintedGym, dispose: disposePaintedGym },
-  'builtin:painted-gate': { load: loadPaintedGate, dispose: disposePaintedGate },
-  'builtin:painted-ground': { load: loadPaintedGround, dispose: disposePaintedGround },
-  'builtin:painted-seaside': { load: loadPaintedSeaside, dispose: disposePaintedSeaside },
-  'builtin:painted-festival': { load: loadPaintedFestival, dispose: disposePaintedFestival },
-  'builtin:shopping-street': { load: loadShoppingStreet, dispose: disposeShoppingStreet },
-  'builtin:painted-shrine': { load: loadPaintedShrine, dispose: disposePaintedShrine },
-  'builtin:painted-gondola': { load: loadPaintedGondola, dispose: disposePaintedGondola },
-};
+export interface BuiltinEnvironment {
+  load: () => Promise<THREE.Group>;
+  dispose: (group: THREE.Group) => void;
+}
+
+/** 組み込みの3D背景（builtin:<名前>）。中身は利用側が registerEnvironment で登録する（AnimeVRM のセットは @anime-vrm/content） */
+const BUILTINS = new Map<string, BuiltinEnvironment>();
+
+export function registerEnvironment(name: string, environment: BuiltinEnvironment): void {
+  BUILTINS.set(`builtin:${name}`, environment);
+}
 
 /** 場所の3D背景を読み込む。model は builtin:<名前> か glb の URL */
 export async function loadEnvironment(model: string): Promise<THREE.Object3D> {
-  const builtin = BUILTINS[model];
+  const builtin = BUILTINS.get(model);
   if (builtin) return builtin.load();
+  if (model.startsWith('builtin:')) throw new Error(`登録されていない3D背景: ${model}`);
   const gltf = await new GLTFLoader().loadAsync(resolveAssetUrl(model));
   return gltf.scene;
 }
 
 export function disposeEnvironment(model: string, object: THREE.Object3D): void {
-  const builtin = BUILTINS[model];
+  const builtin = BUILTINS.get(model);
   if (builtin) {
     builtin.dispose(object as THREE.Group);
     return;
