@@ -1,44 +1,44 @@
 [
   {
     "url": "/models/aoi/aoi-private.vrm",
-    "size": 22489724,
-    "updatedAt": "2026-10-12T00:02:06.312Z",
-    "thumbnailUrl": "/thumbnails/aoi/aoi-private.png?v=1791763326553"
+    "size": 22582976,
+    "updatedAt": "2026-10-17T06:25:40.529Z",
+    "thumbnailUrl": "/thumbnails/aoi/aoi-private.png?v=1792218340754"
   },
   {
     "url": "/models/aoi/aoi-school.vrm",
-    "size": 18217620,
-    "updatedAt": "2026-10-12T00:02:06.333Z",
-    "thumbnailUrl": "/thumbnails/aoi/aoi-school.png?v=1791763326556"
+    "size": 18546716,
+    "updatedAt": "2026-10-17T06:25:40.551Z",
+    "thumbnailUrl": "/thumbnails/aoi/aoi-school.png?v=1792218340758"
   },
   {
     "url": "/models/emili/emili-private.vrm",
     "size": 17528012,
-    "updatedAt": "2026-10-12T00:02:06.355Z",
-    "thumbnailUrl": "/thumbnails/emili/emili-private.png?v=1791763326560"
+    "updatedAt": "2026-10-17T06:25:40.570Z",
+    "thumbnailUrl": "/thumbnails/emili/emili-private.png?v=1792218340760"
   },
   {
     "url": "/models/emili/emili.vrm",
-    "size": 17370184,
-    "updatedAt": "2026-10-12T00:02:06.372Z",
-    "thumbnailUrl": "/thumbnails/emili/emili.png?v=1791763326562"
+    "size": 17473972,
+    "updatedAt": "2026-10-17T06:25:40.588Z",
+    "thumbnailUrl": "/thumbnails/emili/emili.png?v=1792218340764"
   },
   {
     "url": "/models/shion/shion-private.vrm",
     "size": 16071720,
-    "updatedAt": "2026-10-12T00:02:06.389Z",
-    "thumbnailUrl": "/thumbnails/shion/shion-private.png?v=1791763326566"
+    "updatedAt": "2026-10-17T06:25:40.608Z",
+    "thumbnailUrl": "/thumbnails/shion/shion-private.png?v=1792218340765"
   },
   {
     "url": "/models/shion/shion-school.vrm",
-    "size": 16029484,
-    "updatedAt": "2026-10-12T00:02:06.406Z",
-    "thumbnailUrl": "/thumbnails/shion/shion-school.png?v=1791763326568"
+    "size": 16146332,
+    "updatedAt": "2026-10-17T06:25:40.631Z",
+    "thumbnailUrl": "/thumbnails/shion/shion-school.png?v=1792218340769"
   },
   {
     "url": "/models/teacher/teacher.vrm",
     "size": 14706628,
-    "updatedAt": "2026-10-12T00:02:06.426Z",
-    "thumbnailUrl": "/thumbnails/teacher/teacher.png?v=1791763326572"
+    "updatedAt": "2026-10-17T06:25:40.649Z",
+    "thumbnailUrl": "/thumbnails/teacher/teacher.png?v=1792218340770"
   }
 ]

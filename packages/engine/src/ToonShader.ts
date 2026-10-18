@@ -467,9 +467,11 @@ export function applyToonShader(
           uniform float uLitHighlightStrength;
           uniform float uLitHighlightThreshold;
           uniform vec3 uLitHighlightColor;
+          float mtoonPrimaryShading = 0.0;
+          float mtoonPrimaryDotNL = 1.0;
           vec3 mtoonTerminator( const in vec3 col, const in float shading ) {
             float band = 4.0 * shading * ( 1.0 - shading );
-            return mix( col, col * uTerminatorColor, band * uTerminatorStrength );
+            return col * mix( vec3( 1.0 ), uTerminatorColor, band * uTerminatorStrength );
           }
           const float DARK_LIT_TARGET = 0.03;
           vec3 mtoonLitTone( const in vec3 albedo ) {
@@ -477,11 +479,29 @@ export function applyToonShader(
             float lift = 1.0 + min( uDarkLitLift, max( DARK_LIT_TARGET / max( luma, 1e-4 ) - 1.0, 0.0 ) );
             float dim = mix( 1.0, uBrightLitScale, smoothstep( 0.4, 0.85, luma ) );
             return albedo * lift * dim;
+          }
+          vec3 mtoonShadeTone( const in vec3 shadeCol ) {
+            // 1影の深みを引き締める
+            return shadeCol * 0.93;
           }`
           )
           .replace(
+            'shading *= shadow;',
+            /* glsl */ `shading *= shadow;
+          mtoonPrimaryShading = max( mtoonPrimaryShading, shading );
+          mtoonPrimaryDotNL = min( mtoonPrimaryDotNL, dotNL );`
+          )
+          .replace(
             'mix( material.shadeColor, material.diffuseColor, shading )',
-            'mtoonTerminator( mix( material.shadeColor, mtoonLitTone( material.diffuseColor ), shading ), shading )'
+            'mtoonTerminator( mix( mtoonShadeTone( material.shadeColor ), mtoonLitTone( material.diffuseColor ), shading ), shading )'
+          )
+          // 環境光（RE_IndirectDiffuse_MToon）が影側にも diffuseColor をそのまま足すと、
+          // せっかく指定した影色（shadeColor）が白っぽく濁ってコントラストが浅くなる。
+          // 影側では shadeColor を反映する
+          .replaceAll(
+            'reflectedLight.indirectDiffuse += irradiance * BRDF_Lambert( material.diffuseColor );',
+            /* glsl */ `vec3 indirectShade = mix( mtoonShadeTone( material.shadeColor ) * 0.88, material.diffuseColor, mtoonPrimaryShading );
+            reflectedLight.indirectDiffuse += irradiance * BRDF_Lambert( indirectShade );`
           )
           // 段の境目は影と同じくらい硬くする（ぼかすと PBR の照り返しのように見える）。影の中には出さない
           .replaceAll(
@@ -494,6 +514,16 @@ export function applyToonShader(
               vec3 litHighlightAlbedo = mtoonLitTone( material.diffuseColor ) + uLitHighlightColor;
               reflectedLight.directDiffuse += directLight.color * BRDF_Lambert( litHighlightAlbedo ) * litHighlight * uLitHighlightStrength;
             }`
+          )
+          // 輪郭線の色トレス強化: 強い光やリム光が当たる輪郭ほど、線色を表面の光色へ柔らかくなじませる
+          .replace(
+            '#if defined( OUTLINE )\n    col = outlineColorFactor.rgb * mix( vec3( 1.0 ), col, outlineLightingMixFactor );\n  #endif',
+            /* glsl */ `#if defined( OUTLINE )
+    vec3 baseOutline = outlineColorFactor.rgb * mix( vec3( 1.0 ), col, outlineLightingMixFactor );
+    float outlineLightLuma = dot( reflectedLight.directDiffuse + rimMix * rim, vec3( 0.2126, 0.7152, 0.0722 ) );
+    float traceBlend = clamp( outlineLightLuma * 0.35, 0.0, 0.38 ) * clamp( outlineLightingMixFactor + 0.35, 0.0, 1.0 );
+    col = mix( baseOutline, max( baseOutline, col * 0.62 ), traceBlend );
+  #endif`
           );
 
         injectHairShadow(shader, hairShadowUniforms, hairShadowReceiver);
@@ -604,17 +634,24 @@ export function applyToonShader(
     });
   };
 
-  // Keep eyes clear and prevent shadows on eyeballs (sclera/iris/highlights)
+  // Keep eyes clear from directional surface curvature while allowing upper bangs cast shadow on sclera/iris
   const setupEyeMaterials = () => {
     allMToonMaterials.forEach(({ material }) => {
       const matName = material.name || '';
       if (isEyeMaterial(matName)) {
-        // Eyeballs should never be shaded by skin or directional lighting
-        const whiteColor = new THREE.Color(1, 1, 1);
-        if (material.shadeColorFactor) material.shadeColorFactor.copy(whiteColor);
-        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(whiteColor);
+        const isHighlight = /EyeHighlight|Highlight.*Eye/i.test(matName);
+        if (!isHighlight && !material.shadeMultiplyTexture && material.map) {
+          material.shadeMultiplyTexture = material.map;
+        }
+        // ハイライトは常に純白を維持し、白目・虹彩は前髪の落ち影（hairShadowLit）が入った上部にだけ
+        // アニメ特有の澄んだ青紫系の陰影が落ちるようにする（shadingShiftFactor = 1.0 なので通常の法線陰影は出ない）
+        const eyeShadeTone = isHighlight
+          ? new THREE.Color(1, 1, 1)
+          : new THREE.Color('#96a0cc').multiply(originalBaseColors.get(material) ?? new THREE.Color(1, 1, 1));
+        if (material.shadeColorFactor) material.shadeColorFactor.copy(eyeShadeTone);
+        if (material.uniforms?.shadeColorFactor?.value) material.uniforms.shadeColorFactor.value.copy(eyeShadeTone);
 
-        // Always fully lit (shadingShiftFactor = 1.0) so curvature/creases never cast shadow
+        // Always fully lit against normal curvature (shadingShiftFactor = 1.0) so eyeball roundness never casts shadow
         material.shadingShiftFactor = 1.0;
         if (material.uniforms?.shadingShiftFactor) material.uniforms.shadingShiftFactor.value = 1.0;
 

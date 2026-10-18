@@ -101,11 +101,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#e0a08e",
+          "shadeMultiply": "#d89484",
           "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
-          "terminatorColor": "#ff8a70",
-          "terminatorStrength": 0.5,
+          "terminatorColor": "#ff8568",
+          "terminatorStrength": 0.58,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -118,9 +118,11 @@
         },
         "hair": {
           "color": "#ffffff",
-          "shadeMultiply": "#8474a4",
+          "shadeMultiply": "#7d6da0",
           "shadingToonyFactor": 0.994,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#e87a70",
+          "terminatorStrength": 0.42,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
@@ -136,9 +138,11 @@
           "litHighlightStrength": 0.7,
           "litHighlightThreshold": 0.78,
           "litHighlightColor": "#2a2116",
-          "shadeMultiply": "#b8bcd8",
+          "shadeMultiply": "#a6aed0",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#d68298",
+          "terminatorStrength": 0.32,
           "darkLitLift": 1,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
@@ -158,7 +162,7 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0016,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0.25
       },
       "fog": {
         "enabled": true,
@@ -266,11 +270,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#e0a08e",
+          "shadeMultiply": "#d89484",
           "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
-          "terminatorColor": "#ff8a70",
-          "terminatorStrength": 0.6,
+          "terminatorColor": "#ff8568",
+          "terminatorStrength": 0.65,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -283,9 +287,11 @@
         },
         "hair": {
           "color": "#ffffff",
-          "shadeMultiply": "#8474a4",
+          "shadeMultiply": "#7d6da0",
           "shadingToonyFactor": 0.994,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#eb7c6e",
+          "terminatorStrength": 0.45,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
@@ -301,9 +307,11 @@
           "litHighlightStrength": 0.7,
           "litHighlightThreshold": 0.78,
           "litHighlightColor": "#2a2116",
-          "shadeMultiply": "#b8bcd8",
+          "shadeMultiply": "#a6aed0",
           "shadingToonyFactor": 0.997,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#d68298",
+          "terminatorStrength": 0.35,
           "darkLitLift": 1,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
@@ -323,7 +331,7 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0016,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0.25
       },
       "fog": {
         "enabled": true,
@@ -431,11 +439,11 @@
       "materials": {
         "body": {
           "color": "#ffffff",
-          "shadeMultiply": "#d89a96",
+          "shadeMultiply": "#cf8d8a",
           "shadingToonyFactor": 0.95,
           "shadingShiftFactor": -0.05,
-          "terminatorColor": "#ff7a55",
-          "terminatorStrength": 0.7,
+          "terminatorColor": "#ff7048",
+          "terminatorStrength": 0.75,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": true,
           "emissiveIntensity": 0,
@@ -448,9 +456,11 @@
         },
         "hair": {
           "color": "#ffffff",
-          "shadeMultiply": "#8474a4",
+          "shadeMultiply": "#7a689c",
           "shadingToonyFactor": 0.991,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#f06e58",
+          "terminatorStrength": 0.52,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
           "emissiveIntensity": 0,
@@ -466,9 +476,11 @@
           "litHighlightStrength": 0.7,
           "litHighlightThreshold": 0.78,
           "litHighlightColor": "#2a2116",
-          "shadeMultiply": "#b8bcd8",
+          "shadeMultiply": "#9ea4c8",
           "shadingToonyFactor": 0.9955,
           "shadingShiftFactor": -0.05,
+          "terminatorColor": "#e27868",
+          "terminatorStrength": 0.42,
           "darkLitLift": 1,
           "giEqualizationFactor": 0.9,
           "matcapEnabled": false,
@@ -488,7 +500,7 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0016,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0.3
       },
       "fog": {
         "enabled": true,
