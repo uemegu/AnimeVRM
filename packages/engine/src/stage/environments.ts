@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { LocationEnvironment } from '@anime-vrm/scenario';
+import type { LocationEnvironment } from '../schema/visual';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { resolveAssetUrl } from '../utils/path';
 

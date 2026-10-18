@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { VRMLoaderPlugin, VRMUtils, type VRM } from '@pixiv/three-vrm';
-import type { LocationCrowd } from '@anime-vrm/scenario';
+import type { LocationCrowd } from '../schema/visual';
 import { loadMixamoAnimation } from './StageAvatar';
-import { resolveAssetUrl } from '../utils/path';
+import { motionUrl, resolveAssetUrl } from '../utils/path';
 
 /**
  * A crowd of passers-by drawn as pale, flat figures (the way anime and games
@@ -291,7 +291,7 @@ export class Crowd {
       const mixer = new THREE.AnimationMixer(vrm.scene);
       try {
         for (const motion of motions) {
-          const clip = await loadMixamoAnimation(`/animations/${motion}.fbx`, vrm).catch(() => null);
+          const clip = await loadMixamoAnimation(motionUrl(motion), vrm).catch(() => null);
           if (key !== this.settingsKey) return;
           if (!clip) continue;
           const action = mixer.clipAction(clip);

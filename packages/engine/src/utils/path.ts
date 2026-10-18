@@ -1,5 +1,38 @@
 /**
- * Resolves a public asset path considering Vite's base path (e.g. GitHub Pages repository subpath).
+ * 素材の置き場所の設定。
+ * - base: 素材のパス（/textures/... など）の前に付ける基準。省略時は Vite の BASE_URL（なければ /）
+ * - motionUrl: モーション名から FBX の URL を作る
+ * - idleMotion: モーションの指定がないときの待機モーション
+ */
+export interface AssetConfig {
+  base: string;
+  motionUrl: (name: string) => string;
+  idleMotion: string;
+}
+
+const assetConfig: AssetConfig = {
+  base: import.meta.env?.BASE_URL || '/',
+  motionUrl: (name) => `/animations/${name}.fbx`,
+  idleMotion: 'Standing Idle',
+};
+
+/** 素材の置き場所を変える（アプリの入口で、描画を始める前に呼ぶ） */
+export function configureAssets(config: Partial<AssetConfig>): void {
+  Object.assign(assetConfig, config);
+}
+
+/** モーション名（または URL）から FBX の URL */
+export function motionUrl(motion: string): string {
+  return /^(blob:|data:|https?:|\/)/.test(motion) ? motion : assetConfig.motionUrl(motion);
+}
+
+/** 待機モーションの URL */
+export function idleMotionUrl(): string {
+  return motionUrl(assetConfig.idleMotion);
+}
+
+/**
+ * Resolves a public asset path considering the asset base (e.g. GitHub Pages repository subpath).
  * Idempotent: will not duplicate the base path if already present.
  */
 export function resolveAssetUrl(path: string): string {
@@ -18,7 +51,7 @@ function resolvePath(path: string): string {
     return path;
   }
 
-  const base = import.meta.env.BASE_URL || '/';
+  const base = assetConfig.base;
   const normalizedBase = base.endsWith('/') ? base : `${base}/`;
 
   // If path already starts with normalizedBase, return it as is

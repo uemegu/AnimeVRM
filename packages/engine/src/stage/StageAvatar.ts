@@ -15,10 +15,9 @@ import { ClothDent } from '../avatar/clothDent';
 import { SpringWind, type WindSettings } from '../avatar/springWind';
 import { WetDrips } from '../avatar/wetDrips';
 import { AvatarEffects } from './AvatarEffects';
-import { resolveAssetUrl } from '../utils/path';
+import { idleMotionUrl, resolveAssetUrl } from '../utils/path';
 import { setDaylight } from '../scene/Daylight';
 import { HeldItem } from '../avatar/heldItem';
-import type { HeldItemId } from '@anime-vrm/scenario';
 
 const animationAssetCache = new Map<string, THREE.Group>();
 /** モデルごとに変換したモーション。モデルを捨てたら一緒に消えるよう、モデルをキーにする */
@@ -282,7 +281,7 @@ export class StageAvatar {
   public effects: AvatarEffects | null = null;
   /** 手に持つ小物 */
   private heldItem: HeldItem | null = null;
-  private pendingHeldItem: { item: HeldItemId; hand?: 'left' | 'right' } | null = null;
+  private pendingHeldItem: { item: string; hand?: 'left' | 'right' } | null = null;
   private motionSpeed = 1;
 
   private currentAction: THREE.AnimationAction | null = null;
@@ -349,7 +348,7 @@ export class StageAvatar {
     this.clothDentEnabled = options.clothDent ?? true;
   }
 
-  public async load(modelUrl: string, defaultAnimationUrl = '/animations/Standing Idle.fbx'): Promise<VRM> {
+  public async load(modelUrl: string, defaultAnimationUrl = idleMotionUrl()): Promise<VRM> {
     const loader = new GLTFLoader();
     loader.register((parser) => new VRMLoaderPlugin(parser));
 
@@ -466,7 +465,7 @@ export class StageAvatar {
   }
 
   /** 手に持つ小物（null で手放す） */
-  public setHeldItem(spec: { item: HeldItemId; hand?: 'left' | 'right' } | null | undefined): void {
+  public setHeldItem(spec: { item: string; hand?: 'left' | 'right' } | null | undefined): void {
     this.pendingHeldItem = spec ?? null;
     if (!this.vrm) return;
     this.heldItem ??= new HeldItem(this.vrm);

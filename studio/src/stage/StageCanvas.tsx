@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { CameraPose, CameraShift, CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, ShotRig } from '@anime-vrm/scenario';
+import { cutTimeline } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { useRenderQuality } from './renderQuality';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
@@ -181,7 +182,7 @@ export function StageCanvas({
     const manager = managerRef.current;
     if (!manager) return;
     manager.setCameraPose(cut?.cameraPose ?? null);
-    manager.setCutTimeline(cut);
+    manager.setCutTimeline(cut && cutTimeline(cut));
     manager.setCutTime(cutTime, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cutKey]);

@@ -17,17 +17,10 @@ const ALWAYS = [
   'studio/bgm.json',
   'studio/motions.json',
   'studio/projects.json',
-  'textures/girl_face_blush.png',
-  'textures/girl_face_redface.avif',
-  'textures/girl_face_anger.png',
-  'textures/girl_face_sweat.png',
   'animations/Standing Idle.fbx',
-  // ボイスの口パク解析（VoiceAnalyser.ts が読む AudioWorklet と WASM）
-  'worklets/lipsync-processor.js',
-  'wasm/lipsync.wasm',
-  // 雨で濡れた服の絵柄（WetCloth.ts が名前を決め打ちで読む）
+  // 雨で濡れた服の絵柄（content の wet.ts が登録する）
   'textures/wet',
-  // 手に持つ小物の絵柄（heldItem.ts が名前を決め打ちで読む）
+  // 手に持つ小物の絵柄（content の props.ts が名前を決め打ちで読む）
   'textures/props',
   // 場所の選択で選べる海の見える公園（簡易3D）。どのシナリオからも参照されないため固定で入れる
   'textures/painted-seaside',

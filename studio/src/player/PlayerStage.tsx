@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ScenarioAssets, CameraShot, CutinConfig, ScenarioScene, SceneEffects, StillImageConfig, ScrollingBackgroundSettings, StageCastMember, TimeOfDayId } from '@anime-vrm/scenario';
+import { cutTimeline } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { useRenderQuality } from '../stage/renderQuality';
 import { StageLoading, useCastLoading } from '../stage/StageLoading';
@@ -143,7 +144,7 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     const manager = managerRef.current;
     if (!manager) return;
     manager.setCameraPose(cut?.cameraPose ?? null);
-    manager.setCutTimeline(cut);
+    manager.setCutTimeline(cut && cutTimeline(cut));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cut]);
 

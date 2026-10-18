@@ -13,10 +13,13 @@ import { resolveAssetUrl } from '../utils/path';
  * 位置は骨の変形前（バインド姿勢）のメッシュの座標で決めるので、動いても染みは布についたまま動く。
  */
 
-/** 濡れた版のテクスチャ（VRoid の制服Yシャツ N00_007_02_Tops の UV で描いたもの） */
-const WET_TEXTURES: Array<{ pattern: RegExp; url: string }> = [
-  { pattern: /^N00_007_02_Tops_01_CLOTH/, url: '/textures/wet/school_shirt_wet.avif' },
-];
+/** 濡れた版のテクスチャ（マテリアル名ごと）。中身は利用側が registerWetTexture で登録する */
+const WET_TEXTURES: Array<{ pattern: RegExp; url: string }> = [];
+
+/** マテリアル名が pattern に合う服に、同じ UV で描いた濡れた版のテクスチャ（url）を使う */
+export function registerWetTexture(pattern: RegExp, url: string): void {
+  WET_TEXTURES.push({ pattern, url });
+}
 
 const wetTextureCache = new Map<string, THREE.Texture>();
 

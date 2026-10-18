@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { StageSprite } from '@anime-vrm/scenario';
+import type { StageSprite } from '../schema/stage';
 
 const textureCache = new Map<string, Promise<THREE.Texture>>();
 
