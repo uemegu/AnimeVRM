@@ -23,7 +23,7 @@ import {
   Vec3,
 } from '@anime-vrm/engine/schema/stage';
 
-// カメラ・演出・一枚絵など描画に渡す部分の定義は engine にある
+// カメラ・演出・一枚絵など舞台に渡す部分は engine の schema/stage.ts を使う
 export * from '@anime-vrm/engine/schema/stage';
 
 /** 心の声（全角かっこで囲んだセリフ）か。話者がいても口を動かさない */

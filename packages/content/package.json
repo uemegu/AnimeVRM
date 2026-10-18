@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "AnimeVRM のデモ・作品で使う中身（簡易3D背景のセット、手に持つ小物）。描画は @anime-vrm/engine",
+  "description": "簡易3D背景のセット、手に持つ小物、濡れた服の絵柄",
   "exports": {
     "./register": "./src/register.ts",
     "./*": "./src/*.ts"

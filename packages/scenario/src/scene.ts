@@ -1,6 +1,4 @@
-/**
- * シーン設定（assets/studio/time-of-day.json・locations.json）。項目の定義は engine の見た目の設定にある
- */
+/** シーン設定（assets/studio/time-of-day.json・locations.json）の形。engine の schema/visual.ts を使う */
 export * from '@anime-vrm/engine/schema/visual';
 
 /** 組み込みの3D背景（コードで組み立てるセット） */
