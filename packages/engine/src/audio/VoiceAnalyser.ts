@@ -1,7 +1,9 @@
-import { resolveAssetUrl } from '../utils/path';
-
 /** WASM の無音判定に渡す共通の閾値。 */
 export const VOICE_SILENCE_RMS = 0.003;
+
+/** 口パク解析の AudioWorklet と WASM（engine に同梱） */
+const WORKLET_URL = new URL('./lipsync-processor.js', import.meta.url).href;
+const WASM_URL = new URL('./lipsync.wasm', import.meta.url).href;
 
 const moduleLoads = new WeakMap<AudioContext, Promise<void>>();
 const wasmLoads = new Map<string, Promise<ArrayBuffer>>();
@@ -20,11 +22,11 @@ function loadWorkletModule(context: AudioContext): Promise<void> {
 /** Worklet のソース（先読みしてあればメモリ上の blob URL） */
 let workletBlobUrl: Promise<string> | null = null;
 function workletSource(): Promise<string> {
-  return workletBlobUrl ?? Promise.resolve(resolveAssetUrl('/worklets/lipsync-processor.js'));
+  return workletBlobUrl ?? Promise.resolve(WORKLET_URL);
 }
 
 function loadWasmBytes(): Promise<ArrayBuffer> {
-  const url = resolveAssetUrl('/wasm/lipsync.wasm');
+  const url = WASM_URL;
   const existing = wasmLoads.get(url);
   if (existing) return existing;
   const loading = fetch(url).then(async (response) => {
@@ -42,7 +44,7 @@ function loadWasmBytes(): Promise<ArrayBuffer> {
 export async function preloadVoiceAnalyser(): Promise<void> {
   await Promise.all([
     loadWasmBytes(),
-    (workletBlobUrl ??= fetch(resolveAssetUrl('/worklets/lipsync-processor.js'))
+    (workletBlobUrl ??= fetch(WORKLET_URL)
       .then(async (res) => {
         if (!res.ok) throw new Error(`LipSync worklet request failed: ${res.status}`);
         return URL.createObjectURL(new Blob([await res.text()], { type: 'text/javascript' }));

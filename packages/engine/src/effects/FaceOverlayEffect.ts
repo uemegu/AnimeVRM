@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import { resolveAssetUrl } from '../utils/path';
 
+/** 顔に重ねる絵（VRoid の顔の UV で描いたもの。engine に同梱） */
 export const FACE_OVERLAY_TEXTURES = {
-  blush: '/textures/girl_face_blush.png',
-  sweat: '/textures/girl_face_sweat.png',
-  anger: '/textures/girl_face_anger.png',
+  blush: new URL('./textures/girl_face_blush.png', import.meta.url).href,
+  sweat: new URL('./textures/girl_face_sweat.png', import.meta.url).href,
+  anger: new URL('./textures/girl_face_anger.png', import.meta.url).href,
   /** 泣き叫ぶときの強い赤面（blush より濃く広い） */
-  redface: '/textures/girl_face_redface.avif',
+  redface: new URL('./textures/girl_face_redface.avif', import.meta.url).href,
 } as const;
 
 export type FaceOverlayKind = keyof typeof FACE_OVERLAY_TEXTURES;

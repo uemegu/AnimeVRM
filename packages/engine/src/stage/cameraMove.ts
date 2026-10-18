@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { ResolvedCameraMove } from '@anime-vrm/scenario';
+import type { ResolvedCameraMove } from '../schema/stage';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const deg = THREE.MathUtils.degToRad;

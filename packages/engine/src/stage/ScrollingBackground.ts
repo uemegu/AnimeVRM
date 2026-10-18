@@ -72,8 +72,8 @@ const ScrollingBlurShader = {
 };
 
 /** 流れる背景の設定。定義はシナリオと共有するパッケージ（packages/scenario/src/stage.ts）にある */
-export type { ScrollingBackgroundSettings } from '@anime-vrm/scenario';
-import type { ScrollingBackgroundSettings } from '@anime-vrm/scenario';
+export type { ScrollingBackgroundSettings } from '../schema/stage';
+import type { ScrollingBackgroundSettings } from '../schema/stage';
 
 const PLANE_DISTANCE = 4.5;
 

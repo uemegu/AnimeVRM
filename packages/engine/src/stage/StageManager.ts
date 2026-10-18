@@ -22,7 +22,7 @@ import { applyCelShading, setCelLight } from '../scene/celShading';
 import { ScrollingBackground, type ScrollingBackgroundSettings } from './ScrollingBackground';
 import { StageAvatar, loadMixamoAnimation } from './StageAvatar';
 import { Crowd } from './Crowd';
-import { preloadAssets, resolveAssetUrl } from '../utils/path';
+import { idleMotionUrl, motionUrl, preloadAssets, resolveAssetUrl } from '../utils/path';
 import { preloadVoiceAnalyser } from '../audio/VoiceAnalyser';
 import { ScreenEffects } from './ScreenEffects';
 import { RainGround } from './RainGround';
@@ -33,36 +33,13 @@ import { HairShadowRenderer } from '../shader/HairShadow';
 import { CharacterMaskRenderer, DEFAULT_LIGHT_WRAP_PARAMS, EYE_LAYER, LightWrapShader, VisibleMaskPass } from '../postprocessing/LightWrap';
 import { ParaShader, DEFAULT_PARA_PARAMS, applyParaParams } from '../postprocessing/Para';
 import { setHairRingTint } from '../shader/HairRing';
-import {
-  cutStateAt,
-  resolveBloomConfig,
-  resolveLocationVisuals,
-  DEFAULT_AVATAR_LOOK,
-  DEFAULT_BACKDROP,
-  DEFAULT_CAMERA_FOV,
-  DEFAULT_DEPTH_OF_FIELD,
-  DEFAULT_SHOT_RIGS,
-  DEFAULT_SLOT_POSITIONS,
-  isInnerVoice,
-  type CameraPose as CameraPoseSetting,
-  type CameraShift,
-  type CameraShot,
-  type LocationStage,
-  type ShotRig,
-  type AvatarOneShot,
-  type CutAvatarState,
-  type CutState,
-  type ResolvedCameraMove,
-  type ScenarioScene,
-  type SceneEffects,
-  type TextContent,
-} from '@anime-vrm/scenario';
+import { resolveBloomConfig, resolveLocationVisuals, DEFAULT_BACKDROP, DEFAULT_CAMERA_FOV, DEFAULT_DEPTH_OF_FIELD, DEFAULT_SHOT_RIGS, DEFAULT_SLOT_POSITIONS, type LocationStage, type ShotRig } from '../schema/visual';
+import { DEFAULT_AVATAR_LOOK, type CameraPose as CameraPoseSetting, type CameraShift, type CameraShot, type AvatarOneShot, type CutAvatarState, type CutState, type CutTimeline, type ResolvedCameraMove, type SceneEffects, type TextContent } from '../schema/stage';
 import type { StageCastMember } from './types';
 import { StageSpriteActor } from './StageSprite';
 import { applyCameraMove } from './cameraMove';
 import { FrameRateCheck, resolveStageQuality, stageQualityOf, type StageQuality, type StageQualityLevel } from './quality';
 
-const IDLE_ANIMATION_URL = '/animations/Standing Idle.fbx';
 /** これより短いモーションは止め絵のポーズとして扱う（待機に戻さず保つ） */
 // 3D背景の動かない小物の影を描くときだけ使うレイヤー（staticShadowCamera が見る）
 const STATIC_SHADOW_LAYER = 8;
@@ -258,7 +235,7 @@ export class StageManager {
   private freeCamera = false;
 
   // カット内のタイムライン（キーフレーム）
-  private cutScene: ScenarioScene | null = null;
+  private cut: CutTimeline | null = null;
   private cutTime = 0;
   /** キャラごとに最後に当てた状態（差分だけ当てるため） */
   private appliedCut = new Map<string, string>();
@@ -1213,7 +1190,7 @@ export class StageManager {
         const avatar = await this.loadAvatar(item.id, item.modelUrl);
         if (!avatar.vrm) continue;
         for (const motion of item.motions ?? []) {
-          await loadMixamoAnimation(`/animations/${motion}.fbx`, avatar.vrm).catch(() => undefined);
+          await loadMixamoAnimation(motionUrl(motion), avatar.vrm).catch(() => undefined);
         }
       } catch (err) {
         console.warn(`Failed to prewarm avatar ${item.id}:`, err);
@@ -1344,8 +1321,8 @@ export class StageManager {
 
   /** モーション再生。1回きりのモーションは終わったら待機モーションへ戻す（止め絵のポーズは保つ） */
   private playMotion(id: string, avatar: StageAvatar, motion: string | undefined, loop: boolean, cue = '', offsetSec = 0): void {
-    // モーション名（assets/animations/<名前>.fbx）のほか、URL（Studio で生成した直後の FBX など）も受け付ける
-    const url = !motion ? IDLE_ANIMATION_URL : /^(blob:|data:|https?:|\/)/.test(motion) ? motion : `/animations/${motion}.fbx`;
+    // モーション名（置き場所は configureAssets の motionUrl）のほか、URL（Studio で生成した直後の FBX など）も受け付ける
+    const url = !motion ? idleMotionUrl() : motionUrl(motion);
     // 指定が変わった時だけ再生する（1回きりの身振りが待機に戻った後、同じ指定で再生し直さない）
     const key = `${url}|${loop}|${cue}`;
     if (this.avatarMotionUrls.get(id) === key) return;
@@ -1365,7 +1342,7 @@ export class StageManager {
       const timer = window.setTimeout(() => {
         this.motionReturnTimers.delete(id);
         if (this.avatarMotionUrls.get(id) !== key) return;
-        avatar.playAnimation(IDLE_ANIMATION_URL, true);
+        avatar.playAnimation(idleMotionUrl(), true);
       }, durationMs);
       this.motionReturnTimers.set(id, timer);
     });
@@ -1501,8 +1478,8 @@ export class StageManager {
   }
 
   /** カット内のタイムライン（キーフレーム）。カットが変わったら呼ぶ */
-  public setCutTimeline(scene: ScenarioScene | null): void {
-    this.cutScene = scene;
+  public setCutTimeline(cut: CutTimeline | null): void {
+    this.cut = cut;
     this.cutTime = 0;
     // getElapsedTime() は時計を進めて描画ループの delta を食うので、読むだけにする
     this.cutStartedAt = this.clock.elapsedTime;
@@ -1511,13 +1488,13 @@ export class StageManager {
     // 前のカットの文字演出・汗は消す
     this.firedOneShots.clear();
     this.loadedAvatars.forEach((avatar) => avatar.effects?.clearOneShots());
-    this.screenEffects?.playTransition(scene?.screenTransition ?? null, false, () => this.locationReady);
+    this.screenEffects?.playTransition(cut?.screenTransition ?? null, false, () => this.locationReady);
     this.applyCutState(false);
   }
 
   /** カットの切り替え演出（暗転・瞼）をもう一度見せる（Studio で先頭から再生したとき） */
   public replayScreenTransition(): void {
-    this.screenEffects?.playTransition(this.cutScene?.screenTransition ?? null);
+    this.screenEffects?.playTransition(this.cut?.screenTransition ?? null);
   }
 
   /** 文字演出などの言語 */
@@ -1540,7 +1517,7 @@ export class StageManager {
 
   /** カットの指定にタイムラインを重ねた状態を、変わったところだけ当てる */
   private applyCutState(seek: boolean): void {
-    const state: CutState = this.cutScene ? cutStateAt(this.cutScene, this.cutTime) : { avatars: {}, camera: {}, focusLines: false, oneShots: [] };
+    const state: CutState = this.cut ? this.cut.stateAt(this.cutTime) : { avatars: {}, camera: {}, focusLines: false, oneShots: [] };
     for (const member of this.castMembers) {
       const avatar = this.loadedAvatars.get(member.id);
       if (!avatar?.vrm || !this.castIds.includes(member.id)) continue;
@@ -1692,7 +1669,7 @@ export class StageManager {
   /** 今のずらし。キーで構図を切り替えていればキーの指定、なければカットの指定 */
   private currentShift(): CameraShift | null {
     if (this.timelineShot) return this.timelineShift;
-    return this.cutScene?.cameraShift ?? this.cameraShift;
+    return this.cut?.cameraShift ?? this.cameraShift;
   }
 
   /** 注視点はそのまま、カメラを画面の左右・上下の向きへ平行にずらす */
@@ -1931,7 +1908,7 @@ export class StageManager {
       const currentPreset = resolveLocationVisuals(this.presets.timeOfDay[this.currentTimeOfDay] || this.presets.timeOfDay.day, this.presets.locations[this.currentLocationId]?.stage);
 
       // 0. カット内のタイムライン、カメラ構図の補間と、流れる背景
-      if (this.getCutTime && this.cutScene) {
+      if (this.getCutTime && this.cut) {
         const time = this.getCutTime() ?? elapsed - this.cutStartedAt;
         if (time !== this.cutTime) this.setCutTime(time);
       }
@@ -1947,7 +1924,7 @@ export class StageManager {
       const phoneme = this.getSpeakerPhoneme?.();
       const mouthOpen = this.getSpeakerMouthOpen?.() ?? 1;
       // 心の声（かっこで囲んだセリフ）は、ボイスがあっても口を動かさない
-      const innerVoice = isInnerVoice(this.cutScene?.text);
+      const innerVoice = this.cut?.innerVoice ?? false;
       for (const id of this.castIds) {
         const avatar = this.loadedAvatars.get(id);
         if (!avatar?.vrm) continue;

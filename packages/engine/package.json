@@ -7,7 +7,11 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:wasm": "asc assembly/index.ts --config asconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
   },
   "peerDependencies": {
     "@pixiv/three-vrm": "^3.5.5",
@@ -20,9 +24,9 @@
     }
   },
   "devDependencies": {
-    "@anime-vrm/scenario": "*",
     "@pixiv/three-vrm": "^3.5.5",
     "@types/three": "^0.185.4",
+    "assemblyscript": "^0.28.20",
     "meyda": "^5.6.3",
     "three": "^0.183.2",
     "typescript": "^7.0.2",

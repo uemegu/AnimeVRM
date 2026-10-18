@@ -3,9 +3,11 @@
  * ゲーム固有のルール（フェーズごとの時間帯・服装・場所）は呼び出し側が決めて渡す
  */
 import { z } from 'zod';
-import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraMove, CameraMoveType, CameraPose, CameraShift, CameraShot, EffectText, HeldItemId, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig, SweatMode } from './schema.ts';
+import { isInnerVoice } from './schema.ts';
+import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraMove, CameraMoveType, CameraShot, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
+import type { AvatarOneShot, CutAvatarState, CutCameraState, CutState, CutTimeline, ResolvedCameraMove, ScrollingBackgroundSettings, StageCastMember } from '@anime-vrm/engine/schema/stage';
 
 /** シナリオ再生中の舞台の状態。シーンで指定された項目だけ上書きし、指定のない項目は前のシーンから引き継ぐ */
 export interface StageState {
@@ -45,90 +47,10 @@ function mergeStill<T extends { url: string }>(prev: T | null | undefined, value
   return (typeof value === 'string' ? { url: value } : value) as T;
 }
 
-/** 舞台に立てる 2D のデフォルメ画像（描画に渡す形） */
-export interface StageSprite {
-  frames: string[];
-  fps: number;
-  playback: 'once' | 'loop' | 'pingpong';
-  /** 高さ（メートル） */
-  height: number;
-}
-
-/** 舞台に出すキャラ1人分（描画に渡す形） */
-export interface StageCastMember {
-  id: string;
-  /** sprite があるときは空 */
-  modelUrl: string;
-  /** 2D のデフォルメ画像。あれば 3D のモデルは出さない */
-  sprite?: StageSprite;
-  /** 立ち位置の座標。省略時は slot から、場所の設定（または既定）の位置を使う */
-  position?: [number, number, number];
-  slot?: 'left' | 'center' | 'right';
-  /** 省略時は横に立つほど少し内側を向く */
-  rotationY?: number;
-  expression: string;
-  expressionWeight: number;
-  motion?: string;
-  motionLoop: boolean;
-  /** モーションを指定したシーン（変わったら同じモーションでも再生し直す） */
-  motionCue?: string;
-  /** 視線の先（player / camera / partner / speaker / forward / キャラ ID）。なければ正面のまま */
-  lookAtTarget?: string;
-  /** 顔の向きを視線の先へどれだけ向けるか（0〜1） */
-  headTurn?: number;
-  /** 顔・体の演出（指定を変えるまで続く）。省略時は何もしない */
-  look?: AvatarLook;
-  /** 日なたの明るさ（窓の外の人物など） */
-  daylight?: number;
-  /** 雨で濡れた具合（0〜1） */
-  wet?: number;
-  /** 手に持つ小物（hand を省略したら小物ごとの既定の手） */
-  heldItem?: { item: HeldItemId; hand?: 'left' | 'right' };
-}
-
-/** 顔・体の演出の状態 */
-export interface AvatarLook {
-  blush: boolean;
-  /** 赤面・涙目・あわあわ口（省略は false） */
-  redface?: boolean;
-  tearyEyes?: boolean;
-  awawaMouth?: boolean;
-  /** 涙目で目尻の涙の粒を出すか（キャラの設定。省略は出す） */
-  tearDrops?: boolean;
-  anger: boolean;
-  tears: boolean;
-  /** 顔に汗のテクスチャを重ねる（今はビューアの試し用で、シナリオからは指定できない） */
-  faceSweat?: boolean;
-  /** 目が泳ぐ強さ（0 で止まる） */
-  eyeWander: number;
-  fastMotion: boolean;
-  motionSpeed: number;
-}
-
-export const DEFAULT_AVATAR_LOOK: AvatarLook = { blush: false, anger: false, tears: false, eyeWander: 0, fastMotion: false, motionSpeed: 1 };
-
-/** 1回だけ出す演出（文字演出・汗）。key はカット内で同じ演出を二重に出さないための識別子 */
-export interface AvatarOneShot {
-  id: string;
-  at: number;
-  key: string;
-  effectText?: EffectText;
-  sweat?: SweatMode;
-}
-
 /** 目が泳ぐ指定を強さにする */
 export function eyeWanderIntensity(value: boolean | number | undefined): number {
   if (value === undefined || value === false) return 0;
   return value === true ? 1 : value;
-}
-
-/** 流れる背景（描画に渡す形。省略項目は既定値で埋めたもの） */
-export interface ScrollingBackgroundSettings {
-  textureUrl: string;
-  speed: number;
-  blur: number;
-  direction: 'left' | 'right';
-  featherWidth: number;
 }
 
 export const EMPTY_STAGE: StageState = { cast: {} };
@@ -331,30 +253,6 @@ export const BgmBook = z.strictObject({
 });
 export type BgmBook = z.infer<typeof BgmBook>;
 
-/** カット内のある時刻のキャラの状態（タイムラインのキーフレームで上書きされた項目だけ） */
-export interface CutAvatarState {
-  expression?: string;
-  expressionWeight?: number;
-  motion?: string;
-  motionLoop?: boolean;
-  /** 今のモーションを始めた時刻（頭出しでモーションの途中から再生するため） */
-  motionAt?: number;
-  lookAtTarget?: string;
-  headTurn?: number;
-  visible?: boolean;
-  blush?: boolean;
-  redface?: boolean;
-  tearyEyes?: boolean;
-  awawaMouth?: boolean;
-  anger?: boolean;
-  tears?: boolean;
-  eyeWander?: number;
-  motionSpeed?: number;
-  /** 移動（at から duration 秒で to へ）と退場（at から duration 秒で透明になる） */
-  move?: { at: number; to: [number, number, number]; duration: number };
-  fadeOut?: { at: number; duration: number };
-}
-
 /** カメラの動きの種類ごとの既定の秒数 */
 export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
   pan_left: 3,
@@ -374,43 +272,13 @@ export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
   dutch_right: 1,
 };
 
-/** 秒数・大きさを埋めたカメラの動きと、動き始める時刻 */
-export interface ResolvedCameraMove {
-  type: CameraMoveType;
-  duration: number;
-  amount: number;
-  at: number;
-}
-
 export function resolveCameraMove(move: CameraMove, at = 0): ResolvedCameraMove {
   const spec = typeof move === 'string' ? { type: move } : move;
   return { type: spec.type, duration: spec.duration ?? CAMERA_MOVE_DEFAULT_SEC[spec.type], amount: spec.amount ?? 1, at };
 }
 
-/** カット内のある時刻のカメラ（キーフレームで切り替えた構図・直接指定） */
-export interface CutCameraState {
-  shot?: CameraShot;
-  /** 構図を切り替えたキーのずらし（省略で真ん中） */
-  shift?: CameraShift;
-  pose?: CameraPose;
-  /** 切り替えた時刻と、動かすのにかける秒数 */
-  at?: number;
-  duration?: number;
-  /** 今のカメラの動き（カットの指定、またはキーで始めた動き） */
-  move?: ResolvedCameraMove;
-}
-
 /** カットに書いた文字演出・汗を出すまでの秒数（カメラが落ち着いてから出す） */
 export const CUT_ONE_SHOT_DELAY = 0.5;
-
-/** カット内のある時刻の状態 */
-export interface CutState {
-  avatars: Record<string, CutAvatarState>;
-  camera: CutCameraState;
-  focusLines: boolean;
-  /** 時刻 t までに出す1回きりの演出（カットの指定は at 0） */
-  oneShots: AvatarOneShot[];
-}
 
 /**
  * カットの時刻 t（ボイスの再生位置、なければカット開始からの秒数）での、キーフレームを反映した状態。
@@ -474,6 +342,16 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
   }
   if (!camera.move) delete camera.move;
   return { avatars, camera, focusLines, oneShots };
+}
+
+/** カットを描画に渡す形にする（StageManager.setCutTimeline） */
+export function cutTimeline(scene: ScenarioScene): CutTimeline {
+  return {
+    stateAt: (t) => cutStateAt(scene, t),
+    screenTransition: scene.screenTransition,
+    cameraShift: scene.cameraShift,
+    innerVoice: isInnerVoice(scene.text),
+  };
 }
 
 /** カットのカメラの動きが終わる時刻（動きがなければ 0。揺らし続ける手持ち風は数えない） */

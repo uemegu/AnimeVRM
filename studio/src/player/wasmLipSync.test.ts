@@ -14,7 +14,7 @@ interface AnalyzerExports {
 }
 
 async function analyzer() {
-  const bytes = readFileSync(new URL('../../../assets/wasm/lipsync.wasm', import.meta.url));
+  const bytes = readFileSync(new URL('../../../packages/engine/src/audio/lipsync.wasm', import.meta.url));
   const result = await WebAssembly.instantiate(bytes, { env: { abort: () => { throw new Error('WASM abort'); } } });
   const wasm = result.instance.exports as unknown as AnalyzerExports;
   expect(Number(wasm.LIP_SYNC_ABI_VERSION.value)).toBe(2);
@@ -62,7 +62,7 @@ describe('WASM mouth opening from the recording', () => {
       registerProcessor: (_name: string, processor: unknown) => { sandbox.processor = processor; },
       processor: undefined as unknown,
     };
-    const source = readFileSync(new URL('../../../assets/worklets/lipsync-processor.js', import.meta.url), 'utf8');
+    const source = readFileSync(new URL('../../../packages/engine/src/audio/lipsync-processor.js', import.meta.url), 'utf8');
     runInNewContext(source, sandbox);
     const Processor = sandbox.processor as new () => {
       port: { onmessage: (event: unknown) => Promise<void> };

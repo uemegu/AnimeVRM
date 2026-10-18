@@ -6,17 +6,25 @@
  * ID が実在するかどうかはマスターデータと突き合わせて別に確かめる。
  */
 import { z } from 'zod';
+import {
+  CameraMove,
+  CameraPose,
+  CameraShift,
+  CameraShot,
+  CutinConfig,
+  EffectText,
+  LocalizedString,
+  SceneEffects,
+  ScreenTransition,
+  ScrollingBackgroundConfig,
+  StillImageConfig,
+  SweatMode,
+  TextContent,
+  Vec3,
+} from '@anime-vrm/engine/schema/stage';
 
-/** 日本語必須・英語任意の文字列 */
-export const LocalizedString = z.strictObject({
-  ja: z.string(),
-  en: z.string().optional(),
-});
-export type LocalizedString = z.infer<typeof LocalizedString>;
-
-/** 素の文字列（日本語のみ）または多言語文字列 */
-export const TextContent = z.union([z.string(), LocalizedString]);
-export type TextContent = z.infer<typeof TextContent>;
+// カメラ・演出・一枚絵など描画に渡す部分の定義は engine にある
+export * from '@anime-vrm/engine/schema/stage';
 
 /** 心の声（全角かっこで囲んだセリフ）か。話者がいても口を動かさない */
 export function isInnerVoice(text: TextContent | undefined): boolean {
@@ -30,85 +38,13 @@ export const FlagMap = z.record(z.string(), FlagValue);
 export const AffinityMap = z.record(z.string(), z.number());
 
 export const Vec2 = z.tuple([z.number(), z.number()]);
-export const Vec3 = z.tuple([z.number(), z.number(), z.number()]);
 
 /** キャラクターの立ち位置スロット */
 export const AvatarSlotPosition = z.enum(['left', 'right', 'center']);
 export type AvatarSlotPosition = z.infer<typeof AvatarSlotPosition>;
 
-/**
- * カメラの構図。極端な接写は禁止（開発ルール）なので close でもバストアップまで
- * - wide: 登場キャラ全員が入る引き
- * - medium: 話者を中心に隣の人物も入る会話ショット
- * - speaker: 話者のウェストアップ（1人の場面の既定）
- * - close: 話者のバストアップ（感情の強調）
- * - side: 話者を横から（並んで歩きながらの会話。話者は画面の左寄りに横向きで映る）
- */
-export const CameraShot = z.enum(['wide', 'medium', 'speaker', 'close', 'side']);
-export type CameraShot = z.infer<typeof CameraShot>;
-
-/**
- * 構図からカメラを上下左右へずらす位置（3x3 の真ん中以外の8方向。省略で真ん中）。
- * 注視点はそのままなので、少し上から・下から・斜めから見る形になる
- */
-export const CameraShift = z.enum(['up_left', 'up', 'up_right', 'left', 'right', 'down_left', 'down', 'down_right']);
-export type CameraShift = z.infer<typeof CameraShift>;
-
-/**
- * カメラの動き（構図・直接指定に重ねて、カットの間に動かす）。多くは動いた末に指定した構図へ着地する
- * - pan_left / pan_right: その場で横に振って構図へ着地する（左へ振る / 右へ振る）
- * - tilt_up / tilt_down: その場で縦に振って構図へ着地する（下から上へ / 上から下へ）
- * - dolly_in: 遠くからカメラごと被写体へ近づいて構図へ着地する
- * - dolly_out: 構図からカメラごと離れていく
- * - zoom_in / zoom_out: 位置はそのまま、構図から画角で寄っていく / 引いていく
- * - orbit_left / orbit_right: 被写体の周りを1周して構図へ戻る（カメラが左へ / 右へ回る。amount が周回数）
- * - crane_up: 構図からカメラが上へ昇りながら引いていく（被写体は見続ける）
- * - dolly_zoom: 被写体の大きさはそのまま、背景だけ寄って見える（カメラは離れ、画角を狭める）
- * - handheld: 手持ち風にわずかに揺らし続ける
- * - dutch_left / dutch_right: 画面を斜めに傾ける（画面の左側が下がる / 右側が下がる）
- */
-export const CameraMoveType = z.enum([
-  'pan_left',
-  'pan_right',
-  'tilt_up',
-  'tilt_down',
-  'dolly_in',
-  'dolly_out',
-  'zoom_in',
-  'zoom_out',
-  'orbit_left',
-  'orbit_right',
-  'crane_up',
-  'dolly_zoom',
-  'handheld',
-  'dutch_left',
-  'dutch_right',
-]);
-export type CameraMoveType = z.infer<typeof CameraMoveType>;
-
-/** カメラの動き。種類だけ、または秒数（duration）・大きさの倍率（amount）付き */
-export const CameraMove = z.union([
-  CameraMoveType,
-  z.strictObject({
-    type: CameraMoveType,
-    /** 動きにかける秒数（handheld では使わない） */
-    duration: z.number().positive().optional(),
-    /** 動きの大きさの倍率（1 で標準） */
-    amount: z.number().positive().max(3).optional(),
-  }),
-]);
-export type CameraMove = z.infer<typeof CameraMove>;
-
 /** 'player' | 'speaker' | 'partner' | 'camera' | 'forward' またはキャラ ID */
 const LookAtTarget = z.string();
-
-/** カメラの位置・注視点・画角を直接指定する（構図の自動決定より優先） */
-export const CameraPose = z.strictObject({
-  position: Vec3,
-  target: Vec3,
-  fov: z.number().min(10).max(90).optional(),
-});
-export type CameraPose = z.infer<typeof CameraPose>;
 
 /** 表情（VRM の標準の表情） */
 export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima', 'komari']);
@@ -116,26 +52,6 @@ export type Expression = z.infer<typeof Expression>;
 
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
 const HeadTurn = z.number().min(0).max(1);
-
-/** 漫画風の文字演出のプリセット */
-export const EffectTextPreset = z.enum(['doki', 'kirakira', 'yatta', 'iraira', 'gaan', 'wanawana', 'shiin', 'biku', 'nima', 'asease']);
-export type EffectTextPreset = z.infer<typeof EffectTextPreset>;
-
-/** 文字演出（プリセット名、または文字・表示秒数の指定つき） */
-export const EffectText = z.union([
-  EffectTextPreset,
-  z.strictObject({
-    preset: EffectTextPreset,
-    /** 省略時はプリセットの文字 */
-    text: TextContent.optional(),
-    duration: z.number().positive().optional(),
-  }),
-]);
-export type EffectText = z.infer<typeof EffectText>;
-
-/** 汗の演出（fly4 = 汗が飛ぶ、jito = じわっとにじむ） */
-export const SweatMode = z.enum(['fly4', 'jito']);
-export type SweatMode = z.infer<typeof SweatMode>;
 
 /** 音を鳴らすチャネル（stereo はそのまま。left / right は片側だけから鳴らす） */
 export const AudioPan = z.enum(['stereo', 'left', 'right']);
@@ -267,10 +183,6 @@ export const SceneAvatarConfig = z.strictObject({
 });
 export type SceneAvatarConfig = z.infer<typeof SceneAvatarConfig>;
 
-/** 画面の切り替え演出（fade_black = 暗転してから映す、black = 暗転したまま次のカットまで映さない、white = 白く飛ばしたまま次のカットまで映さない、eyelid_close = 瞼を閉じるように暗くなる、eyelid_blink = まばたき） */
-export const ScreenTransition = z.enum(['fade_black', 'black', 'white', 'eyelid_close', 'eyelid_blink']);
-export type ScreenTransition = z.infer<typeof ScreenTransition>;
-
 /**
  * 選択肢を出す条件（書いた項目すべてを満たすときだけ出す）。
  * ★の選択肢（その時点の好感度が基準以上のときだけ出る）は minAffinity で書く
@@ -299,52 +211,6 @@ export const ScenarioChoice = z.strictObject({
   condition: ChoiceCondition.optional(),
 });
 export type ScenarioChoice = z.infer<typeof ScenarioChoice>;
-
-/**
- * 一枚絵（画面いっぱいのイベント絵・カットイン）。文字列は画像の URL だけの指定
- * - fit: 画面いっぱいの絵の合わせ方（cover = 余白なく切り抜く、contain = 全体を収めて余白を暗くする。既定 cover）
- */
-export const StillImageConfig = z.strictObject({
-  url: z.string(),
-  fit: z.enum(['cover', 'contain']).optional(),
-});
-export type StillImageConfig = z.infer<typeof StillImageConfig>;
-
-/**
- * カットイン（舞台の上の端に載せる小窓の絵。ペルソナの選択肢の場面のように、主人公の格好や反応を見せる）
- * - side: 載せる側（既定 right）
- * - size: 画面の幅に対する小窓の幅（0.15〜0.5、既定 0.24）
- */
-export const CutinConfig = z.strictObject({
-  url: z.string(),
-  side: z.enum(['left', 'right']).optional(),
-  size: z.number().min(0.15).max(0.5).optional(),
-});
-export type CutinConfig = z.infer<typeof CutinConfig>;
-
-/** 流れる背景（歩きながらの会話など） */
-export const ScrollingBackgroundConfig = z.strictObject({
-  textureUrl: z.string().optional(),
-  speed: z.number().optional(),
-  blur: z.number().min(0).max(1).optional(),
-  direction: z.enum(['left', 'right']).optional(),
-  featherWidth: z.number().optional(),
-});
-export type ScrollingBackgroundConfig = z.infer<typeof ScrollingBackgroundConfig>;
-
-/**
- * シーンの特殊効果。その効果を持つ場所でだけ働く（ない場所では何もしない）。
- * 効果を足すときは、ここに項目を足し、場所の3D背景（userData.setEffects）で受け取る
- */
-export const SCENE_EFFECT_IDS = ['fireworks', 'crowd'] as const;
-export type SceneEffectId = (typeof SCENE_EFFECT_IDS)[number];
-export const SceneEffects = z.strictObject({
-  /** 花火（夏祭り）。止めると新しく上げず、上がっている花火は消えるまで残る。どこでも指定がなければ上がり続ける */
-  fireworks: z.boolean().optional(),
-  /** 群衆（場所の stage.crowd があるところ）。淡い色のモブを並べる。どこでも指定がなければ出す */
-  crowd: z.boolean().optional(),
-});
-export type SceneEffects = z.infer<typeof SceneEffects>;
 
 /** シーン（1セリフまたは1演出ステップ） */
 export const ScenarioScene = z.strictObject({

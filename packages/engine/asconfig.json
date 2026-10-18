@@ -1,8 +1,8 @@
 {
   "targets": {
     "release": {
-      "outFile": "assets/wasm/lipsync.wasm",
-      "textFile": "assets/wasm/lipsync.wat",
+      "outFile": "src/audio/lipsync.wasm",
+      "textFile": "src/audio/lipsync.wat",
       "optimizeLevel": 3,
       "shrinkLevel": 2,
       "converge": true,
