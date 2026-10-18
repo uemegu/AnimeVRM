@@ -1338,6 +1338,11 @@
         "camera": {
           "fov": 50,
           "far": 180,
+          "depthOfField": {
+            "aperture": 0.02,
+            "maxBlur": 0.01,
+            "sharpRange": 0.3
+          },
           "wide": {
             "distance": 4.5,
             "height": 0.25,

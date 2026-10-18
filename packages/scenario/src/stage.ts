@@ -232,6 +232,8 @@ export const MotionBook = z.strictObject({
       seated: z.boolean().optional(),
       /** 歩く・走るなど、体の向きへ進んで見えるもの（流れる背景では横向きで使う） */
       locomotion: z.boolean().optional(),
+      /** 前のモーションからつなぐ秒数（省略時 0.5）。驚き・ツッコミは短く鋭く、待機へ戻るものは長くゆっくり */
+      fadeIn: z.number().min(0).max(2).optional(),
     })
   ),
 });
@@ -274,7 +276,13 @@ export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
 
 export function resolveCameraMove(move: CameraMove, at = 0): ResolvedCameraMove {
   const spec = typeof move === 'string' ? { type: move } : move;
-  return { type: spec.type, duration: spec.duration ?? CAMERA_MOVE_DEFAULT_SEC[spec.type], amount: spec.amount ?? 1, at };
+  return {
+    type: spec.type,
+    duration: spec.duration ?? CAMERA_MOVE_DEFAULT_SEC[spec.type],
+    amount: spec.amount ?? 1,
+    at,
+    ...(spec.continue ? { continue: true } : {}),
+  };
 }
 
 /** カットに書いた文字演出・汗を出すまでの秒数（カメラが落ち着いてから出す） */
@@ -354,13 +362,13 @@ export function cutTimeline(scene: ScenarioScene): CutTimeline {
   };
 }
 
-/** カットのカメラの動きが終わる時刻（動きがなければ 0。揺らし続ける手持ち風は数えない） */
+/** カットのカメラの動きが終わる時刻（動きがなければ 0。揺らし続ける手持ち風と、次のカットへ続ける動きは数えない） */
 export function cameraMoveEndAt(scene: ScenarioScene): number {
   const moves = [
     ...(scene.cameraMove ? [resolveCameraMove(scene.cameraMove)] : []),
     ...(scene.transitions ?? []).flatMap((k) => (k.cameraMove ? [resolveCameraMove(k.cameraMove, k.at)] : [])),
   ];
-  return Math.max(0, ...moves.filter((m) => m.type !== 'handheld').map((m) => m.at + m.duration));
+  return Math.max(0, ...moves.filter((m) => m.type !== 'handheld' && !m.continue).map((m) => m.at + m.duration));
 }
 
 /** カットの最後のキーフレームの時刻か、カメラの動きが終わる時刻の遅い方（タイムラインの長さの目安） */

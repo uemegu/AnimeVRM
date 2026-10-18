@@ -1,10 +1,12 @@
 {
   "motions": {
     "Standing Idle": {
-      "loop": true
+      "loop": true,
+      "fadeIn": 0.8
     },
     "Idle": {
-      "loop": true
+      "loop": true,
+      "fadeIn": 0.8
     },
     "Walking": {
       "loop": true,
@@ -107,6 +109,24 @@
     "pose_sit_seat": {
       "loop": true,
       "seated": true
+    },
+    "Surprised": {
+      "fadeIn": 0.12
+    },
+    "Angry": {
+      "fadeIn": 0.15
+    },
+    "Punching": {
+      "fadeIn": 0.1
+    },
+    "Antada": {
+      "fadeIn": 0.15
+    },
+    "you_need_me": {
+      "fadeIn": 0.15
+    },
+    "Excited": {
+      "fadeIn": 0.2
     }
   }
 }

@@ -18,7 +18,7 @@ export type Outfit = 'default' | 'private' | 'commute';
 
 interface Props {
   scenario: ScenarioPackage;
-  /** ボイスの相対パスの基準（/scenarios/<category>/<id>/） */
+  /** 一枚絵・カットインなど、相対パスの基準（/scenarios/<category>/<id>/） */
   baseUrl: string;
   index: number;
   data: StudioData;
@@ -37,9 +37,9 @@ interface Props {
 /**
  * カットの見え方（app と同じ描画）。先頭からこのカットまでの指定を引き継いだ舞台を映す
  */
-export function CutPreview({ scenario, index, data, outfit, cutTime, playing, freeCamera, onCameraPose, viewResetKey, onManager }: Props) {
+export function CutPreview({ scenario, baseUrl, index, data, outfit, cutTime, playing, freeCamera, onCameraPose, viewResetKey, onManager }: Props) {
   const { t } = useI18n();
-  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
+  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations, motions: data.motions }), [data]);
   const scene = scenario.scenes[index];
   const stage = useMemo(() => stageAtScene(scenario, index), [scenario, index]);
 
@@ -74,8 +74,8 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
         focusId={scene?.speakerCharacterId ?? null}
         scrolling={scrolling}
         effects={stage.effects}
-        cg={stage.cg}
-        cutin={stage.cutin}
+        cg={stage.cg && { ...stage.cg, url: sceneUrl(stage.cg.url, baseUrl) }}
+        cutin={stage.cutin && { ...stage.cutin, url: sceneUrl(stage.cutin.url, baseUrl) }}
         rain={stage.rain}
         cut={scene ?? null}
         cutTime={cutTime}
@@ -105,4 +105,9 @@ export function CutPreview({ scenario, index, data, outfit, cutTime, playing, fr
       </div>
     </div>
   );
+}
+
+/** '/' で始まらなければシナリオのディレクトリからの相対パス */
+function sceneUrl(url: string, baseUrl: string): string {
+  return /^(\/|blob:|data:|https?:)/.test(url) ? url : `${baseUrl}${url}`;
 }

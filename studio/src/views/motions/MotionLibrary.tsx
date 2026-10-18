@@ -57,7 +57,12 @@ export function MotionLibrary({ data, onChanged }: { data: StudioData; onChanged
   const saveLoop = async (motion: string, value: boolean) => {
     const motions = { ...data.motions };
     if (value) motions[motion] = { ...motions[motion], loop: true };
-    else delete motions[motion];
+    else {
+      // ループの指定だけ外す（席・つなぎの秒数などの設定は残す）
+      const { loop: _loop, ...rest } = motions[motion] ?? {};
+      if (Object.keys(rest).length > 0) motions[motion] = rest;
+      else delete motions[motion];
+    }
     try {
       await api.saveStudioData('motions', { motions });
       toast(format(value ? tm.loopOn : tm.loopOff, { name: motion }));

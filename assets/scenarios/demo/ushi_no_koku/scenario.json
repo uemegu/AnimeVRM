@@ -1,0 +1,693 @@
+{
+  "schemaVersion": 1,
+  "id": "ushi_no_koku",
+  "title": {
+    "ja": "丑の刻のラブレター",
+    "en": "Curse at Midnight, Sealed with Love"
+  },
+  "description": "丑の刻に打たれた、タカシの名が書かれた藁人形。昼の神社で犯人を探す会話がホラーからラブコメへ転じる。凍りつく空気は固定、疑いの移り変わりは肩越しのピント送り、思い詰める気持ちは寄り続けるカメラ、脱力は割らない3ショット、と表現したいことからカメラワークを選んだ見本。",
+  "location": "shrine_3d",
+  "bgm": "mysterious",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "s01",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「……検証終了。昨夜、御神木に打たれた藁人形の名前は――タカシ、あなたよ」",
+        "en": "\"...Verification complete. The straw doll nailed to the sacred tree last night bears your name, Takashi.\""
+      },
+      "screenTransition": "fade_black",
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "avatars": {
+        "emili": {
+          "position": [
+            -0.75,
+            0,
+            0.05
+          ],
+          "rotationY": 0.946,
+          "motion": "pose_shiver_fear",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "shion",
+          "headTurn": 0.6
+        },
+        "shion": {
+          "position": [
+            0.75,
+            0,
+            -0.15
+          ],
+          "rotationY": -0.819,
+          "motion": "pose_hug_notebook",
+          "heldItem": "notebook",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "player",
+          "headTurn": 0.6
+        },
+        "aoi": {
+          "position": [
+            0,
+            0,
+            -0.6
+          ],
+          "rotationY": 0.0,
+          "motion": "clasp_hands_front",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s01.mp3"
+    },
+    {
+      "id": "s02",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ひぃっ！ 誰よ、真夜中にタカシを呪ったのは！」",
+        "en": "\"Eek! Who cursed Takashi in the dead of night?!\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "avatars": {
+        "emili": {
+          "motion": "Surprised",
+          "lookAtTarget": "player",
+          "headTurn": 0.7
+        }
+      },
+      "voiceUrl": "v_s02.mp3"
+    },
+    {
+      "id": "s03",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「釘の高さは地上155センチ。……つまり犯人は、この中にいるわ」",
+        "en": "\"The nail sits 155 cm off the ground. ...Which means the culprit is one of us.\""
+      },
+      "cameraPose": {
+        "position": [
+          -1.682,
+          1.47,
+          0.628
+        ],
+        "target": [
+          0.75,
+          1.3599999999999999,
+          -0.15
+        ],
+        "fov": 22
+      },
+      "transitions": [
+        {
+          "at": 4.35,
+          "cameraPose": {
+            "position": [
+              0.529,
+              1.42,
+              1.17
+            ],
+            "target": [
+              -0.75,
+              1.33,
+              0.05
+            ],
+            "fov": 18
+          }
+        },
+        {
+          "at": 5.05,
+          "cameraPose": {
+            "position": [
+              0.0,
+              1.42,
+              1.1
+            ],
+            "target": [
+              0,
+              1.33,
+              -0.6
+            ],
+            "fov": 18
+          }
+        },
+        {
+          "at": 5.8,
+          "cameraPose": {
+            "position": [
+              -0.37,
+              1.42,
+              1.129
+            ],
+            "target": [
+              0.75,
+              1.33,
+              -0.15
+            ],
+            "fov": 18
+          }
+        },
+        {
+          "at": 6.95,
+          "cameraPose": {
+            "position": [
+              -1.682,
+              1.47,
+              0.628
+            ],
+            "target": [
+              0.75,
+              1.3599999999999999,
+              -0.15
+            ],
+            "fov": 22
+          }
+        }
+      ],
+      "avatars": {
+        "emili": {
+          "motion": "pose_hand_on_chest",
+          "lookAtTarget": "shion",
+          "headTurn": 0.8
+        },
+        "shion": {
+          "lookAtTarget": "emili",
+          "headTurn": 0.7,
+          "transitions": [
+            {
+              "at": 5.8,
+              "lookAtTarget": "camera",
+              "headTurn": 1
+            },
+            {
+              "at": 6.95,
+              "lookAtTarget": "emili",
+              "headTurn": 0.7
+            }
+          ]
+        }
+      },
+      "voiceUrl": "v_s03.mp3"
+    },
+    {
+      "id": "s04",
+      "speaker": {
+        "ja": "タカシ",
+        "en": "Takashi"
+      },
+      "speakerCharacterId": "player",
+      "text": {
+        "ja": "「こ、この中にって……まさかエミリ、昨日の喧嘩を根に持って！？」",
+        "en": "\"O-one of us...? Emili, are you still mad about yesterday?!\""
+      },
+      "cameraPose": {
+        "position": [
+          -1.682,
+          1.47,
+          0.628
+        ],
+        "target": [
+          0.75,
+          1.3599999999999999,
+          -0.15
+        ],
+        "fov": 22
+      },
+      "avatars": {
+        "emili": {
+          "lookAtTarget": "player",
+          "headTurn": 1
+        }
+      },
+      "voiceUrl": "v_s04.mp3"
+    },
+    {
+      "id": "s05",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「はぁ！？ あんたを呪う暇があったら、屋敷のプールで泳いでるわよ！」",
+        "en": "\"Huh?! If I had time to curse you, I'd be swimming in the mansion pool!\""
+      },
+      "camera": "close",
+      "cameraMove": {
+        "type": "handheld",
+        "amount": 1.5
+      },
+      "focusLines": true,
+      "avatars": {
+        "emili": {
+          "motion": "Angry",
+          "expression": "angry",
+          "expressionWeight": 1.0,
+          "anger": true,
+          "effectText": "iraira",
+          "lookAtTarget": "player",
+          "headTurn": 0.8
+        }
+      },
+      "voiceUrl": "v_s05.mp3"
+    },
+    {
+      "id": "s06",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「やめて、二人とも……！」",
+        "en": "\"Stop it, both of you...!\""
+      },
+      "camera": "speaker",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 11,
+        "amount": 0.7,
+        "continue": true
+      },
+      "avatars": {
+        "emili": {
+          "motion": "pose_arms_crossed_pout",
+          "expression": "neutral",
+          "expressionWeight": 1.0,
+          "anger": false,
+          "lookAtTarget": "aoi",
+          "headTurn": 0.6
+        },
+        "shion": {
+          "lookAtTarget": "aoi",
+          "headTurn": 0.6
+        },
+        "aoi": {
+          "motion": "pose_pray_hands",
+          "lookAtTarget": "emili",
+          "headTurn": 0.6
+        }
+      },
+      "voiceUrl": "v_s06.mp3"
+    },
+    {
+      "id": "s07",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「私が……タカシくんの身代わりになるから……」",
+        "en": "\"I'll... take the curse in Takashi's place...\""
+      },
+      "camera": "speaker",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 11,
+        "amount": 0.7,
+        "continue": true
+      },
+      "avatars": {
+        "aoi": {
+          "lookAtTarget": "emili",
+          "headTurn": 0.6
+        }
+      },
+      "voiceUrl": "v_s07.mp3"
+    },
+    {
+      "id": "s08",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「身代わりは要らないわ。……藁人形の裏の『願文』を見なさい」",
+        "en": "\"No one needs to take anything. ...Look at the wish written on the back of the doll.\""
+      },
+      "camera": "speaker",
+      "cg": "doll.avif",
+      "avatars": {
+        "shion": {
+          "motion": "Standing Idle",
+          "heldItem": false,
+          "lookAtTarget": "aoi",
+          "headTurn": 0.6
+        }
+      },
+      "voiceUrl": "v_s08.mp3"
+    },
+    {
+      "id": "s09",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「えっ！？ し、シオンちゃん、それ読んじゃダメぇぇっ！」",
+        "en": "\"Wha—?! Sh-Shion, don't read that out loud!\""
+      },
+      "cameraPose": {
+        "position": [
+          -1.115,
+          1.47,
+          -0.686
+        ],
+        "target": [
+          0.75,
+          1.3599999999999999,
+          -0.15
+        ],
+        "fov": 22
+      },
+      "cg": false,
+      "avatars": {
+        "aoi": {
+          "motion": "Surprised",
+          "redface": true,
+          "effectText": "doki",
+          "lookAtTarget": "shion",
+          "headTurn": 1
+        },
+        "shion": {
+          "motion": "pose_read_book",
+          "heldItem": "book_open",
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s09.mp3"
+    },
+    {
+      "id": "s10",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「『毎朝タカシにお味噌汁を作れますように』……縁結びの願掛けね」",
+        "en": "\"'May I make Takashi miso soup every morning.' ...A wish for a match made in heaven.\""
+      },
+      "cameraPose": {
+        "position": [
+          -1.115,
+          1.47,
+          -0.686
+        ],
+        "target": [
+          0.75,
+          1.3599999999999999,
+          -0.15
+        ],
+        "fov": 22
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "pose_hide_mouth_shy"
+        }
+      },
+      "voiceUrl": "v_s10.mp3"
+    },
+    {
+      "id": "s11",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「縁結びって……丑の刻参りの作法で告白する人がどこにいるのよ！」",
+        "en": "\"A love charm...? Who confesses using the rites of a midnight curse?!\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "bgm": "tuesday_afternoon_hijinks",
+      "avatars": {
+        "emili": {
+          "motion": "you_need_me",
+          "lookAtTarget": "aoi",
+          "headTurn": 0.8
+        },
+        "shion": {
+          "motion": "Standing Idle",
+          "heldItem": false,
+          "lookAtTarget": "emili",
+          "headTurn": 0.5
+        },
+        "aoi": {
+          "lookAtTarget": "forward"
+        }
+      },
+      "voiceUrl": "v_s11.mp3"
+    },
+    {
+      "id": "s12",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「だって……ネットに『絶対に叶う最強のおまじない』って……！」",
+        "en": "\"But... the internet said it was 'the strongest charm that never fails'...!\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "avatars": {
+        "aoi": {
+          "motion": "pose_hand_on_chest",
+          "lookAtTarget": "emili",
+          "headTurn": 0.7
+        }
+      },
+      "voiceUrl": "v_s12.mp3"
+    },
+    {
+      "id": "s13",
+      "speaker": {
+        "ja": "タカシ",
+        "en": "Takashi"
+      },
+      "speakerCharacterId": "player",
+      "text": {
+        "ja": "「おまじないの威力が強すぎて、寿命が縮むかと思ったよ……」",
+        "en": "\"That charm was so strong I thought it'd shave years off my life...\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "avatars": {
+        "emili": {
+          "motion": "Standing Idle",
+          "lookAtTarget": "player",
+          "headTurn": 0.5
+        },
+        "aoi": {
+          "motion": "Standing Idle",
+          "redface": false,
+          "lookAtTarget": "player",
+          "headTurn": 0.5
+        },
+        "shion": {
+          "lookAtTarget": "player",
+          "headTurn": 0.5
+        }
+      },
+      "voiceUrl": "v_s13.mp3"
+    },
+    {
+      "id": "s14",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「ちなみに、五寸釘の代わりに刺さっていたのは……」",
+        "en": "\"By the way, what was pinned there instead of a nail...\""
+      },
+      "camera": "speaker",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 4,
+        "amount": 0.5
+      },
+      "avatars": {
+        "shion": {
+          "motion": "pose_hug_notebook",
+          "heldItem": "notebook",
+          "lookAtTarget": "player",
+          "headTurn": 0.6
+        }
+      },
+      "voiceUrl": "v_s14.mp3"
+    },
+    {
+      "id": "s15",
+      "speaker": {
+        "ja": "シオン",
+        "en": "Shion"
+      },
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「……タコさんウインナーよ」",
+        "en": "\"...an octopus sausage.\""
+      },
+      "cg": "sausage.avif",
+      "voiceUrl": "v_s15.mp3"
+    },
+    {
+      "id": "s16",
+      "speaker": {
+        "ja": "エミリ",
+        "en": "Emili"
+      },
+      "speakerCharacterId": "emili",
+      "text": {
+        "ja": "「ただのお弁当の試作品じゃない！ 私の恐怖を返しなさいよ！」",
+        "en": "\"So it was just a bento prototype?! Give me back all that terror!\""
+      },
+      "camera": "speaker",
+      "cg": false,
+      "transitions": [
+        {
+          "at": 0.35,
+          "cameraMove": {
+            "type": "zoom_in",
+            "duration": 0.15,
+            "amount": 0.5
+          }
+        }
+      ],
+      "avatars": {
+        "emili": {
+          "motion": "Angry",
+          "lookAtTarget": "aoi",
+          "headTurn": 0.7
+        }
+      },
+      "voiceUrl": "v_s16.mp3"
+    },
+    {
+      "id": "s17",
+      "speaker": {
+        "ja": "アオイ",
+        "en": "Aoi"
+      },
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あ、あの……味見、する？」",
+        "en": "\"U-um... want a taste?\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          3.0
+        ],
+        "target": [
+          0,
+          1.05,
+          -0.25
+        ],
+        "fov": 34
+      },
+      "cameraMove": {
+        "type": "crane_up",
+        "duration": 6,
+        "amount": 0.6
+      },
+      "end": true,
+      "avatars": {
+        "aoi": {
+          "motion": "pose_hide_mouth_shy",
+          "lookAtTarget": "emili",
+          "headTurn": 0.6
+        },
+        "emili": {
+          "lookAtTarget": "aoi",
+          "headTurn": 0.6
+        },
+        "shion": {
+          "motion": "Standing Idle",
+          "heldItem": false,
+          "lookAtTarget": "aoi",
+          "headTurn": 0.5
+        }
+      },
+      "voiceUrl": "v_s17.mp3"
+    }
+  ]
+}

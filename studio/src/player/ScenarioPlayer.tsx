@@ -140,7 +140,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
     return () => window.clearTimeout(timer);
   }, [prewarmKey]);
 
-  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
+  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations, motions: data.motions }), [data]);
   const cast = useMemo(
     () =>
       resolveCast(stage, {
@@ -312,8 +312,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         speakerId={scene.speakerCharacterId ?? null}
         scrolling={scrolling}
         effects={stage.effects}
-        cg={stage.cg}
-        cutin={stage.cutin}
+        cg={stage.cg && { ...stage.cg, url: resolveSceneUrl(stage.cg.url) }}
+        cutin={stage.cutin && { ...stage.cutin, url: resolveSceneUrl(stage.cutin.url) }}
         rain={stage.rain}
         cut={cut}
         language={language}

@@ -42,7 +42,7 @@ export function MotionPreview({ data, avatarUrl, motion, cue }: Props) {
       // 覚えられなくても選んだ背景は使える
     }
   };
-  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations }), [data]);
+  const presets = useMemo<StagePresets>(() => ({ timeOfDay: data.timeOfDay, locations: data.locations, motions: data.motions }), [data]);
   const cast = useMemo(
     () => [
       {
