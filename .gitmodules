@@ -1,0 +1,3 @@
+[submodule "packages/engine"]
+	path = packages/engine
+	url = https://github.com/uemegu/AnimeVRM.engine.git
