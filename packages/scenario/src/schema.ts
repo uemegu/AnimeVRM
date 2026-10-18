@@ -122,6 +122,10 @@ export const SceneTransition = z.strictObject({
   at: z.number().nonnegative(),
   /** この時刻から構図を切り替える */
   camera: CameraShot.optional(),
+  /** この時刻から寄る相手を替える（キャラ ID。省略で話者） */
+  cameraFocus: z.string().optional(),
+  /** 肩越し（ots）の手前の人（キャラ ID。省略で寄る相手が見ている人・話者・一番近い人） */
+  cameraOver: z.string().optional(),
   /** 切り替えた構図からカメラをずらす（省略で真ん中） */
   cameraShift: CameraShift.optional(),
   /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
@@ -268,6 +272,10 @@ export const ScenarioScene = z.strictObject({
   timeOfDay: z.string().optional(),
   transitions: z.array(SceneTransition).optional(),
   camera: CameraShot.optional(),
+  /** 寄る相手（キャラ ID）。省略で話者。話者でない人の反応を撮るときに使う */
+  cameraFocus: z.string().optional(),
+  /** 肩越し（ots）の手前の人（キャラ ID）。省略で寄る相手が見ている人、いなければ話者、それもいなければ一番近い人 */
+  cameraOver: z.string().optional(),
   /** 構図からカメラを上下左右へずらす（省略で真ん中） */
   cameraShift: CameraShift.optional(),
   /** カメラを直接指定する（camera の構図より優先。このカットだけに効く） */

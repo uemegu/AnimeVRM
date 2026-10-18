@@ -12,6 +12,9 @@ interface Props {
   cast: StageCastMember[];
   cameraShot: CameraShot;
   speakerId: string | null;
+  /** 寄る相手（省略で話者）と、肩越し（ots）の手前の人 */
+  focusId?: string | null;
+  overId?: string | null;
   scrolling: ScrollingBackgroundSettings | null;
   /** シーンの特殊効果（花火など） */
   effects?: SceneEffects;
@@ -37,7 +40,7 @@ interface Props {
 /**
  * 再生画面の舞台。カットが変わるたびにタイムラインを渡し、時刻はボイスに合わせて描画側が進める
  */
-export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas, prewarm = null, onPrewarmed }: Props) {
+export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, speakerId, focusId = speakerId, overId = null, scrolling, effects, cg = null, cutin = null, rain = false, cut, language, getCutTime, getSpeakerPhoneme, getSpeakerMouthOpen, onCanvas, prewarm = null, onPrewarmed }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<StageManager | null>(null);
   const { loading, run: runSetCast } = useCastLoading(managerRef);
@@ -150,8 +153,8 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
 
   useEffect(() => {
     managerRef.current?.setSpeaker(speakerId);
-    managerRef.current?.setCameraShot(cameraShot, speakerId);
-  }, [speakerId, cameraShot]);
+    managerRef.current?.setCameraShot(cameraShot, focusId, overId);
+  }, [speakerId, cameraShot, focusId, overId]);
 
   useEffect(() => {
     managerRef.current?.setLanguage(language);

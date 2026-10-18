@@ -1,12 +1,13 @@
 import type { AvatarTransition, CameraPose, CameraShot, SceneTransition } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
+import { CameraSubjectFields } from '../../components/CameraSubjectFields';
 import { ShiftPicker } from '../../components/ShiftPicker';
 import { CameraMoveFields } from '../../components/CameraMoveFields';
 import { useI18n } from '../../i18n';
 import { EffectFields } from './EffectFields';
 
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side', 'ots'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 
@@ -75,6 +76,15 @@ export function KeyEditor({ kind, value, data, castIds, currentPose, onChange, o
             {key.camera && <ShiftPicker value={key.cameraShift} onChange={(shift) => set('cameraShift', shift ?? undefined)} />}
           </span>
         </label>
+        {mode === 'shot' && (
+          <CameraSubjectFields
+            focus={key.cameraFocus}
+            over={key.cameraOver}
+            showOver={key.camera === 'ots'}
+            characters={castIds.map((id) => ({ id, name: data.characters.characters.find((c) => c.id === id)?.name.ja ?? id }))}
+            onChange={(focus, over) => onChange(withField(withField(key, 'cameraFocus', focus), 'cameraOver', over))}
+          />
+        )}
         {mode === 'pose' && (
           <div className="field">
             <span className="field-label">{tl.pose}</span>

@@ -206,6 +206,11 @@ export function resolveScrollingBackground(stage: StageState, locationBackground
   };
 }
 
+/** 寄る相手（指定がなければ話者）と、肩越しの手前の人 */
+export function resolveCameraSubjects(scene: Pick<ScenarioScene, 'cameraFocus' | 'cameraOver' | 'speakerCharacterId'> | null): { focusId: string | null; overId: string | null } {
+  return { focusId: scene?.cameraFocus ?? scene?.speakerCharacterId ?? null, overId: scene?.cameraOver ?? null };
+}
+
 /** カメラ構図（指定がなければ、流れる背景なら横から、1人なら話者、選択肢や話者不在は全体、複数人の会話は話者中心） */
 export function resolveCameraShot(
   scene: Pick<ScenarioScene, 'camera' | 'choices' | 'speakerCharacterId'> | null,
@@ -336,8 +341,10 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
   for (const key of [...(scene.transitions ?? [])].sort((a, b) => a.at - b.at)) {
     if (key.at > t) break;
     if (key.focusLines !== undefined) focusLines = key.focusLines;
-    if (key.camera !== undefined || key.cameraPose !== undefined) {
+    if (key.camera !== undefined || key.cameraPose !== undefined || key.cameraFocus !== undefined || key.cameraOver !== undefined) {
       camera.shot = key.camera;
+      camera.focus = key.cameraFocus;
+      camera.over = key.cameraOver;
       camera.shift = key.cameraShift;
       camera.pose = key.cameraPose;
       camera.at = key.at;

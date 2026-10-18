@@ -267,6 +267,29 @@ function checkStory(c: Checker, data: ScenarioPackage) {
     if (!reached.has(scene.id)) c.warn(['scenes', i], `シーン "${scene.id}" には先頭からたどり着けません`);
   });
   checkPosing(c, data);
+  checkCameraSubjects(c, data);
+}
+
+/** カメラの寄る相手（cameraFocus）・肩越しの手前の人（cameraOver）が、そのカットに出ているか */
+function checkCameraSubjects(c: Checker, data: ScenarioPackage) {
+  const cast = new Set<string>();
+  data.scenes.forEach((scene, i) => {
+    if (scene.clearCast) cast.clear();
+    for (const [id, config] of Object.entries(scene.avatars ?? {})) {
+      if (config.visible === false) cast.delete(id);
+      else cast.add(id);
+    }
+    const check = (path: (string | number)[], id: string | undefined, what: string) => {
+      if (id && !cast.has(id)) c.warn(['scenes', i, ...path], `${what} "${id}" はこのカットに出ていません（出ていないと話者・全体の構図になります）`);
+    };
+    check(['cameraFocus'], scene.cameraFocus, '寄る相手');
+    check(['cameraOver'], scene.cameraOver, '肩越しの手前の人');
+    if (scene.cameraOver && scene.camera !== 'ots') c.warn(['scenes', i, 'cameraOver'], 'cameraOver は肩越しの構図（camera: "ots"）でだけ効きます');
+    scene.transitions?.forEach((key, k) => {
+      check(['transitions', k, 'cameraFocus'], key.cameraFocus, '寄る相手');
+      check(['transitions', k, 'cameraOver'], key.cameraOver, '肩越しの手前の人');
+    });
+  });
 }
 
 /**

@@ -15,6 +15,7 @@ import {
 } from '@anime-vrm/scenario';
 import type { StudioData } from '../../data/useStudioData';
 import { Icon } from '../../components/Icon';
+import { CameraSubjectFields } from '../../components/CameraSubjectFields';
 import { ShiftPicker } from '../../components/ShiftPicker';
 import { CameraMoveFields } from '../../components/CameraMoveFields';
 import { format, useI18n } from '../../i18n';
@@ -25,7 +26,7 @@ import { AudioMixFields } from './AudioMixFields';
 import { PlayerAudio } from '../../player/PlayerAudio';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side', 'ots'];
 const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
@@ -292,6 +293,13 @@ function StageTab({
           <ShiftPicker value={scene.cameraShift} onChange={(shift) => set('cameraShift', shift ?? undefined)} />
         </span>
       </label>
+      <CameraSubjectFields
+        focus={scene.cameraFocus}
+        over={scene.cameraOver}
+        showOver={scene.camera === 'ots'}
+        characters={data.characters.characters.map((c) => ({ id: c.id, name: c.name.ja }))}
+        onChange={(focus, over) => onChange(withField(withField(scene, 'cameraFocus', focus), 'cameraOver', over))}
+      />
       <CameraMoveFields value={scene.cameraMove} onChange={(move) => set('cameraMove', move || undefined)} />
       <label className="inspector-check">
         <input type="checkbox" checked={!!scene.clearCast} onChange={(e) => set('clearCast', e.target.checked || undefined)} />

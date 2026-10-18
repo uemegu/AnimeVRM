@@ -3,6 +3,7 @@ import {
   lastKeyframeAt,
   movieCutDuration,
   resolveCameraShot,
+  resolveCameraSubjects,
   resolveCast,
   resolveScrollingBackground,
   ScenarioRunner,
@@ -159,6 +160,7 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
   const locationId = stage.background ?? scenario.location ?? 'classroom';
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
   const shot = resolveCameraShot(scene, cast, stage);
+  const { focusId, overId } = resolveCameraSubjects(scene);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
 
   // カットが変わったときだけ作り直す（文字送りの再描画のたびに舞台がカットを始め直さないように）
@@ -310,6 +312,8 @@ export function ScenarioPlayer({ scenario, baseUrl, data, onExit, onCanvas }: Pr
         cast={stageCast}
         cameraShot={shot}
         speakerId={scene.speakerCharacterId ?? null}
+        focusId={focusId}
+        overId={overId}
         scrolling={scrolling}
         effects={stage.effects}
         cg={stage.cg && { ...stage.cg, url: resolveSceneUrl(stage.cg.url) }}

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import {
   type CameraPose,
   resolveCameraShot,
+  resolveCameraSubjects,
   resolveCast,
   resolveScrollingBackground,
   stageAtScene,
@@ -60,6 +61,7 @@ export function CutPreview({ scenario, baseUrl, index, data, outfit, cutTime, pl
   const locationId = stage.background ?? scenario.location ?? 'classroom';
   const timeOfDay = (stage.timeOfDay ?? 'day') as TimeOfDayId;
   const shot = resolveCameraShot(scene ?? null, cast, stage);
+  const { focusId, overId } = resolveCameraSubjects(scene ?? null);
   const scrolling = resolveScrollingBackground(stage, data.locations[locationId]?.layers.background.url);
   const speaker = textJa(scene?.speaker) || (scene?.speakerCharacterId ? data.characters.characters.find((c) => c.id === scene.speakerCharacterId)?.name.ja : '');
 
@@ -71,7 +73,9 @@ export function CutPreview({ scenario, baseUrl, index, data, outfit, cutTime, pl
         locationId={locationId}
         cast={cast}
         cameraShot={shot}
-        focusId={scene?.speakerCharacterId ?? null}
+        focusId={focusId}
+        overId={overId}
+        speakerId={scene?.speakerCharacterId ?? null}
         scrolling={scrolling}
         effects={stage.effects}
         cg={stage.cg && { ...stage.cg, url: sceneUrl(stage.cg.url, baseUrl) }}

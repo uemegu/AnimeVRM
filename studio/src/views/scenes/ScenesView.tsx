@@ -33,7 +33,7 @@ interface PresetFile<T> {
 type TimeFile = PresetFile<TimeOfDayPreset>;
 type LocationFile = PresetFile<LocationVisualPreset>;
 
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side', 'ots'];
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 /** 構図の値をフォームの範囲に収める（scene.ts の shotRig と同じ範囲） */

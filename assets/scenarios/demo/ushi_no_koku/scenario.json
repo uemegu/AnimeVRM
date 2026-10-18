@@ -122,83 +122,27 @@
         "ja": "「釘の高さは地上155センチ。……つまり犯人は、この中にいるわ」",
         "en": "\"The nail sits 155 cm off the ground. ...Which means the culprit is one of us.\""
       },
-      "cameraPose": {
-        "position": [
-          -1.682,
-          1.47,
-          0.628
-        ],
-        "target": [
-          0.75,
-          1.3599999999999999,
-          -0.15
-        ],
-        "fov": 22
-      },
+      "camera": "ots",
+      "cameraOver": "emili",
       "transitions": [
         {
           "at": 4.35,
-          "cameraPose": {
-            "position": [
-              0.529,
-              1.42,
-              1.17
-            ],
-            "target": [
-              -0.75,
-              1.33,
-              0.05
-            ],
-            "fov": 18
-          }
+          "camera": "close",
+          "cameraFocus": "emili"
         },
         {
           "at": 5.05,
-          "cameraPose": {
-            "position": [
-              0.0,
-              1.42,
-              1.1
-            ],
-            "target": [
-              0,
-              1.33,
-              -0.6
-            ],
-            "fov": 18
-          }
+          "camera": "close",
+          "cameraFocus": "aoi"
         },
         {
           "at": 5.8,
-          "cameraPose": {
-            "position": [
-              -0.37,
-              1.42,
-              1.129
-            ],
-            "target": [
-              0.75,
-              1.33,
-              -0.15
-            ],
-            "fov": 18
-          }
+          "camera": "close"
         },
         {
           "at": 6.95,
-          "cameraPose": {
-            "position": [
-              -1.682,
-              1.47,
-              0.628
-            ],
-            "target": [
-              0.75,
-              1.3599999999999999,
-              -0.15
-            ],
-            "fov": 22
-          }
+          "camera": "ots",
+          "cameraOver": "emili"
         }
       ],
       "avatars": {
@@ -237,19 +181,9 @@
         "ja": "「こ、この中にって……まさかエミリ、昨日の喧嘩を根に持って！？」",
         "en": "\"O-one of us...? Emili, are you still mad about yesterday?!\""
       },
-      "cameraPose": {
-        "position": [
-          -1.682,
-          1.47,
-          0.628
-        ],
-        "target": [
-          0.75,
-          1.3599999999999999,
-          -0.15
-        ],
-        "fov": 22
-      },
+      "camera": "ots",
+      "cameraFocus": "shion",
+      "cameraOver": "emili",
       "avatars": {
         "emili": {
           "lookAtTarget": "player",
@@ -387,19 +321,9 @@
         "ja": "「えっ！？ し、シオンちゃん、それ読んじゃダメぇぇっ！」",
         "en": "\"Wha—?! Sh-Shion, don't read that out loud!\""
       },
-      "cameraPose": {
-        "position": [
-          -1.115,
-          1.47,
-          -0.686
-        ],
-        "target": [
-          0.75,
-          1.3599999999999999,
-          -0.15
-        ],
-        "fov": 22
-      },
+      "camera": "ots",
+      "cameraFocus": "shion",
+      "cameraOver": "aoi",
       "cg": false,
       "avatars": {
         "aoi": {
@@ -428,19 +352,8 @@
         "ja": "「『毎朝タカシにお味噌汁を作れますように』……縁結びの願掛けね」",
         "en": "\"'May I make Takashi miso soup every morning.' ...A wish for a match made in heaven.\""
       },
-      "cameraPose": {
-        "position": [
-          -1.115,
-          1.47,
-          -0.686
-        ],
-        "target": [
-          0.75,
-          1.3599999999999999,
-          -0.15
-        ],
-        "fov": 22
-      },
+      "camera": "ots",
+      "cameraOver": "aoi",
       "avatars": {
         "aoi": {
           "motion": "pose_hide_mouth_shy"

@@ -17,7 +17,12 @@ interface Props {
   cameraShot: CameraShot;
   /** 構図からカメラをずらす（カットを渡すときはカットの cameraShift が優先） */
   cameraShift?: CameraShift | null;
+  /** 寄る相手（キャラ ID） */
   focusId: string | null;
+  /** 肩越し（ots）の手前の人（省略で寄る相手が見ている人・話者・一番近い人） */
+  overId?: string | null;
+  /** 口パクさせる話者（省略で寄る相手） */
+  speakerId?: string | null;
   /** 流れる背景（歩きながらの会話）。null で止める */
   scrolling?: ScrollingBackgroundSettings | null;
   /** シーンの特殊効果（花火など） */
@@ -66,6 +71,8 @@ export function StageCanvas({
   cameraShot,
   cameraShift = null,
   focusId,
+  overId = null,
+  speakerId,
   scrolling = null,
   effects,
   cg = null,
@@ -166,9 +173,9 @@ export function StageCanvas({
   }, [scrollingKey]);
 
   useEffect(() => {
-    managerRef.current?.setSpeaker(focusId);
-    managerRef.current?.setCameraShot(cameraShot, focusId);
-  }, [cameraShot, focusId]);
+    managerRef.current?.setSpeaker(speakerId === undefined ? focusId : speakerId);
+    managerRef.current?.setCameraShot(cameraShot, focusId, overId);
+  }, [cameraShot, focusId, overId, speakerId]);
 
   useEffect(() => {
     managerRef.current?.setCameraShift(cameraShift);
