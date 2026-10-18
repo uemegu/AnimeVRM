@@ -1190,6 +1190,11 @@
         },
         "camera": {
           "far": 260,
+          "bloom": {
+            "strength": 0.2,
+            "radius": 0.55,
+            "threshold": 0.9
+          },
           "fov": 55,
           "wide": {
             "distance": 1.15,

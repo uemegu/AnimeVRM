@@ -28,8 +28,8 @@ export interface HairShadowParams {
 }
 
 export const DEFAULT_HAIR_SHADOW_PARAMS: HairShadowParams = {
-  offset: 0.006,
-  downBias: 0.002,
+  offset: 0.0075,
+  downBias: 0.0035,
   strength: 1.0,
   depthBias: 0.002,
   maxDepthDiff: 0.12,
