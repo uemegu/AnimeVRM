@@ -12,7 +12,7 @@ chin_rest.fbx（座面のない中腰の頬杖）から、椅子に座って机�
 
 寸法はメートル、Blender の世界座標（Z が上、キャラクターは -Y を向く）。腰の真下を原点とする。
 机は場所の座標で、椅子の座面 0.45m・机の高さ 0.66m・腰から机の手前の縁まで 0.13m を想定する
-（packages/engine/src/scene/painted-aoi-room/layout.ts の DESK・DESK_CHAIR）。
+（packages/content/src/sets/painted-aoi-room/layout.ts の DESK・DESK_CHAIR）。
 """
 import math
 import sys

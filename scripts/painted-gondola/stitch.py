@@ -1,6 +1,6 @@
 # Stitch the panorama pieces into an 8192-wide strip (column c = heading c/8192*360 - 45 deg)
 # and cut it into four 90-degree tiles (pano-0..3: front, right, back, left).
-# Run in the folder holding pano-F/R1..R3/L1..L3/C.png (see packages/engine/src/scene/painted-gondola/README.md):
+# Run in the folder holding pano-F/R1..R3/L1..L3/C.png (see packages/content/src/sets/painted-gondola/README.md):
 #   uv run --with pillow --with numpy python <repo>/scripts/painted-gondola/stitch.py
 import os, numpy as np
 from PIL import Image

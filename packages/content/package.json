@@ -1,0 +1,27 @@
+{
+  "name": "@anime-vrm/content",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "AnimeVRM のデモ・作品で使う中身（簡易3D背景のセット、手に持つ小物）。描画は @anime-vrm/engine",
+  "exports": {
+    "./register": "./src/register.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@anime-vrm/engine": "*",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@anime-vrm/engine": "*",
+    "@anime-vrm/scenario": "*",
+    "@pixiv/three-vrm": "^3.5.5",
+    "@types/three": "^0.185.4",
+    "three": "^0.183.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.3"
+  }
+}

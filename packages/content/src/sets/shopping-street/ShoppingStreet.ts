@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
 import { building } from './Buildings';
 import { bench, bookTable, chalkboard, lamp, planter, type FurnitureMaterials } from './StreetFurniture';

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { BACK_Z, CHAIR, FAR_TABLE, FRONT_Z, HEIGHT, LEFT_X, RIGHT_X, SHELF_ROW, TABLE, farTableGeometry } from './layout';
 
 /**

@@ -2,7 +2,7 @@
 
 その環境の `imagegen` スキルに従い、元絵を実際に確認したうえで参照画像に渡す。以下の文章は雛形。建物の寸法、階の比率、色、植物の種類、明かりは対象の元絵に置き換える。
 
-実例は `packages/engine/src/scene/shopping-street/PROMPTS.md`。商店街の素材は元の `assets/textures/town2_far.avif` を参照し、書店・花屋・ギャラリーの立面を個別に生成した。
+実例は `packages/content/src/sets/shopping-street/PROMPTS.md`。商店街の素材は元の `assets/textures/town2_far.avif` を参照し、書店・花屋・ギャラリーの立面を個別に生成した。
 
 ## 建物の立面
 

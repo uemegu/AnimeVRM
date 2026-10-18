@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { castShadows } from '../castShadows';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import { box, canvasTexture, paint } from './materials';
 
 export type FurnitureMaterials = { wood: THREE.Material; iron: THREE.Material; gold: THREE.Material; stone: THREE.Material; soil: THREE.Material; flowers: THREE.Material };

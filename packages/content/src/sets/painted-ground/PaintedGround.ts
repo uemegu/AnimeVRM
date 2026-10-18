@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
-import { castShadows } from '../castShadows';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import { farStandee, groundPlane, skyDome } from '../painted-gate/PaintedGate';
 import { BENCH, CENTRAL_TREE, CYCLE_PARKING, FAR, FIELD, FIELD_ENTRY, GATE, GUARDHOUSE, GYM, OUTER_VERGES, PLANTERS, SCHOOL, SCHOOL_ROOF_HEIGHT, STREET, TRACK, TREES, WING, type Planter } from './layout';
 

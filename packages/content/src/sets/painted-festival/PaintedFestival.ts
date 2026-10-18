@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import type { SceneEffects } from '@anime-vrm/scenario';
 import type { LocationEnvironment } from '@anime-vrm/scenario';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 import { farStandee } from '../painted-gate/PaintedGate';
-import { castShadows } from '../castShadows';
+import { castShadows } from '@anime-vrm/engine/scene/castShadows';
 import { Fireworks } from './Fireworks';
 import {
   ANDON_POSTS, BANNER, EDGE_Z, EMBANKMENT, FAR, FAR_BANK, GROUND, LANTERN_STRINGS, RAILING, RIVER_Y, STALL_COLORS, TILES, type StallKind,

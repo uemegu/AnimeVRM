@@ -28,7 +28,7 @@ Studio の画面を使わず、JSON を直接編集して「編集 → 検証 �
 | 時間帯（`timeOfDay`） | `assets/studio/time-of-day.json` の `presets` のキー |
 | BGM（`bgm`） | `assets/studio/bgm.json` の `bgm` のキー、または `silence` |
 | モーション（`motion`） | `assets/animations/<名前>.fbx` の `<名前>`（拡張子なし）。ループさせるものは `assets/studio/motions.json` |
-| 手に持つ小物（`heldItem`） | `schema.ts` の `HeldItemId`（缶・紙パック・スマホ・本・ノート）。形と持ち方は `packages/engine/src/avatar/heldItem.ts`。モーションだけ変えると手放す |
+| 手に持つ小物（`heldItem`） | `schema.ts` の `HeldItemId`（缶・紙パック・スマホ・本・ノート）。形は `packages/content/src/props.ts`、持ち方は `packages/engine/src/avatar/heldItem.ts`。小物を足すときは `schema.ts` の `HeldItemId` と `props.ts` の `ITEMS` に追加する。モーションだけ変えると手放す |
 | ファイル（`voiceUrl`・`seUrl`・`ambience`・`modelUrl`・画像） | `/` 始まりは素材の置き場（Studio の `assets/` と、作品の置き場。同じ URL の並びで重なる）基準、それ以外はシナリオのディレクトリ基準。一枚絵・カットイン・スタンプなど作品だけで使う素材は作品の置き場（『5秒の告白』は `app/assets/`）に置く |
 
 ## 3. 編集の決まり

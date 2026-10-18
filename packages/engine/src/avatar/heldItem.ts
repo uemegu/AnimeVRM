@@ -1,22 +1,20 @@
 import * as THREE from 'three';
 import type { VRM, VRMHumanBoneName } from '@pixiv/three-vrm';
-import type { HeldItemId } from '@anime-vrm/scenario';
-import { resolveAssetUrl } from '../utils/path';
 import { forEachVertex, mainBone, measureHand, restPosition, skinPart } from './handShape';
 import { reach } from './handClearance';
 
 /**
- * 手に持つ小物（缶・紙パック・スマホ・本（開いた本・閉じた本）・ノート）。
+ * 手に持つ小物の持たせ方。小物の形は registerHeldItem で登録する（AnimeVRM の小物は @anime-vrm/content）。
  * 骨の向きはモデルごとに違うので、毎フレーム、手首と指の付け根の位置から手のひらの向きを求めて置く。
  * 持つ手の指（親指を含む）は、モーションの指の形を捨てて小物に合わせた形にする。
  * 寸法は実物の大きさで作り、キャラの手の大きさに合わせて縮める（アニメ調のモデルは手が小さい）。
  */
 
-type Side = 'left' | 'right';
+export type Side = 'left' | 'right';
 /** fist = 握る、palm = 背面を手のひらに当てて指を添える、both = 両手で開いて持つ、chest = 胸に抱える */
-type Grip = 'fist' | 'palm' | 'both' | 'chest';
+export type Grip = 'fist' | 'palm' | 'both' | 'chest';
 
-interface ItemSpec {
+export interface HeldItemSpec {
   grip: Grip;
   hand: Side;
   build: () => THREE.Object3D;
@@ -26,8 +24,6 @@ interface ItemSpec {
   shape?: 'cylinder';
 }
 
-const TEXTURES = '/textures/props';
-const OUTLINE = '#2a2230';
 /** 手首が耳からこの距離より近ければ、電話を耳に当てる */
 const EAR_SNAP_DISTANCE = 0.25;
 /** 耳に当てた電話の傾き（縦から後ろへ、ラジアン）。上端が耳、下端が口元の向き */
@@ -36,120 +32,21 @@ const EAR_TILT = 0.5;
 const MAX_TWIST = 1.2;
 /** 両手で開いて持つ本の背表紙側と、手のひら（指の曲がり）との間 */
 const BOOK_CLEARANCE = 0.03;
-const loader = new THREE.TextureLoader();
+/** スマホの寸法。palm で持つ・耳に当てるときの置き方に使う */
+export const PHONE_LENGTH = 0.148;
+export const PHONE_THICKNESS = 0.009;
+export const PHONE_WIDTH = 0.071;
 
-function texture(name: string): THREE.Texture {
-  const map = loader.load(resolveAssetUrl(`${TEXTURES}/${name}.avif`));
-  map.colorSpace = THREE.SRGBColorSpace;
-  map.anisotropy = 4;
-  return map;
+/** 持ち物の定義（id ごと）。中身は利用側が registerHeldItem で登録する */
+const ITEMS = new Map<string, HeldItemSpec>();
+
+export function registerHeldItem(id: string, spec: HeldItemSpec): void {
+  ITEMS.set(id, spec);
 }
 
-/** キャラと同じセルの陰影（2段） */
-let gradient: THREE.DataTexture | null = null;
-function toon(color: THREE.ColorRepresentation, map?: THREE.Texture): THREE.MeshToonMaterial {
-  if (!gradient) {
-    gradient = new THREE.DataTexture(new Uint8Array([150, 150, 150, 255, 255, 255, 255, 255]), 2, 1, THREE.RGBAFormat);
-    gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
-    gradient.needsUpdate = true;
-  }
-  return new THREE.MeshToonMaterial({ color, map, gradientMap: gradient });
+function itemSpec(id: string): HeldItemSpec {
+  return ITEMS.get(id)!;
 }
-
-/** 裏面を少し太らせた輪郭線（キャラの線に合わせる） */
-function withOutline(mesh: THREE.Mesh, width = 0.0035): THREE.Group {
-  const group = new THREE.Group();
-  const geometry = mesh.geometry.clone();
-  geometry.computeBoundingBox();
-  const size = geometry.boundingBox!.getSize(new THREE.Vector3());
-  const outline = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: OUTLINE, side: THREE.BackSide }));
-  outline.scale.set(1 + (2 * width) / Math.max(size.x, 1e-3), 1 + (2 * width) / Math.max(size.y, 1e-3), 1 + (2 * width) / Math.max(size.z, 1e-3));
-  group.add(mesh, outline);
-  return group;
-}
-
-/** 缶（190g のコーヒー缶くらい）の半径 */
-const CAN_RADIUS = 0.027;
-
-/** 缶：y 軸が缶の軸。側面にラベルを巻き、上下は金属 */
-function can(label: string): THREE.Object3D {
-  const metal = toon('#cfd3d8');
-  const side = toon('#ffffff', texture(label));
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(CAN_RADIUS, CAN_RADIUS, 0.105, 24, 1), [side, metal, metal]);
-  return withOutline(body);
-}
-
-/** 紙パック：y 軸が縦。4面に同じ柄、上にストロー */
-function carton(): THREE.Object3D {
-  const art = toon('#ffffff', texture('carton_ichigo'));
-  const plain = toon('#fbe3ea');
-  const group = new THREE.Group();
-  group.add(withOutline(new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.088, 0.034), [art, art, plain, plain, art, art])));
-  const straw = new THREE.Mesh(new THREE.CylinderGeometry(0.0028, 0.0028, 0.07, 8).rotateZ(0.25), toon('#f4f4f4'));
-  straw.position.set(-0.008, 0.074, 0);
-  group.add(straw);
-  return group;
-}
-
-const PHONE_LENGTH = 0.148;
-const PHONE_THICKNESS = 0.009;
-const PHONE_WIDTH = 0.071;
-
-/** スマホ：y 軸が長辺、z 軸が画面の向き */
-function phone(): THREE.Object3D {
-  const back = toon('#e9e4ef');
-  const screen = toon('#1b2230');
-  const edge = toon('#b9b3c2');
-  return withOutline(new THREE.Mesh(new THREE.BoxGeometry(PHONE_WIDTH, PHONE_LENGTH, PHONE_THICKNESS), [edge, edge, edge, edge, screen, back]), 0.0025);
-}
-
-/** 開いた本：x 軸が左右、z 軸がページの向き（読む人の側） */
-function openBook(): THREE.Object3D {
-  const pages = toon('#ffffff', texture('book_pages'));
-  const cover = toon('#ffffff', texture('book_cover'));
-  const paper = toon('#efe6cf');
-  const group = new THREE.Group();
-  // 見開きを少しV字に開く
-  for (const sign of [-1, 1]) {
-    const half = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.19, 0.012), [paper, paper, paper, paper, pages, cover]);
-    const uv = half.geometry.attributes.uv as THREE.BufferAttribute;
-    // +z 面（ページ）は見開きの半分ずつを貼る
-    for (let i = 16; i < 20; i++) uv.setX(i, sign < 0 ? uv.getX(i) * 0.5 : 0.5 + uv.getX(i) * 0.5);
-    const pivot = new THREE.Group();
-    const outlined = withOutline(half, 0.0025);
-    outlined.position.x = sign * 0.065;
-    pivot.add(outlined);
-    pivot.rotation.y = -sign * 0.22;
-    group.add(pivot);
-  }
-  return group;
-}
-
-/** 閉じたノート：y 軸が縦、z 軸が表紙の向き */
-function notebook(): THREE.Object3D {
-  const cover = toon('#ffffff', texture('notebook_cover'));
-  const dark = toon('#1f2a44');
-  const paper = toon('#efe9dc');
-  return withOutline(new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.25, 0.018), [paper, dark, paper, paper, cover, dark]));
-}
-
-/** 閉じた本（ハードカバー）：y 軸が縦、z 軸が表紙の向き */
-function closedBook(): THREE.Object3D {
-  const cover = toon('#ffffff', texture('book_cover'));
-  const spine = toon('#2f4a33');
-  const paper = toon('#efe6cf');
-  return withOutline(new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.21, 0.03), [paper, spine, paper, paper, cover, cover]));
-}
-
-const ITEMS: Record<HeldItemId, ItemSpec> = {
-  can_coffee: { grip: 'fist', hand: 'right', build: () => can('can_coffee_label'), radius: CAN_RADIUS, shape: 'cylinder' },
-  can_juice: { grip: 'fist', hand: 'right', build: () => can('can_juice_label'), radius: CAN_RADIUS, shape: 'cylinder' },
-  carton_ichigo: { grip: 'fist', hand: 'right', build: carton, radius: 0.017 },
-  phone: { grip: 'palm', hand: 'right', build: phone },
-  book_open: { grip: 'both', hand: 'right', build: openBook },
-  notebook: { grip: 'chest', hand: 'right', build: notebook },
-  book: { grip: 'chest', hand: 'right', build: closedBook },
-};
 
 /** 実物の手（手首から中指の付け根まで）の長さ。小物はこの手に合わせた寸法で作ってある */
 const REAL_HAND_LENGTH = 0.095;
@@ -209,7 +106,7 @@ const _m = new THREE.Matrix4();
 const _q = new THREE.Quaternion();
 
 export class HeldItem {
-  private item: { id: HeldItemId; hand: Side } | null = null;
+  private item: { id: string; hand: Side } | null = null;
   private object: THREE.Object3D | null = null;
   /** 前のフレームで書き換えた骨と、書き換える前の回転（モーションが指を動かさない場合に備えて、次のフレームで戻す） */
   private applied: Array<{ bone: THREE.Object3D; before: THREE.Quaternion }> = [];
@@ -331,13 +228,17 @@ export class HeldItem {
     return this.shape[side].get(bone)?.radius ?? 0.009;
   }
 
-  set(spec: { item: HeldItemId; hand?: Side } | null | undefined): void {
-    const next = spec ? { id: spec.item, hand: spec.hand ?? ITEMS[spec.item].hand } : null;
+  set(spec: { item: string; hand?: Side } | null | undefined): void {
+    if (spec && !ITEMS.has(spec.item)) {
+      console.warn(`[HeldItem] 登録されていない持ち物: ${spec.item}`);
+      spec = null;
+    }
+    const next = spec ? { id: spec.item, hand: spec.hand ?? itemSpec(spec.item).hand } : null;
     if (next?.id === this.item?.id && next?.hand === this.item?.hand) return;
     this.removeObject();
     this.item = next;
     if (!next) return;
-    this.object = ITEMS[next.id].build();
+    this.object = itemSpec(next.id).build();
     this.object.name = `Held item | ${next.id}`;
     this.bounds = new THREE.Box3().setFromObject(this.object);
     this.object.matrixAutoUpdate = false;
@@ -357,7 +258,7 @@ export class HeldItem {
     this.phoneAngle = PHONE_HOLD_ANGLE;
     this.atEar = false;
     if (!this.item) return;
-    const spec = ITEMS[this.item.id];
+    const spec = itemSpec(this.item.id);
     const grip = spec.grip;
     if (grip === 'chest') return;
     const sides: Side[] = grip === 'both' ? ['left', 'right'] : [this.item.hand];
@@ -562,7 +463,7 @@ export class HeldItem {
 
   /** 握る円柱の中心から、手首と指の付け根を結ぶ線まで（円柱の半径＋手のひら・指の厚み） */
   private gripOffset(side: Side, f: HandFrame): number {
-    const radius = (ITEMS[this.item!.id].radius ?? 0.03) * this.scaleFor(f);
+    const radius = (itemSpec(this.item!.id).radius ?? 0.03) * this.scaleFor(f);
     return radius + Math.max(this.palmThickness(side), this.fingerRadius(side, `${side}MiddleIntermediate`));
   }
 
@@ -684,7 +585,7 @@ export class HeldItem {
     const p = point.clone().applyMatrix4(inverse);
     const r = radius / scale;
     const box = this.bounds;
-    const spec = ITEMS[this.item!.id];
+    const spec = itemSpec(this.item!.id);
     if (spec.shape === 'cylinder') return Math.hypot(p.x, p.z) < spec.radius! + r && p.y > box.min.y - r && p.y < box.max.y + r;
     return p.x > box.min.x - r && p.x < box.max.x + r && p.y > box.min.y - r && p.y < box.max.y + r && p.z > box.min.z - r && p.z < box.max.z + r;
   }
@@ -700,7 +601,7 @@ export class HeldItem {
     const thumbRadius = this.fingerRadius(side, `${side}ThumbDistal`) * 0.5;
     const half = this.bounds ? ((this.bounds.max.y - this.bounds.min.y) / 2) * scale : 0;
     if (grip === 'fist') {
-      const radius = (ITEMS[this.item!.id].radius ?? 0.03) * scale + thumbRadius;
+      const radius = (itemSpec(this.item!.id).radius ?? 0.03) * scale + thumbRadius;
       const height = THREE.MathUtils.clamp(base.clone().sub(center).dot(axis), -half * 0.6, half * 0.6);
       return center
         .addScaledVector(f.palm, -Math.cos(THUMB_WRAP_ANGLE) * radius)
@@ -740,7 +641,7 @@ export class HeldItem {
     const names = finger.endsWith('Thumb') ? ['Metacarpal', 'Proximal', 'Distal'] : ['Proximal', 'Intermediate', 'Distal'];
     const box = this.bounds;
     // 円柱（缶）は軸からの距離で調べる。y 軸が円柱の軸
-    const cylinder = ITEMS[this.item!.id].shape === 'cylinder' ? ITEMS[this.item!.id].radius! : 0;
+    const cylinder = itemSpec(this.item!.id).shape === 'cylinder' ? itemSpec(this.item!.id).radius! : 0;
     for (let i = first; i < joints.length - 1; i++) {
       // 測った太さは付け根のふくらみや指の幅を含むので、半分を指の厚みと見る
       const radius = (this.fingerRadius(side, `${finger}${names[Math.min(i, 2)]}`) * 0.5) / scale;
@@ -843,7 +744,7 @@ export class HeldItem {
   /** node を渡すと正規化ボーン（vrm.update 前の姿勢）で求める */
   private worldMatrix(node?: (name: VRMHumanBoneName) => THREE.Object3D | null): THREE.Matrix4 | null {
     const { id, hand } = this.item!;
-    const grip = ITEMS[id].grip;
+    const grip = itemSpec(id).grip;
     if (grip === 'fist') {
       const f = this.handFrame(hand, node);
       if (!f) return null;

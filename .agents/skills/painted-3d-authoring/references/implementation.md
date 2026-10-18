@@ -6,12 +6,12 @@
 
 | 用途 | 読むファイル |
 | --- | --- |
-| 建物・屋根・ひさし・両面看板 | `packages/engine/src/scene/shopping-street/Buildings.ts` |
+| 建物・屋根・ひさし・両面看板 | `packages/content/src/sets/shopping-street/Buildings.ts` |
 | ベンチ・プランター・A型看板・書籍台・街灯 | 同 `StreetFurniture.ts` |
 | 木・花・遠景・床・バッチ化・dispose | 同 `ShoppingStreet.ts` |
 | 補助的な木目と瓦の素材 | 同 `materials.ts` |
-| 広い校地、中空の植栽囲い、ネット、駐輪場 | `packages/engine/src/scene/painted-ground/PaintedGround.ts` |
-| 共通の床・外周・空 | `packages/engine/src/scene/painted-gate/PaintedGate.ts` の `groundPlane`、`farStandee`、`skyDome` |
+| 広い校地、中空の植栽囲い、ネット、駐輪場 | `packages/content/src/sets/painted-ground/PaintedGround.ts` |
+| 共通の床・外周・空 | `packages/content/src/sets/painted-gate/PaintedGate.ts` の `groundPlane`、`farStandee`、`skyDome` |
 | 複数の場所への座標の対応 | `painted-ground/layout.ts` の `COURTYARD_ORIGIN`、`COURTYARD_SHOTS` と `assets/studio/locations.json` |
 
 校門にはカメラ投影の実装もある。共通の床・空を再利用するために、`projectedMaterial` や基準カメラまで新しい多方向セットへコピーしない。

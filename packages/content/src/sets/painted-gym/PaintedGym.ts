@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { resolveAssetUrl } from '../../utils/path';
-import { castShadowsOfAdded } from '../castShadows';
+import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { castShadowsOfAdded } from '@anime-vrm/engine/scene/castShadows';
 import { COURT, GYM, STAGE, WINDOW_BAYS } from './layout';
 
 const paint = (color: string, map?: THREE.Texture) =>

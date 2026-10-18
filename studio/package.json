@@ -11,6 +11,7 @@
     "build:pages": "tsc --noEmit && vite build --config vite.pages.config.ts && node pages/bakeApi.ts \"${PAGES_OUT_DIR:-../docs}\""
   },
   "dependencies": {
+    "@anime-vrm/content": "*",
     "@anime-vrm/engine": "*",
     "@anime-vrm/motion": "*",
     "@anime-vrm/scenario": "*",
