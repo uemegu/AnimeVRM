@@ -7,7 +7,7 @@ import { CameraMoveFields } from '../../components/CameraMoveFields';
 import { useI18n } from '../../i18n';
 import { EffectFields } from './EffectFields';
 
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side', 'ots'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'face', 'side', 'ots'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 

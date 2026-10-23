@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "talking_face",
+  "title": {
+    "ja": "アオイの独白 — 話すときの目・眉・首",
+    "en": "Aoi's monologue — talking face"
+  },
+  "description": "放課後の中庭で、アオイが夏祭りに誘う独白。話者の目・眉・首の芝居（ふつう・勢い・問いかけ・驚き・照れ・ためらい）を確かめる見本。導入はバストアップ、話が弾むと顔アップ、誘うところでゆっくり寄り、約束して引いて締める。",
+  "location": "courtyard",
+  "bgm": "silence",
+  "timeOfDay": "evening",
+  "scenes": [
+    {
+      "id": "01_calm",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「今日はね、ちょっと聞いてほしいことがあるんだ」"
+      },
+      "voiceUrl": "v_01_calm_ccdc3ec6.mp3",
+      "camera": "close",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "player"
+        }
+      }
+    },
+    {
+      "id": "02_hesitant",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「あの……昨日の帰りに、言いそびれちゃったことなんだけど」"
+      },
+      "voiceUrl": "v_02_hesitant_58f4fddb.mp3",
+      "camera": "close"
+    },
+    {
+      "id": "03_question",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「来週のお祭り、覚えてる？」"
+      },
+      "voiceUrl": "v_03_question_a55b87d5.mp3",
+      "camera": "close"
+    },
+    {
+      "id": "04_excited",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「私ね、すっごく楽しみにしてたの！」"
+      },
+      "voiceUrl": "v_04_excited_06aab004.mp3",
+      "camera": "face"
+    },
+    {
+      "id": "05_surprised",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「えっ、もしかして忘れてた！？」"
+      },
+      "voiceUrl": "v_05_surprised_f2eb774f.mp3",
+      "camera": "face"
+    },
+    {
+      "id": "06_shy",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「……ふふ、冗談だよ。顔に書いてあるもん」"
+      },
+      "voiceUrl": "v_06_shy_b07fb922.mp3",
+      "camera": "face"
+    },
+    {
+      "id": "07_hesitant",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「それでね……もし、よかったらなんだけど」"
+      },
+      "voiceUrl": "v_07_hesitant_1a25f89d.mp3",
+      "camera": "face",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 9,
+        "amount": 0.5,
+        "continue": true
+      }
+    },
+    {
+      "id": "08_shy",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「えへへ、一緒に行けたらいいなって」"
+      },
+      "voiceUrl": "v_08_shy_753b8fd8.mp3",
+      "camera": "face",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 9,
+        "amount": 0.5,
+        "continue": true
+      }
+    },
+    {
+      "id": "09_question",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「……だめ、かな？」"
+      },
+      "voiceUrl": "v_09_question_e1ea9078.mp3",
+      "camera": "face",
+      "cameraMove": {
+        "type": "dolly_in",
+        "duration": 9,
+        "amount": 0.5,
+        "continue": true
+      }
+    },
+    {
+      "id": "10_excited",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「ほんとに！ やったぁ！」"
+      },
+      "voiceUrl": "v_10_excited_4af61d5e.mp3",
+      "camera": "face"
+    },
+    {
+      "id": "11_calm",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「じゃあ土曜日の六時に、神社の前で待ってるね」"
+      },
+      "voiceUrl": "v_11_calm_16e6dafe.mp3",
+      "camera": "close"
+    },
+    {
+      "id": "12_excited",
+      "speakerCharacterId": "aoi",
+      "text": {
+        "ja": "「浴衣、着ていくから。楽しみにしててね！」"
+      },
+      "voiceUrl": "v_12_excited_315cbee5.mp3",
+      "camera": "close",
+      "cameraMove": {
+        "type": "dolly_out",
+        "duration": 4,
+        "amount": 0.35
+      },
+      "end": true
+    }
+  ]
+}

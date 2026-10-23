@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "id": "camera_rules",
+  "title": {
+    "ja": "カメラの法則 — 見本",
+    "en": "Camera rules — samples"
+  },
+  "description": "アクションの告知映像のカメラの法則（動かすのは片方だけ・サイズは2倍以上変える・速いカットと長回し・溜めてから寄る・見上げて締める）を1本にまとめた見本。中庭（簡易3D）で回り込む。",
+  "playMode": "movie",
+  "location": "courtyard",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "open_orbit",
+      "text": "",
+      "duration": 2.2,
+      "camera": "medium",
+      "cameraFocus": "emili",
+      "cameraMove": {
+        "type": "orbit_right",
+        "duration": 2.2,
+        "amount": 0.11
+      },
+      "avatars": {
+        "aoi": {
+          "position": "left",
+          "rotationY": 0.35,
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "emili"
+        },
+        "emili": {
+          "position": "right",
+          "rotationY": -0.35,
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "aoi"
+        }
+      }
+    },
+    {
+      "id": "fast_1_face_emili",
+      "text": "",
+      "duration": 0.15,
+      "camera": "face",
+      "cameraFocus": "emili",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "motionLoop": false,
+          "lookAtTarget": "camera"
+        }
+      }
+    },
+    {
+      "id": "fast_2_wide",
+      "text": "",
+      "duration": 0.15,
+      "camera": "wide"
+    },
+    {
+      "id": "fast_3_face_aoi",
+      "text": "",
+      "duration": 0.15,
+      "camera": "face",
+      "cameraFocus": "aoi",
+      "cameraShift": "up_left"
+    },
+    {
+      "id": "fast_4_medium",
+      "text": "",
+      "duration": 0.15,
+      "camera": "medium",
+      "cameraFocus": "emili"
+    },
+    {
+      "id": "fast_5_face_emili",
+      "text": "",
+      "duration": 0.15,
+      "camera": "face",
+      "cameraFocus": "emili",
+      "cameraShift": "down_right"
+    },
+    {
+      "id": "push_aoi",
+      "text": "",
+      "duration": 0.6,
+      "camera": "face",
+      "cameraFocus": "aoi",
+      "cameraMove": {
+        "type": "push_in",
+        "duration": 0.5
+      }
+    },
+    {
+      "id": "hold_action",
+      "text": "",
+      "duration": 2.0,
+      "camera": "wide",
+      "avatars": {
+        "emili": {
+          "motion": "Excited",
+          "motionLoop": false,
+          "lookAtTarget": "aoi"
+        }
+      }
+    },
+    {
+      "id": "react_aoi",
+      "text": "",
+      "duration": 0.5,
+      "camera": "face",
+      "cameraFocus": "aoi"
+    },
+    {
+      "id": "finale_low",
+      "text": "",
+      "duration": 1.8,
+      "cameraPose": {
+        "position": [
+          0.95,
+          0.62,
+          0.75
+        ],
+        "target": [
+          0.45,
+          1.3,
+          0.0
+        ],
+        "fov": 34
+      },
+      "cameraMove": {
+        "type": "dutch_right",
+        "duration": 0.25,
+        "amount": 0.55
+      },
+      "avatars": {
+        "emili": {
+          "motion": "pose_hands_on_hips_proud",
+          "motionLoop": false,
+          "lookAtTarget": "camera",
+          "fastMotion": true
+        }
+      },
+      "end": true
+    }
+  ]
+}

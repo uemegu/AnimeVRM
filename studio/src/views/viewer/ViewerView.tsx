@@ -19,7 +19,7 @@ import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark'];
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'face', 'side'];
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const FACE_EFFECTS = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'faceSweat'] as const;
 type FaceEffect = (typeof FACE_EFFECTS)[number];

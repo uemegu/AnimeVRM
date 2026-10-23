@@ -26,7 +26,7 @@ import { AudioMixFields } from './AudioMixFields';
 import { PlayerAudio } from '../../player/PlayerAudio';
 
 type Tab = 'line' | 'stage' | 'cast' | 'flow' | 'json';
-const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'side', 'ots'];
+const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'face', 'side', 'ots'];
 const SLOTS = ['left', 'center', 'right'] as const;
 const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised', 'nima', 'komari'] as const;
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;

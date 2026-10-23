@@ -4,6 +4,7 @@
  */
 import { z } from 'zod';
 import { isInnerVoice } from './schema.ts';
+import { speechToneOf } from './speechTone.ts';
 import type { AudioPan, CutinConfig, SceneEffects, StillImageConfig, CameraMove, CameraMoveType, CameraShot, ScenarioPackage, ScenarioScene, ScreenTransition, ScrollingBackgroundConfig, SceneAvatarConfig } from './schema.ts';
 import type { TimeOfDayId } from './scene.ts';
 import type { CharacterSprite } from './characters.ts';
@@ -267,6 +268,7 @@ export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
   tilt_up: 3,
   tilt_down: 3,
   dolly_in: 3,
+  push_in: 0.5,
   dolly_out: 3,
   zoom_in: 2.5,
   zoom_out: 2.5,
@@ -366,6 +368,7 @@ export function cutTimeline(scene: ScenarioScene): CutTimeline {
     screenTransition: scene.screenTransition,
     cameraShift: scene.cameraShift,
     innerVoice: isInnerVoice(scene.text),
+    speechTone: speechToneOf(scene.text),
   };
 }
 
