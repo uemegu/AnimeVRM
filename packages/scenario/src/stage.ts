@@ -332,6 +332,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       if (key.motionSpeed !== undefined) state.motionSpeed = key.motionSpeed;
       if (key.moveTo !== undefined) state.move = { at: key.at, to: key.moveTo, duration: key.moveDuration ?? 1 };
       if (key.fadeOut !== undefined) state.fadeOut = { at: key.at, duration: key.fadeOut };
+      if (key.mistOut !== undefined) state.mistOut = { at: key.at, duration: key.mistOut, ...(key.mistTo ? { to: key.mistTo } : {}) };
       if (key.effectText !== undefined || key.sweat !== undefined) {
         oneShots.push({ id, at: key.at, key: `${id}@${index}`, effectText: key.effectText, sweat: key.sweat });
       }
@@ -340,9 +341,11 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
   }
   const camera: CutCameraState = scene.cameraMove ? { move: resolveCameraMove(scene.cameraMove) } : {};
   let focusLines = scene.focusLines ?? false;
+  const beams: NonNullable<CutState['beams']> = [];
   for (const key of [...(scene.transitions ?? [])].sort((a, b) => a.at - b.at)) {
     if (key.at > t) break;
     if (key.focusLines !== undefined) focusLines = key.focusLines;
+    if (key.beam) beams.push({ at: key.at, from: key.beam.from, to: key.beam.to, duration: key.beam.duration ?? 0.5, color: key.beam.color ?? '#8fd3ff', width: key.beam.width ?? 0.12 });
     if (key.camera !== undefined || key.cameraPose !== undefined || key.cameraFocus !== undefined || key.cameraOver !== undefined) {
       camera.shot = key.camera;
       camera.focus = key.cameraFocus;
@@ -351,6 +354,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       camera.pose = key.cameraPose;
       camera.at = key.at;
       camera.duration = key.cameraTransitionDuration;
+      camera.ease = key.cameraTransitionEase;
       // 構図を切り替えたら、前の動き（離れた・傾けたまま）を新しい構図へ持ち越さない
       if (key.cameraMove === undefined) camera.move = undefined;
     }
@@ -358,7 +362,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
     else if (key.cameraMove !== undefined) camera.move = resolveCameraMove(key.cameraMove, key.at);
   }
   if (!camera.move) delete camera.move;
-  return { avatars, camera, focusLines, oneShots };
+  return { avatars, camera, focusLines, oneShots, beams };
 }
 
 /** カットを描画に渡す形にする（StageManager.setCutTimeline） */

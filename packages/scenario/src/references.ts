@@ -296,7 +296,7 @@ function checkCameraSubjects(c: Checker, data: ScenarioPackage) {
  * 立ち位置とモーションの組み合わせ（GEMINI.md の「シーンとポージングの規則」）。シーンを配列の順にたどる
  * - 座りのモーションは、その場所の席の位置でだけ使う（立ち位置のままだと空中に座る・何もない所に頬杖をつく）
  * - 流れる背景の間、歩き・走りを正面の構図で撮らない（進む向きと背景の流れが食い違う）
- * - 背景が止まったまま歩き・走りをさせない（その場で足踏みしてカメラへ向かってくるように見える）
+ * - 背景が止まったまま歩き・走りをさせない（その場で足踏みしてカメラへ向かってくるように見える）。moveTo で実際に移動させるカットは除く
  */
 function checkPosing(c: Checker, data: ScenarioPackage) {
   const { seatPositions, seatedMotions, locomotionMotions } = c.catalog;
@@ -327,7 +327,8 @@ function checkPosing(c: Checker, data: ScenarioPackage) {
       }
       // このシーンで歩き・走りにした、または背景を止めたのに歩き・走りのまま
       const startsHere = scene.avatars?.[id]?.motion === motion || scrollStopped;
-      if (locomotionMotions?.has(motion) && !scrolling && startsHere && !scene.cg) {
+      const moving = scene.avatars?.[id]?.transitions?.some((key) => key.moveTo !== undefined) ?? false;
+      if (locomotionMotions?.has(motion) && !scrolling && startsHere && !moving && !scene.cg) {
         c.warn(['scenes', i, 'avatars', id, 'motion'], `背景が止まったまま "${motion}" にしています。走らせるなら流れる背景（scrollingBackground）にし、そうでなければ立ちのモーションにします`);
       }
       if (locomotionMotions?.has(motion) && scrolling && scene.camera && scene.camera !== 'side' && !scene.cameraPose) {

@@ -7,6 +7,8 @@
  */
 import { z } from 'zod';
 import {
+  BeamConfig,
+  CameraEase,
   CameraMove,
   CameraPose,
   CameraShift,
@@ -99,6 +101,10 @@ const AvatarMoveFields = {
   moveDuration: z.number().positive().optional(),
   /** この秒数かけて透明になり、消える（去っていくキャラを画面から消すとき） */
   fadeOut: z.number().positive().optional(),
+  /** この秒数かけて霧のように崩れ、舞い上がって消える（人ではないキャラが消える・瞬間移動するとき） */
+  mistOut: z.number().positive().optional(),
+  /** mistOut の霧が流れていく先（次に現れる場所など。省略で上へ舞い上がって消える） */
+  mistTo: Vec3.optional(),
 };
 
 /** セリフ途中のアバター演出（表情・モーション・視線など）。at はボイス再生位置またはシーン経過秒 */
@@ -131,10 +137,14 @@ export const SceneTransition = z.strictObject({
   /** この時刻からカメラを直接指定の位置へ動かす（移動にかける秒数は cameraTransitionDuration） */
   cameraPose: CameraPose.optional(),
   cameraTransitionDuration: z.number().nonnegative().optional(),
+  /** cameraTransitionDuration で動かすときの速さの変わり方（省略で in_out） */
+  cameraTransitionEase: CameraEase.optional(),
   /** この時刻からカメラを動かす（false で止める。構図を切り替えて動きを書かないときも止まる） */
   cameraMove: z.union([CameraMove, z.literal(false)]).optional(),
   /** この時刻から集中線を出す・消す */
   focusLines: z.boolean().optional(),
+  /** この時刻に光線（魔法）を放つ */
+  beam: BeamConfig.optional(),
 });
 export type SceneTransition = z.infer<typeof SceneTransition>;
 

@@ -1,0 +1,761 @@
+{
+  "schemaVersion": 1,
+  "id": "halloween_puca",
+  "title": {
+    "ja": "ハロウィンのイタズラ者",
+    "en": "The Halloween Trickster"
+  },
+  "description": "ハロウィンの夕方、商店街を抜けて神社へ向かうシオンの前に、霧のように現れては消えるイタズラ好きのプーカが姿を見せる。",
+  "location": "shopping_street_3d",
+  "timeOfDay": "evening",
+  "playMode": "movie",
+  "bgm": "silence",
+  "ambience": "/se/walking.mp3",
+  "scenes": [
+    {
+      "id": "street_wide",
+      "text": "",
+      "duration": 3,
+      "cameraPose": {
+        "position": [
+          0.5,
+          1.45,
+          -2.5
+        ],
+        "target": [
+          0,
+          1.1,
+          -11
+        ],
+        "fov": 38
+      },
+      "avatars": {
+        "shion": {
+          "modelUrl": "/models/shion/shion-tripo.vrm",
+          "position": [
+            0,
+            0,
+            -11.6
+          ],
+          "rotationY": 0,
+          "motion": "Walking",
+          "motionLoop": true,
+          "lookAtTarget": "forward",
+          "transitions": [
+            {
+              "at": 0,
+              "moveTo": [
+                0,
+                0,
+                -8.0
+              ],
+              "moveDuration": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "street_face",
+      "text": "",
+      "duration": 1.2,
+      "cameraPose": {
+        "position": [
+          0.2,
+          1.42,
+          4.0
+        ],
+        "target": [
+          0,
+          1.4,
+          -6.0
+        ],
+        "fov": 3
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -6.6
+          ],
+          "rotationY": 0,
+          "transitions": [
+            {
+              "at": 0,
+              "moveTo": [
+                0,
+                0,
+                -5.16
+              ],
+              "moveDuration": 1.2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "street_body",
+      "text": "",
+      "duration": 1.2,
+      "cameraPose": {
+        "position": [
+          2.2,
+          1.05,
+          4.0
+        ],
+        "target": [
+          0,
+          1.0,
+          -5.4
+        ],
+        "fov": 6
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -6.0
+          ],
+          "rotationY": 0,
+          "transitions": [
+            {
+              "at": 0,
+              "moveTo": [
+                0,
+                0,
+                -4.56
+              ],
+              "moveDuration": 1.2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "street_feet",
+      "text": "",
+      "duration": 1.4,
+      "cameraPose": {
+        "position": [
+          1.2,
+          0.22,
+          0
+        ],
+        "target": [
+          0,
+          0.15,
+          0
+        ],
+        "fov": 40
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -0.6
+          ],
+          "rotationY": 0,
+          "transitions": [
+            {
+              "at": 0,
+              "moveTo": [
+                0,
+                0,
+                1.0
+              ],
+              "moveDuration": 1.4
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "scroll_walk",
+      "text": "",
+      "duration": 3,
+      "background": "town",
+      "scrollingBackground": {
+        "textureUrl": "/textures/town_far.avif",
+        "speed": 0.65,
+        "blur": 1,
+        "direction": "left"
+      },
+      "camera": "side",
+      "avatars": {
+        "shion": {
+          "position": [
+            0.12,
+            0,
+            -0.4
+          ],
+          "rotationY": -0.22,
+          "motion": "Walking",
+          "motionLoop": true,
+          "lookAtTarget": "forward"
+        }
+      }
+    },
+    {
+      "id": "nanpa_1",
+      "speaker": {
+        "ja": "ナンパな男",
+        "en": "Flirty Guy"
+      },
+      "speakerCharacterId": "mob_boy",
+      "text": {
+        "ja": "「お姉さん、トリック or トリート〜、今ひま？」",
+        "en": "\"Hey miss, trick or treat~ Got a minute?\""
+      },
+      "camera": "side",
+      "voiceUrl": "nanpa_1.mp3"
+    },
+    {
+      "id": "ignore",
+      "text": "",
+      "duration": 1.6,
+      "camera": "side"
+    },
+    {
+      "id": "nanpa_2",
+      "speaker": {
+        "ja": "ナンパな男",
+        "en": "Flirty Guy"
+      },
+      "speakerCharacterId": "mob_boy",
+      "text": {
+        "ja": "「なんでぇ、お高くとまりやがって」",
+        "en": "\"Tch. Stuck-up, huh?\""
+      },
+      "voicePan": "left",
+      "voiceVolume": 0.8,
+      "camera": "side",
+      "voiceUrl": "nanpa_2.mp3"
+    },
+    {
+      "id": "scroll_face",
+      "text": "",
+      "duration": 2.2,
+      "cameraPose": {
+        "position": [
+          -0.65,
+          1.4,
+          -0.32
+        ],
+        "target": [
+          0.12,
+          1.38,
+          -0.4
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "shrine_wide",
+      "text": "",
+      "duration": 4.5,
+      "background": "shrine_3d",
+      "scrollingBackground": false,
+      "ambience": "/se/rain_loop.mp3",
+      "clearCast": true,
+      "cameraPose": {
+        "position": [
+          0,
+          2.4,
+          11
+        ],
+        "target": [
+          0,
+          4.2,
+          -17
+        ],
+        "fov": 50
+      },
+      "cameraMove": {
+        "type": "pan_right",
+        "duration": 4.5,
+        "amount": 0.25
+      },
+      "rain": true,
+      "timeOfDay": "rainy"
+    },
+    {
+      "id": "shrine_approach",
+      "text": "",
+      "duration": 4.5,
+      "cameraPose": {
+        "position": [
+          6.5,
+          3.6,
+          4
+        ],
+        "target": [
+          0,
+          1.2,
+          -1.5
+        ],
+        "fov": 40
+      },
+      "cameraMove": {
+        "type": "pan_left",
+        "duration": 4.5,
+        "amount": 0.2
+      },
+      "avatars": {
+        "shion": {
+          "modelUrl": "/models/shion/shion-tripo.vrm",
+          "position": [
+            0,
+            0,
+            1.5
+          ],
+          "rotationY": 3.1416,
+          "motion": "Walking",
+          "motionLoop": true,
+          "lookAtTarget": "forward",
+          "transitions": [
+            {
+              "at": 0,
+              "moveTo": [
+                0,
+                0,
+                -3.45
+              ],
+              "moveDuration": 4.5
+            }
+          ],
+          "wet": 0.5
+        }
+      }
+    },
+    {
+      "id": "shrine_back",
+      "text": "",
+      "duration": 3,
+      "cameraPose": {
+        "position": [
+          0.5,
+          1.4,
+          -1.9999999999999996
+        ],
+        "target": [
+          0,
+          3.0,
+          -14
+        ],
+        "fov": 45
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -4.6
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "lookAtTarget": "forward"
+        }
+      }
+    },
+    {
+      "id": "shion_resolve",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「あいつとの決着を今日、ここで…」",
+        "en": "\"Today, right here, I settle things with him...\""
+      },
+      "voiceUrl": "shion_resolve.mp3",
+      "duration": 7.0,
+      "cameraPose": {
+        "position": [
+          1.9,
+          1.42,
+          -4.85
+        ],
+        "target": [
+          0,
+          1.38,
+          -4.85
+        ],
+        "fov": 40
+      },
+      "transitions": [
+        {
+          "at": 3.6,
+          "cameraPose": {
+            "position": [
+              0.38,
+              1.5,
+              -5.449999999999999
+            ],
+            "target": [
+              0,
+              1.2,
+              7
+            ],
+            "fov": 40
+          },
+          "cameraTransitionDuration": 2.4
+        }
+      ],
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -4.6
+          ],
+          "rotationY": 3.1416,
+          "lookAtTarget": "forward",
+          "transitions": [
+            {
+              "at": 6.3,
+              "lookAtTarget": "puca",
+              "headTurn": 1
+            }
+          ]
+        },
+        "puca": {
+          "position": [
+            0,
+            0,
+            7
+          ],
+          "rotationY": 3.1416,
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "lookAtTarget": "shion",
+          "visible": true
+        }
+      }
+    },
+    {
+      "id": "puca_turn",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「くっ！？」",
+        "en": "\"Kh—!?\""
+      },
+      "voiceUrl": "puca_torii.mp3",
+      "duration": 1.3,
+      "cameraPose": {
+        "position": [
+          0,
+          1.5,
+          -4.6
+        ],
+        "target": [
+          0,
+          1.6,
+          -14
+        ],
+        "fov": 45
+      },
+      "transitions": [
+        {
+          "at": 0.2,
+          "cameraPose": {
+            "position": [
+              0.12,
+              1.48,
+              -4.52
+            ],
+            "target": [
+              10,
+              1.4,
+              -3.0999999999999996
+            ],
+            "fov": 45
+          },
+          "cameraTransitionDuration": 0.22,
+          "cameraTransitionEase": "in"
+        },
+        {
+          "at": 0.42,
+          "cameraPose": {
+            "position": [
+              0.18,
+              1.46,
+              -4.3
+            ],
+            "target": [
+              0,
+              1.3,
+              7
+            ],
+            "fov": 45
+          },
+          "cameraTransitionDuration": 0.22,
+          "cameraTransitionEase": "linear"
+        }
+      ],
+      "avatars": {
+        "shion": {
+          "visible": false
+        }
+      }
+    },
+    {
+      "id": "puca_beam",
+      "text": "",
+      "duration": 1.3,
+      "seUrl": "/se/goddess_vanish.mp3",
+      "seVolume": 0.8,
+      "cameraPose": {
+        "position": [
+          0.18,
+          1.46,
+          -4.3
+        ],
+        "target": [
+          0,
+          1.3,
+          7
+        ],
+        "fov": 45
+      },
+      "cameraMove": "handheld",
+      "transitions": [
+        {
+          "at": 0.05,
+          "beam": {
+            "from": [
+              0.42,
+              1.22,
+              -3.8499999999999996
+            ],
+            "to": [
+              0,
+              1.15,
+              14
+            ],
+            "duration": 0.45,
+            "color": "#9b7bff",
+            "width": 0.14
+          }
+        }
+      ],
+      "avatars": {
+        "puca": {
+          "transitions": [
+            {
+              "at": 0.1,
+              "mistOut": 0.8,
+              "mistTo": [
+                -0.75,
+                0,
+                -5.699999999999999
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "puca_behind",
+      "speakerCharacterId": "puca",
+      "text": {
+        "ja": "「くくく、いい尻してるじゃないか」",
+        "en": "\"Heh heh heh. Nice rear you've got there.\""
+      },
+      "duration": 4.6,
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.45,
+          -2.8
+        ],
+        "target": [
+          -0.3,
+          1.25,
+          -5.199999999999999
+        ],
+        "fov": 40
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -4.6
+          ],
+          "rotationY": 0,
+          "lookAtTarget": "camera",
+          "visible": true,
+          "modelUrl": "/models/shion/shion-tripo.vrm",
+          "wet": 0.5
+        },
+        "puca": {
+          "position": [
+            -0.75,
+            0,
+            -5.699999999999999
+          ],
+          "rotationY": 0,
+          "lookAtTarget": "shion",
+          "visible": true,
+          "transitions": [
+            {
+              "at": 3.6,
+              "mistOut": 0.8,
+              "mistTo": [
+                0,
+                11.17,
+                -12.7
+              ]
+            }
+          ]
+        }
+      },
+      "voiceUrl": "puca_behind.mp3"
+    },
+    {
+      "id": "puca_roof",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「待ちなさい！」",
+        "en": "\"Wait right there!\""
+      },
+      "cameraPose": {
+        "position": [
+          0.6,
+          1.5,
+          -1.9999999999999996
+        ],
+        "target": [
+          0,
+          8.8,
+          -12.7
+        ],
+        "fov": 50
+      },
+      "avatars": {
+        "shion": {
+          "position": [
+            0,
+            0,
+            -4.6
+          ],
+          "rotationY": 3.1416,
+          "lookAtTarget": "puca",
+          "headTurn": 0.8
+        },
+        "puca": {
+          "position": [
+            0,
+            11.17,
+            -12.7
+          ],
+          "rotationY": 0,
+          "motion": "pose_arms_crossed_pout",
+          "motionLoop": false,
+          "lookAtTarget": "shion"
+        }
+      },
+      "voiceUrl": "puca_roof.mp3"
+    },
+    {
+      "id": "puca_refuse",
+      "speakerCharacterId": "puca",
+      "text": {
+        "ja": "「やだね、俺はイタズラ好きなんだ」",
+        "en": "\"Nope. I'm a trickster through and through.\""
+      },
+      "cameraPose": {
+        "position": [
+          0.3,
+          1.5,
+          -4.199999999999999
+        ],
+        "target": [
+          0,
+          12.17,
+          -12.7
+        ],
+        "fov": 13
+      },
+      "voiceUrl": "puca_refuse.mp3"
+    },
+    {
+      "id": "puca_bust",
+      "speakerCharacterId": "puca",
+      "text": {
+        "ja": "「ハロウィンは俺の独壇場だぜ？」",
+        "en": "\"Halloween is my turf, you know?\""
+      },
+      "duration": 3.8,
+      "avatars": {
+        "puca": {
+          "transitions": [
+            {
+              "at": 2.6,
+              "mistOut": 0.9
+            }
+          ]
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0.35,
+          12.54,
+          -11.1
+        ],
+        "target": [
+          0,
+          12.44,
+          -12.7
+        ],
+        "fov": 40
+      },
+      "voiceUrl": "puca_bust.mp3"
+    },
+    {
+      "id": "shion_shout",
+      "speakerCharacterId": "shion",
+      "text": {
+        "ja": "「この変態ヤギ猫！」",
+        "en": "\"You perverted goat-cat!\""
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.55,
+          -5.35
+        ],
+        "target": [
+          0,
+          1.42,
+          -4.6
+        ],
+        "fov": 35
+      },
+      "avatars": {
+        "shion": {
+          "lookAtTarget": "camera",
+          "headTurn": 1,
+          "wet": 0.8
+        },
+        "puca": {
+          "visible": false
+        }
+      },
+      "voiceUrl": "shion_shout.mp3",
+      "duration": 8.0,
+      "end": true,
+      "transitions": [
+        {
+          "at": 2.5,
+          "cameraMove": {
+            "type": "crane_up",
+            "duration": 5,
+            "amount": 1.6
+          }
+        }
+      ]
+    }
+  ]
+}

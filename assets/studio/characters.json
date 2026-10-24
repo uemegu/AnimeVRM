@@ -525,6 +525,11 @@
           "url": "/models/monster/puca.vrm"
         }
       ],
+      "voice": {
+        "ref": "assets/voices/puca_ref.mp3",
+        "caption": "低めでざらついた、ニヤニヤと笑う悪戯っぽい青年の声。余裕たっぷりに相手を見下ろしてからかう、ねっとりとしたトーン。",
+        "direction": ""
+      },
       "profile": "人ではないキャラ。ランタンと尻尾を持つ。"
     }
   ],
