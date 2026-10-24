@@ -498,6 +498,26 @@
       ],
       "tearDrops": false,
       "profile": "仮のキャラ。シオンの素体に、Tripo で作った赤い髪とゴシックの服を着せたもの。"
+    },
+    {
+      "id": "puca",
+      "name": {
+        "ja": "プーカ",
+        "en": "Puca"
+      },
+      "role": "sub",
+      "themeColor": "#7c3aed",
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "通常",
+            "en": "Default"
+          },
+          "url": "/models/monster/puca.vrm"
+        }
+      ],
+      "profile": "人ではないキャラ。ランタンと尻尾を持つ。"
     }
   ],
   "voiceMoods": {
