@@ -934,7 +934,7 @@ class Garment:
                 ring[reached & sleeve & ~np.isfinite(ring)] = k
             blend = np.where(np.isfinite(ring), (ring - 1) / 3.0, 1.0)
             # 肩の付け根より上の袖山は、下の肌（肩と腕のウェイトが混ざる）と同じ動きにする。
-            # 腕だけで動かすと、腕を下ろしたときに肩の肌が盛り上がって袖山を突き抜ける
+            # 腕だけで動かすと、袖山が肩の上で大きく回って裂ける
             blend *= 1.0 - smoothstep(self.shoulder_z - 0.03, self.shoulder_z, self.P[:, 2])
             for side, sign in (("L", 1.0), ("R", -1.0)):
                 cols_arm = [i for i, n in enumerate(names) if n.startswith(f"J_Bip_{side}_") and
@@ -964,6 +964,9 @@ class Garment:
             blur = smooth(X, spatial_neighbors(self.P, 0.05), self.spec.get("leg_blur", 30), 1.0)
             X = self.tie_pairs(X * (1 - low[:, None]) + blur * low[:, None])
         aw = getattr(self, "armpit_w", np.zeros(self.nc))
+        if sleeve.any():
+            # 袖はぼかさない（袖の下側が半分胴に残ると、腕を下ろしたときに袖が折れ曲がる）。ぼかすのは身頃の脇だけ
+            aw = aw * (1.0 - smooth(sleeve.astype(float), self.gnb, 3, 1.0))
         if aw.any():
             # 脇の周りは腕と胴のウェイトを広くぼかす。肌と同じウェイトのままだと、腕を振ったときに
             # 布が肌の折れ目に沿って体の中へ折れ込む。ぼかすと布が折れ目の上を渡る
