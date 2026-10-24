@@ -140,6 +140,14 @@
             "ja": "着物"
           },
           "url": "/models/shion/shion-private2.vrm"
+        },
+        {
+          "key": "tripo",
+          "label": {
+            "ja": "ゴシック（Tripo）",
+            "en": "Gothic (Tripo)"
+          },
+          "url": "/models/shion/shion-tripo.vrm"
         }
       ],
       "voice": {

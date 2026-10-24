@@ -1,0 +1,45 @@
+{
+  "body": "assets/models/shion/shion-private.vrm",
+  "work_dir": "tmp/outfit_shion_tripo",
+  "output_vrm": "tmp/shion_tripo.vrm",
+  "garments": [
+    {
+      "name": "Skirt",
+      "kind": "skirt",
+      "input": "tmp/belted skirt 3d model.glb",
+      "ease": 0.005,
+      "shade_color": [
+        0.7,
+        0.7,
+        0.75
+      ],
+      "outline_color": [
+        0.1,
+        0.1,
+        0.1
+      ]
+    },
+    {
+      "name": "CropTop",
+      "kind": "top",
+      "input": "tmp/gothic crop top 3d model.glb",
+      "ease": 0.004,
+      "shade_color": [
+        0.7,
+        0.7,
+        0.75
+      ],
+      "outline_color": [
+        0.1,
+        0.1,
+        0.1
+      ],
+      "mask_skin_depth": 0.04,
+      "mask_sleeve_arm": false
+    }
+  ],
+  "strip_body_materials": [
+    "Onepiece",
+    "Bottoms"
+  ]
+}
