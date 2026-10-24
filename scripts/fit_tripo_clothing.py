@@ -1467,7 +1467,7 @@ def main():
                     n += 1
             # 袖の筒の中の腕は、腕を下ろすと袖が潰れて肌が外に出るので、袖口の手前まで全周を消す
             sleeve = getattr(g, "sleeve", None)
-            if sleeve is not None and sleeve.any():
+            if sleeve is not None and sleeve.any() and g.spec.get("mask_sleeve_arm", True):
                 P = evaluated_points(g.obj, np.array([vs[0] for vs in g.c2v]))
                 for side, sign in (("L", 1.0), ("R", -1.0)):
                     sx = np.abs(P[sleeve & (np.sign(P[:, 0]) == sign), 0])

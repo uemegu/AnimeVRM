@@ -36,7 +36,9 @@
         0.2,
         0.3
       ],
-      "legacy_sleeve": true
+      "legacy_sleeve": true,
+      "mask_skin_depth": 0.04,
+      "mask_sleeve_arm": true
     },
     {
       "name": "Hair",
@@ -65,5 +67,9 @@
   "strip_body_materials": [
     "Onepiece",
     "Bottoms"
-  ]
+  ],
+  "engine_poses": {
+    "studio_idle": "scripts/outfits/poses/shion_idle.pose.json",
+    "studio_walk": "scripts/outfits/poses/shion_walk.pose.json"
+  }
 }
