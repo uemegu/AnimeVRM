@@ -1,0 +1,72 @@
+{
+  "body": "tmp/girl.vrm",
+  "work_dir": "tmp/outfit_redhair",
+  "output_vrm": "tmp/girl_redhair.vrm",
+  "garments": [
+    {
+      "name": "Shorts",
+      "kind": "bottom",
+      "input": "tmp/shorts 3d model.glb",
+      "ease": 0.005,
+      "shade_color": [
+        0.8,
+        0.79,
+        0.84
+      ],
+      "outline_color": [
+        0.3,
+        0.29,
+        0.3
+      ],
+      "fit_legs": true,
+      "leg_ease": 0.012
+    },
+    {
+      "name": "PeplumTop",
+      "kind": "top",
+      "input": "tmp/peplum shirt 3d model.glb",
+      "ease": 0.004,
+      "shade_color": [
+        0.78,
+        0.8,
+        0.9
+      ],
+      "outline_color": [
+        0.16,
+        0.2,
+        0.3
+      ]
+    },
+    {
+      "name": "Hair",
+      "kind": "hair",
+      "input": "tmp/red hair wig 3d model.glb",
+      "ease": 0.003,
+      "shade_color": [
+        0.75,
+        0.7,
+        0.8
+      ],
+      "outline_color": [
+        0.25,
+        0.08,
+        0.1
+      ],
+      "base_color": [
+        0.45,
+        0.03,
+        0.05
+      ],
+      "scale": 0.26,
+      "bangs_above_brow": -0.025
+    }
+  ],
+  "engine_poses": {
+    "studio_idle_0.5": "tmp/outfit_peplum_shorts/idle_0.5.pose.json",
+    "studio_idle_2": "tmp/outfit_peplum_shorts/idle_2.pose.json",
+    "studio_idle_3.5": "tmp/outfit_peplum_shorts/idle_3.5.pose.json"
+  },
+  "remove_body_materials_under_garments": [
+    "Onepiece"
+  ]
+}

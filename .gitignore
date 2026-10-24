@@ -33,6 +33,10 @@ dist-ssr
 !/scripts/check-framing.ts
 !/scripts/profile-render.ts
 !/scripts/transplant-vrm-meshes.ts
+!/scripts/fit_tripo_clothing.py
+!/scripts/merge_tripo_clothing.mjs
+!/scripts/dump_engine_pose.ts
+!/scripts/outfits/
 # Blender で作るモーション（desk_chin_rest.fbx など）
 !/scripts/blender/
 # ardy-generate.ts が読み込む
