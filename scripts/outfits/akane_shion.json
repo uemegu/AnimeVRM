@@ -36,8 +36,7 @@
         0.2,
         0.3
       ],
-      "mask_skin_depth": 0.08,
-      "mask_cuff_margin": 0.0
+      "legacy_sleeve": true
     },
     {
       "name": "Hair",

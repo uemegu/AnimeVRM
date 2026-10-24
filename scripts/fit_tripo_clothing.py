@@ -548,6 +548,7 @@ class Garment:
                 ang = new
                 if done:
                     break
+            ang = self.spec.get("sleeve_angle", ang)  # 角度を直接決めたいとき
             self.pose = [("J_Bip_L_UpperArm", "Y", ang), ("J_Bip_R_UpperArm", "Y", -ang)]
             fit = self.fit_affine(P, info["armpit"])
             self.log(f"袖の下がり {ang:.1f}°  素体の脇の下 z={fit['anchor_b']:.3f}")
@@ -570,6 +571,26 @@ class Garment:
         Q[:, 1] = fit["sy"] * (Q[:, 1] - fit["gy"]) + fit["by"]
         Q[:, 2] = fit["map_z"](Q[:, 2])
         Q[:, 0] *= fit["s"]
+        if kind == "top":
+            # 脇の下の高さと胴の幅だけで合わせると、肩の高さが素体ごとに違う分（脇の下から肩の上までの長さ）がずれ、
+            # 肩の肌が袖山を突き抜ける。肩の付け根の真上で、服の肩の上端が肌の上端より ease 上に来るよう、
+            # 脇の下より上だけを縦に伸ばす
+            ev = fit["ev"]
+            co = ev["co"][self.body.vert_ok]
+            sx = self.body.bone_head("J_Bip_L_UpperArm")[0] + self.spec.get("shoulder_probe", 0.03)  # 襟ぐりを避けて肩先で測る
+            ease = self.spec.get("ease", 0.005)
+            a = fit["anchor_b"]
+            k = 1.0
+            for side in (1.0, -1.0):
+                sk = co[np.abs(co[:, 0] - side * sx) < 0.015]
+                gm = Q[np.abs(Q[:, 0] - side * sx) < 0.015]
+                if len(sk) and len(gm):
+                    self.log(f"  肩 x={side * sx:+.3f} 肌の上端 {sk[:, 2].max():.3f} 服の上端 {gm[:, 2].max():.3f} 脇 {a:.3f}")
+                    k = max(k, (sk[:, 2].max() + ease - a) / max(gm[:, 2].max() - a, 1e-3))
+            if k > 1.0:
+                up = Q[:, 2] > a
+                Q[up, 2] = a + (Q[up, 2] - a) * k
+                self.log(f"肩の高さに合わせて、脇の下より上を縦に {k:.3f} 倍にした")
         self.P = Q
         self.zone_lo = fit["zone_lo"]
         # 体との隙間（点ごと）。上衣の脇の下は腕を前後に振ると体が折れ込むので、ゆとりを広く取る
@@ -586,6 +607,8 @@ class Garment:
                 r0, r1 = self.spec.get("armpit_blur_range", (0.05, 0.13))
                 # 肩の上まで混ぜると、腕を下ろしたときに肩の布が残って潰れるので、脇の高さより下だけにする
                 low = 1.0 - smoothstep(fit["anchor_b"], fit["anchor_b"] + 0.03, self.P[:, 2])
+                if self.spec.get("legacy_sleeve"):
+                    low = 1.0
                 self.armpit_w = np.maximum(self.armpit_w, (1.0 - smoothstep(r0, r1, d)) * low)
         self.log(f"体に沿わせる範囲 z>{self.zone_lo:.3f}")
         return fit["ev"]
@@ -778,6 +801,8 @@ class Garment:
         sleeve = getattr(self, "sleeve", None)
         if sleeve is not None and sleeve.any():
             below = self.P[:, 2] < self.shoulder_z  # self.P は T ポーズの形
+            if self.spec.get("legacy_sleeve"):
+                below = np.ones(self.nc, dtype=bool)
             for side, sign in (("L", 1.0), ("R", -1.0)):
                 idx = np.nonzero(sleeve & below & (np.sign(self.P[:, 0]) == sign))[0]
                 if len(idx):
@@ -935,7 +960,8 @@ class Garment:
             blend = np.where(np.isfinite(ring), (ring - 1) / 3.0, 1.0)
             # 肩の付け根より上の袖山は、下の肌（肩と腕のウェイトが混ざる）と同じ動きにする。
             # 腕だけで動かすと、袖山が肩の上で大きく回って裂ける
-            blend *= 1.0 - smoothstep(self.shoulder_z - 0.03, self.shoulder_z, self.P[:, 2])
+            if not self.spec.get("legacy_sleeve"):
+                blend *= 1.0 - smoothstep(self.shoulder_z - 0.03, self.shoulder_z, self.P[:, 2])
             for side, sign in (("L", 1.0), ("R", -1.0)):
                 cols_arm = [i for i, n in enumerate(names) if n.startswith(f"J_Bip_{side}_") and
                             any(k in n for k in ("UpperArm", "LowerArm", "Hand"))]
@@ -964,7 +990,7 @@ class Garment:
             blur = smooth(X, spatial_neighbors(self.P, 0.05), self.spec.get("leg_blur", 30), 1.0)
             X = self.tie_pairs(X * (1 - low[:, None]) + blur * low[:, None])
         aw = getattr(self, "armpit_w", np.zeros(self.nc))
-        if sleeve.any():
+        if sleeve.any() and not self.spec.get("legacy_sleeve"):
             # 袖はぼかさない（袖の下側が半分胴に残ると、腕を下ろしたときに袖が折れ曲がる）。ぼかすのは身頃の脇だけ
             aw = aw * (1.0 - smooth(sleeve.astype(float), self.gnb, 3, 1.0))
         if aw.any():
