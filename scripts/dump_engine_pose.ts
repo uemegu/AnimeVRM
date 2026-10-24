@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * scripts/shot.ts の写しで、撮影したカットの aoi の姿勢（骨ごとのスキニング行列）も <出力>.pose.json に書き出す。
+ * scripts/shot.ts の写しで、撮影したカットの最初のキャラの姿勢（骨ごとのスキニング行列）も <出力>.pose.json に書き出す。
  * 衣装は default / private / commute 以外（例: tripo）も指定できる。fit_tripo_clothing.py の engine_poses に使う。
  *
  *   node scripts/dump_engine_pose.ts demo/demo_test --file check.json --scene back --outfit tripo --time 2 -o tmp/outfit/idle_2.png
@@ -147,7 +147,7 @@ try {
     await page.screenshot({ path: file });
     const pose = await page.evaluate(() => {
       const m: any = (window as any).__shot.manager();
-      const av = m.loadedAvatars.get('aoi');
+      const av = [...m.loadedAvatars.values()][0];
       const vrm = av.vrm;
       vrm.scene.updateMatrixWorld(true);
       let mesh: any = null;

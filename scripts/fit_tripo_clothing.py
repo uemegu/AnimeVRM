@@ -1418,6 +1418,38 @@ def main():
         hidden = np.zeros(len(body.rest_co), dtype=bool)
         hidden[body_pts] = covered(lambda: body.evaluate()["co"][body_pts], [g.obj for g in done], body, poke_depth=0.02)
         hidden = erode(hidden, body.edges)
+        # mask_skin_depth を書いた服は、服の内側にある肌を見え方によらず消す（T ポーズで、肌から外向きに
+        # その距離以内に服がある所）。袖口・肩のように、体に沿わせきれず肌が服を突き抜ける所を消すため
+        body.set_pose([])
+        ev_rest = body.evaluate()
+        for g in done:
+            depth = g.spec.get("mask_skin_depth")
+            if not depth:
+                continue
+            gb = combined_bvh([g.obj])
+            n = 0
+            for vi in body_pts:
+                if hidden[vi]:
+                    continue
+                o = Vector(ev_rest["co"][vi])
+                nv = Vector(ev_rest["vn"][vi])
+                if gb.ray_cast(o - nv * 0.01, nv, depth + 0.01)[0] is not None:
+                    hidden[vi] = True
+                    n += 1
+            # 袖の筒の中の腕は、腕を下ろすと袖が潰れて肌が外に出るので、袖口の手前まで全周を消す
+            sleeve = getattr(g, "sleeve", None)
+            if sleeve is not None and sleeve.any():
+                P = evaluated_points(g.obj, np.array([vs[0] for vs in g.c2v]))
+                for side, sign in (("L", 1.0), ("R", -1.0)):
+                    sx = np.abs(P[sleeve & (np.sign(P[:, 0]) == sign), 0])
+                    if not len(sx):
+                        continue
+                    cuff = np.percentile(sx, 98) - g.spec.get("mask_cuff_margin", 0.015)
+                    arm = np.nonzero(body.arm_vert[side] & body.vert_ok)[0]
+                    sel = arm[np.abs(ev_rest["co"][arm, 0]) < cuff]
+                    n += int((~hidden[sel]).sum())
+                    hidden[sel] = True
+            print(f"  [{g.name}] 服の内側の肌を消す {n} 頂点（{depth * 100:.0f}cm 以内と袖の中の腕）")
         # 素体に作り込まれたインナー（VRoid の Onepiece など）は、服から 6cm 以内なら見え方によらず消す
         # （首元・袖口から下のインナーがのぞくと、服の下に別の服を着ているように見える）
         keys = [k.lower() for k in cfg.get("remove_body_materials_under_garments", [])]

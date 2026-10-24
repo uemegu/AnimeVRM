@@ -7,7 +7,7 @@
 // VRM の拡張（VRMC_vrm・SpringBone・MToon）は JSON をそのまま残すので失われない。
 import fs from 'node:fs';
 import path from 'node:path';
-import { addSway } from './sway_bones.mjs';
+import { addDangles, addSway } from './sway_bones.mjs';
 
 const cfg = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const outPath = cfg.output_vrm;
@@ -216,6 +216,7 @@ for (const spec of layers) {
     const { bytes: pBytes } = readAccessorBytes(cloth, cPrim.attributes.POSITION);
     const positions = new Float32Array(pBytes.buffer.slice(pBytes.byteOffset, pBytes.byteOffset + pBytes.length));
     addSway(swayCtx, spec, positions, joints, weights);
+    addDangles(swayCtx, spec, positions, readIndices(cloth, cPrim.indices), joints, weights);
     for (const [name, accIdx] of Object.entries(cPrim.attributes)) {
       const { acc, bytes } = readAccessorBytes(cloth, accIdx);
       if (name === 'JOINTS_0') {

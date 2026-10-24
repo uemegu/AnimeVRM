@@ -252,3 +252,125 @@ export function addSway(ctx, spec, positions, joints, weights) {
   }
   console.log(`[揺れ ${spec.name}] 骨の列 ${valid.length} 本（高さ ${startY.toFixed(3)} から下、頂点 ${hang.length}）`);
 }
+
+/**
+ * 細長く垂れ下がった小さな部品（袖口・脇の紐など）に、重力で下へ垂れる骨を付ける。
+ * T ポーズで縦に長い（高さが幅の aspect 倍以上）、ひとつながりの小さな部品を探し、上端から下端へ骨を並べる。
+ * 骨の親は、その部品の上端の頂点をいちばん強く動かしている骨（袖口なら前腕・手）。
+ */
+export function addDangles(ctx, spec, positions, indices, joints, weights) {
+  const opt = spec.dangle;
+  if (opt === false || spec.kind === 'hair') return;
+  const { json } = ctx;
+  const { world } = nodeWorlds(json);
+  const count = positions.length / 3;
+
+  // UV の境目で分かれた頂点を位置でまとめ、三角形でつながる部品に分ける
+  const key = (i) => `${Math.round(positions[i * 3] * 1e4)},${Math.round(positions[i * 3 + 1] * 1e4)},${Math.round(positions[i * 3 + 2] * 1e4)}`;
+  const parent = Array.from({ length: count }, (_, i) => i);
+  const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  const unite = (a, b) => { parent[find(a)] = find(b); };
+  const first = new Map();
+  for (let i = 0; i < count; i++) {
+    const k = key(i);
+    if (first.has(k)) unite(i, first.get(k));
+    else first.set(k, i);
+  }
+  for (let t = 0; t < indices.length; t += 3) {
+    unite(indices[t], indices[t + 1]);
+    unite(indices[t], indices[t + 2]);
+  }
+  const comps = new Map();
+  for (let i = 0; i < count; i++) {
+    const r = find(i);
+    if (!comps.has(r)) comps.set(r, []);
+    comps.get(r).push(i);
+  }
+
+  const aspect = opt?.aspect ?? 2.5;
+  const minLen = opt?.min_length ?? 0.03;
+  const SEG = 3;
+  let made = 0;
+  for (const verts of comps.values()) {
+    if (verts.length > count * 0.05) continue;
+    const xs = verts.map((i) => positions[i * 3]);
+    const ys = verts.map((i) => positions[i * 3 + 1]);
+    const zs = verts.map((i) => positions[i * 3 + 2]);
+    const h = Math.max(...ys) - Math.min(...ys);
+    const w = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs));
+    // 細い紐、または蝶結びごと垂れた長い紐（結び目の輪で幅が広い）
+    const thin = h >= minLen && h >= aspect * w;
+    const long = h >= (opt?.long_length ?? 0.08) && h >= 1.2 * w;
+    if (!thin && !long) continue;
+    const top = Math.max(...ys);
+    const bottom = Math.min(...ys);
+
+    // 親の骨：上端の頂点のウェイトがいちばん大きい骨
+    const score = new Map();
+    for (const i of verts) {
+      if (positions[i * 3 + 1] < top - 0.01) continue;
+      for (let q = 0; q < 4; q++) score.set(joints[i * 4 + q], (score.get(joints[i * 4 + q]) ?? 0) + weights[i * 4 + q]);
+    }
+    const parentJoint = [...score].sort((a, b) => b[1] - a[1])[0][0];
+    let parentNode = parentJoint < ctx.skinJointCount
+      ? json.skins[0].joints[parentJoint]
+      : ctx.newJoints[parentJoint - ctx.skinJointCount].node;
+
+    const nodes = [];
+    for (let s = 0; s <= SEG; s++) {
+      const y = top - (h * s) / SEG;
+      const near = verts.filter((i) => Math.abs(positions[i * 3 + 1] - y) < h / SEG / 2 + 1e-4);
+      const pos = [0, 1, 2].map((a) => near.reduce((acc, i) => acc + positions[i * 3 + a], 0) / near.length);
+      pos[1] = y;
+      const local = apply(invert(world[parentNode]), pos);
+      const idx = json.nodes.length;
+      json.nodes.push({ name: `J_Sec_${spec.name}_Dangle${made}_${s}`, translation: local });
+      (json.nodes[parentNode].children ??= []).push(idx);
+      world[idx] = mul(world[parentNode], fromTRS(local));
+      nodes.push(idx);
+      parentNode = idx;
+    }
+    const jointIdx = nodes.map((node) => {
+      ctx.newJoints.push({ node, ibm: invert(world[node]) });
+      return ctx.skinJointCount + ctx.newJoints.length - 1;
+    });
+
+    // 上端は元のウェイトのまま、下ほど骨で動かす
+    for (const i of verts) {
+      const t = (top - positions[i * 3 + 1]) / Math.max(h, 1e-6);
+      const p = Math.min(SEG - 1, Math.max(0, t * SEG - 0.5));
+      const s0 = Math.floor(p);
+      const s1 = Math.min(SEG - 1, s0 + 1);
+      const u = p - s0;
+      const k = smoothstep(0, 0.2, t);
+      const all = new Map();
+      for (let q = 0; q < 4; q++) {
+        const wv = weights[i * 4 + q] * (1 - k);
+        if (wv > 0) all.set(joints[i * 4 + q], (all.get(joints[i * 4 + q]) ?? 0) + wv);
+      }
+      all.set(jointIdx[s0], (all.get(jointIdx[s0]) ?? 0) + (1 - u) * k);
+      all.set(jointIdx[s1], (all.get(jointIdx[s1]) ?? 0) + u * k);
+      const best = [...all].sort((x, y) => y[1] - x[1]).slice(0, 4);
+      const sum = best.reduce((acc, [, wv]) => acc + wv, 0);
+      for (let q = 0; q < 4; q++) {
+        joints[i * 4 + q] = best[q]?.[0] ?? 0;
+        weights[i * 4 + q] = best[q] ? best[q][1] / sum : 0;
+      }
+    }
+
+    // 紐は軽いので、硬さを弱く重力を強くして下へ垂らす
+    ctx.springs.push({
+      name: `${spec.name}_Dangle${made}`,
+      joints: nodes.map((node) => ({
+        node,
+        hitRadius: opt?.hit_radius ?? 0.005,
+        stiffness: opt?.stiffness ?? 0.3,
+        gravityPower: opt?.gravity ?? 1.0,
+        gravityDir: [0, -1, 0],
+        dragForce: opt?.drag ?? 0.4,
+      })),
+    });
+    made++;
+  }
+  if (made) console.log(`[垂れる紐 ${spec.name}] ${made} 本`);
+}
