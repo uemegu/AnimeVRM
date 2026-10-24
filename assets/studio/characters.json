@@ -490,14 +490,6 @@
         {
           "key": "default",
           "label": {
-            "ja": "私服（Tripo）",
-            "en": "Casual (Tripo)"
-          },
-          "url": "/models/akane/akane-tripo.vrm"
-        },
-        {
-          "key": "gothic",
-          "label": {
             "ja": "ゴシック（Tripo）",
             "en": "Gothic (Tripo)"
           },
@@ -505,7 +497,7 @@
         }
       ],
       "tearDrops": false,
-      "profile": "仮のキャラ。シオンの素体に、Tripo で作った赤い髪と服（私服・ゴシック）を着せたもの。"
+      "profile": "仮のキャラ。シオンの素体に、Tripo で作った赤い髪とゴシックの服を着せたもの。"
     }
   ],
   "voiceMoods": {

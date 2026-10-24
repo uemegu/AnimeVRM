@@ -874,6 +874,21 @@ class Garment:
         # Tripo の髪には内側にマネキンの頭の面が入っていて、どの大きさでも一部は頭の中に入る。
         # 大きさを上げていくと中に入る割合が下げ止まる（毛束が頭の外に出て、マネキンだけが残る）。
         # 下げ止まりに inside_tolerance を足した割合まで下がった最初の（いちばん小さい）大きさにする
+        if self.spec.get("placed"):
+            # 入力の GLB で頭にかぶせた位置そのまま使う（Blender で手で置き直した髪。素体と同じ座標で書き出す）。
+            # 大きさ探しと前髪の持ち上げはしない。マネキンは、頭の中心から少し広げても頭の中に残る点とする
+            self.P = W.copy()
+            inside = inside_head(self.P)
+            grow = self.spec.get("mannequin_grow", 1.05)
+            mannequin = inside_head(center + (W - center) * grow)
+            self.log(f"置いた位置のまま（頭の中に入る点 {inside.mean():.0%}、マネキンの点 {mannequin.mean():.0%}）")
+        else:
+            mannequin = self.fit_hair_scale(W, wx, wy, wtop, top, cy, gap, brow_z, inside_head)
+        self.hidden_inside = mannequin
+        self.finish_hair(body, center, bvh, brow_z, cy)
+
+    def fit_hair_scale(self, W, wx, wy, wtop, top, cy, gap, brow_z, inside_head):
+        """頭に入り込まない大きさを探して髪を置き、前髪の高さを合わせる。マネキンの点を返す。"""
         sample = W[np.random.default_rng(0).choice(len(W), min(2000, len(W)), replace=False)]
         rows = []
         for sc in np.arange(0.15, 0.45, 0.0025):
@@ -889,7 +904,12 @@ class Garment:
         if brow_z is not None:
             bangs = ~inside & (np.abs(self.P[:, 0]) < 0.04) & (self.P[:, 1] < cy - 0.03)
             if bangs.any():
-                lift = brow_z + self.spec.get("bangs_above_brow", -0.012) - self.P[bangs, 2].min()
+                # 前髪より下に離れてぶら下がる毛先（顔の奥の数本など）は前髪の下端に数えない。
+                # 上から辿って 2 cm 以上の切れ目があれば、そこより下は無視する
+                bz = np.sort(self.P[bangs, 2])[::-1]
+                cut = np.nonzero(-np.diff(bz) > 0.02)[0]
+                bottom = bz[cut[0]] if len(cut) else bz[-1]
+                lift = brow_z + self.spec.get("bangs_above_brow", -0.012) - bottom
                 if lift > 0:
                     self.P[:, 2] += lift
                     inside = inside_head(self.P)
@@ -902,8 +922,10 @@ class Garment:
         # 中に入る割合が下げ止まる大きさで頭の中に入る点がマネキンなので、それを全部消す。隙間は地毛の土台が埋める
         sc_floor = next(sc for sc, r in rows if r <= floor + 0.01)
         mannequin = inside_head((W - [wx, wy, wtop]) * sc_floor + [0.0, cy, top + gap])
-        self.hidden_inside = mannequin
         self.log(f"マネキンの点 {mannequin.mean():.0%}（倍率 {sc_floor:.3f} で頭の中に入る点）")
+        return mannequin
+
+    def finish_hair(self, body, center, bvh, brow_z, cy):
         # 顔と髪は別々に作ってあるので、前髪の高さを決めたあと、外にはみ出した毛束だけを内側へずらす。
         # 全体を同じ倍率で縮めると毛束の間隔が変わり、横から奥の隙間がのぞく。頭に沿う毛は動かさない
         width = float(self.spec.get("width_scale", 1.0))
@@ -1299,12 +1321,19 @@ def make_inner_hair(g, ratio, turn_deg, name):
             n += 1
         v.co = q
     obj.data.update()
-    # 顔の前（眉より下）に来る毛は消す。前髪の奥に暗い毛が重なると目に掛かる
+    # 顔の前（眉より下）に来る毛は消す。前髪の奥に暗い毛が重なると目に掛かる。
+    # 前髪がまばらな髪では、消した切り口が隙間から水平な暗い帯に見えるので、inner_front_cut で額ごと消す。
+    # 額の幅（inner_front_half_width）より外は眉の上で止める。こめかみまで消すと横から地肌がのぞく
     if g.brow_z is not None:
         import bmesh
         bm = bmesh.new()
         bm.from_mesh(obj.data)
-        front = [f for f in bm.faces if all(v.co.z < g.brow_z + 0.01 and v.co.y < g.head_cy - 0.02 for v in f.verts)]
+        cut = g.brow_z + g.spec.get("inner_front_cut", 0.01)
+        half = g.spec.get("inner_front_half_width", 0.05)
+        def in_front(v):
+            top = cut if abs(v.co.x) < half else g.brow_z + 0.01
+            return v.co.z < top and v.co.y < g.head_cy - 0.02
+        front = [f for f in bm.faces if all(in_front(v) for v in f.verts)]
         bmesh.ops.delete(bm, geom=front, context="FACES")
         bm.to_mesh(obj.data)
         bm.free()

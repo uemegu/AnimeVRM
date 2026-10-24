@@ -47,7 +47,8 @@ node scripts/merge_tripo_clothing.mjs scripts/outfits/<名前>.json
   - `mask_skin_depth`（例 0.04）：服の内側の胴の肌を消す。`mask_sleeve_arm`（既定 true）：袖の中の腕の肌も消す
   - `legacy_sleeve: true`：袖の調整をアオイの素体で決めた作り方にする（シオンではこちらが良かった）
   - `sleeve_angle`：袖の角度を直接決める（普段は自動）
-- 髪：`scale`（大きさ。0.26 前後）、`bangs_above_brow`（前髪の下端の高さ。負で眉より下）、`base_color`（素体の後ろ髪の土台の色）、`inner_layer`（内側の暗い毛の層。既定あり）
+- 髪を Blender で手で置き直したとき：素体と同じ座標で髪だけを GLB に書き出し、`placed: true` にする（大きさ探し・前髪の持ち上げをせず、置いた位置のまま使う。`scale`・`bangs_above_brow` は効かない）。素体ごと書き出したファイルは顔の位置が数 mm ずれることがあるので、顔の位置を合わせて髪だけ取り出す（アカネのゴシックは `tmp/hair.glb` → `tmp/hair_placed.glb`）
+- 髪：`scale`（大きさ。0.26 前後）、`bangs_above_brow`（前髪の下端の高さ。負で眉より下）、`base_color`（素体の後ろ髪の土台の色）、`inner_layer`（内側の暗い毛の層。既定あり）、`inner_front_cut`・`inner_front_half_width`（内側の層を額の前で消す高さ＝眉から何 m 上まで、と幅＝中央から左右何 m。既定 0.01・0.05。前髪がまばらで、層の切り口が隙間から暗い帯に見えるときに上げる。ピンクのウィッグは 0.07・0.07）
 
 ## 4. 確かめ方（必ず Studio の描画で）
 
