@@ -35,6 +35,7 @@ dist-ssr
 !/scripts/transplant-vrm-meshes.ts
 !/scripts/fit_tripo_clothing.py
 !/scripts/merge_tripo_clothing.mjs
+!/scripts/sway_bones.mjs
 !/scripts/dump_engine_pose.ts
 !/scripts/outfits/
 # Blender で作るモーション（desk_chin_rest.fbx など）

@@ -7,6 +7,7 @@
 // VRM の拡張（VRMC_vrm・SpringBone・MToon）は JSON をそのまま残すので失われない。
 import fs from 'node:fs';
 import path from 'node:path';
+import { addSway } from './sway_bones.mjs';
 
 const cfg = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const outPath = cfg.output_vrm;
@@ -185,6 +186,7 @@ const layers = cfg.garments.flatMap((g) => {
   }
   return [g, ...inner];
 });
+const swayCtx = { json: vrm.json, skinJointCount: skin.joints.length, newJoints: [], springs: [] };
 for (const spec of layers) {
   const cloth = readGlb(path.join(cfg.work_dir, `${spec.name}.glb`));
   const cSkin = cloth.json.skins[0];
@@ -198,15 +200,29 @@ for (const spec of layers) {
   const primitives = [];
   for (const cPrim of cloth.json.meshes[meshNode.mesh].primitives) {
     const attributes = {};
+    // 骨とウェイトは素体のスキンの番号に直してから、垂れる部分に揺れの骨を足す
+    const { acc: jAcc, bytes: jBytes } = readAccessorBytes(cloth, cPrim.attributes.JOINTS_0);
+    const joints = new Uint16Array(jAcc.count * 4);
+    for (let i = 0; i < jAcc.count * 4; i++) {
+      joints[i] = remap[jAcc.componentType === 5121 ? jBytes.readUInt8(i) : jBytes.readUInt16LE(i * 2)];
+    }
+    const { acc: wAcc, bytes: wBytes } = readAccessorBytes(cloth, cPrim.attributes.WEIGHTS_0);
+    const wScale = wAcc.componentType === 5126 ? 1 : wAcc.componentType === 5121 ? 1 / 255 : 1 / 65535;
+    const weights = new Float32Array(wAcc.count * 4);
+    for (let i = 0; i < wAcc.count * 4; i++) {
+      weights[i] = wAcc.componentType === 5126 ? wBytes.readFloatLE(i * 4)
+        : (wAcc.componentType === 5121 ? wBytes.readUInt8(i) : wBytes.readUInt16LE(i * 2)) * wScale;
+    }
+    const { bytes: pBytes } = readAccessorBytes(cloth, cPrim.attributes.POSITION);
+    const positions = new Float32Array(pBytes.buffer.slice(pBytes.byteOffset, pBytes.byteOffset + pBytes.length));
+    addSway(swayCtx, spec, positions, joints, weights);
     for (const [name, accIdx] of Object.entries(cPrim.attributes)) {
       const { acc, bytes } = readAccessorBytes(cloth, accIdx);
       if (name === 'JOINTS_0') {
-        const out = Buffer.alloc(acc.count * 8);
-        for (let i = 0; i < acc.count * 4; i++) {
-          const j = acc.componentType === 5121 ? bytes.readUInt8(i) : bytes.readUInt16LE(i * 2);
-          out.writeUInt16LE(remap[j], i * 2);
-        }
+        const out = Buffer.from(joints.buffer);
         attributes[name] = appendAccessor(out, { ...acc, componentType: 5123 }, 34962);
+      } else if (name === 'WEIGHTS_0') {
+        attributes[name] = appendAccessor(Buffer.from(weights.buffer), { ...acc, componentType: 5126, normalized: false }, 34962);
       } else {
         attributes[name] = appendAccessor(bytes, acc, 34962);
       }
@@ -354,6 +370,18 @@ if (hairSpec) {
     p.attributes.NORMAL = appendAccessor(normals, { ...nAcc, count: acc.count, min: [-1, -1, -1], max: [1, 1, 1] }, 34962);
     console.log(`地毛を毛の内側まで広げた（${moved} 頂点、x ${min[0].toFixed(3)}..${max[0].toFixed(3)}）`);
   }
+}
+
+// 足した揺れの骨をスキンと VRMC_springBone に登録する
+if (swayCtx.newJoints.length) {
+  const { bytes: oldIbm } = readAccessorBytes(vrm, skin.inverseBindMatrices);
+  const extra = Buffer.alloc(swayCtx.newJoints.length * 64);
+  swayCtx.newJoints.forEach(({ ibm }, n) => ibm.forEach((v, q) => extra.writeFloatLE(v, n * 64 + q * 4)));
+  skin.joints.push(...swayCtx.newJoints.map(({ node }) => node));
+  skin.inverseBindMatrices = appendAccessor(Buffer.concat([oldIbm, extra]), { componentType: 5126, count: skin.joints.length, type: 'MAT4' });
+  const sb = (vrm.json.extensions.VRMC_springBone ??= { specVersion: '1.0', colliders: [], colliderGroups: [], springs: [] });
+  sb.springs.push(...swayCtx.springs);
+  console.log(`揺れの骨 ${swayCtx.newJoints.length} 本、揺れの列 ${swayCtx.springs.length} 本を足した`);
 }
 
 const bin = Buffer.concat(binChunks);
