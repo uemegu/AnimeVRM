@@ -597,12 +597,14 @@ class Garment:
         ease = self.spec.get("ease", 0.005)
         self.ease = np.full(self.nc, ease)
         self.armpit_w = np.zeros(self.nc)
+        self.armpit_zone = np.zeros(self.nc)
         if kind == "top" and fit["armpit_hw"]:
             y = self.body.bone_head("J_Bip_L_UpperArm")[1]
             for sx in (1.0, -1.0):
                 a = np.array([sx * fit["armpit_hw"], y, fit["anchor_b"]])
                 d = np.linalg.norm(self.P - a, axis=1)
                 w = 1.0 - smoothstep(0.03, 0.08, d)
+                self.armpit_zone = np.maximum(self.armpit_zone, 1.0 - smoothstep(0.05, 0.10, d))
                 self.ease = np.maximum(self.ease, ease + (self.spec.get("armpit_ease", 0.008) - ease) * w)
                 r0, r1 = self.spec.get("armpit_blur_range", (0.05, 0.13))
                 # 肩の上まで混ぜると、腕を下ろしたときに肩の布が残って潰れるので、脇の高さより下だけにする
@@ -787,8 +789,20 @@ class Garment:
             mark[self.tris[flipped].ravel()] = True
             mark = neighbor_avg(mark.astype(float), self.gnb) > 0  # 1 周広げる
             D = self.tie_pairs(np.where(mark[:, None], neighbor_avg(D, self.gnb), D), 1)
-        if it:
-            self.log(f"裏返りを直した（{it} 回、残り {int(flipped.sum())} 面）")
+        if flipped.any():
+            # なめらかにしても直らない所は、その周りの変形を取り消す（裏返った面は穴に見える）。境目は周りへなめらかにつなぐ
+            mark = np.zeros(self.nc, dtype=bool)
+            mark[self.tris[flipped].ravel()] = True
+            w = mark.astype(float)
+            for _ in range(4):
+                w = np.maximum(w, neighbor_avg(w, self.gnb))
+            w = smooth(w, self.gnb, 4, 0.5)
+            w = np.clip(w * 1.5, 0, 1)
+            D = self.tie_pairs(D * (1 - w[:, None]))
+            left = int((np.einsum("ij,ij->i", n0, self.face_normals(before + D)) <= 0).sum())
+            self.log(f"裏返りが残った {int(flipped.sum())} 面の周りの変形を取り消した（残り {left} 面）")
+        elif it:
+            self.log(f"裏返りを直した（{it} 回）")
         self.P = before + D
 
     def nearest_body(self, ev, P, max_dist=0.08):
@@ -1058,6 +1072,10 @@ class Garment:
             self.log(f"ポーズ別のめり込み（{r + 1} 回目） {dict(zip(poses, counts))}")
             if not total.any():
                 break
+            # 脇の下は、腕を前・後ろ・下に動かす姿勢ごとに押す向きが逆になり、広げると布が折れて裏返る（穴に見える）。
+            # 脇の下では広げず、突き抜ける肌は消す（poke_depth）
+            if self.spec.get("relax_armpit", False) is False:
+                total = total * (1.0 - getattr(self, "armpit_zone", np.zeros(self.nc)))[:, None]
             self.P = self.P + spread(total, snb)
         self.untangle(before)
         self.body.set_pose([])
