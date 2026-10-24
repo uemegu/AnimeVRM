@@ -58,6 +58,12 @@ AIエージェントによるデバッグ・動作確認では、BGM・SE・ボ�
 
 ---
 
+## Tripo の服・髪を VRM に着せる
+
+Tripo などで作った服・髪の GLB を VRM の素体に着せる／直すときは、[tripo-outfit-fitting](.agents/skills/tripo-outfit-fitting/SKILL.md) を読む。設定ファイル（`scripts/outfits/*.json`）を書いて `scripts/fit_tripo_clothing.py`（Blender）と `scripts/merge_tripo_clothing.mjs` を流す。上衣は T ポーズで作らせ、見た目は Studio の描画で確かめる。
+
+---
+
 ## シナリオ設計規則 (Scenario Design Guidelines)
 
 - **選択肢シーンにおけるセリフ・ナレーションの完全排除**:
