@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "id": "emili_expressions",
+  "title": {
+    "ja": "エミリの表情 — 見本",
+    "en": "Emili's expressions — samples"
+  },
+  "description": "エミリの顔アップで、すべての表情（笑顔・穏やか・悲しい・怒り・驚き・ニマニマ・困り笑い・えへへ・ウィンク・きらきら・照れ・うるうる・しょんぼり）を2秒ずつ順に切り替える見本。怒りは怒りマーク、えへへ・照れは頬染め、照れは目が泳ぐ、うるうるは涙目と組み合わせる。",
+  "playMode": "movie",
+  "location": "courtyard",
+  "bgm": "silence",
+  "timeOfDay": "day",
+  "scenes": [
+    {
+      "id": "faces",
+      "text": "",
+      "speakerCharacterId": "emili",
+      "duration": 30.0,
+      "camera": "face",
+      "cameraFocus": "emili",
+      "avatars": {
+        "emili": {
+          "position": "center",
+          "motion": "Standing Idle",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "lookAtTarget": "camera",
+          "blush": false,
+          "tearyEyes": false,
+          "eyeWander": false,
+          "transitions": [
+            {
+              "at": 2.0,
+              "expression": "happy",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 4.0,
+              "expression": "relaxed",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 6.0,
+              "expression": "sad",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 8.0,
+              "expression": "angry",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": true
+            },
+            {
+              "at": 10.0,
+              "expression": "surprised",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 12.0,
+              "expression": "nima",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 14.0,
+              "expression": "komari",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 16.0,
+              "expression": "ehehe",
+              "expressionWeight": 1,
+              "blush": true,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 18.0,
+              "expression": "wink",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 20.0,
+              "expression": "kirakira",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 22.0,
+              "expression": "tere",
+              "expressionWeight": 1,
+              "blush": true,
+              "tearyEyes": false,
+              "eyeWander": true,
+              "anger": false
+            },
+            {
+              "at": 24.0,
+              "expression": "uruuru",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": true,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 26.0,
+              "expression": "shonbori",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            },
+            {
+              "at": 28.0,
+              "expression": "neutral",
+              "expressionWeight": 1,
+              "blush": false,
+              "tearyEyes": false,
+              "eyeWander": false,
+              "anger": false
+            }
+          ],
+          "anger": false
+        }
+      }
+    }
+  ]
+}
