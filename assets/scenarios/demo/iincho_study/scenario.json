@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "id": "iincho_study",
+  "title": {
+    "ja": "委員長と問題集",
+    "en": "Studying with the Class Rep"
+  },
+  "description": "教室で問題に詰まったタカシに委員長が声をかけ、のぞき込んだ拍子にタカシが余計なことを口走る。",
+  "location": "classroom",
+  "timeOfDay": "day",
+  "bgm": "tuesday_afternoon_hijinks",
+  "scenes": [
+    {
+      "id": "s1",
+      "speakerCharacterId": "player",
+      "text": "うーん、わからない",
+      "voiceUrl": "v_s1.mp3",
+      "avatars": {
+        "iincho": {
+          "position": [
+            0.25,
+            0,
+            0.75
+          ],
+          "rotationY": -0.2,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s2",
+      "speakerCharacterId": "iincho",
+      "text": "どうしたの、タカシくん？",
+      "voiceUrl": "v_s2.mp3",
+      "avatars": {
+        "iincho": {
+          "position": [
+            0.25,
+            0,
+            0.75
+          ],
+          "rotationY": -0.2,
+          "motion": "Standing Idle",
+          "expression": "neutral",
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s3",
+      "speakerCharacterId": "player",
+      "text": "ちょっとこの問題が・・・",
+      "voiceUrl": "v_s3.mp3",
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s4",
+      "speakerCharacterId": "iincho",
+      "text": "どれどれ？",
+      "voiceUrl": "v_s4.mp3",
+      "avatars": {
+        "iincho": {
+          "position": [
+            0.25,
+            0,
+            0.75
+          ],
+          "rotationY": -0.2,
+          "motion": "pose_lean_forward_peek",
+          "expression": "neutral",
+          "lookAtTarget": "forward"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s5",
+      "speakerCharacterId": "player",
+      "text": "（いい匂いが…）",
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s6",
+      "speakerCharacterId": "iincho",
+      "text": "なんか変なこと考えてない？",
+      "voiceUrl": "v_s6.mp3",
+      "avatars": {
+        "iincho": {
+          "position": [
+            0.25,
+            0,
+            0.75
+          ],
+          "rotationY": -0.2,
+          "motion": "Standing Idle",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true,
+          "anger": true,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s7",
+      "speakerCharacterId": "player",
+      "text": "いや、何も...",
+      "voiceUrl": "v_s7.mp3",
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    },
+    {
+      "id": "s8",
+      "speakerCharacterId": "iincho",
+      "text": "本当かなぁ",
+      "voiceUrl": "v_s8.mp3",
+      "avatars": {
+        "iincho": {
+          "position": [
+            0.25,
+            0,
+            0.75
+          ],
+          "rotationY": -0.2,
+          "motion": "Angry",
+          "expression": "angry",
+          "expressionWeight": 1,
+          "blush": true,
+          "lookAtTarget": "player"
+        }
+      },
+      "cameraPose": {
+        "position": [
+          0,
+          1.25,
+          2
+        ],
+        "target": [
+          0.25,
+          1.32,
+          0.75
+        ],
+        "fov": 35
+      }
+    }
+  ]
+}

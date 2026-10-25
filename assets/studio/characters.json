@@ -366,11 +366,20 @@
       },
       "role": "mob",
       "themeColor": "#94a3b8",
-      "models": [],
+      "models": [
+        {
+          "key": "default",
+          "label": {
+            "ja": "制服",
+            "en": "School"
+          },
+          "url": "/models/iincho/iincho-school-hair2-slimface.vrm"
+        }
+      ],
       "profile": "2年A組のクラス委員長（女子）。提出物を集める真面目な生徒。",
       "voice": {
         "ref": "assets/voices/iincho_ref.mp3",
-        "caption": "少しダウナーで皮肉っぽい、真面目な女子高校生の声。",
+        "caption": "柔らかく落ち着いた、面倒見のよいお姉さんのような女子高校生の声。",
         "direction": ""
       }
     },

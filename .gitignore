@@ -35,6 +35,9 @@ dist-ssr
 !/scripts/transplant-vrm-meshes.ts
 !/scripts/fit_tripo_clothing.py
 !/scripts/merge_tripo_clothing.mjs
+!/scripts/attach_vrm_node.mjs
+!/scripts/style_iincho_hair.mjs
+!/scripts/reshape_face_contour.mjs
 !/scripts/sway_bones.mjs
 !/scripts/dump_engine_pose.ts
 !/scripts/outfits/
