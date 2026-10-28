@@ -33,6 +33,13 @@
             "en": "Commute"
           },
           "url": "/models/aoi/aoi-school-with-bag.vrm"
+        },
+        {
+          "key": "tripo",
+          "label": {
+            "ja": "tripo"
+          },
+          "url": "/models/aoi/aoi-toripo-wear.vrm"
         }
       ],
       "voice": {
@@ -74,6 +81,14 @@
             "en": "Commute"
           },
           "url": "/models/emili/emili-school-with-bag.vrm"
+        },
+        {
+          "key": "military",
+          "label": {
+            "ja": "ミリタリー",
+            "en": "Military"
+          },
+          "url": "/models/emili/emili-military.vrm"
         }
       ],
       "sprites": [
@@ -148,6 +163,13 @@
             "en": "Gothic (Tripo)"
           },
           "url": "/models/shion/shion-tripo.vrm"
+        },
+        {
+          "key": "tripo2",
+          "label": {
+            "ja": "Tripo移植"
+          },
+          "url": "/models/shion/shion-tripo-eye.vrm"
         }
       ],
       "voice": {
@@ -303,12 +325,12 @@
       "role": "sub",
       "themeColor": "#a16207",
       "models": [],
-      "profile": "タカシの母。マンションで息子と二人暮らし。台所の換気扇まで磨き上げる息子に呆れている。",
       "voice": {
         "ref": "assets/voices/takashi_mom_ref.mp3",
         "caption": "40代の母親の声。少し低めで落ち着いた、さばさばした声。呆れながらも愛情のある、自然な会話のトーン。",
         "direction": ""
-      }
+      },
+      "profile": "タカシの母。マンションで息子と二人暮らし。台所の換気扇まで磨き上げる息子に呆れている。"
     },
     {
       "id": "aoi_mom",
@@ -319,12 +341,12 @@
       "role": "mob",
       "themeColor": "#ca8a04",
       "models": [],
-      "profile": "アオイの母。おっとりした声だけの登場。",
       "voice": {
         "ref": "assets/voices/aoi_mom_ref.mp3",
         "caption": "40代のおっとりした優しい母親の声。柔らかく穏やかなトーン。",
         "direction": ""
-      }
+      },
+      "profile": "アオイの母。おっとりした声だけの登場。"
     },
     {
       "id": "mob_boy",
@@ -335,12 +357,12 @@
       "role": "mob",
       "themeColor": "#64748b",
       "models": [],
-      "profile": "2年A組の男子。",
       "voice": {
         "ref": "assets/voices/mob_boy_ref.mp3",
         "caption": "元気でお調子者の男子高校生の声。明るく、からかうような軽いノリ。",
         "direction": ""
-      }
+      },
+      "profile": "2年A組の男子。"
     },
     {
       "id": "mob_student",
@@ -351,12 +373,12 @@
       "role": "mob",
       "themeColor": "#94a3b8",
       "models": [],
-      "profile": "図書室などに居合わせた生徒。",
       "voice": {
         "ref": "assets/voices/mob_student_ref.mp3",
         "caption": "おとなしく真面目な高校生の声。少し気弱で丁寧なトーン。",
         "direction": ""
-      }
+      },
+      "profile": "図書室などに居合わせた生徒。"
     },
     {
       "id": "iincho",
@@ -376,12 +398,12 @@
           "url": "/models/iincho/iincho-school-hair2-slimface.vrm"
         }
       ],
-      "profile": "2年A組のクラス委員長（女子）。提出物を集める真面目な生徒。",
       "voice": {
         "ref": "assets/voices/iincho_ref.mp3",
         "caption": "柔らかく落ち着いた、面倒見のよいお姉さんのような女子高校生の声。",
         "direction": ""
-      }
+      },
+      "profile": "2年A組のクラス委員長（女子）。提出物を集める真面目な生徒。"
     },
     {
       "id": "kids",
@@ -392,12 +414,12 @@
       "role": "mob",
       "themeColor": "#84cc16",
       "models": [],
-      "profile": "通学路の小学生たち（声のみ）。",
       "voice": {
         "ref": "assets/voices/kids_ref.mp3",
         "caption": "小学校低学年の子どもの声。無邪気で高い声。",
         "direction": ""
-      }
+      },
+      "profile": "通学路の小学生たち（声のみ）。"
     },
     {
       "id": "teacher_colleague",
@@ -408,12 +430,12 @@
       "role": "mob",
       "themeColor": "#78716c",
       "models": [],
-      "profile": "職員室で白石先生の隣の席の先生。",
       "voice": {
         "ref": "assets/voices/teacher_colleague_ref.mp3",
         "caption": "人の良さそうな中年の男性教師の声。穏やかで少し気弱。",
         "direction": ""
-      }
+      },
+      "profile": "職員室で白石先生の隣の席の先生。"
     },
     {
       "id": "sebastian",
@@ -424,12 +446,12 @@
       "role": "mob",
       "themeColor": "#57534e",
       "models": [],
-      "profile": "神崎家の執事（声のみ）。",
       "voice": {
         "ref": "assets/voices/sebastian_ref.mp3",
         "caption": "初老の執事の男性の声。落ち着いて品があり、低く丁寧で控えめ。",
         "direction": ""
-      }
+      },
+      "profile": "神崎家の執事（声のみ）。"
     },
     {
       "id": "cafeteria_lady",
@@ -440,12 +462,12 @@
       "role": "mob",
       "themeColor": "#d97706",
       "models": [],
-      "profile": "購買のレジのおばちゃん。現金しか受け付けない。",
       "voice": {
         "ref": "assets/voices/cafeteria_lady_ref.mp3",
         "caption": "50代の気のいい購買のおばちゃんの声。明るく大らかで、のんびりした話し方。",
         "direction": ""
-      }
+      },
+      "profile": "購買のレジのおばちゃん。現金しか受け付けない。"
     },
     {
       "id": "sp_leader",
@@ -519,7 +541,7 @@
     {
       "id": "puca",
       "name": {
-        "ja": "プーカ",
+        "ja": "モンスター",
         "en": "Puca"
       },
       "role": "sub",
@@ -528,10 +550,17 @@
         {
           "key": "default",
           "label": {
-            "ja": "通常",
+            "ja": "プーカ",
             "en": "Default"
           },
           "url": "/models/monster/puca.vrm"
+        },
+        {
+          "key": "pumpkin",
+          "label": {
+            "ja": "パンプキン"
+          },
+          "url": "/models/monster/pumpukin.vrm"
         }
       ],
       "voice": {
