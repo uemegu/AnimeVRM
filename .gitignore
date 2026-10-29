@@ -58,3 +58,21 @@ dist-ssr
 /trash
 /tmp
 __pycache__/
+
+# Mixamo のモーション（ファイル単体を配れないので入れない。README の「Mixamo のモーション」）
+**/animations/Acknowledging.fbx
+**/animations/Angry.fbx
+**/animations/Antada.fbx
+**/animations/Dismissing Gesture.fbx
+**/animations/Excited.fbx
+**/animations/Female Standing Pose.fbx
+**/animations/Idle.fbx
+**/animations/Jogging.fbx
+**/animations/Ohoho.fbx
+**/animations/Punching.fbx
+**/animations/Quick Formal Bow.fbx
+**/animations/Salute.fbx
+**/animations/Standing Greeting.fbx
+**/animations/Standing Idle.fbx
+**/animations/Surprised.fbx
+**/animations/Walking.fbx

@@ -4,7 +4,7 @@ VRM のキャラクターをセルルック（アニメ調）で描き、会話�
 
 作品はそれぞれのリポジトリに置き、このリポジトリをサブモジュールとして使います（ギャルゲー『5秒の告白』は [confession_in_5_seconds](https://github.com/uemegu/confession_in_5_seconds)）。作品のシナリオは Studio の外部プロジェクトとして開けます（下の「外部プロジェクト」）。
 
-- シナリオ再生（Pages）: [https://uemegu.github.io/AnimeVRM/](https://uemegu.github.io/AnimeVRM/)
+- シナリオ再生（Pages）: 作り直すまで非公開
 
 ## 構成
 
@@ -20,9 +20,15 @@ npm workspaces のモノレポです。
 | `packages/motion/` | ardy-mini によるモーション生成、体型への合わせ込み、接触の補正、FBX 書き出し。[README](packages/motion/src/ardy/README.md) |
 | `mini-game/pool/` | ミニゲーム「水上ヒップアタック相撲」（プール）。浮島の上で 2 人がお尻で押し合う勝者予想ゲーム。水面・しぶき・レンズの水滴、押し合いの物理、BGM・SE。`assets/` に専用のモーション・ボイス・BGM・SE。`scripts/` に Playwright の動作確認 |
 | `assets/` | 素材（モデル・モーション・背景・BGM・SE・ボイス・シナリオ）。`assets/studio/*.json` は Studio で編集する設定（場所・時間帯・キャラクター・モーション・BGM） |
-| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない）。`docs/pool/` はプールのビルド |
+| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない。今はリポジトリに入れていない）。`docs/pool/` はプールのビルド |
 | `tools/eye-editor/` | Eye Atelier（モデルを作るときに使う、目元の調整ツール。Blender 連携） |
 | `plans/` | 計画と決定事項 |
+
+## Mixamo のモーション
+
+次のモーションは [Mixamo](https://www.mixamo.com/) のもので、利用条件によりファイル単体を配れないため、リポジトリに入れていません。Mixamo から FBX（Format: FBX Binary、Skin: Without Skin、30fps）で落とし、同じ名前で `assets/animations/` に置いてください。
+
+Acknowledging, Angry, Antada, Dismissing Gesture, Excited, Female Standing Pose, Idle, Jogging, Ohoho, Punching, Quick Formal Bow, Salute, Standing Greeting, Standing Idle, Surprised, Walking
 
 ## 使い方
 
