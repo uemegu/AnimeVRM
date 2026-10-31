@@ -518,27 +518,6 @@
       "profile": "陽気な商店街のおじさん。"
     },
     {
-      "id": "akane",
-      "name": {
-        "ja": "アカネ（仮）",
-        "en": "Akane"
-      },
-      "role": "sub",
-      "themeColor": "#b91c1c",
-      "models": [
-        {
-          "key": "default",
-          "label": {
-            "ja": "ゴシック（Tripo）",
-            "en": "Gothic (Tripo)"
-          },
-          "url": "/models/akane/akane-gothic.vrm"
-        }
-      ],
-      "tearDrops": false,
-      "profile": "仮のキャラ。シオンの素体に、Tripo で作った赤い髪とゴシックの服を着せたもの。"
-    },
-    {
       "id": "puca",
       "name": {
         "ja": "モンスター",
