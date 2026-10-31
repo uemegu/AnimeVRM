@@ -1,10 +1,10 @@
 # AnimeVRM
 
-VRM のキャラクターをセルルック（アニメ調）で描き、会話シナリオを演じさせるプロジェクトです。シナリオやシーンを作る **Studio** と、シナリオ再生だけの **Pages 版** が、同じ描画とシナリオ形式を使います。
+VRM のキャラクターをセルルック（アニメ調）で描き、会話シナリオを演じさせるプロジェクトです。シナリオやシーンを作る **Studio** と、キャラクターを眺める **Pages 版（ビューアのみ）** が、同じ描画を使います。
 
 作品はそれぞれのリポジトリに置き、このリポジトリをサブモジュールとして使います（ギャルゲー『5秒の告白』は [confession_in_5_seconds](https://github.com/uemegu/confession_in_5_seconds)）。作品のシナリオは Studio の外部プロジェクトとして開けます（下の「外部プロジェクト」）。
 
-- シナリオ再生（Pages）: 作り直すまで非公開
+- ビューア（GitHub Pages）: https://uemegu.github.io/AnimeVRM/
 
 ## 構成
 
@@ -12,7 +12,7 @@ npm workspaces のモノレポです。
 
 | ディレクトリ | 中身 |
 | :--- | :--- |
-| `studio/` | Studio（React、ローカル専用）。ビューア・シーン設定・シナリオ編集・シナリオ再生・キャラクター管理・モーション。`studio/pages/` は Pages 版（再生だけ） |
+| `studio/` | Studio（React、ローカル専用）。ビューア・シーン設定・シナリオ編集・シナリオ再生・キャラクター管理・モーション。`studio/pages/` は Pages 版（ビューアのみ） |
 | `server/` | Studio 用のローカルサーバー（Hono、localhost のみ）。シナリオや設定の保存、素材の一覧、音声生成。[server/README.md](server/README.md) |
 | `packages/engine/` | 描画（[AnimeVRM.engine](https://github.com/uemegu/AnimeVRM.engine) のサブモジュール）。舞台（`stage/`）、トゥーンシェーダー、ポストプロセス、感情演出、舞台に渡す形（`schema/`）、口パクの解析 |
 | `packages/content/` | 簡易3D背景のセット、手に持つ小物、濡れた服の絵柄。アプリの入口で `@anime-vrm/content/register` を読み込むと engine に登録される |
@@ -20,7 +20,7 @@ npm workspaces のモノレポです。
 | `packages/motion/` | ardy-mini によるモーション生成、体型への合わせ込み、接触の補正、FBX 書き出し。[README](packages/motion/src/ardy/README.md) |
 | `mini-game/pool/` | ミニゲーム「水上ヒップアタック相撲」（プール）。浮島の上で 2 人がお尻で押し合う勝者予想ゲーム。水面・しぶき・レンズの水滴、押し合いの物理、BGM・SE。`assets/` に専用のモーション・ボイス・BGM・SE。`scripts/` に Playwright の動作確認 |
 | `assets/` | 素材（モデル・モーション・背景・BGM・SE・ボイス・シナリオ）。`assets/studio/*.json` は Studio で編集する設定（場所・時間帯・キャラクター・モーション・BGM） |
-| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない。今はリポジトリに入れていない）。`docs/pool/` はプールのビルド |
+| `docs/` | Pages 版の出力（`npm run build:pages` で作る。手で編集しない。Git 管理外。GitHub Actions でビルドして公開） |
 | `tools/eye-editor/` | Eye Atelier（モデルを作るときに使う、目元の調整ツール。Blender 連携） |
 | `plans/` | 計画と決定事項 |
 
@@ -43,28 +43,36 @@ npm run studio
 # ミニゲーム（プール。http://localhost:5178）
 npm run pool
 
-# Pages 版を docs/ に書き出す（再生するシナリオが使う素材だけをコピーする。プールも docs/pool/ に出す）
+# Pages 版を docs/ に書き出す（ビューアのみ。Mixamo の追加ダウンロード不要）
 npm run build:pages
 
-# プールだけをビルドする（docs/pool/。Pages では /AnimeVRM/pool/）
+# プールだけをローカル向けにビルドする（docs/pool/。Pages の公開対象外）
 npm run build:pool
 
 npm run typecheck
 npm test
 ```
 
+### GitHub Pages の公開
+
+GitHub の Settings → Pages → Build and deployment → Source を **GitHub Actions** に設定します。`main` への push、または Actions の **Deploy viewer to GitHub Pages** の手動実行で公開します。シーン設定・シナリオ編集・シナリオ再生・ミニゲームは含みません。
+
+標準の立ち姿は `pose_hands_on_hips_proud`。公開する素材は Git 管理下のモデル・背景・モーション・試聴用音声だけで、ローカルの Mixamo FBX や未登録の制作途中のモデルは含めません。
+
+ビルド結果は `cd studio && npx vite preview --config vite.pages.config.ts` で起動し、http://localhost:5177/AnimeVRM/ で確認できます。
+
 ### Studio の画面
 
 - **ビューア**：キャラクター・場所・時間帯・モーション・表情を選んで見え方を確かめる
 - **シーン**：場所（遠景・中景・近景、3D背景、立ち位置、カメラの構図）と時間帯（ライト・ポストプロセス・マテリアル）の設定。俯瞰の簡易3Dで配置を確かめられる
 - **シナリオ**：シナリオの一覧・作成・保存、カットの編集（セリフ・舞台・キャラ・演出・分岐）、プレビュー、フローチャート、カット内のタイムライン、ボイスの生成（Irodori-TTS）
-- **シナリオ再生**：保存したシナリオを分岐・ボイス・BGM・演出つきで通して再生する（Pages 版と同じ画面）
+- **シナリオ再生**：保存したシナリオを分岐・ボイス・BGM・演出つきで通して再生する（ローカル専用）
 - **キャラクター**：名前・モデル・音声生成の参照音声・設定。登場するシナリオやセリフの逆引き
 - **モーション**：ardy-mini で候補を作って比べ、採用したものを保存する。登録済みモーションの一覧、接触点の校正
 
 ### シナリオ
 
-演出の見本は `assets/scenarios/demo/<ID>/scenario.json`（Pages で再生する）。形式は `packages/scenario/src/schema.ts` が正です。演出の書き方の説明は作品側の FEATURES.md（confession_in_5_seconds の `app/FEATURES.md`）にあります。
+演出の見本は `assets/scenarios/demo/<ID>/scenario.json`（Studio で再生する）。形式は `packages/scenario/src/schema.ts` が正です。演出の書き方の説明は作品側の FEATURES.md（confession_in_5_seconds の `app/FEATURES.md`）にあります。
 
 ### 外部プロジェクト
 

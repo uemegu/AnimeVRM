@@ -12,6 +12,10 @@ import { ScenariosView } from './views/scenarios/ScenariosView';
 import { PlayerView } from './views/player/PlayerView';
 import { MotionsView } from './views/motions/MotionsView';
 import { SettingsView } from './views/settings/SettingsView';
+import { configureAssets } from '@anime-vrm/engine/utils/path';
+import { DEFAULT_MOTION } from './defaultMotion';
+
+configureAssets({ idleMotion: DEFAULT_MOTION });
 
 // 本番（GitHub Pages）は直リンクの 404 を返すので、URL は #/ 形式にする
 const createRouter = import.meta.env.PROD ? createHashRouter : createBrowserRouter;

@@ -76,3 +76,6 @@ __pycache__/
 **/animations/Standing Idle.fbx
 **/animations/Surprised.fbx
 **/animations/Walking.fbx
+
+# GitHub Actions でビルドする Pages 公開物
+/docs/

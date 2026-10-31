@@ -1,87 +1,36 @@
-/**
- * Pages のビルドに入れる素材を、再生するシナリオから拾う（assets/ を丸ごと入れると数百 MB になるため）
- */
+/** ビューアで使う、Git 管理下の素材だけを Pages に含める。 */
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { collectScenarioAssets, type ScenarioAssetBooks } from '@anime-vrm/scenario';
+import { DEFAULT_MOTION } from '../src/defaultMotion';
 
-interface Json {
-  [key: string]: any;
-}
+const STUDIO_FILES = ['characters', 'locations', 'time-of-day', 'bgm'].map((name) => `studio/${name}.json`);
 
-/** 描画が名前を決め打ちで読むもの（感情演出の顔の重ね絵・待機モーション） */
-const ALWAYS = [
-  'studio/characters.json',
-  'studio/locations.json',
-  'studio/time-of-day.json',
-  'studio/bgm.json',
-  'studio/motions.json',
-  'studio/projects.json',
-  'animations/Standing Idle.fbx',
-  // 雨で濡れた服の絵柄（content の wet.ts が登録する）
-  'textures/wet',
-  // 手に持つ小物の絵柄（content の props.ts が名前を決め打ちで読む）
-  'textures/props',
-  // 場所の選択で選べる海の見える公園（簡易3D）。どのシナリオからも参照されないため固定で入れる
-  'textures/painted-seaside',
-  'textures/painted-classroom/sky-only.png',
-  'textures/painted-classroom/thumb-seaside.avif',
-];
-
-/** 組み込みの3D背景が読むテクスチャのディレクトリ */
-const BUILTIN_ENVIRONMENTS: Record<string, string> = {
-  'builtin:painted-classroom': 'textures/painted-classroom',
-  'builtin:painted-library': 'textures/painted-library',
-  'builtin:painted-aoi-room': 'textures/painted-aoi-room',
-  'builtin:painted-gym': 'textures/painted-gym',
-  'builtin:painted-gate': 'textures/painted-gate',
-  'builtin:painted-ground': 'textures/painted-ground',
-  'builtin:painted-seaside': 'textures/painted-seaside',
-  'builtin:shopping-street': 'textures/shopping-street',
-  'builtin:painted-shrine': 'textures/painted-shrine',
-  'builtin:painted-gondola': 'textures/painted-gondola',
-};
-
-const readJson = (file: string): Json => JSON.parse(fs.readFileSync(file, 'utf8'));
-const strip = (url: string) => url.replace(/^\//, '');
-
-/**
- * 素材の一覧（assets/ からの相対パス。ディレクトリも含む）。
- * scenarioIds は assets/scenarios/demo/ のシナリオ ID、extra は共有用画像など
- */
-export function collectPagesAssets(assetsDir: string, scenarioIds: string[], extra: string[] = []): string[] {
-  const found = new Set<string>([...ALWAYS, ...extra.map(strip)]);
-  const books: ScenarioAssetBooks = {
-    locations: readJson(path.join(assetsDir, 'studio/locations.json')).presets,
-    bgm: readJson(path.join(assetsDir, 'studio/bgm.json')).bgm,
-    motions: readJson(path.join(assetsDir, 'studio/motions.json')).motions,
-    characters: readJson(path.join(assetsDir, 'studio/characters.json')).characters,
+export function collectPagesAssets(assetsDir: string): string[] {
+  const repoRoot = path.dirname(assetsDir);
+  const prefix = `${path.basename(assetsDir)}/`;
+  // ローカルだけの Mixamo FBX や制作途中の素材を公開しない。CI と手元で同じ一覧にする。
+  const tracked = new Set(
+    execFileSync('git', ['-C', repoRoot, 'ls-files', '-z', '--', prefix], { encoding: 'utf8' })
+      .split('\0')
+      .filter(Boolean)
+      .map((file) => file.slice(prefix.length))
+  );
+  const characters = JSON.parse(fs.readFileSync(path.join(assetsDir, 'studio/characters.json'), 'utf8')) as {
+    characters: { models: { url: string }[] }[];
   };
-  // 再生の先読み（collectScenarioAssets）と同じ一覧をコピーする。組み込みの3D背景はテクスチャのディレクトリごと
-  for (const id of scenarioIds) {
-    const base = `scenarios/demo/${id}/`;
-    found.add(`${base}scenario.json`);
-    const assets = collectScenarioAssets(readJson(path.join(assetsDir, base, 'scenario.json')), books, `/${base}`);
-    for (const file of assets.files) found.add(strip(file));
-    for (const model of assets.environments) {
-      found.add(BUILTIN_ENVIRONMENTS[model] ?? strip(model));
-      if (model === 'builtin:painted-ground') {
-        // 校門の旧セットの舗装・塀・門柱の石・道路・家並みを共用する
-        for (const file of ['tile-paving', 'tile-wall', 'tile-stone', 'tile-road', 'far-houses']) found.add(`textures/painted-gate/${file}.avif`);
-      }
-    }
-  }
-
-  // VRM のサムネイル（キャラクター・ビューアの一覧で使う）
-  for (const file of [...found]) {
-    if (!file.startsWith('models/') || !file.endsWith('.vrm')) continue;
-    const stem = file.slice('models/'.length, -'.vrm'.length);
-    for (const ext of ['.png', '.jpg', '.jpeg', '.webp']) {
-      if (fs.existsSync(path.join(assetsDir, 'thumbnails', `${stem}${ext}`))) found.add(`thumbnails/${stem}${ext}`);
-    }
-  }
-
-  const missing = [...found].filter((p) => !fs.existsSync(path.join(assetsDir, p)));
+  const models = new Set(characters.characters.flatMap((c) => c.models.map((m) => m.url.replace(/^\//, ''))));
+  const files = [...tracked].filter((file) =>
+    STUDIO_FILES.includes(file) ||
+    models.has(file) ||
+    // 組み込み3D背景・表情・小物の絵柄も含む。シナリオ素材・生成用モデルは不要。
+    (/^textures\//.test(file) && /\.(avif|png|jpe?g|webp)$/i.test(file)) ||
+    (/^animations\//.test(file) && /\.fbx$/i.test(file)) ||
+    (/^(bgm|se|voices)\//.test(file) && /\.(mp3|ogg|wav)$/i.test(file)) ||
+    file === 'ogp/studio.png'
+  );
+  const required = [...STUDIO_FILES, `animations/${DEFAULT_MOTION}.fbx`, 'ogp/studio.png'];
+  const missing = [...new Set([...required, ...files])].filter((file) => !tracked.has(file) || !fs.existsSync(path.join(assetsDir, file)));
   if (missing.length) throw new Error(`Pages の素材が見つかりません:\n${missing.join('\n')}`);
-  return [...found].sort();
+  return files.sort();
 }

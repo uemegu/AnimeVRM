@@ -39,7 +39,7 @@ function initialCollapsed(): boolean {
   return window.innerWidth < 1200;
 }
 
-export function Layout() {
+export function Layout({ viewerOnly = false }: { viewerOnly?: boolean }) {
   const { t, language, setLanguage } = useI18n();
   const backdrop = useBackdropActive();
   const ambient = useAmbientActive();
@@ -81,7 +81,7 @@ export function Layout() {
           </div>
           <div className="studio-brand-text">
             <span className="studio-brand-title">AnimeVRM</span>
-            <span className="studio-brand-sub">Studio</span>
+            <span className="studio-brand-sub">{viewerOnly ? t.nav.viewer : 'Studio'}</span>
           </div>
           <button
             type="button"
@@ -95,7 +95,7 @@ export function Layout() {
           </button>
         </div>
         <nav className="studio-nav">
-          {NAV_ITEMS.map((item) => (
+          {NAV_ITEMS.filter((item) => !viewerOnly || item.path === '/viewer').map((item) => (
             <NavLink key={item.path} to={item.path} title={collapsed ? item.label(t) : undefined} className={({ isActive }) => `studio-nav-item${isActive ? ' active' : ''}`}>
               <Icon name={item.icon} />
               <span className="studio-nav-label">{item.label(t)}</span>

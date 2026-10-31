@@ -17,6 +17,7 @@ import { Icon } from '../../components/Icon';
 import { LocationPicker } from '../../components/LocationPicker';
 import './viewer.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { DEFAULT_MOTION } from '../../defaultMotion';
 
 const TIMES: TimeOfDayId[] = ['morning', 'day', 'evening', 'night', 'rainy', 'indoor_dark'];
 const SHOTS: CameraShot[] = ['wide', 'medium', 'speaker', 'close', 'face', 'side'];
@@ -26,7 +27,6 @@ type FaceEffect = (typeof FACE_EFFECTS)[number];
 const TABS = ['expression', 'motion', 'voice', 'sound'] as const;
 const SOUND_KINDS = ['bgm', 'se'] as const;
 type Tab = (typeof TABS)[number];
-const IDLE = 'Standing Idle';
 
 /** assets/animations/<name>.fbx の name */
 function motionName(url: string): string {
@@ -57,7 +57,7 @@ export function ViewerView() {
   const [lookAtCamera, setLookAtCamera] = useState(false);
   const [faceCamera, setFaceCamera] = useState(false);
   const [faceEffects, setFaceEffects] = useState<Record<FaceEffect, boolean>>({ blush: false, redface: false, tearyEyes: false, awawaMouth: false, anger: false, tears: false, faceSweat: false });
-  const [motion, setMotion] = useState(IDLE);
+  const [motion, setMotion] = useState(DEFAULT_MOTION);
   const [rain, setRain] = useState(false);
   const [motionLoop, setMotionLoop] = useState(true);
   const [motionCue, setMotionCue] = useState(0);
