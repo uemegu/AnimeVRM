@@ -33,12 +33,9 @@ dist-ssr
 !/scripts/check-framing.ts
 !/scripts/profile-render.ts
 !/scripts/transplant-vrm-meshes.ts
-!/scripts/fit_tripo_clothing.py
-!/scripts/merge_tripo_clothing.mjs
 !/scripts/attach_vrm_node.mjs
 !/scripts/style_iincho_hair.mjs
 !/scripts/reshape_face_contour.mjs
-!/scripts/sway_bones.mjs
 !/scripts/dump_engine_pose.ts
 !/scripts/outfits/
 # Blender で作るモーション（desk_chin_rest.fbx など）
@@ -79,3 +76,9 @@ __pycache__/
 
 # GitHub Actions でビルドする Pages 公開物
 /docs/
+
+# 衣装の生成用ファイルはローカルに保持し、完成モデルだけを管理する
+/scripts/outfits/emili_military.json
+/scripts/outfits/poses/emili_*.pose.json
+/scripts/outfits/textures/emili_military/
+/assets/models/emili/emili-boots.vrm
