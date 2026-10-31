@@ -24,7 +24,7 @@ export function collectPagesAssets(assetsDir: string): string[] {
     STUDIO_FILES.includes(file) ||
     models.has(file) ||
     // 組み込み3D背景・表情・小物の絵柄も含む。シナリオ素材・生成用モデルは不要。
-    (/^textures\//.test(file) && /\.(avif|png|jpe?g|webp)$/i.test(file)) ||
+    (/^textures\//.test(file) && /\.(avif|png|jpe?g|webp|glb)$/i.test(file)) ||
     (/^animations\//.test(file) && /\.fbx$/i.test(file)) ||
     (/^(bgm|se|voices)\//.test(file) && /\.(mp3|ogg|wav)$/i.test(file)) ||
     file === 'ogp/studio.png'

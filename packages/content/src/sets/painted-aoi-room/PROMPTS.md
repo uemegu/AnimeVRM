@@ -1,6 +1,6 @@
 # 生成素材
 
-codex CLI の built-in image generation（`codex exec -s workspace-write --skip-git-repo-check "<指示>" -i scratch/aoi-room/reference.png < /dev/null`）で生成。参照は `assets/textures/aoi_room_far.avif` を PNG に復号した `scratch/aoi-room/reference.png`。透過のもの（wall-front・bed-side・bed-foot・table-top・plush-*）は `avifenc -s 6 -q 85 --qalpha 100`、ほかは `avifenc -s 6 -q 85`。thumb.avif はデモの overview の撮影から。
+codex CLI の built-in image generation（`codex exec -s workspace-write --skip-git-repo-check "<指示>" -i scratch/aoi-room/reference.png < /dev/null`）で生成。参照は `assets/textures/aoi_room_far.avif` を PNG に復号した `scratch/aoi-room/reference.png`。透過のもの（wall-front）は `avifenc -s 6 -q 85 --qalpha 100`、ほかは `avifenc -s 6 -q 85`。thumb.avif はデモの overview の撮影から。
 
 ## wall-front.avif
 
@@ -64,117 +64,6 @@ Asset: SEAMLESS TILEABLE floor texture. Save as PNG to scratch/aoi-room/gen/floo
 True top-down orthographic view of light honey-coloured wooden flooring planks (like the reference floor), planks running vertically in the image, about 9 planks across (the tile covers 1.8 m x 1.8 m), staggered butt joints, fine grain, satin finish, uniform soft light. Edges must tile seamlessly. No perspective, no furniture, no rug, no reflections of objects, no cast shadows, no sun patches.
 ```
 
-## rug.avif
+## props/*.glb
 
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: SEAMLESS TILEABLE rug texture. Save as PNG to scratch/aoi-room/gen/rug.png, size 1024x1024 (opaque).
-True top-down orthographic view of a fluffy cream-white shaggy rug pile like the one in the reference, the tile covers 1 m x 1 m, soft warm-white tufts with gentle warm shading, uniform light. Edges must tile seamlessly. No border, no fringe, no perspective, no furniture, no shadows.
-```
-
-## bed-side.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: cut-out elevation for a 3D bed in a game. Save as PNG to scratch/aoi-room/gen/bed-side.png, size 1536x1024, transparent_background=true.
-TRUE ORTHOGRAPHIC SIDE VIEW (long side) of the single bed from the reference, no perspective: the bed is 2.0 m long; the visible part spans the FULL IMAGE WIDTH edge to edge (left edge = head end, right edge = foot end). From the floor up: a light-wood bed base 0.30 m tall with three storage drawers with small handles, then the white duvet with yellow flower pattern hanging over the mattress edge, and a yellow knitted throw blanket with tassel fringe draped over the foot half, hanging down the side. Total height of the bed side 0.50 m. The top of the bed is flat at the mattress line (no pillows, no headboard, no plush toys visible).
-Everything above the bed and around it is GENUINELY FULLY TRANSPARENT. No floor, no wall, no shadow.
-```
-
-## bed-foot.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: cut-out elevation for a 3D bed in a game. Save as PNG to scratch/aoi-room/gen/bed-foot.png, size 1536x1024, transparent_background=true.
-TRUE ORTHOGRAPHIC END VIEW of the FOOT END of the single bed from the reference, no perspective: 1.0 m wide and 0.50 m tall, filling the full image width edge to edge. A light-wood bed base 0.30 m tall (plain wood foot panel, no drawers), the white duvet with yellow flower pattern hanging over the mattress end, and a yellow knitted throw blanket with tassel fringe draped over it hanging down. The top edge is the flat mattress line (no pillows, no headboard).
-Everything above and around is GENUINELY FULLY TRANSPARENT. No floor, no wall, no shadow.
-```
-
-## bed-top.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: top texture for a 3D bed. Save as PNG to scratch/aoi-room/gen/bed-top.png, size 1024x1536 (opaque).
-TRUE TOP-DOWN ORTHOGRAPHIC view of the top surface of the single bed from the reference, filling the image edge to edge: 1.0 m wide (image width) and 1.5 m long (image height). Top of the image is toward the pillows (pillows are separate 3D objects; do not paint them), bottom of the image is the foot end. White duvet with a scattered yellow and pale green flower pattern, soft folds, and over the bottom 45% a yellow knitted throw blanket laid across the bed. Soft uniform light. No perspective, no pillows, no plush toys, no sides of the bed, no floor.
-```
-
-## bookshelf.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: front elevation of a bookcase for a 3D room. Save as PNG to scratch/aoi-room/gen/bookshelf.png, size 1024x1536 (opaque).
-TRUE ORTHOGRAPHIC FRONT VIEW, no perspective, of a white-and-light-wood bookcase like the one at the right of the reference, 1.2 m wide and 1.8 m tall, its outer frame filling the image edge to edge. Five shelves: colourful books (spines), picture books facing out, small potted plants, woven storage boxes, a small photo frame, a little ceramic bird. Bottom shelf: two white storage bins. Lit by warm sunlight from the left. No wall, floor or anything outside the bookcase.
-```
-
-## table-top.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: top texture for a 3D low table. Save as PNG to scratch/aoi-room/gen/table-top.png, size 1536x1024, transparent_background=true.
-TRUE TOP-DOWN ORTHOGRAPHIC view (camera straight above) of the oval light-wood low table top from the reference: a rounded oval (stadium shape) touching all four image edges, 1.0 m x 0.55 m proportions. Glossy honey wood with sunlight sheen. On it, seen straight from above: a yellow gingham table runner across the middle, a small glass vase with yellow and white flowers (seen from above), two stacked books, and a white mug with tea. Everything outside the oval is GENUINELY FULLY TRANSPARENT. No legs, no perspective, no floor.
-```
-
-## plush-bear.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: cut-out sprite. Save as PNG to scratch/aoi-room/gen/plush-bear.png, size 1024x1024, transparent_background=true.
-The fluffy light-brown teddy bear with a ribbon bow from the reference, sitting, front view, whole bear visible, bottom touching the image bottom centre. GENUINELY FULLY TRANSPARENT background, no floor, no shadow, no basket.
-```
-
-## plush-shiba.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy teenage girl's bedroom in a Japanese apartment, cream plaster walls, honey-coloured light wood, sunny yellow and white textiles, small flower motifs, warm afternoon sunlight. Keep its painted detail (fine wood grain, fabric texture, soft sunlight); not a low-poly render or flat colours. No people, no text labels, no borders or white margins.
-Asset: cut-out sprite. Save as PNG to scratch/aoi-room/gen/plush-shiba.png, size 1024x1024, transparent_background=true.
-The lying-down shiba-inu plush toy from the reference, seen from the front-side three-quarter view, whole toy visible, bottom touching the image bottom. GENUINELY FULLY TRANSPARENT background, no bed, no shadow.
-```
-
-
-## wood.avif
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: a detailed painted anime background of a bright, cosy bedroom. Keep its painted detail; not a photo, not a low-poly render or flat colours. No text, no borders.
-Asset: SEAMLESS TILEABLE wood material texture for modelled furniture (desk, chair, nightstand, headboard, table edge). Save as PNG to scratch/aoi-room/gen/wood.png, size 1024x1024 (opaque).
-Flat frontal orthographic view of light honey-coloured natural wood (the same light wood as the reference bed frame, desk and table), fine straight grain running horizontally, subtle painted warmth and soft satin sheen, uniform light. ONLY the wood surface: no planks seams, no edges, no knobs, no objects, no shadows, no sun patches, no perspective. All four edges must tile seamlessly.
-```
-
-## bed-top / bed-side / bed-foot（ひざ掛けを消した版）
-
-最初の生成（ひざ掛け入り）を Image 2 に渡して編集した。
-
-### bed-top2
-
-```text
-Precise edit of Image 2 (scratch/aoi-room/gen/bed-top-with-throw.png, a top-down texture of a bed duvet). Image 1 is the art-style reference. Save as PNG to scratch/aoi-room/gen/bed-top.png, size 1024x1536 (opaque).
-Remove the yellow knitted throw blanket completely: the white duvet with the scattered yellow and pale green flower pattern and soft folds must continue over the whole image, edge to edge, as if the throw was never there. Keep the exact same canvas size, orthographic top-down view, colours, pattern scale and painted style. No pillows, no other objects, no shadows of a blanket.
-```
-
-### bed-side2
-
-```text
-Precise edit of Image 2 (scratch/aoi-room/gen/bed-side-with-throw.png, an orthographic side elevation cut-out of a bed on transparent background). Image 1 is the art-style reference. Save as PNG to scratch/aoi-room/gen/bed-side.png, size 1536x1024, transparent_background=true.
-Remove the yellow knitted throw blanket and its tassels completely: the white duvet with the yellow flower pattern hangs evenly over the mattress edge along the whole length, and the light-wood bed base with its three drawers is fully visible below. Keep the exact same position, size and outline of the bed in the canvas, the same flat top line, and everything outside the bed GENUINELY FULLY TRANSPARENT. No new objects, no shadow.
-```
-
-### bed-foot2
-
-```text
-Precise edit of Image 2 (scratch/aoi-room/gen/bed-foot-with-throw.png, an orthographic end elevation cut-out of the foot of a bed on transparent background). Image 1 is the art-style reference. Save as PNG to scratch/aoi-room/gen/bed-foot.png, size 1536x1024, transparent_background=true.
-Remove the yellow knitted throw blanket and its tassels completely: the white duvet with the yellow flower pattern hangs evenly over the mattress end, and the plain light-wood foot panel is fully visible below. Keep the exact same position, size and outline of the bed in the canvas, the same flat top line, and everything outside the bed GENUINELY FULLY TRANSPARENT. No new objects, no shadow.
-```
-
-### throw
-
-```text
-Image 1 (scratch/aoi-room/reference.png) is the exact art-style, colour and material reference: the sunny yellow knitted throw blanket with tassel fringe draped over the bed in this painted anime bedroom.
-Asset: texture of ONE whole throw blanket laid perfectly flat, for a 3D cloth mesh in a game. Save as PNG to scratch/aoi-room/gen/throw.png, size 1536x1024, transparent_background=true.
-TRUE TOP-DOWN ORTHOGRAPHIC view. The blanket is a rectangle filling the image width and height edge to edge (about 1.4 m x 1.0 m), sunny yellow chunky knit with a subtle cable/rib texture, soft painted shading but NO folds, NO wrinkles and NO perspective (the folds come from the 3D mesh). Along the LEFT and RIGHT short edges only, a row of hanging tassel fringe about 6% of the width long, ending in the image's left and right borders. Uniform soft light, no cast shadows, no bed, no floor. Everything between the tassels GENUINELY FULLY TRANSPARENT.
-```
-
-### table-top2（上の物を消した版）
-
-```text
-Precise edit of Image 2 (scratch/aoi-room/gen/table-top-with-items.png, a top-down cut-out texture of an oval wooden low table top on transparent background). Image 1 is the art-style reference. Save as PNG to scratch/aoi-room/gen/table-top.png, size 1536x1024, transparent_background=true.
-Remove EVERY object standing on the table: the glass flower vase and flowers, the stacked books and the mug of tea, and any shadows they cast. Keep only the flat things: the glossy honey wood top with its grain and soft sunlight sheen, and the flat yellow gingham table runner (continue the runner's check pattern where the objects were). Keep the exact same canvas size, oval outline, position and top-down orthographic view, and everything outside the oval GENUINELY FULLY TRANSPARENT.
-```
+家具・小物は Tripo で元絵から部品ごとに作った GLB（ベッド・ナイトテーブル・勉強机・椅子・本棚・ローテーブル・ラグ・黄色いクッション・花のクッション・くま）。Blender で1つのメッシュにまとめ、傾いて出たクッションを主軸で水平に戻し、底を y=0・x/z の中心を原点に置き、テクスチャを 2048px（小物は 1024px）の JPEG に縮めて書き出している。向きは正面が +z。実寸への拡大縮小と配置は `layout.ts` の `PROPS`。
