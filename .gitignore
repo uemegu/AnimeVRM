@@ -56,6 +56,11 @@ dist-ssr
 /tmp
 __pycache__/
 
+# その他の試み（布シミュレーション / ComfyUI ワークフロー / 撮影デモ）
+/examples/skirt-cloth/
+/workflows/shion-festival/
+/assets/scenarios/demo/short_filming/
+
 # Mixamo のモーション（ファイル単体を配れないので入れない。README の「Mixamo のモーション」）
 **/animations/Acknowledging.fbx
 **/animations/Angry.fbx
@@ -82,3 +87,4 @@ __pycache__/
 /scripts/outfits/poses/emili_*.pose.json
 /scripts/outfits/textures/emili_military/
 /assets/models/emili/emili-boots.vrm
+scripts/style_iincho_hair.mjs
