@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "aoi_gate_fisheye",
+  "title": { "ja": "カメラ練習：アオイ・校門・魚眼ズーム", "en": "Camera practice: Aoi at the gate, fisheye" },
+  "description": "話者の構図から『ん〜』と覗き込むアオイの顔へ1.8秒で寄る。2秒で笑顔と頬の赤らめに切り替えて『うん、オッケー』。全体4.5秒。",
+  "playMode": "movie",
+  "location": "school_gate",
+  "timeOfDay": "morning",
+  "bgm": "silence",
+  "scenes": [
+    {
+      "id": "peek_fisheye",
+      "text": "ん〜。うん、オッケー。",
+      "voiceUrl": "voice.mp3",
+      "speakerCharacterId": "aoi",
+      "camera": "speaker",
+      "cameraFocus": "aoi",
+      "cameraMove": { "type": "fisheye_in", "duration": 1.8, "amount": 1.25 },
+      "duration": 4.5,
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "modelUrl": "/models/aoi/aoi-school.vrm",
+          "motion": "pose_lean_forward_peek",
+          "motionLoop": true,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "blush": false,
+          "lookAtTarget": "camera",
+          "headTurn": 0,
+          "transitions": [
+            { "at": 2, "expression": "happy", "expressionWeight": 1, "blush": true }
+          ]
+        }
+      }
+    }
+  ]
+}

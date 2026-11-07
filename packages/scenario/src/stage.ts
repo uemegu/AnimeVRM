@@ -272,6 +272,7 @@ export const CAMERA_MOVE_DEFAULT_SEC: Record<CameraMoveType, number> = {
   dolly_out: 3,
   zoom_in: 2.5,
   zoom_out: 2.5,
+  fisheye_in: 1.8,
   orbit_left: 6,
   orbit_right: 6,
   crane_up: 4,

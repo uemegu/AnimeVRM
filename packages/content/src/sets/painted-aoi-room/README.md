@@ -3,6 +3,7 @@
 一枚絵の「アオイの部屋」（`assets/textures/aoi_room_far.avif`）を、座れて四方から撮れるようにした撮影用セット。ベッドの縁に座る・勉強机で頬杖をつく場面のために作った。窓の外の空は絵に描かず透過にし、ビューアの空（SkyBackground）を `sky-only.png` 経由で後ろに描く。
 
 - 場所: `aoi_house`（`assets/studio/locations.json` の組み込み3D背景 `builtin:painted-aoi-room`）。元の一枚絵は `aoi_house_2d` に残してある
+- 順光版: `aoi_house_frontlit`（アオイの部屋（順光・簡易3D））。同じセット・立ち位置・カメラ・席を使い、人物の正面側から光を当てる。光の来る向きは `(0.8, 1.3, 2.0)`、光条とレンズフレアは無効。光の色・強さ・環境光は時間帯に従う
 - シナリオ: `assets/scenarios/demo/painted_aoi_room/`（正面・左右・後ろ、俯瞰、立ち、ベッド・机の席）
 - 素材: 壁・床は `assets/textures/painted-aoi-room/*.avif`（生成指示は `PROMPTS.md`）、家具・小物は `assets/textures/painted-aoi-room/props/*.glb`（Tripo）
 
