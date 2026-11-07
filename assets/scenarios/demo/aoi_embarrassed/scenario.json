@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "id": "aoi_embarrassed",
+  "title": {
+    "ja": "あおいの動揺",
+    "en": "Aoi flustered"
+  },
+  "description": "朝のあおいの部屋（順光）で、tripo モデルのあおいが驚き、赤面して慌てる。",
+  "location": "aoi_house_frontlit",
+  "timeOfDay": "morning",
+  "bgm": "silence",
+  "scenes": [
+    {
+      "id": "s1",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "えっ",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "Surprised",
+          "motionLoop": false,
+          "expression": "surprised",
+          "expressionWeight": 1,
+          "redface": false,
+          "lookAtTarget": "camera",
+          "modelUrl": "/models/aoi/aoi-toripo-wear.vrm"
+        }
+      },
+      "camera": "medium",
+      "background": "aoi_house_frontlit",
+      "voiceUrl": "v_s1.mp3"
+    },
+    {
+      "id": "s2",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ななななな何してるの！？",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "upper_P025",
+          "motionLoop": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "redface": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "speaker",
+      "voiceUrl": "v_s2.mp3"
+    },
+    {
+      "id": "s3",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "それはちょっと恥ずかしい・・・",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "upper_P020",
+          "motionLoop": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "redface": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "close",
+      "voiceUrl": "v_s3.mp3"
+    },
+    {
+      "id": "s4",
+      "speaker": "アオイ",
+      "speakerCharacterId": "aoi",
+      "text": "ちょ、ちょっと待って！？",
+      "avatars": {
+        "aoi": {
+          "position": "center",
+          "motion": "upper_P019",
+          "motionLoop": false,
+          "expression": "neutral",
+          "expressionWeight": 1,
+          "redface": true,
+          "lookAtTarget": "camera"
+        }
+      },
+      "camera": "face",
+      "cameraShift": "up",
+      "voiceUrl": "v_s4.mp3"
+    }
+  ]
+}
