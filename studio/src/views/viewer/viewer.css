@@ -362,6 +362,7 @@
 
 /* 右: 舞台（16:9） */
 .viewer-stage {
+  --viewer-frame-offset: 280px;
   position: relative;
   isolation: isolate;
   display: flex;
@@ -373,6 +374,10 @@
   padding: 12px 24px 16px;
   background: transparent;
   overflow: hidden;
+}
+
+.viewer-stage.location-minimized {
+  --viewer-frame-offset: 160px;
 }
 
 /* 選択した背景の拡大＆ぼやけた表示を背面に敷く */
@@ -421,7 +426,7 @@
 
 .viewer-frame {
   position: relative;
-  width: min(100%, calc((100vh - 280px) * 16 / 9));
+  width: min(100%, calc((100vh - var(--viewer-frame-offset)) * 16 / 9));
   aspect-ratio: 16 / 9;
   border-radius: 10px;
   overflow: hidden;
@@ -429,6 +434,14 @@
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
   z-index: 1;
   flex-shrink: 0;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.viewer-stage.location-minimized .viewer-frame {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
 }
 
 /* プレビュー直下: カメラの動き（左）とキャプション（右） */
@@ -437,9 +450,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  width: min(100%, calc((100vh - 280px) * 16 / 9));
+  width: min(100%, calc((100vh - var(--viewer-frame-offset)) * 16 / 9));
   z-index: 1;
   flex-shrink: 0;
+  transition: width 0.2s ease;
+}
+.viewer-stage.location-minimized .viewer-frame-meta {
+  width: 100%;
 }
 .viewer-frame-meta .viewer-caption {
   margin-left: auto;
@@ -460,11 +477,97 @@
 .viewer-stage-bottom {
   display: flex;
   flex-direction: column;
-  width: min(100%, calc((100vh - 280px) * 16 / 9));
+  width: min(100%, calc((100vh - var(--viewer-frame-offset)) * 16 / 9));
   max-width: 100%;
   flex: 1;
   min-height: 0;
   z-index: 1;
+  transition: width 0.2s ease;
+}
+
+.viewer-stage.location-minimized .viewer-stage-bottom {
+  width: 100%;
+}
+
+.viewer-stage-bottom.minimized {
+  flex: 0 0 auto;
+}
+
+.viewer-location-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 8px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.viewer-stage-bottom.minimized .viewer-location-box {
+  flex: 0 0 auto;
+  height: 32px;
+  justify-content: center;
+}
+
+.viewer-location-toggle-btn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-sub);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  transition: all 0.15s ease;
+}
+
+.viewer-location-toggle-btn:hover {
+  background: #ffffff;
+  color: var(--text);
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.1);
+}
+
+.viewer-location-minimized-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 38px 0 12px;
+  min-width: 0;
+  height: 100%;
+}
+
+.viewer-location-minimized-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.viewer-location-minimized-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .viewer-location-grid {
@@ -479,11 +582,10 @@
   overflow-x: hidden;
   padding: 8px 10px;
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  border-radius: 8px;
+}
+
+.viewer-stage-bottom.minimized .viewer-location-grid {
+  display: none;
 }
 
 .viewer-location-thumb {

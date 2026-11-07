@@ -28,6 +28,18 @@ const TABS = ['expression', 'motion', 'voice', 'sound'] as const;
 const SOUND_KINDS = ['bgm', 'se'] as const;
 type Tab = (typeof TABS)[number];
 
+const LOCATION_MINIMIZED_KEY = 'studio_viewer_location_minimized';
+
+function initialLocationMinimized(): boolean {
+  try {
+    const stored = localStorage.getItem(LOCATION_MINIMIZED_KEY);
+    if (stored !== null) return stored === 'true';
+  } catch {
+    // 保存できない環境では展開状態
+  }
+  return false;
+}
+
 /** assets/animations/<name>.fbx の name */
 function motionName(url: string): string {
   return url.replace(/^\/animations\//, '').replace(/\.fbx$/i, '');
@@ -63,6 +75,19 @@ export function ViewerView() {
   const [motionCue, setMotionCue] = useState(0);
   const [motionFilter, setMotionFilter] = useState('');
   const [tab, setTab] = useState<Tab>('expression');
+  const [locationMinimized, setLocationMinimized] = useState(initialLocationMinimized);
+
+  const toggleLocationMinimized = () => {
+    setLocationMinimized((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(LOCATION_MINIMIZED_KEY, String(next));
+      } catch {
+        // 保存できなくても動作はする
+      }
+      return next;
+    });
+  };
 
   // 汗・文字演出は1回きりなので、押したときに直接出す
   const managerRef = useRef<StageManager | null>(null);
@@ -373,7 +398,7 @@ export function ViewerView() {
       </aside>
 
       <section
-        className="viewer-stage"
+        className={`viewer-stage${locationMinimized ? ' location-minimized' : ''}`}
         style={currentBgUrl ? ({ '--stage-bg-url': `url("${resolveAssetUrl(currentBgUrl)}")` } as React.CSSProperties) : undefined}
       >
         <div className="viewer-stage-top">
@@ -427,9 +452,28 @@ export function ViewerView() {
           </p>
         </div>
 
-        <div className="viewer-stage-bottom">
-          <div className="viewer-location-grid">
-            <LocationPicker locations={presets.locations} selectedId={locationId} onSelect={setLocationId} />
+        <div className={`viewer-stage-bottom${locationMinimized ? ' minimized' : ''}`}>
+          <div className="viewer-location-box">
+            <button
+              type="button"
+              className="viewer-location-toggle-btn"
+              title={locationMinimized ? t.viewer.expandLocations : t.viewer.minimizeLocations}
+              aria-label={locationMinimized ? t.viewer.expandLocations : t.viewer.minimizeLocations}
+              aria-expanded={!locationMinimized}
+              onClick={toggleLocationMinimized}
+            >
+              <Icon name={locationMinimized ? 'chevronUp' : 'chevronDown'} size={14} />
+            </button>
+            {locationMinimized ? (
+              <div className="viewer-location-minimized-label">
+                <span className="viewer-location-minimized-title">{t.viewer.location}</span>
+                <span className="viewer-location-minimized-name">{presets.locations[locationId]?.name}</span>
+              </div>
+            ) : (
+              <div className="viewer-location-grid">
+                <LocationPicker locations={presets.locations} selectedId={locationId} onSelect={setLocationId} />
+              </div>
+            )}
           </div>
         </div>
       </section>
