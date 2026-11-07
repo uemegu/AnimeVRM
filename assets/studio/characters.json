@@ -40,6 +40,14 @@
             "ja": "tripo"
           },
           "url": "/models/aoi/aoi-toripo-wear.vrm"
+        },
+        {
+          "key": "texture_trial",
+          "label": {
+            "ja": "制服（髪・頬テクスチャ試作）",
+            "en": "School (hair and cheek texture trial)"
+          },
+          "url": "/models/aoi/aoi-school-texture-trial.vrm"
         }
       ],
       "voice": {
@@ -396,6 +404,70 @@
             "en": "School"
           },
           "url": "/models/iincho/iincho-school-hair2-slimface.vrm"
+        },
+        {
+          "key": "hd_kokuro1",
+          "label": {
+            "ja": "制服（黒髪ロング 1）",
+            "en": "School (Dark long hair 1)"
+          },
+          "url": "/models/iincho/iincho-school-hd-kokuro1.vrm"
+        },
+        {
+          "key": "hd_kokuro2",
+          "label": {
+            "ja": "制服（黒髪ロング 2）",
+            "en": "School (Dark long hair 2)"
+          },
+          "url": "/models/iincho/iincho-school-hd-kokuro2.vrm"
+        },
+        {
+          "key": "hd_kokuro3",
+          "label": {
+            "ja": "制服（黒髪ロング 3）",
+            "en": "School (Dark long hair 3)"
+          },
+          "url": "/models/iincho/iincho-school-hd-kokuro3.vrm"
+        },
+        {
+          "key": "hd_kokuro4",
+          "label": {
+            "ja": "制服（黒髪ロング 4）",
+            "en": "School (Dark long hair 4)"
+          },
+          "url": "/models/iincho/iincho-school-hd-kokuro4.vrm"
+        },
+        {
+          "key": "hd_reijo1",
+          "label": {
+            "ja": "制服（ゆるふわロング 1）",
+            "en": "School (Wavy long hair 1)"
+          },
+          "url": "/models/iincho/iincho-school-hd-reijo1.vrm"
+        },
+        {
+          "key": "hd_reijo2",
+          "label": {
+            "ja": "制服（ゆるふわロング 2）",
+            "en": "School (Wavy long hair 2)"
+          },
+          "url": "/models/iincho/iincho-school-hd-reijo2.vrm"
+        },
+        {
+          "key": "hd_reijo3",
+          "label": {
+            "ja": "制服（ゆるふわロング 3）",
+            "en": "School (Wavy long hair 3)"
+          },
+          "url": "/models/iincho/iincho-school-hd-reijo3.vrm"
+        },
+        {
+          "key": "hd_reijo4",
+          "label": {
+            "ja": "制服（ゆるふわロング 4）",
+            "en": "School (Wavy long hair 4)"
+          },
+          "url": "/models/iincho/iincho-school-hd-reijo4.vrm"
         }
       ],
       "voice": {
