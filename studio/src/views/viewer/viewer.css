@@ -767,7 +767,7 @@
     width: 100%;
   }
   .viewer-panel .segmented button {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
   }
   /* 見出し＋操作ボタンは折り返す。BGM/効果音の切替は横並びのまま */
   .viewer-section-title {
