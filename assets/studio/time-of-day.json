@@ -114,7 +114,7 @@
           "parametricRimFresnelPowerFactor": 5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -131,7 +131,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.2,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -152,7 +152,7 @@
           "parametricRimFresnelPowerFactor": 4,
           "parametricRimLiftFactor": 0.02,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -161,7 +161,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.1,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0.25
       },
       "fog": {
@@ -283,7 +283,7 @@
           "parametricRimFresnelPowerFactor": 5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -300,7 +300,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.2,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -321,7 +321,7 @@
           "parametricRimFresnelPowerFactor": 4,
           "parametricRimLiftFactor": 0.02,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -330,7 +330,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.1,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0.25
       },
       "fog": {
@@ -452,7 +452,7 @@
           "parametricRimFresnelPowerFactor": 5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -469,7 +469,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.2,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -490,7 +490,7 @@
           "parametricRimFresnelPowerFactor": 4,
           "parametricRimLiftFactor": 0.02,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -499,7 +499,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.1,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0.3
       },
       "fog": {
@@ -638,7 +638,7 @@
           "parametricRimFresnelPowerFactor": 3.5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.3,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -653,7 +653,7 @@
           "parametricRimFresnelPowerFactor": 3.5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.3,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -672,7 +672,7 @@
           "parametricRimFresnelPowerFactor": 3.5,
           "parametricRimLiftFactor": 0.05,
           "rimLightingMixFactor": 0.4,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -681,7 +681,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.15,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0
       },
       "fog": {
@@ -803,7 +803,7 @@
           "parametricRimFresnelPowerFactor": 5,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -818,7 +818,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0.1,
           "rimLightingMixFactor": 0.2,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -837,7 +837,7 @@
           "parametricRimFresnelPowerFactor": 4,
           "parametricRimLiftFactor": 0.02,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -846,7 +846,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.1,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0
       },
       "fog": {
@@ -969,7 +969,7 @@
           "parametricRimFresnelPowerFactor": 4.2,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#080a12",
@@ -984,7 +984,7 @@
           "parametricRimFresnelPowerFactor": 4.2,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#080a12",
@@ -1002,7 +1002,7 @@
           "parametricRimFresnelPowerFactor": 4.2,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 1,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -1011,7 +1011,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0,
-        "widthFactor": 0.001,
+        "widthFactor": 0.0015,
         "lightingMixFactor": 0
       },
       "fog": {
@@ -1143,7 +1143,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 0,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "hair": {
           "color": "#ffffff",
@@ -1158,7 +1158,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 0,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         },
         "cloth": {
           "color": "#ffffff",
@@ -1177,7 +1177,7 @@
           "parametricRimFresnelPowerFactor": 0,
           "parametricRimLiftFactor": 0,
           "rimLightingMixFactor": 0,
-          "outlineWidthFactor": 0.0016
+          "outlineWidthFactor": 0.0024
         }
       },
       "outline": {
@@ -1186,7 +1186,7 @@
         "screenSpaceWidth": true,
         "autoLineWeight": true,
         "darknessFactor": 0.1,
-        "widthFactor": 0.0016,
+        "widthFactor": 0.0024,
         "lightingMixFactor": 0
       }
     }
