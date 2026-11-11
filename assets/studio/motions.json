@@ -127,6 +127,246 @@
     },
     "Excited": {
       "fadeIn": 0.2
+    },
+    "full_P001": {
+      "loop": true
+    },
+    "full_P002": {
+      "loop": true
+    },
+    "full_P003": {
+      "loop": true
+    },
+    "full_P004": {
+      "loop": true
+    },
+    "full_P006": {
+      "loop": true
+    },
+    "full_P007": {
+      "loop": true
+    },
+    "full_P010": {
+      "loop": true
+    },
+    "full_P012": {
+      "loop": true
+    },
+    "full_P015": {
+      "loop": true
+    },
+    "full_P017": {
+      "loop": true
+    },
+    "full_P018": {
+      "loop": true
+    },
+    "full_P020": {
+      "loop": true
+    },
+    "full_P021": {
+      "loop": true
+    },
+    "full_P022": {
+      "loop": true
+    },
+    "full_P024": {
+      "loop": true
+    },
+    "full_P025": {
+      "loop": true
+    },
+    "full_P026": {
+      "loop": true
+    },
+    "full_P027": {
+      "loop": true
+    },
+    "full_P029": {
+      "loop": true
+    },
+    "full_P031": {
+      "loop": true
+    },
+    "full_P032": {
+      "loop": true
+    },
+    "full_P033": {
+      "loop": true
+    },
+    "full_P034": {
+      "loop": true
+    },
+    "full_P036": {
+      "loop": true
+    },
+    "full_P037": {
+      "loop": true
+    },
+    "full_P038": {
+      "loop": true
+    },
+    "full_P040": {
+      "loop": true
+    },
+    "full_P041": {
+      "loop": true
+    },
+    "full_P042": {
+      "loop": true
+    },
+    "full_P043": {
+      "loop": true
+    },
+    "full_P044": {
+      "loop": true
+    },
+    "full_P045": {
+      "loop": true
+    },
+    "full_P046": {
+      "loop": true
+    },
+    "full_P047": {
+      "loop": true
+    },
+    "full_P048": {
+      "loop": true
+    },
+    "full_P049": {
+      "loop": true
+    },
+    "full_P051": {
+      "loop": true
+    },
+    "full_P052": {
+      "loop": true
+    },
+    "full_P054": {
+      "loop": true
+    },
+    "full_P056": {
+      "loop": true
+    },
+    "full_P057": {
+      "loop": true
+    },
+    "full_P058": {
+      "loop": true
+    },
+    "full_P059": {
+      "loop": true
+    },
+    "full_P061": {
+      "loop": true
+    },
+    "full_P062": {
+      "loop": true
+    },
+    "full_P063": {
+      "loop": true
+    },
+    "full_P064": {
+      "loop": true
+    },
+    "full_P065": {
+      "loop": true
+    },
+    "full_P067": {
+      "loop": true
+    },
+    "full_P068": {
+      "loop": true
+    },
+    "full_P069": {
+      "loop": true
+    },
+    "full_P070": {
+      "loop": true
+    },
+    "full_P071": {
+      "loop": true
+    },
+    "full_P072": {
+      "loop": true
+    },
+    "full_P073": {
+      "loop": true
+    },
+    "full_P077": {
+      "loop": true
+    },
+    "full_P079": {
+      "loop": true
+    },
+    "upper_P001": {
+      "loop": true
+    },
+    "upper_P002": {
+      "loop": true
+    },
+    "upper_P003": {
+      "loop": true
+    },
+    "upper_P004": {
+      "loop": true
+    },
+    "upper_P005": {
+      "loop": true
+    },
+    "upper_P006": {
+      "loop": true
+    },
+    "upper_P007": {
+      "loop": true
+    },
+    "upper_P008": {
+      "loop": true
+    },
+    "upper_P009": {
+      "loop": true
+    },
+    "upper_P010": {
+      "loop": true
+    },
+    "upper_P011": {
+      "loop": true
+    },
+    "upper_P013": {
+      "loop": true
+    },
+    "upper_P015": {
+      "loop": true
+    },
+    "upper_P016": {
+      "loop": true
+    },
+    "upper_P017": {
+      "loop": true
+    },
+    "upper_P018": {
+      "loop": true
+    },
+    "upper_P019": {
+      "loop": true
+    },
+    "upper_P020": {
+      "loop": true
+    },
+    "upper_P021": {
+      "loop": true
+    },
+    "upper_P022": {
+      "loop": true
+    },
+    "upper_P023": {
+      "loop": true
+    },
+    "upper_P024": {
+      "loop": true
+    },
+    "upper_P025": {
+      "loop": true
     }
   }
 }
