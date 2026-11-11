@@ -42,12 +42,12 @@ export function PlayerView() {
   const scenarioLocation = scenario && category && id ? (scenario.location ?? scenario.scenes.find((s) => s.background)?.background) : undefined;
   useBackdrop(scenarioLocation ? locationBackdropUrl(data?.locations[scenarioLocation]) : undefined);
 
-  // 選んだプロジェクトのシナリオを種類の順に並べる。電話・メールは再生できないので除く
+  // 選んだプロジェクトのシナリオを、種類の順、種類の中では作った順（新しいものが先）に並べる。電話・メールは再生できないので除く
   const entries = useMemo(() => {
     const order = project?.categories ?? [];
     return list
       .filter((s) => s.kind === 'story' && order.includes(s.category))
-      .sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category) || a.id.localeCompare(b.id))
+      .sort((a, b) => order.indexOf(a.category) - order.indexOf(b.category) || b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id))
       .map((s) => ({
         key: `${s.category}/${s.id}`,
         title: s.title,

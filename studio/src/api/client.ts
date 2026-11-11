@@ -77,6 +77,7 @@ export interface ScenarioSummary {
   title: string;
   lineCount: number;
   updatedAt: string;
+  createdAt: string;
   location?: string;
   description?: string;
   links: ScenarioLinks;

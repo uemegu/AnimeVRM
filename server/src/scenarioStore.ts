@@ -14,6 +14,8 @@ export interface ScenarioSummary {
   /** シーン（電話はステップ、メールはメッセージ）の数 */
   lineCount: number;
   updatedAt: string;
+  /** 作った日時（ファイルの作成日時。取れないときは更新日時）。再生画面の並び順に使う */
+  createdAt: string;
   /** 舞台の場所（一覧のサムネイルに使う） */
   location?: string;
   description?: string;
@@ -84,6 +86,7 @@ export class ScenarioStore {
           kind === 'call' ? Object.keys(data.steps ?? {}).length : kind === 'mail' ? (data.messages ?? []).length : (data.scenes ?? []).length;
         result.push({
           category, id, kind, title: textOf(data.title), lineCount, updatedAt: stat.mtime.toISOString(),
+          createdAt: (stat.birthtimeMs > 0 ? stat.birthtime : stat.mtime).toISOString(),
           ...(typeof data.location === 'string' ? { location: data.location } : {}),
           ...(data.description !== undefined ? { description: textOf(data.description) } : {}),
           links: scenarioLinks(data),

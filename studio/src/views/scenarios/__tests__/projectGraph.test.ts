@@ -10,6 +10,7 @@ const scenario = (category: ScenarioSummary['category'], id: string, links: Part
   title: id,
   lineCount: 1,
   updatedAt: '',
+  createdAt: '',
   links: { sets: [], requires: [], unless: [], conditions: [], after: [], ...links },
 });
 
