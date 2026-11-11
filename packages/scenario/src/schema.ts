@@ -70,7 +70,7 @@ const EyeWander = z.union([z.boolean(), z.number().min(0).max(2)]);
 const AvatarLookFields = {
   /** 頬を赤らめる（目も潤む） */
   blush: z.boolean().optional(),
-  /** 赤面（blush より濃く広い。強い反応のとき） */
+  /** 赤面（顔に濃い斜線と汗。目を見開き眉を下げる。指定した表情の目・眉より優先。強い反応のとき） */
   redface: z.boolean().optional(),
   /** 涙目（目が潤み、目尻に涙の粒がたまる） */
   tearyEyes: z.boolean().optional(),
