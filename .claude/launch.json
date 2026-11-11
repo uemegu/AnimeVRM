@@ -45,6 +45,46 @@
         "scratch/home-splat"
       ],
       "port": 5199
+    },
+    {
+      "name": "engine-example",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "example",
+        "-w",
+        "@anime-vrm/engine"
+      ],
+      "port": 5192
+    },
+    {
+      "name": "engine-example-pages",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--config",
+        "packages/engine/examples/basic/vite.config.ts",
+        "--port",
+        "5193",
+        "--strictPort"
+      ],
+      "env": {
+        "EXAMPLE_BASE": "/AnimeVRM.engine/"
+      },
+      "port": 5193,
+      "url": "http://localhost:5193"
+    },
+    {
+      "name": "motions-site",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "../../AnimeVRM.Motions"
+      ],
+      "port": 5194
     }
   ]
 }

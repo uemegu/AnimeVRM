@@ -15,7 +15,7 @@ from settings_schema import RANGES, import_document
 
 ROOT = Path(__file__).resolve().parent
 TOKEN = secrets.token_urlsafe(32)
-PORT = 8765
+PORT = 8766
 
 
 def blender(code):
