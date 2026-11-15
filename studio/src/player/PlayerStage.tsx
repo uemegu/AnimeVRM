@@ -3,6 +3,7 @@ import type { ScenarioAssets, CameraShot, CutinConfig, ScenarioScene, SceneEffec
 import { cutTimeline } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { useRenderQuality } from '../stage/renderQuality';
+import { garmentsOf } from '../stage/garments';
 import { StageLoading, useCastLoading } from '../stage/StageLoading';
 
 interface Props {
@@ -65,6 +66,7 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
       language,
       quality: renderQuality.level,
       onSlowFrames: renderQuality.level ? () => slowFramesRef.current() : undefined,
+      garments: garmentsOf,
       getCutTime: () => timeRef.current(),
       getSpeakerPhoneme: () => phonemeRef.current(),
       getSpeakerMouthOpen: () => mouthOpenRef.current(),
@@ -89,6 +91,12 @@ export function PlayerStage({ presets, timeOfDay, locationId, cast, cameraShot, 
     appliedQuality.current = qualityLevel;
     managerRef.current?.setQuality(qualityLevel);
   }, [qualityLevel]);
+
+  // 布（設定画面で選ぶ）。段階を切り替えると段階の既定に戻るので、段階の後に当て直す
+  const { cloth, clothSleep } = renderQuality;
+  useEffect(() => {
+    managerRef.current?.setQuality({ skirtCloth: cloth, clothSleep });
+  }, [cloth, clothSleep, qualityLevel]);
 
   useEffect(() => {
     managerRef.current?.setTimeOfDay(timeOfDay);

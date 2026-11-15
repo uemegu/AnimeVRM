@@ -4,6 +4,7 @@ import type { CameraPose, CameraShift, CameraShot, CutinConfig, ScenarioScene, S
 import { cutTimeline } from '@anime-vrm/scenario';
 import { StageManager, type StagePresets } from '@anime-vrm/engine/stage/StageManager';
 import { useRenderQuality } from './renderQuality';
+import { garmentsOf } from './garments';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import { useI18n } from '../i18n';
@@ -114,6 +115,7 @@ export function StageCanvas({
       language,
       quality: renderQuality.level,
       onSlowFrames: renderQuality.level ? () => slowFramesRef.current() : undefined,
+      garments: garmentsOf,
       getSpeakerPhoneme: () => phonemeRef.current?.(),
       getSpeakerMouthOpen: () => mouthOpenRef.current?.() ?? 1,
     });
@@ -138,6 +140,12 @@ export function StageCanvas({
     appliedQuality.current = qualityLevel;
     managerRef.current?.setQuality(qualityLevel);
   }, [qualityLevel]);
+
+  // 布（設定画面で選ぶ）。段階を切り替えると段階の既定に戻るので、段階の後に当て直す
+  const { cloth, clothSleep } = renderQuality;
+  useEffect(() => {
+    managerRef.current?.setQuality({ skirtCloth: cloth, clothSleep });
+  }, [cloth, clothSleep, qualityLevel]);
 
   // シーン設定の編集をその場で反映する
   useEffect(() => managerRef.current?.setPresets(presets), [presets]);

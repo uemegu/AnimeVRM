@@ -16,7 +16,12 @@
             "ja": "制服",
             "en": "School"
           },
-          "url": "/models/aoi/aoi-school.vrm"
+          "url": "/models/aoi/aoi-school.vrm",
+          "cloth": {
+            "N00_001_03_Bottoms_01_CLOTH": {
+              "fabric": "suiting"
+            }
+          }
         },
         {
           "key": "private",

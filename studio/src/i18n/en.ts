@@ -41,6 +41,20 @@ export const en: Dictionary = {
       low: 'Slightly lower resolution and skips heavy effects such as depth of field. About half the load of high quality.',
     },
     qualityLowered: 'Rendering could not keep up, so the quality was switched to Light. You can switch back in Settings.',
+    cloth: 'Cloth simulation for clothes',
+    clothHint: 'Moves skirts and tops as cloth. Saved on this device.',
+    clothOptions: { on: 'On', off: 'Off' },
+    clothHints: {
+      on: 'The cloth hangs and rests against the legs and body. About 4-5 ms per character per frame (almost none while at rest).',
+      off: 'Sways with the spring bones. Light, and looks as before.',
+    },
+    clothSleep: 'Rest cloth that has stopped',
+    clothSleepHint: 'When nothing moves the cloth any more, it is settled, stopped and no longer computed. Stops it from trembling without end.',
+    clothSleepOptions: { on: 'Rest', off: 'Keep computing' },
+    clothSleepHints: {
+      on: 'Normally this. Computing resumes at once when the body moves or the wind blows.',
+      off: 'Keeps computing even when still. For comparing and investigating.',
+    },
   },
   comingSoon: {
     title: 'This view is not ready yet',

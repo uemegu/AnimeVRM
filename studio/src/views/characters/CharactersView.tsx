@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { forgetGarments } from '../../stage/garments';
 import { useNavigate, useParams } from 'react-router';
 import type { Character, CharacterBook, CharacterRole } from '@anime-vrm/scenario';
 import { api, type AssetEntry } from '../../api/client';
@@ -64,6 +65,7 @@ export function CharactersView() {
     setStatus({ kind: 'saving' });
     try {
       await api.saveCharacters(draft);
+      forgetGarments();
       setSaved(structuredClone(draft));
       setStatus({ kind: 'saved' });
     } catch (err) {

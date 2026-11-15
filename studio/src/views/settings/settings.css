@@ -6,6 +6,9 @@
   margin: 0 0 24px;
   font-size: 20px;
 }
+.settings-section + .settings-section {
+  margin-top: 32px;
+}
 .settings-section h2 {
   margin: 0 0 6px;
   font-size: 15px;

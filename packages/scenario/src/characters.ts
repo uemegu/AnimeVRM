@@ -6,11 +6,32 @@ import { z } from 'zod';
 import { LocalizedString } from './schema.ts';
 
 /** 見た目のバリエーション（制服・私服など）。key はシナリオや app から参照する名前（default は必須） */
+/** 生地の名前（engine の src/cloth/fabric.ts の FABRICS と同じ） */
+export const FabricName = z.enum(['jersey', 'jerseyOuter', 'shirting', 'suiting']);
+
+/** 生地を値で書くとき：曲げ剛性（N·m）と面積あたりの重さ（kg/m²）。engine の src/cloth/fabric.ts の Fabric */
+export const FabricValues = z.strictObject({ bending: z.number().positive(), weight: z.number().positive() });
+
+/** 布として動かす服 1 着（engine の src/cloth/vrm.ts の GarmentSpec と同じ形） */
+export const ClothGarment = z.strictObject({
+  /** 生地。名前か値。曲げにくさと重さが決まる */
+  fabric: z.union([FabricName, FabricValues]),
+  /** hang：腰から吊る（スカート）。rest：肩と腕に乗せる（上着）。省くと骨の付き方で決める */
+  kind: z.enum(['hang', 'rest']).optional(),
+  /** この服が外側に重なる服（cloth のほかのキー）。上着の裾をスカートの外に乗せるときなど */
+  over: z.array(z.string()).optional(),
+});
+
 export const CharacterModel = z.strictObject({
   key: z.string().regex(/^[a-z][a-z0-9_]*$/),
   label: LocalizedString,
   /** assets/ 以下の URL パス（例: /models/aoi/aoi-school.vrm） */
   url: z.string().startsWith('/'),
+  /**
+   * 布として動かす服（材質名かメッシュ名 → 指定）。書いた服だけを布にし、ほかは骨と揺れもので動かす。
+   * 中身は engine の src/cloth/vrm.ts の GarmentSpec
+   */
+  cloth: z.record(z.string(), ClothGarment).optional(),
 });
 export type CharacterModel = z.infer<typeof CharacterModel>;
 

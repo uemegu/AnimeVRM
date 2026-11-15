@@ -4,6 +4,26 @@ import { useToast } from '../components/Toast';
 import { useI18n } from '../i18n';
 
 const STORAGE_KEY = 'studio_render_quality';
+const CLOTH_KEY = 'studio_cloth';
+const CLOTH_SLEEP_KEY = 'studio_cloth_sleep';
+
+/** 保存した ON/OFF。なければ fallback */
+function storedFlag(key: string, fallback: boolean): boolean {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored === 'true' || stored === 'false') return stored === 'true';
+  } catch {
+    // 保存できない環境では既定のまま
+  }
+  return fallback;
+}
+function storeFlag(key: string, value: boolean): void {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // 保存できなくても、開いている間は切り替わる
+  }
+}
 
 function initialLevel(): StageQualityLevel {
   try {
@@ -21,9 +41,15 @@ interface RenderQuality {
   setLevel: (level: StageQualityLevel) => void;
   /** 舞台の描画が間に合わないと知らせてきたとき（StageManager の onSlowFrames） */
   onSlowFrames: () => void;
+  /** スカート・上着を布として動かす（engine の skirtCloth。既定は切） */
+  cloth: boolean;
+  setCloth: (on: boolean) => void;
+  /** 布が止まったら眠らせて計算を休む（engine の clothSleep。既定は入） */
+  clothSleep: boolean;
+  setClothSleep: (on: boolean) => void;
 }
 
-const RenderQualityContext = createContext<RenderQuality>({ level: undefined, setLevel: () => {}, onSlowFrames: () => {} });
+const RenderQualityContext = createContext<RenderQuality>({ level: undefined, setLevel: () => {}, onSlowFrames: () => {}, cloth: false, setCloth: () => {}, clothSleep: true, setClothSleep: () => {} });
 
 /**
  * 舞台の描画の品質（設定画面で選ぶ。保存する）。
@@ -49,7 +75,14 @@ export function RenderQualityProvider({ children }: { children: ReactNode }) {
     setLevel('low');
     toast(t.settings.qualityLowered, 'info');
   }, [setLevel, toast, t]);
-  const value = useMemo(() => ({ level, setLevel, onSlowFrames }), [level, setLevel, onSlowFrames]);
+  const [cloth, setClothState] = useState(() => storedFlag(CLOTH_KEY, false));
+  const [clothSleep, setClothSleepState] = useState(() => storedFlag(CLOTH_SLEEP_KEY, true));
+  const setCloth = useCallback((on: boolean) => { setClothState(on); storeFlag(CLOTH_KEY, on); }, []);
+  const setClothSleep = useCallback((on: boolean) => { setClothSleepState(on); storeFlag(CLOTH_SLEEP_KEY, on); }, []);
+  const value = useMemo(
+    () => ({ level, setLevel, onSlowFrames, cloth, setCloth, clothSleep, setClothSleep }),
+    [level, setLevel, onSlowFrames, cloth, setCloth, clothSleep, setClothSleep],
+  );
   return <RenderQualityContext.Provider value={value}>{children}</RenderQualityContext.Provider>;
 }
 
