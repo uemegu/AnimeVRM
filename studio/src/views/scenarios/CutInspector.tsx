@@ -3,6 +3,8 @@ import {
   HeldItemId,
   ScenarioScene as SceneSchema,
   SCENE_EFFECT_IDS,
+  WAVE_GLASS_KINDS,
+  WAVE_GLASS_TARGETS,
   stageAtScene,
   TIME_OF_DAY_IDS,
   type CameraShot,
@@ -32,7 +34,7 @@ const EXPRESSIONS = ['neutral', 'happy', 'relaxed', 'sad', 'angry', 'surprised',
 const LOOK_AT = ['player', 'camera', 'partner', 'speaker', 'forward'] as const;
 /** 次のカットの選択肢で「ここで終わる」を表す値 */
 const END = '__end__';
-const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'black', 'white', 'eyelid_close', 'eyelid_blink'];
+const SCREEN_TRANSITIONS: ScreenTransition[] = ['fade_black', 'black', 'white', 'eyelid_close', 'eyelid_blink', 'memory'];
 
 /** 音声生成に必要な、シナリオの場所と保存状態 */
 export interface VoiceContext {
@@ -332,6 +334,63 @@ function StageTab({
             <option value="on">{t.scenarios.effectStart}</option>
             <option value="off">{t.scenarios.effectStop}</option>
           </select>
+        </label>
+      ))}
+      <label className="field">
+        <span className="field-label">{t.scenarios.waveGlass}</span>
+        <select
+          className="select"
+          value={scene.effects?.waveGlass ?? ''}
+          onChange={(e) => {
+            const next = { ...scene.effects, waveGlass: (e.target.value || undefined) as NonNullable<ScenarioScene['effects']>['waveGlass'] };
+            if (next.waveGlass === undefined) delete next.waveGlass;
+            set('effects', Object.keys(next).length > 0 ? next : undefined);
+          }}
+        >
+          <option value="">{inherited(t.scenarios.waveGlassKinds[before?.effects?.waveGlass ?? 'off'])}</option>
+          {(['off', ...WAVE_GLASS_KINDS] as const).map((kind) => (
+            <option key={kind} value={kind}>
+              {t.scenarios.waveGlassKinds[kind]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span className="field-label">{t.scenarios.waveGlassTarget}</span>
+        <select
+          className="select"
+          value={scene.effects?.waveGlassTarget ?? ''}
+          onChange={(e) => {
+            const next = { ...scene.effects, waveGlassTarget: (e.target.value || undefined) as NonNullable<ScenarioScene['effects']>['waveGlassTarget'] };
+            if (next.waveGlassTarget === undefined) delete next.waveGlassTarget;
+            set('effects', Object.keys(next).length > 0 ? next : undefined);
+          }}
+        >
+          <option value="">{inherited(t.scenarios.waveGlassTargets[before?.effects?.waveGlassTarget ?? 'all'])}</option>
+          {WAVE_GLASS_TARGETS.map((target) => (
+            <option key={target} value={target}>
+              {t.scenarios.waveGlassTargets[target]}
+            </option>
+          ))}
+        </select>
+      </label>
+      {(['waveGlassStrength', 'transmittedLight'] as const).map((field) => (
+        <label key={field} className="field">
+          <span className="field-label">{t.scenarios[field]}</span>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={3}
+            step={0.1}
+            placeholder={inherited(String(before?.effects?.[field] ?? 1))}
+            value={scene.effects?.[field] ?? ''}
+            onChange={(e) => {
+              const next = { ...scene.effects, [field]: e.target.value === '' ? undefined : Math.min(3, Math.max(0, Number(e.target.value))) };
+              if (next[field] === undefined) delete next[field];
+              set('effects', Object.keys(next).length > 0 ? next : undefined);
+            }}
+          />
         </label>
       ))}
       <label className="inspector-check">

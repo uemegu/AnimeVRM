@@ -10,6 +10,7 @@ import { disposePaintedGondola, loadPaintedGondola } from './sets/painted-gondol
 import { disposePaintedSeaside, loadPaintedSeaside } from './sets/painted-seaside/PaintedSeaside';
 import { disposeShoppingStreet, loadShoppingStreet } from './sets/shopping-street/ShoppingStreet';
 import { disposePaintedShrine, loadPaintedShrine } from './sets/painted-shrine/PaintedShrine';
+import { disposeResidentialStreet, loadResidentialStreet } from './sets/residential-street/ResidentialStreet';
 
 /** 簡易3D背景のセットを builtin:<名前> として登録する */
 export function registerSets(): void {
@@ -22,6 +23,7 @@ export function registerSets(): void {
   registerEnvironment('painted-seaside', { load: loadPaintedSeaside, dispose: disposePaintedSeaside });
   registerEnvironment('painted-festival', { load: loadPaintedFestival, dispose: disposePaintedFestival });
   registerEnvironment('shopping-street', { load: loadShoppingStreet, dispose: disposeShoppingStreet });
+  registerEnvironment('residential-street', { load: loadResidentialStreet, dispose: disposeResidentialStreet });
   registerEnvironment('painted-shrine', { load: loadPaintedShrine, dispose: disposePaintedShrine });
   registerEnvironment('painted-gondola', { load: loadPaintedGondola, dispose: disposePaintedGondola });
 }

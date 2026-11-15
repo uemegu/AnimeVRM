@@ -12,6 +12,7 @@ export const BUILTIN_ENVIRONMENTS = {
   'builtin:painted-seaside': { ja: '簡易3D 海の見える公園', en: 'Painted seaside park' },
   'builtin:painted-festival': { ja: '簡易3D 夏祭り', en: 'Painted summer festival' },
   'builtin:shopping-street': { ja: '簡易3D 商店街', en: 'Shopping street' },
+  'builtin:residential-street': { ja: '簡易3D 住宅街', en: 'Residential street' },
   'builtin:painted-shrine': { ja: '簡易3D 神社', en: 'Shrine' },
   'builtin:painted-gondola': { ja: '簡易3D 観覧車のゴンドラ', en: 'Ferris wheel gondola' },
 } as const;

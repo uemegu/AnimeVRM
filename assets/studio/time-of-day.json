@@ -162,7 +162,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0.25
+        "lightingMixFactor": 0.25,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": true,
@@ -331,7 +332,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0.25
+        "lightingMixFactor": 0.25,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": true,
@@ -500,7 +502,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0.3
+        "lightingMixFactor": 0.3,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": true,
@@ -682,7 +685,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.15,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": true,
@@ -847,7 +851,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": true,
@@ -1012,7 +1017,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0,
         "widthFactor": 0.0015,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0,
+        "colorTrace": 0.7
       },
       "fog": {
         "enabled": false,
@@ -1187,7 +1193,8 @@
         "autoLineWeight": true,
         "darknessFactor": 0.1,
         "widthFactor": 0.0024,
-        "lightingMixFactor": 0
+        "lightingMixFactor": 0,
+        "colorTrace": 0.7
       }
     }
   }

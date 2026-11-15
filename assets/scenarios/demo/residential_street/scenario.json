@@ -1,0 +1,165 @@
+{
+ "schemaVersion": 1,
+ "id": "residential_street",
+ "title": {
+  "ja": "夏の住宅街 — 簡易3D",
+  "en": "Summer residential street (painted 3D)"
+ },
+ "description": "2階建ての家とブロック塀、電柱が並ぶ住宅街の長い直線道路。北へ330m見通せる。",
+ "location": "residential_street",
+ "bgm": "silence",
+ "timeOfDay": "day",
+ "scenes": [
+  {
+   "id": "forward",
+   "text": "正面（北へ伸びる道路）",
+   "cameraPose": {
+    "position": [
+     0,
+     1.5,
+     2
+    ],
+    "target": [
+     0,
+     1.5,
+     -40
+    ],
+    "fov": 50
+   }
+  },
+  {
+   "id": "left_90",
+   "text": "同じ場所から左90度",
+   "cameraPose": {
+    "position": [
+     0,
+     1.5,
+     2
+    ],
+    "target": [
+     -20,
+     1.8,
+     2
+    ],
+    "fov": 58
+   }
+  },
+  {
+   "id": "right_90",
+   "text": "同じ場所から右90度",
+   "cameraPose": {
+    "position": [
+     0,
+     1.5,
+     2
+    ],
+    "target": [
+     20,
+     1.8,
+     2
+    ],
+    "fov": 58
+   }
+  },
+  {
+   "id": "back_180",
+   "text": "同じ場所から後ろ180度",
+   "cameraPose": {
+    "position": [
+     0,
+     1.5,
+     2
+    ],
+    "target": [
+     0,
+     1.5,
+     40
+    ],
+    "fov": 50
+   }
+  },
+  {
+   "id": "house_corner",
+   "text": "家の角を斜めから",
+   "cameraPose": {
+    "position": [
+     -1.5,
+     1.5,
+     -2
+    ],
+    "target": [
+     9,
+     2.6,
+     -12
+    ],
+    "fov": 55
+   }
+  },
+  {
+   "id": "north_end",
+   "text": "道の奥から振り返る",
+   "cameraPose": {
+    "position": [
+     0,
+     1.5,
+     -150
+    ],
+    "target": [
+     0,
+     1.5,
+     0
+    ],
+    "fov": 50
+   }
+  },
+  {
+   "id": "overview",
+   "text": "屋根と区画の俯瞰",
+   "cameraPose": {
+    "position": [
+     26,
+     30,
+     36
+    ],
+    "target": [
+     0,
+     1,
+     -20
+    ],
+    "fov": 60
+   }
+  },
+  {
+   "id": "with_avatar",
+   "text": "今日も暑いね。",
+   "cameraPose": {
+    "position": [
+     0,
+     1.45,
+     3
+    ],
+    "target": [
+     0,
+     1.35,
+     0
+    ],
+    "fov": 50
+   },
+   "speakerCharacterId": "aoi",
+   "avatars": {
+    "aoi": {
+     "position": [
+      0,
+      0,
+      0
+     ],
+     "rotationY": 0,
+     "motion": "Standing Idle",
+     "expression": "neutral",
+     "expressionWeight": 1,
+     "lookAtTarget": "player"
+    }
+   }
+  }
+ ]
+}
