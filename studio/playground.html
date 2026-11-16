@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>布の試し場</title>
+    <style>
+      html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+      #canvas { display: block; width: 100%; height: 100%; }
+      #help {
+        position: fixed; left: 12px; top: 12px; padding: 10px 14px; border-radius: 8px;
+        background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 13px; line-height: 1.7; pointer-events: none;
+      }
+      #help b { display: inline-block; min-width: 4.5em; font-weight: 600; }
+      #status { margin-top: 6px; color: #cfd8e3; font-size: 12px; white-space: pre; }
+    </style>
+  </head>
+  <body>
+    <!-- 布のシミュレーションを試すページ。npm run dev -w studio のあと http://localhost:5175/playground.html -->
+    <canvas id="canvas"></canvas>
+    <div id="help">
+      <div><b>W A S D</b>・矢印キー：歩く（カメラの向きが前）</div>
+      <div><b>Shift</b>＋移動：走る</div>
+      <div><b>Space</b>：ジャンプ</div>
+      <div><b>E</b>：ダンス（もう一度押すとやめる）</div>
+      <div><b>マウス</b>：カメラを回す・ホイールで寄る</div>
+      <div id="status">読み込み中…</div>
+    </div>
+    <script type="module" src="/src/playground/main.ts"></script>
+  </body>
+</html>
