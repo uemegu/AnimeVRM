@@ -90,3 +90,22 @@ __pycache__/
 /scripts/outfits/textures/emili_military/
 /assets/models/emili/emili-boots.vrm
 scripts/style_iincho_hair.mjs
+assets/models/iincho/iincho-school-hair2-slimface.vrm
+assets/models/iincho/iincho-school-hair2.vrm
+# Studio で表示を確認する髪・頬テクスチャの試作モデル
+/assets/models/aoi/aoi-school-texture-trial.vrm
+assets/models/iincho/iincho-school-hd-kokuro1.vrm
+assets/models/iincho/iincho-school-hd-kokuro2.vrm
+assets/models/iincho/iincho-school-hd-kokuro3.vrm
+assets/models/iincho/iincho-school-hd-kokuro4.vrm
+assets/models/iincho/iincho-school-hd-reijo1.vrm
+assets/models/iincho/iincho-school-hd-reijo2.vrm
+assets/models/iincho/iincho-school-hd-reijo3.vrm
+assets/models/iincho/iincho-school-hd-reijo4.vrm
+assets/models/iincho/textures/hairdeck-kokuro.avif
+assets/models/iincho/textures/hairdeck-reijo.avif
+
+# 布シミュレーション ON/OFF の比較動画を撮る道具（ローカル専用）
+/studio/cloth-compare.html
+/studio/src/cloth-compare/
+/scripts/record-cloth-compare.mjs
