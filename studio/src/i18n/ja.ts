@@ -316,6 +316,12 @@ export const ja = {
     effectOff: '止まっている',
     effectStart: 'このカットから出す',
     effectStop: 'このカットで止める',
+    waveGlass: '波ガラス',
+    waveGlassKinds: { off: 'なし', underwater: '水中' },
+    waveGlassTarget: '波ガラスの対象',
+    waveGlassTargets: { all: '全体', background: '背景のみ', character: 'キャラのみ' },
+    waveGlassStrength: '波ガラスの強さ',
+    transmittedLight: '透過光の倍率',
     timeline: {
       title: 'タイムライン',
       play: '再生',

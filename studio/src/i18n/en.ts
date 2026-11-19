@@ -318,6 +318,12 @@ export const en: Dictionary = {
     effectOff: 'stopped',
     effectStart: 'Start from this cut',
     effectStop: 'Stop at this cut',
+    waveGlass: 'Wave glass',
+    waveGlassKinds: { off: 'Off', underwater: 'Underwater' },
+    waveGlassTarget: 'Wave glass target',
+    waveGlassTargets: { all: 'All', background: 'Background', character: 'Character' },
+    waveGlassStrength: 'Wave glass strength',
+    transmittedLight: 'Transmitted light',
     timeline: {
       title: 'Timeline',
       play: 'Play',
