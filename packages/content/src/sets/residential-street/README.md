@@ -31,7 +31,8 @@
 - 道路の上から前後左右、家の角を斜めから、道の奥から振り返る向き、俯瞰、人物を置いた会話カメラを撮って確認した。
 - 家の裏（道路から 14m より外）は無地の地面だけ。俯瞰では空き地が見える。道路の高さからは家と塀で隠れる。
 - 門の中へ入る・庭に立つ・家に入ることは想定していない。塀に笠木はない。
-- Pages 用の登録（`studio/pages/catalog.ts`・`collectAssets.ts`）とサムネイルは未対応。
+- サムネイル: `assets/textures/residential-street/thumb.avif`（デモの `forward` を撮ったもの）。
+- Pages 用の登録（`studio/pages/catalog.ts`・`collectAssets.ts`）は未対応。
 
 ```sh
 npm run validate

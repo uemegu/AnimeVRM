@@ -1451,7 +1451,8 @@
             0
           ]
         }
-      }
+      },
+      "thumbnail": "/textures/residential-street/thumb.avif"
     },
     "shopping_street_3d": {
       "id": "shopping_street_3d",
