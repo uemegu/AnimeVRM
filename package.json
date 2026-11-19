@@ -6,8 +6,6 @@
   "scripts": {
     "studio": "npm run dev -w studio",
     "server": "npm run dev -w server",
-    "pool": "vite --config mini-game/pool/vite.config.ts",
-    "build:pool": "vite build --config mini-game/pool/vite.config.ts",
     "build:pages": "npm run build:pages -w studio",
     "build:wasm": "npm run build:wasm -w @anime-vrm/engine",
     "convert:textures": "bash convert_textures.sh",
