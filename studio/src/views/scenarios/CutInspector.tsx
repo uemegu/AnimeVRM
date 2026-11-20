@@ -3,6 +3,7 @@ import {
   HeldItemId,
   ScenarioScene as SceneSchema,
   SCENE_EFFECT_IDS,
+  POSE_STEPS,
   WAVE_GLASS_KINDS,
   WAVE_GLASS_TARGETS,
   stageAtScene,
@@ -393,6 +394,25 @@ function StageTab({
           />
         </label>
       ))}
+      <label className="field">
+        <span className="field-label">{t.scenarios.poseStep}</span>
+        <select
+          className="select"
+          value={scene.effects?.poseStep ?? ''}
+          onChange={(e) => {
+            const next = { ...scene.effects, poseStep: (e.target.value || undefined) as NonNullable<ScenarioScene['effects']>['poseStep'] };
+            if (next.poseStep === undefined) delete next.poseStep;
+            set('effects', Object.keys(next).length > 0 ? next : undefined);
+          }}
+        >
+          <option value="">{inherited(t.scenarios.poseSteps[before?.effects?.poseStep ?? 'off'])}</option>
+          {(['off', ...POSE_STEPS] as const).map((step) => (
+            <option key={step} value={step}>
+              {t.scenarios.poseSteps[step]}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className="inspector-check">
         <input type="checkbox" checked={!!scene.focusLines} onChange={(e) => set('focusLines', e.target.checked || undefined)} />
         {t.scenarios.focusLines}

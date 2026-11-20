@@ -324,6 +324,8 @@ export const en: Dictionary = {
     waveGlassTargets: { all: 'All', background: 'Background', character: 'Character' },
     waveGlassStrength: 'Wave glass strength',
     transmittedLight: 'Transmitted light',
+    poseStep: 'Stepped animation',
+    poseSteps: { off: 'Off (smooth)', twos: 'On twos (12 poses/s)', threes: 'On threes (8 poses/s)' },
     timeline: {
       title: 'Timeline',
       play: 'Play',

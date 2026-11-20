@@ -322,6 +322,8 @@ export const ja = {
     waveGlassTargets: { all: '全体', background: '背景のみ', character: 'キャラのみ' },
     waveGlassStrength: '波ガラスの強さ',
     transmittedLight: '透過光の倍率',
+    poseStep: 'コマ打ち',
+    poseSteps: { off: 'なし（なめらか）', twos: '2コマ打ち（毎秒12枚）', threes: '3コマ打ち（毎秒8枚）' },
     timeline: {
       title: 'タイムライン',
       play: '再生',
