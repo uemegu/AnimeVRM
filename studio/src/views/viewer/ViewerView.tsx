@@ -209,11 +209,10 @@ export function ViewerView() {
               lookAtTarget: lookAtCamera || faceCamera ? 'camera' : undefined,
               headTurn: faceCamera ? 1 : 0,
               look: { ...DEFAULT_AVATAR_LOOK, ...faceEffects, ...(character?.tearDrops === false ? { tearDrops: false } : {}) },
-              wet: rain ? 1 : 0,
             },
           ]
         : [],
-    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects, rain]
+    [characterId, character, model, expression, motion, motionLoop, motionCue, lookAtCamera, faceCamera, faceEffects]
   );
 
   useBackdrop(locationBackdropUrl(presets?.locations[locationId]));

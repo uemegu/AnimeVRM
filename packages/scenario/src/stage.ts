@@ -173,7 +173,6 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
       lookAtTarget: config.lookAtTarget,
       headTurn: config.headTurn,
       ...(config.daylight !== undefined ? { daylight: config.daylight } : {}),
-      ...(config.wet !== undefined ? { wet: config.wet } : {}),
       ...(config.heldItem ? { heldItem: typeof config.heldItem === 'string' ? { item: config.heldItem } : config.heldItem } : {}),
       look: {
         blush: config.blush ?? false,

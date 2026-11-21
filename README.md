@@ -15,7 +15,7 @@ npm workspaces のモノレポです。
 | `studio/` | Studio（React、ローカル専用）。ビューア・シーン設定・シナリオ編集・シナリオ再生・キャラクター管理・モーション。`studio/pages/` は Pages 版（ビューアのみ） |
 | `server/` | Studio 用のローカルサーバー（Hono、localhost のみ）。シナリオや設定の保存、素材の一覧、音声生成。[server/README.md](server/README.md) |
 | `packages/engine/` | 描画（[AnimeVRM.engine](https://github.com/uemegu/AnimeVRM.engine) のサブモジュール）。舞台（`stage/`）、トゥーンシェーダー、ポストプロセス、感情演出、舞台に渡す形（`schema/`）、口パクの解析 |
-| `packages/content/` | 簡易3D背景のセット、手に持つ小物、濡れた服の絵柄。アプリの入口で `@anime-vrm/content/register` を読み込むと engine に登録される |
+| `packages/content/` | 簡易3D背景のセット、手に持つ小物。アプリの入口で `@anime-vrm/content/register` を読み込むと engine に登録される |
 | `packages/scenario/` | シナリオ・キャラクターの形式（zod スキーマ）と、舞台の状態を決める処理・分岐の進行 |
 | `packages/motion/` | ardy-mini によるモーション生成、体型への合わせ込み、接触の補正、FBX 書き出し。[README](packages/motion/src/ardy/README.md) |
 | `assets/` | 素材（モデル・モーション・背景・BGM・SE・ボイス・シナリオ）。`assets/studio/*.json` は Studio で編集する設定（場所・時間帯・キャラクター・モーション・BGM） |

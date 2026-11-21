@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "簡易3D背景のセット、手に持つ小物、濡れた服の絵柄",
+  "description": "簡易3D背景のセット、手に持つ小物",
   "exports": {
     "./register": "./src/register.ts",
     "./*": "./src/*.ts"

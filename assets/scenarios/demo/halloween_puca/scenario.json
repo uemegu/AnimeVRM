@@ -325,8 +325,7 @@
               ],
               "moveDuration": 4.5
             }
-          ],
-          "wet": 0.5
+          ]
         }
       }
     },
@@ -586,8 +585,7 @@
           "rotationY": 0,
           "lookAtTarget": "camera",
           "visible": true,
-          "modelUrl": "/models/shion/shion-tripo.vrm",
-          "wet": 0.5
+          "modelUrl": "/models/shion/shion-tripo.vrm"
         },
         "puca": {
           "position": [
@@ -736,8 +734,7 @@
       "avatars": {
         "shion": {
           "lookAtTarget": "camera",
-          "headTurn": 1,
-          "wet": 0.8
+          "headTurn": 1
         },
         "puca": {
           "visible": false
