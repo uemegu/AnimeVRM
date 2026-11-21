@@ -8,7 +8,17 @@ import { pathToFileURL } from 'node:url';
 import type { z } from 'zod';
 import { CharacterBook } from './characters.ts';
 import { scenarioLinks, type ScenarioLinks } from './links.ts';
-import { ProjectBook, ProjectManifest, type ScenarioProject } from './projects.ts';
+import { ProjectBook, ProjectManifest, projectOfCategory, type ScenarioProject } from './projects.ts';
+import {
+  duplicatedIds,
+  emptyProjectData,
+  PROJECT_DATA_NAMES,
+  PROJECT_DATA_SCHEMAS,
+  projectDataEntries,
+  projectDataPath,
+  type ProjectData,
+  type ProjectDataName,
+} from './projectData.ts';
 import { checkFlagLinks, checkScenarioReferences, checkStudioDataReferences, type Catalog, type Issue, type Problem } from './references.ts';
 import { LocationFile, TimeOfDayFile } from './scene.ts';
 import { ScenarioCategory, schemaForCategory } from './schema.ts';
@@ -105,6 +115,81 @@ export function listProjects(paths: WorkspacePaths): ScenarioProject[] {
   const builtIn = fs.existsSync(file) ? ProjectBook.parse(readJson(file)).projects : [];
   const external = (paths.projects ?? []).map(({ dir: _dir, assetsDir: _assets, hooks: _hooks, ...project }) => project);
   return [...builtIn.filter((p) => !external.some((e) => e.id === p.id)), ...external];
+}
+
+/** プロジェクトの置き場（外部プロジェクトはその assetsDir、Studio のプロジェクトは assets/） */
+export function assetsDirOfProject(paths: WorkspacePaths, projectId: string): string {
+  return paths.projects?.find((p) => p.id === projectId)?.assetsDir ?? paths.assetsDir;
+}
+
+/** プロジェクト専用データのファイル（絶対パス） */
+export function projectDataFileOf(paths: WorkspacePaths, projectId: string, name: ProjectDataName): string {
+  return path.join(assetsDirOfProject(paths, projectId), projectDataPath(projectId, name));
+}
+
+/** 種類が入っているプロジェクトの ID（Studio のものと外部のもの。どこにもなければ undefined） */
+export function projectIdOfCategory(paths: WorkspacePaths, category: string): string | undefined {
+  const projects = listProjects(paths);
+  return projects.length ? projectOfCategory({ projects }, category)?.id : undefined;
+}
+
+/** プロジェクト専用データを読む。ファイルがなければ空。形式が違うものは problems に入れて空にする */
+export function readProjectData(paths: WorkspacePaths, projectId: string, problems: Problem[] = []): ProjectData {
+  const data = emptyProjectData();
+  for (const name of PROJECT_DATA_NAMES) {
+    const abs = projectDataFileOf(paths, projectId, name);
+    if (!fs.existsSync(abs)) continue;
+    const file = path.relative(paths.repoRoot, abs);
+    let json: unknown;
+    try {
+      json = readJson(abs);
+    } catch (err) {
+      problems.push({ severity: 'error', file, path: '', message: `JSON として読めません: ${(err as Error).message}` });
+      continue;
+    }
+    const parsed = PROJECT_DATA_SCHEMAS[name].safeParse(json);
+    if (!parsed.success) {
+      problems.push(...withFile(file, schemaIssues(parsed.error)));
+      continue;
+    }
+    (data as unknown as Record<string, unknown>)[name] = projectDataEntries(name, json);
+  }
+  return data;
+}
+
+/** 共通のデータにプロジェクト専用のデータを足したもの（Studio データの名前 → 中身） */
+function withProjectData(studio: Map<string, unknown>, own: ProjectData): Map<string, unknown> {
+  const merged = new Map(studio);
+  const characters = studio.get('characters') as z.infer<typeof CharacterBook> | undefined;
+  if (characters) merged.set('characters', { ...characters, characters: [...characters.characters, ...own.characters] });
+  const locations = studio.get('locations') as z.infer<typeof LocationFile> | undefined;
+  if (locations) merged.set('locations', { ...locations, presets: { ...locations.presets, ...own.locations } });
+  const bgm = studio.get('bgm') as z.infer<typeof BgmBook> | undefined;
+  if (bgm) merged.set('bgm', { ...bgm, bgm: { ...bgm.bgm, ...own.bgm } });
+  return merged;
+}
+
+/** 共通のデータの ID */
+function sharedIds(studio: Map<string, unknown>) {
+  return {
+    characters: ((studio.get('characters') as z.infer<typeof CharacterBook> | undefined)?.characters ?? []).map((c) => c.id),
+    locations: Object.keys((studio.get('locations') as z.infer<typeof LocationFile> | undefined)?.presets ?? {}),
+    bgm: Object.keys((studio.get('bgm') as z.infer<typeof BgmBook> | undefined)?.bgm ?? {}),
+  };
+}
+
+/** プロジェクト専用データのうち、共通と同じ ID のもの */
+export function projectDataConflicts(paths: WorkspacePaths, projectId: string, own: ProjectData): Problem[] {
+  const studio = readStudioData(paths, []);
+  const dup = duplicatedIds(sharedIds(studio), own);
+  return PROJECT_DATA_NAMES.flatMap((name) =>
+    dup[name].map((id) => ({
+      severity: 'error' as const,
+      file: path.relative(paths.repoRoot, projectDataFileOf(paths, projectId, name)),
+      path: id,
+      message: `ID "${id}" は共通（assets/studio/${name}.json）にもあります`,
+    }))
+  );
 }
 
 /** 外部プロジェクトの保存後の処理と検証（studio-project.json の hooks に書いたモジュールが export する） */
@@ -282,7 +367,9 @@ function buildCatalog(paths: WorkspacePaths, studio: Map<string, unknown>, scena
 /** 保存しようとしているシナリオ1本を、リポジトリのマスターデータと突き合わせる（スキーマの検証は済んでいること） */
 export function checkScenarioInWorkspace(paths: WorkspacePaths, category: ScenarioCategory, id: string, data: unknown): Issue[] {
   const ignored: Problem[] = [];
-  const studio = readStudioData(paths, ignored);
+  const projectId = projectIdOfCategory(paths, category);
+  const shared = readStudioData(paths, ignored);
+  const studio = projectId ? withProjectData(shared, readProjectData(paths, projectId, ignored)) : shared;
   const scenarios = readScenarios(paths, ignored).filter((s) => !(s.category === category && s.id === id));
   scenarios.push({ category, id, file: '', data });
   return checkScenarioReferences(category, id, data, buildCatalog(paths, studio, scenarios));
@@ -291,6 +378,19 @@ export function checkScenarioInWorkspace(paths: WorkspacePaths, category: Scenar
 /** 保存しようとしている Studio データを突き合わせる（スキーマの検証は済んでいること） */
 export function checkStudioDataInWorkspace(paths: WorkspacePaths, name: string, data: unknown): Issue[] {
   return checkStudioDataReferences(name, data, buildCatalog(paths, new Map(), []));
+}
+
+/**
+ * 保存しようとしているプロジェクト専用データを突き合わせる（スキーマの検証は済んでいること）。
+ * 参照先のファイルと、共通との ID の重なり。path は ID の重なりなら ID
+ */
+export function checkProjectDataInWorkspace(paths: WorkspacePaths, projectId: string, name: ProjectDataName, file: unknown): Issue[] {
+  const own = { ...emptyProjectData(), [name]: projectDataEntries(name, file) } as ProjectData;
+  const asStudio = name === 'characters' ? { characters: own.characters } : file;
+  return [
+    ...checkStudioDataReferences(name, asStudio, buildCatalog(paths, new Map(), [])),
+    ...projectDataConflicts(paths, projectId, own).map(({ file: _file, ...issue }) => issue),
+  ];
 }
 
 export interface WorkspaceReport {
@@ -311,6 +411,26 @@ export function validateWorkspace(paths: WorkspacePaths): WorkspaceReport {
   for (const [name, data] of studio) {
     problems.push(...withFile(path.relative(paths.repoRoot, path.join(paths.assetsDir, 'studio', `${name}.json`)), checkStudioDataReferences(name, data, catalog)));
   }
+
+  // プロジェクト専用のキャラ・場所・BGM。シナリオはそのプロジェクトのものと共通のものを合わせて突き合わせる
+  const projectCatalogs = new Map<string, Catalog>();
+  let projectDataCount = 0;
+  for (const project of listProjects(paths)) {
+    const own = readProjectData(paths, project.id, problems);
+    for (const name of PROJECT_DATA_NAMES) {
+      const abs = projectDataFileOf(paths, project.id, name);
+      if (!fs.existsSync(abs)) continue;
+      projectDataCount++;
+      const asStudio = name === 'characters' ? { characters: own.characters } : name === 'locations' ? { presets: own.locations } : { bgm: own.bgm };
+      problems.push(...withFile(path.relative(paths.repoRoot, abs), checkStudioDataReferences(name, asStudio, catalog)));
+    }
+    problems.push(...projectDataConflicts(paths, project.id, own));
+    projectCatalogs.set(project.id, buildCatalog(paths, withProjectData(studio, own), scenarios));
+  }
+  const catalogOf = (category: string) => {
+    const projectId = projectIdOfCategory(paths, category);
+    return (projectId && projectCatalogs.get(projectId)) || catalog;
+  };
 
   // 外部プロジェクトどうし・Studio のプロジェクトと、種類が重ならないこと
   const owners = new Map<string, string>();
@@ -342,10 +462,10 @@ export function validateWorkspace(paths: WorkspacePaths): WorkspaceReport {
     const other = seen.get(s.id);
     if (other) problems.push({ severity: 'error', file: s.file, path: 'id', message: `シナリオ ID "${s.id}" が ${other} と重複しています` });
     seen.set(s.id, s.file);
-    problems.push(...withFile(s.file, checkScenarioReferences(s.category, s.id, s.data, catalog)));
+    problems.push(...withFile(s.file, checkScenarioReferences(s.category, s.id, s.data, catalogOf(s.category))));
     links.push({ file: s.file, links: scenarioLinks(s.data) });
   }
   problems.push(...checkFlagLinks(links));
 
-  return { problems, scenarioCount: scenarios.length, studioDataCount: studio.size };
+  return { problems, scenarioCount: scenarios.length, studioDataCount: studio.size + projectDataCount };
 }

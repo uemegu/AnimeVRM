@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { READ_ONLY } from '../api/client';
 import { useI18n, type Language } from '../i18n';
+import { useProjects } from '../data/useProjects';
 import { Icon, type IconName } from './Icon';
 import { ToastProvider } from './Toast';
 import { RenderQualityProvider } from '../stage/renderQuality';
@@ -94,6 +95,7 @@ export function Layout({ viewerOnly = false }: { viewerOnly?: boolean }) {
             <Icon name="sidebar" size={16} />
           </button>
         </div>
+        {!viewerOnly && <ProjectSwitcher />}
         <nav className="studio-nav">
           {NAV_ITEMS.filter((item) => !viewerOnly || item.path === '/viewer').map((item) => (
             <NavLink key={item.path} to={item.path} title={collapsed ? item.label(t) : undefined} className={({ isActive }) => `studio-nav-item${isActive ? ' active' : ''}`}>
@@ -133,6 +135,25 @@ export function Layout({ viewerOnly = false }: { viewerOnly?: boolean }) {
         </div>
       </main>
     </div>
+  );
+}
+
+/** いま扱うプロジェクト。シナリオ・キャラ・場所・BGM の一覧がこのプロジェクトのもの（と共通のもの）になる */
+function ProjectSwitcher() {
+  const { t, language } = useI18n();
+  const { projects, current, select } = useProjects();
+  if (!projects || !current) return null;
+  return (
+    <label className="studio-project">
+      <span className="studio-project-label">{t.dataScope.project}</span>
+      <select className="select" value={current.id} onChange={(e) => select(e.target.value)}>
+        {projects.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name[language] ?? p.name.ja}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

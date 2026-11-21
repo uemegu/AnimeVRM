@@ -4,7 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { CharacterBook } from '../src/index.ts';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../../assets');
-const book = JSON.parse(fs.readFileSync(path.join(ASSETS, 'studio/characters.json'), 'utf8'));
+const readJson = (file: string) => JSON.parse(fs.readFileSync(path.join(ASSETS, file), 'utf8'));
+// 共通のキャラに、5秒の告白専用のキャラ（studio/projects/demo/）を足したもの。デモのシナリオはこれを使う
+const book = readJson('studio/characters.json');
+book.characters = [...book.characters, ...readJson('studio/projects/demo/characters.json').characters];
 
 describe('assets/studio/characters.json', () => {
   it('スキーマに合うこと', () => {

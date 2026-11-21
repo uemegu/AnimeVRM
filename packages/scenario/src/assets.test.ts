@@ -6,10 +6,11 @@ import { collectScenarioAssets } from './assets.ts';
 const ASSETS = path.resolve(import.meta.dirname, '../../../assets');
 const json = (file: string) => JSON.parse(fs.readFileSync(path.join(ASSETS, file), 'utf8'));
 const books = {
-  locations: json('studio/locations.json').presets,
-  bgm: json('studio/bgm.json').bgm,
+  // デモのシナリオは、共通のものと 5秒の告白専用のもの（studio/projects/demo/）を使う
+  locations: { ...json('studio/locations.json').presets, ...json('studio/projects/demo/locations.json').presets },
+  bgm: { ...json('studio/bgm.json').bgm, ...json('studio/projects/demo/bgm.json').bgm },
   motions: json('studio/motions.json').motions,
-  characters: json('studio/characters.json').characters,
+  characters: [...json('studio/characters.json').characters, ...json('studio/projects/demo/characters.json').characters],
 };
 
 describe('collectScenarioAssets', () => {

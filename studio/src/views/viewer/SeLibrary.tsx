@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { api, ApiError, READ_ONLY, type AssetEntry } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
+import { useProjects } from '../../data/useProjects';
+import { SharedTag } from '../../components/DataScope';
 
 /** assets/se/<name>.<ext> の name.ext */
 function seFileName(url: string): string {
@@ -18,11 +20,13 @@ interface Props {
 }
 
 /**
- * 効果音の一覧（assets/se）。試聴と、手元の音声ファイルの登録ができる。シナリオではカットの seUrl にパスを書く
+ * 効果音の一覧（共通の assets/se と、いまのプロジェクトの置き場の se）。試聴と、手元の音声ファイルの登録ができる。
+ * シナリオではカットの seUrl にパスを書く。プロジェクトの置き場のものは、そのプロジェクトのシナリオからだけ使える
  */
 export function SeLibrary({ heading, playingUrl, muted, onToggle, onToggleMute }: Props) {
   const { t } = useI18n();
   const tv = t.viewer;
+  const { current: project } = useProjects();
   const [files, setFiles] = useState<AssetEntry[]>([]);
   const [filter, setFilter] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -31,8 +35,8 @@ export function SeLibrary({ heading, playingUrl, muted, onToggle, onToggleMute }
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    api.assets('se').then(setFiles, () => setMessage(t.common.loadFailed));
-  }, [t]);
+    api.assets('se', project?.id).then(setFiles, () => setMessage(t.common.loadFailed));
+  }, [t, project?.id]);
 
   // 登録した効果音が見えるところまで送る
   const [reveal, setReveal] = useState<string | null>(null);
@@ -41,7 +45,10 @@ export function SeLibrary({ heading, playingUrl, muted, onToggle, onToggleMute }
     listRef.current?.querySelector(`[data-url="${CSS.escape(reveal)}"]`)?.scrollIntoView({ block: 'nearest' });
   }, [reveal, files]);
 
+  // 素材の置き場を自分で持つプロジェクト（外部プロジェクト）では、共通のファイルに印を付け、登録するファイルはその置き場に置く
+  const scoped = !!project?.ownAssets;
   const shown = files.filter((f) => seFileName(f.url).toLowerCase().includes(filter.toLowerCase()));
+  const target = scoped ? project!.id : undefined;
 
   const upload = async (file: File) => {
     setMessage(null);
@@ -49,12 +56,12 @@ export function SeLibrary({ heading, playingUrl, muted, onToggle, onToggleMute }
     try {
       let result;
       try {
-        result = await api.uploadAsset('se', file.name, file);
+        result = await api.uploadAsset('se', file.name, file, false, target);
       } catch (err) {
         if (!(err instanceof ApiError && err.status === 409) || !window.confirm(format(tv.voiceOverwrite, { name: file.name }))) throw err;
-        result = await api.uploadAsset('se', file.name, file, true);
+        result = await api.uploadAsset('se', file.name, file, true, target);
       }
-      setFiles(await api.assets('se'));
+      setFiles(await api.assets('se', project?.id));
       setMessage(format(tv.voiceUploaded, { name: file.name }));
       setFilter('');
       setReveal(result.url);
@@ -108,6 +115,7 @@ export function SeLibrary({ heading, playingUrl, muted, onToggle, onToggleMute }
                 </span>
                 <span className="viewer-voice-name">{seFileName(f.url)}</span>
               </button>
+              {scoped && !f.project && <SharedTag />}
             </li>
           );
         })}

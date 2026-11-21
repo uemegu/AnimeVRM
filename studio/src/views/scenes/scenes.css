@@ -321,3 +321,13 @@
   pointer-events: none;
 }
 
+
+/* 置き場所（共通・プロジェクト専用） */
+.scenes-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.scenes-item-id .scope-tag {
+  margin-left: 6px;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ScenarioPackage } from '@anime-vrm/scenario';
+import { projectOfCategory, ScenarioPackage } from '@anime-vrm/scenario';
 import { api, type ScenarioSummary } from '../../api/client';
 import { useProjects } from '../../data/useProjects';
 import { useI18n } from '../../i18n';
@@ -15,8 +15,8 @@ import '../../player/player.css';
  * シナリオ再生（Studio）。保存済みのシナリオを、分岐・ボイス・演出つきで通して再生する
  */
 export function PlayerView() {
-  const { t, language } = useI18n();
-  const { projects, current: project, select: selectProject, error: projectsError } = useProjects();
+  const { t } = useI18n();
+  const { projects, current: project, error: projectsError } = useProjects();
   const { category, id } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState<PlayerData | null>(null);
@@ -24,8 +24,13 @@ export function PlayerView() {
   const [scenario, setScenario] = useState<ScenarioPackage | null>(null);
   const [error, setError] = useState(false);
 
+  // 再生するシナリオのプロジェクト（一覧では選んでいるプロジェクト）のキャラ・場所・BGM
+  const dataProject = (category && projects ? projectOfCategory({ projects }, category) : undefined) ?? project;
   useEffect(() => {
-    loadPlayerData().then(setData, () => setError(true));
+    if (!dataProject) return;
+    loadPlayerData(dataProject.id).then(setData, () => setError(true));
+  }, [dataProject?.id]);
+  useEffect(() => {
     api.scenarios().then(setList, () => setError(true));
   }, []);
 
@@ -73,15 +78,6 @@ export function PlayerView() {
     <div className="player-list">
       <div className="player-list-head">
         <h1>{t.player.listTitle}</h1>
-        {projects && project && (
-          <select className="select" aria-label={t.scenarios.project} value={project.id} onChange={(e) => selectProject(e.target.value)}>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name[language] ?? p.name.ja}
-              </option>
-            ))}
-          </select>
-        )}
       </div>
       <ScenarioCatalog entries={entries} onSelect={(key) => navigate(`/player/${key}`)} />
     </div>

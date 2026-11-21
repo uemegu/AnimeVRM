@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
 import { stageAtScene, type ScenarioPackage } from '../packages/scenario/src/index.ts';
-import { findScenarios, loadExternalProjects } from '../packages/scenario/src/node.ts';
+import { findScenarios, loadExternalProjects, projectIdOfCategory } from '../packages/scenario/src/node.ts';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -34,7 +34,8 @@ const LIMIT = { x: 0.92, top: 0.92, bottom: -0.38 };
 
 const targets: { category: string; id: string; scenario: ScenarioPackage }[] = [];
 // 外部プロジェクト（studio-projects.txt・STUDIO_PROJECTS）のシナリオも含む
-for (const { category, id, file } of findScenarios({ repoRoot: REPO_ROOT, assetsDir: path.join(REPO_ROOT, 'assets'), projects: loadExternalProjects(REPO_ROOT) })) {
+const workspace = { repoRoot: REPO_ROOT, assetsDir: path.join(REPO_ROOT, 'assets'), projects: loadExternalProjects(REPO_ROOT) };
+for (const { category, id, file } of findScenarios(workspace)) {
   if (['demo', 'call', 'mail'].includes(category)) continue;
   if (filters.length && !filters.some((f) => f === category || f === `${category}/${id}`)) continue;
   targets.push({ category, id, scenario: JSON.parse(fs.readFileSync(file, 'utf8')) });
@@ -61,6 +62,7 @@ try {
       await page.evaluate((request) => window.__shot!.render(request), {
         scenario: scenario as never,
         baseUrl: `/scenarios/${category}/${id}/`,
+        project: projectIdOfCategory(workspace, category),
         sceneIndex: index,
         time: 0,
         outfit: 'default' as const,

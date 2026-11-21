@@ -3,7 +3,7 @@
   "projects": [
     {
       "id": "demo",
-      "name": { "ja": "デモ", "en": "Demo" },
+      "name": { "ja": "5秒の告白", "en": "Confession in 5 Seconds" },
       "description": "演出の見本。Pages で再生する",
       "categories": ["demo"]
     }

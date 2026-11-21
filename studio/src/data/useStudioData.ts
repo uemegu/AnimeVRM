@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import type { BgmBook, CharacterBook, LocationVisualPreset, MotionBook, TimeOfDayPreset } from '@anime-vrm/scenario';
 import { api } from '../api/client';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { fetchProjectData, mergeProjectData } from './projectData';
 
-/** シナリオ編集などで使うマスターデータ一式（assets/studio/*.json とアセット一覧） */
+/** シナリオ編集などで使うマスターデータ一式（assets/studio/*.json に、プロジェクト専用のキャラ・場所・BGM を足したものと、アセット一覧） */
 export interface StudioData {
   characters: CharacterBook;
   locations: Record<string, LocationVisualPreset>;
@@ -22,7 +23,8 @@ async function staticJson<T>(name: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function useStudioData(): { data: StudioData | null; error: boolean; reload: () => void } {
+/** projectId のプロジェクト専用のキャラ・場所・BGM も含める（なければ共通のものだけ） */
+export function useStudioData(projectId?: string): { data: StudioData | null; error: boolean; reload: () => void } {
   const [data, setData] = useState<StudioData | null>(null);
   const [error, setError] = useState(false);
   const [version, setVersion] = useState(0);
@@ -35,9 +37,10 @@ export function useStudioData(): { data: StudioData | null; error: boolean; relo
       staticJson<MotionBook>('motions'),
       api.assets('animations'),
       api.assets('se'),
+      fetchProjectData(projectId),
     ])
-      .then(([characters, locations, timeOfDay, bgm, motions, animations, se]) =>
-        setData({
+      .then(([characters, locations, timeOfDay, bgm, motions, animations, se, own]) =>
+        setData(mergeProjectData({
           characters,
           locations: locations.presets,
           timeOfDay: timeOfDay.presets,
@@ -45,9 +48,9 @@ export function useStudioData(): { data: StudioData | null; error: boolean; relo
           motions: motions.motions,
           animations: animations.map((a) => a.url.replace(/^\/animations\//, '').replace(/\.fbx$/i, '')),
           se: se.map((a) => a.url),
-        })
+        }, own))
       )
       .catch(() => setError(true));
-  }, [version]);
+  }, [version, projectId]);
   return { data, error, reload: () => setVersion((v) => v + 1) };
 }

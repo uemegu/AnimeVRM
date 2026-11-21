@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, createHashRouter, Navigate, RouterProvider } from 'react-router';
 import { ComingSoon, Layout, NAV_ITEMS } from './components/Layout';
 import { LanguageProvider } from './i18n';
+import { ProjectsProvider } from './data/useProjects';
 import { CharactersView } from './views/characters/CharactersView';
 import { ViewerView } from './views/viewer/ViewerView';
 import { ScenesView } from './views/scenes/ScenesView';
@@ -36,7 +37,9 @@ const router = createRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <LanguageProvider>
-      <RouterProvider router={router} />
+      <ProjectsProvider>
+        <RouterProvider router={router} />
+      </ProjectsProvider>
     </LanguageProvider>
   </StrictMode>
 );

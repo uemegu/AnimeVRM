@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
+import { assetsDirOfProject, listProjects } from '@anime-vrm/scenario/node';
 import type { ServerConfig } from '../config.ts';
 import { resolveInside } from '../safePath.ts';
 import { ensureVrmThumbnail, extractThumbnailForVrm } from '../vrmThumbnail.ts';
@@ -28,6 +29,8 @@ export interface AssetEntry {
   updatedAt: string;
   /** VRM モデルの場合のサムネイル画像 URL（例: /api/assets/thumbnails/aoi/aoi-school.png） */
   thumbnailUrl?: string;
+  /** ?project=<ID> のとき、そのプロジェクトの置き場にあるもの（Studio の assets/ のものは付けない） */
+  project?: true;
 }
 
 async function walk(dir: string): Promise<string[]> {
@@ -46,6 +49,16 @@ function isKind(kind: string): kind is AssetKind {
 
 export function assetRoutes(config: ServerConfig) {
   const app = new Hono();
+
+  /**
+   * ?project=<ID> のプロジェクトの置き場（外部プロジェクトならその assetsDir。なければ Studio の assets/）。
+   * 置き場は assets/ と同じ並びで、同じ URL で配信される
+   */
+  const projectDir = (projectId: string | undefined): string | null => {
+    if (!projectId) return config.assetsDir;
+    if (!listProjects(config).some((p) => p.id === projectId)) return null;
+    return assetsDirOfProject(config, projectId);
+  };
 
   app.get('/', (c) => c.json(Object.keys(ASSET_KINDS)));
 
@@ -84,13 +97,28 @@ export function assetRoutes(config: ServerConfig) {
     const kind = c.req.param('kind');
     if (!isKind(kind)) return c.json({ error: '不明なアセットの種類です' }, 404);
     const { dir, extensions } = ASSET_KINDS[kind];
-    const base = path.join(config.assetsDir, dir);
-    const files = (await walk(base)).filter((f) => (extensions as readonly string[]).includes(path.extname(f).toLowerCase()));
+    // ?project=<ID> なら、そのプロジェクトの置き場にあるものも並べる（同じ URL は Studio の assets/ のものだけ）
+    const extra = projectDir(c.req.query('project') || undefined);
+    if (!extra) return c.json({ error: 'プロジェクトがありません' }, 404);
+    const roots = [...new Set([config.assetsDir, extra].map((d) => path.resolve(d)))];
+    const seen = new Set<string>();
+    const files: { root: string; file: string; url: string }[] = [];
+    for (const root of roots) {
+      for (const f of (await walk(path.join(root, dir))).sort()) {
+        if (!(extensions as readonly string[]).includes(path.extname(f).toLowerCase())) continue;
+        const url = '/' + path.relative(root, f).split(path.sep).join('/');
+        if (seen.has(url)) continue;
+        seen.add(url);
+        files.push({ root, file: f, url });
+      }
+    }
     const result: AssetEntry[] = await Promise.all(
-      files.sort().map(async (f) => {
+      files.map(async ({ root, file: f, url }) => {
+        const base = path.join(root, dir);
         const stat = await fs.stat(f);
         const entry: AssetEntry = {
-          url: '/' + path.relative(config.assetsDir, f).split(path.sep).join('/'),
+          ...(root !== path.resolve(config.assetsDir) ? { project: true as const } : {}),
+          url,
           size: stat.size,
           updatedAt: stat.mtime.toISOString(),
         };
@@ -123,7 +151,10 @@ export function assetRoutes(config: ServerConfig) {
     if (!(extensions as readonly string[]).includes(path.extname(name).toLowerCase())) {
       return c.json({ error: `拡張子は ${extensions.join(' / ')} のいずれかにしてください` }, 400);
     }
-    const file = resolveInside(path.join(config.assetsDir, dir), name);
+    // ?project=<ID> なら、そのプロジェクトの置き場に置く
+    const root = projectDir(c.req.query('project') || undefined);
+    if (!root) return c.json({ error: 'プロジェクトがありません' }, 404);
+    const file = resolveInside(path.join(root, dir), name);
     if (!file) return c.json({ error: 'ファイル名が不正です' }, 400);
     const exists = await fs.stat(file).then(() => true, () => false);
     if (exists && c.req.query('overwrite') !== '1') {
@@ -139,7 +170,7 @@ export function assetRoutes(config: ServerConfig) {
       await extractThumbnailForVrm(file, path.join(config.assetsDir, 'thumbnails'), relWithoutExt);
     }
 
-    return c.json({ ok: true, url: '/' + path.relative(config.assetsDir, file).split(path.sep).join('/') }, exists ? 200 : 201);
+    return c.json({ ok: true, url: '/' + path.relative(root, file).split(path.sep).join('/') }, exists ? 200 : 201);
   });
 
   return app;

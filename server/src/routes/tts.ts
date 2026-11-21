@@ -46,7 +46,7 @@ export function ttsRoutes(config: ServerConfig, store: ScenarioStore) {
     const { category, id, lineId } = c.req.param();
     const scenario = await loadVoicedScenario(category, id);
     if (!scenario) return c.json({ error: 'シナリオがありません' }, 404);
-    const profiles = await loadVoiceProfiles(config.assetsDir);
+    const profiles = await loadVoiceProfiles(config, category);
     const line = findVoiceLine(scenario, lineId, profiles);
     if (!line) return c.json({ error: 'セリフがありません' }, 404);
     return c.json({ ...line, caption: defaultCaption(line, profiles) });
@@ -64,7 +64,7 @@ export function ttsRoutes(config: ServerConfig, store: ScenarioStore) {
     const { category = '', id = '', lineId = '' } = body;
     const scenario = await loadVoicedScenario(category, id);
     if (!scenario) return c.json({ error: 'シナリオがありません' }, 404);
-    const profiles = await loadVoiceProfiles(config.assetsDir);
+    const profiles = await loadVoiceProfiles(config, category);
     const line = findVoiceLine(scenario, lineId, profiles);
     if (!line) return c.json({ error: 'セリフがありません' }, 404);
     if (!line.text.trim()) return c.json({ error: '本文が空のセリフです' }, 400);

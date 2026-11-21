@@ -5,7 +5,12 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   assetsDirOfCategory,
+  assetsDirOfProject,
+  checkProjectDataInWorkspace,
   checkProjects,
+  checkScenarioInWorkspace,
+  projectDataFileOf,
+  readProjectData,
   contentDirs,
   findScenarios,
   listProjects,
@@ -101,6 +106,51 @@ describe('外部プロジェクト', () => {
       fixed: [],
     });
     expect(await checkProjects(paths, { fix: true })).toEqual({ problems: [], fixed: ['直しました'] });
+  });
+});
+
+describe('プロジェクト専用のキャラ・場所・BGM', () => {
+  const character = (id: string) => ({ id, name: { ja: id }, role: 'sub', themeColor: '#123456', models: [], profile: '' });
+  const characters = (...ids: string[]) => ({ characters: ids.map(character), voiceMoods: {}, whisperCaption: '', shoutCaption: '' });
+  const speaking = (id: string, speaker: string) => ({ id, title: 'テスト', scenes: [{ id: 's1', text: 'こんにちは', speakerCharacterId: speaker }] });
+
+  beforeEach(() => {
+    write(path.join(paths.assetsDir, 'studio/characters.json'), characters('aoi'));
+  });
+
+  it('置き場は外部プロジェクトならその素材の置き場、Studio のプロジェクトなら assets/', () => {
+    expect(assetsDirOfProject(paths, 'game')).toBe(path.join(root, 'game/content'));
+    expect(projectDataFileOf(paths, 'game', 'characters')).toBe(path.join(root, 'game/content/studio/projects/game/characters.json'));
+    expect(projectDataFileOf(paths, 'demo', 'bgm')).toBe(path.join(paths.assetsDir, 'studio/projects/demo/bgm.json'));
+  });
+
+  it('シナリオは共通のものと自分のプロジェクト専用のものだけを使える', () => {
+    write(projectDataFileOf(paths, 'game', 'characters'), { characters: [character('hero')] });
+    write(path.join(root, 'game/content/scenarios/action/a1/scenario.json'), speaking('a1', 'hero'));
+    write(path.join(paths.assetsDir, 'scenarios/demo/d1/scenario.json'), speaking('d1', 'hero'));
+    expect(readProjectData(paths, 'game').characters.map((c) => c.id)).toEqual(['hero']);
+    const report = validateWorkspace(paths);
+    // demo のシナリオからは game 専用の hero は見えない
+    expect(report.problems.map((p) => p.file)).toEqual(['assets/scenarios/demo/d1/scenario.json']);
+    expect(checkScenarioInWorkspace(paths, 'action', 'a1', speaking('a1', 'hero'))).toEqual([]);
+    expect(checkScenarioInWorkspace(paths, 'demo', 'd1', speaking('d1', 'aoi'))).toEqual([]);
+  });
+
+  it('共通と同じ ID はエラー', () => {
+    write(projectDataFileOf(paths, 'game', 'characters'), { characters: [character('aoi')] });
+    expect(validateWorkspace(paths).problems).toEqual([
+      expect.objectContaining({ severity: 'error', file: '../game/content/studio/projects/game/characters.json', message: expect.stringContaining('共通') }),
+    ]);
+    expect(checkProjectDataInWorkspace(paths, 'game', 'characters', { characters: [character('aoi')] })).toEqual([
+      expect.objectContaining({ severity: 'error', path: 'aoi' }),
+    ]);
+  });
+
+  it('形式が違えばエラーにして、中身は使わない', () => {
+    write(projectDataFileOf(paths, 'demo', 'bgm'), { bgm: { Bad: { url: 'x' } } });
+    const problems: { message: string }[] = [];
+    expect(readProjectData(paths, 'demo', problems as never).bgm).toEqual({});
+    expect(problems.length).toBeGreaterThan(0);
   });
 });
 

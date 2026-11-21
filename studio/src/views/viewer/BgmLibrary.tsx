@@ -3,6 +3,10 @@ import type { BgmBook } from '@anime-vrm/scenario';
 import { api, ApiError, READ_ONLY, type AssetEntry } from '../../api/client';
 import { Icon } from '../../components/Icon';
 import { format, useI18n } from '../../i18n';
+import { emptyProjectData } from '@anime-vrm/scenario';
+import { useProjects } from '../../data/useProjects';
+import { fetchProjectData, saveProjectData, type DataScope } from '../../data/projectData';
+import { SharedTag, SharedToggle } from '../../components/DataScope';
 
 type BgmEntry = BgmBook['bgm'][string];
 
@@ -32,6 +36,8 @@ interface Draft {
   ja: string;
   en: string;
   volumeScale: number;
+  /** 置き場所（共通か、いまのプロジェクト専用か） */
+  scope: DataScope;
 }
 
 interface Props {
@@ -45,12 +51,17 @@ interface Props {
 }
 
 /**
- * BGM の一覧（assets/studio/bgm.json）。試聴と、音声ファイルの登録（assets/bgm に置き、ID・曲名・音量を付ける）ができる
+ * BGM の一覧（サイドバーで選んだプロジェクトで使えるもの：そのプロジェクト専用のものと、共通の assets/studio/bgm.json）。
+ * 試聴と、音声ファイルの登録（bgm/ に置き、ID・曲名・音量を付ける）ができる。
+ * 新しく登録するものはいまのプロジェクト専用。素材の置き場を持つプロジェクト（外部プロジェクト）では、ファイルもその置き場に置く
  */
 export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onToggleMute }: Props) {
   const { t, language } = useI18n();
   const tv = t.viewer;
+  const { current: project } = useProjects();
   const [book, setBook] = useState<BgmBook | null>(null);
+  /** いまのプロジェクト専用の BGM */
+  const [own, setOwn] = useState<BgmBook['bgm']>({});
   const [files, setFiles] = useState<AssetEntry[]>([]);
   const [filter, setFilter] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -60,17 +71,24 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    Promise.all([api.studioData<BgmBook>('bgm'), api.assets('bgm')]).then(
-      ([bgm, list]) => {
+    setDraft(null);
+    Promise.all([api.studioData<BgmBook>('bgm'), api.assets('bgm', project?.id), fetchProjectData(project?.id)]).then(
+      ([bgm, list, projectData]) => {
         setBook(bgm);
+        setOwn(projectData.bgm);
         setFiles(list);
       },
       () => setMessage(t.common.loadFailed)
     );
-  }, [t]);
+  }, [t, project?.id]);
 
-  const entries = Object.entries(book?.bgm ?? {});
-  const registeredUrls = new Set(entries.map(([, e]) => e.url));
+  const scopeOf = (id: string): DataScope => (Object.hasOwn(own, id) ? 'project' : 'shared');
+  const allEntries = [...Object.entries(book?.bgm ?? {}), ...Object.entries(own)];
+  const taken = { ...book?.bgm, ...own };
+  const entries = allEntries;
+  /** プロジェクトの置き場にあるファイル（共通の BGM には使えない） */
+  const inProjectDir = (url: string) => files.some((f) => f.url === url && f.project);
+  const registeredUrls = new Set(allEntries.map(([, e]) => e.url));
   const unregistered = files.filter((f) => !registeredUrls.has(f.url));
   const q = filter.toLowerCase();
   const matches = (...texts: string[]) => texts.some((s) => s.toLowerCase().includes(q));
@@ -80,25 +98,29 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
   const startRegister = (url: string) => {
     if (!book) return;
     setMessage(null);
-    setDraft({ editing: null, id: idFromFile(url, book.bgm), url, ja: '', en: '', volumeScale: 1 });
+    // いまのプロジェクト専用に登録する（プロジェクトがない公開版では共通）
+    const scope: DataScope = project ? 'project' : 'shared';
+    setDraft({ editing: null, id: idFromFile(url, taken), url, ja: '', en: '', volumeScale: 1, scope });
   };
   const startEdit = (id: string, entry: BgmEntry) => {
     setMessage(null);
-    setDraft({ editing: id, id, url: entry.url, ja: entry.title.ja, en: entry.title.en, volumeScale: entry.volumeScale });
+    setDraft({ editing: id, id, url: entry.url, ja: entry.title.ja, en: entry.title.en, volumeScale: entry.volumeScale, scope: scopeOf(id) });
   };
 
   const upload = async (file: File) => {
     setMessage(null);
     setUploading(true);
+    // 素材の置き場を自分で持つプロジェクト（外部プロジェクト）なら、ファイルもその置き場に置く
+    const target = project?.ownAssets ? project.id : undefined;
     try {
       let result;
       try {
-        result = await api.uploadAsset('bgm', file.name, file);
+        result = await api.uploadAsset('bgm', file.name, file, false, target);
       } catch (err) {
         if (!(err instanceof ApiError && err.status === 409) || !window.confirm(format(tv.voiceOverwrite, { name: file.name }))) throw err;
-        result = await api.uploadAsset('bgm', file.name, file, true);
+        result = await api.uploadAsset('bgm', file.name, file, true, target);
       }
-      setFiles(await api.assets('bgm'));
+      setFiles(await api.assets('bgm', project?.id));
       setFilter('');
       // 既に登録済みのファイルを上書きしたときは、ファイルを差し替えただけ
       if (registeredUrls.has(result.url)) setMessage(format(tv.voiceUploaded, { name: file.name }));
@@ -114,7 +136,7 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
   const idError =
     draft && !/^[a-z][a-z0-9_]*$/.test(draft.id)
       ? tv.bgmIdInvalid
-      : draft && draft.editing === null && book && Object.hasOwn(book.bgm, draft.id)
+      : draft && draft.editing === null && Object.hasOwn(taken, draft.id)
         ? tv.bgmIdTaken
         : null;
   const canSave = !!draft && !idError && draft.ja.trim() !== '' && draft.en.trim() !== '' && !saving;
@@ -122,11 +144,17 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
   const save = async () => {
     if (!book || !draft || !canSave) return;
     const entry: BgmEntry = { url: draft.url, volumeScale: draft.volumeScale, title: { ja: draft.ja.trim(), en: draft.en.trim() } };
-    const next: BgmBook = { ...book, bgm: { ...book.bgm, [draft.id]: entry } };
+    // 置き場所を変えたときは、元の置き場から外して新しい置き場へ入れる
+    const { [draft.id]: _shared, ...sharedRest } = book.bgm;
+    const { [draft.id]: _own, ...ownRest } = own;
+    const nextShared: BgmBook = { ...book, bgm: draft.scope === 'shared' ? { ...book.bgm, [draft.id]: entry } : sharedRest };
+    const nextOwn = draft.scope === 'project' ? { ...own, [draft.id]: entry } : ownRest;
     setSaving(true);
     try {
-      await api.saveStudioData('bgm', next);
-      setBook(next);
+      if (JSON.stringify(nextShared) !== JSON.stringify(book)) await api.saveStudioData('bgm', nextShared);
+      if (project && JSON.stringify(nextOwn) !== JSON.stringify(own)) await saveProjectData(project.id, 'bgm', { ...emptyProjectData(), bgm: nextOwn });
+      setBook(nextShared);
+      setOwn(nextOwn);
       setMessage(format(tv.bgmSaved, { id: draft.id }));
       setDraft(null);
     } catch (err) {
@@ -190,6 +218,7 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
           {shownEntries.map(([id, entry]) => (
             <li key={id}>
               {playButton(entry.url, entry.volumeScale, entry.title[language], id)}
+              {project && scopeOf(id) === 'shared' && <SharedTag />}
               {!READ_ONLY && (
                 <button type="button" className="viewer-bgm-action" onClick={() => startEdit(id, entry)}>
                   {tv.bgmEdit}
@@ -226,6 +255,13 @@ export function BgmLibrary({ heading, playingUrl, muted, onToggle, onVolume, onT
             <input className="input" value={draft.id} readOnly={draft.editing !== null} onChange={(e) => setDraft({ ...draft, id: e.target.value })} />
             <span className="field-hint">{idError ?? tv.bgmIdHint}</span>
           </label>
+          {project && (
+            <SharedToggle
+              shared={draft.scope === 'shared'}
+              onChange={(shared) => setDraft({ ...draft, scope: shared ? 'shared' : 'project' })}
+              disabledReason={draft.scope === 'project' && inProjectDir(draft.url) ? t.dataScope.fileInProject : undefined}
+            />
+          )}
           <label className="field">
             <span className="field-label">{tv.bgmTitleJa}</span>
             <input className="input" value={draft.ja} onChange={(e) => setDraft({ ...draft, ja: e.target.value })} />

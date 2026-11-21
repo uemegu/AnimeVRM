@@ -7,6 +7,10 @@ import { SaveBar, saveErrorStatus, type SaveStatus } from '../../components/Save
 import { Icon } from '../../components/Icon';
 import { useI18n } from '../../i18n';
 import { CharacterEditor } from './CharacterEditor';
+import { useProjects } from '../../data/useProjects';
+import { fetchProjectData, saveProjectData, type DataScope } from '../../data/projectData';
+import { SharedTag, SharedToggle } from '../../components/DataScope';
+import { emptyProjectData } from '@anime-vrm/scenario';
 import './characters.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
 
@@ -17,35 +21,72 @@ function newCharacter(id: string): Character {
   return { id, name: { ja: id, en: '' }, role: 'sub', themeColor: '#64748b', models: [], profile: '' };
 }
 
+/** 共通（assets/studio/characters.json）とプロジェクト専用を合わせたもの。own はプロジェクト専用のキャラ ID */
+interface Saved {
+  book: CharacterBook;
+  own: string[];
+}
+
+/** 共通のものとプロジェクト専用のものに分ける */
+function split(book: CharacterBook, own: Set<string>) {
+  return {
+    shared: { ...book, characters: book.characters.filter((c) => !own.has(c.id)) },
+    project: book.characters.filter((c) => own.has(c.id)),
+  };
+}
+
 export function CharactersView() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const { characterId } = useParams();
-  const [saved, setSaved] = useState<CharacterBook | null>(null);
+  // サイドバーで選んだプロジェクトで使えるキャラ（そのプロジェクト専用のものと共通のもの）
+  const { current: project } = useProjects();
+  const [saved, setSaved] = useState<Saved | null>(null);
   const [draft, setDraft] = useState<CharacterBook | null>(null);
+  const [own, setOwn] = useState<Set<string>>(new Set());
   const [models, setModels] = useState<AssetEntry[]>([]);
   const [voices, setVoices] = useState<AssetEntry[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [status, setStatus] = useState<SaveStatus>(null);
   const [newId, setNewId] = useState<string | null>(null);
 
+  // プロジェクトを切り替えたら読み直す（共通のものと、そのプロジェクト専用のもの）
   useEffect(() => {
-    Promise.all([api.characters(), api.assets('models'), api.assets('voices')])
-      .then(([book, modelList, voiceList]) => {
-        setSaved(book);
+    if (!project) return;
+    setSaved(null);
+    setDraft(null);
+    Promise.all([api.characters(), fetchProjectData(project.id), api.assets('models', project.id), api.assets('voices')])
+      .then(([shared, projectData, modelList, voiceList]) => {
+        const book = { ...shared, characters: [...shared.characters, ...projectData.characters] };
+        const ownIds = projectData.characters.map((c) => c.id);
+        setSaved({ book, own: ownIds });
         setDraft(structuredClone(book));
+        setOwn(new Set(ownIds));
         setModels(modelList);
         setVoices(voiceList);
+        setStatus(null);
       })
       .catch(() => setLoadError(true));
-  }, []);
+  }, [project?.id]);
 
-  const dirty = useMemo(() => JSON.stringify(saved) !== JSON.stringify(draft), [saved, draft]);
+  const scopeOf = (id: string): DataScope => (own.has(id) ? 'project' : 'shared');
+  const dirty = useMemo(
+    () => !!saved && (JSON.stringify(saved.book) !== JSON.stringify(draft) || JSON.stringify([...saved.own].sort()) !== JSON.stringify([...own].sort())),
+    [saved, draft, own]
+  );
   const selected = draft?.characters.find((c) => c.id === characterId) ?? null;
 
   useEffect(() => {
     if (draft && !selected && draft.characters.length > 0) navigate(`/characters/${draft.characters[0].id}`, { replace: true });
   }, [draft, selected, navigate]);
+
+  const setScope = (id: string, scope: DataScope) => {
+    const next = new Set(own);
+    if (scope === 'project') next.add(id);
+    else next.delete(id);
+    setOwn(next);
+    setStatus(null);
+  };
 
   const updateCharacter = useCallback((next: Character) => {
     setDraft((book) => book && { ...book, characters: book.characters.map((c) => (c.id === next.id ? next : c)) });
@@ -55,18 +96,25 @@ export function CharactersView() {
   const removeCharacter = useCallback(
     (id: string) => {
       setDraft((book) => book && { ...book, characters: book.characters.filter((c) => c.id !== id) });
+      setOwn((ids) => new Set([...ids].filter((x) => x !== id)));
       navigate('/characters', { replace: true });
     },
     [navigate]
   );
 
+  // 共通のものは assets/studio/characters.json、プロジェクト専用のものはプロジェクトの置き場へ。変わった方だけ書く
   const save = async () => {
-    if (!draft) return;
+    if (!draft || !saved || !project) return;
     setStatus({ kind: 'saving' });
     try {
-      await api.saveCharacters(draft);
+      const before = split(saved.book, new Set(saved.own));
+      const after = split(draft, own);
+      if (JSON.stringify(before.shared) !== JSON.stringify(after.shared)) await api.saveCharacters(after.shared);
+      if (JSON.stringify(before.project) !== JSON.stringify(after.project)) {
+        await saveProjectData(project.id, 'characters', { ...emptyProjectData(), characters: after.project });
+      }
       forgetGarments();
-      setSaved(structuredClone(draft));
+      setSaved({ book: structuredClone(draft), own: [...own] });
       setStatus({ kind: 'saved' });
     } catch (err) {
       setStatus(saveErrorStatus(err));
@@ -77,6 +125,8 @@ export function CharactersView() {
   const addCharacter = () => {
     if (!draft || !newId || idError) return;
     setDraft({ ...draft, characters: [...draft.characters, newCharacter(newId)] });
+    // 新しいキャラはいまのプロジェクト専用。共通にするときは編集欄のチェックで
+    setOwn(new Set([...own, newId]));
     setNewId(null);
     navigate(`/characters/${newId}`);
   };
@@ -136,6 +186,7 @@ export function CharactersView() {
                       )}
                       <span className="characters-item-name">{c.name.ja}</span>
                       <span className="characters-item-id">{c.id}</span>
+                      {scopeOf(c.id) === 'shared' && <SharedTag />}
                     </button>
                   );
                 })}
@@ -156,14 +207,26 @@ export function CharactersView() {
               </div>
             </div>
           )}
-          <SaveBar dirty={dirty} status={status} onRevert={() => saved && setDraft(structuredClone(saved))} onSave={save} />
+          <div className="characters-detail-actions">
+            {selected && <SharedToggle shared={scopeOf(selected.id) === 'shared'} onChange={(shared) => setScope(selected.id, shared ? 'shared' : 'project')} />}
+            <SaveBar
+              dirty={dirty}
+              status={status}
+              onRevert={() => {
+                if (!saved) return;
+                setDraft(structuredClone(saved.book));
+                setOwn(new Set(saved.own));
+              }}
+              onSave={save}
+            />
+          </div>
         </header>
         {selected && (
           <CharacterEditor
             key={selected.id}
             character={selected}
             book={draft}
-            isNew={!saved?.characters.some((c) => c.id === selected.id)}
+            isNew={!saved?.book.characters.some((c) => c.id === selected.id)}
             models={models}
             voices={voices}
             onChange={updateCharacter}

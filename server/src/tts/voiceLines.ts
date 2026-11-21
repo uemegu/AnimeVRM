@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { CharacterBook, type CallScenario, type CharacterVoice, type ScenarioPackage } from '@anime-vrm/scenario';
+import { CharacterBook, mergeCharacterBook, type CallScenario, type CharacterVoice, type ScenarioPackage } from '@anime-vrm/scenario';
+import { projectIdOfCategory, readProjectData, type WorkspacePaths } from '@anime-vrm/scenario/node';
 import { textOf } from '../scenarioStore.ts';
 
 /** 音声生成に必要な、キャラクター管理（assets/studio/characters.json）の中身 */
@@ -17,6 +18,17 @@ export async function loadCharacterBook(assetsDir: string): Promise<CharacterBoo
   return CharacterBook.parse(JSON.parse(await fs.readFile(path.join(assetsDir, 'studio', 'characters.json'), 'utf8')));
 }
 
+/** 共通のキャラに、プロジェクト専用のキャラ（studio/projects/<ID>/characters.json）を足したもの。projectId がなければ共通のものだけ */
+export async function loadProjectCharacterBook(paths: WorkspacePaths, projectId: string | undefined): Promise<CharacterBook> {
+  const shared = await loadCharacterBook(paths.assetsDir);
+  return projectId ? mergeCharacterBook(shared, readProjectData(paths, projectId).characters) : shared;
+}
+
+/** シナリオの種類が入っているプロジェクトのキャラ（共通のものを含む） */
+export function loadCharacterBookOfCategory(paths: WorkspacePaths, category: string): Promise<CharacterBook> {
+  return loadProjectCharacterBook(paths, projectIdOfCategory(paths, category));
+}
+
 export function voiceProfilesOf(book: CharacterBook): VoiceProfiles {
   return {
     speakers: Object.fromEntries(book.characters.filter((c) => c.voice).map((c) => [c.id, c.voice!])),
@@ -26,8 +38,9 @@ export function voiceProfilesOf(book: CharacterBook): VoiceProfiles {
   };
 }
 
-export async function loadVoiceProfiles(assetsDir: string): Promise<VoiceProfiles> {
-  return voiceProfilesOf(await loadCharacterBook(assetsDir));
+/** シナリオの種類が入っているプロジェクトの音声設定（共通のキャラを含む） */
+export async function loadVoiceProfiles(paths: WorkspacePaths, category: string): Promise<VoiceProfiles> {
+  return voiceProfilesOf(await loadCharacterBookOfCategory(paths, category));
 }
 
 /** 1セリフ分の音声生成の材料 */

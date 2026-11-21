@@ -54,7 +54,11 @@ beforeEach(async () => {
   await copyScenario('ending', 'ending_good');
   await copyScenario('call', 'aoi_call_d14');
   await fs.mkdir(path.join(assetsDir, 'studio'), { recursive: true });
-  await fs.copyFile(path.join(REAL_ASSETS, 'studio', 'characters.json'), path.join(assetsDir, 'studio', 'characters.json'));
+  // 試験用のシナリオは共通のキャラを使うので、5秒の告白専用のキャラ（studio/projects/demo/）も共通に入れておく
+  const readReal = async (file: string) => JSON.parse(await fs.readFile(path.join(REAL_ASSETS, 'studio', file), 'utf8'));
+  const shared = await readReal('characters.json');
+  shared.characters = [...shared.characters, ...(await readReal('projects/demo/characters.json')).characters];
+  await fs.writeFile(path.join(assetsDir, 'studio', 'characters.json'), JSON.stringify(shared, null, 2));
   // 参照音声はパスが存在すればよい
   await fs.mkdir(path.join(root, 'assets', 'voices'), { recursive: true });
   await fs.writeFile(path.join(root, 'assets', 'voices', '001.mp3'), 'ref');
@@ -217,6 +221,45 @@ describe('Studio 用 JSON', () => {
     expect((await json(res)).issues[0].path).toBe('presets.school.id');
     const ok = await putJson('/api/studio-data/locations', { presets: { school: { id: 'school', name: '学校', layers: { background: {} } } } });
     expect(ok.status).toBe(200);
+  });
+});
+
+describe('プロジェクト専用のデータ', () => {
+  beforeEach(async () => {
+    await fs.writeFile(path.join(assetsDir, 'studio', 'projects.json'), JSON.stringify({ projects: [{ id: 'demo', name: { ja: 'デモ' }, categories: ['demo'] }] }));
+  });
+
+  it('プロジェクトの置き場に保存する。形式・名前・プロジェクトが違えば断る', async () => {
+    const bgm = { bgm: { theme: { url: '/bgm/theme.mp3', volumeScale: 1, title: { ja: 'テーマ', en: 'Theme' } } } };
+    const res = await putJson('/api/projects/demo/data/bgm', bgm);
+    expect(res.status).toBe(200);
+    // ファイルがないので問題として返す（strict でなければ保存する）
+    expect((await json(res)).problems[0].message).toContain('/bgm/theme.mp3');
+    expect(JSON.parse(await fs.readFile(path.join(assetsDir, 'studio/projects/demo/bgm.json'), 'utf8'))).toEqual(bgm);
+    expect((await putJson('/api/projects/demo/data/bgm', { bgm: { Bad: {} } })).status).toBe(400);
+    expect((await putJson('/api/projects/demo/data/motions', { motions: {} })).status).toBe(400);
+    expect((await putJson('/api/projects/none/data/bgm', bgm)).status).toBe(404);
+    // 空になったらファイルを消す
+    expect((await putJson('/api/projects/demo/data/bgm', { bgm: {} })).status).toBe(200);
+    await expect(fs.stat(path.join(assetsDir, 'studio/projects/demo'))).rejects.toThrow();
+  });
+
+  it('共通と同じ ID のキャラは strict なら断る', async () => {
+    const shared = JSON.parse(await fs.readFile(path.join(assetsDir, 'studio', 'characters.json'), 'utf8'));
+    const res = await request('/api/projects/demo/data/characters?strict=1', {
+      method: 'PUT',
+      body: JSON.stringify({ characters: [{ ...shared.characters[0], models: [] }] }),
+      headers: { 'content-type': 'application/json' },
+    });
+    expect(res.status).toBe(400);
+    expect((await json(res)).issues[0].message).toContain('共通');
+  });
+
+  it('素材の一覧と登録に ?project= を付けると、そのプロジェクトの置き場も扱う（Studio のプロジェクトは assets/）', async () => {
+    const put = await request('/api/assets/se/hit.mp3?project=demo', { method: 'PUT', body: 'mp3', headers: { 'content-type': 'audio/mpeg' } });
+    expect(put.status).toBe(201);
+    expect((await json(request('/api/assets/se?project=demo'))).map((a: { url: string }) => a.url)).toEqual(['/se/hit.mp3']);
+    expect((await request('/api/assets/se?project=none')).status).toBe(404);
   });
 });
 

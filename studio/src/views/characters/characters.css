@@ -30,6 +30,12 @@
   font-size: 15px;
 }
 
+.characters-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .characters-new {
   display: grid;
   grid-template-columns: 1fr auto;

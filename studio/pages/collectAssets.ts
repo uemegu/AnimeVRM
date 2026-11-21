@@ -16,12 +16,19 @@ export function collectPagesAssets(assetsDir: string): string[] {
       .filter(Boolean)
       .map((file) => file.slice(prefix.length))
   );
-  const characters = JSON.parse(fs.readFileSync(path.join(assetsDir, 'studio/characters.json'), 'utf8')) as {
-    characters: { models: { url: string }[] }[];
-  };
-  const models = new Set(characters.characters.flatMap((c) => c.models.map((m) => m.url.replace(/^\//, ''))));
+  // 組み込みプロジェクト専用のキャラ・場所・BGM（studio/projects/<ID>/）も含め、bakeApi で共通のものに混ぜる
+  const projectFiles = [...tracked].filter((file) => /^studio\/projects\/[^/]+\/(characters|locations|bgm)\.json$/.test(file));
+  const characterFiles = ['studio/characters.json', ...projectFiles.filter((file) => file.endsWith('/characters.json'))];
+  const models = new Set(
+    characterFiles.flatMap((file) =>
+      (JSON.parse(fs.readFileSync(path.join(assetsDir, file), 'utf8')) as { characters: { models: { url: string }[] }[] }).characters.flatMap((c) =>
+        c.models.map((m) => m.url.replace(/^\//, ''))
+      )
+    )
+  );
   const files = [...tracked].filter((file) =>
     STUDIO_FILES.includes(file) ||
+    projectFiles.includes(file) ||
     models.has(file) ||
     // 組み込み3D背景・表情・小物の絵柄も含む。シナリオ素材・生成用モデルは不要。
     (/^textures\//.test(file) && /\.(avif|png|jpe?g|webp|glb)$/i.test(file)) ||

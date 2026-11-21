@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-import type { ScenarioProject } from '@anime-vrm/scenario';
-import { api } from '../api/client';
+import { createContext, createElement, useContext, useEffect, useState, type ReactNode } from 'react';
+import { api, type StudioProject } from '../api/client';
 
 const STORAGE_KEY = 'studio_project';
 
@@ -12,12 +11,15 @@ function savedProjectId(): string | null {
   }
 }
 
-/**
- * シナリオのプロジェクト（assets/studio/projects.json と、studio-projects.txt・STUDIO_PROJECTS で読み込んだ外部プロジェクト）と、いま選んでいるプロジェクト。
- * 選択はシナリオ編集と再生で共通にし、ブラウザに覚えておく
- */
-export function useProjects(): { projects: ScenarioProject[] | null; current: ScenarioProject | null; select: (id: string) => void; error: boolean } {
-  const [projects, setProjects] = useState<ScenarioProject[] | null>(null);
+export interface ProjectsState {
+  projects: StudioProject[] | null;
+  current: StudioProject | null;
+  select: (id: string) => void;
+  error: boolean;
+}
+
+function useProjectsState(): ProjectsState {
+  const [projects, setProjects] = useState<StudioProject[] | null>(null);
   const [currentId, setCurrentId] = useState<string | null>(savedProjectId);
   const [error, setError] = useState(false);
 
@@ -37,6 +39,24 @@ export function useProjects(): { projects: ScenarioProject[] | null; current: Sc
     }
   };
 
-  const current = projects ? (projects.find((p) => p.id === currentId) ?? projects[0]) : null;
+  const current = projects ? (projects.find((p) => p.id === currentId) ?? projects[0] ?? null) : null;
   return { projects, current, select, error };
 }
+
+const ProjectsContext = createContext<ProjectsState | null>(null);
+
+/** プロジェクトの選択を、サイドバーとすべての画面で共有する */
+export function ProjectsProvider({ children }: { children: ReactNode }) {
+  return createElement(ProjectsContext.Provider, { value: useProjectsState() }, children);
+}
+
+/**
+ * プロジェクト（assets/studio/projects.json と、studio-projects.txt・STUDIO_PROJECTS で読み込んだ外部プロジェクト）と、いま選んでいるプロジェクト。
+ * シナリオ・キャラ・場所・BGM はプロジェクトごとに分かれる。選択はすべての画面で共通にし、ブラウザに覚えておく
+ */
+export function useProjects(): ProjectsState {
+  return useContext(ProjectsContext) ?? NO_PROJECTS;
+}
+
+/** ProjectsProvider の外（公開版のビューア）。プロジェクトなし＝共通のものだけ */
+const NO_PROJECTS: ProjectsState = { projects: [], current: null, select: () => {}, error: false };

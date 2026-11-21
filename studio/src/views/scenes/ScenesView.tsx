@@ -24,6 +24,10 @@ import { locationBackdropUrl, useBackdrop } from '../../components/Backdrop';
 import { LocationPicker } from '../../components/LocationPicker';
 import './scenes.css';
 import { resolveAssetUrl } from '@anime-vrm/engine/utils/path';
+import { emptyProjectData, mergeCharacterBook } from '@anime-vrm/scenario';
+import { useProjects } from '../../data/useProjects';
+import { fetchProjectData, saveProjectData, type DataScope } from '../../data/projectData';
+import { SharedTag, SharedToggle } from '../../components/DataScope';
 
 type Tab = 'time-of-day' | 'locations';
 interface PresetFile<T> {
@@ -43,13 +47,26 @@ const clampRig = (rig: ShotRig): ShotRig => ({
   targetHeight: clamp(rig.targetHeight, -1.2, 1),
 });
 
+/** 共通の場所（assets/studio/locations.json）と、プロジェクト専用の場所に分ける */
+function splitLocations(file: LocationFile, own: Set<string>) {
+  const entries = Object.entries(file.presets);
+  return {
+    shared: { ...file, presets: Object.fromEntries(entries.filter(([id]) => !own.has(id))) },
+    project: Object.fromEntries(entries.filter(([id]) => own.has(id))),
+  };
+}
+
 export function ScenesView() {
   const { t } = useI18n();
+  // サイドバーで選んだプロジェクトで使える場所（そのプロジェクト専用のものと共通のもの）。時間帯はすべて共通
+  const { current: project } = useProjects();
   const navigate = useNavigate();
   const params = useParams();
   const tab: Tab = params.tab === 'locations' ? 'locations' : 'time-of-day';
 
-  const [saved, setSaved] = useState<{ time: TimeFile; locations: LocationFile } | null>(null);
+  // locations は共通とプロジェクト専用を合わせたもの。own はプロジェクト専用の場所の ID
+  const [saved, setSaved] = useState<{ time: TimeFile; locations: LocationFile; own: string[] } | null>(null);
+  const [own, setOwn] = useState<Set<string>>(new Set());
   const [time, setTime] = useState<TimeFile | null>(null);
   const [locations, setLocations] = useState<LocationFile | null>(null);
   const [book, setBook] = useState<CharacterBook | null>(null);
@@ -75,31 +92,43 @@ export function ScenesView() {
     setViewResetKey((k) => k + 1);
   }, [tab, params.id]);
 
+  // プロジェクトを切り替えたら読み直す（時間帯は共通だけ）
   useEffect(() => {
+    if (!project) return;
+    setSaved(null);
     Promise.all([
       api.studioData<TimeFile>('time-of-day'),
       api.studioData<LocationFile>('locations'),
       api.characters(),
-      api.assets('textures'),
-      api.assets('environments'),
+      api.assets('textures', project.id),
+      api.assets('environments', project.id),
+      fetchProjectData(project.id),
     ])
-      .then(([timeFile, locationFile, characters, textures, environmentList]) => {
-        setSaved({ time: timeFile, locations: locationFile });
+      .then(([timeFile, sharedLocations, characters, textures, environmentList, projectData]) => {
+        const locationFile = { ...sharedLocations, presets: { ...sharedLocations.presets, ...projectData.locations } };
+        const ownIds = Object.keys(projectData.locations);
+        setSaved({ time: timeFile, locations: locationFile, own: ownIds });
         setTime(structuredClone(timeFile));
         setLocations(structuredClone(locationFile));
-        setBook(characters);
+        setOwn(new Set(ownIds));
+        setStatus(null);
+        setBook(mergeCharacterBook(characters, projectData.characters));
         setImages(textures.map((a) => a.url));
         setEnvironments(environmentList.map((a) => a.url));
       })
       .catch(() => setLoadError(true));
-  }, []);
+  }, [project?.id]);
 
+  const scopeOf = (id: string): DataScope => (own.has(id) ? 'project' : 'shared');
   const presets = useMemo(() => (time && locations ? { timeOfDay: time.presets, locations: locations.presets } : null), [time, locations]);
   const ids = tab === 'time-of-day' ? (TIME_OF_DAY_IDS as readonly string[]) : Object.keys(locations?.presets ?? {});
   const selectedId = params.id && ids.includes(params.id) ? params.id : ids[0];
 
   const dirty =
-    !!saved && (JSON.stringify(saved.time) !== JSON.stringify(time) || JSON.stringify(saved.locations) !== JSON.stringify(locations));
+    !!saved &&
+    (JSON.stringify(saved.time) !== JSON.stringify(time) ||
+      JSON.stringify(saved.locations) !== JSON.stringify(locations) ||
+      JSON.stringify([...saved.own].sort()) !== JSON.stringify([...own].sort()));
 
   // プレビューに立たせるキャラ（選んだキャラと、ほかのヒロイン）
   const cast = useMemo<StageCastMember[]>(() => {
@@ -124,12 +153,19 @@ export function ScenesView() {
   if (loadError) return <div className="scenes-message">{t.common.loadFailed}</div>;
   if (!time || !locations || !presets || !saved || !book) return null;
 
+  // 共通の場所は assets/studio/locations.json、プロジェクト専用の場所はプロジェクトの置き場へ。変わった方だけ書く
   const save = async () => {
+    if (!project) return;
     setStatus({ kind: 'saving' });
     try {
       if (JSON.stringify(saved.time) !== JSON.stringify(time)) await api.saveStudioData('time-of-day', time);
-      if (JSON.stringify(saved.locations) !== JSON.stringify(locations)) await api.saveStudioData('locations', locations);
-      setSaved({ time: structuredClone(time), locations: structuredClone(locations) });
+      const before = splitLocations(saved.locations, new Set(saved.own));
+      const after = splitLocations(locations, own);
+      if (JSON.stringify(before.shared) !== JSON.stringify(after.shared)) await api.saveStudioData('locations', after.shared);
+      if (JSON.stringify(before.project) !== JSON.stringify(after.project)) {
+        await saveProjectData(project.id, 'locations', { ...emptyProjectData(), locations: after.project });
+      }
+      setSaved({ time: structuredClone(time), locations: structuredClone(locations), own: [...own] });
       setStatus({ kind: 'saved' });
     } catch (err) {
       setStatus(saveErrorStatus(err));
@@ -139,6 +175,7 @@ export function ScenesView() {
   const revert = () => {
     setTime(structuredClone(saved.time));
     setLocations(structuredClone(saved.locations));
+    setOwn(new Set(saved.own));
     setStatus(null);
   };
 
@@ -147,6 +184,8 @@ export function ScenesView() {
     if (!newId || idError) return;
     const preset = { ...(defaultValue(LocationVisualPreset as never) as LocationVisualPreset), id: newId, name: newId };
     setLocations({ ...locations, presets: { ...locations.presets, [newId]: preset } });
+    // 新しい場所はいまのプロジェクト専用。共通にするときは上のチェックで
+    setOwn(new Set([...own, newId]));
     setNewId(null);
     navigate(`/scenes/locations/${newId}`);
   };
@@ -186,7 +225,21 @@ export function ScenesView() {
             </button>
           ))}
         </div>
-        <SaveBar dirty={dirty} status={status} onRevert={revert} onSave={save} />
+        <div className="scenes-header-actions">
+          {tab === 'locations' && editingLocation && (
+            <SharedToggle
+              shared={scopeOf(selectedId) === 'shared'}
+              onChange={(shared) => {
+                const next = new Set(own);
+                if (shared) next.delete(selectedId);
+                else next.add(selectedId);
+                setOwn(next);
+                setStatus(null);
+              }}
+            />
+          )}
+          <SaveBar dirty={dirty} status={status} onRevert={revert} onSave={save} />
+        </div>
       </header>
 
       <div className="scenes-body">
@@ -228,7 +281,10 @@ export function ScenesView() {
               >
                 <div className="scenes-item-text">
                   <span className="scenes-item-name">{name}</span>
-                  <span className="scenes-item-id">{id}</span>
+                  <span className="scenes-item-id">
+                    {id}
+                    {isLocation && scopeOf(id) === 'shared' && <SharedTag />}
+                  </span>
                 </div>
                 {isLocation && (
                   <div className="scenes-item-thumb">

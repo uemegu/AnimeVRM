@@ -16,6 +16,22 @@ const writeJson = (file: string, data: unknown) => {
 };
 const has = (url: string) => !url.startsWith('/') || fs.existsSync(path.join(out, url));
 
+// 公開版にはプロジェクトの選択がないので、組み込みプロジェクト専用のキャラ・場所・BGM を共通のものに混ぜる（同じ ID は置けない）
+const projectsDir = path.join(out, 'studio', 'projects');
+for (const id of fs.existsSync(projectsDir) ? fs.readdirSync(projectsDir) : []) {
+  const own = (name: string) => path.join(projectsDir, id, `${name}.json`);
+  const merge = (name: string, key: string, join: (a: unknown, b: unknown) => unknown) => {
+    if (!fs.existsSync(own(name))) return;
+    const shared = readJson(studioFile(name));
+    shared[key] = join(shared[key], readJson(own(name))[key]);
+    writeJson(studioFile(name), shared);
+  };
+  merge('characters', 'characters', (a, b) => [...(a as unknown[]), ...(b as unknown[])]);
+  merge('locations', 'presets', (a, b) => ({ ...(a as object), ...(b as object) }));
+  merge('bgm', 'bgm', (a, b) => ({ ...(a as object), ...(b as object) }));
+}
+fs.rmSync(projectsDir, { recursive: true, force: true });
+
 const characters = readJson(studioFile('characters'));
 characters.characters = characters.characters
   .map((c: { models: { url: string }[] }) => ({ ...c, models: c.models.filter((m) => has(m.url)) }))

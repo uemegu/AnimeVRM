@@ -19,7 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { chromium, type Browser } from '@playwright/test';
-import { assetsDirOfCategory, loadExternalProjects } from '../packages/scenario/src/node.ts';
+import { assetsDirOfCategory, loadExternalProjects, projectIdOfCategory } from '../packages/scenario/src/node.ts';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -126,6 +126,7 @@ try {
       {
         scenario: scenario as never,
         baseUrl: `/scenarios/${category}/${id}/`,
+        project: projectIdOfCategory(workspace, category),
         sceneIndex: index,
         time,
         outfit: options.outfit as 'default',

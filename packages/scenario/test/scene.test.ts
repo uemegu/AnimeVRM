@@ -4,7 +4,13 @@ import { describe, expect, it } from 'vitest';
 import { LocationFile, TimeOfDayFile, resolveBloomConfig, resolveLocationVisuals, DeepGlowConfig, LocationEnvironment, PostProcessingConfig } from '../src/index.ts';
 
 const STUDIO = path.resolve(import.meta.dirname, '../../../assets/studio');
-const read = (name: string) => JSON.parse(fs.readFileSync(path.join(STUDIO, name), 'utf8'));
+const readFile = (name: string) => JSON.parse(fs.readFileSync(path.join(STUDIO, name), 'utf8'));
+// 場所は共通のものに 5秒の告白専用のもの（studio/projects/demo/）を足して見る
+const read = (name: string) => {
+  const file = readFile(name);
+  if (name === 'locations.json') file.presets = { ...file.presets, ...readFile('projects/demo/locations.json').presets };
+  return file;
+};
 const issues = (result: { success: boolean; error?: { issues: Array<{ path: PropertyKey[]; message: string }> } }) =>
   result.success ? [] : result.error!.issues.map((i) => `${i.path.join('.')}: ${i.message}`);
 

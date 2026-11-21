@@ -6,7 +6,7 @@ import { checkStudioDataInWorkspace } from '@anime-vrm/scenario/node';
 import type { ServerConfig } from '../config.ts';
 import { characterUsage, type ScenarioRecord } from '../characterUsage.ts';
 import type { ScenarioStore } from '../scenarioStore.ts';
-import { loadCharacterBook } from '../tts/voiceLines.ts';
+import { loadCharacterBook, loadProjectCharacterBook } from '../tts/voiceLines.ts';
 
 /**
  * キャラクター管理（assets/studio/characters.json）と、キャラからシナリオ・ボイスへの逆引き
@@ -38,7 +38,8 @@ export function characterRoutes(config: ServerConfig, store: ScenarioStore) {
   });
 
   app.get('/:id/usage', async (c) => {
-    const book = await loadCharacterBook(config.assetsDir);
+    // ?project=<ID> ならそのプロジェクト専用のキャラも探す
+    const book = await loadProjectCharacterBook(config, c.req.query('project') || undefined);
     const id = c.req.param('id');
     if (!book.characters.some((ch) => ch.id === id)) return c.json({ error: 'キャラクターがいません' }, 404);
     const records: ScenarioRecord[] = [];

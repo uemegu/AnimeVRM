@@ -1,4 +1,5 @@
 import { NavLink, useParams } from 'react-router';
+import { useProjects } from '../../data/useProjects';
 import { useStudioData } from '../../data/useStudioData';
 import { useI18n } from '../../i18n';
 import { CalibratePanel } from './CalibratePanel';
@@ -17,7 +18,8 @@ export function MotionsView() {
   const { t } = useI18n();
   const { tab } = useParams();
   const current: Tab = TABS.includes(tab as Tab) ? (tab as Tab) : 'library';
-  const { data, error, reload } = useStudioData();
+  const { current: project } = useProjects();
+  const { data, error, reload } = useStudioData(project?.id);
   useBackdrop();
 
   return (

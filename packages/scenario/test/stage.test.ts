@@ -105,7 +105,9 @@ describe('舞台の状態', () => {
   });
 
   it('bgm.json がスキーマに合い、音声ファイルが存在すること', () => {
-    const book = BgmBook.parse(JSON.parse(fs.readFileSync(path.join(STUDIO, 'bgm.json'), 'utf8')));
+    // 共通の BGM と、5秒の告白専用の BGM（studio/projects/demo/）
+    const read = (file: string) => BgmBook.parse(JSON.parse(fs.readFileSync(path.join(STUDIO, file), 'utf8')));
+    const book = { bgm: { ...read('bgm.json').bgm, ...read('projects/demo/bgm.json').bgm } };
     expect(Object.values(book.bgm).filter((b) => !fs.existsSync(path.join(STUDIO, '..', b.url)))).toEqual([]);
   });
 

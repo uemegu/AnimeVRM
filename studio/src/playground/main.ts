@@ -10,11 +10,12 @@ import '@anime-vrm/content/register';
 import * as THREE from 'three';
 import { createWindLane } from './windLane';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { LocationVisualPreset, TimeOfDayPreset } from '@anime-vrm/engine/schema/visual';
+import type { TimeOfDayPreset } from '@anime-vrm/engine/schema/visual';
 import type { GarmentSpec } from '@anime-vrm/engine/cloth/vrm';
 import type { SkirtHoldOptions } from '@anime-vrm/engine/avatar/skirtHold';
 import { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { motionUrl } from '@anime-vrm/engine/utils/path';
+import { fetchAllLocations } from '../data/projectData';
 
 const models = { aoi: '/models/aoi/aoi-breaking.vrm', emili: '/models/emili/emili-private.vrm' } as const;
 type Character = keyof typeof models;
@@ -67,7 +68,7 @@ async function json<T>(url: string): Promise<T> {
 }
 
 const [locations, timeOfDay] = await Promise.all([
-  json<{ presets: Record<string, LocationVisualPreset> }>('/studio/locations.json'),
+  fetchAllLocations().then((presets) => ({ presets })),
   json<{ presets: Record<string, TimeOfDayPreset> }>('/studio/time-of-day.json'),
 ]);
 

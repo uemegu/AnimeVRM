@@ -31,6 +31,14 @@ export const en: Dictionary = {
     cancel: 'Cancel',
     stop: 'Stop',
   },
+  dataScope: {
+    project: 'Project',
+    makeShared: 'Shared',
+    sharedHint: 'Shared: usable in every project',
+    projectHint: 'Only for the current project. Check to make it usable in every project',
+    sharedTag: 'Shared',
+    fileInProject: "This file lives in the project's folder, so it cannot be shared",
+  },
   settings: {
     title: 'Settings',
     quality: 'Rendering quality',

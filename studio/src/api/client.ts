@@ -47,11 +47,16 @@ export function extensionOf(name: string): string {
   return dot < 0 ? '' : name.slice(dot).toLowerCase();
 }
 
+/** Studio で扱うプロジェクト。ownAssets は素材の置き場を自分で持つもの（外部プロジェクト） */
+export type StudioProject = ScenarioProject & { ownAssets?: true };
+
 export interface AssetEntry {
   url: string;
   size: number;
   updatedAt: string;
   thumbnailUrl?: string;
+  /** プロジェクトの置き場にあるもの（api.assets に projectId を渡したとき） */
+  project?: true;
 }
 
 export type AssetKind = 'models' | 'environments' | 'animations' | 'textures' | 'bgm' | 'se' | 'voices';
@@ -113,17 +118,23 @@ export const api = {
       file
     ),
   /** プロジェクト（Studio のものと、studio-projects.txt・STUDIO_PROJECTS で読み込んだ外部のもの） */
-  projects: () => request<ScenarioProject[]>('/projects'),
+  projects: () => request<StudioProject[]>('/projects'),
+  /** プロジェクト専用のキャラ・場所・BGM を保存する（読むときは静的ファイル。studio/src/data/projectData.ts） */
+  saveProjectData: (projectId: string, name: string, file: unknown) =>
+    putJson<{ ok: true }>(`/projects/${encodeURIComponent(projectId)}/data/${encodeURIComponent(name)}`, file),
   scenarios: () => request<ScenarioSummary[]>('/scenarios'),
   scenario: (category: string, id: string) => request<unknown>(`/scenarios/${category}/${encodeURIComponent(id)}`),
   saveScenario: (category: string, id: string, data: unknown) => putJson<{ ok: true }>(`/scenarios/${category}/${encodeURIComponent(id)}`, data),
   characters: () => request<CharacterBook>('/characters'),
   saveCharacters: (book: CharacterBook) => putJson<{ ok: true }>('/characters', book),
   characterUsage: (id: string) => request<CharacterScenarioUsage[]>(`/characters/${encodeURIComponent(id)}/usage`),
-  assets: (kind: AssetKind) => request<AssetEntry[]>(`/assets/${kind}`),
-  /** アセットを登録する（name は assets/<種類>/ からの相対パス。同じ名前があれば overwrite のときだけ上書き） */
-  uploadAsset: (kind: AssetKind, name: string, file: Blob, overwrite = false) =>
-    putFile<{ ok: true; url: string }>(`/assets/${kind}/${name.split('/').map(encodeURIComponent).join('/')}${overwrite ? '?overwrite=1' : ''}`, file),
+  /** アセットの一覧。projectId があれば、そのプロジェクトの置き場にあるものも並べる */
+  assets: (kind: AssetKind, projectId?: string) => request<AssetEntry[]>(`/assets/${kind}${projectId ? `?project=${encodeURIComponent(projectId)}` : ''}`),
+  /** アセットを登録する（name は assets/<種類>/ からの相対パス。同じ名前があれば overwrite のときだけ上書き）。projectId があればそのプロジェクトの置き場に置く */
+  uploadAsset: (kind: AssetKind, name: string, file: Blob, overwrite = false, projectId?: string) => {
+    const query = [overwrite && 'overwrite=1', projectId && `project=${encodeURIComponent(projectId)}`].filter(Boolean).join('&');
+    return putFile<{ ok: true; url: string }>(`/assets/${kind}/${name.split('/').map(encodeURIComponent).join('/')}${query ? `?${query}` : ''}`, file);
+  },
   saveMotion: (body: { name: string; fbx: string; candidates?: unknown; loop?: boolean; overwrite?: boolean }) =>
     fetch('/api/motions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }),
   saveMotionProfile: (path: string, profile: unknown) => putJson<{ ok: true }>(`/motions/profiles/${path}`, profile),

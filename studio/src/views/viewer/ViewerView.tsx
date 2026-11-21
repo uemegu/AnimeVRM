@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CameraMoveType, DEFAULT_AVATAR_LOOK, EffectTextPreset, resolveCameraMove, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
+import { CameraMoveType, DEFAULT_AVATAR_LOOK, EffectTextPreset, mergeCharacterBook, resolveCameraMove, SweatMode, type CameraShift, type CameraShot, type CharacterBook } from '@anime-vrm/scenario';
 import type { StageCastMember } from '@anime-vrm/engine/stage/types';
 import type { TimeOfDayId } from '@anime-vrm/engine/stage/visual';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { api, type AssetEntry } from '../../api/client';
 import { useI18n } from '../../i18n';
+import { useProjects } from '../../data/useProjects';
+import { fetchProjectData } from '../../data/projectData';
 import { StageCanvas } from '../../stage/StageCanvas';
 import { useStagePresets } from '../../stage/useStagePresets';
 import { PlayerAudio } from '../../player/PlayerAudio';
@@ -95,16 +97,18 @@ export function ViewerView() {
     managerRef.current = manager;
   }, []);
 
+  // いまのプロジェクト専用のキャラも並べる（公開版はプロジェクトなし＝共通のものだけ）
+  const { current: project } = useProjects();
   useEffect(() => {
-    Promise.all([api.characters(), api.assets('animations'), api.assets('models'), api.assets('voices')])
-      .then(([characters, animationList, modelList, voiceList]) => {
-        setBook(characters);
+    Promise.all([api.characters(), api.assets('animations'), api.assets('models', project?.id), api.assets('voices'), fetchProjectData(project?.id)])
+      .then(([characters, animationList, modelList, voiceList, projectData]) => {
+        setBook(mergeCharacterBook(characters, projectData.characters));
         setMotions(animationList);
         setModels(modelList);
         setVoices(voiceList);
       })
       .catch(() => setLoadError(true));
-  }, []);
+  }, [project?.id]);
 
   // ボイスの試聴（再生中は表示中のキャラが口を動かす）
   const audioRef = useRef<PlayerAudio | null>(null);

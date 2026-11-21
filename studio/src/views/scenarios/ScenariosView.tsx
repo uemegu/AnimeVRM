@@ -20,11 +20,13 @@ import './scenarios.css';
 const ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 export function ScenariosView() {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { category, id, cut } = useParams();
-  const { data, error: dataError } = useStudioData();
   const { projects, current: project, select: selectProject, error: projectsError } = useProjects();
+  // 開いたシナリオのプロジェクトのキャラ・場所・BGM（共通のものを含む）
+  const owner = category && projects ? projectOfCategory({ projects }, category) : undefined;
+  const { data, error: dataError } = useStudioData(owner?.id ?? project?.id);
   const [list, setList] = useState<ScenarioSummary[] | null>(null);
   const [search, setSearch] = useState('');
   const [saved, setSaved] = useState<unknown>(null);
@@ -45,10 +47,21 @@ export function ScenariosView() {
 
   // 開いたシナリオのプロジェクトに一覧を合わせる
   useEffect(() => {
-    const owner = category && projects ? projectOfCategory({ projects }, category) : undefined;
     if (owner && owner.id !== project?.id) selectProject(owner.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, projects]);
+
+  // サイドバーでプロジェクトを切り替えたら、ほかのプロジェクトのシナリオを閉じて全体図へ戻る
+  const shownProject = useRef<string | null>(null);
+  useEffect(() => {
+    if (!project) return;
+    const previous = shownProject.current;
+    shownProject.current = project.id;
+    if (previous === null || previous === project.id) return;
+    setCreating(null);
+    if (category && !(project.categories as string[]).includes(category)) navigate('/scenarios');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id]);
 
   const refreshList = () => api.scenarios().then(setList).catch(() => setLoadError(true));
   useEffect(() => {
@@ -164,22 +177,6 @@ export function ScenariosView() {
     <div className={`scenarios${listOpen ? '' : ' list-collapsed'}`}>
       <aside className="scenario-list">
         <div className="scenario-project-bar">
-          <select
-            className="select"
-            aria-label={t.scenarios.project}
-            value={project.id}
-            onChange={(e) => {
-              selectProject(e.target.value);
-              setCreating(null);
-              navigate('/scenarios');
-            }}
-          >
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name[language] ?? p.name.ja}
-              </option>
-            ))}
-          </select>
           <button type="button" className={`btn chart-toggle${id ? '' : ' active'}`} onClick={() => navigate('/scenarios')}>
             <Icon name="chart" size={15} />
             {t.scenarios.showChart}

@@ -29,6 +29,14 @@ export const ja = {
     cancel: 'キャンセル',
     stop: '停止',
   },
+  dataScope: {
+    project: 'プロジェクト',
+    makeShared: '共通にする',
+    sharedHint: '共通：すべてのプロジェクトで使えます',
+    projectHint: 'いまのプロジェクト専用です。チェックすると、すべてのプロジェクトで使えるようになります',
+    sharedTag: '共通',
+    fileInProject: 'このファイルはプロジェクトの置き場にあるので、共通にできません',
+  },
   settings: {
     title: '設定',
     quality: '描画の品質',

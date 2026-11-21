@@ -10,6 +10,7 @@ import { createRoot } from 'react-dom/client';
 import type { BgmBook, CharacterBook, LocationVisualPreset, MotionBook, ScenarioPackage, TimeOfDayPreset } from '@anime-vrm/scenario';
 import type { StudioData } from '../data/useStudioData';
 import { LanguageProvider } from '../i18n';
+import { fetchProjectData, mergeProjectData } from '../data/projectData';
 import { CutPreview, type Outfit } from '../views/scenarios/CutPreview';
 import type { StageManager } from '@anime-vrm/engine/stage/StageManager';
 
@@ -17,6 +18,8 @@ export interface ShotRequest {
   scenario: ScenarioPackage;
   /** ボイスなどの相対パスの基準（/scenarios/<category>/<id>/） */
   baseUrl: string;
+  /** シナリオのプロジェクト。そのプロジェクト専用のキャラ・場所・BGM も使う */
+  project?: string;
   sceneIndex: number;
   /** カット内の時刻（秒）。タイムラインのキーフレームをこの時刻まで反映する */
   time: number;
@@ -58,20 +61,36 @@ async function loadData(): Promise<StudioData> {
   return { characters, locations: locations.presets, timeOfDay: timeOfDay.presets, bgm: bgm.bgm, motions: motions.motions, animations: [], se: [] };
 }
 
+/** プロジェクト専用のキャラ・場所・BGM を足したもの（プロジェクトごとに1回だけ読む） */
+const projectDataCache = new Map<string, Promise<StudioData>>();
+function dataOfProject(shared: StudioData, projectId: string | undefined): Promise<StudioData> {
+  if (!projectId) return Promise.resolve(shared);
+  let data = projectDataCache.get(projectId);
+  if (!data) {
+    data = fetchProjectData(projectId).then((own) => mergeProjectData(shared, own));
+    projectDataCache.set(projectId, data);
+  }
+  return data;
+}
+
 let resolveRendered: (() => void) | null = null;
 let stageManager: StageManager | null = null;
 
-function ShotPage({ data }: { data: StudioData }) {
+function ShotPage({ shared }: { shared: StudioData }) {
   const [request, setRequest] = useState<ShotRequest | null>(null);
+  const [data, setData] = useState<StudioData>(shared);
 
   useEffect(() => {
     window.__shot = {
       ready: true,
-      render: (next) =>
-        new Promise<void>((resolve) => {
+      render: async (next) => {
+        const nextData = await dataOfProject(shared, next.project);
+        return new Promise<void>((resolve) => {
           resolveRendered = resolve;
+          setData(nextData);
           setRequest(next);
-        }),
+        });
+      },
       heads: () => stageManager?.headsOnScreen() ?? [],
       manager: () => stageManager,
     };
@@ -111,7 +130,7 @@ loadData()
   .then((data) =>
     createRoot(document.getElementById('root')!).render(
       <LanguageProvider>
-        <ShotPage data={data} />
+        <ShotPage shared={data} />
       </LanguageProvider>
     )
   )
