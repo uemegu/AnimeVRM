@@ -11,6 +11,10 @@
         position: fixed; left: 12px; top: 12px; padding: 10px 14px; border-radius: 8px;
         background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 13px; line-height: 1.7; pointer-events: none;
       }
+      #panel { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; padding: 10px 16px; color: white; background: #18292fee; border: 1px solid #ffffff44; border-radius: 10px; font-size: 13px; }
+      #panel label { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+      #panel select { color: #132b31; background: #f5f5eb; border-radius: 5px; padding: 5px; font: inherit; }
+      #load-error:empty { display: none; }
       #help b { display: inline-block; min-width: 4.5em; font-weight: 600; }
       #status { margin-top: 6px; color: #cfd8e3; font-size: 12px; white-space: pre; }
     </style>
@@ -23,8 +27,15 @@
       <div><b>Shift</b>＋移動：走る</div>
       <div><b>Space</b>：ジャンプ</div>
       <div><b>E</b>：ダンス（もう一度押すとやめる）</div>
+      <div><b>G</b>：突風（扇風機の正面で。めくれた裾を手で押さえる）</div>
       <div><b>マウス</b>：カメラを回す・ホイールで寄る</div>
+      <div>扇風機の正面を外れると、風が弱まります。</div>
       <div id="status">読み込み中…</div>
+    </div>
+    <div id="panel">
+      <label>キャラ <select id="character" disabled><option value="aoi">アオイ（ダンス）</option><option value="emili">エミリ（私服）</option></select></label>
+      <label>風量 <select id="fan-level"><option value="2">弱</option><option value="5">中</option><option value="9">強</option><option value="18">突風</option></select></label>
+      <span id="load-error" role="alert"></span>
     </div>
     <script type="module" src="/src/playground/main.ts"></script>
   </body>

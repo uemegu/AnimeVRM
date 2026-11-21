@@ -8,19 +8,39 @@
  */
 import '@anime-vrm/content/register';
 import * as THREE from 'three';
+import { createWindLane } from './windLane';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { LocationVisualPreset, TimeOfDayPreset } from '@anime-vrm/engine/schema/visual';
 import type { GarmentSpec } from '@anime-vrm/engine/cloth/vrm';
+import type { SkirtHoldOptions } from '@anime-vrm/engine/avatar/skirtHold';
 import { StageManager } from '@anime-vrm/engine/stage/StageManager';
 import { motionUrl } from '@anime-vrm/engine/utils/path';
 
-const MODEL = '/models/aoi/aoi-breaking.vrm';
+const models = { aoi: '/models/aoi/aoi-breaking.vrm', emili: '/models/emili/emili-private.vrm' } as const;
+type Character = keyof typeof models;
+const characterSelect = document.querySelector<HTMLSelectElement>('#character')!;
+const fanLevel = document.querySelector<HTMLSelectElement>('#fan-level')!;
 const LOCATION = 'courtyard';
 
 /** 布にする服：スカートはスーツ地、上着（腰まで届く上着）は天竺ニット（外衣）で、裾はスカートの外に乗る */
-const GARMENTS: Record<string, GarmentSpec> = {
-  N00_001_03_Bottoms_01_CLOTH: { fabric: 'suiting' },
-  N00_004_01_Tops_01_CLOTH: { fabric: 'jerseyOuter', over: ['N00_001_03_Bottoms_01_CLOTH'] },
+const garments: Record<string, Record<string, GarmentSpec>> = {
+  [models.emili]: { N00_002_01_Tops_01_CLOTH: { kind: 'hang', fabric: 'shirting' } },
+  [models.aoi]: {
+    N00_001_03_Bottoms_01_CLOTH: { fabric: 'suiting' },
+    N00_004_01_Tops_01_CLOTH: { fabric: 'jerseyOuter', over: ['N00_001_03_Bottoms_01_CLOTH'] },
+  },
+};
+
+/**
+ * 風で裾を押さえる芝居（engine の avatar/skirtHold.ts）の設定。この試し場で、アオイとエミリを突風に当てて絵を見て決めた値
+ */
+const SKIRT_HOLD: Partial<SkirtHoldOptions> = {
+  liftOn: 0.035,       // 裾が 3.5cm 上がったら気づく
+  minWind: 4,          // 4m/s より弱い風（扇風機の弱・中）や、ダンスで広がった裾には反応しない
+  press: 0.025,        // 手のひらで裾を 2.5cm まで体へ寄せる
+  palmAboveHem: 0.03,  // 手のひらは裾の 3cm 上。指は裾の下へ
+  stroke: 0.08,        // 8cm 上に手を着けて撫で下ろす
+  backOver: 1.5,       // 後ろを押さえるのは、後ろの浮きが前の 1.5 倍を超えたときだけ
 };
 
 const MOTIONS = {
@@ -51,7 +71,7 @@ const [locations, timeOfDay] = await Promise.all([
   json<{ presets: Record<string, TimeOfDayPreset> }>('/studio/time-of-day.json'),
 ]);
 
-// 風は止める（布の動きが風によるものか分からなくならないよう。場所の設定ファイルは変えない）
+// 通り道の外は無風にする。
 const { wind: _wind, ...calmLocation } = locations.presets[LOCATION];
 const stage = new StageManager({
   canvas,
@@ -59,16 +79,23 @@ const stage = new StageManager({
   initialTimeOfDay: 'day',
   initialLocationId: LOCATION,
   quality: { skirtCloth: true },
-  garments: (url) => (url === MODEL ? GARMENTS : undefined),
+  garments: (url) => garments[url],
 });
 const resize = () => stage.resize(canvas.clientWidth, canvas.clientHeight);
 new ResizeObserver(resize).observe(canvas);
 resize();
 
-await stage.setCast([{ id: 'aoi', modelUrl: MODEL, slot: 'center', rotationY: 0, expression: 'neutral', expressionWeight: 1, motion: MOTIONS.idle, motionLoop: true }]);
-const avatar = await stage.loadAvatar('aoi', MODEL);
-const root = avatar.vrm!.scene;
-stage.setCameraShot('wide', 'aoi');
+function castMember(id: Character, motion: string) {
+  return { id, modelUrl: models[id], slot: 'center' as const, rotationY: 0, expression: 'neutral' as const, expressionWeight: 1, motion, motionLoop: true };
+}
+let current: Character = 'aoi';
+await stage.setCast([castMember(current, MOTIONS.idle)]);
+let avatar = await stage.loadAvatar(current, models[current]);
+avatar.setSkirtHold(true, SKIRT_HOLD);
+let root = avatar.vrm!.scene;
+stage.setCameraShot('wide', current);
+const sampleWind = createWindLane(avatar.scene, root.position, root.rotation.y - 0.72);
+let windSpeed = 0;
 
 // ---- カメラ：マウスで回す。注視点はキャラに付いていく ----
 const controls = new OrbitControls(stage.viewCamera, canvas);
@@ -77,22 +104,25 @@ controls.maxPolarAngle = Math.PI * 0.49;
 controls.minDistance = 0.8;
 controls.maxDistance = 8;
 const lookHeight = 0.9;
+/** 注視点のキャラからのずれ（キャラを画面の右寄りに置く。調べるときは開発者ツールから変えられる） */
+const follow = { x: -0.48, y: lookHeight, z: 0 };
 stage.setFreeCamera(true);
 // キャラの正面 2.6m、少し上から
 const front = new THREE.Vector3(Math.sin(root.rotation.y), 0, Math.cos(root.rotation.y));
-controls.target.set(root.position.x, root.position.y + lookHeight, root.position.z);
-stage.viewCamera.position.set(root.position.x + front.x * 2.6, root.position.y + 1.25, root.position.z + front.z * 2.6);
+controls.target.set(root.position.x + follow.x, root.position.y + follow.y, root.position.z + follow.z);
+stage.viewCamera.position.set(controls.target.x + front.x * 3.65, root.position.y + 1.36, controls.target.z + front.z * 3.65);
 controls.update();
 // 調べる用（開発者ツールから）
-Object.assign(window, { playground: { stage, avatar } });
+Object.assign(window, { playground: { stage, controls, follow, get avatar() { return avatar; } } });
 
 // ---- キー ----
 const keys = new Set<string>();
 addEventListener('keydown', (event) => {
-  if (event.repeat) return;
+  if (event.repeat || event.target instanceof HTMLSelectElement) return;
   keys.add(event.code);
   if (event.code === 'Space') { event.preventDefault(); jump(); }
   if (event.code === 'KeyE') toggleDance();
+  if (event.code === 'KeyG') sampleWind.gust();
 });
 addEventListener('keyup', (event) => keys.delete(event.code));
 addEventListener('blur', () => keys.clear());
@@ -186,22 +216,73 @@ function steer(dt: number): void {
   }
 
   // カメラの注視点をキャラに付ける（カメラも同じだけ動かして、見る角度と距離を保つ）
-  const tx = root.position.x - controls.target.x, tz = root.position.z - controls.target.z, ty = root.position.y + lookHeight - controls.target.y;
+  const tx = root.position.x + follow.x - controls.target.x, tz = root.position.z + follow.z - controls.target.z, ty = root.position.y + follow.y - controls.target.y;
   controls.target.x += tx; controls.target.y += ty; controls.target.z += tz;
   stage.viewCamera.position.x += tx; stage.viewCamera.position.y += ty; stage.viewCamera.position.z += tz;
   controls.update();
   stage.setFreeCameraTarget(controls.target);
 }
-const updateAvatar = avatar.update.bind(avatar);
-avatar.update = (delta, frameInfo) => {
-  steer(delta);
-  updateAvatar(delta, frameInfo);
-};
+function attachControls() {
+  const actor = avatar;
+  const updateAvatar = actor.update;
+  actor.update = function(delta, frameInfo) {
+    // 遅い描画が続くと布は毎回初期姿勢に戻る。試し場では歩行・モーション・布を
+    // 同じ小さな刻みで進める。タブ復帰など長い中断は通常のリセットに任せる。
+    const dt = delta < 0.25 ? Math.min(delta, 1 / 20) : delta;
+    steer(dt);
+    const wind = sampleWind(dt, root.position, Number(fanLevel.value));
+    avatar.setWind(wind);
+    windSpeed = (wind?.strength ?? 0) * 20;
+    updateAvatar.call(actor, dt, frameInfo);
+  };
+  return () => { actor.update = updateAvatar; };
+}
+let detach = attachControls();
+characterSelect.disabled = false;
+characterSelect.addEventListener('change', async () => {
+  const id = characterSelect.value as Character;
+  characterSelect.disabled = true;
+  document.querySelector('#load-error')!.textContent = '';
+  keys.clear();
+  try {
+    const nextAvatar = await stage.loadAvatar(id, models[id]);
+    nextAvatar.setSkirtHold(true, SKIRT_HOLD);
+    const position = root.position.clone();
+    const keepDance = mode === 'dance';
+    await stage.setCast([castMember(id, keepDance ? MOTIONS.dance : MOTIONS.idle)]);
+    detach();
+    current = id;
+    avatar = nextAvatar;
+    root = avatar.vrm!.scene;
+    root.position.copy(position);
+    root.rotation.y = heading;
+    avatar.resetClothOnNextUpdate();
+    mode = keepDance ? 'dance' : 'idle';
+    playing = keepDance ? MOTIONS.dance : MOTIONS.idle;
+    detach = attachControls();
+    stage.setCameraShot('wide', current);
+  } catch (error) {
+    characterSelect.value = current;
+    document.querySelector('#load-error')!.textContent = 'キャラクターを読み込めませんでした。';
+    console.error(error);
+  } finally { characterSelect.disabled = false; }
+});
+fanLevel.addEventListener('change', () => { fanLevel.blur(); });
+
+
+function holdLabel(): string {
+  const state = avatar.skirtHoldState;
+  if (!state) return '押さえない';
+  const where = state.sides.left === state.sides.right ? (state.sides.left === 'front' ? '前' : '後ろ') : '前と後ろ';
+  return { free: '—', noticed: '気づいた', reaching: `${where}へ手を出す`, holding: `${where}を押さえている`, returning: '手を戻す' }[state.phase];
+}
 
 // 表示だけは自前の描画ループで
 function showStatus(): void {
   const skirt = avatar.skirtCloth, tops = avatar.otherCloths;
   status.textContent = `動き：${{ idle: '待機', walk: '歩く', run: '走る', jump: 'ジャンプ', dance: 'ダンス' }[mode]}\n`
+    + (windSpeed > 0 ? `送風：約${windSpeed.toFixed(1)} m/s${sampleWind.gusting ? '（突風）' : ''}\n` : '風：無風\n')
+    + `裾：${holdLabel()}\n`
     + `布：スカート ${skirt ? (skirt.sleeping ? '休止中' : `${skirt.cloth.stats.ms.toFixed(1)}ms`) : 'なし'}`
     + `・上着 ${tops.length ? tops.map((c) => ((c as unknown as { knit?: { sleeping: boolean } }).knit?.sleeping ? '休止中' : '計算中')).join('・') : 'なし'}`;
   requestAnimationFrame(showStatus);
