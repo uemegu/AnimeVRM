@@ -3,11 +3,12 @@ import { useI18n } from '../../i18n';
 import { textJa } from './scenarioEdit';
 
 /** 演出の項目（カットのキャラ指定とタイムラインのキーで共通） */
-export type EffectValues = Pick<SceneAvatarConfig, 'blush' | 'redface' | 'tearyEyes' | 'awawaMouth' | 'anger' | 'tears' | 'fastMotion' | 'eyeWander' | 'motionSpeed' | 'effectText' | 'sweat'>;
+export type EffectValues = Pick<SceneAvatarConfig, 'blush' | 'redface' | 'tearyEyes' | 'awawaMouth' | 'anger' | 'tears' | 'fastMotion' | 'eyeWander' | 'cheekPinch' | 'motionSpeed' | 'effectText' | 'sweat'>;
 type Key = keyof EffectValues;
 
 const TOGGLES = ['blush', 'redface', 'tearyEyes', 'awawaMouth', 'anger', 'tears', 'fastMotion'] as const;
 const WANDER_LEVELS = [0, 0.6, 1, 1.6] as const;
+const PINCH_SIDES = ['left', 'right', 'both', 'off'] as const;
 
 interface Props {
   value: EffectValues;
@@ -67,6 +68,21 @@ export function EffectFields({ value, unsetLabel, onChange, withFastMotion = fal
           {WANDER_LEVELS.map((level) => (
             <option key={level} value={String(level)}>
               {fx.wanderLevels[level]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="field">
+        <span className="field-label">{fx.cheekPinch}</span>
+        <select
+          className="select"
+          value={value.cheekPinch === undefined ? '' : value.cheekPinch === false ? 'off' : value.cheekPinch}
+          onChange={(e) => onChange('cheekPinch', e.target.value === '' ? undefined : e.target.value === 'off' ? false : (e.target.value as 'left' | 'right' | 'both'))}
+        >
+          <option value="">{unsetLabel('cheekPinch')}</option>
+          {PINCH_SIDES.map((side) => (
+            <option key={side} value={side}>
+              {fx.cheekPinchSides[side]}
             </option>
           ))}
         </select>

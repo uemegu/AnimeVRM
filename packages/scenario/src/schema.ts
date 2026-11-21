@@ -49,7 +49,7 @@ export type AvatarSlotPosition = z.infer<typeof AvatarSlotPosition>;
 const LookAtTarget = z.string();
 
 /** 表情（VRM の標準の表情） */
-export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima', 'komari', 'ehehe', 'wink', 'kirakira', 'tere', 'uruuru', 'shonbori']);
+export const Expression = z.enum(['neutral', 'happy', 'angry', 'sad', 'relaxed', 'surprised', 'nima', 'komari', 'ehehe', 'wink', 'kirakira', 'tere', 'uruuru', 'shonbori', 'puku', 'cheekPinch', 'cheekPinchLeft', 'cheekPinchRight']);
 export type Expression = z.infer<typeof Expression>;
 
 /** 顔の向きを視線の先へどれだけ向けるか（0 = 目だけ、1 = 顔も大きく向ける） */
@@ -81,6 +81,8 @@ const AvatarLookFields = {
   /** 涙を流す */
   tears: z.boolean().optional(),
   eyeWander: EyeWander.optional(),
+  /** 自分の手で頬をつまんで引っぱる（left / right は体の左・右の頬、both は両手で両頬。false で手を戻す）。手は今のモーションに重ねる */
+  cheekPinch: z.union([z.enum(['left', 'right', 'both']), z.literal(false)]).optional(),
   /** モーションの再生速度（1 が通常） */
   motionSpeed: z.number().positive().max(4).optional(),
 };

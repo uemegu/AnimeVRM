@@ -184,6 +184,7 @@ export function resolveCast(stage: StageState, options: CastOptions): StageCastM
         anger: config.anger ?? false,
         tears: config.tears ?? false,
         eyeWander: eyeWanderIntensity(config.eyeWander),
+        ...(config.cheekPinch ? { cheekPinch: config.cheekPinch } : {}),
         fastMotion: config.fastMotion ?? false,
         motionSpeed: config.motionSpeed ?? 1,
       },
@@ -331,6 +332,7 @@ export function cutStateAt(scene: ScenarioScene, t: number): CutState {
       if (key.tears !== undefined) state.tears = key.tears;
       if (key.eyeWander !== undefined) state.eyeWander = eyeWanderIntensity(key.eyeWander);
       if (key.motionSpeed !== undefined) state.motionSpeed = key.motionSpeed;
+      if (key.cheekPinch !== undefined) state.cheekPinch = key.cheekPinch;
       if (key.moveTo !== undefined) state.move = { at: key.at, to: key.moveTo, duration: key.moveDuration ?? 1 };
       if (key.fadeOut !== undefined) state.fadeOut = { at: key.at, duration: key.fadeOut };
       if (key.mistOut !== undefined) state.mistOut = { at: key.at, duration: key.mistOut, ...(key.mistTo ? { to: key.mistTo } : {}) };
