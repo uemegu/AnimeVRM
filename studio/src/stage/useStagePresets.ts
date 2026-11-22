@@ -21,9 +21,17 @@ export function useStagePresets(): { presets: StagePresets | null; error: boolea
   const [error, setError] = useState(false);
   const { current: project } = useProjects();
   useEffect(() => {
+    let active = true;
     Promise.all([load<TimeOfDayPreset>('time-of-day'), load<LocationVisualPreset>('locations'), fetchProjectData(project?.id)])
-      .then(([timeOfDay, locations, own]) => setPresets({ timeOfDay, locations: { ...locations, ...own.locations } }))
-      .catch(() => setError(true));
+      .then(([timeOfDay, locations, own]) => {
+        if (!active) return;
+        setPresets({ timeOfDay, locations: { ...locations, ...own.locations } });
+        setError(false);
+      })
+      .catch(() => {
+        if (active) setError(true);
+      });
+    return () => { active = false; };
   }, [project?.id]);
   return { presets, error };
 }

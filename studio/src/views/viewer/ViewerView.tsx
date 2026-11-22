@@ -100,14 +100,20 @@ export function ViewerView() {
   // いまのプロジェクト専用のキャラも並べる（公開版はプロジェクトなし＝共通のものだけ）
   const { current: project } = useProjects();
   useEffect(() => {
+    let active = true;
     Promise.all([api.characters(), api.assets('animations'), api.assets('models', project?.id), api.assets('voices'), fetchProjectData(project?.id)])
       .then(([characters, animationList, modelList, voiceList, projectData]) => {
+        if (!active) return;
         setBook(mergeCharacterBook(characters, projectData.characters));
         setMotions(animationList);
         setModels(modelList);
         setVoices(voiceList);
+        setLoadError(false);
       })
-      .catch(() => setLoadError(true));
+      .catch(() => {
+        if (active) setLoadError(true);
+      });
+    return () => { active = false; };
   }, [project?.id]);
 
   // ボイスの試聴（再生中は表示中のキャラが口を動かす）
