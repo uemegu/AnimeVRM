@@ -97,7 +97,7 @@ const AvatarOneShotFields = {
 
 /** セリフ途中の移動・退場（at から始まる。モーションは別に motion で指定する） */
 const AvatarMoveFields = {
-  /** この座標まで一定の速さで移動する（進行方向を向く。走って去る・歩いてくるなど） */
+  /** この座標まで一定の速さで移動する（進行方向を向く。走って去る・歩いてくるなど）。歩き・走りのモーションなら、moveDuration 秒で着くよう歩くテンポを変え、足が床を滑らない速さで進む（テンポは 0.4〜2 倍まで。超える分は着く時刻がずれる） */
   moveTo: Vec3.optional(),
   /** moveTo にかける秒数（省略時 1） */
   moveDuration: z.number().positive().optional(),
